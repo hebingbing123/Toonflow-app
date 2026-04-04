@@ -38,6 +38,12 @@ pub struct CreateJobBody {
     pub payload: serde_json::Value,
 }
 
+#[derive(Debug, FromRow, Serialize)]
+struct JobKindSummaryRow {
+    kind: String,
+    job_count: i64,
+}
+
 /// WebSocket envelope (`docs/websocket-events.md`): full job row as `payload`.
 pub fn envelope_generation_job_updated(row: &JobRow) -> String {
     let v = json!({
@@ -50,6 +56,7 @@ pub fn envelope_generation_job_updated(row: &JobRow) -> String {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/jobs/kinds/summary", get(list_job_kind_summaries))
         .route("/api/v1/jobs/kinds", get(list_job_kinds))
         .route("/api/v1/jobs", get(list_jobs).post(create_job))
         .route("/api/v1/jobs/{id}", get(get_job))
@@ -96,6 +103,31 @@ async fn list_job_kinds(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(Json(kinds))
+}
+
+async fn list_job_kind_summaries(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<JobKindSummaryRow>>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let rows = sqlx::query_as::<_, JobKindSummaryRow>(
+        r#"
+        SELECT kind, COUNT(*)::bigint AS job_count
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+        GROUP BY kind
+        ORDER BY kind ASC
+        "#,
+    )
+    .bind(uid)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(rows))
 }
 
 async fn list_jobs(

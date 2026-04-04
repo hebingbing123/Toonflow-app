@@ -50,11 +50,13 @@ class _HomePageState extends State<HomePage> {
 
   bool _loadingJobs = false;
   bool _loadingJobKinds = false;
+  bool _loadingJobKindSummary = false;
   bool _creatingJob = false;
   String? _cancellingJobId;
   String? _retryingJobId;
   List<JobRow>? _jobs;
   String? _jobKindsLine;
+  String? _jobKindSummaryLine;
 
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
@@ -563,6 +565,38 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingJobKinds = false;
+      });
+    }
+  }
+
+  Future<void> _loadJobKindSummary() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingJobKindSummary = true;
+      _error = null;
+      _jobKindSummaryLine = null;
+    });
+    try {
+      final rows = await fetchJobKindSummaries(token);
+      if (!mounted) return;
+      setState(() {
+        _jobKindSummaryLine = rows.isEmpty
+            ? '(empty)'
+            : rows.map((r) => '${r.kind}: ${r.jobCount}').join(', ');
+        _loadingJobKindSummary = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobKindSummary = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobKindSummary = false;
       });
     }
   }
@@ -1946,6 +1980,15 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed:
+                        _loadingJobKindSummary ? null : _loadJobKindSummary,
+                    child: Text(
+                      _loadingJobKindSummary
+                          ? '…'
+                          : 'GET …/jobs/kinds/summary',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: _creatingJob ? null : _createProbeJob,
                     child: Text(
                       _creatingJob ? '…' : 'POST job (flutter.probe)',
@@ -1956,6 +1999,10 @@ class _HomePageState extends State<HomePage> {
               if (_jobKindsLine != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('job kinds: $_jobKindsLine'),
+              ],
+              if (_jobKindSummaryLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('job kinds/summary: $_jobKindSummaryLine'),
               ],
               if (_jobs != null) ...[
                 const SizedBox(height: 8),
