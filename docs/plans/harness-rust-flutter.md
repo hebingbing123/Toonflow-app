@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`isolated.echo`**（子进程隔离 MVP）、**`skills.read`** 与 REST 同路径安全规则）；**仍缺**通用 WASM/多工具进程池与完整 Agent 循环
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**；**用量**：`app_usage_event` + worker 成功落库 + **`GET /api/v1/usage/summary`**；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 与集成测试（isolate）；仍缺多实例分布式队列与端到端契约回归矩阵
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**（**PG + SKIP LOCKED** 已可多实例）、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**；**用量**：`app_usage_event` + **`GET /api/v1/usage/summary`**；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 与集成测试（isolate）；**不依赖 Redis 才能完成重构**；仍缺端到端契约回归矩阵与业务域全覆盖
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
@@ -39,7 +39,7 @@ todos:
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile`；计费 webhook upsert；**`app_usage_event`** 追加 + **`GET /api/v1/usage/summary`**；**仍缺**配额硬执行（与 plan_tier 联动）、订阅状态机、CNY/USD 收单商适配层
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**queued/running 取消**、`failed` **重试**（清 `claimed_by`）、`Idempotency-Key`；**429** 与 billing **除外**；**计费 webhook**：HMAC、去重、**可选 profile upsert**；**仍缺**Redis/云队列、提供商原生验签、分布式限流
+    content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**queued/running 取消**、`failed` **重试**、`Idempotency-Key`；**429** 与 billing **除外**（当前 HTTP 限流为**进程内** `tower_governor`，**与 Redis 无关**）；**计费 webhook**：HMAC、去重、profile upsert；**仍缺**提供商原生验签。**刻意后置**：**Redis/云队列**仅用于**超高吞吐任务扇出**（非限流）；**PG 队列已可支撑多 worker**。**限流/分布式配额聚合**不阻塞功能重构，可等产品化阶段再收紧
     status: pending
 isProject: false
 ---
@@ -364,7 +364,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 
 ### 11.5 限流与密钥（推荐默认）
 
-- **限流**：Rust 侧 **按 `sub`（用户 id）+ 路由** 限流（如 `tower_governor` 或同类）；**登录、生成类接口** 更严；配额可落 **PG 表**。
+- **限流**：**推荐形态**是 Rust 侧 **按 `sub`（用户 id）+ 路由** 限流（如 `tower_governor` 或同类）；**登录、生成类接口** 更严；公平使用配额可落 **PG 表**（与 `app_usage_event` 等挂钩）。**当前实现**为 **每客户端 IP** 的进程内令牌桶（**不依赖 Redis**）。**Redis 不是 HTTP 限流的默认路径**——文档里出现的 Redis 主要指 **§13.1** 的**可选任务队列**（高吞吐扇出），与现网 `tower_governor` 无关。**功能重构阶段**可优先把 **业务 parity** 做完，**不必**先把限流/配额做到极致；需要时再收紧。
 - **LLM Key**：**仅 `backend` 进程可读**；租户级 key **加密存 PG** 或 **外部 KMS**；**永不**进 `frontend/` 构建产物。
 
 ### 11.6 对象存储与生成物（推荐默认）
@@ -489,7 +489,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 ### 13.1 长时任务与状态真源
 
 - **生成类请求常分钟级**：**任务表**（`job_id`、状态机、进度）、**可取消**、**超时与重试**。
-- **队列**：可先 **PG**（`FOR UPDATE SKIP LOCKED`），再 **Redis / 云队列**；与 §11.5、§12 **同一用户维度** 扣减。
+- **队列**：**默认 PG** 即可（`FOR UPDATE SKIP LOCKED`，已支持多进程/多副本 worker 抢任务）。**Redis / 云队列**是**可选升级**（极高峰扇出、与 HTTP 限流**无关**）。用量扣减与 §11.5、§12 **同一用户维度** 设计即可。
 - **WebSocket** 仅 **推送**；**状态以 DB 为准**，重连后 **REST 拉 job 状态**。
 
 ### 13.2 API 契约与客户端体验
