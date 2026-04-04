@@ -87,6 +87,7 @@ class ProjectDetail {
   }
 }
 
+/// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
   final res = await http
@@ -173,6 +174,7 @@ class ScriptRow {
   }
 }
 
+/// `GET /api/v1/scripts/legacy/{legacy_id}`. See `getScriptByLegacyIdV1`.
 Future<ScriptRow> fetchScriptByLegacyId(
   String accessToken,
   int legacyId,
@@ -291,6 +293,7 @@ class StoryboardRow {
   }
 }
 
+/// `GET /api/v1/scripts/legacy/{script_legacy_id}/storyboards`. See `listStoryboardsByScriptLegacyIdV1`.
 Future<List<StoryboardRow>> fetchStoryboardsForScript(
   String accessToken,
   int scriptLegacyId,
@@ -313,6 +316,7 @@ Future<List<StoryboardRow>> fetchStoryboardsForScript(
       .toList();
 }
 
+/// `GET /api/v1/storyboards/legacy/{legacy_id}`. See `getStoryboardByLegacyIdV1`.
 Future<StoryboardRow> fetchStoryboardByLegacyId(
   String accessToken,
   int legacyId,
@@ -471,6 +475,7 @@ class JobRow {
   }
 }
 
+/// `GET /api/v1/jobs` — up to 100 jobs for the caller, newest first. See `listJobsV1`.
 Future<List<JobRow>> fetchJobs(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
   final res = await http
@@ -524,6 +529,7 @@ Future<JobRow> createJob(
   return JobRow.fromJson(map);
 }
 
+/// `POST /api/v1/jobs/{id}/cancel` — `queued` or `running` only. See `cancelJobV1`.
 Future<JobRow> cancelJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/cancel');
   final res = await http
@@ -545,6 +551,7 @@ Future<JobRow> cancelJob(String accessToken, String jobId) async {
   return JobRow.fromJson(map);
 }
 
+/// `POST /api/v1/jobs/{id}/retry` — `failed` jobs re-queued. See `retryJobV1`.
 Future<JobRow> retryJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/retry');
   final res = await http
@@ -566,6 +573,7 @@ Future<JobRow> retryJob(String accessToken, String jobId) async {
   return JobRow.fromJson(map);
 }
 
+/// `GET /api/v1/skills` — Markdown paths under `data/skills`. See `listSkillsV1`.
 Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills');
   final res = await http
@@ -583,6 +591,7 @@ Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
       .toList();
 }
 
+/// `GET /api/v1/skills/content?path=…`. See `getSkillContentV1`.
 Future<SkillContentResponse> fetchSkillContent(
   String accessToken,
   String relativePath,
@@ -606,6 +615,7 @@ Future<SkillContentResponse> fetchSkillContent(
   return SkillContentResponse.fromJson(map);
 }
 
+/// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
   final res = await http
@@ -621,6 +631,7 @@ Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   return HarnessToolsResponse.fromJson(map);
 }
 
+/// `GET /api/v1/projects/legacy/{legacy_id}` — project plus script briefs. See `getProjectByLegacyIdV1`.
 Future<ProjectDetail> fetchProjectByLegacyId(
   String accessToken,
   int legacyId,
