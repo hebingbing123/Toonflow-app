@@ -784,6 +784,7 @@ class JobRow {
     this.result,
     this.errorMessage,
     this.idempotencyKey,
+    this.claimedBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -796,6 +797,8 @@ class JobRow {
   final Map<String, dynamic>? result;
   final String? errorMessage;
   final String? idempotencyKey;
+  /// Worker label when `running` (`WORKER_ID` on server); mirrors OpenAPI `claimed_by`.
+  final String? claimedBy;
   final String createdAt;
   final String updatedAt;
 
@@ -811,6 +814,7 @@ class JobRow {
           : Map<String, dynamic>.from(json['result'] as Map),
       errorMessage: json['error_message'] as String?,
       idempotencyKey: json['idempotency_key'] as String?,
+      claimedBy: json['claimed_by'] as String?,
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
     );

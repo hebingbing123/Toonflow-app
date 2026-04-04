@@ -781,8 +781,14 @@ class _HomePageState extends State<HomePage> {
       final j = await fetchJob(token, id);
       if (!mounted) return;
       setState(() {
-        _jobByIdLine =
-            '${j.kind} · ${j.status} · updated ${j.updatedAt}';
+        final parts = <String>[
+          '${j.kind} · ${j.status}',
+          'updated ${j.updatedAt}',
+        ];
+        if (j.claimedBy != null && j.claimedBy!.isNotEmpty) {
+          parts.add('claimed_by=${j.claimedBy}');
+        }
+        _jobByIdLine = parts.join(' · ');
         _loadingJobById = false;
       });
     } on RustApiException catch (e) {
@@ -2315,7 +2321,14 @@ class _HomePageState extends State<HomePage> {
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         title: Text('${j.kind} · ${j.status}'),
-                        subtitle: Text(j.id),
+                        subtitle: Text(
+                          [
+                            j.id,
+                            if (j.claimedBy != null &&
+                                j.claimedBy!.isNotEmpty)
+                              'claimed_by=${j.claimedBy}',
+                          ].join(' · '),
+                        ),
                         onTap: () =>
                             setState(() => _jobIdCtrl.text = j.id),
                         trailing: (j.status == 'failed' ||
