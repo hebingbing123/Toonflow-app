@@ -111,6 +111,46 @@ class ProjectStats {
   }
 }
 
+/// JSON body for **`GET /health`** and **`GET /api/v1/health`** (OpenAPI `HealthResponse`).
+class HealthResponse {
+  const HealthResponse({
+    required this.status,
+    required this.service,
+  });
+
+  final String status;
+  final String service;
+
+  factory HealthResponse.fromJson(Map<String, dynamic> json) {
+    return HealthResponse(
+      status: json['status'] as String,
+      service: json['service'] as String,
+    );
+  }
+}
+
+/// `GET /api/v1/health` — no auth.
+Future<HealthResponse> fetchHealthV1() async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/health');
+  final res = await http.get(uri).timeout(const Duration(seconds: 5));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return HealthResponse.fromJson(map);
+}
+
+/// Unversioned **`GET /health`** — same JSON as [fetchHealthV1].
+Future<HealthResponse> fetchHealthRoot() async {
+  final uri = Uri.parse('$kApiBaseUrl/health');
+  final res = await http.get(uri).timeout(const Duration(seconds: 5));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return HealthResponse.fromJson(map);
+}
+
 /// `GET /api/v1/version` — no auth.
 Future<Map<String, dynamic>> fetchVersionV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/version');

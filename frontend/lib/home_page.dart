@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -130,22 +129,21 @@ class _HomePageState extends State<HomePage> {
       _error = null;
       _healthBody = null;
     });
-    final uri = Uri.parse('$kApiBaseUrl/api/v1/health');
     try {
-      final res = await http.get(uri).timeout(const Duration(seconds: 5));
-      if (res.statusCode == 200) {
-        final map = jsonDecode(res.body) as Map<String, dynamic>;
-        setState(() {
-          _healthBody = map.toString();
-          _loadingHealth = false;
-        });
-      } else {
-        setState(() {
-          _error = 'health HTTP ${res.statusCode}';
-          _loadingHealth = false;
-        });
-      }
+      final h = await fetchHealthV1();
+      if (!mounted) return;
+      setState(() {
+        _healthBody = 'status=${h.status} service=${h.service}';
+        _loadingHealth = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingHealth = false;
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loadingHealth = false;
@@ -159,22 +157,21 @@ class _HomePageState extends State<HomePage> {
       _error = null;
       _healthRootBody = null;
     });
-    final uri = Uri.parse('$kApiBaseUrl/health');
     try {
-      final res = await http.get(uri).timeout(const Duration(seconds: 5));
-      if (res.statusCode == 200) {
-        final map = jsonDecode(res.body) as Map<String, dynamic>;
-        setState(() {
-          _healthRootBody = map.toString();
-          _loadingHealthRoot = false;
-        });
-      } else {
-        setState(() {
-          _error = 'GET /health HTTP ${res.statusCode}';
-          _loadingHealthRoot = false;
-        });
-      }
+      final h = await fetchHealthRoot();
+      if (!mounted) return;
+      setState(() {
+        _healthRootBody = 'status=${h.status} service=${h.service}';
+        _loadingHealthRoot = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingHealthRoot = false;
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loadingHealthRoot = false;
