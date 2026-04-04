@@ -31,6 +31,10 @@ cargo run
 - `GET http://127.0.0.1:8666/api/v1/ready`
 - `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
 
+WebSocket（JSON 信封见 `docs/websocket-events.md`）：
+
+- `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
+
 ## 技能资产
 
 Harness 用 Markdown 技能位于 **`data/skills/`**（由仓库根目录 `data/skills` 复制而来；过渡期 Node 栈仍可使用根目录副本）。

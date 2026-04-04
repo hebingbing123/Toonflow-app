@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: |
     HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
-    WebSocket real-time channel is documented separately in `docs/websocket-events.md` (`/api/v1/ws`).
+    WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in `docs/websocket-events.md`; optional query `access_token`.
 
 servers:
   - url: http://127.0.0.1:8666

@@ -4,7 +4,9 @@
 mod app;
 mod auth;
 mod error;
+mod harness;
 mod state;
+mod ws;
 
 use std::net::SocketAddr;
 

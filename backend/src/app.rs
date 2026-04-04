@@ -8,6 +8,8 @@ use axum::{
     routing::get,
     Json, Router,
 };
+
+use crate::ws::ws_upgrade;
 use serde::Serialize;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
@@ -102,6 +104,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
         .route("/api/v1/me", get(me))
+        .route("/api/v1/ws", get(ws_upgrade))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

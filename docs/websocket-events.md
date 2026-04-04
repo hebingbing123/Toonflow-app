@@ -30,6 +30,20 @@ Unknown `type` or unsupported `schema_version` → close with policy-defined cod
 
 Server responds with `session.ready` or `error.occurred` before other traffic.
 
+### `session.ready` (server → client)
+
+| Field | Notes |
+|-------|--------|
+| `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |
+
+### `session.ack` (server → client)
+
+Generic success for attach / context update / cancel; carries `request_id` when the client sent one.
+
+### `agent.chat.stub` (server → client, **MVP**)
+
+Returned until the LLM/agent loop is wired; `payload.received` is `true`, `payload.hint` explains the placeholder.
+
 ## Channels vs legacy Socket.IO namespaces
 
 Legacy Node stack used Socket.IO namespaces:
