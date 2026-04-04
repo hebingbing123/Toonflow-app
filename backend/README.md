@@ -63,7 +63,7 @@ cargo run
 - `GET http://127.0.0.1:8666/api/v1/ready`
 - `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
 - `GET http://127.0.0.1:8666/api/v1/usage/summary` — 当前用户在 **`app_usage_event`** 中的条数（近 24h / 近 7 天）及近 7 天按 **`event_type`** 分组的 **`event_counts_last_7d`**；成功完成的生成任务由 worker 写入 **`generation_job.succeeded`**
-- 生成任务（**`app_generation_job`**；Bearer）：**`GET /api/v1/jobs`**（列表）、**`GET /api/v1/jobs/kinds`**（**`kind`** 去重列表）、**`GET /api/v1/jobs/kinds/summary`**（按 **`kind`** 计数）、**`POST /api/v1/jobs`** 等 — 详见 OpenAPI
+- 生成任务（**`app_generation_job`**；Bearer）：**`GET /api/v1/jobs`**（列表）、**`GET /api/v1/jobs/kinds`**（**`kind`** 去重）、**`GET /api/v1/jobs/kinds/summary`**（按 **`kind`** 计数）、**`GET /api/v1/jobs/status/summary`**（按 **`status`** 计数）、**`POST /api/v1/jobs`** 等 — 详见 OpenAPI
 - 静态模型目录（编译时嵌入 **`data/models_catalog.json`**；Bearer；对齐旧 **`modelSelect`** 的 **`type`** 过滤语义，无 Postgres **`o_vendorConfig`**）：
   - `GET /api/v1/models?type=text|image|video|all` — `all` 不含 `video`
   - `GET /api/v1/models/detail?model_id={vendor_id}:{model_name}` — 如 `1:gpt-4o-mini`

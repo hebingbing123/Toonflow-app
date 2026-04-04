@@ -51,12 +51,14 @@ class _HomePageState extends State<HomePage> {
   bool _loadingJobs = false;
   bool _loadingJobKinds = false;
   bool _loadingJobKindSummary = false;
+  bool _loadingJobStatusSummary = false;
   bool _creatingJob = false;
   String? _cancellingJobId;
   String? _retryingJobId;
   List<JobRow>? _jobs;
   String? _jobKindsLine;
   String? _jobKindSummaryLine;
+  String? _jobStatusSummaryLine;
 
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
@@ -597,6 +599,38 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingJobKindSummary = false;
+      });
+    }
+  }
+
+  Future<void> _loadJobStatusSummary() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingJobStatusSummary = true;
+      _error = null;
+      _jobStatusSummaryLine = null;
+    });
+    try {
+      final rows = await fetchJobStatusSummaries(token);
+      if (!mounted) return;
+      setState(() {
+        _jobStatusSummaryLine = rows.isEmpty
+            ? '(empty)'
+            : rows.map((r) => '${r.status}: ${r.jobCount}').join(', ');
+        _loadingJobStatusSummary = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobStatusSummary = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobStatusSummary = false;
       });
     }
   }
@@ -1989,6 +2023,16 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed: _loadingJobStatusSummary
+                        ? null
+                        : _loadJobStatusSummary,
+                    child: Text(
+                      _loadingJobStatusSummary
+                          ? '…'
+                          : 'GET …/jobs/status/summary',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: _creatingJob ? null : _createProbeJob,
                     child: Text(
                       _creatingJob ? '…' : 'POST job (flutter.probe)',
@@ -2003,6 +2047,10 @@ class _HomePageState extends State<HomePage> {
               if (_jobKindSummaryLine != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('job kinds/summary: $_jobKindSummaryLine'),
+              ],
+              if (_jobStatusSummaryLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('job status/summary: $_jobStatusSummaryLine'),
               ],
               if (_jobs != null) ...[
                 const SizedBox(height: 8),

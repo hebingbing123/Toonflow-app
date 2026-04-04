@@ -800,6 +800,40 @@ Future<List<JobKindSummary>> fetchJobKindSummaries(String accessToken) async {
       .toList();
 }
 
+class JobStatusSummary {
+  const JobStatusSummary({required this.status, required this.jobCount});
+
+  final String status;
+  final int jobCount;
+
+  factory JobStatusSummary.fromJson(Map<String, dynamic> json) {
+    return JobStatusSummary(
+      status: json['status'] as String,
+      jobCount: (json['job_count'] as num).toInt(),
+    );
+  }
+}
+
+/// `GET /api/v1/jobs/status/summary` — per-status counts. See `listJobStatusSummariesV1`.
+Future<List<JobStatusSummary>> fetchJobStatusSummaries(
+  String accessToken,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/status/summary');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => JobStatusSummary.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
 /// `GET /api/v1/jobs/{id}` — job must belong to the caller. See `getJobV1`.
 Future<JobRow> fetchJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId');

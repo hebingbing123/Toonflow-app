@@ -44,6 +44,12 @@ struct JobKindSummaryRow {
     job_count: i64,
 }
 
+#[derive(Debug, FromRow, Serialize)]
+struct JobStatusSummaryRow {
+    status: String,
+    job_count: i64,
+}
+
 /// WebSocket envelope (`docs/websocket-events.md`): full job row as `payload`.
 pub fn envelope_generation_job_updated(row: &JobRow) -> String {
     let v = json!({
@@ -58,6 +64,10 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/jobs/kinds/summary", get(list_job_kind_summaries))
         .route("/api/v1/jobs/kinds", get(list_job_kinds))
+        .route(
+            "/api/v1/jobs/status/summary",
+            get(list_job_status_summaries),
+        )
         .route("/api/v1/jobs", get(list_jobs).post(create_job))
         .route("/api/v1/jobs/{id}", get(get_job))
         .route("/api/v1/jobs/{id}/cancel", post(cancel_job))
@@ -121,6 +131,31 @@ async fn list_job_kind_summaries(
         WHERE owner_user_id = $1
         GROUP BY kind
         ORDER BY kind ASC
+        "#,
+    )
+    .bind(uid)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(rows))
+}
+
+async fn list_job_status_summaries(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<JobStatusSummaryRow>>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let rows = sqlx::query_as::<_, JobStatusSummaryRow>(
+        r#"
+        SELECT status, COUNT(*)::bigint AS job_count
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+        GROUP BY status
+        ORDER BY status ASC
         "#,
     )
     .bind(uid)
