@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> {
   final List<String> _wsLog = [];
 
   bool _loadingProjects = false;
+  bool _creatingProject = false;
   List<ProjectRow>? _projects;
 
   bool _loadingJobs = false;
@@ -123,6 +124,30 @@ class _HomePageState extends State<HomePage> {
         _error = e.toString();
         _loadingHealth = false;
       });
+    }
+  }
+
+  Future<void> _createEmptyProject() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _creatingProject = true;
+      _error = null;
+    });
+    try {
+      await createProject(token);
+      if (!mounted) return;
+      await _loadProjects();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已创建项目')),
+      );
+    } on RustApiException catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _creatingProject = false);
     }
   }
 
@@ -296,6 +321,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _wsLog.clear();
       _projects = null;
+      _creatingProject = false;
       _jobs = null;
       _usageSummaryBody = null;
       _agentMemoryBody = null;
@@ -1510,11 +1536,27 @@ class _HomePageState extends State<HomePage> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingProjects ? null : _loadProjects,
-                child: Text(
-                  _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
-                ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: (_loadingProjects || _creatingProject)
+                        ? null
+                        : _loadProjects,
+                    child: Text(
+                      _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: (_loadingProjects || _creatingProject)
+                        ? null
+                        : _createEmptyProject,
+                    child: Text(
+                      _creatingProject ? '创建中…' : 'POST /api/v1/projects',
+                    ),
+                  ),
+                ],
               ),
               if (_projects != null) ...[
                 const SizedBox(height: 12),

@@ -420,6 +420,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [projects]
+      summary: Create project (allocates global legacy_id)
+      operationId: createProjectV1
+      description: |
+        Inserts **`app_project`** for the JWT subject. **`legacy_id`** is **`MAX(legacy_id)+1`** table-wide under a transaction-scoped advisory lock (avoids races with concurrent creates).
+        All body fields optional; omit or use empty string for unset text. **`create_time_ms`** is set server-side.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectRow"
+        "400":
+          description: Unknown JSON properties (extra keys rejected)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/projects/legacy/{legacy_id}:
     get:
@@ -1431,6 +1471,33 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ScriptBrief"
+
+    CreateProjectBody:
+      type: object
+      additionalProperties: false
+      description: |
+        All optional. Whitespace-only strings are stored as omitted (`NULL`). Aligns with legacy **`/api/project/addProject`** field set (without SQLite-only `userId`).
+      properties:
+        name:
+          type: string
+        intro:
+          type: string
+        project_type:
+          type: string
+        image_model:
+          type: string
+        image_quality:
+          type: string
+        video_model:
+          type: string
+        art_style:
+          type: string
+        director_manual:
+          type: string
+        mode:
+          type: string
+        video_ratio:
+          type: string
 
     PatchProjectBody:
       type: object

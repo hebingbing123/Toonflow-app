@@ -159,6 +159,32 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
       .toList();
 }
 
+/// `POST /api/v1/projects` — optional snake_case fields; see `createProjectV1`.
+Future<ProjectRow> createProject(
+  String accessToken, {
+  Map<String, dynamic>? fields,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(fields ?? <String, dynamic>{}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectRow.fromJson(map);
+}
+
 /// `PATCH /api/v1/projects/legacy/{legacy_id}` — merge patch for `name` / `intro` only.
 ///
 /// [body] must only include keys allowed by OpenAPI `PatchProjectBody` (unknown keys → HTTP 400).

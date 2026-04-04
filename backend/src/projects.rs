@@ -69,15 +69,126 @@ struct PatchProjectBody {
     video_ratio: Option<Value>,
 }
 
+/// JSON body for `POST /api/v1/projects` (snake_case; all fields optional).
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct CreateProjectBody {
+    #[serde(default)]
+    name: Option<String>,
+    #[serde(default)]
+    intro: Option<String>,
+    #[serde(default)]
+    project_type: Option<String>,
+    #[serde(default)]
+    image_model: Option<String>,
+    #[serde(default)]
+    image_quality: Option<String>,
+    #[serde(default)]
+    video_model: Option<String>,
+    #[serde(default)]
+    art_style: Option<String>,
+    #[serde(default)]
+    director_manual: Option<String>,
+    #[serde(default)]
+    mode: Option<String>,
+    #[serde(default)]
+    video_ratio: Option<String>,
+}
+
+/// Stable key for `pg_advisory_xact_lock` when allocating `app_project.legacy_id` (global uniqueness).
+const ADV_LOCK_PROJECT_LEGACY_ID: i64 = 884_422_001;
+
+fn trim_opt(s: Option<String>) -> Option<String> {
+    s.and_then(|v| {
+        let t = v.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_owned())
+        }
+    })
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/api/v1/projects", get(list_projects))
+        .route("/api/v1/projects", get(list_projects).post(create_project))
         .route(
             "/api/v1/projects/legacy/{legacy_id}",
             get(get_project_by_legacy)
                 .patch(patch_project_by_legacy)
                 .delete(delete_project_by_legacy),
         )
+}
+
+async fn create_project(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<CreateProjectBody>,
+) -> Result<(StatusCode, Json<ProjectRow>), ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_PROJECT_LEGACY_ID)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_legacy: i32 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        FROM app_project
+        "#,
+    )
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+
+    let row = sqlx::query_as::<_, ProjectRow>(
+        r#"
+        INSERT INTO app_project (
+          owner_user_id, legacy_id, name, intro, project_type,
+          image_model, image_quality, video_model, art_style,
+          director_manual, mode, video_ratio, create_time_ms, metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb)
+        RETURNING id, legacy_id, name, intro, project_type,
+                  image_model, image_quality, video_model, art_style,
+                  director_manual, mode, video_ratio, create_time_ms
+        "#,
+    )
+    .bind(uid)
+    .bind(next_legacy)
+    .bind(trim_opt(body.name))
+    .bind(trim_opt(body.intro))
+    .bind(trim_opt(body.project_type))
+    .bind(trim_opt(body.image_model))
+    .bind(trim_opt(body.image_quality))
+    .bind(trim_opt(body.video_model))
+    .bind(trim_opt(body.art_style))
+    .bind(trim_opt(body.director_manual))
+    .bind(trim_opt(body.mode))
+    .bind(trim_opt(body.video_ratio))
+    .bind(now_ms)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok((StatusCode::CREATED, Json(row)))
 }
 
 async fn list_projects(
@@ -319,6 +430,22 @@ mod tests {
     fn patch_project_body_rejects_unknown_fields() {
         let err =
             serde_json::from_str::<PatchProjectBody>(r#"{"name":"a","extra":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn create_project_body_accepts_empty_object() {
+        let b: CreateProjectBody = serde_json::from_str("{}").unwrap();
+        assert!(b.name.is_none());
+    }
+
+    #[test]
+    fn create_project_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<CreateProjectBody>(r#"{"name":"a","x":1}"#).unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),
