@@ -1,9 +1,9 @@
 ---
 name: Rust 与 Harness 评估
-overview: 在 Toonflow-app 现状评估基础上，确认目标形态为「**单仓** `backend/` + `frontend/`；Harness + Supabase；**第一版不上 BFF**；HTTP **`/api/v1`**、WebSocket **`/api/v1/ws`**；默认端口 8666；工程默认 §11；**SaaS：Free 默认可用；付费以 CNY 主卖，后期里程碑支持 USD 收银（§12.0）**；**实施第一步拉分支**；**推荐实施顺序见 YAML `implementation-order` todo**」，并给出与当前 Electron/Node 栈的差异、风险与推荐迁移节奏。
+overview: 在 Toonflow-app 现状评估基础上，确认目标形态为「**单仓** `backend/` + `frontend/`；Harness + Supabase；**第一版不上 BFF**；HTTP **`/api/v1`**、WebSocket **`/api/v1/ws`**；默认端口 8666；工程默认 §11；**异步任务以 Postgres 为队列真源（不急上 Redis 等旁路组件，见 §7.1）**；**SaaS：Free 默认可用；付费以 CNY 主卖，后期里程碑支持 USD 收银（§12.0）**；**实施第一步拉分支**；**推荐实施顺序见 YAML `implementation-order` todo**」，并给出与当前 Electron/Node 栈的差异、风险与推荐迁移节奏。
 todos:
   - id: implementation-order
-    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp（PG 主库；旧 SQLite 仅迁移源）+ harness-rust-core（首条端到端竖切）→ flutter-shell；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入；decommission-electron 置于功能 parity 与灰度之后
+    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp（**PG 主库 + PG 任务队列**，旧 SQLite 仅迁移源）+ harness-rust-core（首条端到端竖切）→ flutter-shell；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入；decommission-electron 置于功能 parity 与灰度之后；**少加中间件**（§6、§7.1）
     status: pending
   - id: api-contract
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
@@ -271,6 +271,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 - **契约第一**：没有稳定 API/实时协议，Flutter 与 Rust 并行会反复返工。
 - **竖切交付**：每一里程碑都应是「Flutter 可用 + Rust 可测」的切片，而不是「Rust 写完再一次性接 Flutter」。
 - **明确非目标**：不做 **iOS/Android**；第一期若范围过大，可优先 **桌面竖切**，Web 后上或功能子集先行。
+- **依赖克制**：优先用 **已有栈（Postgres、Rust、Flutter）** 把业务与契约迁完；**少加中间件**，避免「组件一多、排障与升级成本反噬迭代速度」——与 §7.1「PG 队列」一致。
 
 ### 短剧生成质量：验收与可量化指标（已纳入路线图）
 
@@ -291,6 +292,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 - **客户端 ↔ Rust**：**统一连接 Rust 服务**；默认 **端口 8666**；**dev** 典型 `http://127.0.0.1:8666`；**prod** 为部署 URL（HTTPS + 反代）；Flutter **`baseUrl` 可配置**（dev/prod）。
 - **数据与环境**：**生产** = **Supabase 托管 PG**；**开发** = **本地 `supabase start`**（§4.1）；**对象存储** dev/prod 区分（§4.1、§11.6）；**私有化** 可回落 **自管 PG**（§4.1）。
 - **鉴权**：**Supabase Auth**；dev/prod 经 CLI / 环境配置切换（§4.2）；**第一版无 BFF**，**Bearer JWT** 直连 Rust。
+- **异步任务 / 队列（工程取舍）**：**以 Postgres 为唯一真源**（任务表 + 事务内认领，如 `FOR UPDATE SKIP LOCKED`）。**重构与 MVP 阶段不引入 Redis、Kafka 等旁路队列组件**，减少依赖与运维面；与限流（当前进程内 `tower_governor`）**解耦**。若日后单库写入或抢任务成为明确瓶颈，再**单独立项**评估 Redis / 云托管队列，而非与功能 parity 绑死。
 
 ### 7.2 仍待拍板（**索引表**：不重述 §11 / §12 / §13）
 
