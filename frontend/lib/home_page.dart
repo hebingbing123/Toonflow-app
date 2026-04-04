@@ -35,6 +35,15 @@ class _HomePageState extends State<HomePage> {
   bool _loadingProjects = false;
   List<ProjectRow>? _projects;
 
+  final _skillPathCtrl =
+      TextEditingController(text: 'script_execution_script.md');
+
+  bool _loadingHarnessTools = false;
+  bool _loadingSkillList = false;
+  bool _loadingSkillPreview = false;
+  String? _harnessToolsLine;
+  String? _skillsListSummary;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +61,7 @@ class _HomePageState extends State<HomePage> {
     _ws?.sink.close();
     _email.dispose();
     _password.dispose();
+    _skillPathCtrl.dispose();
     super.dispose();
   }
 
@@ -159,7 +169,117 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _wsLog.clear();
       _projects = null;
+      _harnessToolsLine = null;
+      _skillsListSummary = null;
     });
+  }
+
+  Future<void> _loadHarnessTools() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingHarnessTools = true;
+      _error = null;
+      _harnessToolsLine = null;
+    });
+    try {
+      final r = await fetchHarnessTools(token);
+      if (!mounted) return;
+      setState(() {
+        _harnessToolsLine = r.tools.join(', ');
+        _loadingHarnessTools = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingHarnessTools = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingHarnessTools = false;
+      });
+    }
+  }
+
+  Future<void> _loadSkillList() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingSkillList = true;
+      _error = null;
+      _skillsListSummary = null;
+    });
+    try {
+      final list = await fetchSkills(token);
+      if (!mounted) return;
+      final sample = list.take(5).map((m) => m.path).join(', ');
+      setState(() {
+        _skillsListSummary =
+            '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
+        _loadingSkillList = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillList = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillList = false;
+      });
+    }
+  }
+
+  Future<void> _previewSkillFile() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final path = _skillPathCtrl.text.trim();
+    if (path.isEmpty) return;
+    setState(() {
+      _loadingSkillPreview = true;
+      _error = null;
+    });
+    try {
+      final r = await fetchSkillContent(token, path);
+      if (!mounted) return;
+      setState(() => _loadingSkillPreview = false);
+      final text = r.content.length > 12000
+          ? '${r.content.substring(0, 12000)}…\n\n(truncated)'
+          : r.content;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(r.path),
+          content: SingleChildScrollView(
+            child: SelectableText(text, style: Theme.of(ctx).textTheme.bodySmall),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPreview = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPreview = false;
+      });
+    }
   }
 
   Future<void> _loadProjects() async {
@@ -856,6 +976,58 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
+              const SizedBox(height: 16),
+              Text(
+                'Harness / skills (read-only)',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: _loadingHarnessTools ? null : _loadHarnessTools,
+                    child: Text(
+                      _loadingHarnessTools ? '…' : 'GET /api/v1/harness/tools',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingSkillList ? null : _loadSkillList,
+                    child: Text(
+                      _loadingSkillList ? '…' : 'GET /api/v1/skills',
+                    ),
+                  ),
+                ],
+              ),
+              if (_harnessToolsLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  'tools: $_harnessToolsLine',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              if (_skillsListSummary != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  _skillsListSummary!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              const SizedBox(height: 8),
+              TextField(
+                controller: _skillPathCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Skill relative path',
+                ),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingSkillPreview ? null : _previewSkillFile,
+                child: Text(
+                  _loadingSkillPreview ? '加载中…' : 'GET /api/v1/skills/content',
+                ),
+              ),
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: _loadingWs ? null : _testWebSocket,

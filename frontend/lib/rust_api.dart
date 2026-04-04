@@ -356,6 +356,107 @@ Future<StoryboardRow> updateStoryboardByLegacyId(
   return StoryboardRow.fromJson(map);
 }
 
+class SkillFileMeta {
+  const SkillFileMeta({
+    required this.path,
+    required this.sizeBytes,
+  });
+
+  final String path;
+  final int sizeBytes;
+
+  factory SkillFileMeta.fromJson(Map<String, dynamic> json) {
+    return SkillFileMeta(
+      path: json['path'] as String,
+      sizeBytes: (json['size_bytes'] as num).toInt(),
+    );
+  }
+}
+
+class SkillContentResponse {
+  const SkillContentResponse({
+    required this.path,
+    required this.content,
+  });
+
+  final String path;
+  final String content;
+
+  factory SkillContentResponse.fromJson(Map<String, dynamic> json) {
+    return SkillContentResponse(
+      path: json['path'] as String,
+      content: json['content'] as String,
+    );
+  }
+}
+
+class HarnessToolsResponse {
+  const HarnessToolsResponse({required this.tools});
+
+  final List<String> tools;
+
+  factory HarnessToolsResponse.fromJson(Map<String, dynamic> json) {
+    return HarnessToolsResponse(
+      tools: (json['tools'] as List<dynamic>).map((e) => e as String).toList(),
+    );
+  }
+}
+
+Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => SkillFileMeta.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<SkillContentResponse> fetchSkillContent(
+  String accessToken,
+  String relativePath,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/content').replace(
+    queryParameters: {'path': relativePath},
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SkillContentResponse.fromJson(map);
+}
+
+Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return HarnessToolsResponse.fromJson(map);
+}
+
 Future<ProjectDetail> fetchProjectByLegacyId(
   String accessToken,
   int legacyId,
