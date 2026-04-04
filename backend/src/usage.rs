@@ -1,5 +1,7 @@
 //! Usage metering (`app_usage_event`, §12.3): record server-side outcomes and expose per-user counts.
 
+use std::collections::HashMap;
+
 use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::routing::get;
@@ -40,6 +42,8 @@ pub async fn record_generation_job_succeeded(
 struct UsageSummaryResponse {
     events_last_24h: i64,
     events_last_7d: i64,
+    /// Per-`event_type` counts in the rolling last 7 days (same window as `events_last_7d`).
+    event_counts_last_7d: HashMap<String, i64>,
 }
 
 pub fn router() -> Router<AppState> {
@@ -74,8 +78,24 @@ async fn usage_summary(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    let breakdown: Vec<(String, i64)> = sqlx::query_as(
+        r#"
+        SELECT event_type, COUNT(*)::bigint
+        FROM app_usage_event
+        WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY event_type
+        "#,
+    )
+    .bind(uid)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let event_counts_last_7d: HashMap<String, i64> = breakdown.into_iter().collect();
+
     Ok(Json(UsageSummaryResponse {
         events_last_24h: row.0,
         events_last_7d: row.1,
+        event_counts_last_7d,
     }))
 }

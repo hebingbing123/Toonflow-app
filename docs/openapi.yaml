@@ -222,6 +222,7 @@ paths:
       operationId: usageSummaryV1
       description: |
         Counts rows in **`app_usage_event`** for **`user_id = JWT sub`**: last 24 hours and last 7 days.
+        Also returns **`event_counts_last_7d`**: a map of **`event_type` → count** for the same 7-day window.
         Events are appended by the job worker when a generation job reaches **`succeeded`**.
       security:
         - bearerAuth: []
@@ -1553,7 +1554,7 @@ components:
 
     UsageSummaryResponse:
       type: object
-      required: [events_last_24h, events_last_7d]
+      required: [events_last_24h, events_last_7d, event_counts_last_7d]
       properties:
         events_last_24h:
           type: integer
@@ -1563,6 +1564,12 @@ components:
           type: integer
           format: int64
           description: Rows in `app_usage_event` in the rolling last 7 days
+        event_counts_last_7d:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          description: Per `event_type` counts in the rolling last 7 days (empty object when no rows)
 
     QueryAgentMemoryBody:
       type: object
