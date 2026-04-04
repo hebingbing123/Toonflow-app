@@ -35,6 +35,10 @@ class _HomePageState extends State<HomePage> {
   bool _loadingProjects = false;
   List<ProjectRow>? _projects;
 
+  bool _loadingJobs = false;
+  bool _creatingJob = false;
+  List<JobRow>? _jobs;
+
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
 
@@ -169,6 +173,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _wsLog.clear();
       _projects = null;
+      _jobs = null;
       _harnessToolsLine = null;
       _skillsListSummary = null;
     });
@@ -278,6 +283,63 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingSkillPreview = false;
+      });
+    }
+  }
+
+  Future<void> _loadJobs() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingJobs = true;
+      _error = null;
+      _jobs = null;
+    });
+    try {
+      final list = await fetchJobs(token);
+      if (!mounted) return;
+      setState(() {
+        _jobs = list;
+        _loadingJobs = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobs = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobs = false;
+      });
+    }
+  }
+
+  Future<void> _createProbeJob() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _creatingJob = true;
+      _error = null;
+    });
+    try {
+      await createJob(token, 'flutter.probe');
+      if (!mounted) return;
+      setState(() => _creatingJob = false);
+      await _loadJobs();
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _creatingJob = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _creatingJob = false;
       });
     }
   }
@@ -975,6 +1037,45 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => _openProjectDetail(p),
                   ),
                 ),
+              ],
+              const SizedBox(height: 16),
+              Text(
+                'Generation jobs',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: _loadingJobs ? null : _loadJobs,
+                    child: Text(
+                      _loadingJobs ? '…' : 'GET /api/v1/jobs',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _creatingJob ? null : _createProbeJob,
+                    child: Text(
+                      _creatingJob ? '…' : 'POST job (flutter.probe)',
+                    ),
+                  ),
+                ],
+              ),
+              if (_jobs != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '${_jobs!.length} job(s)',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                ..._jobs!.take(8).map(
+                      (j) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('${j.kind} · ${j.status}'),
+                        subtitle: Text(j.id),
+                      ),
+                    ),
               ],
               const SizedBox(height: 16),
               Text(

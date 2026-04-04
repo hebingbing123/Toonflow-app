@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 占位名、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；仍缺任务真源、Harness 工具硬隔离与契约测试固化
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务真源起步**：`app_generation_job` + `GET/POST /api/v1/jobs`、`GET /api/v1/jobs/{id}`（排队插入；尚无 worker）；仍缺队列执行、Harness 工具硬隔离与契约测试固化
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
@@ -21,7 +21,7 @@ todos:
     content: Supabase Auth：v1 无 BFF；supabase_flutter + Bearer 调 Rust；环境切换；HTTPS+PKCE；见 §4.2
     status: completed
   - id: flutter-shell
-    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST 与 **skills / harness/tools** 只读探针
+    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/探针创建，与 **skills / harness/tools** 只读探针
     status: completed
   - id: decommission-electron
     content: 功能 parity 与灰度后下线 Electron + Node 服务端路径
@@ -39,7 +39,7 @@ todos:
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：任务表+队列、WS 推送与 DB 真源、取消/重试；429+Retry-After、幂等键；计费 webhook 验签与去重（§13）
+    content: 长时生成：**进度**：`app_generation_job` + 基础 REST；**仍缺**队列 worker、WS 推送、取消/重试；429+Retry-After、幂等键；计费 webhook 验签与去重（§13）
     status: pending
 isProject: false
 ---

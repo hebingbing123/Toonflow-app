@@ -5,6 +5,7 @@ mod app;
 mod auth;
 mod error;
 mod harness;
+mod jobs;
 mod json_patch;
 mod llm;
 mod projects;

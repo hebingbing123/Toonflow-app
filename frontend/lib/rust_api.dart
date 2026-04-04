@@ -402,6 +402,89 @@ class HarnessToolsResponse {
   }
 }
 
+class JobRow {
+  const JobRow({
+    required this.id,
+    required this.ownerUserId,
+    required this.kind,
+    required this.status,
+    required this.payload,
+    this.result,
+    this.errorMessage,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String ownerUserId;
+  final String kind;
+  final String status;
+  final Map<String, dynamic> payload;
+  final Map<String, dynamic>? result;
+  final String? errorMessage;
+  final String createdAt;
+  final String updatedAt;
+
+  factory JobRow.fromJson(Map<String, dynamic> json) {
+    return JobRow(
+      id: json['id'] as String,
+      ownerUserId: json['owner_user_id'] as String,
+      kind: json['kind'] as String,
+      status: json['status'] as String,
+      payload: Map<String, dynamic>.from(json['payload'] as Map? ?? {}),
+      result: json['result'] == null
+          ? null
+          : Map<String, dynamic>.from(json['result'] as Map),
+      errorMessage: json['error_message'] as String?,
+      createdAt: json['created_at'] as String,
+      updatedAt: json['updated_at'] as String,
+    );
+  }
+}
+
+Future<List<JobRow>> fetchJobs(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => JobRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<JobRow> createJob(
+  String accessToken,
+  String kind, {
+  Map<String, dynamic> payload = const {},
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'kind': kind, 'payload': payload}),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
+}
+
 Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills');
   final res = await http
