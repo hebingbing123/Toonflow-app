@@ -6,6 +6,17 @@
 - 仅在高风险操作（如删库、`rm -rf`、改生产密钥）时暂停向人类确认。
 - 默认 **小步多次 commit**，而不是停在「等你回复再继续」。
 
+## 重构栈门禁（自动跑，别让用户手动点）
+
+凡改动 **`backend/`**、**`frontend/`**、**`docs/openapi.yaml`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
+
+```bash
+yarn refactor:check
+# 等价：bash scripts/refactor-check.sh
+```
+
+须 **OpenAPI 可解析** + **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) 对齐（不含 Supabase 容器与旧栈 `yarn lint`）。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
+
 ## 为什么人类端还会觉得「每一步都要确认」？
 
 1. **Cursor 产品设置**：终端/网络等操作可能弹出「Run / Allow」——在 Cursor **Settings** 里对当前工作区开启 **自动运行 / 减少审批**（具体名称随版本变化，如 *Auto-run*、*YOLO*、*Agent* 模式），可减少每次点确认。
