@@ -61,7 +61,7 @@
 | 目录 | 说明 |
 |------|------|
 | **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
-| **`frontend/`** | Flutter 桌面 + Web，`API_BASE_URL` 指向后端（见 `frontend/README.md`） |
+| **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
 | **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
 | **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件与旧版 Socket.IO 对照 |
