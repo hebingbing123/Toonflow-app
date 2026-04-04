@@ -325,6 +325,38 @@ Future<ScriptRow> updateScriptByLegacyId(
   return ScriptRow.fromJson(map);
 }
 
+/// `POST /api/v1/projects/legacy/{project_legacy_id}/scripts` — see `createScriptUnderProjectLegacyV1`.
+Future<ScriptRow> createScriptUnderProjectLegacy(
+  String accessToken,
+  int projectLegacyId, {
+  Map<String, dynamic>? fields,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/scripts',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(fields ?? <String, dynamic>{}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
 /// `DELETE /api/v1/scripts/legacy/{legacy_id}` — see `deleteScriptByLegacyIdV1`.
 Future<void> deleteScriptByLegacyId(String accessToken, int legacyId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/legacy/$legacyId');

@@ -619,6 +619,47 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 12),
                       Text('${detail.scripts.length} script(s)'),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: saving[0]
+                              ? null
+                              : () async {
+                                  setDialogState(() => saving[0] = true);
+                                  try {
+                                    final s =
+                                        await createScriptUnderProjectLegacy(
+                                      token,
+                                      p.legacyId,
+                                    );
+                                    if (!ctx.mounted) return;
+                                    setDialogState(() => saving[0] = false);
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '已创建剧本 legacy #${s.legacyId}（关闭对话框再打开可刷新列表）',
+                                        ),
+                                      ),
+                                    );
+                                  } on RustApiException catch (e) {
+                                    if (ctx.mounted) {
+                                      setDialogState(() => saving[0] = false);
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (ctx.mounted) {
+                                      setDialogState(() => saving[0] = false);
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
+                                      );
+                                    }
+                                  }
+                                },
+                          child: const Text('POST 空剧本'),
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       ...detail.scripts.map(
                         (s) => ListTile(

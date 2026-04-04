@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode},
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -36,13 +36,117 @@ struct PatchScriptBody {
     extract_state: Option<Value>,
 }
 
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct CreateScriptBody {
+    #[serde(default)]
+    name: Option<String>,
+    #[serde(default)]
+    content: Option<String>,
+    #[serde(default)]
+    extract_state: Option<i32>,
+}
+
+/// Advisory lock key for allocating globally unique `app_script.legacy_id`.
+const ADV_LOCK_SCRIPT_LEGACY_ID: i64 = 884_422_002;
+
+fn trim_opt(s: Option<String>) -> Option<String> {
+    s.and_then(|v| {
+        let t = v.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_owned())
+        }
+    })
+}
+
 pub fn router() -> Router<AppState> {
-    Router::new().route(
-        "/api/v1/scripts/legacy/{legacy_id}",
-        get(get_script_by_legacy)
-            .patch(patch_script_by_legacy)
-            .delete(delete_script_by_legacy),
+    Router::new()
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/scripts",
+            post(create_script_under_project),
+        )
+        .route(
+            "/api/v1/scripts/legacy/{legacy_id}",
+            get(get_script_by_legacy)
+                .patch(patch_script_by_legacy)
+                .delete(delete_script_by_legacy),
+        )
+}
+
+async fn create_script_under_project(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<CreateScriptBody>,
+) -> Result<(StatusCode, Json<ScriptRow>), ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_uuid: Uuid = sqlx::query_scalar(
+        r#"
+        SELECT id FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
     )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_legacy: i32 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        FROM app_script
+        "#,
+    )
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+
+    let row = sqlx::query_as::<_, ScriptRow>(
+        r#"
+        INSERT INTO app_script (
+          project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
+        RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(next_legacy)
+    .bind(trim_opt(body.name))
+    .bind(trim_opt(body.content))
+    .bind(body.extract_state)
+    .bind(now_ms)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok((StatusCode::CREATED, Json(row)))
 }
 
 async fn get_script_by_legacy(
@@ -187,6 +291,22 @@ mod tests {
     #[test]
     fn patch_script_body_rejects_unknown_fields() {
         let err = serde_json::from_str::<PatchScriptBody>(r#"{"name":"a","extra":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn create_script_body_accepts_empty() {
+        let b: CreateScriptBody = serde_json::from_str("{}").unwrap();
+        assert!(b.name.is_none());
+    }
+
+    #[test]
+    fn create_script_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<CreateScriptBody>(r#"{"name":"a","x":1}"#).unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),

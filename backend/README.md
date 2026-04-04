@@ -39,6 +39,8 @@ cargo run
 
 项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** 随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
+新建剧本：**`POST /api/v1/projects/legacy/{project_legacy_id}/scripts`**（Bearer，JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`legacy_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
+
 剧本删除：**`DELETE /api/v1/scripts/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
 
 分镜删除：**`DELETE /api/v1/storyboards/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户剧本树下的 **`app_storyboard`** 单行（`script → project` 所有权校验）。
