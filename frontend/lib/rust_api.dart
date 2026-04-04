@@ -493,6 +493,25 @@ Future<List<JobRow>> fetchJobs(String accessToken) async {
       .toList();
 }
 
+/// `GET /api/v1/jobs/{id}` — job must belong to the caller. See `getJobV1`.
+Future<JobRow> fetchJob(String accessToken, String jobId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
+}
+
 /// `POST /api/v1/jobs` — queues a generation job.
 ///
 /// [idempotencyKey]: sent as HTTP header `Idempotency-Key` (server trims and keeps up to
