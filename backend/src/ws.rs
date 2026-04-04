@@ -79,18 +79,28 @@ async fn send_error(
     message: &str,
     request_id: Option<&str>,
 ) -> bool {
-    let payload = json!({
+    let mut payload = json!({
         "code": code,
         "message": message,
     });
+    if let Some(rid) = request_id {
+        payload["request_id"] = json!(rid);
+    }
     send_envelope(socket, "error.occurred", 1, payload, request_id).await
 }
 
 fn error_occurred_json(code: &str, message: &str, request_id: Option<&str>) -> String {
+    let mut inner = json!({
+        "code": code,
+        "message": message,
+    });
+    if let Some(r) = request_id {
+        inner["request_id"] = json!(r);
+    }
     let mut v = json!({
         "type": "error.occurred",
         "schema_version": 1,
-        "payload": { "code": code, "message": message },
+        "payload": inner,
     });
     if let Some(r) = request_id {
         v["request_id"] = json!(r);
@@ -562,5 +572,16 @@ mod tests {
         let e: ClientEnvelope = serde_json::from_str(raw).unwrap();
         assert_eq!(e.msg_type, "session.auth");
         assert_eq!(e.schema_version, 1);
+    }
+
+    #[test]
+    fn error_occurred_json_includes_request_id_in_payload() {
+        let rid = "550e8400-e29b-41d4-a716-446655440000";
+        let s = error_occurred_json("x", "y", Some(rid));
+        let v: Value = serde_json::from_str(&s).unwrap();
+        assert_eq!(v.get("request_id").and_then(Value::as_str), Some(rid));
+        let payload = v.get("payload").unwrap();
+        assert_eq!(payload.get("request_id").and_then(Value::as_str), Some(rid));
+        assert_eq!(payload.get("code").and_then(Value::as_str), Some("x"));
     }
 }

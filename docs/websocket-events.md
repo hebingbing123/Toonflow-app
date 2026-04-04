@@ -124,7 +124,7 @@ Content block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdow
 
 | `type` | `payload` |
 |--------|-----------|
-| `error.occurred` | `code` (string), `message` (string), optional `request_id`, optional `details` |
+| `error.occurred` | `code` (string), `message` (string), optional `request_id` inside **`payload`** (and the same id may appear on the **envelope** root when the client sent one), optional `details` |
 
 Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`not_found`** (skill path missing), **`skill_unavailable`** (skills dir missing on server), **`unsupported_schema`**.
 
