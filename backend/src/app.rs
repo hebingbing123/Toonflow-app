@@ -188,6 +188,34 @@ pub fn build_router(state: AppState) -> Router {
 }
 
 #[cfg(test)]
+mod jwt_fixture {
+    use chrono::Utc;
+    use jsonwebtoken::{encode, EncodingKey, Header};
+    use serde::Serialize;
+    use uuid::Uuid;
+
+    #[derive(Serialize)]
+    struct SmokeJwtClaims {
+        sub: String,
+        exp: i64,
+        aud: &'static str,
+    }
+
+    pub(crate) fn encode_supabase_style(sub: Uuid, secret: &[u8]) -> String {
+        encode(
+            &Header::default(),
+            &SmokeJwtClaims {
+                sub: sub.to_string(),
+                exp: Utc::now().timestamp() + 86_400,
+                aud: "authenticated",
+            },
+            &EncodingKey::from_secret(secret),
+        )
+        .expect("encode test jwt")
+    }
+}
+
+#[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
 
@@ -195,19 +223,17 @@ mod contract_smoke_tests {
     use axum::extract::ConnectInfo;
     use axum::http::header;
     use axum::http::{Request, StatusCode};
-    use chrono::Utc;
-    use jsonwebtoken::{encode, EncodingKey, Header};
-    use serde::Serialize;
     use serde_json::Value;
     use tower::ServiceExt;
     use uuid::Uuid;
 
     use super::build_router;
+    use super::jwt_fixture;
     use crate::notify_hub::WsNotifyHub;
     use crate::state::AppState;
 
     const MAX_JSON: usize = 65_536;
-    /// Shared with [`SmokeJwtClaims`] encoding; must satisfy Supabase-style `aud` + HS256 verify.
+    /// Shared with [`jwt_fixture::encode_supabase_style`]; must satisfy Supabase-style `aud` + HS256 verify.
     const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
 
     fn test_addr() -> SocketAddr {
@@ -224,24 +250,8 @@ mod contract_smoke_tests {
         }
     }
 
-    #[derive(Serialize)]
-    struct SmokeJwtClaims {
-        sub: String,
-        exp: i64,
-        aud: &'static str,
-    }
-
     fn test_jwt(sub: Uuid) -> String {
-        encode(
-            &Header::default(),
-            &SmokeJwtClaims {
-                sub: sub.to_string(),
-                exp: Utc::now().timestamp() + 86_400,
-                aud: "authenticated",
-            },
-            &EncodingKey::from_secret(TEST_JWT_SECRET),
-        )
-        .expect("encode test jwt")
+        jwt_fixture::encode_supabase_style(sub, TEST_JWT_SECRET)
     }
 
     async fn oneshot_json(req: Request<Body>) -> (StatusCode, Value) {
@@ -379,5 +389,141 @@ mod contract_smoke_tests {
         assert_eq!(status, StatusCode::OK);
         assert_eq!(v["path"], "script_execution_script.md");
         assert!(v["content"].as_str().is_some_and(|s| !s.trim().is_empty()));
+    }
+}
+
+/// Postgres-backed contract checks (opt-in: **`#[ignore]`** so default **`cargo test`** stays DB-free).
+#[cfg(test)]
+mod pg_contract_tests {
+    use std::net::SocketAddr;
+
+    use axum::body::Body;
+    use axum::extract::ConnectInfo;
+    use axum::http::header;
+    use axum::http::{Method, Request, StatusCode};
+    use axum::response::Response;
+    use serde_json::Value;
+    use sqlx::postgres::PgPoolOptions;
+    use tower::ServiceExt;
+    use uuid::Uuid;
+
+    use super::build_router;
+    use super::jwt_fixture;
+    use crate::notify_hub::WsNotifyHub;
+    use crate::state::AppState;
+
+    const MAX_JSON: usize = 65_536;
+    /// JWT `sub` and `app_project.owner_user_id` for this run.
+    const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+
+    fn test_addr() -> SocketAddr {
+        SocketAddr::from(([127, 0, 0, 1], 42_043))
+    }
+
+    async fn read_json_response(res: Response) -> (StatusCode, Value) {
+        let status = res.status();
+        let bytes = axum::body::to_bytes(res.into_body(), MAX_JSON)
+            .await
+            .unwrap();
+        let v = if bytes.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_slice(&bytes).expect("response json")
+        };
+        (status, v)
+    }
+
+    fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState {
+        AppState {
+            pool: Some(pool),
+            jwt_secret: Some(jwt_secret.into_bytes()),
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+        }
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
+    async fn projects_create_stats_delete_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool, secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "body={created}");
+        let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, stats) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "stats={stats}");
+        assert_eq!(stats["script_count"], 0);
+        assert_eq!(stats["storyboard_count"], 0);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, empty) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NO_CONTENT, "body={empty}");
+
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, err) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NOT_FOUND, "err={err}");
     }
 }
