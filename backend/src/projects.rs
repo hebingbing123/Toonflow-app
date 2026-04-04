@@ -44,6 +44,16 @@ struct ProjectDetailResponse {
     scripts: Vec<ScriptBrief>,
 }
 
+/// Per-project counts for dashboards; aligns with legacy **`generalStatistics`** shape.
+/// **`role_count`** / **`video_count`** are **`0`** until PG equivalents of **`o_assets`** / **`o_video`** exist.
+#[derive(Serialize)]
+struct ProjectStatsResponse {
+    script_count: i64,
+    storyboard_count: i64,
+    role_count: i64,
+    video_count: i64,
+}
+
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 struct PatchProjectBody {
@@ -112,6 +122,10 @@ fn trim_opt(s: Option<String>) -> Option<String> {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/projects", get(list_projects).post(create_project))
+        .route(
+            "/api/v1/projects/legacy/{legacy_id}/stats",
+            get(project_stats_by_legacy),
+        )
         .route(
             "/api/v1/projects/legacy/{legacy_id}",
             get(get_project_by_legacy)
@@ -258,6 +272,64 @@ async fn get_project_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(ProjectDetailResponse { project, scripts }))
+}
+
+async fn project_stats_by_legacy(
+    State(state): State<AppState>,
+    Path(legacy_id): Path<i32>,
+    headers: HeaderMap,
+) -> Result<Json<ProjectStatsResponse>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let project_id: Uuid = sqlx::query_scalar(
+        r#"
+        SELECT id
+        FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let script_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_script
+        WHERE project_id = $1
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let storyboard_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_storyboard sb
+        INNER JOIN app_script s ON sb.script_id = s.id
+        WHERE s.project_id = $1
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(ProjectStatsResponse {
+        script_count,
+        storyboard_count,
+        role_count: 0,
+        video_count: 0,
+    }))
 }
 
 async fn patch_project_by_legacy(

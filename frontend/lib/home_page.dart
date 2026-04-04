@@ -653,6 +653,14 @@ class _HomePageState extends State<HomePage> {
       nameCtrl.text = detail.project.name ?? '';
       introCtrl.text = detail.project.intro ?? '';
       final scriptList = List<ScriptBrief>.from(detail.scripts);
+      ProjectStats? statsSnap;
+      try {
+        statsSnap = await fetchProjectStatsByLegacyId(token, p.legacyId);
+      } catch (_) {
+        statsSnap = null;
+      }
+      if (!mounted) return;
+      final statsRef = <ProjectStats?>[statsSnap];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -683,6 +691,21 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(height: 12),
+                      if (statsRef[0] != null)
+                        Text(
+                          'GET …/stats：剧本 ${statsRef[0]!.scriptCount} · 分镜 '
+                          '${statsRef[0]!.storyboardCount} · 角色/视频 '
+                          '${statsRef[0]!.roleCount}/${statsRef[0]!.videoCount}（占位）',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        )
+                      else
+                        Text(
+                          'GET …/stats 未加载',
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(ctx).colorScheme.outline,
+                              ),
+                        ),
+                      const SizedBox(height: 12),
                       Text('${scriptList.length} script(s)'),
                       Align(
                         alignment: Alignment.centerLeft,
@@ -705,6 +728,14 @@ class _HomePageState extends State<HomePage> {
                                         extractState: s.extractState,
                                       ),
                                     );
+                                    try {
+                                      statsRef[0] =
+                                          await fetchProjectStatsByLegacyId(
+                                        token,
+                                        p.legacyId,
+                                      );
+                                    } catch (_) {}
+                                    if (!ctx.mounted) return;
                                     setDialogState(() => saving[0] = false);
                                     ScaffoldMessenger.of(ctx).showSnackBar(
                                       SnackBar(
@@ -756,6 +787,13 @@ class _HomePageState extends State<HomePage> {
                                       scriptList
                                         ..clear()
                                         ..addAll(d.scripts);
+                                      try {
+                                        statsRef[0] =
+                                            await fetchProjectStatsByLegacyId(
+                                          token,
+                                          p.legacyId,
+                                        );
+                                      } catch (_) {}
                                       setDialogState(() {});
                                     },
                                   ),

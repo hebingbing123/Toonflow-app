@@ -689,6 +689,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/legacy/{legacy_id}/stats:
+    get:
+      tags: [projects]
+      summary: Project overview counts by legacy id
+      operationId: getProjectStatsByLegacyIdV1
+      description: |
+        Bearer JWT. Resolves **`app_project`** by **`legacy_id`** and owner; returns **`app_script`** / **`app_storyboard`** counts.
+        **`role_count`** and **`video_count`** are **`0`** (placeholders; legacy **`generalStatistics`** used **`o_assets`** / **`o_video`** — no PG MVP tables yet).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStatsResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that legacy id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/scripts:
     post:
       tags: [scripts]
@@ -1691,6 +1734,28 @@ components:
           type: integer
           format: int64
           nullable: true
+
+    ProjectStatsResponse:
+      type: object
+      required:
+        [script_count, storyboard_count, role_count, video_count]
+      description: |
+        Field names align with legacy **`generalStatistics`** (`roleCount`, etc.) via snake_case JSON.
+      properties:
+        script_count:
+          type: integer
+          format: int64
+        storyboard_count:
+          type: integer
+          format: int64
+        role_count:
+          type: integer
+          format: int64
+          description: Placeholder **`0`** until assets are modeled in Postgres
+        video_count:
+          type: integer
+          format: int64
+          description: Placeholder **`0`** until video rows are modeled in Postgres
 
     ScriptBrief:
       type: object

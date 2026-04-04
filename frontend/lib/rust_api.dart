@@ -87,6 +87,30 @@ class ProjectDetail {
   }
 }
 
+class ProjectStats {
+  const ProjectStats({
+    required this.scriptCount,
+    required this.storyboardCount,
+    required this.roleCount,
+    required this.videoCount,
+  });
+
+  final int scriptCount;
+  final int storyboardCount;
+  final int roleCount;
+  final int videoCount;
+
+  factory ProjectStats.fromJson(Map<String, dynamic> json) {
+    int n(String k) => (json[k] as num).toInt();
+    return ProjectStats(
+      scriptCount: n('script_count'),
+      storyboardCount: n('storyboard_count'),
+      roleCount: n('role_count'),
+      videoCount: n('video_count'),
+    );
+  }
+}
+
 /// `GET /api/v1/version` — no auth.
 Future<Map<String, dynamic>> fetchVersionV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/version');
@@ -905,4 +929,26 @@ Future<ProjectDetail> fetchProjectByLegacyId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectDetail.fromJson(map);
+}
+
+/// `GET /api/v1/projects/legacy/{legacy_id}/stats` — see `getProjectStatsByLegacyIdV1`.
+Future<ProjectStats> fetchProjectStatsByLegacyId(
+  String accessToken,
+  int legacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId/stats');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectStats.fromJson(map);
 }
