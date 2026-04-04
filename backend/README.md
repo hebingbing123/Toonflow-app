@@ -27,7 +27,7 @@ cargo run
 2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
 3. `cargo run --bin toonflow-legacy-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
 
-详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
+填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script`。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
 
 ### LLM（WebSocket `agent.chat.send`）
 
