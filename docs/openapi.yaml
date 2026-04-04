@@ -617,7 +617,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/JobRow"
         "400":
-          description: Empty `kind` or invalid JSON
+          description: Empty `kind`, malformed JSON, unknown properties in body (only `kind` and `payload`), or JSON that fails deserialization
           content:
             application/json:
               schema:
@@ -1119,7 +1119,9 @@ components:
 
     CreateJobBody:
       type: object
+      additionalProperties: false
       required: [kind]
+      description: Only `kind` and `payload` are accepted; extra properties are rejected by the server (HTTP 400).
       properties:
         kind:
           type: string
