@@ -47,7 +47,7 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
                 UPDATE app_generation_job
                 SET status = 'succeeded', result = $1, error_message = NULL, updated_at = NOW()
                 WHERE id = $2
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, created_at, updated_at
+                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
                 "#,
             )
             .bind(result)
@@ -61,7 +61,7 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
                 UPDATE app_generation_job
                 SET status = 'failed', error_message = $1, updated_at = NOW()
                 WHERE id = $2
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, created_at, updated_at
+                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
                 "#,
             )
             .bind(msg)
@@ -92,7 +92,7 @@ async fn claim_next_job(pool: &PgPool) -> Result<Option<JobRow>, sqlx::Error> {
         SET status = 'running', updated_at = NOW()
         FROM cte
         WHERE j.id = cte.id
-        RETURNING j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.created_at, j.updated_at
+        RETURNING j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.created_at, j.updated_at
         "#,
     )
     .fetch_optional(&mut *tx)

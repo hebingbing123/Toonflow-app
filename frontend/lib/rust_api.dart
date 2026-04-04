@@ -411,6 +411,7 @@ class JobRow {
     required this.payload,
     this.result,
     this.errorMessage,
+    this.idempotencyKey,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -422,6 +423,7 @@ class JobRow {
   final Map<String, dynamic> payload;
   final Map<String, dynamic>? result;
   final String? errorMessage;
+  final String? idempotencyKey;
   final String createdAt;
   final String updatedAt;
 
@@ -436,6 +438,7 @@ class JobRow {
           ? null
           : Map<String, dynamic>.from(json['result'] as Map),
       errorMessage: json['error_message'] as String?,
+      idempotencyKey: json['idempotency_key'] as String?,
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
     );
@@ -463,20 +466,46 @@ Future<JobRow> createJob(
   String accessToken,
   String kind, {
   Map<String, dynamic> payload = const {},
+  String? idempotencyKey,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
+  final headers = <String, String>{
+    'Authorization': 'Bearer $accessToken',
+    'Content-Type': 'application/json',
+  };
+  if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
   final res = await http
       .post(
         uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: jsonEncode({'kind': kind, 'payload': payload}),
       )
       .timeout(const Duration(seconds: 20));
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
+}
+
+Future<JobRow> cancelJob(String accessToken, String jobId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/cancel');
+  final res = await http
+      .post(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 409) {
+    throw RustApiException(res.body, statusCode: 409);
   }
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);

@@ -37,6 +37,7 @@ class _HomePageState extends State<HomePage> {
 
   bool _loadingJobs = false;
   bool _creatingJob = false;
+  String? _cancellingJobId;
   List<JobRow>? _jobs;
 
   final _skillPathCtrl =
@@ -314,6 +315,30 @@ class _HomePageState extends State<HomePage> {
         _error = e.toString();
         _loadingJobs = false;
       });
+    }
+  }
+
+  Future<void> _cancelQueuedJob(JobRow j) async {
+    final token = _session?.accessToken;
+    if (token == null || j.status != 'queued') return;
+    setState(() {
+      _cancellingJobId = j.id;
+      _error = null;
+    });
+    try {
+      await cancelJob(token, j.id);
+      if (!mounted) return;
+      await _loadJobs();
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _cancellingJobId = null);
+      }
     }
   }
 
@@ -1074,6 +1099,16 @@ class _HomePageState extends State<HomePage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text('${j.kind} · ${j.status}'),
                         subtitle: Text(j.id),
+                        trailing: j.status == 'queued'
+                            ? TextButton(
+                                onPressed: _cancellingJobId == j.id
+                                    ? null
+                                    : () => _cancelQueuedJob(j),
+                                child: Text(
+                                  _cancellingJobId == j.id ? '…' : '取消',
+                                ),
+                              )
+                            : null,
                       ),
                     ),
               ],

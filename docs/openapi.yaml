@@ -579,8 +579,17 @@ paths:
       operationId: createJobV1
       description: |
         Inserts a row with `status: queued`. Worker processing is not part of this endpoint.
+        Optional header **`Idempotency-Key`**: when set (max 200 chars after trim), the first successful insert is stored per owner; retries with the same key return the **same row** (HTTP 200) without creating a duplicate.
       security:
         - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+          description: Optional; dedupe create per `owner_user_id` when replayed.
       requestBody:
         required: true
         content:
@@ -602,6 +611,54 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/jobs/{id}/cancel:
+    post:
+      tags: [jobs]
+      summary: Cancel a queued job
+      operationId: cancelJobV1
+      description: |
+        Sets `status` to `cancelled` when the job is still **`queued`**. Jobs already **`running`** or terminal cannot be cancelled via this MVP endpoint (HTTP 409).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job row after cancellation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "409":
+          description: Job is not in `queued` status
           content:
             application/json:
               schema:
@@ -968,7 +1025,7 @@ components:
           type: string
         status:
           type: string
-          enum: [queued, running, succeeded, failed]
+          enum: [queued, running, succeeded, failed, cancelled]
         payload:
           type: object
           additionalProperties: true
@@ -979,6 +1036,10 @@ components:
         error_message:
           type: string
           nullable: true
+        idempotency_key:
+          type: string
+          nullable: true
+          description: Set when created with `Idempotency-Key` header; unique per owner when present.
         created_at:
           type: string
           format: date-time
