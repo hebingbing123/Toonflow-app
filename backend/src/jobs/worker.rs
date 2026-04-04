@@ -9,9 +9,10 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::harness::observe;
-use crate::jobs::{envelope_generation_job_updated, JobRow};
 use crate::state::AppState;
 use crate::usage;
+
+use super::{envelope_generation_job_updated, JobRow};
 
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")

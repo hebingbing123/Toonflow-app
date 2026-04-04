@@ -1,3 +1,7 @@
+//! REST routes under `/api/v1/jobs` and the in-process poller in [`worker`].
+
+pub mod worker;
+
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,

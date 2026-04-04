@@ -7,7 +7,6 @@ mod auth;
 mod billing;
 mod error;
 mod harness;
-mod job_worker;
 mod jobs;
 mod json_patch;
 mod llm;
@@ -61,7 +60,7 @@ async fn main() {
 
     let worker_state = state.clone();
     tokio::spawn(async move {
-        job_worker::run(worker_state).await;
+        jobs::worker::run(worker_state).await;
     });
 
     let app = app::build_router(state);
