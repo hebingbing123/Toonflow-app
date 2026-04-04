@@ -193,7 +193,9 @@ class _HomePageState extends State<HomePage> {
       final r = await fetchHarnessTools(token);
       if (!mounted) return;
       setState(() {
-        _harnessToolsLine = r.tools.join(', ');
+        _harnessToolsLine = r.tools
+            .map((t) => '${t.name}: ${t.description}')
+            .join('\n');
         _loadingHarnessTools = false;
       });
     } on RustApiException catch (e) {

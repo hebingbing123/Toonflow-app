@@ -390,14 +390,30 @@ class SkillContentResponse {
   }
 }
 
+class HarnessToolInfo {
+  const HarnessToolInfo({required this.name, required this.description});
+
+  final String name;
+  final String description;
+
+  factory HarnessToolInfo.fromJson(Map<String, dynamic> json) {
+    return HarnessToolInfo(
+      name: json['name'] as String,
+      description: json['description'] as String,
+    );
+  }
+}
+
 class HarnessToolsResponse {
   const HarnessToolsResponse({required this.tools});
 
-  final List<String> tools;
+  final List<HarnessToolInfo> tools;
 
   factory HarnessToolsResponse.fromJson(Map<String, dynamic> json) {
     return HarnessToolsResponse(
-      tools: (json['tools'] as List<dynamic>).map((e) => e as String).toList(),
+      tools: (json['tools'] as List<dynamic>)
+          .map((e) => HarnessToolInfo.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

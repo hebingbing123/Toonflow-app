@@ -532,7 +532,7 @@ paths:
   /api/v1/harness/tools:
     get:
       tags: [harness]
-      summary: List registered Harness tool names (stubs)
+      summary: List registered Harness tools (name and description; dispatch still WIP)
       operationId: listHarnessToolsV1
       security:
         - bearerAuth: []
@@ -1051,6 +1051,15 @@ components:
         content:
           type: string
 
+    HarnessToolInfo:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
     HarnessToolsResponse:
       type: object
       required: [tools]
@@ -1058,7 +1067,7 @@ components:
         tools:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/HarnessToolInfo"
 
     JobRow:
       type: object

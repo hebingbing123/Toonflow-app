@@ -55,7 +55,7 @@ pub struct SkillContentResponse {
 
 #[derive(Serialize)]
 pub struct HarnessToolsResponse {
-    pub tools: Vec<String>,
+    pub tools: &'static [crate::harness::tools::HarnessToolInfo],
 }
 
 #[derive(Deserialize)]
@@ -142,8 +142,7 @@ async fn list_harness_tools(
     headers: HeaderMap,
 ) -> Result<Json<HarnessToolsResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
-    let reg = ToolRegistry::default();
     Ok(Json(HarnessToolsResponse {
-        tools: reg.names().iter().map(|s| (*s).to_string()).collect(),
+        tools: ToolRegistry::catalog(),
     }))
 }
