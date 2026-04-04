@@ -210,10 +210,17 @@ class _HomePageState extends State<HomePage> {
       _versionBody = null;
     });
     try {
-      final map = await fetchVersionV1();
+      final v = await fetchVersionV1();
       if (!mounted) return;
+      final parts = <String>[
+        'service=${v.service}',
+        'version=${v.version}',
+      ];
+      if (v.gitSha != null && v.gitSha!.isNotEmpty) {
+        parts.add('git_sha=${v.gitSha}');
+      }
       setState(() {
-        _versionBody = map.toString();
+        _versionBody = parts.join(' · ');
         _loadingVersion = false;
       });
     } on RustApiException catch (e) {

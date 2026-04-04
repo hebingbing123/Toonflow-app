@@ -151,14 +151,35 @@ Future<HealthResponse> fetchHealthRoot() async {
   return HealthResponse.fromJson(map);
 }
 
-/// `GET /api/v1/version` — no auth.
-Future<Map<String, dynamic>> fetchVersionV1() async {
+/// `GET /api/v1/version` — no auth; OpenAPI `VersionResponse`.
+class VersionResponse {
+  const VersionResponse({
+    required this.service,
+    required this.version,
+    this.gitSha,
+  });
+
+  final String service;
+  final String version;
+  final String? gitSha;
+
+  factory VersionResponse.fromJson(Map<String, dynamic> json) {
+    return VersionResponse(
+      service: json['service'] as String,
+      version: json['version'] as String,
+      gitSha: json['git_sha'] as String?,
+    );
+  }
+}
+
+Future<VersionResponse> fetchVersionV1() async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/version');
   final res = await http.get(uri).timeout(const Duration(seconds: 5));
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return jsonDecode(res.body) as Map<String, dynamic>;
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VersionResponse.fromJson(map);
 }
 
 /// `GET /api/v1/ready` — no auth; see `readyV1`.
