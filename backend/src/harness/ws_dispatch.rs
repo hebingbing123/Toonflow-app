@@ -11,11 +11,11 @@ use crate::harness::ws_agent::{self, HarnessAgentWsParams};
 use crate::harness::ws_auth::{self, WsConnectionSession};
 use crate::harness::ws_channel::WsAgentChannel;
 use crate::harness::ws_chat::{self, ChatTurnWsParams};
+use crate::harness::ws_outbound::{send_envelope, send_error};
 use crate::harness::ws_session::{self, WsSessionBindState};
 use crate::harness::ws_tool;
 use crate::harness::{observe, HarnessContext};
 use crate::state::AppState;
-use crate::ws::{send_envelope, send_error};
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct ClientEnvelope {

@@ -5,8 +5,8 @@ use serde_json::{json, Value};
 
 use crate::harness::invoke;
 use crate::harness::wire::HarnessToolInvokePayload;
+use crate::harness::ws_outbound::{send_envelope, send_error};
 use crate::harness::HarnessContext;
-use crate::ws::{send_envelope, send_error};
 
 pub async fn handle_harness_tool_invoke(
     socket: &mut WebSocket,

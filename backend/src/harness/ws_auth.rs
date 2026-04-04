@@ -9,8 +9,8 @@ use uuid::Uuid;
 use crate::auth::verify_supabase_user_jwt;
 use crate::harness::wire::SessionAuthPayload;
 use crate::harness::ws_channel::WsAgentChannel;
+use crate::harness::ws_outbound::{send_envelope, send_error};
 use crate::state::AppState;
-use crate::ws::{send_envelope, send_error};
 
 /// Per-WebSocket connection state (user id, agent attach, notify subscription, LLM cancel).
 pub struct WsConnectionSession {

@@ -5,8 +5,8 @@ use futures_util::{SinkExt, StreamExt};
 
 use crate::harness::ws_auth::{self, WsConnectionSession};
 use crate::harness::ws_dispatch;
+use crate::harness::ws_outbound::send_error;
 use crate::state::AppState;
-use crate::ws::send_error;
 
 pub(crate) async fn run_socket(
     mut socket: WebSocket,

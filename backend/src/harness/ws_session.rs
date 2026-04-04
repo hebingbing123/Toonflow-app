@@ -7,7 +7,7 @@ use uuid::Uuid;
 use super::permissions;
 use super::wire::{AttachProductionPayload, AttachScriptPayload};
 use super::ws_channel::WsAgentChannel;
-use crate::ws::{send_envelope, send_error};
+use crate::harness::ws_outbound::{send_envelope, send_error};
 
 /// Mutable session fields shared by attach / context handlers.
 pub struct WsSessionBindState<'a> {
