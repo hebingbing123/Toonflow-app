@@ -22,6 +22,22 @@ yarn refactor:check
 1. **Cursor 产品设置**：终端/网络等操作可能弹出「Run / Allow」——在 Cursor **Settings** 里对当前工作区开启 **自动运行 / 减少审批**（具体名称随版本变化，如 *Auto-run*、*YOLO*、*Agent* 模式），可减少每次点确认。
 2. **对话轮次**：一次「用户发消息」通常对应模型的一段输出；模型不能无限自己发下一条用户消息。若要一口气做完多阶段，可在**同一条用户指令**里写清范围（例如：「按路线图把 A、B、C 做完并分别 commit」），或依赖 **Agent 自动多步**（若你的 Cursor 版本支持且已打开自动执行）。
 
+## 希望「尽量少点允许」时请在 Cursor 里做的事（人类操作一次即可）
+
+界面文案随版本会变，按下面**意图**找对应开关即可：
+
+1. 打开 **Settings**（macOS：`Cmd + ,`），搜索 **Agent** / **Auto-run** / **Terminal**。
+2. 打开 **Agent 自动运行**（或「在 Agent 模式下自动执行终端命令」一类开关）。
+3. 若提供 **命令允许列表（allowlist）**：为本仓库加入与门禁一致的命令，例如：
+   - `bash scripts/refactor-check.sh`、`yarn refactor:check`
+   - `cargo fmt`、`cargo clippy`、`cargo test`（工作目录在 `backend/` 时）
+   - `flutter pub get`、`flutter analyze`、`flutter test`（工作目录在 `frontend/` 时）
+   - `ruby -ryaml`（解析 `docs/openapi.yaml` 时）
+4. **不要**把高危操作放进允许列表（如 `rm -rf`、`git push --force`、直连生产数据库）；重构门禁脚本本身是只读检查 + 本地测试，风险可控。
+5. 若仍频繁拦截：看 **Sandbox / Allowlist** 相关说明，或临时用 **Agent / Max** 模式（名称因版本而异），在**可信仓库**内使用。
+
+完成以上设置后，**同一套** [`scripts/refactor-check.sh`](scripts/refactor-check.sh) 在本地与 Agent 终端里才能接近「改完即跑、少打断」。
+
 ## 与本地 `.cursor/rules` 的关系
 
 仓库根 `.cursor/` 可能被 `.gitignore` 忽略；**本文件是进 Git 的约定**，便于任何克隆本仓库的 Agent 行为一致。
