@@ -65,14 +65,15 @@
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
 | **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
 | **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件与旧版 Socket.IO 对照 |
-| **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/` |
+| **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 | **`docs/migration/`** | 旧栈 SQLite → Supabase PG 迁移说明（[`legacy-sqlite-to-supabase.md`](docs/migration/legacy-sqlite-to-supabase.md)） |
 
 > 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。
 
 ### CI 与工程规范
 
-- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — `backend/`：`cargo fmt --check`、`clippy -D warnings`、`test`；`frontend/`：`flutter analyze`、`flutter test`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
+- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — `backend/`：`cargo fmt --check`、`clippy -D warnings`、`test`；**Postgres 迁移冒烟**（空库 + `pg_bootstrap` + `toonflow-sqlx-migrate`）；`frontend/`：`flutter analyze`、`flutter test`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
+- **迁移说明**：[`docs/migration/database-migrations.md`](docs/migration/database-migrations.md)（Supabase CLI 为主；Rust **sqlx** 用于裸 PG/CI）。
 - **工具链**：根目录 [`rust-toolchain.toml`](rust-toolchain.toml) 锁定 Rust stable + `rustfmt` / `clippy`。
 - **依赖更新**：[`.github/dependabot.yml`](.github/dependabot.yml) 覆盖 Cargo、pub、GitHub Actions。
 

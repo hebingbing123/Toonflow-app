@@ -1,5 +1,7 @@
 # 旧栈 SQLite → Supabase Postgres 迁移说明
 
+迁移文件真源与 Rust/sqlx 侧执行方式见 **[database-migrations.md](./database-migrations.md)**。
+
 ## 角色划分
 
 | 形态 | 存储 | 说明 |
