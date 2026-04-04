@@ -811,6 +811,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [storyboards]
+      summary: Delete storyboard by legacy id
+      operationId: deleteStoryboardByLegacyIdV1
+      description: |
+        Deletes **`app_storyboard`** when the row belongs to a script under a project owned by the caller.
+        (Legacy SQLite also removed **`o_assets2Storyboard`** links; PG MVP has no equivalent join table yet.)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/skills:
     get:

@@ -458,6 +458,23 @@ Future<StoryboardRow> updateStoryboardByLegacyId(
   return StoryboardRow.fromJson(map);
 }
 
+/// `DELETE /api/v1/storyboards/legacy/{legacy_id}` — see `deleteStoryboardByLegacyIdV1`.
+Future<void> deleteStoryboardByLegacyId(String accessToken, int legacyId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/storyboards/legacy/$legacyId');
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 class SkillFileMeta {
   const SkillFileMeta({
     required this.path,

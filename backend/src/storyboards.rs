@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, State},
-    http::HeaderMap,
+    http::{HeaderMap, StatusCode},
     routing::get,
     Json, Router,
 };
@@ -74,7 +74,9 @@ pub fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/storyboards/legacy/{legacy_id}",
-            get(get_by_legacy).patch(patch_by_legacy),
+            get(get_by_legacy)
+                .patch(patch_by_legacy)
+                .delete(delete_by_legacy),
         )
 }
 
@@ -279,6 +281,40 @@ async fn patch_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(row))
+}
+
+async fn delete_by_legacy(
+    State(state): State<AppState>,
+    Path(legacy_id): Path<i32>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let res = sqlx::query(
+        r#"
+        DELETE FROM app_storyboard sb
+        USING app_script sc, app_project p
+        WHERE sb.script_id = sc.id
+          AND sc.project_id = p.id
+          AND sb.legacy_id = $1
+          AND p.owner_user_id = $2
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(uid)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 #[cfg(test)]

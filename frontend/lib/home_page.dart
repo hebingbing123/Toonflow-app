@@ -1069,6 +1069,66 @@ class _HomePageState extends State<HomePage> {
                         saving[0] ? null : () => Navigator.of(ctx).pop(),
                     child: const Text('Close'),
                   ),
+                  TextButton(
+                    onPressed: saving[0]
+                        ? null
+                        : () async {
+                            final ok = await showDialog<bool>(
+                              context: ctx,
+                              builder: (c) => AlertDialog(
+                                title: const Text('删除分镜？'),
+                                content: Text(
+                                  '将删除 storyboard #${row.legacyId}。',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(c).pop(false),
+                                    child: const Text('取消'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () =>
+                                        Navigator.of(c).pop(true),
+                                    child: const Text('删除'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (ok != true || !ctx.mounted) return;
+                            setDialogState(() => saving[0] = true);
+                            try {
+                              await deleteStoryboardByLegacyId(
+                                token,
+                                storyLegacyId,
+                              );
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).pop();
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    '分镜已删除；请重新打开「分镜列表」以刷新',
+                                  ),
+                                ),
+                              );
+                            } on RustApiException catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                    child: const Text('DELETE'),
+                  ),
                   FilledButton(
                     onPressed: saving[0]
                         ? null
