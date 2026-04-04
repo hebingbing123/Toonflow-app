@@ -4,7 +4,7 @@
 //! |------|------|
 //! | [`tools`] | Static catalog (`HarnessToolInfo`); source of truth for allowlists and OpenAPI/WS docs. |
 //! | [`http`] | REST under `/api/v1/harness/*` (e.g. tool listing). |
-//! | [`wire`] | Deserialize structs for `harness.*` WebSocket payloads (`schema_version` 1). |
+//! | [`wire`] | Deserialize structs for WebSocket **`payload`** bodies (`harness.*`, `agent.*.attach`, `agent.chat.send`, `session.auth`). |
 //! | [`ws_tool`] / [`ws_agent`] / [`ws_chat`] | WebSocket branches for `harness.tool.invoke`, `harness.agent.run`, and `agent.chat.send` (keeps the top-level `ws` module thin). |
 //! | [`invoke`] | Execute catalog tools (sync + async); gated by [`permissions`]. |
 //! | [`observe`] | `tracing` hooks for WS frames, tool runs, HTTP catalog, memory REST, generation jobs. |

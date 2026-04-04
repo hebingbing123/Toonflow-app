@@ -1,7 +1,38 @@
-//! JSON payload shapes for WebSocket messages typed under the Harness surface (`harness.tool.invoke`, `harness.agent.run`).
+//! JSON **`payload`** shapes for WebSocket envelopes (`schema_version` **1**): Harness tools, agent loop, and session attach.
 
 use serde::Deserialize;
 use serde_json::Value;
+
+// --- Session auth (`session.auth`) ---
+
+#[derive(Debug, Deserialize)]
+pub struct SessionAuthPayload {
+    pub access_token: String,
+}
+
+// --- Agent channel attach (`agent.script.attach`, `agent.production.attach`, `agent.context.update`) ---
+
+#[derive(Debug, Deserialize)]
+pub struct AttachScriptPayload {
+    pub isolation_key: String,
+    pub project_id: i64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AttachProductionPayload {
+    pub isolation_key: String,
+    pub project_id: i64,
+    pub script_id: i64,
+}
+
+// --- Streaming chat (`agent.chat.send`) ---
+
+#[derive(Debug, Deserialize)]
+pub struct ChatSendPayload {
+    pub content: String,
+}
+
+// --- Harness tool / agent run ---
 
 #[derive(Debug, Deserialize)]
 pub struct HarnessToolInvokePayload {

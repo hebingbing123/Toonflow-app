@@ -1,5 +1,8 @@
 use crate::auth::verify_supabase_user_jwt;
-use crate::harness::wire::HarnessAgentRunPayload;
+use crate::harness::wire::{
+    AttachProductionPayload, AttachScriptPayload, ChatSendPayload, HarnessAgentRunPayload,
+    SessionAuthPayload,
+};
 use crate::harness::ws_agent::{self, HarnessAgentWsParams};
 use crate::harness::ws_chat::{self, ChatTurnWsParams};
 use crate::harness::ws_tool;
@@ -548,29 +551,6 @@ async fn dispatch_client_text(
             .await;
         }
     }
-}
-
-#[derive(Debug, Deserialize)]
-struct SessionAuthPayload {
-    access_token: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct AttachScriptPayload {
-    isolation_key: String,
-    project_id: i64,
-}
-
-#[derive(Debug, Deserialize)]
-struct AttachProductionPayload {
-    isolation_key: String,
-    project_id: i64,
-    script_id: i64,
-}
-
-#[derive(Debug, Deserialize)]
-struct ChatSendPayload {
-    content: String,
 }
 
 #[cfg(test)]
