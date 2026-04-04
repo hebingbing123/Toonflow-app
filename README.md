@@ -69,7 +69,7 @@
 | **`docs/migration/`** | 旧栈 SQLite → Supabase PG 迁移说明（[`legacy-sqlite-to-supabase.md`](docs/migration/legacy-sqlite-to-supabase.md)） |
 
 > 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。  
-> **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；勿反复询问「下一步」。
+> **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；勿反复询问「下一步」。Agent 行为约定见 **[`AGENTS.md`](AGENTS.md)**；若 Cursor 仍逐项要你点「运行」，请在编辑器设置里放宽对该工作区的自动执行/审批。
 
 ### CI 与工程规范
 
