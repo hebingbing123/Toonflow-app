@@ -4,16 +4,23 @@ version = "0.1.0"
 edition = "2021"
 description = "Toonflow API (Harness-oriented Rust backend; work in progress)"
 
+[[bin]]
+name = "toonflow-legacy-import"
+path = "src/bin/legacy_import.rs"
+
 [dependencies]
+anyhow = "1"
 axum = { version = "0.8", features = ["macros", "ws"] }
+base64 = "0.22"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 dotenvy = "0.15"
 futures-util = "0.3"
 jsonwebtoken = "9"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "tls-rustls-ring", "uuid"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "tls-rustls-ring", "uuid", "json"] }
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["rt"] }
 tower-http = { version = "0.6", features = ["cors", "trace"] }

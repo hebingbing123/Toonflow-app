@@ -21,6 +21,14 @@ cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选�
 cargo run
 ```
 
+### 旧库导入（SQLite → `legacy_staging`）
+
+1. 确保 Supabase 迁移已应用（含 `legacy_staging.snapshot`）。
+2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
+3. `cargo run --bin toonflow-legacy-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
+
+详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
+
 ### LLM（WebSocket `agent.chat.send`）
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。
