@@ -645,6 +645,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [scripts]
+      summary: Delete script by legacy id
+      operationId: deleteScriptByLegacyIdV1
+      description: |
+        Deletes **`app_script`** when the row belongs to a project owned by the caller.
+        Child **`app_storyboard`** rows cascade (**`ON DELETE CASCADE`**).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/scripts/legacy/{script_legacy_id}/storyboards:
     get:

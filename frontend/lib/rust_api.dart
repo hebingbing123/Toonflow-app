@@ -299,6 +299,23 @@ Future<ScriptRow> updateScriptByLegacyId(
   return ScriptRow.fromJson(map);
 }
 
+/// `DELETE /api/v1/scripts/legacy/{legacy_id}` — see `deleteScriptByLegacyIdV1`.
+Future<void> deleteScriptByLegacyId(String accessToken, int legacyId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/legacy/$legacyId');
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 class StoryboardRow {
   const StoryboardRow({
     required this.id,

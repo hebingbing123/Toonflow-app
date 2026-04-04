@@ -37,6 +37,8 @@ cargo run
 
 项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** 随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
+剧本删除：**`DELETE /api/v1/scripts/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
+
 ### LLM（WebSocket `agent.chat.send`）
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。
