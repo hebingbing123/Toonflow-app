@@ -166,6 +166,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [projects]
+      summary: Partially update project by legacy id
+      operationId: patchProjectByLegacyIdV1
+      description: |
+        JSON merge patch for `name` and `intro`. Omit a key to leave that column unchanged;
+        `null` or empty string clears the column. At least one of `name` or `intro` must appear in the body.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchProjectBody"
+      responses:
+        "200":
+          description: Updated project row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectRow"
+        "400":
+          description: Invalid body or no fields to apply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that legacy id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
 components:
   securitySchemes:
@@ -263,6 +316,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ScriptBrief"
+
+    PatchProjectBody:
+      type: object
+      description: |
+        At least one property required. Use `null` or `""` to clear `name` or `intro`.
+      properties:
+        name:
+          type: string
+          nullable: true
+        intro:
+          type: string
+          nullable: true
 
     ErrorBody:
       type: object

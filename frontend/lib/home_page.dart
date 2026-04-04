@@ -195,41 +195,102 @@ class _HomePageState extends State<HomePage> {
   Future<void> _openProjectDetail(ProjectRow p) async {
     final token = _session?.accessToken;
     if (token == null) return;
+    final nameCtrl = TextEditingController(text: p.name ?? '');
+    final introCtrl = TextEditingController(text: p.intro ?? '');
     try {
       final detail = await fetchProjectByLegacyId(token, p.legacyId);
       if (!mounted) return;
+      nameCtrl.text = detail.project.name ?? '';
+      introCtrl.text = detail.project.intro ?? '';
       await showDialog<void>(
         context: context,
         builder: (ctx) {
-          return AlertDialog(
-            title: Text(
-              detail.project.name ?? 'legacy #${detail.project.legacyId}',
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('${detail.scripts.length} script(s)'),
-                  const SizedBox(height: 8),
-                  ...detail.scripts.map(
-                    (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        '#${s.legacyId} ${s.name ?? ""}',
-                        style: Theme.of(ctx).textTheme.bodySmall,
+          return StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              final saving = <bool>[false];
+              return AlertDialog(
+                title: Text(
+                  detail.project.name ?? 'legacy #${detail.project.legacyId}',
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Name (empty = clear)',
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: introCtrl,
+                        maxLines: 3,
+                        decoration: const InputDecoration(
+                          labelText: 'Intro (empty = clear)',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text('${detail.scripts.length} script(s)'),
+                      const SizedBox(height: 8),
+                      ...detail.scripts.map(
+                        (s) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            '#${s.legacyId} ${s.name ?? ""}',
+                            style: Theme.of(ctx).textTheme.bodySmall,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed:
+                        saving[0] ? null : () => Navigator.of(ctx).pop(),
+                    child: const Text('Close'),
+                  ),
+                  FilledButton(
+                    onPressed: saving[0]
+                        ? null
+                        : () async {
+                            setDialogState(() => saving[0] = true);
+                            try {
+                              await updateProjectByLegacyId(token, p.legacyId, {
+                                'name': nameCtrl.text.isEmpty
+                                    ? null
+                                    : nameCtrl.text,
+                                'intro': introCtrl.text.isEmpty
+                                    ? null
+                                    : introCtrl.text,
+                              });
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).pop();
+                              if (!mounted) return;
+                              await _loadProjects();
+                            } on RustApiException catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                    child: Text(saving[0] ? '保存中…' : 'PATCH 保存'),
                   ),
                 ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Close'),
-              ),
-            ],
+              );
+            },
           );
         },
       );
@@ -239,6 +300,9 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString());
+    } finally {
+      nameCtrl.dispose();
+      introCtrl.dispose();
     }
   }
 

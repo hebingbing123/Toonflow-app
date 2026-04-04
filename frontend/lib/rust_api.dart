@@ -104,6 +104,35 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
       .toList();
 }
 
+Future<ProjectRow> updateProjectByLegacyId(
+  String accessToken,
+  int legacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectRow.fromJson(map);
+}
+
 Future<ProjectDetail> fetchProjectByLegacyId(
   String accessToken,
   int legacyId,

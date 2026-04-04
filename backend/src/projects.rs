@@ -4,7 +4,8 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -35,12 +36,46 @@ struct ProjectDetailResponse {
     scripts: Vec<ScriptBrief>,
 }
 
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct PatchProjectBody {
+    #[serde(default)]
+    name: Option<Value>,
+    #[serde(default)]
+    intro: Option<Value>,
+}
+
+enum FieldPatch<T> {
+    Absent,
+    Set(Option<T>),
+}
+
+fn parse_optional_text_field(
+    v: Option<Value>,
+    field: &str,
+) -> Result<FieldPatch<String>, ApiError> {
+    match v {
+        None => Ok(FieldPatch::Absent),
+        Some(Value::Null) => Ok(FieldPatch::Set(None)),
+        Some(Value::String(s)) => {
+            if s.is_empty() {
+                Ok(FieldPatch::Set(None))
+            } else {
+                Ok(FieldPatch::Set(Some(s)))
+            }
+        }
+        _ => Err(ApiError::BadRequest(format!(
+            "{field} must be a string, null, or omitted",
+        ))),
+    }
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/projects", get(list_projects))
         .route(
             "/api/v1/projects/legacy/{legacy_id}",
-            get(get_project_by_legacy),
+            get(get_project_by_legacy).patch(patch_project_by_legacy),
         )
 }
 
@@ -107,4 +142,66 @@ async fn get_project_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(ProjectDetailResponse { project, scripts }))
+}
+
+async fn patch_project_by_legacy(
+    State(state): State<AppState>,
+    Path(legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<PatchProjectBody>,
+) -> Result<Json<ProjectRow>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let name_patch = parse_optional_text_field(body.name, "name")?;
+    let intro_patch = parse_optional_text_field(body.intro, "intro")?;
+    if matches!(name_patch, FieldPatch::Absent) && matches!(intro_patch, FieldPatch::Absent) {
+        return Err(ApiError::BadRequest(
+            "expected at least one of: name, intro".into(),
+        ));
+    }
+
+    let current = sqlx::query_as::<_, ProjectRow>(
+        r#"
+        SELECT id, legacy_id, name, intro, project_type, create_time_ms
+        FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let new_name = match name_patch {
+        FieldPatch::Absent => current.name.clone(),
+        FieldPatch::Set(v) => v,
+    };
+    let new_intro = match intro_patch {
+        FieldPatch::Absent => current.intro.clone(),
+        FieldPatch::Set(v) => v,
+    };
+
+    let row = sqlx::query_as::<_, ProjectRow>(
+        r#"
+        UPDATE app_project
+        SET name = $1, intro = $2, updated_at = NOW()
+        WHERE id = $3 AND owner_user_id = $4
+        RETURNING id, legacy_id, name, intro, project_type, create_time_ms
+        "#,
+    )
+    .bind(&new_name)
+    .bind(&new_intro)
+    .bind(current.id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(row))
 }

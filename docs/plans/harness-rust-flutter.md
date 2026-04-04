@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 迁移、直连/池化 URL）；旧 Electron/Node 栈的 **SQLite + data/** 只做 **一次性迁入 PG** 的导入工具链，非新栈持久化形态；AI Provider 流式；**竖切**：Flutter 已接 Bearer JWT 下的 `GET /api/v1/projects` 与 `GET /api/v1/projects/legacy/{id}`；仍缺领域写入 API、任务真源与自动化契约测试固化
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 迁移、直连/池化 URL）；旧 Electron/Node 栈的 **SQLite + data/** 只做 **一次性迁入 PG** 的导入工具链，非新栈持久化形态；AI Provider 流式；**竖切**：Flutter 已接 `GET` + `PATCH /api/v1/projects/legacy/{id}`（name/intro）；仍缺脚本/分镜等业务写入、任务真源与 CI 契约测试固化
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
