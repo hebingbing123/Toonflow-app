@@ -100,10 +100,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
 
     let (out_tx, mut out_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
 
-    if let Some(ref mut s) = session {
-        let cid = state.notify.subscribe(s.user_id, out_tx.clone()).await;
-        s.ws_notify = Some((s.user_id, cid));
-    }
+    ws_auth::subscribe_notify_for_session(&mut session, &state, &out_tx).await;
 
     loop {
         tokio::select! {
@@ -149,11 +146,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
         }
     }
 
-    if let Some(s) = session {
-        if let Some((uid, cid)) = s.ws_notify {
-            state.notify.unsubscribe(uid, cid).await;
-        }
-    }
+    ws_auth::unsubscribe_notify_if_any(session.as_ref(), &state).await;
 }
 
 #[cfg(test)]

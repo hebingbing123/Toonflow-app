@@ -24,7 +24,7 @@ pub struct WsConnectionSession {
     pub ws_notify: Option<(Uuid, Uuid)>,
 }
 
-/// If the handshake URL carried **`access_token`**, verify JWT and return a session **without** notify subscription yet (caller subscribes and sets [`WsConnectionSession::ws_notify`]).
+/// If the handshake URL carried **`access_token`**, verify JWT and return a session **without** notify subscription yet (call [`subscribe_notify_for_session`] once **`out_tx`** exists).
 /// Invalid or missing token yields **`None`** (same as an anonymous connection until **`session.auth`**).
 #[must_use]
 pub fn session_from_query_access_token(
@@ -48,6 +48,27 @@ impl WsConnectionSession {
             script_id: None,
             llm_cancel: CancellationToken::new(),
             ws_notify,
+        }
+    }
+}
+
+/// Register this connection on [`AppState::notify`] when **`session`** is already authenticated (query token path).
+pub async fn subscribe_notify_for_session(
+    session: &mut Option<WsConnectionSession>,
+    state: &AppState,
+    out_tx: &UnboundedSender<String>,
+) {
+    if let Some(ref mut s) = session {
+        let cid = state.notify.subscribe(s.user_id, out_tx.clone()).await;
+        s.ws_notify = Some((s.user_id, cid));
+    }
+}
+
+/// Best-effort teardown for [`WsConnectionSession::ws_notify`].
+pub async fn unsubscribe_notify_if_any(session: Option<&WsConnectionSession>, state: &AppState) {
+    if let Some(s) = session {
+        if let Some((uid, cid)) = s.ws_notify {
+            state.notify.unsubscribe(uid, cid).await;
         }
     }
 }
