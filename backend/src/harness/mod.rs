@@ -6,6 +6,7 @@
 //! | [`http`] | REST under `/api/v1/harness/*` (e.g. tool listing). |
 //! | [`wire`] | Deserialize structs for WebSocket **`payload`** bodies (`harness.*`, `agent.*.attach`, `agent.chat.send`, `session.auth`). |
 //! | [`ws_channel`] | `Script` / `Production` discriminator + LLM assistant label. |
+//! | [`ws_auth`] | `session.auth` → `session.ready` and [`WsConnectionSession`]. |
 //! | [`ws_session`] | `agent.script.attach` / `agent.production.attach` / `agent.context.update`. |
 //! | [`ws_tool`] / [`ws_agent`] / [`ws_chat`] | `harness.tool.invoke`, `harness.agent.run`, `agent.chat.send` (keeps the top-level `ws` module thin). |
 //! | [`invoke`] | Execute catalog tools (sync + async); gated by [`permissions`]. |
@@ -23,6 +24,7 @@ pub mod tools;
 pub(crate) mod wasm_runtime;
 pub mod wire;
 pub(crate) mod ws_agent;
+pub mod ws_auth;
 pub mod ws_channel;
 pub(crate) mod ws_chat;
 pub(crate) mod ws_session;

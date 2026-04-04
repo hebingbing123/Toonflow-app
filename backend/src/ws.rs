@@ -1,6 +1,7 @@
 use crate::auth::verify_supabase_user_jwt;
-use crate::harness::wire::{ChatSendPayload, HarnessAgentRunPayload, SessionAuthPayload};
+use crate::harness::wire::{ChatSendPayload, HarnessAgentRunPayload};
 use crate::harness::ws_agent::{self, HarnessAgentWsParams};
+use crate::harness::ws_auth::{self, WsConnectionSession};
 use crate::harness::ws_channel::WsAgentChannel;
 use crate::harness::ws_chat::{self, ChatTurnWsParams};
 use crate::harness::ws_session::{self, WsSessionBindState};
@@ -40,16 +41,7 @@ struct ClientEnvelope {
     request_id: Option<String>,
 }
 
-struct Session {
-    user_id: Uuid,
-    channel: Option<WsAgentChannel>,
-    isolation_key: Option<String>,
-    project_id: Option<i64>,
-    script_id: Option<i64>,
-    llm_cancel: CancellationToken,
-    /// `(user_id, subscription_id)` for [`crate::notify_hub::WsNotifyHub`].
-    ws_notify: Option<(Uuid, Uuid)>,
-}
+type Session = WsConnectionSession;
 
 pub(crate) async fn send_envelope(
     socket: &mut WebSocket,
@@ -127,15 +119,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
     if let Some(ref raw) = query_token {
         if let Ok(claims) = verify_supabase_user_jwt(raw, secret) {
             if let Ok(uid) = Uuid::parse_str(claims.sub.trim()) {
-                session = Some(Session {
-                    user_id: uid,
-                    channel: None,
-                    isolation_key: None,
-                    project_id: None,
-                    script_id: None,
-                    llm_cancel: CancellationToken::new(),
-                    ws_notify: None,
-                });
+                session = Some(WsConnectionSession::new_authenticated(uid, None));
             }
         }
     }
@@ -234,58 +218,18 @@ async fn dispatch_client_text(
             return;
         }
 
-        let Ok(auth) = serde_json::from_value::<SessionAuthPayload>(env.payload.clone()) else {
-            let _ = send_error(
-                socket,
-                "invalid_payload",
-                "session.auth requires payload.access_token",
-                env.request_id.as_deref(),
-            )
-            .await;
-            return;
-        };
-
-        let Ok(claims) = verify_supabase_user_jwt(&auth.access_token, secret) else {
-            let _ = send_error(
-                socket,
-                "invalid_token",
-                "JWT verification failed",
-                env.request_id.as_deref(),
-            )
-            .await;
-            return;
-        };
-
-        let Ok(uid) = Uuid::parse_str(claims.sub.trim()) else {
-            let _ = send_error(
-                socket,
-                "invalid_token",
-                "invalid sub claim",
-                env.request_id.as_deref(),
-            )
-            .await;
-            return;
-        };
-
-        let conn_id = state.notify.subscribe(uid, out_tx.clone()).await;
-        *session = Some(Session {
-            user_id: uid,
-            channel: None,
-            isolation_key: None,
-            project_id: None,
-            script_id: None,
-            llm_cancel: CancellationToken::new(),
-            ws_notify: Some((uid, conn_id)),
-        });
-
-        let _ = send_envelope(
+        if let Some(s) = ws_auth::try_session_auth(
             socket,
-            "session.ready",
-            1,
-            json!({ "sub": uid.to_string() }),
+            secret,
+            state,
+            out_tx,
+            &env.payload,
             env.request_id.as_deref(),
         )
-        .await;
+        .await
+        {
+            *session = Some(s);
+        }
         return;
     }
 

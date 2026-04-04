@@ -6,7 +6,7 @@ use tokio::process::Command;
 #[tokio::test]
 async fn harness_isolate_echo_roundtrip() {
     let exe =
-        option_env!("CARGO_BIN_EXE_toonflow-server").expect("cargo test sets CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo test sets CARGO_BIN_EXE_*");
     let mut child = Command::new(exe)
         .arg("__harness_isolate_echo__")
         .stdin(std::process::Stdio::piped())

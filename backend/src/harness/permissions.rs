@@ -34,6 +34,11 @@ pub fn ws_channel_allowed(user: Uuid, channel: &str) -> bool {
     ws_channel_allowed_inner(&ws_channel_allowlist_from_env(), channel)
 }
 
+/// True when `tool_name` is listed in the static Harness tool catalog.
+pub fn tool_invocation_allowed(_user: Uuid, tool_name: &str) -> bool {
+    ToolRegistry::catalog().iter().any(|t| t.name == tool_name)
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -54,9 +59,4 @@ mod tests {
         assert!(ws_channel_allowed_inner(&allow, "script"));
         assert!(!ws_channel_allowed_inner(&allow, "production"));
     }
-}
-
-/// True when `tool_name` is listed in the static Harness tool catalog.
-pub fn tool_invocation_allowed(_user: Uuid, tool_name: &str) -> bool {
-    ToolRegistry::catalog().iter().any(|t| t.name == tool_name)
 }
