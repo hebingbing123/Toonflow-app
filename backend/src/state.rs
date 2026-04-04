@@ -4,6 +4,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
 use crate::llm::LlmConfig;
+use crate::notify_hub::WsNotifyHub;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -11,6 +12,7 @@ pub struct AppState {
     pub jwt_secret: Option<Vec<u8>>,
     pub llm: Option<LlmConfig>,
     pub http_client: reqwest::Client,
+    pub notify: WsNotifyHub,
 }
 
 impl AppState {
@@ -63,6 +65,7 @@ impl AppState {
             jwt_secret,
             llm,
             http_client,
+            notify: WsNotifyHub::new(),
         })
     }
 }

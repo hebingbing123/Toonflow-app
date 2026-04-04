@@ -36,6 +36,12 @@ Server responds with `session.ready` or `error.occurred` before other traffic.
 |-------|--------|
 | `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |
 
+### `generation.job.updated` (server → client)
+
+Pushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `created_at`, `updated_at`).
+
+The server registers the connection for push after auth (`?access_token=` or `session.auth`).
+
 ### `session.ack` (server → client)
 
 Generic success for attach / context update / cancel; carries `request_id` when the client sent one.

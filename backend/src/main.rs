@@ -5,9 +5,11 @@ mod app;
 mod auth;
 mod error;
 mod harness;
+mod job_worker;
 mod jobs;
 mod json_patch;
 mod llm;
+mod notify_hub;
 mod projects;
 mod scripts;
 mod skills;
@@ -43,6 +45,11 @@ async fn main() {
         .expect("bind failed");
 
     tracing::info!(%addr, "toonflow-server listening");
+
+    let worker_state = state.clone();
+    tokio::spawn(async move {
+        job_worker::run(worker_state).await;
+    });
 
     let app = app::build_router(state);
     axum::serve(listener, app).await.expect("server failed");

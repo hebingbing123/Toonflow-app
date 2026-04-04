@@ -48,6 +48,8 @@ struct Session {
     project_id: Option<i64>,
     script_id: Option<i64>,
     llm_cancel: CancellationToken,
+    /// `(user_id, subscription_id)` for [`crate::notify_hub::WsNotifyHub`].
+    ws_notify: Option<(Uuid, Uuid)>,
 }
 
 async fn send_envelope(
@@ -123,12 +125,18 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
                     project_id: None,
                     script_id: None,
                     llm_cancel: CancellationToken::new(),
+                    ws_notify: None,
                 });
             }
         }
     }
 
     let (out_tx, mut out_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
+
+    if let Some(ref mut s) = session {
+        let cid = state.notify.subscribe(s.user_id, out_tx.clone()).await;
+        s.ws_notify = Some((s.user_id, cid));
+    }
 
     loop {
         tokio::select! {
@@ -158,7 +166,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
                     Message::Ping(p) => {
                         let _ = socket.send(Message::Pong(p)).await;
                     }
-                    Message::Close(_) => return,
+                    Message::Close(_) => break,
                     Message::Pong(_) => {}
                     Message::Binary(_) => {
                         let _ = send_error(
@@ -171,6 +179,12 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
                     }
                 }
             }
+        }
+    }
+
+    if let Some(s) = session {
+        if let Some((uid, cid)) = s.ws_notify {
+            state.notify.unsubscribe(uid, cid).await;
         }
     }
 }
@@ -244,6 +258,7 @@ async fn dispatch_client_text(
             return;
         };
 
+        let conn_id = state.notify.subscribe(uid, out_tx.clone()).await;
         *session = Some(Session {
             user_id: uid,
             channel: None,
@@ -251,6 +266,7 @@ async fn dispatch_client_text(
             project_id: None,
             script_id: None,
             llm_cancel: CancellationToken::new(),
+            ws_notify: Some((uid, conn_id)),
         });
 
         let _ = send_envelope(

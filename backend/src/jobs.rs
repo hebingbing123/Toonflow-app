@@ -6,6 +6,7 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -32,6 +33,16 @@ pub struct CreateJobBody {
     pub kind: String,
     #[serde(default)]
     pub payload: serde_json::Value,
+}
+
+/// WebSocket envelope (`docs/websocket-events.md`): full job row as `payload`.
+pub fn envelope_generation_job_updated(row: &JobRow) -> String {
+    let v = json!({
+        "type": "generation.job.updated",
+        "schema_version": 1,
+        "payload": row,
+    });
+    serde_json::to_string(&v).expect("JobRow serializes to JSON")
 }
 
 pub fn router() -> Router<AppState> {
