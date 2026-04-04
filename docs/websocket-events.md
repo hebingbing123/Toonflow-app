@@ -38,7 +38,7 @@ Server responds with `session.ready` or `error.occurred` before other traffic.
 
 ### `generation.job.updated` (server → client)
 
-Pushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`, or `queued` → `cancelled`). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `idempotency_key`, `created_at`, `updated_at`).
+Pushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`, `queued` → `cancelled`, or `failed` → `queued` via retry). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `idempotency_key`, `created_at`, `updated_at`).
 
 The server registers the connection for push after auth (`?access_token=` or `session.auth`).
 

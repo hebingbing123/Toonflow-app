@@ -625,7 +625,7 @@ paths:
   /api/v1/jobs/{id}/cancel:
     post:
       tags: [jobs]
-      summary: Cancel a queued job
+      summary: Cancel a queued or running job
       operationId: cancelJobV1
       description: |
         Sets `status` to `cancelled` when the job is **`queued`** or **`running`**. The worker finishes cooperatively (it does not overwrite `cancelled` when completing). Terminal states **`succeeded`**, **`failed`**, **`cancelled`** → HTTP 409.
@@ -659,6 +659,54 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "409":
           description: Job is not `queued` or `running` (already terminal)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/jobs/{id}/retry:
+    post:
+      tags: [jobs]
+      summary: Re-queue a failed job
+      operationId: retryJobV1
+      description: |
+        Sets `status` to **`queued`**, clears `error_message` and `result`, for jobs in **`failed`** only. The worker will pick the row up again. Other statuses → HTTP 409.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job row after re-queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "409":
+          description: Job is not `failed`
           content:
             application/json:
               schema:

@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingJobs = false;
   bool _creatingJob = false;
   String? _cancellingJobId;
+  String? _retryingJobId;
   List<JobRow>? _jobs;
 
   final _skillPathCtrl =
@@ -340,6 +341,30 @@ class _HomePageState extends State<HomePage> {
     } finally {
       if (mounted) {
         setState(() => _cancellingJobId = null);
+      }
+    }
+  }
+
+  Future<void> _retryFailedJob(JobRow j) async {
+    final token = _session?.accessToken;
+    if (token == null || j.status != 'failed') return;
+    setState(() {
+      _retryingJobId = j.id;
+      _error = null;
+    });
+    try {
+      await retryJob(token, j.id);
+      if (!mounted) return;
+      await _loadJobs();
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _retryingJobId = null);
       }
     }
   }
@@ -1101,14 +1126,32 @@ class _HomePageState extends State<HomePage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text('${j.kind} · ${j.status}'),
                         subtitle: Text(j.id),
-                        trailing: (j.status == 'queued' || j.status == 'running')
-                            ? TextButton(
-                                onPressed: _cancellingJobId == j.id
-                                    ? null
-                                    : () => _cancelQueuedJob(j),
-                                child: Text(
-                                  _cancellingJobId == j.id ? '…' : '取消',
-                                ),
+                        trailing: (j.status == 'failed' ||
+                                j.status == 'queued' ||
+                                j.status == 'running')
+                            ? Wrap(
+                                spacing: 4,
+                                children: [
+                                  if (j.status == 'failed')
+                                    TextButton(
+                                      onPressed: _retryingJobId == j.id
+                                          ? null
+                                          : () => _retryFailedJob(j),
+                                      child: Text(
+                                        _retryingJobId == j.id ? '…' : '重试',
+                                      ),
+                                    ),
+                                  if (j.status == 'queued' ||
+                                      j.status == 'running')
+                                    TextButton(
+                                      onPressed: _cancellingJobId == j.id
+                                          ? null
+                                          : () => _cancelQueuedJob(j),
+                                      child: Text(
+                                        _cancellingJobId == j.id ? '…' : '取消',
+                                      ),
+                                    ),
+                                ],
                               )
                             : null,
                       ),

@@ -51,6 +51,7 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/jobs", get(list_jobs).post(create_job))
         .route("/api/v1/jobs/{id}", get(get_job))
         .route("/api/v1/jobs/{id}/cancel", post(cancel_job))
+        .route("/api/v1/jobs/{id}/retry", post(retry_job))
 }
 
 fn idempotency_key_header(headers: &HeaderMap) -> Option<String> {
@@ -242,5 +243,54 @@ async fn cancel_job(
 
     Err(ApiError::Conflict(
         "job cannot be cancelled in its current status (not queued or running)".into(),
+    ))
+}
+
+async fn retry_job(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    headers: HeaderMap,
+) -> Result<Json<JobRow>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let updated = sqlx::query_as::<_, JobRow>(
+        r#"
+        UPDATE app_generation_job
+        SET status = 'queued', error_message = NULL, result = NULL, updated_at = NOW()
+        WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
+        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        "#,
+    )
+    .bind(id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if let Some(row) = updated {
+        let text = envelope_generation_job_updated(&row);
+        state.notify.broadcast_to_user(uid, text).await;
+        return Ok(Json(row));
+    }
+
+    let exists: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM app_generation_job WHERE id = $1 AND owner_user_id = $2)",
+    )
+    .bind(id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if !exists {
+        return Err(ApiError::NotFound);
+    }
+
+    Err(ApiError::Conflict(
+        "only failed jobs can be retried (re-queue)".into(),
     ))
 }

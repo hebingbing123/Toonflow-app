@@ -514,6 +514,27 @@ Future<JobRow> cancelJob(String accessToken, String jobId) async {
   return JobRow.fromJson(map);
 }
 
+Future<JobRow> retryJob(String accessToken, String jobId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId/retry');
+  final res = await http
+      .post(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 409) {
+    throw RustApiException(res.body, statusCode: 409);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
+}
+
 Future<List<SkillFileMeta>> fetchSkills(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/skills');
   final res = await http
