@@ -11,17 +11,26 @@ use uuid::Uuid;
 use crate::jobs::{envelope_generation_job_updated, JobRow};
 use crate::state::AppState;
 
+fn worker_id_label() -> String {
+    std::env::var("WORKER_ID")
+        .ok()
+        .map(|s| s.trim().chars().take(128).collect::<String>())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "default".to_string())
+}
+
 pub async fn run(state: AppState) {
     let Some(pool) = state.pool.clone() else {
         tracing::info!("job worker: DATABASE_URL unset; worker not started");
         return;
     };
 
-    tracing::info!("job worker: started (poll interval 500ms)");
+    let wid = worker_id_label();
+    tracing::info!(worker_id = %wid, "job worker: started (poll interval 500ms)");
     let mut interval = tokio::time::interval(Duration::from_millis(500));
     loop {
         interval.tick().await;
-        if let Err(e) = process_one_job(&state, &pool).await {
+        if let Err(e) = process_one_job(&state, &pool, &wid).await {
             tracing::warn!(error = %e, "job worker tick failed");
         }
     }
@@ -32,8 +41,12 @@ enum JobRunError {
     Cancelled,
 }
 
-async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Error> {
-    let Some(row) = claim_next_job(pool).await? else {
+async fn process_one_job(
+    state: &AppState,
+    pool: &PgPool,
+    worker_id: &str,
+) -> Result<(), sqlx::Error> {
+    let Some(row) = claim_next_job(pool, worker_id).await? else {
         return Ok(());
     };
 
@@ -55,7 +68,7 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
                 UPDATE app_generation_job
                 SET status = 'succeeded', result = $1, error_message = NULL, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(result)
@@ -78,7 +91,7 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
                 UPDATE app_generation_job
                 SET status = 'failed', error_message = $1, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(msg)
@@ -96,7 +109,7 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
     Ok(())
 }
 
-async fn claim_next_job(pool: &PgPool) -> Result<Option<JobRow>, sqlx::Error> {
+async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>, sqlx::Error> {
     let mut tx = pool.begin().await?;
     let row = sqlx::query_as::<_, JobRow>(
         r#"
@@ -108,12 +121,13 @@ async fn claim_next_job(pool: &PgPool) -> Result<Option<JobRow>, sqlx::Error> {
             LIMIT 1
         )
         UPDATE app_generation_job AS j
-        SET status = 'running', updated_at = NOW()
+        SET status = 'running', claimed_by = $1, updated_at = NOW()
         FROM cte
         WHERE j.id = cte.id
-        RETURNING j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.created_at, j.updated_at
+        RETURNING j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
         "#,
     )
+    .bind(worker_id)
     .fetch_optional(&mut *tx)
     .await?;
     tx.commit().await?;

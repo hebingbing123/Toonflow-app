@@ -36,10 +36,10 @@ todos:
     content: 单仓 backend（Rust）+ frontend（Flutter）；根 README 说明目录；建 docs/plans/ 并纳入本计划快照（§7.2）；清理误建目录；见 §11
     status: completed
   - id: saas-product-spec
-    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile` 已有 plan_tier 等字段；**`POST /api/v1/webhooks/billing`** + `app_billing_webhook_event` + HMAC **`X-Toonflow-Signature`** 与 **`id`** 去重（首期 CNY 收单方可对接）
+    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile` plan_tier 等；webhook **首次**入库可据 **`user_id`+`plan_tier`** upsert profile；**仍缺**用量计量表、订阅状态机、CNY/USD 收单商适配层
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker**（**`FOR UPDATE SKIP LOCKED`** _claim_）+ **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查与 **billing webhook** 除外；可选受信代理下 `Forwarded`/`X-Forwarded-For`）；**HTTP 可观测**：`X-Request-Id`、JSON 错误 `request_id`；**WS** `error.occurred` 的 **`payload.request_id`**；**契约单测**：`Idempotency-Key` 头解析/截断、`generation.job.updated` 信封、`CreateJobBody` / **`Patch*Body`** 拒未知字段、**`json_patch`** 文本/i32 字段解析；**计费 webhook**：HMAC + DB 去重（§13）；**仍缺**Redis/云队列、多实例 worker 协调、提供商专属验签格式与订阅状态机
+    content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**queued/running 取消**、`failed` **重试**（清 `claimed_by`）、`Idempotency-Key`；**429** 与 billing **除外**；**计费 webhook**：HMAC、去重、**可选 profile upsert**；**仍缺**Redis/云队列、提供商原生验签、分布式限流
     status: pending
 isProject: false
 ---

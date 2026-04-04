@@ -24,6 +24,8 @@ pub struct JobRow {
     pub result: Option<serde_json::Value>,
     pub error_message: Option<String>,
     pub idempotency_key: Option<String>,
+    /// Worker label (`WORKER_ID` env) when `running`; set on claim.
+    pub claimed_by: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -81,7 +83,7 @@ async fn list_jobs(
     let uid = require_user_uuid(&state, &headers)?;
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
         ORDER BY created_at DESC
@@ -114,7 +116,7 @@ async fn create_job(
     if let Some(ref key) = idem {
         if let Some(row) = sqlx::query_as::<_, JobRow>(
             r#"
-            SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+            SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
             WHERE owner_user_id = $1 AND idempotency_key = $2
             "#,
@@ -133,7 +135,7 @@ async fn create_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', $4)
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(uid)
@@ -151,7 +153,7 @@ async fn create_job(
             };
             sqlx::query_as::<_, JobRow>(
                 r#"
-                SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+                SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
                 WHERE owner_user_id = $1 AND idempotency_key = $2
                 "#,
@@ -183,7 +185,7 @@ async fn get_job(
     let uid = require_user_uuid(&state, &headers)?;
     let row = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -213,7 +215,7 @@ async fn cancel_job(
         UPDATE app_generation_job
         SET status = 'cancelled', updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status IN ('queued', 'running')
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
@@ -260,9 +262,9 @@ async fn retry_job(
     let updated = sqlx::query_as::<_, JobRow>(
         r#"
         UPDATE app_generation_job
-        SET status = 'queued', error_message = NULL, result = NULL, updated_at = NOW()
+        SET status = 'queued', error_message = NULL, result = NULL, claimed_by = NULL, updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
+        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
@@ -311,6 +313,7 @@ mod tests {
             result: None,
             error_message: None,
             idempotency_key: Some("idem-1".into()),
+            claimed_by: None,
             created_at: Utc::now(),
             updated_at: Utc::now(),
         }
