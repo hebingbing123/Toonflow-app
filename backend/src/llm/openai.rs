@@ -4,6 +4,8 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
+use super::envelope::envelope;
+
 #[derive(Clone)]
 pub struct LlmConfig {
     pub api_key: String,
@@ -27,18 +29,6 @@ impl LlmConfig {
             model,
         })
     }
-}
-
-fn envelope(msg_type: &str, payload: Value, request_id: Option<&str>) -> String {
-    let mut v = json!({
-        "type": msg_type,
-        "schema_version": 1,
-        "payload": payload,
-    });
-    if let Some(r) = request_id {
-        v["request_id"] = json!(r);
-    }
-    serde_json::to_string(&v).expect("serialize envelope")
 }
 
 /// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
