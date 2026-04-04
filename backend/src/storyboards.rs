@@ -280,3 +280,19 @@ async fn patch_by_legacy(
 
     Ok(Json(row))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn patch_storyboard_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<PatchStoryboardBody>(r#"{"prompt":"x","extra":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+}
