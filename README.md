@@ -74,7 +74,7 @@
 ### CI 与工程规范
 
 - **本地重构门禁（与 CI 对齐，含 OpenAPI 解析）**：仓库根执行 **`yarn refactor:check`**（[`scripts/refactor-check.sh`](scripts/refactor-check.sh)）— `docs/openapi.yaml` YAML 校验 + `backend/` fmt/clippy/test + `frontend/` analyze/test。需本机已装 **Rust stable** 与 **Flutter**。
-- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — OpenAPI 解析；`backend/`：`cargo fmt --check`、`clippy -D warnings`、`test`；**`supabase/migrations`**：`supabase db start` + `supabase db reset`；`frontend/`：`flutter analyze`、`flutter test`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
+- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — **`refactor-monorepo`** 任务执行与本地相同的 [`scripts/refactor-check.sh`](scripts/refactor-check.sh)（OpenAPI 解析 + `backend/` + `frontend/`）；**`supabase/migrations`**：`supabase db start` + `supabase db reset`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
 - **迁移说明**：仅维护 [`supabase/migrations/`](supabase/migrations/)，详见 [`docs/migration/database-migrations.md`](docs/migration/database-migrations.md)。
 - **工具链**：根目录 [`rust-toolchain.toml`](rust-toolchain.toml) 锁定 Rust stable + `rustfmt` / `clippy`。
 - **依赖更新**：[`.github/dependabot.yml`](.github/dependabot.yml) 覆盖 Cargo、pub、GitHub Actions。

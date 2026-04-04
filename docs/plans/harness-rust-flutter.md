@@ -358,7 +358,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 ### 11.4 CI（推荐默认）
 
 - **本地一键（与 PR 门禁对齐）**：仓库根 **`yarn refactor:check`**（[`scripts/refactor-check.sh`](../../scripts/refactor-check.sh)）— OpenAPI 解析 + backend fmt/clippy/test + frontend analyze/test；见 **[`AGENTS.md`](../../AGENTS.md)**。
-- **PR 门禁**：**backend** — `cargo fmt --check`、`clippy`、`test`；**frontend** — `flutter analyze`、`flutter test`（有测试则跑）。
+- **PR 门禁**：GitHub Actions 任务 **`refactor-monorepo`** 运行 [`scripts/refactor-check.sh`](../../scripts/refactor-check.sh)（与 **`yarn refactor:check`** 一致）；另含 **Supabase 迁移**、旧栈 **`yarn lint`**。
 - **数据库**：合并到主分支前或部署流水线中执行 **Supabase CLI**（`supabase db push` / 托管 Dashboard 迁移），真源为 `supabase/migrations/*.sql`；**不在**无审查情况下对生产库执行。
 - **可选**：容器镜像构建 job，与部署环境一致。
 

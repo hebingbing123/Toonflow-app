@@ -13,20 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  openapi-yaml:
-    name: OpenAPI YAML (parse check)
+  refactor-monorepo:
+    name: Refactor stack (OpenAPI + Rust + Flutter)
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Parse docs/openapi.yaml
-        run: ruby -ryaml -e "YAML.load_file('docs/openapi.yaml')"
-
-  rust-backend:
-    name: Rust (backend/)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -35,9 +24,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: backend
-      - run: cargo fmt -- --check
-      - run: cargo clippy -- -D warnings
-      - run: cargo test
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: scripts/refactor-check.sh (same as yarn refactor:check)
+        run: bash scripts/refactor-check.sh
 
   supabase-migrations:
     name: Supabase migrations (local DB)
@@ -51,22 +43,6 @@ jobs:
         run: |
           supabase db start
           supabase db reset --yes --no-seed
-
-  flutter-frontend:
-    name: Flutter (frontend/)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
 
   legacy-node:
     name: Legacy Node (tsc)

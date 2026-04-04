@@ -15,7 +15,7 @@ yarn refactor:check
 # 等价：bash scripts/refactor-check.sh
 ```
 
-须 **OpenAPI 可解析** + **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) 对齐（不含 Supabase 容器与旧栈 `yarn lint`）。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
+须 **OpenAPI 可解析** + **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 CI 任务 **`refactor-monorepo`**（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)，内部即 **`scripts/refactor-check.sh`**）一致；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
 
 ## 为什么人类端还会觉得「每一步都要确认」？
 
