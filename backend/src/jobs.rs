@@ -500,4 +500,15 @@ mod tests {
             "{err}"
         );
     }
+
+    #[test]
+    fn trim_query_opt_trims_and_drops_empty() {
+        assert_eq!(super::trim_query_opt(None), None);
+        assert_eq!(super::trim_query_opt(Some(String::new())), None);
+        assert_eq!(super::trim_query_opt(Some("   \t  ".into())), None);
+        assert_eq!(
+            super::trim_query_opt(Some("  flutter.probe  ".into())),
+            Some("flutter.probe".into())
+        );
+    }
 }

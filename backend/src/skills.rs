@@ -226,3 +226,29 @@ async fn list_harness_tools(
         tools: ToolRegistry::catalog(),
     }))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn safe_join_rejects_parent_segment() {
+        let root = Path::new("/tmp/skills-root");
+        assert!(matches!(
+            safe_join_under_root(root, ".."),
+            Err(SkillReadError::BadPath(_))
+        ));
+        assert!(matches!(
+            safe_join_under_root(root, "legit/../nope.md"),
+            Err(SkillReadError::BadPath(_))
+        ));
+    }
+
+    #[test]
+    fn safe_join_builds_under_root() {
+        let root = Path::new("/tmp/skills-root");
+        let p = safe_join_under_root(root, "dir/script.md").unwrap();
+        assert!(p.ends_with("dir/script.md"));
+    }
+}
