@@ -652,6 +652,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       nameCtrl.text = detail.project.name ?? '';
       introCtrl.text = detail.project.intro ?? '';
+      final scriptList = List<ScriptBrief>.from(detail.scripts);
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -682,7 +683,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text('${detail.scripts.length} script(s)'),
+                      Text('${scriptList.length} script(s)'),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
@@ -697,11 +698,18 @@ class _HomePageState extends State<HomePage> {
                                       p.legacyId,
                                     );
                                     if (!ctx.mounted) return;
+                                    scriptList.add(
+                                      ScriptBrief(
+                                        legacyId: s.legacyId,
+                                        name: s.name,
+                                        extractState: s.extractState,
+                                      ),
+                                    );
                                     setDialogState(() => saving[0] = false);
                                     ScaffoldMessenger.of(ctx).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          '已创建剧本 legacy #${s.legacyId}（关闭对话框再打开可刷新列表）',
+                                          '已创建剧本 legacy #${s.legacyId}',
                                         ),
                                       ),
                                     );
@@ -725,7 +733,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...detail.scripts.map(
+                      ...scriptList.map(
                         (s) => ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
@@ -736,7 +744,21 @@ class _HomePageState extends State<HomePage> {
                           trailing: const Icon(Icons.edit_outlined, size: 18),
                           onTap: saving[0]
                               ? null
-                              : () => _openScriptEditor(token, s.legacyId),
+                              : () => _openScriptEditor(
+                                    token,
+                                    s.legacyId,
+                                    onScriptTreeMutated: () async {
+                                      final d = await fetchProjectByLegacyId(
+                                        token,
+                                        p.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      scriptList
+                                        ..clear()
+                                        ..addAll(d.scripts);
+                                      setDialogState(() {});
+                                    },
+                                  ),
                         ),
                       ),
                     ],
@@ -859,7 +881,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _openScriptEditor(String token, int scriptLegacyId) async {
+  Future<void> _openScriptEditor(
+    String token,
+    int scriptLegacyId, {
+    Future<void> Function()? onScriptTreeMutated,
+  }) async {
     final nameCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final stateCtrl = TextEditingController();
@@ -919,91 +945,123 @@ class _HomePageState extends State<HomePage> {
                                       scriptLegacyId,
                                     );
                                     if (!mounted) return;
+                                    final boardsList =
+                                        List<StoryboardRow>.from(boards);
                                     await showDialog<void>(
                                       context: context,
-                                      builder: (ctx2) => AlertDialog(
-                                        title: Text('分镜 (${boards.length})'),
-                                        content: SizedBox(
-                                          width: double.maxFinite,
-                                          child: ListView.builder(
-                                            shrinkWrap: true,
-                                            itemCount: boards.length,
-                                            itemBuilder: (_, i) {
-                                              final b = boards[i];
-                                              return ListTile(
-                                                title: Text(
-                                                  '#${b.legacyId} ${b.state ?? ""}',
-                                                ),
-                                                subtitle: Text(
-                                                  b.prompt ?? '',
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                onTap: () {
-                                                  Navigator.of(ctx2).pop();
-                                                  _openStoryboardEditor(
-                                                    token,
-                                                    b.legacyId,
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () async {
-                                              try {
-                                                final row =
-                                                    await createStoryboardUnderScriptLegacy(
-                                                  token,
-                                                  scriptLegacyId,
-                                                );
-                                                if (ctx2.mounted) {
-                                                  Navigator.of(ctx2).pop();
-                                                }
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        '已创建分镜 legacy #${row.legacyId}（可再打开分镜列表查看）',
+                                      builder: (ctx2) {
+                                        final creatingSb = <bool>[false];
+                                        return StatefulBuilder(
+                                          builder: (ctx2, setBoardsState) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                '分镜 (${boardsList.length})',
+                                              ),
+                                              content: SizedBox(
+                                                width: double.maxFinite,
+                                                child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: boardsList.length,
+                                                  itemBuilder: (_, i) {
+                                                    final b = boardsList[i];
+                                                    return ListTile(
+                                                      title: Text(
+                                                        '#${b.legacyId} ${b.state ?? ""}',
                                                       ),
-                                                    ),
-                                                  );
-                                                }
-                                              } on RustApiException catch (e) {
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content:
-                                                          Text(e.toString()),
-                                                    ),
-                                                  );
-                                                }
-                                              } catch (e) {
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content:
-                                                          Text(e.toString()),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            },
-                                            child: const Text('POST 空分镜'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(ctx2).pop(),
-                                            child: const Text('Close'),
-                                          ),
-                                        ],
-                                      ),
+                                                      subtitle: Text(
+                                                        b.prompt ?? '',
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      onTap: () {
+                                                        Navigator.of(ctx2)
+                                                            .pop();
+                                                        _openStoryboardEditor(
+                                                          token,
+                                                          b.legacyId,
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: creatingSb[0]
+                                                      ? null
+                                                      : () async {
+                                                          creatingSb[0] = true;
+                                                          setBoardsState(() {});
+                                                          try {
+                                                            final row =
+                                                                await createStoryboardUnderScriptLegacy(
+                                                              token,
+                                                              scriptLegacyId,
+                                                            );
+                                                            if (ctx2.mounted) {
+                                                              boardsList
+                                                                  .add(row);
+                                                              ScaffoldMessenger
+                                                                      .of(ctx2)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                    '已创建分镜 legacy #${row.legacyId}',
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }
+                                                          } on RustApiException catch (e) {
+                                                            if (ctx2.mounted) {
+                                                              ScaffoldMessenger
+                                                                      .of(ctx2)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                    e.toString(),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }
+                                                          } catch (e) {
+                                                            if (ctx2.mounted) {
+                                                              ScaffoldMessenger
+                                                                      .of(ctx2)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                    e.toString(),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }
+                                                          } finally {
+                                                            creatingSb[0] =
+                                                                false;
+                                                            if (ctx2.mounted) {
+                                                              setBoardsState(
+                                                                () {},
+                                                              );
+                                                            }
+                                                          }
+                                                        },
+                                                  child: Text(
+                                                    creatingSb[0]
+                                                        ? '创建中…'
+                                                        : 'POST 空分镜',
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(ctx2).pop(),
+                                                  child: const Text('Close'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
                                     );
                                   } on RustApiException catch (e) {
                                     if (mounted) {
@@ -1066,13 +1124,13 @@ class _HomePageState extends State<HomePage> {
                                 scriptLegacyId,
                               );
                               if (!ctx.mounted) return;
+                              await onScriptTreeMutated?.call();
+                              if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    '剧本已删除；请关闭并重新打开项目详情以刷新列表',
-                                  ),
+                                  content: Text('剧本已删除'),
                                 ),
                               );
                             } on RustApiException catch (e) {
