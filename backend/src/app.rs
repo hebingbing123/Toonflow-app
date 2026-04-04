@@ -2,6 +2,7 @@ use crate::auth::require_claims;
 use crate::error::ApiError;
 use crate::projects;
 use crate::scripts;
+use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
 
@@ -91,6 +92,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(projects::router())
         .merge(scripts::router())
         .merge(storyboards::router())
+        .merge(skills::router())
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))

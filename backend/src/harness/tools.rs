@@ -1,11 +1,19 @@
-/// Future: register atomic tools for the agent loop.
-#[derive(Default)]
-#[allow(dead_code)]
-pub struct ToolRegistry;
+/// Registered tool **names** for the Harness agent loop (dispatch still WIP).
+#[derive(Debug, Clone, Copy)]
+pub struct ToolRegistry {
+    names: &'static [&'static str],
+}
 
-#[allow(dead_code)]
+impl Default for ToolRegistry {
+    fn default() -> Self {
+        Self {
+            names: &["echo", "skills.read"],
+        }
+    }
+}
+
 impl ToolRegistry {
-    pub fn new() -> Self {
-        Self
+    pub fn names(&self) -> &'static [&'static str] {
+        self.names
     }
 }

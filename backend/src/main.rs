@@ -9,6 +9,7 @@ mod json_patch;
 mod llm;
 mod projects;
 mod scripts;
+mod skills;
 mod state;
 mod storyboards;
 mod ws;

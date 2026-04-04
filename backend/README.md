@@ -47,6 +47,12 @@ WebSocket（JSON 信封见 `docs/websocket-events.md`）：
 
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
 
+技能 Markdown（只读，Bearer JWT）：
+
+- `GET /api/v1/skills` — 列出 `data/skills/**/*.md`
+- `GET /api/v1/skills/content?path=…` — 读取单个文件（防 `..` 穿越）
+- `GET /api/v1/harness/tools` — 当前注册的 Harness 工具名（占位）
+
 ## 技能资产
 
 Harness 用 Markdown 技能位于 **`data/skills/`**（由仓库根目录 `data/skills` 复制而来；过渡期 Node 栈仍可使用根目录副本）。

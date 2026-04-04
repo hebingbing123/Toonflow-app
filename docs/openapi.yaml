@@ -21,6 +21,10 @@ tags:
     description: Scripts under owned projects (Postgres + RLS)
   - name: storyboards
     description: Storyboards under owned scripts (Postgres + RLS)
+  - name: skills
+    description: Read-only Markdown skills from `backend/data/skills`
+  - name: harness
+    description: Harness metadata (tool registry stubs)
 
 paths:
   /health:
@@ -446,6 +450,96 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/skills:
+    get:
+      tags: [skills]
+      summary: List Markdown skills (relative paths under `data/skills`)
+      operationId: listSkillsV1
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SkillFileMeta"
+        "400":
+          description: Skills directory missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/skills/content:
+    get:
+      tags: [skills]
+      summary: Read one skill file (UTF-8 text)
+      operationId: getSkillContentV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Relative path, e.g. `script_execution_script.md`
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillContentResponse"
+        "400":
+          description: Path unsafe or file too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/harness/tools:
+    get:
+      tags: [harness]
+      summary: List registered Harness tool names (stubs)
+      operationId: listHarnessToolsV1
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HarnessToolsResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -710,6 +804,35 @@ components:
           type: integer
           format: int32
           nullable: true
+
+    SkillFileMeta:
+      type: object
+      required: [path, size_bytes]
+      properties:
+        path:
+          type: string
+          description: Relative path under `data/skills`
+        size_bytes:
+          type: integer
+          format: int64
+
+    SkillContentResponse:
+      type: object
+      required: [path, content]
+      properties:
+        path:
+          type: string
+        content:
+          type: string
+
+    HarnessToolsResponse:
+      type: object
+      required: [tools]
+      properties:
+        tools:
+          type: array
+          items:
+            type: string
 
     ErrorBody:
       type: object
