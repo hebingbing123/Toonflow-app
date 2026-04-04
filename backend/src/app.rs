@@ -193,15 +193,22 @@ mod contract_smoke_tests {
 
     use axum::body::Body;
     use axum::extract::ConnectInfo;
+    use axum::http::header;
     use axum::http::{Request, StatusCode};
+    use chrono::Utc;
+    use jsonwebtoken::{encode, EncodingKey, Header};
+    use serde::Serialize;
     use serde_json::Value;
     use tower::ServiceExt;
+    use uuid::Uuid;
 
     use super::build_router;
     use crate::notify_hub::WsNotifyHub;
     use crate::state::AppState;
 
     const MAX_JSON: usize = 65_536;
+    /// Shared with [`SmokeJwtClaims`] encoding; must satisfy Supabase-style `aud` + HS256 verify.
+    const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
 
     fn test_addr() -> SocketAddr {
         SocketAddr::from(([127, 0, 0, 1], 42_042))
@@ -210,31 +217,65 @@ mod contract_smoke_tests {
     fn smoke_state() -> AppState {
         AppState {
             pool: None,
-            jwt_secret: Some(b"not-used-for-these-routes".to_vec()),
+            jwt_secret: Some(TEST_JWT_SECRET.to_vec()),
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
         }
     }
 
-    async fn get_json(uri: &str) -> (StatusCode, Value) {
+    #[derive(Serialize)]
+    struct SmokeJwtClaims {
+        sub: String,
+        exp: i64,
+        aud: &'static str,
+    }
+
+    fn test_jwt(sub: Uuid) -> String {
+        encode(
+            &Header::default(),
+            &SmokeJwtClaims {
+                sub: sub.to_string(),
+                exp: Utc::now().timestamp() + 86_400,
+                aud: "authenticated",
+            },
+            &EncodingKey::from_secret(TEST_JWT_SECRET),
+        )
+        .expect("encode test jwt")
+    }
+
+    async fn oneshot_json(req: Request<Body>) -> (StatusCode, Value) {
         let app = build_router(smoke_state());
-        let res = app
-            .oneshot(
-                Request::builder()
-                    .uri(uri)
-                    .extension(ConnectInfo(test_addr()))
-                    .body(Body::empty())
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
+        let res = app.oneshot(req).await.unwrap();
         let status = res.status();
         let body = axum::body::to_bytes(res.into_body(), MAX_JSON)
             .await
             .unwrap();
         let v: Value = serde_json::from_slice(&body).expect("response body is json");
         (status, v)
+    }
+
+    async fn get_json(uri: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .uri(uri)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn get_json_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
     }
 
     #[tokio::test]
@@ -261,5 +302,47 @@ mod contract_smoke_tests {
         assert_eq!(status, StatusCode::OK);
         assert_eq!(v["status"], "ok");
         assert_eq!(v["database"], "not_configured");
+    }
+
+    #[tokio::test]
+    async fn models_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/models").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn models_list_ok_with_supabase_style_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/models", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        let arr = v.as_array().expect("models list is array");
+        assert!(!arr.is_empty(), "embedded catalog must expose models");
+        assert!(arr[0].get("id").is_some());
+        assert!(arr[0].get("model_name").is_none()); // list entry uses legacy shape: value, type, …
+        assert!(arr[0].get("value").is_some());
+    }
+
+    #[tokio::test]
+    async fn harness_tools_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/harness/tools", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        let tools = v["tools"].as_array().expect("tools array");
+        assert!(!tools.is_empty());
+        let names: Vec<&str> = tools.iter().filter_map(|t| t["name"].as_str()).collect();
+        assert!(names.contains(&"echo"));
+        assert!(names.contains(&"wasm.probe"));
+    }
+
+    #[tokio::test]
+    async fn skills_summary_ok_with_jwt_when_skills_tree_present() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/skills/summary", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(
+            v["markdown_file_count"].as_u64().unwrap_or(0) > 0,
+            "repo ships backend/data/skills markdown"
+        );
     }
 }
