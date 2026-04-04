@@ -478,6 +478,11 @@ Future<List<JobRow>> fetchJobs(String accessToken) async {
       .toList();
 }
 
+/// `POST /api/v1/jobs` — queues a generation job.
+///
+/// [idempotencyKey]: sent as HTTP header `Idempotency-Key` (server trims and keeps up to
+/// 200 characters). Same authenticated user + same key replays return the **existing**
+/// job row (HTTP 200), no duplicate insert. See OpenAPI `createJobV1`.
 Future<JobRow> createJob(
   String accessToken,
   String kind, {

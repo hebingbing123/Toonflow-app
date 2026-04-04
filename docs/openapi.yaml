@@ -870,8 +870,10 @@ components:
 
     PatchProjectBody:
       type: object
+      additionalProperties: false
       description: |
         At least one property required. Use `null` or `""` to clear `name` or `intro`.
+        Only the listed properties are accepted; extra keys are rejected (HTTP 400).
       properties:
         name:
           type: string
@@ -910,7 +912,8 @@ components:
 
     PatchScriptBody:
       type: object
-      description: At least one property required.
+      additionalProperties: false
+      description: At least one property required; unknown properties rejected (HTTP 400).
       properties:
         name:
           type: string
@@ -988,7 +991,8 @@ components:
 
     PatchStoryboardBody:
       type: object
-      description: At least one property required.
+      additionalProperties: false
+      description: At least one property required; unknown properties rejected (HTTP 400).
       properties:
         prompt:
           type: string
