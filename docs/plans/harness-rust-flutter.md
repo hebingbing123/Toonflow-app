@@ -3,7 +3,7 @@ name: Rust 与 Harness 评估
 overview: 在 Toonflow-app 现状评估基础上，确认目标形态为「**单仓** `backend/` + `frontend/`；Harness + Supabase；**第一版不上 BFF**；HTTP **`/api/v1`**、WebSocket **`/api/v1/ws`**；默认端口 8666；工程默认 §11；**SaaS：Free 默认可用；付费以 CNY 主卖，后期里程碑支持 USD 收银（§12.0）**；**实施第一步拉分支**；**推荐实施顺序见 YAML `implementation-order` todo**」，并给出与当前 Electron/Node 栈的差异、风险与推荐迁移节奏。
 todos:
   - id: implementation-order
-    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp + harness-rust-core（首条端到端竖切）→ flutter-shell；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入；decommission-electron 置于功能 parity 与灰度之后
+    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp（PG 主库；旧 SQLite 仅迁移源）+ harness-rust-core（首条端到端竖切）→ flutter-shell；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入；decommission-electron 置于功能 parity 与灰度之后
     status: pending
   - id: api-contract
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：Supabase Postgres 连接串与迁移（SQLx/SeaORM）、池化 URL 与直连、从旧版 data/SQLite 导入、AI Provider 流式、一条业务竖切测试
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 迁移、直连/池化 URL）；旧 Electron/Node 栈的 **SQLite + data/** 只做 **一次性迁入 PG** 的导入工具链，非新栈持久化形态；AI Provider 流式；一条业务竖切测试
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
