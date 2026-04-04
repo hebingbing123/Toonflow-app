@@ -110,7 +110,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: `SUPABASE_JWT_SECRET` not configured on server
+          description: "`SUPABASE_JWT_SECRET` not configured on server"
           content:
             application/json:
               schema:
@@ -803,7 +803,7 @@ components:
         database:
           type: string
           enum: [not_configured, connected]
-          description: `not_configured` when `DATABASE_URL` is unset
+          description: "`not_configured` when `DATABASE_URL` is unset"
 
     MeResponse:
       type: object
