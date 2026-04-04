@@ -1,10 +1,15 @@
 openapi: 3.1.0
+externalDocs:
+  description: WebSocket `/api/v1/ws` — JSON envelope, events, Harness `harness.tool.invoke` / `harness.tool.result`
+  url: ./websocket-events.md
 info:
   title: Toonflow API
   version: 1.0.0
   description: |
     HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
-    WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in `docs/websocket-events.md`; optional query `access_token`.
+    WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in **`docs/websocket-events.md`** (also linked from `externalDocs` above); optional query `access_token`.
+
+    **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses the WebSocket types **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `skills.read` with `arguments.path`) — see the WebSocket doc for payloads and `error.occurred` codes.
 
     **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, and `/api/v1/ready`.
     Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
@@ -32,7 +37,7 @@ tags:
   - name: skills
     description: Read-only Markdown skills from `backend/data/skills`
   - name: harness
-    description: Harness metadata (tool registry stubs)
+    description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
 
