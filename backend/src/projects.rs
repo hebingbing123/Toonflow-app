@@ -21,6 +21,13 @@ pub struct ProjectRow {
     pub name: Option<String>,
     pub intro: Option<String>,
     pub project_type: Option<String>,
+    pub image_model: Option<String>,
+    pub image_quality: Option<String>,
+    pub video_model: Option<String>,
+    pub art_style: Option<String>,
+    pub director_manual: Option<String>,
+    pub mode: Option<String>,
+    pub video_ratio: Option<String>,
     pub create_time_ms: Option<i64>,
 }
 
@@ -44,6 +51,22 @@ struct PatchProjectBody {
     name: Option<Value>,
     #[serde(default)]
     intro: Option<Value>,
+    #[serde(default)]
+    project_type: Option<Value>,
+    #[serde(default)]
+    image_model: Option<Value>,
+    #[serde(default)]
+    image_quality: Option<Value>,
+    #[serde(default)]
+    video_model: Option<Value>,
+    #[serde(default)]
+    art_style: Option<Value>,
+    #[serde(default)]
+    director_manual: Option<Value>,
+    #[serde(default)]
+    mode: Option<Value>,
+    #[serde(default)]
+    video_ratio: Option<Value>,
 }
 
 pub fn router() -> Router<AppState> {
@@ -66,7 +89,9 @@ async fn list_projects(
     let uid = require_user_uuid(&state, &headers)?;
     let rows = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type, create_time_ms
+        SELECT id, legacy_id, name, intro, project_type,
+               image_model, image_quality, video_model, art_style,
+               director_manual, mode, video_ratio, create_time_ms
         FROM app_project
         WHERE owner_user_id = $1
         ORDER BY create_time_ms DESC NULLS LAST, legacy_id DESC
@@ -92,7 +117,9 @@ async fn get_project_by_legacy(
 
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type, create_time_ms
+        SELECT id, legacy_id, name, intro, project_type,
+               image_model, image_quality, video_model, art_style,
+               director_manual, mode, video_ratio, create_time_ms
         FROM app_project
         WHERE legacy_id = $1 AND owner_user_id = $2
         "#,
@@ -134,15 +161,38 @@ async fn patch_project_by_legacy(
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let intro_patch = parse_optional_text_field(body.intro, "intro")?;
-    if matches!(name_patch, FieldPatch::Absent) && matches!(intro_patch, FieldPatch::Absent) {
+    let project_type_patch = parse_optional_text_field(body.project_type, "project_type")?;
+    let image_model_patch = parse_optional_text_field(body.image_model, "image_model")?;
+    let image_quality_patch = parse_optional_text_field(body.image_quality, "image_quality")?;
+    let video_model_patch = parse_optional_text_field(body.video_model, "video_model")?;
+    let art_style_patch = parse_optional_text_field(body.art_style, "art_style")?;
+    let director_manual_patch = parse_optional_text_field(body.director_manual, "director_manual")?;
+    let mode_patch = parse_optional_text_field(body.mode, "mode")?;
+    let video_ratio_patch = parse_optional_text_field(body.video_ratio, "video_ratio")?;
+
+    let patches = [
+        &name_patch,
+        &intro_patch,
+        &project_type_patch,
+        &image_model_patch,
+        &image_quality_patch,
+        &video_model_patch,
+        &art_style_patch,
+        &director_manual_patch,
+        &mode_patch,
+        &video_ratio_patch,
+    ];
+    if !patches.iter().any(|p| !matches!(**p, FieldPatch::Absent)) {
         return Err(ApiError::BadRequest(
-            "expected at least one of: name, intro".into(),
+            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio)".into(),
         ));
     }
 
     let current = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type, create_time_ms
+        SELECT id, legacy_id, name, intro, project_type,
+               image_model, image_quality, video_model, art_style,
+               director_manual, mode, video_ratio, create_time_ms
         FROM app_project
         WHERE legacy_id = $1 AND owner_user_id = $2
         "#,
@@ -154,25 +204,40 @@ async fn patch_project_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    let new_name = match name_patch {
-        FieldPatch::Absent => current.name.clone(),
-        FieldPatch::Set(v) => v,
-    };
-    let new_intro = match intro_patch {
-        FieldPatch::Absent => current.intro.clone(),
-        FieldPatch::Set(v) => v,
-    };
+    let new_name = merge_text_patch(&current.name, name_patch);
+    let new_intro = merge_text_patch(&current.intro, intro_patch);
+    let new_project_type = merge_text_patch(&current.project_type, project_type_patch);
+    let new_image_model = merge_text_patch(&current.image_model, image_model_patch);
+    let new_image_quality = merge_text_patch(&current.image_quality, image_quality_patch);
+    let new_video_model = merge_text_patch(&current.video_model, video_model_patch);
+    let new_art_style = merge_text_patch(&current.art_style, art_style_patch);
+    let new_director_manual = merge_text_patch(&current.director_manual, director_manual_patch);
+    let new_mode = merge_text_patch(&current.mode, mode_patch);
+    let new_video_ratio = merge_text_patch(&current.video_ratio, video_ratio_patch);
 
     let row = sqlx::query_as::<_, ProjectRow>(
         r#"
         UPDATE app_project
-        SET name = $1, intro = $2, updated_at = NOW()
-        WHERE id = $3 AND owner_user_id = $4
-        RETURNING id, legacy_id, name, intro, project_type, create_time_ms
+        SET name = $1, intro = $2, project_type = $3,
+            image_model = $4, image_quality = $5, video_model = $6,
+            art_style = $7, director_manual = $8, mode = $9, video_ratio = $10,
+            updated_at = NOW()
+        WHERE id = $11 AND owner_user_id = $12
+        RETURNING id, legacy_id, name, intro, project_type,
+                  image_model, image_quality, video_model, art_style,
+                  director_manual, mode, video_ratio, create_time_ms
         "#,
     )
     .bind(&new_name)
     .bind(&new_intro)
+    .bind(&new_project_type)
+    .bind(&new_image_model)
+    .bind(&new_image_quality)
+    .bind(&new_video_model)
+    .bind(&new_art_style)
+    .bind(&new_director_manual)
+    .bind(&new_mode)
+    .bind(&new_video_ratio)
     .bind(current.id)
     .bind(uid)
     .fetch_one(pool)
@@ -180,6 +245,13 @@ async fn patch_project_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(row))
+}
+
+fn merge_text_patch(current: &Option<String>, patch: FieldPatch<String>) -> Option<String> {
+    match patch {
+        FieldPatch::Absent => current.clone(),
+        FieldPatch::Set(v) => v,
+    }
 }
 
 #[cfg(test)]

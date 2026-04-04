@@ -319,8 +319,8 @@ paths:
       summary: Partially update project by legacy id
       operationId: patchProjectByLegacyIdV1
       description: |
-        JSON merge patch for `name` and `intro`. Omit a key to leave that column unchanged;
-        `null` or empty string clears the column. At least one of `name` or `intro` must appear in the body.
+        JSON merge patch for text columns on `app_project`. Omit a key to leave that column unchanged;
+        `null` or empty string clears the column. At least one listed property must appear in the body.
       security:
         - bearerAuth: []
       parameters:
@@ -344,7 +344,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProjectRow"
         "400":
-          description: Invalid body, no fields to apply, unknown properties (only `name` and `intro` allowed), or malformed JSON
+          description: Invalid body, no fields to apply, unknown properties, or malformed JSON
           content:
             application/json:
               schema:
@@ -995,6 +995,27 @@ components:
         project_type:
           type: string
           nullable: true
+        image_model:
+          type: string
+          nullable: true
+        image_quality:
+          type: string
+          nullable: true
+        video_model:
+          type: string
+          nullable: true
+        art_style:
+          type: string
+          nullable: true
+        director_manual:
+          type: string
+          nullable: true
+        mode:
+          type: string
+          nullable: true
+        video_ratio:
+          type: string
+          nullable: true
         create_time_ms:
           type: integer
           format: int64
@@ -1030,13 +1051,37 @@ components:
       type: object
       additionalProperties: false
       description: |
-        At least one property required. Use `null` or `""` to clear `name` or `intro`.
+        At least one property required. Use `null` or `""` to clear a column.
         Only the listed properties are accepted; extra keys are rejected (HTTP 400).
       properties:
         name:
           type: string
           nullable: true
         intro:
+          type: string
+          nullable: true
+        project_type:
+          type: string
+          nullable: true
+        image_model:
+          type: string
+          nullable: true
+        image_quality:
+          type: string
+          nullable: true
+        video_model:
+          type: string
+          nullable: true
+        art_style:
+          type: string
+          nullable: true
+        director_manual:
+          type: string
+          nullable: true
+        mode:
+          type: string
+          nullable: true
+        video_ratio:
           type: string
           nullable: true
 
