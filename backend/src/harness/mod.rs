@@ -7,7 +7,8 @@
 //! | [`wire`] | Deserialize structs for WebSocket **`payload`** bodies (`harness.*`, `agent.*.attach`, `agent.chat.send`, `session.auth`). |
 //! | [`ws_channel`] | `Script` / `Production` discriminator + LLM assistant label. |
 //! | [`ws_auth`] | `?access_token=` / `session.auth`, notify subscribe/unsubscribe, [`WsConnectionSession`]. |
-//! | [`ws_dispatch`] | Parse client JSON envelope and route authenticated frames (thin `ws` upgrade loop). |
+//! | [`ws_connection`] | Post-upgrade socket loop (notify outbound + `ws_dispatch`). |
+//! | [`ws_dispatch`] | Parse client JSON envelope and route authenticated frames. |
 //! | [`ws_session`] | `agent.script.attach` / `agent.production.attach` / `agent.context.update`. |
 //! | [`ws_tool`] / [`ws_agent`] / [`ws_chat`] | `harness.tool.invoke`, `harness.agent.run`, `agent.chat.send` (keeps the top-level `ws` module thin). |
 //! | [`invoke`] | Execute catalog tools (sync + async); gated by [`permissions`]. |
@@ -28,6 +29,7 @@ pub(crate) mod ws_agent;
 pub mod ws_auth;
 pub mod ws_channel;
 pub(crate) mod ws_chat;
+pub(crate) mod ws_connection;
 pub(crate) mod ws_dispatch;
 pub(crate) mod ws_session;
 pub(crate) mod ws_tool;
