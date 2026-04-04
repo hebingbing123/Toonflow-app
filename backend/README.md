@@ -2,11 +2,22 @@
 
 Axum HTTP 服务，默认端口 **8666**（环境变量 `PORT` 可覆盖）。
 
+## 本地数据库（Supabase CLI）
+
+在仓库根目录：
+
+```bash
+supabase start
+supabase status   # 复制 DB URL、JWT secret
+```
+
+迁移位于 `supabase/migrations/`，由 **`supabase db reset`** / `db push` 应用；Rust 进程**不**重复跑迁移，避免与 CLI 迁移表冲突。
+
 ## 开发与运行
 
 ```bash
 cd backend
-cp .env.example .env   # 可选
+cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET
 cargo run
 ```
 
@@ -14,6 +25,11 @@ cargo run
 
 - `GET http://127.0.0.1:8666/health`
 - `GET http://127.0.0.1:8666/api/v1/health`
+
+就绪（可选连库）与鉴权探针：
+
+- `GET http://127.0.0.1:8666/api/v1/ready`
+- `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
 
 ## 技能资产
 

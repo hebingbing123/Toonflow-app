@@ -1,55 +1,27 @@
 //! Toonflow HTTP API entrypoint.
 //! Default listen port: 8666 (override with `PORT`).
 
-use axum::{
-    http::{header, Method},
-    routing::get,
-    Json, Router,
-};
-use serde::Serialize;
+mod app;
+mod auth;
+mod error;
+mod state;
+
 use std::net::SocketAddr;
-use tower_http::cors::{Any, CorsLayer};
-use tower_http::trace::TraceLayer;
+
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-
-#[derive(Serialize)]
-struct HealthResponse {
-    status: &'static str,
-    service: &'static str,
-}
-
-async fn health() -> Json<HealthResponse> {
-    Json(HealthResponse {
-        status: "ok",
-        service: "toonflow-server",
-    })
-}
-
-fn app() -> Router {
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PATCH,
-            Method::PUT,
-            Method::DELETE,
-        ])
-        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::ACCEPT]);
-
-    Router::new()
-        .route("/health", get(health))
-        .route("/api/v1/health", get(health))
-        .layer(cors)
-        .layer(TraceLayer::new_for_http())
-}
 
 #[tokio::main]
 async fn main() {
+    let _ = dotenvy::dotenv();
+
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    let state = state::AppState::from_env()
+        .await
+        .expect("failed to initialize app state (check DATABASE_URL)");
 
     let port: u16 = std::env::var("PORT")
         .ok()
@@ -63,6 +35,6 @@ async fn main() {
 
     tracing::info!(%addr, "toonflow-server listening");
 
-    let app = app();
+    let app = app::build_router(state);
     axum::serve(listener, app).await.expect("server failed");
 }

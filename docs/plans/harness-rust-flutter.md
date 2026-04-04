@@ -16,7 +16,7 @@ todos:
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
-    status: pending
+    status: completed
   - id: supabase-auth
     content: Supabase Auth：v1 无 BFF；supabase_flutter + Bearer 调 Rust；环境切换；HTTPS+PKCE；见 §4.2
     status: pending

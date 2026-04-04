@@ -65,6 +65,7 @@
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
 | **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
 | **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件与旧版 Socket.IO 对照 |
+| **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/` |
 
 > 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。
 
