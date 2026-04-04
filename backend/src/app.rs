@@ -186,3 +186,80 @@ pub fn build_router(state: AppState) -> Router {
         .layer(TraceLayer::new_for_http())
         .layer(cors)
 }
+
+#[cfg(test)]
+mod contract_smoke_tests {
+    use std::net::SocketAddr;
+
+    use axum::body::Body;
+    use axum::extract::ConnectInfo;
+    use axum::http::{Request, StatusCode};
+    use serde_json::Value;
+    use tower::ServiceExt;
+
+    use super::build_router;
+    use crate::notify_hub::WsNotifyHub;
+    use crate::state::AppState;
+
+    const MAX_JSON: usize = 65_536;
+
+    fn test_addr() -> SocketAddr {
+        SocketAddr::from(([127, 0, 0, 1], 42_042))
+    }
+
+    fn smoke_state() -> AppState {
+        AppState {
+            pool: None,
+            jwt_secret: Some(b"not-used-for-these-routes".to_vec()),
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+        }
+    }
+
+    async fn get_json(uri: &str) -> (StatusCode, Value) {
+        let app = build_router(smoke_state());
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .uri(uri)
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let status = res.status();
+        let body = axum::body::to_bytes(res.into_body(), MAX_JSON)
+            .await
+            .unwrap();
+        let v: Value = serde_json::from_slice(&body).expect("response body is json");
+        (status, v)
+    }
+
+    #[tokio::test]
+    async fn health_routes_ok_without_database() {
+        for uri in ["/health", "/api/v1/health"] {
+            let (status, v) = get_json(uri).await;
+            assert_eq!(status, StatusCode::OK, "uri={uri}");
+            assert_eq!(v["status"], "ok");
+            assert_eq!(v["service"], "toonflow-server");
+        }
+    }
+
+    #[tokio::test]
+    async fn version_shape_matches_contract() {
+        let (status, v) = get_json("/api/v1/version").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["service"], "toonflow-server");
+        assert!(v["version"].as_str().is_some_and(|s| !s.is_empty()));
+    }
+
+    #[tokio::test]
+    async fn ready_without_database_reports_not_configured() {
+        let (status, v) = get_json("/api/v1/ready").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["status"], "ok");
+        assert_eq!(v["database"], "not_configured");
+    }
+}
