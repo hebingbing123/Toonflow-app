@@ -772,8 +772,23 @@ class JobRow {
 }
 
 /// `GET /api/v1/jobs` — up to 100 jobs for the caller, newest first. See `listJobsV1`.
-Future<List<JobRow>> fetchJobs(String accessToken) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs');
+///
+/// [kind] and [status] are optional exact-match query filters (non-empty only).
+Future<List<JobRow>> fetchJobs(
+  String accessToken, {
+  String? kind,
+  String? status,
+}) async {
+  final qp = <String, String>{};
+  if (kind != null && kind.trim().isNotEmpty) {
+    qp['kind'] = kind.trim();
+  }
+  if (status != null && status.trim().isNotEmpty) {
+    qp['status'] = status.trim();
+  }
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs').replace(
+    queryParameters: qp.isEmpty ? null : qp,
+  );
   final res = await http
       .get(
         uri,

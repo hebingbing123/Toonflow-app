@@ -1267,9 +1267,24 @@ paths:
       operationId: listJobsV1
       description: |
         Returns up to 100 `app_generation_job` rows for `owner_user_id = JWT sub`, newest first.
+        Optional query **`kind`** and **`status`**: when set (non-empty after trim), rows must match **exactly** (AND). Omitted or blank → no filter on that dimension.
         Requires `DATABASE_URL` on the server.
       security:
         - bearerAuth: []
+      parameters:
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact `kind` filter
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, running, succeeded, failed, cancelled]
+          description: Exact `status` filter
       responses:
         "200":
           description: OK

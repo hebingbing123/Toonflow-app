@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::HeaderMap,
     routing::{get, post},
     Json, Router,
@@ -28,6 +28,16 @@ pub struct JobRow {
     pub claimed_by: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct ListJobsQuery {
+    /// Exact match on `kind` when set (after trim; empty omitted).
+    #[serde(default)]
+    kind: Option<String>,
+    /// Exact match on `status` when set (after trim; empty omitted).
+    #[serde(default)]
+    status: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -165,25 +175,43 @@ async fn list_job_status_summaries(
     Ok(Json(rows))
 }
 
+fn trim_query_opt(s: Option<String>) -> Option<String> {
+    s.and_then(|v| {
+        let t = v.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_owned())
+        }
+    })
+}
+
 async fn list_jobs(
     State(state): State<AppState>,
     headers: HeaderMap,
+    Query(q): Query<ListJobsQuery>,
 ) -> Result<Json<Vec<JobRow>>, ApiError> {
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let uid = require_user_uuid(&state, &headers)?;
+    let kind = trim_query_opt(q.kind);
+    let status = trim_query_opt(q.status);
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
+          AND ($2::text IS NULL OR kind = $2)
+          AND ($3::text IS NULL OR status = $3)
         ORDER BY created_at DESC
         LIMIT 100
         "#,
     )
     .bind(uid)
+    .bind(kind)
+    .bind(status)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

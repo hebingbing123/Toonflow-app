@@ -543,6 +543,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _loadJobsKindFlutterProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingJobs = true;
+      _error = null;
+      _jobs = null;
+    });
+    try {
+      final list = await fetchJobs(token, kind: 'flutter.probe');
+      if (!mounted) return;
+      setState(() {
+        _jobs = list;
+        _loadingJobs = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobs = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobs = false;
+      });
+    }
+  }
+
   Future<void> _loadJobKinds() async {
     final token = _session?.accessToken;
     if (token == null) return;
@@ -2053,6 +2083,10 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       _loadingJobs ? '…' : 'GET /api/v1/jobs',
                     ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingJobs ? null : _loadJobsKindFlutterProbe,
+                    child: const Text('GET jobs?kind=flutter.probe'),
                   ),
                   FilledButton.tonal(
                     onPressed: _loadingJobKinds ? null : _loadJobKinds,
