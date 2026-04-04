@@ -298,8 +298,62 @@ Future<UsageSummaryResponse> fetchUsageSummary(String accessToken) async {
   return UsageSummaryResponse.fromJson(map);
 }
 
+/// Row from `GET /api/v1/models` — OpenAPI `ModelListEntry`.
+class ModelListEntry {
+  const ModelListEntry({
+    required this.id,
+    required this.label,
+    required this.value,
+    required this.type,
+    required this.name,
+  });
+
+  final int id;
+  final String label;
+  final String value;
+  final String type;
+  final String name;
+
+  factory ModelListEntry.fromJson(Map<String, dynamic> json) {
+    return ModelListEntry(
+      id: (json['id'] as num).toInt(),
+      label: json['label'] as String,
+      value: json['value'] as String,
+      type: json['type'] as String,
+      name: json['name'] as String,
+    );
+  }
+}
+
+/// `GET /api/v1/models/detail` body — OpenAPI `ModelDetailResponse`.
+class ModelDetailResponse {
+  const ModelDetailResponse({
+    required this.vendorId,
+    required this.vendorName,
+    required this.name,
+    required this.modelName,
+    required this.type,
+  });
+
+  final int vendorId;
+  final String vendorName;
+  final String name;
+  final String modelName;
+  final String type;
+
+  factory ModelDetailResponse.fromJson(Map<String, dynamic> json) {
+    return ModelDetailResponse(
+      vendorId: (json['vendor_id'] as num).toInt(),
+      vendorName: json['vendor_name'] as String,
+      name: json['name'] as String,
+      modelName: json['model_name'] as String,
+      type: json['type'] as String,
+    );
+  }
+}
+
 /// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.
-Future<List<dynamic>> fetchModelsCatalog(
+Future<List<ModelListEntry>> fetchModelsCatalog(
   String accessToken, {
   String typeFilter = 'all',
 }) async {
@@ -315,11 +369,14 @@ Future<List<dynamic>> fetchModelsCatalog(
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return jsonDecode(res.body) as List<dynamic>;
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => ModelListEntry.fromJson(e as Map<String, dynamic>))
+      .toList();
 }
 
 /// `GET /api/v1/models/detail?model_id=…` — Bearer; see `modelDetailV1`.
-Future<Map<String, dynamic>> fetchModelDetail(
+Future<ModelDetailResponse> fetchModelDetail(
   String accessToken, {
   required String modelId,
 }) async {
@@ -335,7 +392,8 @@ Future<Map<String, dynamic>> fetchModelDetail(
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return jsonDecode(res.body) as Map<String, dynamic>;
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ModelDetailResponse.fromJson(map);
 }
 
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.

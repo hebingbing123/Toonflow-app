@@ -352,7 +352,13 @@ class _HomePageState extends State<HomePage> {
       final list = await fetchModelsCatalog(token, typeFilter: 'all');
       if (!mounted) return;
       setState(() {
-        _modelsCatalogBody = list.toString();
+        final sample = list
+            .take(4)
+            .map((m) => '${m.value}(${m.type})')
+            .join(', ');
+        _modelsCatalogBody = list.isEmpty
+            ? '(empty)'
+            : '${list.length} models${sample.isEmpty ? '' : '; sample: $sample'}';
         _loadingModelsCatalog = false;
       });
     } on RustApiException catch (e) {
@@ -379,10 +385,11 @@ class _HomePageState extends State<HomePage> {
       _modelDetailBody = null;
     });
     try {
-      final map = await fetchModelDetail(token, modelId: '1:gpt-4o-mini');
+      final d = await fetchModelDetail(token, modelId: '1:gpt-4o-mini');
       if (!mounted) return;
       setState(() {
-        _modelDetailBody = map.toString();
+        _modelDetailBody =
+            '${d.name} (${d.modelName}) type=${d.type} · vendor ${d.vendorName} [${d.vendorId}]';
         _loadingModelDetail = false;
       });
     } on RustApiException catch (e) {
