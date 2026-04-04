@@ -43,6 +43,8 @@ cargo run
 
 剧本删除：**`DELETE /api/v1/scripts/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
 
+新建分镜：**`POST /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**（Bearer，JSON 体字段均可选）— 写入 **`app_storyboard`**；**`legacy_id`** 为事务内 **`pg_advisory_xact_lock(884_422_003)`** + 全表 **`MAX(legacy_id)+1`**；默认填充 **`legacy_script_id`**、**`legacy_project_id`**。旧 **`o_videoTrack`** 前置插入未实现。
+
 分镜删除：**`DELETE /api/v1/storyboards/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户剧本树下的 **`app_storyboard`** 单行（`script → project` 所有权校验）。
 
 ### LLM（WebSocket `agent.chat.send`）

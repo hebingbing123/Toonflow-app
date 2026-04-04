@@ -462,6 +462,38 @@ Future<List<StoryboardRow>> fetchStoryboardsForScript(
       .toList();
 }
 
+/// `POST /api/v1/scripts/legacy/{script_legacy_id}/storyboards` — see `createStoryboardUnderScriptLegacyV1`.
+Future<StoryboardRow> createStoryboardUnderScriptLegacy(
+  String accessToken,
+  int scriptLegacyId, {
+  Map<String, dynamic>? fields,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/scripts/legacy/$scriptLegacyId/storyboards',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(fields ?? <String, dynamic>{}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return StoryboardRow.fromJson(map);
+}
+
 /// `GET /api/v1/storyboards/legacy/{legacy_id}`. See `getStoryboardByLegacyIdV1`.
 Future<StoryboardRow> fetchStoryboardByLegacyId(
   String accessToken,

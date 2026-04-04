@@ -889,6 +889,51 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         actions: [
                                           TextButton(
+                                            onPressed: () async {
+                                              try {
+                                                final row =
+                                                    await createStoryboardUnderScriptLegacy(
+                                                  token,
+                                                  scriptLegacyId,
+                                                );
+                                                if (ctx2.mounted) {
+                                                  Navigator.of(ctx2).pop();
+                                                }
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        '已创建分镜 legacy #${row.legacyId}（可再打开分镜列表查看）',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              } on RustApiException catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content:
+                                                          Text(e.toString()),
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content:
+                                                          Text(e.toString()),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: const Text('POST 空分镜'),
+                                          ),
+                                          TextButton(
                                             onPressed: () =>
                                                 Navigator.of(ctx2).pop(),
                                             child: const Text('Close'),

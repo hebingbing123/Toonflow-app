@@ -814,6 +814,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [storyboards]
+      summary: Create storyboard under a script (allocates global storyboard legacy_id)
+      operationId: createStoryboardUnderScriptLegacyV1
+      description: |
+        Inserts **`app_storyboard`** for the script identified by **`script_legacy_id`** (must belong to a project owned by the caller).
+        **`legacy_id`** is **`MAX(legacy_id)+1`** over **`app_storyboard`** under advisory lock **`884_422_003`** (distinct from project/script locks).
+        Defaults **`legacy_script_id`** to the path script legacy id and **`legacy_project_id`** to the parent project's legacy id unless overridden in the body.
+        **`create_time_ms`** is server-set. Legacy Node flow created **`o_videoTrack`** first; not replicated in PG MVP.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoryboardBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryboardRow"
+        "400":
+          description: Unknown JSON properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/storyboards/legacy/{legacy_id}:
     get:
@@ -1713,6 +1768,46 @@ components:
           type: integer
           format: int64
           nullable: true
+
+    CreateStoryboardBody:
+      type: object
+      additionalProperties: false
+      description: |
+        All optional. Text fields: whitespace-only strings are omitted (`NULL`).
+        Omit **`legacy_script_id`** / **`legacy_project_id`** to use path script and parent project legacy ids.
+      properties:
+        prompt:
+          type: string
+        file_path:
+          type: string
+        duration:
+          type: string
+        state:
+          type: string
+        track_id:
+          type: integer
+          format: int32
+        reason:
+          type: string
+        track:
+          type: string
+        video_desc:
+          type: string
+        should_generate_image:
+          type: integer
+          format: int32
+        legacy_script_id:
+          type: integer
+          format: int32
+        legacy_project_id:
+          type: integer
+          format: int32
+        flow_id:
+          type: integer
+          format: int32
+        sb_index:
+          type: integer
+          format: int32
 
     PatchStoryboardBody:
       type: object
