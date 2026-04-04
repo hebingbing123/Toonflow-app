@@ -219,7 +219,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProjectRow"
         "400":
-          description: Invalid body or no fields to apply
+          description: Invalid body, no fields to apply, unknown properties (only `name` and `intro` allowed), or malformed JSON
           content:
             application/json:
               schema:
@@ -312,7 +312,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ScriptRow"
         "400":
-          description: Invalid body or no fields to apply
+          description: Invalid body, no fields to apply, unknown properties (only `name`, `content`, `extract_state`), or malformed JSON
           content:
             application/json:
               schema:
@@ -441,7 +441,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/StoryboardRow"
         "400":
-          description: Invalid body or no fields
+          description: Invalid body, no fields to apply, unknown properties (only keys on `PatchStoryboardBody`), or malformed JSON
           content:
             application/json:
               schema:
