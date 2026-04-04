@@ -166,8 +166,10 @@ paths:
   /api/v1/me:
     get:
       tags: [session]
-      summary: Current user from JWT (no DB round-trip)
+      summary: Current user from JWT plus SaaS profile when database is configured
       operationId: meV1
+      description: |
+        Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).
       security:
         - bearerAuth: []
       responses:
@@ -184,7 +186,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: "`SUPABASE_JWT_SECRET` not configured on server"
+          description: "`SUPABASE_JWT_SECRET` not configured, or database error when loading profile"
           content:
             application/json:
               schema:
@@ -881,7 +883,7 @@ components:
 
     MeResponse:
       type: object
-      required: [sub]
+      required: [sub, plan_tier]
       properties:
         sub:
           type: string
@@ -891,6 +893,15 @@ components:
           type: string
           format: email
           description: Present when included in JWT claims
+        plan_tier:
+          type: string
+          description: From `app_user_profile`; `free` when DATABASE_URL is unset or no row exists
+        billing_currency:
+          type: string
+          nullable: true
+        billing_provider:
+          type: string
+          nullable: true
 
     ProjectRow:
       type: object

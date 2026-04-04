@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`isolated.echo`**（子进程隔离 MVP）、**`skills.read`** 与 REST 同路径安全规则）；**仍缺**通用 WASM/多工具进程池与完整 Agent 循环
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 文档与集成测试（isolate 子进程）；仍缺多实例分布式队列与端到端契约回归矩阵
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**（`app_user_profile`，无行则 `free`）；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 与集成测试（isolate）；仍缺多实例分布式队列与端到端契约回归矩阵
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
