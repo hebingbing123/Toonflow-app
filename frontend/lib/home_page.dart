@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingHealth = false;
   bool _loadingMe = false;
   bool _loadingWs = false;
+  bool _loadingWsHarness = false;
   final List<String> _wsLog = [];
 
   bool _loadingProjects = false;
@@ -950,14 +951,19 @@ class _HomePageState extends State<HomePage> {
           if (!mounted) return;
           setState(() {
             _wsLog.insert(0, message.toString());
-            if (_wsLog.length > 12) _wsLog.removeLast();
+            if (_wsLog.length > 16) _wsLog.removeLast();
           });
         },
         onError: (Object e) {
           if (mounted) setState(() => _error = 'ws: $e');
         },
         onDone: () {
-          if (mounted) setState(() => _loadingWs = false);
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+            });
+          }
         },
       );
 
@@ -986,6 +992,71 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _error = e.toString();
           _loadingWs = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testHarnessToolWebSocket() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+
+    _wsSub?.cancel();
+    await _ws?.sink.close();
+
+    setState(() {
+      _loadingWsHarness = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
+      final channel = WebSocketChannel.connect(uri);
+      _ws = channel;
+
+      _wsSub = channel.stream.listen(
+        (message) {
+          if (!mounted) return;
+          setState(() {
+            _wsLog.insert(0, message.toString());
+            if (_wsLog.length > 16) _wsLog.removeLast();
+          });
+        },
+        onError: (Object e) {
+          if (mounted) setState(() => _error = 'ws: $e');
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+            });
+          }
+        },
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': 'echo',
+            'arguments': {
+              'source': 'flutter',
+              'probe': 'harness.tool.invoke',
+              'at': DateTime.now().toUtc().toIso8601String(),
+            },
+          },
+        }),
+      );
+
+      if (mounted) setState(() => _loadingWsHarness = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loadingWsHarness = false;
         });
       }
     }
@@ -1212,9 +1283,27 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingWs ? null : _testWebSocket,
-                child: const Text('WebSocket: attach + LLM stream'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: (_loadingWs || _loadingWsHarness)
+                        ? null
+                        : _testWebSocket,
+                    child: Text(
+                      _loadingWs ? '…' : 'WebSocket: attach + LLM stream',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: (_loadingWs || _loadingWsHarness)
+                        ? null
+                        : _testHarnessToolWebSocket,
+                    child: Text(
+                      _loadingWsHarness ? '…' : 'WS: harness.tool.invoke (echo)',
+                    ),
+                  ),
+                ],
               ),
               if (_wsLog.isNotEmpty) ...[
                 const SizedBox(height: 8),
