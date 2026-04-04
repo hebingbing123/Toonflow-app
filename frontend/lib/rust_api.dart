@@ -121,6 +121,34 @@ Future<Map<String, dynamic>> fetchVersionV1() async {
   return jsonDecode(res.body) as Map<String, dynamic>;
 }
 
+/// `GET /api/v1/ready` — no auth; see `readyV1`.
+class ReadyV1Response {
+  const ReadyV1Response({
+    required this.status,
+    required this.database,
+  });
+
+  final String status;
+  final String database;
+
+  factory ReadyV1Response.fromJson(Map<String, dynamic> json) {
+    return ReadyV1Response(
+      status: json['status'] as String,
+      database: json['database'] as String,
+    );
+  }
+}
+
+Future<ReadyV1Response> fetchReadyV1() async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/ready');
+  final res = await http.get(uri).timeout(const Duration(seconds: 10));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ReadyV1Response.fromJson(map);
+}
+
 /// `GET /api/v1/usage/summary` — see `usageSummaryV1`.
 Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/usage/summary');

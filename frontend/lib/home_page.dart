@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
 
   String? _healthBody;
   String? _versionBody;
+  String? _readyBody;
   String? _meBody;
   String? _usageSummaryBody;
   String? _modelsCatalogBody;
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   bool _loadingHealth = false;
   bool _loadingVersion = false;
+  bool _loadingReady = false;
   bool _loadingMe = false;
   bool _loadingUsageSummary = false;
   bool _loadingModelsCatalog = false;
@@ -189,6 +191,34 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingVersion = false;
+      });
+    }
+  }
+
+  Future<void> _pingReady() async {
+    setState(() {
+      _loadingReady = true;
+      _error = null;
+      _readyBody = null;
+    });
+    try {
+      final r = await fetchReadyV1();
+      if (!mounted) return;
+      setState(() {
+        _readyBody = 'status=${r.status}, database=${r.database}';
+        _loadingReady = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingReady = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingReady = false;
       });
     }
   }
@@ -400,6 +430,7 @@ class _HomePageState extends State<HomePage> {
       _usageSummaryBody = null;
       _agentMemoryBody = null;
       _versionBody = null;
+      _readyBody = null;
       _harnessToolsLine = null;
       _skillsAggregateLine = null;
       _skillsListSummary = null;
@@ -1937,6 +1968,15 @@ class _HomePageState extends State<HomePage> {
           if (_versionBody != null) ...[
             const SizedBox(height: 8),
             Text('version: $_versionBody'),
+          ],
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            onPressed: _loadingReady ? null : _pingReady,
+            child: Text(_loadingReady ? '请求中…' : 'GET /api/v1/ready'),
+          ),
+          if (_readyBody != null) ...[
+            const SizedBox(height: 8),
+            Text('ready: $_readyBody'),
           ],
           const Divider(height: 32),
           Text(
