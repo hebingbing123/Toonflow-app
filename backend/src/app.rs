@@ -1,6 +1,7 @@
 use crate::auth::require_claims;
 use crate::error::ApiError;
 use crate::projects;
+use crate::scripts;
 use crate::state::AppState;
 
 use axum::{
@@ -87,6 +88,7 @@ pub fn build_router(state: AppState) -> Router {
 
     Router::new()
         .merge(projects::router())
+        .merge(scripts::router())
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))

@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
@@ -43,31 +44,6 @@ struct PatchProjectBody {
     name: Option<Value>,
     #[serde(default)]
     intro: Option<Value>,
-}
-
-enum FieldPatch<T> {
-    Absent,
-    Set(Option<T>),
-}
-
-fn parse_optional_text_field(
-    v: Option<Value>,
-    field: &str,
-) -> Result<FieldPatch<String>, ApiError> {
-    match v {
-        None => Ok(FieldPatch::Absent),
-        Some(Value::Null) => Ok(FieldPatch::Set(None)),
-        Some(Value::String(s)) => {
-            if s.is_empty() {
-                Ok(FieldPatch::Set(None))
-            } else {
-                Ok(FieldPatch::Set(Some(s)))
-            }
-        }
-        _ => Err(ApiError::BadRequest(format!(
-            "{field} must be a string, null, or omitted",
-        ))),
-    }
 }
 
 pub fn router() -> Router<AppState> {

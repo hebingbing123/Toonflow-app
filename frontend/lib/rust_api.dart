@@ -133,6 +133,92 @@ Future<ProjectRow> updateProjectByLegacyId(
   return ProjectRow.fromJson(map);
 }
 
+class ScriptRow {
+  const ScriptRow({
+    required this.id,
+    required this.projectId,
+    required this.legacyId,
+    this.name,
+    this.content,
+    this.extractState,
+    this.createTimeMs,
+  });
+
+  final String id;
+  final String projectId;
+  final int legacyId;
+  final String? name;
+  final String? content;
+  final int? extractState;
+  final int? createTimeMs;
+
+  factory ScriptRow.fromJson(Map<String, dynamic> json) {
+    return ScriptRow(
+      id: json['id'] as String,
+      projectId: json['project_id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String?,
+      content: json['content'] as String?,
+      extractState: json['extract_state'] == null
+          ? null
+          : (json['extract_state'] as num).toInt(),
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+    );
+  }
+}
+
+Future<ScriptRow> fetchScriptByLegacyId(
+  String accessToken,
+  int legacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/legacy/$legacyId');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
+Future<ScriptRow> updateScriptByLegacyId(
+  String accessToken,
+  int legacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/legacy/$legacyId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
 Future<ProjectDetail> fetchProjectByLegacyId(
   String accessToken,
   int legacyId,

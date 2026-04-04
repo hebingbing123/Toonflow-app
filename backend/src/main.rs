@@ -5,8 +5,10 @@ mod app;
 mod auth;
 mod error;
 mod harness;
+mod json_patch;
 mod llm;
 mod projects;
+mod scripts;
 mod state;
 mod ws;
 

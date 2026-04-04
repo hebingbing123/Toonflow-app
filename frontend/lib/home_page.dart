@@ -235,12 +235,17 @@ class _HomePageState extends State<HomePage> {
                       Text('${detail.scripts.length} script(s)'),
                       const SizedBox(height: 8),
                       ...detail.scripts.map(
-                        (s) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
+                        (s) => ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
                             '#${s.legacyId} ${s.name ?? ""}',
                             style: Theme.of(ctx).textTheme.bodySmall,
                           ),
+                          trailing: const Icon(Icons.edit_outlined, size: 18),
+                          onTap: saving[0]
+                              ? null
+                              : () => _openScriptEditor(token, s.legacyId),
                         ),
                       ),
                     ],
@@ -303,6 +308,138 @@ class _HomePageState extends State<HomePage> {
     } finally {
       nameCtrl.dispose();
       introCtrl.dispose();
+    }
+  }
+
+  Future<void> _openScriptEditor(String token, int scriptLegacyId) async {
+    final nameCtrl = TextEditingController();
+    final contentCtrl = TextEditingController();
+    final stateCtrl = TextEditingController();
+    try {
+      final script = await fetchScriptByLegacyId(token, scriptLegacyId);
+      if (!mounted) return;
+      nameCtrl.text = script.name ?? '';
+      contentCtrl.text = script.content ?? '';
+      stateCtrl.text = script.extractState?.toString() ?? '';
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              final saving = <bool>[false];
+              return AlertDialog(
+                title: Text('Script #${script.legacyId}'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Name (empty = clear)',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: contentCtrl,
+                        minLines: 4,
+                        maxLines: 12,
+                        decoration: const InputDecoration(
+                          labelText: 'Content (empty = clear)',
+                          alignLabelWithHint: true,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: stateCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'extract_state (empty = clear)',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed:
+                        saving[0] ? null : () => Navigator.of(ctx).pop(),
+                    child: const Text('Close'),
+                  ),
+                  FilledButton(
+                    onPressed: saving[0]
+                        ? null
+                        : () async {
+                            setDialogState(() => saving[0] = true);
+                            int? extractParsed;
+                            final st = stateCtrl.text.trim();
+                            if (st.isNotEmpty) {
+                              extractParsed = int.tryParse(st);
+                              if (extractParsed == null) {
+                                if (ctx.mounted) {
+                                  setDialogState(() => saving[0] = false);
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('extract_state 须为整数'),
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+                            }
+                            try {
+                              await updateScriptByLegacyId(
+                                token,
+                                scriptLegacyId,
+                                {
+                                  'name': nameCtrl.text.isEmpty
+                                      ? null
+                                      : nameCtrl.text,
+                                  'content': contentCtrl.text.isEmpty
+                                      ? null
+                                      : contentCtrl.text,
+                                  'extract_state': st.isEmpty
+                                      ? null
+                                      : extractParsed,
+                                },
+                              );
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).pop();
+                            } on RustApiException catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setDialogState(() => saving[0] = false);
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                    child: Text(saving[0] ? '保存中…' : 'PATCH 保存'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      nameCtrl.dispose();
+      contentCtrl.dispose();
+      stateCtrl.dispose();
     }
   }
 
