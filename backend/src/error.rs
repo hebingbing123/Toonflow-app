@@ -18,6 +18,7 @@ pub enum ApiError {
     Unauthorized,
     BadToken,
     AuthNotConfigured,
+    NotFound,
     DatabaseError(String),
 }
 
@@ -39,6 +40,7 @@ impl IntoResponse for ApiError {
                 "auth_not_configured",
                 "SUPABASE_JWT_SECRET is not set",
             ),
+            ApiError::NotFound => (StatusCode::NOT_FOUND, "not_found", "Resource not found"),
             ApiError::DatabaseError(msg) => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "database_error",

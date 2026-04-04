@@ -1,5 +1,6 @@
-use crate::auth::verify_supabase_user_jwt;
+use crate::auth::require_claims;
 use crate::error::ApiError;
+use crate::projects;
 use crate::state::AppState;
 
 use axum::{
@@ -60,26 +61,11 @@ async fn ready(State(state): State<AppState>) -> Result<Json<ReadyResponse>, Api
     }
 }
 
-fn bearer_token(headers: &HeaderMap) -> Option<&str> {
-    let value = headers.get(header::AUTHORIZATION)?.to_str().ok()?;
-    let rest = value.strip_prefix("Bearer ")?;
-    let t = rest.trim();
-    if t.is_empty() {
-        return None;
-    }
-    Some(t)
-}
-
 async fn me(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<MeResponse>, ApiError> {
-    let secret = state
-        .jwt_secret
-        .as_deref()
-        .ok_or(ApiError::AuthNotConfigured)?;
-    let token = bearer_token(&headers).ok_or(ApiError::Unauthorized)?;
-    let claims = verify_supabase_user_jwt(token, secret).map_err(|_| ApiError::BadToken)?;
+    let claims = require_claims(&state, &headers)?;
     let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
     Ok(Json(MeResponse {
         sub,
@@ -100,6 +86,7 @@ pub fn build_router(state: AppState) -> Router {
         .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::ACCEPT]);
 
     Router::new()
+        .merge(projects::router())
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))

@@ -15,6 +15,8 @@ tags:
     description: Health and probes
   - name: session
     description: Auth probe (Supabase JWT)
+  - name: projects
+    description: User-owned projects and scripts (Postgres + RLS)
 
 paths:
   /health:
@@ -91,6 +93,80 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects:
+    get:
+      tags: [projects]
+      summary: List projects for the current user
+      operationId: listProjectsV1
+      description: |
+        Returns `app_project` rows where `owner_user_id` matches the JWT `sub`.
+        Requires `DATABASE_URL` on the server (otherwise 503).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/legacy/{legacy_id}:
+    get:
+      tags: [projects]
+      summary: Project detail by legacy integer id
+      operationId: getProjectByLegacyIdV1
+      description: |
+        Resolves `app_project` by `legacy_id` and current user; includes child `app_script` rows.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetailResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that legacy id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -137,6 +213,56 @@ components:
           type: string
           format: email
           description: Present when included in JWT claims
+
+    ProjectRow:
+      type: object
+      required: [id, legacy_id]
+      properties:
+        id:
+          type: string
+          format: uuid
+        legacy_id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+        intro:
+          type: string
+          nullable: true
+        project_type:
+          type: string
+          nullable: true
+        create_time_ms:
+          type: integer
+          format: int64
+          nullable: true
+
+    ScriptBrief:
+      type: object
+      required: [legacy_id]
+      properties:
+        legacy_id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+        extract_state:
+          type: integer
+          format: int32
+          nullable: true
+
+    ProjectDetailResponse:
+      type: object
+      required: [project, scripts]
+      properties:
+        project:
+          $ref: "#/components/schemas/ProjectRow"
+        scripts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptBrief"
 
     ErrorBody:
       type: object

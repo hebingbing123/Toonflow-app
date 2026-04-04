@@ -6,6 +6,7 @@ mod auth;
 mod error;
 mod harness;
 mod llm;
+mod projects;
 mod state;
 mod ws;
 
