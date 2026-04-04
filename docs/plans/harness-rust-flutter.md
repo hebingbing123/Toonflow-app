@@ -12,7 +12,7 @@ todos:
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`isolated.echo`**（子进程隔离 MVP）、**`skills.read`** 与 REST 同路径安全规则）；**仍缺**通用 WASM/多工具进程池与完整 Agent 循环
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**（`app_user_profile`，无行则 `free`）；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 与集成测试（isolate）；仍缺多实例分布式队列与端到端契约回归矩阵
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**；**用量**：`app_usage_event` + worker 成功落库 + **`GET /api/v1/usage/summary`**；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 与集成测试（isolate）；仍缺多实例分布式队列与端到端契约回归矩阵
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
@@ -36,7 +36,7 @@ todos:
     content: 单仓 backend（Rust）+ frontend（Flutter）；根 README 说明目录；建 docs/plans/ 并纳入本计划快照（§7.2）；清理误建目录；见 §11
     status: completed
   - id: saas-product-spec
-    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile` plan_tier 等；webhook **首次**入库可据 **`user_id`+`plan_tier`** upsert profile；**仍缺**用量计量表、订阅状态机、CNY/USD 收单商适配层
+    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile`；计费 webhook upsert；**`app_usage_event`** 追加 + **`GET /api/v1/usage/summary`**；**仍缺**配额硬执行（与 plan_tier 联动）、订阅状态机、CNY/USD 收单商适配层
     status: pending
   - id: jobs-and-webhook-hardening
     content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**queued/running 取消**、`failed` **重试**（清 `claimed_by`）、`Idempotency-Key`；**429** 与 billing **除外**；**计费 webhook**：HMAC、去重、**可选 profile upsert**；**仍缺**Redis/云队列、提供商原生验签、分布式限流

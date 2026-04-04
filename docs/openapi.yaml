@@ -21,6 +21,8 @@ info:
     **Request correlation:** Responses include **`X-Request-Id`** (echo client value or server-generated UUID).
     JSON error bodies (`code`, `message`) also include **`request_id`** when applicable. Clients may send **`X-Request-Id`** on requests (optional).
 
+    **Usage (MVP):** Successful generation jobs append **`app_usage_event`** (`generation_job.succeeded`). **`GET /api/v1/usage/summary`** returns per-user counts (24h / 7d) for fair-use dashboards.
+
 servers:
   - url: http://127.0.0.1:8666
     description: Local dev (default `PORT`; override with env)
@@ -42,6 +44,8 @@ tags:
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
+  - name: usage
+    description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
   - name: webhooks
     description: Server-to-server billing webhooks (HMAC); not browser CORS flows
 
@@ -187,6 +191,36 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: "`SUPABASE_JWT_SECRET` not configured, or database error when loading profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/usage/summary:
+    get:
+      tags: [usage]
+      summary: Usage event counts for the current user
+      operationId: usageSummaryV1
+      description: |
+        Counts rows in **`app_usage_event`** for **`user_id = JWT sub`**: last 24 hours and last 7 days.
+        Events are appended by the job worker when a generation job reaches **`succeeded`**.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageSummaryResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
           content:
             application/json:
               schema:
@@ -902,6 +936,19 @@ components:
         billing_provider:
           type: string
           nullable: true
+
+    UsageSummaryResponse:
+      type: object
+      required: [events_last_24h, events_last_7d]
+      properties:
+        events_last_24h:
+          type: integer
+          format: int64
+          description: Rows in `app_usage_event` in the rolling last 24 hours
+        events_last_7d:
+          type: integer
+          format: int64
+          description: Rows in `app_usage_event` in the rolling last 7 days
 
     ProjectRow:
       type: object

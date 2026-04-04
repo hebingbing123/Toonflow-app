@@ -1,0 +1,81 @@
+//! Usage metering (`app_usage_event`, §12.3): record server-side outcomes and expose per-user counts.
+
+use axum::extract::State;
+use axum::http::HeaderMap;
+use axum::routing::get;
+use axum::{Json, Router};
+use serde::Serialize;
+use serde_json::json;
+use sqlx::PgPool;
+use uuid::Uuid;
+
+use crate::auth::require_user_uuid;
+use crate::error::ApiError;
+use crate::state::AppState;
+
+/// Called when a generation job reaches `succeeded` (best-effort; failures are logged only).
+pub async fn record_generation_job_succeeded(
+    pool: &PgPool,
+    user_id: Uuid,
+    job_id: Uuid,
+    job_kind: &str,
+) -> Result<(), sqlx::Error> {
+    let payload = json!({ "kind": job_kind });
+    sqlx::query(
+        r#"
+        INSERT INTO app_usage_event (user_id, event_type, source_job_id, payload)
+        VALUES ($1, $2, $3, $4)
+        "#,
+    )
+    .bind(user_id)
+    .bind("generation_job.succeeded")
+    .bind(job_id)
+    .bind(payload)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+#[derive(Serialize)]
+struct UsageSummaryResponse {
+    events_last_24h: i64,
+    events_last_7d: i64,
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new().route("/api/v1/usage/summary", get(usage_summary))
+}
+
+async fn usage_summary(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<UsageSummaryResponse>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let row: (i64, i64) = sqlx::query_as(
+        r#"
+        SELECT
+            COUNT(*) FILTER (
+                WHERE created_at >= NOW() - INTERVAL '1 day'
+            )::bigint,
+            COUNT(*) FILTER (
+                WHERE created_at >= NOW() - INTERVAL '7 days'
+            )::bigint
+        FROM app_usage_event
+        WHERE user_id = $1
+        "#,
+    )
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(UsageSummaryResponse {
+        events_last_24h: row.0,
+        events_last_7d: row.1,
+    }))
+}

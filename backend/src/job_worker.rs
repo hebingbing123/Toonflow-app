@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use crate::jobs::{envelope_generation_job_updated, JobRow};
 use crate::state::AppState;
+use crate::usage;
 
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")
@@ -77,6 +78,15 @@ async fn process_one_job(
             .await?;
 
             if let Some(final_row) = updated {
+                if let Err(e) =
+                    usage::record_generation_job_succeeded(pool, owner, id, &final_row.kind).await
+                {
+                    tracing::warn!(
+                        error = %e,
+                        job_id = %id,
+                        "app_usage_event insert failed (job still succeeded)"
+                    );
+                }
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }

@@ -7,6 +7,7 @@ use crate::scripts;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
+use crate::usage;
 
 use axum::{
     extract::State,
@@ -143,6 +144,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(storyboards::router())
         .merge(skills::router())
         .merge(jobs::router())
+        .merge(usage::router())
         .route("/api/v1/me", get(me))
         .route("/api/v1/ws", get(ws_upgrade))
         .layer(governor_layer_from_env());

@@ -48,6 +48,7 @@ cargo run
 
 - `GET http://127.0.0.1:8666/api/v1/ready`
 - `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
+- `GET http://127.0.0.1:8666/api/v1/usage/summary` — 当前用户在 **`app_usage_event`** 中的条数（近 24h / 近 7 天）；成功完成的生成任务由 worker 写入 **`generation_job.succeeded`**
 
 WebSocket（JSON 信封见 `docs/websocket-events.md`）：
 

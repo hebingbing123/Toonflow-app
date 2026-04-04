@@ -18,6 +18,7 @@ mod scripts;
 mod skills;
 mod state;
 mod storyboards;
+mod usage;
 mod ws;
 
 use std::net::SocketAddr;
