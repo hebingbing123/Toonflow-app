@@ -1,4 +1,5 @@
 use crate::auth::verify_supabase_user_jwt;
+use crate::harness::wire::{HarnessAgentRunPayload, HarnessToolInvokePayload};
 use crate::harness::{invoke, observe, permissions, HarnessContext};
 use crate::llm;
 use crate::state::AppState;
@@ -636,24 +637,6 @@ struct AttachProductionPayload {
 #[derive(Debug, Deserialize)]
 struct ChatSendPayload {
     content: String,
-}
-
-fn default_max_tool_rounds() -> usize {
-    8
-}
-
-#[derive(Debug, Deserialize)]
-struct HarnessAgentRunPayload {
-    content: String,
-    #[serde(default = "default_max_tool_rounds")]
-    max_tool_rounds: usize,
-}
-
-#[derive(Debug, Deserialize)]
-struct HarnessToolInvokePayload {
-    name: String,
-    #[serde(default)]
-    arguments: Option<Value>,
 }
 
 #[cfg(test)]

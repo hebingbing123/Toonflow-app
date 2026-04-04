@@ -12,3 +12,7 @@ pub fn agent_llm_turn_requested(user_id: Uuid, content_len: usize) {
 pub fn harness_tool_invoke(ctx: &HarnessContext, tool_name: &str) {
     tracing::info!(user_id = %ctx.user_id, %tool_name, "harness.tool.invoke");
 }
+
+pub fn harness_tools_catalog_http(user_id: Uuid) {
+    tracing::debug!(%user_id, "harness.http.tools_catalog");
+}

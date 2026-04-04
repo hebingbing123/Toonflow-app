@@ -2,6 +2,7 @@ use crate::agent_memory;
 use crate::auth::require_claims;
 use crate::billing;
 use crate::error::ApiError;
+use crate::harness;
 use crate::jobs;
 use crate::models_catalog;
 use crate::projects;
@@ -164,6 +165,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(scripts::router())
         .merge(storyboards::router())
         .merge(skills::router())
+        .merge(harness::http::router())
         .merge(jobs::router())
         .merge(usage::router())
         .route("/api/v1/me", get(me))

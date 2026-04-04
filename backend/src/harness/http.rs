@@ -1,0 +1,34 @@
+//! REST routes under `/api/v1/harness/*` (tool catalog; future policy or admin endpoints stay here).
+
+use axum::extract::State;
+use axum::http::HeaderMap;
+use axum::routing::get;
+use axum::{Json, Router};
+
+use serde::Serialize;
+
+use crate::auth::require_user_uuid;
+use crate::error::ApiError;
+use crate::harness::observe;
+use crate::harness::tools::{HarnessToolInfo, ToolRegistry};
+use crate::state::AppState;
+
+#[derive(Serialize)]
+pub struct HarnessToolsResponse {
+    pub tools: &'static [HarnessToolInfo],
+}
+
+async fn list_harness_tools(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<HarnessToolsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    observe::harness_tools_catalog_http(uid);
+    Ok(Json(HarnessToolsResponse {
+        tools: ToolRegistry::catalog(),
+    }))
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new().route("/api/v1/harness/tools", get(list_harness_tools))
+}

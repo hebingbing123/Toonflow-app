@@ -14,7 +14,6 @@ use walkdir::WalkDir;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::harness::tools::ToolRegistry;
 use crate::state::AppState;
 
 const MAX_SKILL_BYTES: u64 = 2_000_000;
@@ -110,11 +109,6 @@ pub struct SkillsSummaryResponse {
     pub total_bytes: u64,
 }
 
-#[derive(Serialize)]
-pub struct HarnessToolsResponse {
-    pub tools: &'static [crate::harness::tools::HarnessToolInfo],
-}
-
 #[derive(Deserialize)]
 pub struct SkillContentQuery {
     /// Relative path under `data/skills`, e.g. `script_execution_script.md`
@@ -126,7 +120,6 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/skills/summary", get(skills_summary))
         .route("/api/v1/skills", get(list_skills))
         .route("/api/v1/skills/content", get(get_skill_content))
-        .route("/api/v1/harness/tools", get(list_harness_tools))
 }
 
 /// Walk `data/skills` for `*.md` files; stops after [`MAX_SKILL_FILES`] matches (same rule as list).
@@ -215,16 +208,6 @@ async fn get_skill_content(
     let _ = require_user_uuid(&state, &headers)?;
     let doc = read_skill_markdown(q.path.trim()).map_err(SkillReadError::into_api_error)?;
     Ok(Json(doc))
-}
-
-async fn list_harness_tools(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> Result<Json<HarnessToolsResponse>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    Ok(Json(HarnessToolsResponse {
-        tools: ToolRegistry::catalog(),
-    }))
 }
 
 #[cfg(test)]
