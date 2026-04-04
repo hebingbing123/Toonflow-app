@@ -1,10 +1,16 @@
+use std::time::Duration;
+
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+
+use crate::llm::LlmConfig;
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: Option<PgPool>,
     pub jwt_secret: Option<Vec<u8>>,
+    pub llm: Option<LlmConfig>,
+    pub http_client: reqwest::Client,
 }
 
 impl AppState {
@@ -36,6 +42,27 @@ impl AppState {
             tracing::warn!("SUPABASE_JWT_SECRET not set; GET /api/v1/me returns 503");
         }
 
-        Ok(Self { pool, jwt_secret })
+        let llm = LlmConfig::from_env();
+        if llm.is_none() {
+            tracing::warn!(
+                "OPENAI_API_KEY / LLM_API_KEY not set; agent.chat.send returns llm_not_configured"
+            );
+        }
+
+        let http_client = reqwest::Client::builder()
+            .connect_timeout(Duration::from_secs(30))
+            .timeout(Duration::from_secs(180))
+            .build()
+            .unwrap_or_else(|e| {
+                tracing::error!(%e, "reqwest client build failed; using default Client::new()");
+                reqwest::Client::new()
+            });
+
+        Ok(Self {
+            pool,
+            jwt_secret,
+            llm,
+            http_client,
+        })
     }
 }

@@ -5,6 +5,7 @@ mod app;
 mod auth;
 mod error;
 mod harness;
+mod llm;
 mod state;
 mod ws;
 

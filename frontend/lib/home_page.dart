@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: _loadingWs ? null : _testWebSocket,
-                child: const Text('WebSocket: attach + chat.stub'),
+                child: const Text('WebSocket: attach + LLM stream'),
               ),
               if (_wsLog.isNotEmpty) ...[
                 const SizedBox(height: 8),

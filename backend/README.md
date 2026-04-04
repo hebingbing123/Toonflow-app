@@ -17,9 +17,13 @@ supabase status   # 复制 DB URL、JWT secret
 
 ```bash
 cd backend
-cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET
+cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选）OPENAI_API_KEY
 cargo run
 ```
+
+### LLM（WebSocket `agent.chat.send`）
+
+设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。
 
 健康检查：
 

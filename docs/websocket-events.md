@@ -40,9 +40,16 @@ Server responds with `session.ready` or `error.occurred` before other traffic.
 
 Generic success for attach / context update / cancel; carries `request_id` when the client sent one.
 
-### `agent.chat.stub` (server → client, **MVP**)
+### `agent.chat.send` → LLM stream (server → client)
 
-Returned until the LLM/agent loop is wired; `payload.received` is `true`, `payload.hint` explains the placeholder.
+When `OPENAI_API_KEY` or `LLM_API_KEY` is configured, the server streams an OpenAI-compatible **`/v1/chat/completions`** response and emits (in order):
+
+1. **`chat.message.created`** — assistant shell (`status`: `streaming`, `name`: `统筹` or `视频策划` by channel).
+2. **`chat.content.added`** — first `text` block (`messageId`, `content.id`).
+3. **`chat.content.updated`** — repeated; `payload.append` carries each token/chunk (client concatenates for full text).
+4. **`chat.message.updated`** — `status`: `complete` or `stop` (cancel / disconnect).
+
+If the API key is missing, respond with **`error.occurred`** (`code`: `llm_not_configured`). Upstream failures use `code`: `llm_error`.
 
 ## Channels vs legacy Socket.IO namespaces
 
@@ -79,7 +86,7 @@ Legacy emits arbitrary Socket.IO event names. Map to `domain.action`:
 | `message` | `chat.message.created` | New message shell: `id`, `role`, `name`, `status`, `datetime`, `content` array |
 | `message:update` | `chat.message.updated` | `id`, `status`, optional `ext` (e.g. `error`) |
 | `content:add` | `chat.content.added` | `messageId`, `content` (discriminated by `content.type`) |
-| `content:update` | `chat.content.updated` | Partial updates / streaming chunks per content block |
+| `content:update` | `chat.content.updated` | Streaming: e.g. `append` per chunk (see § `agent.chat.send` above) |
 
 Content block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdown`, `image`, `thinking`, `search`, `suggestion`, `toolcall`, `activity`, `reasoning`, etc.) until OpenAPI/JSON Schema is generated for them.
 
