@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'rust_api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +31,9 @@ class _HomePageState extends State<HomePage> {
   bool _loadingMe = false;
   bool _loadingWs = false;
   final List<String> _wsLog = [];
+
+  bool _loadingProjects = false;
+  List<ProjectRow>? _projects;
 
   @override
   void initState() {
@@ -152,7 +156,90 @@ class _HomePageState extends State<HomePage> {
     _ws?.sink.close();
     _ws = null;
     _wsSub = null;
-    setState(() => _wsLog.clear());
+    setState(() {
+      _wsLog.clear();
+      _projects = null;
+    });
+  }
+
+  Future<void> _loadProjects() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingProjects = true;
+      _error = null;
+      _projects = null;
+    });
+    try {
+      final list = await fetchProjects(token);
+      if (!mounted) return;
+      setState(() {
+        _projects = list;
+        _loadingProjects = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingProjects = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingProjects = false;
+      });
+    }
+  }
+
+  Future<void> _openProjectDetail(ProjectRow p) async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    try {
+      final detail = await fetchProjectByLegacyId(token, p.legacyId);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text(
+              detail.project.name ?? 'legacy #${detail.project.legacyId}',
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${detail.scripts.length} script(s)'),
+                  const SizedBox(height: 8),
+                  ...detail.scripts.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '#${s.legacyId} ${s.name ?? ""}',
+                        style: Theme.of(ctx).textTheme.bodySmall,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    }
   }
 
   Future<void> _testWebSocket() async {
@@ -290,6 +377,35 @@ class _HomePageState extends State<HomePage> {
               if (_meBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('/me: $_meBody'),
+              ],
+              const SizedBox(height: 16),
+              Text(
+                'Projects (RLS + Postgres)',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingProjects ? null : _loadProjects,
+                child: Text(
+                  _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
+                ),
+              ),
+              if (_projects != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '${_projects!.length} project(s)',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                ..._projects!.map(
+                  (p) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(p.name ?? 'legacy #${p.legacyId}'),
+                    subtitle: Text('legacy_id=${p.legacyId} · ${p.id}'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _openProjectDetail(p),
+                  ),
+                ),
               ],
               const SizedBox(height: 8),
               FilledButton.tonal(
