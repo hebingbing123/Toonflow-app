@@ -270,26 +270,34 @@ class _HomePageState extends State<HomePage> {
       _error = null;
       _meBody = null;
     });
-    final uri = Uri.parse('$kApiBaseUrl/api/v1/me');
     try {
-      final res = await http
-          .get(
-            uri,
-            headers: {'Authorization': 'Bearer $token'},
-          )
-          .timeout(const Duration(seconds: 5));
-      if (res.statusCode == 200) {
-        setState(() {
-          _meBody = res.body;
-          _loadingMe = false;
-        });
-      } else {
-        setState(() {
-          _error = '/me HTTP ${res.statusCode}: ${res.body}';
-          _loadingMe = false;
-        });
+      final r = await fetchMeV1(token);
+      if (!mounted) return;
+      final parts = <String>[
+        'sub=${r.sub}',
+        'plan_tier=${r.planTier}',
+      ];
+      if (r.email != null && r.email!.isNotEmpty) {
+        parts.add('email=${r.email}');
       }
+      if (r.billingCurrency != null && r.billingCurrency!.isNotEmpty) {
+        parts.add('billing_currency=${r.billingCurrency}');
+      }
+      if (r.billingProvider != null && r.billingProvider!.isNotEmpty) {
+        parts.add('billing_provider=${r.billingProvider}');
+      }
+      setState(() {
+        _meBody = parts.join(' · ');
+        _loadingMe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingMe = false;
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loadingMe = false;

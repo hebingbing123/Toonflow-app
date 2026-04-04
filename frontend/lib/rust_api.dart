@@ -149,6 +149,48 @@ Future<ReadyV1Response> fetchReadyV1() async {
   return ReadyV1Response.fromJson(map);
 }
 
+/// `GET /api/v1/me` — Bearer; see `meV1` / OpenAPI `MeResponse`.
+class MeResponse {
+  const MeResponse({
+    required this.sub,
+    this.email,
+    required this.planTier,
+    this.billingCurrency,
+    this.billingProvider,
+  });
+
+  final String sub;
+  final String? email;
+  final String planTier;
+  final String? billingCurrency;
+  final String? billingProvider;
+
+  factory MeResponse.fromJson(Map<String, dynamic> json) {
+    return MeResponse(
+      sub: json['sub'] as String,
+      email: json['email'] as String?,
+      planTier: json['plan_tier'] as String,
+      billingCurrency: json['billing_currency'] as String?,
+      billingProvider: json['billing_provider'] as String?,
+    );
+  }
+}
+
+Future<MeResponse> fetchMeV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/me');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 5));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return MeResponse.fromJson(map);
+}
+
 /// `GET /api/v1/usage/summary` — see `usageSummaryV1`.
 Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/usage/summary');
