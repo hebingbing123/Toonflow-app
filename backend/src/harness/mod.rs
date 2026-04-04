@@ -1,6 +1,7 @@
 //! Harness-oriented runtime boundaries (tools, permissions, observation).
 //! Agent/model orchestration will plug in here; this module stays dependency-light.
 
+pub mod invoke;
 pub mod observe;
 pub mod permissions;
 pub mod tools;

@@ -1,5 +1,5 @@
 use crate::auth::verify_supabase_user_jwt;
-use crate::harness::{observe, permissions, HarnessContext};
+use crate::harness::{invoke, observe, permissions, HarnessContext};
 use crate::llm;
 use crate::state::AppState;
 
@@ -381,6 +381,57 @@ async fn dispatch_client_text(
             )
             .await;
         }
+        "harness.tool.invoke" => {
+            if env.schema_version != 1 {
+                let _ = send_error(
+                    socket,
+                    "unsupported_schema",
+                    "harness.tool.invoke requires schema_version 1",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            }
+            let Ok(p) = serde_json::from_value::<HarnessToolInvokePayload>(env.payload.clone())
+            else {
+                let _ = send_error(
+                    socket,
+                    "invalid_payload",
+                    "need payload.name (string) and optional payload.arguments (object)",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            };
+            let name = p.name.trim();
+            if name.is_empty() {
+                let _ = send_error(
+                    socket,
+                    "invalid_payload",
+                    "payload.name must be a non-empty string",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            }
+            let args = p.arguments.unwrap_or_else(|| json!({}));
+            match invoke::invoke_tool(&ctx, name, &args) {
+                Ok(result) => {
+                    let _ = send_envelope(
+                        socket,
+                        "harness.tool.result",
+                        1,
+                        json!({ "name": name, "result": result }),
+                        env.request_id.as_deref(),
+                    )
+                    .await;
+                }
+                Err(e) => {
+                    let _ =
+                        send_error(socket, e.code(), &e.message(), env.request_id.as_deref()).await;
+                }
+            }
+        }
         "agent.chat.send" => {
             if sess.channel.is_none() {
                 let _ = send_error(
@@ -492,6 +543,13 @@ struct AttachProductionPayload {
 #[derive(Debug, Deserialize)]
 struct ChatSendPayload {
     content: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct HarnessToolInvokePayload {
+    name: String,
+    #[serde(default)]
+    arguments: Option<Value>,
 }
 
 #[cfg(test)]

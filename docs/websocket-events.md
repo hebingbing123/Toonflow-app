@@ -36,6 +36,26 @@ Server responds with `session.ready` or `error.occurred` before other traffic.
 |-------|--------|
 | `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |
 
+### `harness.tool.invoke` (client → server)
+
+Requires an authenticated session (`?access_token=` or successful `session.auth`). Does **not** require `agent.*.attach`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `type` | const `harness.tool.invoke` | yes |
+| `schema_version` | `1` | yes |
+| `payload.name` | string | yes (tool id from `GET /api/v1/harness/tools`) |
+| `payload.arguments` | object | no (defaults to `{}`) |
+
+### `harness.tool.result` (server → client)
+
+Emitted when invocation succeeds.
+
+| Field | Notes |
+|-------|--------|
+| `payload.name` | Tool that ran |
+| `payload.result` | JSON value returned by the tool (for `echo`, mirrors `arguments`) |
+
 ### `generation.job.updated` (server → client)
 
 Pushed when a row in `app_generation_job` owned by the caller transitions (for example `queued` → `running` → `succeeded` / `failed`, `queued` → `cancelled`, or `failed` → `queued` via retry). **`payload`** is the full job object (snake_case: `id`, `owner_user_id`, `kind`, `status`, `payload`, `result`, `error_message`, `idempotency_key`, `created_at`, `updated_at`).
@@ -81,6 +101,7 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — MVP: `echo` returns arguments via `harness.tool.result`; `skills.read` → `error.occurred` `tool_not_implemented` (use REST) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
 | `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; legacy used ack callback — use `request_id` + optional `session.ack` server message |
@@ -103,6 +124,8 @@ Content block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdow
 | `type` | `payload` |
 |--------|-----------|
 | `error.occurred` | `code` (string), `message` (string), optional `request_id`, optional `details` |
+
+Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no WS/runtime path yet), **`unsupported_schema`**, **`invalid_payload`**.
 
 Align `code` / `message` semantics with `docs/openapi.yaml` `ErrorBody` where possible.
 
