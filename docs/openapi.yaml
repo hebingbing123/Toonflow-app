@@ -1171,6 +1171,35 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/skills/summary:
+    get:
+      tags: [skills]
+      summary: Aggregate Markdown skill count and total bytes
+      operationId: getSkillsSummaryV1
+      description: |
+        Counts **`*.md`** files under **`data/skills`** and sums file sizes for the first **20000** matches in directory-walk order (same cap as **`GET /api/v1/skills`**; the list endpoint then sorts paths).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillsSummaryResponse"
+        "400":
+          description: Skills directory missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/skills:
     get:
       tags: [skills]
@@ -2237,6 +2266,19 @@ components:
         size_bytes:
           type: integer
           format: int64
+
+    SkillsSummaryResponse:
+      type: object
+      required: [markdown_file_count, total_bytes]
+      properties:
+        markdown_file_count:
+          type: integer
+          format: int64
+          description: Number of Markdown files counted (capped)
+        total_bytes:
+          type: integer
+          format: int64
+          description: Sum of file sizes for counted files
 
     SkillContentResponse:
       type: object

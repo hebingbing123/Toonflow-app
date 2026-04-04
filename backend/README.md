@@ -83,6 +83,7 @@ WebSocket（JSON 信封见 `docs/websocket-events.md`）：
 
 技能 Markdown（只读，Bearer JWT）：
 
+- `GET /api/v1/skills/summary` — `data/skills` 下 Markdown 数量与总字节（与列表同上限）
 - `GET /api/v1/skills` — 列出 `data/skills/**/*.md`
 - `GET /api/v1/skills/content?path=…` — 读取单个文件（防 `..` 穿越）
 - `GET /api/v1/harness/tools` — 当前注册的 Harness 工具（`name` + `description`；调度仍占位）

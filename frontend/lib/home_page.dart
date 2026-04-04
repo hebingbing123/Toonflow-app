@@ -66,9 +66,11 @@ class _HomePageState extends State<HomePage> {
       TextEditingController(text: 'script_execution_script.md');
 
   bool _loadingHarnessTools = false;
+  bool _loadingSkillsSummary = false;
   bool _loadingSkillList = false;
   bool _loadingSkillPreview = false;
   String? _harnessToolsLine;
+  String? _skillsAggregateLine;
   String? _skillsListSummary;
 
   @override
@@ -399,6 +401,7 @@ class _HomePageState extends State<HomePage> {
       _agentMemoryBody = null;
       _versionBody = null;
       _harnessToolsLine = null;
+      _skillsAggregateLine = null;
       _skillsListSummary = null;
     });
   }
@@ -431,6 +434,37 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingHarnessTools = false;
+      });
+    }
+  }
+
+  Future<void> _loadSkillsAggregate() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingSkillsSummary = true;
+      _error = null;
+      _skillsAggregateLine = null;
+    });
+    try {
+      final s = await fetchSkillsSummary(token);
+      if (!mounted) return;
+      setState(() {
+        _skillsAggregateLine =
+            '${s.markdownFileCount} md files, ${s.totalBytes} bytes total';
+        _loadingSkillsSummary = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillsSummary = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillsSummary = false;
       });
     }
   }
@@ -2193,6 +2227,15 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed:
+                        _loadingSkillsSummary ? null : _loadSkillsAggregate,
+                    child: Text(
+                      _loadingSkillsSummary
+                          ? '…'
+                          : 'GET /api/v1/skills/summary',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: _loadingSkillList ? null : _loadSkillList,
                     child: Text(
                       _loadingSkillList ? '…' : 'GET /api/v1/skills',
@@ -2204,6 +2247,13 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 8),
                 SelectableText(
                   'tools: $_harnessToolsLine',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              if (_skillsAggregateLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  'summary: $_skillsAggregateLine',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

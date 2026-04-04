@@ -683,6 +683,24 @@ class SkillFileMeta {
   }
 }
 
+/// `GET /api/v1/skills/summary`. See `getSkillsSummaryV1`.
+class SkillsSummary {
+  const SkillsSummary({
+    required this.markdownFileCount,
+    required this.totalBytes,
+  });
+
+  final int markdownFileCount;
+  final int totalBytes;
+
+  factory SkillsSummary.fromJson(Map<String, dynamic> json) {
+    return SkillsSummary(
+      markdownFileCount: (json['markdown_file_count'] as num).toInt(),
+      totalBytes: (json['total_bytes'] as num).toInt(),
+    );
+  }
+}
+
 class SkillContentResponse {
   const SkillContentResponse({
     required this.path,
@@ -983,6 +1001,22 @@ Future<JobRow> retryJob(String accessToken, String jobId) async {
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
+}
+
+/// `GET /api/v1/skills/summary`. See `getSkillsSummaryV1`.
+Future<SkillsSummary> fetchSkillsSummary(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/summary');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SkillsSummary.fromJson(map);
 }
 
 /// `GET /api/v1/skills` — Markdown paths under `data/skills`. See `listSkillsV1`.

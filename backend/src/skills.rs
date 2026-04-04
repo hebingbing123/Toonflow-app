@@ -103,6 +103,13 @@ pub struct SkillContentResponse {
     pub content: String,
 }
 
+/// Aggregate over `*.md` under `data/skills` (same walk cap as [`list_skills`]).
+#[derive(Serialize)]
+pub struct SkillsSummaryResponse {
+    pub markdown_file_count: u64,
+    pub total_bytes: u64,
+}
+
 #[derive(Serialize)]
 pub struct HarnessToolsResponse {
     pub tools: &'static [crate::harness::tools::HarnessToolInfo],
@@ -116,9 +123,49 @@ pub struct SkillContentQuery {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/skills/summary", get(skills_summary))
         .route("/api/v1/skills", get(list_skills))
         .route("/api/v1/skills/content", get(get_skill_content))
         .route("/api/v1/harness/tools", get(list_harness_tools))
+}
+
+/// Walk `data/skills` for `*.md` files; stops after [`MAX_SKILL_FILES`] matches (same rule as list).
+fn scan_skill_markdown_aggregate() -> Result<SkillsSummaryResponse, ApiError> {
+    let root = skills_root();
+    if !root.is_dir() {
+        return Err(ApiError::BadRequest(
+            "skills directory missing (expected backend/data/skills)".into(),
+        ));
+    }
+    let mut n: usize = 0;
+    let mut total: u64 = 0;
+    for entry in WalkDir::new(&root).into_iter().filter_map(|e| e.ok()) {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let path = entry.path();
+        if path.extension().and_then(|s| s.to_str()) != Some("md") {
+            continue;
+        }
+        let size = entry.metadata().map(|m| m.len()).unwrap_or(0);
+        n += 1;
+        total = total.saturating_add(size);
+        if n >= MAX_SKILL_FILES {
+            break;
+        }
+    }
+    Ok(SkillsSummaryResponse {
+        markdown_file_count: n as u64,
+        total_bytes: total,
+    })
+}
+
+async fn skills_summary(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<SkillsSummaryResponse>, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    Ok(Json(scan_skill_markdown_aggregate()?))
 }
 
 async fn list_skills(
