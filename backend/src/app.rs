@@ -20,9 +20,9 @@ use axum::{
     Json, Router,
 };
 
+use crate::harness::ws_upgrade::ws_upgrade;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
-use crate::ws::ws_upgrade;
 use serde::Serialize;
 use sqlx::FromRow;
 use tower_http::cors::{Any, CorsLayer};

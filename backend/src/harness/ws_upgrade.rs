@@ -1,12 +1,12 @@
-//! Axum WebSocket upgrade for `/api/v1/ws`. Outbound framing lives in [`crate::harness::ws_outbound`].
-
-use crate::harness::ws_connection;
-use crate::state::AppState;
+//! Axum **`GET /api/v1/ws`** upgrade handler.
 
 use axum::extract::ws::WebSocketUpgrade;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use serde::Deserialize;
+
+use crate::harness::ws_connection;
+use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 pub struct WsQuery {
