@@ -14,6 +14,7 @@ use axum::{
     Json, Router,
 };
 
+use crate::rate_limit::governor_layer_from_env;
 use crate::ws::ws_upgrade;
 use serde::Serialize;
 use tower_http::cors::{Any, CorsLayer};
@@ -89,17 +90,21 @@ pub fn build_router(state: AppState) -> Router {
         ])
         .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::ACCEPT]);
 
-    Router::new()
+    let rate_limited = Router::new()
         .merge(projects::router())
         .merge(scripts::router())
         .merge(storyboards::router())
         .merge(skills::router())
         .merge(jobs::router())
+        .route("/api/v1/me", get(me))
+        .route("/api/v1/ws", get(ws_upgrade))
+        .layer(governor_layer_from_env());
+
+    Router::new()
+        .merge(rate_limited)
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
-        .route("/api/v1/me", get(me))
-        .route("/api/v1/ws", get(ws_upgrade))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

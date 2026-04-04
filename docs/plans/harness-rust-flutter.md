@@ -39,7 +39,7 @@ todos:
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker** + **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**仍缺**独立队列、429+Retry-After；计费 webhook 验签与去重（§13）
+    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker** + **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查路由除外）；**仍缺**独立队列、分布式限流；计费 webhook 验签与去重（§13）
     status: pending
 isProject: false
 ---

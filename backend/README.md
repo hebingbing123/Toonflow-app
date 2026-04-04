@@ -21,6 +21,8 @@ cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选�
 cargo run
 ```
 
+每 **peer IP** 限流（`tower_governor`）；可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、`/api/v1/ready`。
+
 ### 旧库导入（SQLite → `legacy_staging`）
 
 1. 确保 Supabase 迁移已应用（含 `legacy_staging.snapshot`）。

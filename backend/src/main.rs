@@ -11,6 +11,7 @@ mod json_patch;
 mod llm;
 mod notify_hub;
 mod projects;
+mod rate_limit;
 mod scripts;
 mod skills;
 mod state;
@@ -52,5 +53,10 @@ async fn main() {
     });
 
     let app = app::build_router(state);
-    axum::serve(listener, app).await.expect("server failed");
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .expect("server failed");
 }
