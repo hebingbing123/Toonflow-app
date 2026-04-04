@@ -1,12 +1,11 @@
 use crate::auth::verify_supabase_user_jwt;
-use crate::harness::wire::{
-    AttachProductionPayload, AttachScriptPayload, ChatSendPayload, HarnessAgentRunPayload,
-    SessionAuthPayload,
-};
+use crate::harness::wire::{ChatSendPayload, HarnessAgentRunPayload, SessionAuthPayload};
 use crate::harness::ws_agent::{self, HarnessAgentWsParams};
+use crate::harness::ws_channel::WsAgentChannel;
 use crate::harness::ws_chat::{self, ChatTurnWsParams};
+use crate::harness::ws_session::{self, WsSessionBindState};
 use crate::harness::ws_tool;
-use crate::harness::{observe, permissions, HarnessContext};
+use crate::harness::{observe, HarnessContext};
 use crate::state::AppState;
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
@@ -41,15 +40,9 @@ struct ClientEnvelope {
     request_id: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum WsChannel {
-    Script,
-    Production,
-}
-
 struct Session {
     user_id: Uuid,
-    channel: Option<WsChannel>,
+    channel: Option<WsAgentChannel>,
     isolation_key: Option<String>,
     project_id: Option<i64>,
     script_id: Option<i64>,
@@ -305,94 +298,48 @@ async fn dispatch_client_text(
 
     match env.msg_type.as_str() {
         "agent.script.attach" => {
-            let Ok(p) = serde_json::from_value::<AttachScriptPayload>(env.payload.clone()) else {
-                let _ = send_error(
-                    socket,
-                    "invalid_payload",
-                    "need isolation_key, project_id",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
+            let mut st = WsSessionBindState {
+                channel: &mut sess.channel,
+                isolation_key: &mut sess.isolation_key,
+                project_id: &mut sess.project_id,
+                script_id: &mut sess.script_id,
             };
-            if !permissions::ws_channel_allowed(sess.user_id, "script") {
-                let _ = send_error(
-                    socket,
-                    "forbidden",
-                    "script channel denied",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
-            }
-            sess.channel = Some(WsChannel::Script);
-            sess.isolation_key = Some(p.isolation_key);
-            sess.project_id = Some(p.project_id);
-            sess.script_id = None;
-            let _ = send_envelope(
+            ws_session::handle_script_attach(
                 socket,
-                "session.ack",
-                1,
-                json!({ "ok": true, "channel": "script" }),
+                sess.user_id,
+                &mut st,
+                &env.payload,
                 env.request_id.as_deref(),
             )
             .await;
         }
         "agent.production.attach" => {
-            let Ok(p) = serde_json::from_value::<AttachProductionPayload>(env.payload.clone())
-            else {
-                let _ = send_error(
-                    socket,
-                    "invalid_payload",
-                    "need isolation_key, project_id, script_id",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
+            let mut st = WsSessionBindState {
+                channel: &mut sess.channel,
+                isolation_key: &mut sess.isolation_key,
+                project_id: &mut sess.project_id,
+                script_id: &mut sess.script_id,
             };
-            if !permissions::ws_channel_allowed(sess.user_id, "production") {
-                let _ = send_error(
-                    socket,
-                    "forbidden",
-                    "production channel denied",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
-            }
-            sess.channel = Some(WsChannel::Production);
-            sess.isolation_key = Some(p.isolation_key);
-            sess.project_id = Some(p.project_id);
-            sess.script_id = Some(p.script_id);
-            let _ = send_envelope(
+            ws_session::handle_production_attach(
                 socket,
-                "session.ack",
-                1,
-                json!({ "ok": true, "channel": "production" }),
+                sess.user_id,
+                &mut st,
+                &env.payload,
                 env.request_id.as_deref(),
             )
             .await;
         }
         "agent.context.update" => {
-            let Ok(p) = serde_json::from_value::<AttachProductionPayload>(env.payload.clone())
-            else {
-                let _ = send_error(
-                    socket,
-                    "invalid_payload",
-                    "need isolation_key, project_id, script_id",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
+            let mut st = WsSessionBindState {
+                channel: &mut sess.channel,
+                isolation_key: &mut sess.isolation_key,
+                project_id: &mut sess.project_id,
+                script_id: &mut sess.script_id,
             };
-            sess.isolation_key = Some(p.isolation_key);
-            sess.project_id = Some(p.project_id);
-            sess.script_id = Some(p.script_id);
-            let _ = send_envelope(
+            ws_session::handle_context_update(
                 socket,
-                "session.ack",
-                1,
-                json!({ "ok": true }),
+                &mut st,
+                &env.payload,
                 env.request_id.as_deref(),
             )
             .await;
@@ -456,11 +403,10 @@ async fn dispatch_client_text(
             sess.llm_cancel = CancellationToken::new();
             let cancel = sess.llm_cancel.clone();
 
-            let assistant_name = match sess.channel {
-                Some(WsChannel::Script) => "统筹",
-                Some(WsChannel::Production) => "视频策划",
-                None => unreachable!(),
-            };
+            let assistant_name = sess
+                .channel
+                .map(WsAgentChannel::assistant_name_zh)
+                .expect("channel checked above");
 
             let max_rounds = p.max_tool_rounds.clamp(1, 32);
             ws_agent::spawn_harness_agent_run(HarnessAgentWsParams {
@@ -512,11 +458,10 @@ async fn dispatch_client_text(
             sess.llm_cancel = CancellationToken::new();
             let cancel = sess.llm_cancel.clone();
 
-            let assistant_name = match sess.channel {
-                Some(WsChannel::Script) => "统筹",
-                Some(WsChannel::Production) => "视频策划",
-                None => unreachable!(),
-            };
+            let assistant_name = sess
+                .channel
+                .map(WsAgentChannel::assistant_name_zh)
+                .expect("channel checked above");
 
             ws_chat::spawn_stream_chat_turn(ChatTurnWsParams {
                 cfg,
