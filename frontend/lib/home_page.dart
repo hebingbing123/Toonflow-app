@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingAgentMemory = false;
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
+  bool _loadingWsIsolatedEcho = false;
   bool _loadingWsSkillsRead = false;
   final List<String> _wsLog = [];
 
@@ -104,7 +105,10 @@ class _HomePageState extends State<HomePage> {
       kSupabaseConfigured ? Supabase.instance.client.auth.currentSession : null;
 
   bool get _wsProbesBusy =>
-      _loadingWs || _loadingWsHarness || _loadingWsSkillsRead;
+      _loadingWs ||
+      _loadingWsHarness ||
+      _loadingWsIsolatedEcho ||
+      _loadingWsSkillsRead;
 
   void _appendWsLog(String raw) {
     const maxChars = 12000;
@@ -1856,6 +1860,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _loadingWs = false;
               _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -1920,6 +1925,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _loadingWs = false;
               _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -1947,6 +1953,67 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _error = e.toString();
           _loadingWsHarness = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testHarnessIsolatedEchoWebSocket() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+
+    _wsSub?.cancel();
+    await _ws?.sink.close();
+
+    setState(() {
+      _loadingWsIsolatedEcho = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
+      final channel = WebSocketChannel.connect(uri);
+      _ws = channel;
+
+      _wsSub = channel.stream.listen(
+        (message) => _appendWsLog(message.toString()),
+        onError: (Object e) {
+          if (mounted) setState(() => _error = 'ws: $e');
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
+              _loadingWsSkillsRead = false;
+            });
+          }
+        },
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': 'isolated.echo',
+            'arguments': {
+              'source': 'flutter',
+              'probe': 'harness.tool.invoke (isolated)',
+              'at': DateTime.now().toUtc().toIso8601String(),
+            },
+          },
+        }),
+      );
+
+      if (mounted) setState(() => _loadingWsIsolatedEcho = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loadingWsIsolatedEcho = false;
         });
       }
     }
@@ -1984,6 +2051,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _loadingWs = false;
               _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -2445,6 +2513,15 @@ class _HomePageState extends State<HomePage> {
                     onPressed: _wsProbesBusy ? null : _testHarnessToolWebSocket,
                     child: Text(
                       _loadingWsHarness ? '…' : 'WS: harness.tool.invoke (echo)',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed:
+                        _wsProbesBusy ? null : _testHarnessIsolatedEchoWebSocket,
+                    child: Text(
+                      _loadingWsIsolatedEcho
+                          ? '…'
+                          : 'WS: isolated.echo (subprocess)',
                     ),
                   ),
                   FilledButton.tonal(
