@@ -61,6 +61,9 @@ cargo run
 - `GET http://127.0.0.1:8666/api/v1/ready`
 - `GET http://127.0.0.1:8666/api/v1/me` — 请求头 `Authorization: Bearer <Supabase access_token>`
 - `GET http://127.0.0.1:8666/api/v1/usage/summary` — 当前用户在 **`app_usage_event`** 中的条数（近 24h / 近 7 天）；成功完成的生成任务由 worker 写入 **`generation_job.succeeded`**
+- 静态模型目录（编译时嵌入 **`data/models_catalog.json`**；Bearer；对齐旧 **`modelSelect`** 的 **`type`** 过滤语义，无 Postgres **`o_vendorConfig`**）：
+  - `GET /api/v1/models?type=text|image|video|all` — `all` 不含 `video`
+  - `GET /api/v1/models/detail?model_id={vendor_id}:{model_name}` — 如 `1:gpt-4o-mini`
 - Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；需用户拥有对应 **`app_project.legacy_id`**）：
   - `POST /api/v1/agents/memory/query` — 列出 message 行（camelCase body，对齐旧 **`/api/agents/getMemory`**）
   - `POST /api/v1/agents/memory/clear` — 清除语义对齐旧 **`/api/agents/clearMemory`**（`type` 或 `clearType`：`all` / `message` / `summary`）

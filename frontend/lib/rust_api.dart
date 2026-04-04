@@ -112,6 +112,46 @@ Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
   return jsonDecode(res.body) as Map<String, dynamic>;
 }
 
+/// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.
+Future<List<dynamic>> fetchModelsCatalog(
+  String accessToken, {
+  String typeFilter = 'all',
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models').replace(
+    queryParameters: {'type': typeFilter},
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as List<dynamic>;
+}
+
+/// `GET /api/v1/models/detail?model_id=…` — Bearer; see `modelDetailV1`.
+Future<Map<String, dynamic>> fetchModelDetail(
+  String accessToken, {
+  required String modelId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models/detail').replace(
+    queryParameters: {'model_id': modelId},
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
 Future<List<dynamic>> queryAgentMemory(
   String accessToken, {

@@ -28,12 +28,16 @@ class _HomePageState extends State<HomePage> {
   String? _versionBody;
   String? _meBody;
   String? _usageSummaryBody;
+  String? _modelsCatalogBody;
+  String? _modelDetailBody;
   String? _agentMemoryBody;
   String? _error;
   bool _loadingHealth = false;
   bool _loadingVersion = false;
   bool _loadingMe = false;
   bool _loadingUsageSummary = false;
+  bool _loadingModelsCatalog = false;
+  bool _loadingModelDetail = false;
   bool _loadingAgentMemory = false;
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
@@ -240,6 +244,66 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingUsageSummary = false;
+      });
+    }
+  }
+
+  Future<void> _callModelsCatalog() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingModelsCatalog = true;
+      _error = null;
+      _modelsCatalogBody = null;
+    });
+    try {
+      final list = await fetchModelsCatalog(token, typeFilter: 'all');
+      if (!mounted) return;
+      setState(() {
+        _modelsCatalogBody = list.toString();
+        _loadingModelsCatalog = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingModelsCatalog = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingModelsCatalog = false;
+      });
+    }
+  }
+
+  Future<void> _callModelDetail() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingModelDetail = true;
+      _error = null;
+      _modelDetailBody = null;
+    });
+    try {
+      final map = await fetchModelDetail(token, modelId: '1:gpt-4o-mini');
+      if (!mounted) return;
+      setState(() {
+        _modelDetailBody = map.toString();
+        _loadingModelDetail = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingModelDetail = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingModelDetail = false;
       });
     }
   }
@@ -1615,6 +1679,37 @@ class _HomePageState extends State<HomePage> {
               if (_usageSummaryBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('usage: $_usageSummaryBody'),
+              ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: _loadingModelsCatalog ? null : _callModelsCatalog,
+                    child: Text(
+                      _loadingModelsCatalog
+                          ? '请求中…'
+                          : 'GET /api/v1/models?type=all',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingModelDetail ? null : _callModelDetail,
+                    child: Text(
+                      _loadingModelDetail
+                          ? '请求中…'
+                          : 'GET /api/v1/models/detail (1:gpt-4o-mini)',
+                    ),
+                  ),
+                ],
+              ),
+              if (_modelsCatalogBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('models: $_modelsCatalogBody'),
+              ],
+              if (_modelDetailBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('model detail: $_modelDetailBody'),
               ],
               const SizedBox(height: 16),
               Text(

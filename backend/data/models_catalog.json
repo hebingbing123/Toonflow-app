@@ -1,0 +1,25 @@
+{
+  "vendors": [
+    {
+      "id": 1,
+      "name": "OpenAI",
+      "models": [
+        {
+          "name": "GPT-4o mini",
+          "model_name": "gpt-4o-mini",
+          "type": "text"
+        },
+        {
+          "name": "GPT-4o",
+          "model_name": "gpt-4o",
+          "type": "text"
+        },
+        {
+          "name": "DALL·E 3",
+          "model_name": "dall-e-3",
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}

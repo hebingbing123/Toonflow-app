@@ -3,6 +3,7 @@ use crate::auth::require_claims;
 use crate::billing;
 use crate::error::ApiError;
 use crate::jobs;
+use crate::models_catalog;
 use crate::projects;
 use crate::scripts;
 use crate::skills;
@@ -154,6 +155,7 @@ pub fn build_router(state: AppState) -> Router {
 
     let rate_limited = Router::new()
         .merge(agent_memory::router())
+        .merge(models_catalog::router())
         .merge(projects::router())
         .merge(scripts::router())
         .merge(storyboards::router())

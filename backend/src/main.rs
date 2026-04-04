@@ -11,6 +11,7 @@ mod job_worker;
 mod jobs;
 mod json_patch;
 mod llm;
+mod models_catalog;
 mod notify_hub;
 mod projects;
 mod rate_limit;

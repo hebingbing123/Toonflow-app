@@ -46,6 +46,8 @@ tags:
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
   - name: usage
     description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
+  - name: models
+    description: Static vendor/model catalog (`backend/data/models_catalog.json`); legacy `modelSelect` parity without `o_vendorConfig`
   - name: agents
     description: Per-user agent memory (`app_agent_memory`; Postgres + RLS); legacy `/api/agents/getMemory` / `clearMemory` parity
   - name: webhooks
@@ -238,6 +240,100 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/models:
+    get:
+      tags: [models]
+      summary: List models from static catalog (filtered by type)
+      operationId: listModelsV1
+      description: |
+        Bearer JWT. Data is baked from **`backend/data/models_catalog.json`** at compile time (no Postgres **`o_vendorConfig`**).
+        Query **`type`**: `text` \| `image` \| `video` \| `all`. Omitted defaults to **`all`**, which **excludes** `video` rows (same rule as legacy **`modelSelect/getModelList`**).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [text, image, video, all]
+          description: Filter; `all` means every type except `video`
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ModelListEntry"
+        "400":
+          description: Invalid `type` query value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/models/detail:
+    get:
+      tags: [models]
+      summary: Resolve one model by composite id
+      operationId: modelDetailV1
+      description: |
+        Bearer JWT. **`model_id`** format **`{vendor_id}:{model_name}`** (e.g. `1:gpt-4o-mini`), aligned with legacy **`modelSelect/getModelDetail`** splitting **`modelId`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: model_id
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "1:gpt-4o-mini"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelDetailResponse"
+        "400":
+          description: Missing `model_id`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Unknown vendor or model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
           content:
             application/json:
               schema:
@@ -1338,6 +1434,45 @@ components:
         version:
           type: string
           description: Rust crate / binary version (`CARGO_PKG_VERSION`)
+
+    ModelListEntry:
+      type: object
+      required: [id, label, value, type, name]
+      description: Legacy-shaped row; `id` is vendor id, `name` is vendor name, `value` is API model id string
+      properties:
+        id:
+          type: integer
+          format: int32
+        label:
+          type: string
+          description: Human-readable model label
+        value:
+          type: string
+          description: Provider model id (e.g. `gpt-4o-mini`)
+        type:
+          type: string
+          enum: [text, image, video]
+        name:
+          type: string
+          description: Vendor display name
+
+    ModelDetailResponse:
+      type: object
+      required: [vendor_id, vendor_name, name, model_name, type]
+      properties:
+        vendor_id:
+          type: integer
+          format: int32
+        vendor_name:
+          type: string
+        name:
+          type: string
+          description: Human-readable model label
+        model_name:
+          type: string
+        type:
+          type: string
+          enum: [text, image, video]
 
     ReadyResponse:
       type: object
