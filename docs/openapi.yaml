@@ -9,9 +9,11 @@ info:
     HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
     WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in **`docs/websocket-events.md`** (also linked from `externalDocs` above); optional query `access_token`.
 
-    **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses the WebSocket types **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `skills.read` with `arguments.path`) — see the WebSocket doc for payloads and `error.occurred` codes.
+    **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses the WebSocket types **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `isolated.echo` — process-isolated echo — `skills.read` with `arguments.path`) — see the WebSocket doc for payloads and `error.occurred` codes.
 
-    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, and `/api/v1/ready`.
+    **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — verify **`X-Toonflow-Signature: sha256=<hex>`** as HMAC-SHA256(raw body, `BILLING_WEBHOOK_SECRET`). Body must be JSON with string **`id`** (dedupe key). Returns **`received`** + **`duplicate`** when replayed. **Not** JWT-authenticated; configure secret in production. **Not** in the per-IP rate-limit bucket (same as `/health`).
+
+    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, `/api/v1/ready`, and **`POST /api/v1/webhooks/billing`**.
     Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
     Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers.
     Tune with `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
@@ -40,6 +42,8 @@ tags:
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
+  - name: webhooks
+    description: Server-to-server billing webhooks (HMAC); not browser CORS flows
 
 paths:
   /health:
@@ -84,6 +88,62 @@ paths:
                 $ref: "#/components/schemas/ReadyResponse"
         "503":
           description: Database unreachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/webhooks/billing:
+    post:
+      tags: [webhooks]
+      summary: Ingest signed billing webhook (idempotent by JSON `id`)
+      operationId: postBillingWebhookV1
+      description: |
+        Verifies **HMAC-SHA256** of the **raw request body** using `BILLING_WEBHOOK_SECRET`.
+        Header **`X-Toonflow-Signature`** must be `sha256=` followed by lowercase hex (64 chars).
+        Persists to `app_billing_webhook_event` when `id` is new; replays return `duplicate: true` (HTTP 200).
+        Returns **503** if `BILLING_WEBHOOK_SECRET` is unset or `DATABASE_URL` is not configured.
+      security: []
+      parameters:
+        - name: X-Toonflow-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Format `sha256=<hex>` (HMAC-SHA256 of raw body).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              additionalProperties: true
+              properties:
+                id:
+                  type: string
+                  description: Provider event id; used as deduplication key.
+      responses:
+        "200":
+          description: Accepted (or duplicate replay)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingWebhookResponse"
+        "400":
+          description: Invalid JSON or missing non-empty `id`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing/bad signature
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Secret or database not configured
           content:
             application/json:
               schema:
@@ -1077,6 +1137,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/HarnessToolInfo"
+
+    BillingWebhookResponse:
+      type: object
+      required: [received, duplicate]
+      properties:
+        received:
+          type: boolean
+        duplicate:
+          type: boolean
+        id:
+          type: integer
+          format: int64
+          description: Row id when `duplicate` is false
 
     JobRow:
       type: object

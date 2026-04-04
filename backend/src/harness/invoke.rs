@@ -20,6 +20,8 @@ pub enum InvokeError {
     SkillNotFound,
     SkillBadRequest(String),
     SkillUnavailable,
+    /// Child process / IPC failure for process-isolated tools (`isolated.echo`).
+    IsolationFailed(String),
 }
 
 impl From<SkillReadError> for InvokeError {
@@ -46,6 +48,7 @@ impl InvokeError {
             InvokeError::SkillNotFound => "not_found",
             InvokeError::SkillBadRequest(_) => "invalid_payload",
             InvokeError::SkillUnavailable => "skill_unavailable",
+            InvokeError::IsolationFailed(_) => "isolation_failed",
         }
     }
 
@@ -60,22 +63,16 @@ impl InvokeError {
             InvokeError::SkillUnavailable => {
                 "skills directory is not available on this server".into()
             }
+            InvokeError::IsolationFailed(m) => m.clone(),
         }
     }
 }
 
-/// Run a catalog tool by name. Returns JSON suitable for `harness.tool.result.payload.result`.
-pub fn invoke_tool(
-    ctx: &HarnessContext,
+fn dispatch_in_process(
+    _ctx: &HarnessContext,
     name: &str,
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
-    if !permissions::tool_invocation_allowed(ctx.user_id, name) {
-        return Err(InvokeError::UnknownTool(name.to_string()));
-    }
-
-    observe::harness_tool_invoke(ctx, name);
-
     match name {
         "echo" => Ok(arguments.clone()),
         "skills.read" => {
@@ -98,6 +95,41 @@ pub fn invoke_tool(
             tool: name.to_string(),
             hint: "registered in catalog but execution is not wired yet".to_string(),
         }),
+    }
+}
+
+/// Run a catalog tool by name. Returns JSON suitable for `harness.tool.result.payload.result`.
+/// WebSocket uses [`invoke_tool_async`] (process-isolated tools); this remains for tests and a future sync caller.
+#[allow(dead_code)]
+pub fn invoke_tool(
+    ctx: &HarnessContext,
+    name: &str,
+    arguments: &Value,
+) -> Result<Value, InvokeError> {
+    if !permissions::tool_invocation_allowed(ctx.user_id, name) {
+        return Err(InvokeError::UnknownTool(name.to_string()));
+    }
+
+    observe::harness_tool_invoke(ctx, name);
+
+    dispatch_in_process(ctx, name, arguments)
+}
+
+/// Like [`invoke_tool`], but routes process-isolated tools to async handlers (WebSocket path).
+pub async fn invoke_tool_async(
+    ctx: &HarnessContext,
+    name: &str,
+    arguments: &Value,
+) -> Result<Value, InvokeError> {
+    if !permissions::tool_invocation_allowed(ctx.user_id, name) {
+        return Err(InvokeError::UnknownTool(name.to_string()));
+    }
+
+    observe::harness_tool_invoke(ctx, name);
+
+    match name {
+        "isolated.echo" => super::isolate::isolated_echo(arguments).await,
+        _ => dispatch_in_process(ctx, name, arguments),
     }
 }
 

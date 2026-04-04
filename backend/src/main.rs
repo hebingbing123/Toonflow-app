@@ -3,6 +3,7 @@
 
 mod app;
 mod auth;
+mod billing;
 mod error;
 mod harness;
 mod job_worker;
@@ -25,6 +26,14 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 
 #[tokio::main]
 async fn main() {
+    if std::env::args()
+        .nth(1)
+        .as_deref()
+        .is_some_and(|s| s == "__harness_isolate_echo__")
+    {
+        harness::isolate::stdio_echo_child();
+    }
+
     let _ = dotenvy::dotenv();
 
     tracing_subscriber::registry()

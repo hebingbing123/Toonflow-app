@@ -22,6 +22,10 @@ pub enum ApiError {
     Conflict(String),
     BadRequest(String),
     DatabaseError(String),
+    /// `BILLING_WEBHOOK_SECRET` unset — webhook ingestion disabled.
+    WebhookNotConfigured,
+    /// HMAC did not match body (or bad `X-Toonflow-Signature` format).
+    InvalidWebhookSignature,
 }
 
 impl IntoResponse for ApiError {
@@ -49,6 +53,16 @@ impl IntoResponse for ApiError {
                 StatusCode::SERVICE_UNAVAILABLE,
                 "database_error",
                 msg.as_str(),
+            ),
+            ApiError::WebhookNotConfigured => (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "webhook_not_configured",
+                "BILLING_WEBHOOK_SECRET is not set",
+            ),
+            ApiError::InvalidWebhookSignature => (
+                StatusCode::UNAUTHORIZED,
+                "invalid_webhook_signature",
+                "HMAC verification failed",
             ),
         };
 

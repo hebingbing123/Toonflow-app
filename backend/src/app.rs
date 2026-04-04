@@ -1,4 +1,5 @@
 use crate::auth::require_claims;
+use crate::billing;
 use crate::error::ApiError;
 use crate::jobs;
 use crate::projects;
@@ -110,6 +111,7 @@ pub fn build_router(state: AppState) -> Router {
 
     Router::new()
         .merge(rate_limited)
+        .merge(billing::router())
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))

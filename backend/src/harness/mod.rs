@@ -2,6 +2,7 @@
 //! Agent/model orchestration will plug in here; this module stays dependency-light.
 
 pub mod invoke;
+pub mod isolate;
 pub mod observe;
 pub mod permissions;
 pub mod tools;

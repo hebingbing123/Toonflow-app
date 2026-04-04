@@ -425,7 +425,7 @@ async fn dispatch_client_text(
                 return;
             }
             let args = p.arguments.unwrap_or_else(|| json!({}));
-            match invoke::invoke_tool(&ctx, name, &args) {
+            match invoke::invoke_tool_async(&ctx, name, &args).await {
                 Ok(result) => {
                     let _ = send_envelope(
                         socket,

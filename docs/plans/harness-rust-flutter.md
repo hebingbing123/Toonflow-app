@@ -9,10 +9,10 @@ todos:
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
     status: completed
   - id: harness-rust-core
-    content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`skills.read`** 与 REST 同路径安全规则）
+    content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`isolated.echo`**（子进程隔离 MVP）、**`skills.read`** 与 REST 同路径安全规则）；**仍缺**通用 WASM/多工具进程池与完整 Agent 循环
     status: pending
   - id: rust-backend-mvp
-    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；仍缺分布式队列、Harness 硬隔离与契约测试固化
+    content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**契约**：OpenAPI/WS 文档与集成测试（isolate 子进程）；仍缺多实例分布式队列与端到端契约回归矩阵
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
@@ -36,10 +36,10 @@ todos:
     content: 单仓 backend（Rust）+ frontend（Flutter）；根 README 说明目录；建 docs/plans/ 并纳入本计划快照（§7.2）；清理误建目录；见 §11
     status: completed
   - id: saas-product-spec
-    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段
+    content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile` 已有 plan_tier 等字段；**`POST /api/v1/webhooks/billing`** + `app_billing_webhook_event` + HMAC **`X-Toonflow-Signature`** 与 **`id`** 去重（首期 CNY 收单方可对接）
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker** + **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查除外；可选受信代理下 `Forwarded`/`X-Forwarded-For`）；**HTTP 可观测**：`X-Request-Id`、JSON 错误 `request_id`；**WS** `error.occurred` 的 **`payload.request_id`**；**契约单测**：`Idempotency-Key` 头解析/截断、`generation.job.updated` 信封、`CreateJobBody` / **`Patch*Body`** 拒未知字段、**`json_patch`** 文本/i32 字段解析；**仍缺**独立队列、分布式协调限流；计费 webhook 验签与去重（§13）
+    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker**（**`FOR UPDATE SKIP LOCKED`** _claim_）+ **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查与 **billing webhook** 除外；可选受信代理下 `Forwarded`/`X-Forwarded-For`）；**HTTP 可观测**：`X-Request-Id`、JSON 错误 `request_id`；**WS** `error.occurred` 的 **`payload.request_id`**；**契约单测**：`Idempotency-Key` 头解析/截断、`generation.job.updated` 信封、`CreateJobBody` / **`Patch*Body`** 拒未知字段、**`json_patch`** 文本/i32 字段解析；**计费 webhook**：HMAC + DB 去重（§13）；**仍缺**Redis/云队列、多实例 worker 协调、提供商专属验签格式与订阅状态机
     status: pending
 isProject: false
 ---

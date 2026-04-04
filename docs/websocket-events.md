@@ -55,7 +55,7 @@ Emitted when invocation succeeds.
 | Field | Notes |
 |-------|--------|
 | `payload.name` | Tool that ran |
-| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `skills.read`: `{ path, content }` like the REST skill body) |
+| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }` like the REST skill body) |
 
 ### `generation.job.updated` (server → client)
 
@@ -102,7 +102,7 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
-| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content` |
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content` |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
 | `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; legacy used ack callback — use `request_id` + optional `session.ack` server message |

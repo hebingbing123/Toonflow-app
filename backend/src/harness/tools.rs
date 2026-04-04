@@ -15,6 +15,10 @@ const CATALOG: &[HarnessToolInfo] = &[
         description: "Returns the provided payload unchanged; used to verify tool plumbing.",
     },
     HarnessToolInfo {
+        name: "isolated.echo",
+        description: "Same JSON echo as `echo`, but executed in a child process (address-space isolation; Harness hard-boundary MVP).",
+    },
+    HarnessToolInfo {
         name: "skills.read",
         description:
             "Read one Markdown skill under backend/data/skills; WS/args: { \"path\": \"relative/path.md\" } (same rules as GET /api/v1/skills/content).",
