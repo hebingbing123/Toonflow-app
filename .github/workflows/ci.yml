@@ -13,6 +13,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  openapi-yaml:
+    name: OpenAPI YAML (parse check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse docs/openapi.yaml
+        run: ruby -ryaml -e "YAML.load_file('docs/openapi.yaml')"
+
   rust-backend:
     name: Rust (backend/)
     runs-on: ubuntu-latest
