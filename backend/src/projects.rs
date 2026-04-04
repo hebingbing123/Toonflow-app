@@ -54,6 +54,14 @@ struct ProjectStatsResponse {
     video_count: i64,
 }
 
+/// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
+#[derive(Serialize)]
+struct ProjectsSummaryResponse {
+    project_count: i64,
+    script_count: i64,
+    storyboard_count: i64,
+}
+
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 struct PatchProjectBody {
@@ -121,6 +129,7 @@ fn trim_opt(s: Option<String>) -> Option<String> {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/projects/summary", get(projects_summary))
         .route("/api/v1/projects", get(list_projects).post(create_project))
         .route(
             "/api/v1/projects/legacy/{legacy_id}/stats",
@@ -229,6 +238,43 @@ async fn list_projects(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(Json(rows))
+}
+
+async fn projects_summary(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<ProjectsSummaryResponse>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let row: (i64, i64, i64) = sqlx::query_as(
+        r#"
+        SELECT
+            (SELECT COUNT(*)::bigint FROM app_project WHERE owner_user_id = $1),
+            (SELECT COUNT(*)::bigint
+             FROM app_script s
+             INNER JOIN app_project p ON s.project_id = p.id
+             WHERE p.owner_user_id = $1),
+            (SELECT COUNT(*)::bigint
+             FROM app_storyboard sb
+             INNER JOIN app_script s ON sb.script_id = s.id
+             INNER JOIN app_project p ON s.project_id = p.id
+             WHERE p.owner_user_id = $1)
+        "#,
+    )
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(ProjectsSummaryResponse {
+        project_count: row.0,
+        script_count: row.1,
+        storyboard_count: row.2,
+    }))
 }
 
 async fn get_project_by_legacy(

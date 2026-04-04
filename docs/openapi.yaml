@@ -486,6 +486,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/summary:
+    get:
+      tags: [projects]
+      summary: Aggregate project, script, and storyboard counts for the current user
+      operationId: getProjectsSummaryV1
+      description: |
+        One round-trip totals for **`owner_user_id = JWT sub`**: rows in **`app_project`**, **`app_script`** (via owned projects), and **`app_storyboard`** (via owned script trees).
+        Complements per-project **`GET /api/v1/projects/legacy/{legacy_id}/stats`**.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectsSummaryResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects:
     get:
       tags: [projects]
@@ -1837,6 +1867,20 @@ components:
           type: integer
           format: int64
           nullable: true
+
+    ProjectsSummaryResponse:
+      type: object
+      required: [project_count, script_count, storyboard_count]
+      properties:
+        project_count:
+          type: integer
+          format: int64
+        script_count:
+          type: integer
+          format: int64
+        storyboard_count:
+          type: integer
+          format: int64
 
     ProjectStatsResponse:
       type: object

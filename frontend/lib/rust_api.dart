@@ -223,6 +223,43 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
       .toList();
 }
 
+class ProjectsSummary {
+  const ProjectsSummary({
+    required this.projectCount,
+    required this.scriptCount,
+    required this.storyboardCount,
+  });
+
+  final int projectCount;
+  final int scriptCount;
+  final int storyboardCount;
+
+  factory ProjectsSummary.fromJson(Map<String, dynamic> json) {
+    int n(String k) => (json[k] as num).toInt();
+    return ProjectsSummary(
+      projectCount: n('project_count'),
+      scriptCount: n('script_count'),
+      storyboardCount: n('storyboard_count'),
+    );
+  }
+}
+
+/// `GET /api/v1/projects/summary` — totals for the caller. See `getProjectsSummaryV1`.
+Future<ProjectsSummary> fetchProjectsSummary(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/summary');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProjectsSummary.fromJson(map);
+}
+
 /// `POST /api/v1/projects` — optional snake_case fields; see `createProjectV1`.
 Future<ProjectRow> createProject(
   String accessToken, {
