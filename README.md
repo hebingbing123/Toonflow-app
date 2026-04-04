@@ -53,7 +53,18 @@
 </div>
 
 
+
 ---
+
+## Monorepo（Rust + Flutter，与现有 Electron/Node 并行）
+
+| 目录 | 说明 |
+|------|------|
+| **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
+| **`frontend/`** | Flutter 桌面 + Web，`API_BASE_URL` 指向后端（见 `frontend/README.md`） |
+| **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
+
+> 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。
 
 # 🌐 多语言支持
 
