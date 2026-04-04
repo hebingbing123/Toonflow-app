@@ -63,6 +63,9 @@ class _HomePageState extends State<HomePage> {
   String? _jobKindsLine;
   String? _jobKindSummaryLine;
   String? _jobStatusSummaryLine;
+  bool _loadingJobById = false;
+  String? _jobByIdLine;
+  final _jobIdCtrl = TextEditingController();
 
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
@@ -92,6 +95,7 @@ class _HomePageState extends State<HomePage> {
     _ws?.sink.close();
     _email.dispose();
     _password.dispose();
+    _jobIdCtrl.dispose();
     _skillPathCtrl.dispose();
     super.dispose();
   }
@@ -427,6 +431,7 @@ class _HomePageState extends State<HomePage> {
       _projects = null;
       _creatingProject = false;
       _jobs = null;
+      _jobByIdLine = null;
       _usageSummaryBody = null;
       _agentMemoryBody = null;
       _versionBody = null;
@@ -728,6 +733,39 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingJobStatusSummary = false;
+      });
+    }
+  }
+
+  Future<void> _fetchJobById() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final id = _jobIdCtrl.text.trim();
+    if (id.isEmpty) return;
+    setState(() {
+      _loadingJobById = true;
+      _error = null;
+      _jobByIdLine = null;
+    });
+    try {
+      final j = await fetchJob(token, id);
+      if (!mounted) return;
+      setState(() {
+        _jobByIdLine =
+            '${j.kind} · ${j.status} · updated ${j.updatedAt}';
+        _loadingJobById = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobById = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobById = false;
       });
     }
   }
@@ -2195,6 +2233,31 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _jobIdCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(
+                  labelText: 'Job id (tap a row below to paste)',
+                ),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: (_loadingJobById ||
+                        _jobIdCtrl.text.trim().isEmpty)
+                    ? null
+                    : _fetchJobById,
+                child: Text(
+                  _loadingJobById ? '…' : 'GET /api/v1/jobs/{id}',
+                ),
+              ),
+              if (_jobByIdLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  'job by id: $_jobByIdLine',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               if (_jobKindsLine != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('job kinds: $_jobKindsLine'),
@@ -2219,6 +2282,8 @@ class _HomePageState extends State<HomePage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text('${j.kind} · ${j.status}'),
                         subtitle: Text(j.id),
+                        onTap: () =>
+                            setState(() => _jobIdCtrl.text = j.id),
                         trailing: (j.status == 'failed' ||
                                 j.status == 'queued' ||
                                 j.status == 'running')
