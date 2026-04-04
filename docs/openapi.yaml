@@ -11,6 +11,9 @@ info:
     Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers.
     Tune with `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
 
+    **Request correlation:** Responses include **`X-Request-Id`** (echo client value or server-generated UUID).
+    JSON error bodies (`code`, `message`) also include **`request_id`** when applicable. Clients may send **`X-Request-Id`** on requests (optional).
+
 servers:
   - url: http://127.0.0.1:8666
     description: Local dev (default `PORT`; override with env)

@@ -9,12 +9,14 @@ use crate::storyboards;
 
 use axum::{
     extract::State,
-    http::{header, HeaderMap, Method},
+    http::{header, HeaderMap, HeaderName, Method},
+    middleware::from_fn,
     routing::get,
     Json, Router,
 };
 
 use crate::rate_limit::governor_layer_from_env;
+use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::ws::ws_upgrade;
 use serde::Serialize;
 use tower_http::cors::{Any, CorsLayer};
@@ -88,7 +90,13 @@ pub fn build_router(state: AppState) -> Router {
             Method::PUT,
             Method::DELETE,
         ])
-        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::ACCEPT]);
+        .allow_headers([
+            header::AUTHORIZATION,
+            header::CONTENT_TYPE,
+            header::ACCEPT,
+            HeaderName::from_static("x-request-id"),
+        ])
+        .expose_headers([HeaderName::from_static("x-request-id")]);
 
     let rate_limited = Router::new()
         .merge(projects::router())
@@ -106,6 +114,11 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/health", get(health))
         .route("/api/v1/ready", get(ready))
         .with_state(state)
+        .layer(from_fn(inject_request_id_into_json_errors))
+        .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())
+        .layer(tower_http::request_id::SetRequestIdLayer::x_request_id(
+            tower_http::request_id::MakeRequestUuid,
+        ))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
 }

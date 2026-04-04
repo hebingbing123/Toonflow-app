@@ -12,6 +12,7 @@ mod llm;
 mod notify_hub;
 mod projects;
 mod rate_limit;
+mod request_id_mw;
 mod scripts;
 mod skills;
 mod state;

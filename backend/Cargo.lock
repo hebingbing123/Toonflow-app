@@ -2382,6 +2382,7 @@ dependencies = [
  "sqlx",
  "tokio",
  "tokio-util",
+ "tower",
  "tower-http",
  "tower_governor",
  "tracing",
@@ -2423,6 +2424,7 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
