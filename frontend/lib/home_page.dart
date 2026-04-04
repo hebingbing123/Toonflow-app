@@ -25,10 +25,16 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<dynamic>? _wsSub;
 
   String? _healthBody;
+  String? _versionBody;
   String? _meBody;
+  String? _usageSummaryBody;
+  String? _agentMemoryBody;
   String? _error;
   bool _loadingHealth = false;
+  bool _loadingVersion = false;
   bool _loadingMe = false;
+  bool _loadingUsageSummary = false;
+  bool _loadingAgentMemory = false;
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
   bool _loadingWsSkillsRead = false;
@@ -120,6 +126,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _pingVersion() async {
+    setState(() {
+      _loadingVersion = true;
+      _error = null;
+      _versionBody = null;
+    });
+    try {
+      final map = await fetchVersionV1();
+      if (!mounted) return;
+      setState(() {
+        _versionBody = map.toString();
+        _loadingVersion = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingVersion = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingVersion = false;
+      });
+    }
+  }
+
   Future<void> _callMe() async {
     final token = _session?.accessToken;
     if (token == null) return;
@@ -151,6 +185,76 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingMe = false;
+      });
+    }
+  }
+
+  Future<void> _callUsageSummary() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingUsageSummary = true;
+      _error = null;
+      _usageSummaryBody = null;
+    });
+    try {
+      final map = await fetchUsageSummary(token);
+      if (!mounted) return;
+      setState(() {
+        _usageSummaryBody = map.toString();
+        _loadingUsageSummary = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingUsageSummary = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingUsageSummary = false;
+      });
+    }
+  }
+
+  Future<void> _probeAgentMemory() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projects = _projects;
+    if (projects == null || projects.isEmpty) {
+      setState(() => _error = 'Load projects first (agent memory needs a legacy project id).');
+      return;
+    }
+    final legacyId = projects.first.legacyId;
+    setState(() {
+      _loadingAgentMemory = true;
+      _error = null;
+      _agentMemoryBody = null;
+    });
+    try {
+      final rows = await queryAgentMemory(
+        token,
+        projectId: legacyId,
+        agentType: 'scriptAgent',
+      );
+      if (!mounted) return;
+      setState(() {
+        _agentMemoryBody = '${rows.length} message(s) for project $legacyId';
+        _loadingAgentMemory = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingAgentMemory = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingAgentMemory = false;
       });
     }
   }
@@ -193,6 +297,9 @@ class _HomePageState extends State<HomePage> {
       _wsLog.clear();
       _projects = null;
       _jobs = null;
+      _usageSummaryBody = null;
+      _agentMemoryBody = null;
+      _versionBody = null;
       _harnessToolsLine = null;
       _skillsListSummary = null;
     });
@@ -1150,6 +1257,15 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 8),
             Text('health: $_healthBody'),
           ],
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            onPressed: _loadingVersion ? null : _pingVersion,
+            child: Text(_loadingVersion ? '请求中…' : 'GET /api/v1/version'),
+          ),
+          if (_versionBody != null) ...[
+            const SizedBox(height: 8),
+            Text('version: $_versionBody'),
+          ],
           const Divider(height: 32),
           Text(
             'Supabase Auth',
@@ -1200,6 +1316,17 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 8),
                 SelectableText('/me: $_meBody'),
               ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingUsageSummary ? null : _callUsageSummary,
+                child: Text(
+                  _loadingUsageSummary ? '请求中…' : 'GET /api/v1/usage/summary',
+                ),
+              ),
+              if (_usageSummaryBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('usage: $_usageSummaryBody'),
+              ],
               const SizedBox(height: 16),
               Text(
                 'Projects (RLS + Postgres)',
@@ -1228,6 +1355,19 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => _openProjectDetail(p),
                   ),
                 ),
+                const SizedBox(height: 8),
+                FilledButton.tonal(
+                  onPressed: _loadingAgentMemory ? null : _probeAgentMemory,
+                  child: Text(
+                    _loadingAgentMemory
+                        ? '请求中…'
+                        : 'POST /api/v1/agents/memory/query (first project)',
+                  ),
+                ),
+                if (_agentMemoryBody != null) ...[
+                  const SizedBox(height: 8),
+                  SelectableText('agent memory: $_agentMemoryBody'),
+                ],
               ],
               const SizedBox(height: 16),
               Text(

@@ -1,3 +1,4 @@
+use crate::agent_memory;
 use crate::auth::require_claims;
 use crate::billing;
 use crate::error::ApiError;
@@ -152,6 +153,7 @@ pub fn build_router(state: AppState) -> Router {
         .expose_headers([HeaderName::from_static("x-request-id")]);
 
     let rate_limited = Router::new()
+        .merge(agent_memory::router())
         .merge(projects::router())
         .merge(scripts::router())
         .merge(storyboards::router())

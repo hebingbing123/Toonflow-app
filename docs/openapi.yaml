@@ -46,6 +46,8 @@ tags:
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
   - name: usage
     description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
+  - name: agents
+    description: Per-user agent memory (`app_agent_memory`; Postgres + RLS); legacy `/api/agents/getMemory` / `clearMemory` parity
   - name: webhooks
     description: Server-to-server billing webhooks (HMAC); not browser CORS flows
 
@@ -230,6 +232,152 @@ paths:
                 $ref: "#/components/schemas/UsageSummaryResponse"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/agents/memory/query:
+    post:
+      tags: [agents]
+      summary: List agent message memories for a legacy project scope
+      operationId: queryAgentMemoryV1
+      description: |
+        Returns **`message`** rows for **`owner_user_id` + `projectId` + `agentType` + `episodesId`** (omit or null `episodesId` for the non-episode scope).
+        Response shape matches legacy **`/api/agents/getMemory`** `data` array (camelCase, markdown content blocks).
+        Requires an **`app_project`** row owned by the user with **`legacy_id = projectId`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryAgentMemoryBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryHistoryItem"
+        "400":
+          description: Invalid body or unknown `agentType`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No owned project with that legacy id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/agents/memory/clear:
+    post:
+      tags: [agents]
+      summary: Clear agent memories for a legacy project scope
+      operationId: clearAgentMemoryV1
+      description: |
+        Same semantics as legacy **`/api/agents/clearMemory`**: `all` deletes all rows; `message` deletes messages and summaries; `summary` clears summary rows and resets `summarized` on messages.
+        Send **`type`** (legacy) or **`clearType`** with values **`all`**, **`message`**, or **`summary`** (default **`all`**).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClearAgentMemoryBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearAgentMemoryResponse"
+        "400":
+          description: Invalid body or unknown `agentType` / clear kind
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No owned project with that legacy id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/agents/memory/append:
+    post:
+      tags: [agents]
+      summary: Append a single message memory (no auto-summary)
+      operationId: appendAgentMemoryV1
+      description: |
+        Inserts one **`message`** row (`summarized = 0`, optional `embedding` left null). Does **not** run legacy auto-summary compaction (that required LLM + embeddings in Node).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppendAgentMemoryBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppendAgentMemoryResponse"
+        "400":
+          description: Invalid body, empty `content`, or unknown `agentType`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No owned project with that legacy id
           content:
             application/json:
               schema:
@@ -975,6 +1123,132 @@ components:
           type: integer
           format: int64
           description: Rows in `app_usage_event` in the rolling last 7 days
+
+    QueryAgentMemoryBody:
+      type: object
+      required: [projectId, agentType]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+          description: Legacy integer project id (`app_project.legacy_id`)
+        agentType:
+          type: string
+          enum: [scriptAgent, productionAgent]
+        episodesId:
+          type: integer
+          format: int32
+          nullable: true
+
+    ClearAgentMemoryBody:
+      type: object
+      required: [projectId, agentType]
+      additionalProperties: false
+      description: |
+        Optional **`type`** (legacy) or **`clearType`**: `all` (default), `message`, or `summary`.
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        agentType:
+          type: string
+          enum: [scriptAgent, productionAgent]
+        episodesId:
+          type: integer
+          format: int32
+          nullable: true
+        clearType:
+          type: string
+          enum: [all, message, summary]
+          default: all
+        type:
+          type: string
+          enum: [all, message, summary]
+          description: Legacy alias for `clearType` (same values)
+
+    ClearAgentMemoryResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+
+    AppendAgentMemoryBody:
+      type: object
+      required: [projectId, agentType, content]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        agentType:
+          type: string
+          enum: [scriptAgent, productionAgent]
+        episodesId:
+          type: integer
+          format: int32
+          nullable: true
+        role:
+          type: string
+          description: Defaults to `user` when omitted
+        content:
+          type: string
+        name:
+          type: string
+          nullable: true
+        createTime:
+          type: integer
+          format: int64
+          description: Epoch milliseconds; server default is now
+
+    AppendAgentMemoryResponse:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          format: uuid
+
+    MemoryMarkdownBlock:
+      type: object
+      required: [type, status, data]
+      properties:
+        type:
+          type: string
+          enum: [markdown]
+        status:
+          type: string
+          enum: [complete]
+        data:
+          type: string
+
+    MemoryHistoryItem:
+      type: object
+      required: [id, role, status, datetime, content, createTime]
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        name:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [complete]
+        datetime:
+          type: string
+          format: date-time
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryMarkdownBlock"
+        createTime:
+          type: integer
+          format: int64
+          description: Epoch milliseconds (stored as `create_time_ms`)
 
     ProjectRow:
       type: object

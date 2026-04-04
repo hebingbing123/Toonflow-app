@@ -87,6 +87,60 @@ class ProjectDetail {
   }
 }
 
+/// `GET /api/v1/version` — no auth.
+Future<Map<String, dynamic>> fetchVersionV1() async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/version');
+  final res = await http.get(uri).timeout(const Duration(seconds: 5));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
+/// `GET /api/v1/usage/summary` — see `usageSummaryV1`.
+Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/usage/summary');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
+/// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
+Future<List<dynamic>> queryAgentMemory(
+  String accessToken, {
+  required int projectId,
+  required String agentType,
+  int? episodesId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/query');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'agentType': agentType,
+    'episodesId': episodesId,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as List<dynamic>;
+}
+
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
