@@ -6,9 +6,10 @@ info:
     HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
     WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in `docs/websocket-events.md`; optional query `access_token`.
 
-    **Rate limiting (MVP):** Per peer IP on all routes except unversioned `/health`, `/api/v1/health`, and `/api/v1/ready`.
-    Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers when enabled server-side.
-    Tune with env `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
+    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, and `/api/v1/ready`.
+    Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
+    Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers.
+    Tune with `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
 
 servers:
   - url: http://127.0.0.1:8666

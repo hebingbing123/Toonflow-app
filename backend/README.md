@@ -21,7 +21,7 @@ cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选�
 cargo run
 ```
 
-每 **peer IP** 限流（`tower_governor`）；可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、`/api/v1/ready`。
+每 **客户端 IP** 限流（`tower_governor`）；默认按 **连接 peer IP**。仅在**受信**反向代理后可将 **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** 设为使用 `Forwarded` / `X-Forwarded-For` 等（未受信时勿开，易被伪造）。可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、`/api/v1/ready`。
 
 ### 旧库导入（SQLite → `legacy_staging`）
 
