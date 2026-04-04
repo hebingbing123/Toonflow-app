@@ -1,35 +1,41 @@
-# 数据库迁移：Supabase CLI 与 Rust（sqlx）
+# 数据库迁移：统一使用 `supabase/migrations`
 
-## 是不是 Flyway？
+## 单一真源
 
-**不是 Flyway 这个产品**，但工作方式与 **Flyway / Liquibase** 同类：
+所有 **PostgreSQL schema 变更**只维护在：
 
-- **版本化 SQL 文件**，按文件名里的时间戳顺序执行；
-- **真源在仓库里**：本仓库为 `supabase/migrations/*.sql`；
-- **日常开发/联调**以 **Supabase CLI** 为准：`supabase start`、`supabase db reset`、`supabase migration new …`。
+**`supabase/migrations/*.sql`**
 
-## 为什么又有一个 Rust 入口？
+命名与 Flyway 类似：`YYYYMMDDHHMMSS_description.sql`，由 **Supabase CLI** 按顺序应用并记录版本（本地/远程各自一套元数据，但**文件只有这一处**）。
 
-在 **纯 Postgres**（例如 CI 里的临时库、或自管 PG 没有 Supabase 栈）上，没有 GoTrue/`auth` 等对象时，仍希望 **自动验证迁移能跑通**。因此提供：
+**Rust / sqlx** 只连库、跑查询；**不在应用里再跑一套迁移**，避免和 Supabase 账本冲突。
 
-1. **`backend/ci/pg_bootstrap_for_migrations.sql`** — 在裸库上创建最小的 `auth.users`、`authenticated` / `service_role` 角色和 `auth.uid()` 占位，满足现有 RLS / `GRANT … TO service_role` 语句。
-2. **`toonflow-sqlx-migrate` 二进制** — 使用 **sqlx** 自带的迁移表 `_sqlx_migrations`（类似 Flyway 的 `flyway_schema_history`），对 **同一套** `supabase/migrations/` SQL 执行一遍。
+## 本地开发（可以，且推荐）
 
-### 与 Supabase 两套账本
+1. 安装 [Supabase CLI](https://supabase.com/docs/guides/cli) 与 Docker。
+2. 仓库根目录：
+   ```bash
+   supabase start          # 本地全栈（含 Postgres、Auth 等），首次会拉镜像
+   # 或仅数据库：
+   supabase db start
+   ```
+3. 应用迁移（开发中改完 SQL 后常用）：
+   ```bash
+   supabase db reset       # 按当前 migrations 重建本地库（会清数据）
+   ```
+4. 连接串：执行 `supabase status`，把 **DB URL** 配到 Rust 的 `DATABASE_URL`。
 
-| 环境 | 推荐方式 | 版本记录表 |
-|------|----------|------------|
-| Supabase 本地/云端 | `supabase db reset` / Dashboard 迁移 | Supabase 自有元数据 |
-| 裸 Postgres / CI | `psql … bootstrap` + `cargo run --bin toonflow-sqlx-migrate` | `_sqlx_migrations` |
-
-**不要在同一数据库上混用两种工具各跑一遍**（会重复执行同一 SQL）。任选其一作为该库的「唯一执行者」。CI 使用 **空库 + sqlx** 仅做语法/顺序冒烟。
-
-## 命令示例（裸 Postgres）
+新建迁移：
 
 ```bash
-export DATABASE_URL='postgresql://USER:PASS@HOST:5432/DB'
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/ci/pg_bootstrap_for_migrations.sql
-cd backend && cargo run --bin toonflow-sqlx-migrate
+supabase migration new my_change
+# 编辑生成的 supabase/migrations/<timestamp>_my_change.sql
 ```
 
-可选：安装 **sqlx-cli** 后也可用 `sqlx migrate run --source ../supabase/migrations`（与二进制等价思路，见 [sqlx-cli](https://github.com/launchbadge/sqlx)）。
+## CI
+
+PR/推送流水线里用同一套 CLI：`supabase db start` → `supabase db reset --yes --no-seed`，确保 `supabase/migrations` 在**官方本地镜像**上能完整跑通（见根目录 `.github/workflows/ci.yml`）。
+
+## 云端 Supabase
+
+在托管项目上应用迁移：按官方流程 **`supabase link`** 后 **`supabase db push`**（或 Dashboard），仍只使用仓库里的 `supabase/migrations/*.sql`。

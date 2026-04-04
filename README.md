@@ -72,8 +72,8 @@
 
 ### CI 与工程规范
 
-- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — `backend/`：`cargo fmt --check`、`clippy -D warnings`、`test`；**Postgres 迁移冒烟**（空库 + `pg_bootstrap` + `toonflow-sqlx-migrate`）；`frontend/`：`flutter analyze`、`flutter test`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
-- **迁移说明**：[`docs/migration/database-migrations.md`](docs/migration/database-migrations.md)（Supabase CLI 为主；Rust **sqlx** 用于裸 PG/CI）。
+- **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — `backend/`：`cargo fmt --check`、`clippy -D warnings`、`test`；**`supabase/migrations`**：`supabase db start` + `supabase db reset`；`frontend/`：`flutter analyze`、`flutter test`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
+- **迁移说明**：仅维护 [`supabase/migrations/`](supabase/migrations/)，详见 [`docs/migration/database-migrations.md`](docs/migration/database-migrations.md)。
 - **工具链**：根目录 [`rust-toolchain.toml`](rust-toolchain.toml) 锁定 Rust stable + `rustfmt` / `clippy`。
 - **依赖更新**：[`.github/dependabot.yml`](.github/dependabot.yml) 覆盖 Cargo、pub、GitHub Actions。
 

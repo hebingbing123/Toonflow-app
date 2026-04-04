@@ -31,37 +31,18 @@ jobs:
       - run: cargo clippy -- -D warnings
       - run: cargo test
 
-  sqlx-migrations:
-    name: Postgres migrations (sqlx smoke)
+  supabase-migrations:
+    name: Supabase migrations (local DB)
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: toonflow_mig_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 3s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/toonflow_mig_test
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: supabase/setup-cli@v1
         with:
-          workspaces: backend
-      - name: Install psql client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Bootstrap minimal auth schema (bare Postgres)
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/ci/pg_bootstrap_for_migrations.sql
-      - name: Run sqlx migrations against supabase/migrations
-        working-directory: backend
-        run: cargo run --bin toonflow-sqlx-migrate
+          version: latest
+      - name: Start local Postgres (Supabase CLI) and apply supabase/migrations
+        run: |
+          supabase db start
+          supabase db reset --yes --no-seed
 
   flutter-frontend:
     name: Flutter (frontend/)
