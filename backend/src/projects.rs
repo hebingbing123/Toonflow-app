@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, State},
-    http::HeaderMap,
+    http::{HeaderMap, StatusCode},
     routing::get,
     Json, Router,
 };
@@ -74,7 +74,9 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/projects", get(list_projects))
         .route(
             "/api/v1/projects/legacy/{legacy_id}",
-            get(get_project_by_legacy).patch(patch_project_by_legacy),
+            get(get_project_by_legacy)
+                .patch(patch_project_by_legacy)
+                .delete(delete_project_by_legacy),
         )
 }
 
@@ -245,6 +247,61 @@ async fn patch_project_by_legacy(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(row))
+}
+
+async fn delete_project_by_legacy(
+    State(state): State<AppState>,
+    Path(legacy_id): Path<i32>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND legacy_project_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(legacy_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let res = sqlx::query(
+        r#"
+        DELETE FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(uid)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        tx.rollback()
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        return Err(ApiError::NotFound);
+    }
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 fn merge_text_patch(current: &Option<String>, patch: FieldPatch<String>) -> Option<String> {

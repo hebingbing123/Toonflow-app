@@ -515,6 +515,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [projects]
+      summary: Delete project by legacy id
+      operationId: deleteProjectByLegacyIdV1
+      description: |
+        Deletes the row in **`app_project`** for the current user. Child **`app_script`** / **`app_storyboard`** rows cascade (FK **`ON DELETE CASCADE`**).
+        Also deletes **`app_agent_memory`** for the same **`legacy_project_id`** and user (not FK-linked to the project).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that legacy id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/scripts/legacy/{legacy_id}:
     get:

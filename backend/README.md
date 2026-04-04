@@ -35,6 +35,8 @@ cargo run
 
 填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script`。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
 
+项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** 随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
+
 ### LLM（WebSocket `agent.chat.send`）
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。
