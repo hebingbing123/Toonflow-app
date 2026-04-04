@@ -33,6 +33,12 @@ struct HealthResponse {
 }
 
 #[derive(Serialize)]
+struct VersionResponse {
+    service: &'static str,
+    version: &'static str,
+}
+
+#[derive(Serialize)]
 struct ReadyResponse {
     status: &'static str,
     database: &'static str,
@@ -62,6 +68,13 @@ async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok",
         service: "toonflow-server",
+    })
+}
+
+async fn version() -> Json<VersionResponse> {
+    Json(VersionResponse {
+        service: "toonflow-server",
+        version: env!("CARGO_PKG_VERSION"),
     })
 }
 
@@ -154,6 +167,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(billing::router())
         .route("/health", get(health))
         .route("/api/v1/health", get(health))
+        .route("/api/v1/version", get(version))
         .route("/api/v1/ready", get(ready))
         .with_state(state)
         .layer(from_fn(inject_request_id_into_json_errors))

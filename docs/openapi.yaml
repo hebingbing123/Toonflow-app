@@ -13,7 +13,7 @@ info:
 
     **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — verify **`X-Toonflow-Signature: sha256=<hex>`** as HMAC-SHA256(raw body, `BILLING_WEBHOOK_SECRET`). Body must be JSON with string **`id`** (dedupe key). Returns **`received`** + **`duplicate`** when replayed. **Not** JWT-authenticated; configure secret in production. **Not** in the per-IP rate-limit bucket (same as `/health`).
 
-    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, `/api/v1/ready`, and **`POST /api/v1/webhooks/billing`**.
+    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, `/api/v1/version`, `/api/v1/ready`, and **`POST /api/v1/webhooks/billing`**.
     Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
     Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers.
     Tune with `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
@@ -75,6 +75,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+
+  /api/v1/version:
+    get:
+      tags: [system]
+      summary: Server semantic version (from Cargo package)
+      operationId: versionV1
+      description: |
+        Public, no auth. Aligns with legacy **`/api/other/getVersion`** use cases for client compatibility checks.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionResponse"
 
   /api/v1/ready:
     get:
@@ -902,6 +917,17 @@ components:
         service:
           type: string
           example: toonflow-server
+
+    VersionResponse:
+      type: object
+      required: [service, version]
+      properties:
+        service:
+          type: string
+          example: toonflow-server
+        version:
+          type: string
+          description: Rust crate / binary version (`CARGO_PKG_VERSION`)
 
     ReadyResponse:
       type: object
