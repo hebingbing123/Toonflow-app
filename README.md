@@ -68,7 +68,8 @@
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 | **`docs/migration/`** | 旧栈 SQLite → Supabase PG 迁移说明（[`legacy-sqlite-to-supabase.md`](docs/migration/legacy-sqlite-to-supabase.md)） |
 
-> 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。
+> 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。  
+> **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；勿反复询问「下一步」。
 
 ### CI 与工程规范
 
