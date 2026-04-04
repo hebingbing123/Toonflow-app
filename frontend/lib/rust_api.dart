@@ -752,6 +752,22 @@ Future<List<JobRow>> fetchJobs(String accessToken) async {
       .toList();
 }
 
+/// `GET /api/v1/jobs/kinds` — distinct kinds for the caller. See `listJobKindsV1`.
+Future<List<String>> fetchJobKinds(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/kinds');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list.map((e) => e as String).toList();
+}
+
 /// `GET /api/v1/jobs/{id}` — job must belong to the caller. See `getJobV1`.
 Future<JobRow> fetchJob(String accessToken, String jobId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs/$jobId');

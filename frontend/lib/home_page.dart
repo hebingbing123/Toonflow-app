@@ -49,10 +49,12 @@ class _HomePageState extends State<HomePage> {
   List<ProjectRow>? _projects;
 
   bool _loadingJobs = false;
+  bool _loadingJobKinds = false;
   bool _creatingJob = false;
   String? _cancellingJobId;
   String? _retryingJobId;
   List<JobRow>? _jobs;
+  String? _jobKindsLine;
 
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
@@ -531,6 +533,36 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingJobs = false;
+      });
+    }
+  }
+
+  Future<void> _loadJobKinds() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingJobKinds = true;
+      _error = null;
+      _jobKindsLine = null;
+    });
+    try {
+      final kinds = await fetchJobKinds(token);
+      if (!mounted) return;
+      setState(() {
+        _jobKindsLine = kinds.isEmpty ? '(empty)' : kinds.join(', ');
+        _loadingJobKinds = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobKinds = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingJobKinds = false;
       });
     }
   }
@@ -1908,6 +1940,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed: _loadingJobKinds ? null : _loadJobKinds,
+                    child: Text(
+                      _loadingJobKinds ? '…' : 'GET /api/v1/jobs/kinds',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: _creatingJob ? null : _createProbeJob,
                     child: Text(
                       _creatingJob ? '…' : 'POST job (flutter.probe)',
@@ -1915,6 +1953,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+              if (_jobKindsLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('job kinds: $_jobKindsLine'),
+              ],
               if (_jobs != null) ...[
                 const SizedBox(height: 8),
                 Text(

@@ -21,7 +21,7 @@ todos:
     content: Supabase Auth：v1 无 BFF；supabase_flutter + Bearer 调 Rust；环境切换；HTTPS+PKCE；见 §4.2
     status: completed
   - id: flutter-shell
-    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/探针创建，与 **skills / harness/tools** 只读探针、**WS** `harness.tool.invoke`（**echo**、**skills.read**，与 Skill path 联动）；调试区含 **`/api/v1/version`**、**`/api/v1/usage/summary`**、**`GET /api/v1/models`** / **`models/detail`**（静态目录）、**`agents/memory/query`**（首项目 legacy id）；**`POST /api/v1/projects`** 空项目探针；项目详情对话框展示 **`GET …/projects/legacy/{id}/stats`** 并在增删剧本后尝试刷新；可 **`POST 空剧本`**、**`DELETE`** 项目；剧本编辑对话框可 **`DELETE`** 剧本；分镜列表对话框可 **`POST 空分镜`**；分镜编辑对话框可 **`DELETE`** 分镜
+    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/**`GET /api/v1/jobs/kinds`**/探针创建，与 **skills / harness/tools** 只读探针、**WS** `harness.tool.invoke`（**echo**、**skills.read**，与 Skill path 联动）；调试区含 **`/api/v1/version`**、**`/api/v1/usage/summary`**、**`GET /api/v1/models`** / **`models/detail`**（静态目录）、**`agents/memory/query`**（首项目 legacy id）；**`POST /api/v1/projects`** 空项目探针；项目详情对话框展示 **`GET …/projects/legacy/{id}/stats`** 并在增删剧本后尝试刷新；可 **`POST 空剧本`**、**`DELETE`** 项目；剧本编辑对话框可 **`DELETE`** 剧本；分镜列表对话框可 **`POST 空分镜`**；分镜编辑对话框可 **`DELETE`** 分镜
     status: completed
   - id: decommission-electron
     content: 功能 parity 与灰度后下线 Electron + Node 服务端路径
@@ -39,7 +39,7 @@ todos:
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段；**进度**：`app_user_profile`；计费 webhook upsert；**`app_usage_event`** 追加 + **`GET /api/v1/usage/summary`**（含近 7 天 **`event_type`** 分组 **`event_counts_last_7d`**）；**仍缺**配额硬执行（与 plan_tier 联动）、订阅状态机、CNY/USD 收单商适配层
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**queued/running 取消**、`failed` **重试**、`Idempotency-Key`；**429** 与 billing **除外**（当前 HTTP 限流为**进程内** `tower_governor`，**与 Redis 无关**）；**计费 webhook**：HMAC、去重、profile upsert；**仍缺**提供商原生验签。**刻意后置**：**Redis/云队列**仅用于**超高吞吐任务扇出**（非限流）；**PG 队列已可支撑多 worker**。**限流/分布式配额聚合**不阻塞功能重构，可等产品化阶段再收紧
+    content: 长时生成：**进度**：`app_generation_job` + REST + worker（**`SKIP LOCKED`** + **`WORKER_ID`→`claimed_by`**）+ **WS**；**`GET /api/v1/jobs/kinds`**（用户维度 **`kind`** 去重，MVP 替代旧 **`o_tasks.taskClass`** 类探针）；**queued/running 取消**、`failed` **重试**、`Idempotency-Key`；**429** 与 billing **除外**（当前 HTTP 限流为**进程内** `tower_governor`，**与 Redis 无关**）；**计费 webhook**：HMAC、去重、profile upsert；**仍缺**提供商原生验签。**刻意后置**：**Redis/云队列**仅用于**超高吞吐任务扇出**（非限流）；**PG 队列已可支撑多 worker**。**限流/分布式配额聚合**不阻塞功能重构，可等产品化阶段再收紧
     status: pending
 isProject: false
 ---

@@ -50,6 +50,7 @@ pub fn envelope_generation_job_updated(row: &JobRow) -> String {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/jobs/kinds", get(list_job_kinds))
         .route("/api/v1/jobs", get(list_jobs).post(create_job))
         .route("/api/v1/jobs/{id}", get(get_job))
         .route("/api/v1/jobs/{id}/cancel", post(cancel_job))
@@ -70,6 +71,31 @@ fn is_unique_violation(e: &sqlx::Error) -> bool {
         sqlx::Error::Database(db) => db.code().map(|c| c == "23505").unwrap_or(false),
         _ => false,
     }
+}
+
+/// Distinct `kind` values for the caller (rough analogue of legacy `getTaskCategories` over `o_tasks.taskClass`).
+async fn list_job_kinds(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<String>>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let kinds: Vec<String> = sqlx::query_scalar(
+        r#"
+        SELECT DISTINCT kind
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+        ORDER BY kind ASC
+        "#,
+    )
+    .bind(uid)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(Json(kinds))
 }
 
 async fn list_jobs(
