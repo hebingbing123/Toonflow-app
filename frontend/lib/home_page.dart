@@ -318,10 +318,11 @@ class _HomePageState extends State<HomePage> {
       _usageSummaryBody = null;
     });
     try {
-      final map = await fetchUsageSummary(token);
+      final u = await fetchUsageSummary(token);
       if (!mounted) return;
       setState(() {
-        _usageSummaryBody = map.toString();
+        _usageSummaryBody =
+            'events_last_24h=${u.eventsLast24h} · events_last_7d=${u.eventsLast7d} · event_counts_last_7d=${u.eventCountsLast7d}';
         _loadingUsageSummary = false;
       });
     } on RustApiException catch (e) {

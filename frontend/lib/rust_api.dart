@@ -252,8 +252,38 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
   return MeResponse.fromJson(map);
 }
 
+/// `GET /api/v1/usage/summary` — OpenAPI `UsageSummaryResponse`.
+class UsageSummaryResponse {
+  const UsageSummaryResponse({
+    required this.eventsLast24h,
+    required this.eventsLast7d,
+    required this.eventCountsLast7d,
+  });
+
+  final int eventsLast24h;
+  final int eventsLast7d;
+  final Map<String, int> eventCountsLast7d;
+
+  factory UsageSummaryResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['event_counts_last_7d'];
+    final counts = <String, int>{};
+    if (raw is Map) {
+      raw.forEach((k, v) {
+        if (k is String && v is num) {
+          counts[k] = v.toInt();
+        }
+      });
+    }
+    return UsageSummaryResponse(
+      eventsLast24h: (json['events_last_24h'] as num).toInt(),
+      eventsLast7d: (json['events_last_7d'] as num).toInt(),
+      eventCountsLast7d: counts,
+    );
+  }
+}
+
 /// `GET /api/v1/usage/summary` — see `usageSummaryV1`.
-Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
+Future<UsageSummaryResponse> fetchUsageSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/usage/summary');
   final res = await http
       .get(
@@ -264,7 +294,8 @@ Future<Map<String, dynamic>> fetchUsageSummary(String accessToken) async {
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return jsonDecode(res.body) as Map<String, dynamic>;
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return UsageSummaryResponse.fromJson(map);
 }
 
 /// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.
