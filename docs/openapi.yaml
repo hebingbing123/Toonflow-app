@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: Toonflow API
+  version: 1.0.0
+  description: |
+    HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
+    WebSocket real-time channel is documented separately in `docs/websocket-events.md` (`/api/v1/ws`).
+
+servers:
+  - url: http://127.0.0.1:8666
+    description: Local dev (default `PORT`; override with env)
+
+tags:
+  - name: system
+    description: Health and probes
+
+paths:
+  /health:
+    get:
+      tags: [system]
+      summary: Liveness (unversioned)
+      operationId: healthRoot
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/v1/health:
+    get:
+      tags: [system]
+      summary: Liveness (versioned)
+      operationId: healthV1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Supabase-issued access token (`Authorization: Bearer <jwt>`).
+        Rust validates signature/claims per Supabase project settings (see architecture plan §4.2).
+
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, service]
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: toonflow-server
+
+    ErrorBody:
+      type: object
+      required: [code, message]
+      description: |
+        Stable error envelope for `/api/v1/*`. Clients should log `request_id` for support.
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code (snake_case)
+          example: unauthorized
+        message:
+          type: string
+          description: Human-readable summary
+        request_id:
+          type: string
+          format: uuid
+          description: Correlates with server logs / tracing
+        details:
+          type: object
+          additionalProperties: true
+          description: Optional structured detail (validation fields, etc.)
+
+    RateLimitError:
+      allOf:
+        - $ref: "#/components/schemas/ErrorBody"
+        - type: object
+          properties:
+            code:
+              const: rate_limited
+            retry_after_ms:
+              type: integer
+              description: Suggested backoff in milliseconds (mirror `Retry-After` when present)

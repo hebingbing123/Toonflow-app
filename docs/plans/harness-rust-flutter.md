@@ -7,7 +7,7 @@ todos:
     status: pending
   - id: api-contract
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
-    status: pending
+    status: completed
   - id: harness-rust-core
     content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案
     status: pending
@@ -31,10 +31,10 @@ todos:
     status: pending
   - id: git-branch
     content: 实施时第一步：从当前 main/master 新建并 checkout 重构分支（如 refactor/harness-rust-flutter），再写任何实现；整次重构在此分支上完成，合并前 PR+CI
-    status: pending
+    status: completed
   - id: monorepo-layout
     content: 单仓 backend（Rust）+ frontend（Flutter）；根 README 说明目录；建 docs/plans/ 并纳入本计划快照（§7.2）；清理误建目录；见 §11
-    status: pending
+    status: completed
   - id: saas-product-spec
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段
     status: pending
