@@ -23,6 +23,11 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Read one Markdown skill under backend/data/skills; WS/args: { \"path\": \"relative/path.md\" } (same rules as GET /api/v1/skills/content).",
     },
+    HarnessToolInfo {
+        name: "wasm.probe",
+        description:
+            "Runs an embedded WebAssembly module via the wasmi interpreter (sandbox MVP); returns JSON like { \"ok\": true, \"value\": 42 }.",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).

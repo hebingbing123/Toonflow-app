@@ -79,7 +79,8 @@ cargo run
 WebSocket（JSON 信封见 `docs/websocket-events.md`）：
 
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
-- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；目录见 `GET /api/v1/harness/tools`
+- 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发上限见环境变量 **`HARNESS_ISOLATE_MAX_CONCURRENT`**，默认 **4**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；目录见 `GET /api/v1/harness/tools`
+- 已 attach **`agent.script.attach` / `agent.production.attach`** 且配置 LLM 密钥时，可发 **`harness.agent.run`**（`payload.content`，可选 **`max_tool_rounds`** 默认 8、限制 1–32）：服务端多轮 OpenAI **tools** 调用与 Harness 工具闭环，最终仍发 **`chat.message.*`** 文本信封
 
 技能 Markdown（只读，Bearer JWT）：
 

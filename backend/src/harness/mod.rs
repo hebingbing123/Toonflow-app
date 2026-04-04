@@ -6,6 +6,7 @@ pub mod isolate;
 pub mod observe;
 pub mod permissions;
 pub mod tools;
+pub(crate) mod wasm_runtime;
 
 use uuid::Uuid;
 

@@ -1,13 +1,27 @@
 //! Process-isolated Harness tools: spawn the same binary with a hidden subcommand so allowlisted
 //! tool logic runs outside the API process (address-space boundary), as a vm2-style replacement path.
+//!
+//! Concurrency is capped by **`HARNESS_ISOLATE_MAX_CONCURRENT`** (default **4**) so many parallel
+//! `isolated.echo` calls cannot exhaust process/file descriptors.
 
+use std::sync::LazyLock;
 use std::time::Duration;
 
 use serde_json::Value;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
+use tokio::sync::Semaphore;
 
 use super::invoke::InvokeError;
+
+static ISOLATE_SLOTS: LazyLock<Semaphore> = LazyLock::new(|| {
+    let n = std::env::var("HARNESS_ISOLATE_MAX_CONCURRENT")
+        .ok()
+        .and_then(|s| s.parse::<usize>().ok())
+        .filter(|&n| n > 0)
+        .unwrap_or(4);
+    Semaphore::new(n)
+});
 
 /// Child entry: read JSON from stdin, write the same JSON to stdout (echo). Used by `isolated.echo`.
 pub fn stdio_echo_child() -> ! {
@@ -36,6 +50,11 @@ pub fn stdio_echo_child() -> ! {
 
 /// Run a trivial JSON echo in a child process (same semantics as `echo`, but out-of-process).
 pub async fn isolated_echo(arguments: &Value) -> Result<Value, InvokeError> {
+    let _permit = ISOLATE_SLOTS
+        .acquire()
+        .await
+        .map_err(|_| InvokeError::IsolationFailed("isolate pool shut down".into()))?;
+
     let exe = std::env::current_exe()
         .map_err(|e| InvokeError::IsolationFailed(format!("current_exe: {e}")))?;
     let payload = serde_json::to_string(arguments)

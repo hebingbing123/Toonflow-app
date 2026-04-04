@@ -55,7 +55,53 @@ Emitted when invocation succeeds.
 | Field | Notes |
 |-------|--------|
 | `payload.name` | Tool that ran |
-| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }` like the REST skill body) |
+| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }` like the REST skill body; `wasm.probe`: `{ ok, value }` from embedded WASM via **wasmi**) |
+
+### `harness.agent.run` (client → server)
+
+Multi-round **OpenAI tool calling** loop: the model may invoke Harness catalog tools; the server runs them (same rules as `harness.tool.invoke`) and feeds results back until the model returns a final assistant message.
+
+Requires **`OPENAI_API_KEY` / `LLM_API_KEY`** (same as `agent.chat.send`). Requires an authenticated session and **an attached channel** (`agent.script.attach` or `agent.production.attach`) before use.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `type` | const `harness.agent.run` | yes |
+| `schema_version` | `1` | yes |
+| `payload.content` | string | yes (user goal / instruction) |
+| `payload.max_tool_rounds` | integer | no (default **8**, clamped **1–32**; each “round” is one chat completion that may issue tool calls) |
+
+Shares **`agent.run.cancel`** with streaming chat: cancel aborts an in-flight `harness.agent.run`.
+
+### `harness.agent.started` (server → client)
+
+| Field | Notes |
+|-------|-------|
+| `payload.max_tool_rounds` | Configured cap |
+
+### `harness.agent.tool_call` (server → client)
+
+Emitted before each tool execution during the loop.
+
+| Field | Notes |
+|-------|-------|
+| `payload.call_id` | OpenAI `tool_call` id |
+| `payload.name` | Tool name |
+| `payload.arguments` | Parsed JSON arguments (or a fallback object if JSON parse fails) |
+
+### `harness.agent.finished` (server → client)
+
+After the model returns a final text response (no tool calls in that completion).
+
+| Field | Notes |
+|-------|-------|
+| `payload.tool_rounds_executed` | Completions that executed at least one tool call |
+| `payload.finish_reason` | e.g. `stop` |
+
+### `harness.agent.cancelled` (server → client)
+
+Emitted when the run stops due to **`agent.run.cancel`** (cancel token).
+
+The final assistant text uses the same **`chat.message.*` / `chat.content.*`** sequence as a non-streaming single block (one `chat.content.updated` with full text).
 
 ### `generation.job.updated` (server → client)
 
@@ -102,7 +148,8 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
-| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content` |
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content`; `wasm.probe` runs embedded WASM (wasmi) |
+| (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
 | `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; legacy used ack callback — use `request_id` + optional `session.ack` server message |
@@ -126,7 +173,7 @@ Content block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdow
 |--------|-----------|
 | `error.occurred` | `code` (string), `message` (string), optional `request_id` inside **`payload`** (and the same id may appear on the **envelope** root when the client sent one), optional `details` |
 
-Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`not_found`** (skill path missing), **`skill_unavailable`** (skills dir missing on server), **`unsupported_schema`**.
+Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`not_found`** (skill path missing), **`skill_unavailable`** (skills dir missing on server), **`isolation_failed`** (child process tool error), **`wasm_failed`** (WASM interpreter error for `wasm.probe`), **`unsupported_schema`**.
 
 Align `code` / `message` semantics with `docs/openapi.yaml` `ErrorBody` where possible.
 

@@ -442,6 +442,89 @@ async fn dispatch_client_text(
                 }
             }
         }
+        "harness.agent.run" => {
+            if sess.channel.is_none() {
+                let _ = send_error(
+                    socket,
+                    "invalid_state",
+                    "attach a channel before harness.agent.run",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            }
+            let Ok(p) = serde_json::from_value::<HarnessAgentRunPayload>(env.payload.clone())
+            else {
+                let _ = send_error(
+                    socket,
+                    "invalid_payload",
+                    "need content string; optional max_tool_rounds (usize, default 8)",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            };
+            let content = p.content.trim();
+            if content.is_empty() {
+                let _ = send_error(
+                    socket,
+                    "invalid_payload",
+                    "content must be non-empty",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            }
+
+            let Some(cfg) = state.llm.clone() else {
+                let _ = send_error(
+                    socket,
+                    "llm_not_configured",
+                    "set OPENAI_API_KEY or LLM_API_KEY",
+                    env.request_id.as_deref(),
+                )
+                .await;
+                return;
+            };
+
+            observe::agent_llm_turn_requested(sess.user_id, content.len());
+
+            sess.llm_cancel.cancel();
+            sess.llm_cancel = CancellationToken::new();
+            let cancel = sess.llm_cancel.clone();
+
+            let assistant_name = match sess.channel {
+                Some(WsChannel::Script) => "统筹",
+                Some(WsChannel::Production) => "视频策划",
+                None => unreachable!(),
+            };
+
+            let client = state.http_client.clone();
+            let owned_content = content.to_string();
+            let max_rounds = p.max_tool_rounds.clamp(1, 32);
+            let req_id = env.request_id.clone();
+            let tx = out_tx.clone();
+            let user_id = sess.user_id;
+
+            tokio::spawn(async move {
+                let ctx = HarnessContext::new(user_id);
+                if let Err(e) = llm::harness_agent_run(
+                    &cfg,
+                    &client,
+                    &owned_content,
+                    assistant_name,
+                    &ctx,
+                    max_rounds,
+                    cancel,
+                    tx.clone(),
+                    req_id.as_deref(),
+                )
+                .await
+                {
+                    let _ = tx.send(error_occurred_json("llm_error", &e, req_id.as_deref()));
+                }
+            });
+        }
         "agent.chat.send" => {
             if sess.channel.is_none() {
                 let _ = send_error(
@@ -553,6 +636,17 @@ struct AttachProductionPayload {
 #[derive(Debug, Deserialize)]
 struct ChatSendPayload {
     content: String,
+}
+
+fn default_max_tool_rounds() -> usize {
+    8
+}
+
+#[derive(Debug, Deserialize)]
+struct HarnessAgentRunPayload {
+    content: String,
+    #[serde(default = "default_max_tool_rounds")]
+    max_tool_rounds: usize,
 }
 
 #[derive(Debug, Deserialize)]

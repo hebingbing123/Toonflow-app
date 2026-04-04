@@ -22,6 +22,8 @@ pub enum InvokeError {
     SkillUnavailable,
     /// Child process / IPC failure for process-isolated tools (`isolated.echo`).
     IsolationFailed(String),
+    /// WASM interpreter failure (`wasm.probe`).
+    WasmFailed(String),
 }
 
 impl From<SkillReadError> for InvokeError {
@@ -49,6 +51,7 @@ impl InvokeError {
             InvokeError::SkillBadRequest(_) => "invalid_payload",
             InvokeError::SkillUnavailable => "skill_unavailable",
             InvokeError::IsolationFailed(_) => "isolation_failed",
+            InvokeError::WasmFailed(_) => "wasm_failed",
         }
     }
 
@@ -64,6 +67,7 @@ impl InvokeError {
                 "skills directory is not available on this server".into()
             }
             InvokeError::IsolationFailed(m) => m.clone(),
+            InvokeError::WasmFailed(m) => m.clone(),
         }
     }
 }
@@ -75,6 +79,7 @@ fn dispatch_in_process(
 ) -> Result<Value, InvokeError> {
     match name {
         "echo" => Ok(arguments.clone()),
+        "wasm.probe" => super::wasm_runtime::invoke_probe().map_err(InvokeError::WasmFailed),
         "skills.read" => {
             let path = arguments
                 .get("path")
@@ -129,6 +134,12 @@ pub async fn invoke_tool_async(
 
     match name {
         "isolated.echo" => super::isolate::isolated_echo(arguments).await,
+        "wasm.probe" => {
+            let r = tokio::task::spawn_blocking(super::wasm_runtime::invoke_probe)
+                .await
+                .map_err(|e| InvokeError::WasmFailed(format!("join: {e}")))?;
+            r.map_err(InvokeError::WasmFailed)
+        }
         _ => dispatch_in_process(ctx, name, arguments),
     }
 }
@@ -177,5 +188,11 @@ mod tests {
         );
         let content = out.get("content").and_then(Value::as_str).unwrap();
         assert!(!content.is_empty());
+    }
+
+    #[test]
+    fn wasm_probe_returns_42() {
+        let out = invoke_tool(&ctx(), "wasm.probe", &json!({})).unwrap();
+        assert_eq!(out.get("value").and_then(Value::as_i64), Some(42));
     }
 }
