@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<dynamic>? _wsSub;
 
   String? _healthBody;
+  String? _healthRootBody;
   String? _versionBody;
   String? _readyBody;
   String? _meBody;
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   String? _agentMemoryBody;
   String? _error;
   bool _loadingHealth = false;
+  bool _loadingHealthRoot = false;
   bool _loadingVersion = false;
   bool _loadingReady = false;
   bool _loadingMe = false;
@@ -147,6 +149,35 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingHealth = false;
+      });
+    }
+  }
+
+  Future<void> _pingHealthRoot() async {
+    setState(() {
+      _loadingHealthRoot = true;
+      _error = null;
+      _healthRootBody = null;
+    });
+    final uri = Uri.parse('$kApiBaseUrl/health');
+    try {
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
+      if (res.statusCode == 200) {
+        final map = jsonDecode(res.body) as Map<String, dynamic>;
+        setState(() {
+          _healthRootBody = map.toString();
+          _loadingHealthRoot = false;
+        });
+      } else {
+        setState(() {
+          _error = 'GET /health HTTP ${res.statusCode}';
+          _loadingHealthRoot = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loadingHealthRoot = false;
       });
     }
   }
@@ -2128,13 +2159,29 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text('API: $kApiBaseUrl', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: _loadingHealth ? null : _pingHealth,
-            child: Text(_loadingHealth ? '请求中…' : 'GET /api/v1/health'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton(
+                onPressed: _loadingHealth ? null : _pingHealth,
+                child: Text(_loadingHealth ? '请求中…' : 'GET /api/v1/health'),
+              ),
+              FilledButton.tonal(
+                onPressed: _loadingHealthRoot ? null : _pingHealthRoot,
+                child: Text(
+                  _loadingHealthRoot ? '请求中…' : 'GET /health',
+                ),
+              ),
+            ],
           ),
           if (_healthBody != null) ...[
             const SizedBox(height: 8),
-            Text('health: $_healthBody'),
+            Text('health (v1): $_healthBody'),
+          ],
+          if (_healthRootBody != null) ...[
+            const SizedBox(height: 8),
+            Text('health (root): $_healthRootBody'),
           ],
           const SizedBox(height: 12),
           FilledButton.tonal(
