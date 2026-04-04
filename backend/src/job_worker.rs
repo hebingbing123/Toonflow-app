@@ -81,6 +81,7 @@ async fn process_one_job(
             .await?;
 
             if let Some(final_row) = updated {
+                observe::generation_job(owner, id, "succeeded");
                 if let Err(e) =
                     usage::record_generation_job_succeeded(pool, owner, id, &final_row.kind).await
                 {
@@ -96,6 +97,7 @@ async fn process_one_job(
             // If None: row was cancelled; cancel_job already sent WS.
         }
         Err(JobRunError::Cancelled) => {
+            observe::generation_job(owner, id, "cancelled");
             // Status is already `cancelled`; client was notified by cancel endpoint.
         }
         Err(JobRunError::Failed(msg)) => {
@@ -113,6 +115,7 @@ async fn process_one_job(
             .await?;
 
             if let Some(final_row) = updated {
+                observe::generation_job(owner, id, "failed");
                 let text = envelope_generation_job_updated(&final_row);
                 state.notify.broadcast_to_user(owner, text).await;
             }

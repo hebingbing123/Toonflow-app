@@ -5,7 +5,7 @@
 //! | [`tools`] | Static catalog (`HarnessToolInfo`); source of truth for allowlists and OpenAPI/WS docs. |
 //! | [`http`] | REST under `/api/v1/harness/*` (e.g. tool listing). |
 //! | [`wire`] | Deserialize structs for `harness.*` WebSocket payloads (`schema_version` 1). |
-//! | [`ws_tool`] / [`ws_agent`] | WebSocket branches for `harness.tool.invoke` and `harness.agent.run` (keeps the top-level `ws` module thin). |
+//! | [`ws_tool`] / [`ws_agent`] / [`ws_chat`] | WebSocket branches for `harness.tool.invoke`, `harness.agent.run`, and `agent.chat.send` (keeps the top-level `ws` module thin). |
 //! | [`invoke`] | Execute catalog tools (sync + async); gated by [`permissions`]. |
 //! | [`observe`] | `tracing` hooks for WS frames, tool runs, HTTP catalog, memory REST, generation jobs. |
 //! | [`isolate`] / [`wasm_runtime`] | Hard isolation backends (subprocess, embedded WASM). |
@@ -21,6 +21,7 @@ pub mod tools;
 pub(crate) mod wasm_runtime;
 pub mod wire;
 pub(crate) mod ws_agent;
+pub(crate) mod ws_chat;
 pub(crate) mod ws_tool;
 
 use uuid::Uuid;

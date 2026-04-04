@@ -1,9 +1,9 @@
 use crate::auth::verify_supabase_user_jwt;
 use crate::harness::wire::HarnessAgentRunPayload;
 use crate::harness::ws_agent::{self, HarnessAgentWsParams};
+use crate::harness::ws_chat::{self, ChatTurnWsParams};
 use crate::harness::ws_tool;
 use crate::harness::{observe, permissions, HarnessContext};
-use crate::llm;
 use crate::state::AppState;
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
@@ -505,8 +505,6 @@ async fn dispatch_client_text(
                 return;
             };
 
-            observe::agent_llm_turn_requested(sess.user_id, p.content.len());
-
             sess.llm_cancel.cancel();
             sess.llm_cancel = CancellationToken::new();
             let cancel = sess.llm_cancel.clone();
@@ -517,25 +515,15 @@ async fn dispatch_client_text(
                 None => unreachable!(),
             };
 
-            let client = state.http_client.clone();
-            let content = p.content.clone();
-            let req_id = env.request_id.clone();
-            let tx = out_tx.clone();
-
-            tokio::spawn(async move {
-                if let Err(e) = llm::stream_chat_turn(
-                    &cfg,
-                    &client,
-                    &content,
-                    assistant_name,
-                    cancel,
-                    tx.clone(),
-                    req_id.as_deref(),
-                )
-                .await
-                {
-                    let _ = tx.send(error_occurred_json("llm_error", &e, req_id.as_deref()));
-                }
+            ws_chat::spawn_stream_chat_turn(ChatTurnWsParams {
+                cfg,
+                client: state.http_client.clone(),
+                content: p.content.clone(),
+                assistant_name,
+                user_id: sess.user_id,
+                cancel,
+                out_tx: out_tx.clone(),
+                request_id: env.request_id.clone(),
             });
         }
         "agent.run.cancel" => {
