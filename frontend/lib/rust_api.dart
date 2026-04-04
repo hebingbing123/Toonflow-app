@@ -219,6 +219,143 @@ Future<ScriptRow> updateScriptByLegacyId(
   return ScriptRow.fromJson(map);
 }
 
+class StoryboardRow {
+  const StoryboardRow({
+    required this.id,
+    required this.scriptId,
+    required this.legacyId,
+    this.legacyScriptId,
+    this.prompt,
+    this.filePath,
+    this.duration,
+    this.state,
+    this.trackId,
+    this.reason,
+    this.track,
+    this.videoDesc,
+    this.shouldGenerateImage,
+    this.legacyProjectId,
+    this.flowId,
+    this.sbIndex,
+    this.createTimeMs,
+  });
+
+  final String id;
+  final String scriptId;
+  final int legacyId;
+  final int? legacyScriptId;
+  final String? prompt;
+  final String? filePath;
+  final String? duration;
+  final String? state;
+  final int? trackId;
+  final String? reason;
+  final String? track;
+  final String? videoDesc;
+  final int? shouldGenerateImage;
+  final int? legacyProjectId;
+  final int? flowId;
+  final int? sbIndex;
+  final int? createTimeMs;
+
+  factory StoryboardRow.fromJson(Map<String, dynamic> json) {
+    int? ni(String k) => json[k] == null ? null : (json[k] as num).toInt();
+    return StoryboardRow(
+      id: json['id'] as String,
+      scriptId: json['script_id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyScriptId: ni('legacy_script_id'),
+      prompt: json['prompt'] as String?,
+      filePath: json['file_path'] as String?,
+      duration: json['duration'] as String?,
+      state: json['state'] as String?,
+      trackId: ni('track_id'),
+      reason: json['reason'] as String?,
+      track: json['track'] as String?,
+      videoDesc: json['video_desc'] as String?,
+      shouldGenerateImage: ni('should_generate_image'),
+      legacyProjectId: ni('legacy_project_id'),
+      flowId: ni('flow_id'),
+      sbIndex: ni('sb_index'),
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+    );
+  }
+}
+
+Future<List<StoryboardRow>> fetchStoryboardsForScript(
+  String accessToken,
+  int scriptLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/scripts/legacy/$scriptLegacyId/storyboards',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => StoryboardRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+Future<StoryboardRow> fetchStoryboardByLegacyId(
+  String accessToken,
+  int legacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/storyboards/legacy/$legacyId');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return StoryboardRow.fromJson(map);
+}
+
+Future<StoryboardRow> updateStoryboardByLegacyId(
+  String accessToken,
+  int legacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/storyboards/legacy/$legacyId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return StoryboardRow.fromJson(map);
+}
+
 Future<ProjectDetail> fetchProjectByLegacyId(
   String accessToken,
   int legacyId,

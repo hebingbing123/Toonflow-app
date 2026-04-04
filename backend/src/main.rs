@@ -10,6 +10,7 @@ mod llm;
 mod projects;
 mod scripts;
 mod state;
+mod storyboards;
 mod ws;
 
 use std::net::SocketAddr;
