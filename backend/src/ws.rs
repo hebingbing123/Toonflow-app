@@ -1,5 +1,4 @@
-use crate::auth::verify_supabase_user_jwt;
-use crate::harness::ws_auth::WsConnectionSession;
+use crate::harness::ws_auth::{self, WsConnectionSession};
 use crate::harness::ws_dispatch;
 use crate::state::AppState;
 
@@ -9,7 +8,6 @@ use axum::response::IntoResponse;
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
 use serde_json::{json, Value};
-use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 pub struct WsQuery {
@@ -97,15 +95,8 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, query_token: Opti
 
     let secret = secret.as_slice();
 
-    let mut session: Option<Session> = None;
-
-    if let Some(ref raw) = query_token {
-        if let Ok(claims) = verify_supabase_user_jwt(raw, secret) {
-            if let Ok(uid) = Uuid::parse_str(claims.sub.trim()) {
-                session = Some(WsConnectionSession::new_authenticated(uid, None));
-            }
-        }
-    }
+    let mut session: Option<Session> =
+        ws_auth::session_from_query_access_token(query_token.as_deref(), secret);
 
     let (out_tx, mut out_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
 

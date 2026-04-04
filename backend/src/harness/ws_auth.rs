@@ -1,4 +1,4 @@
-//! WebSocket **`session.auth`** → **`session.ready`** (first authenticated frame when URL had no token).
+//! WebSocket session bootstrap: **`?access_token=`** (silent if invalid) and **`session.auth`** → **`session.ready`**.
 
 use axum::extract::ws::WebSocket;
 use serde_json::{json, Value};
@@ -22,6 +22,19 @@ pub struct WsConnectionSession {
     pub llm_cancel: CancellationToken,
     /// `(user_id, subscription_id)` for [`crate::notify_hub::WsNotifyHub`].
     pub ws_notify: Option<(Uuid, Uuid)>,
+}
+
+/// If the handshake URL carried **`access_token`**, verify JWT and return a session **without** notify subscription yet (caller subscribes and sets [`WsConnectionSession::ws_notify`]).
+/// Invalid or missing token yields **`None`** (same as an anonymous connection until **`session.auth`**).
+#[must_use]
+pub fn session_from_query_access_token(
+    raw: Option<&str>,
+    secret: &[u8],
+) -> Option<WsConnectionSession> {
+    let raw = raw?;
+    let claims = verify_supabase_user_jwt(raw, secret).ok()?;
+    let uid = Uuid::parse_str(claims.sub.trim()).ok()?;
+    Some(WsConnectionSession::new_authenticated(uid, None))
 }
 
 impl WsConnectionSession {

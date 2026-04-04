@@ -6,7 +6,7 @@
 //! | [`http`] | REST under `/api/v1/harness/*` (e.g. tool listing). |
 //! | [`wire`] | Deserialize structs for WebSocket **`payload`** bodies (`harness.*`, `agent.*.attach`, `agent.chat.send`, `session.auth`). |
 //! | [`ws_channel`] | `Script` / `Production` discriminator + LLM assistant label. |
-//! | [`ws_auth`] | `session.auth` → `session.ready` and [`WsConnectionSession`]. |
+//! | [`ws_auth`] | `?access_token=` pre-auth + `session.auth` → `session.ready` and [`WsConnectionSession`]. |
 //! | [`ws_dispatch`] | Parse client JSON envelope and route authenticated frames (thin `ws` upgrade loop). |
 //! | [`ws_session`] | `agent.script.attach` / `agent.production.attach` / `agent.context.update`. |
 //! | [`ws_tool`] / [`ws_agent`] / [`ws_chat`] | `harness.tool.invoke`, `harness.agent.run`, `agent.chat.send` (keeps the top-level `ws` module thin). |
