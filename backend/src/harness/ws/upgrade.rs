@@ -5,7 +5,7 @@ use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use serde::Deserialize;
 
-use crate::harness::ws_connection;
+use crate::harness::ws::connection;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -18,5 +18,5 @@ pub async fn ws_upgrade(
     Query(query): Query<WsQuery>,
     State(state): State<AppState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| ws_connection::run_socket(socket, state, query.access_token))
+    ws.on_upgrade(move |socket| connection::run_socket(socket, state, query.access_token))
 }

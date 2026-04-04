@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 
 use crate::harness::invoke;
 use crate::harness::wire::HarnessToolInvokePayload;
-use crate::harness::ws_outbound::{send_envelope, send_error};
+use crate::harness::ws::outbound::{send_envelope, send_error};
 use crate::harness::HarnessContext;
 
 pub async fn handle_harness_tool_invoke(

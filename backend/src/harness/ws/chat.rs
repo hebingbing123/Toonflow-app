@@ -5,7 +5,7 @@ use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 use crate::harness::observe;
-use crate::harness::ws_outbound::error_occurred_json;
+use crate::harness::ws::outbound::error_occurred_json;
 use crate::llm::{stream_chat_turn, LlmConfig};
 
 /// Inputs for [`spawn_stream_chat_turn`].

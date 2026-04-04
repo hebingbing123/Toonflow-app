@@ -4,7 +4,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
-use crate::harness::ws_outbound::error_occurred_json;
+use crate::harness::ws::outbound::error_occurred_json;
 use crate::harness::{observe, HarnessContext};
 use crate::llm::{harness_agent_run, LlmConfig};
 

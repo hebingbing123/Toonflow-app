@@ -20,7 +20,7 @@ use axum::{
     Json, Router,
 };
 
-use crate::harness::ws_upgrade::ws_upgrade;
+use crate::harness::ws::upgrade::ws_upgrade;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
 use serde::Serialize;

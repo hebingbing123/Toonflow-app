@@ -7,13 +7,13 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 
 use crate::harness::wire::{ChatSendPayload, HarnessAgentRunPayload};
-use crate::harness::ws_agent::{self, HarnessAgentWsParams};
-use crate::harness::ws_auth::{self, WsConnectionSession};
-use crate::harness::ws_channel::WsAgentChannel;
-use crate::harness::ws_chat::{self, ChatTurnWsParams};
-use crate::harness::ws_outbound::{send_envelope, send_error};
-use crate::harness::ws_session::{self, WsSessionBindState};
-use crate::harness::ws_tool;
+use crate::harness::ws::agent::{self, HarnessAgentWsParams};
+use crate::harness::ws::auth::{self, WsConnectionSession};
+use crate::harness::ws::channel::WsAgentChannel;
+use crate::harness::ws::chat::{self, ChatTurnWsParams};
+use crate::harness::ws::outbound::{send_envelope, send_error};
+use crate::harness::ws::session::{self, WsSessionBindState};
+use crate::harness::ws::tool;
 use crate::harness::{observe, HarnessContext};
 use crate::state::AppState;
 
@@ -62,7 +62,7 @@ pub(crate) async fn dispatch_client_text(
             return;
         }
 
-        if let Some(s) = ws_auth::try_session_auth(
+        if let Some(s) = auth::try_session_auth(
             socket,
             secret,
             state,
@@ -92,7 +92,7 @@ pub(crate) async fn dispatch_client_text(
                 project_id: &mut sess.project_id,
                 script_id: &mut sess.script_id,
             };
-            ws_session::handle_script_attach(
+            session::handle_script_attach(
                 socket,
                 sess.user_id,
                 &mut st,
@@ -108,7 +108,7 @@ pub(crate) async fn dispatch_client_text(
                 project_id: &mut sess.project_id,
                 script_id: &mut sess.script_id,
             };
-            ws_session::handle_production_attach(
+            session::handle_production_attach(
                 socket,
                 sess.user_id,
                 &mut st,
@@ -124,7 +124,7 @@ pub(crate) async fn dispatch_client_text(
                 project_id: &mut sess.project_id,
                 script_id: &mut sess.script_id,
             };
-            ws_session::handle_context_update(
+            session::handle_context_update(
                 socket,
                 &mut st,
                 &env.payload,
@@ -133,7 +133,7 @@ pub(crate) async fn dispatch_client_text(
             .await;
         }
         "harness.tool.invoke" => {
-            ws_tool::handle_harness_tool_invoke(
+            tool::handle_harness_tool_invoke(
                 socket,
                 &ctx,
                 env.schema_version,
@@ -197,7 +197,7 @@ pub(crate) async fn dispatch_client_text(
                 .expect("channel checked above");
 
             let max_rounds = p.max_tool_rounds.clamp(1, 32);
-            ws_agent::spawn_harness_agent_run(HarnessAgentWsParams {
+            agent::spawn_harness_agent_run(HarnessAgentWsParams {
                 cfg,
                 client: state.http_client.clone(),
                 content: content.to_string(),
@@ -251,7 +251,7 @@ pub(crate) async fn dispatch_client_text(
                 .map(WsAgentChannel::assistant_name_zh)
                 .expect("channel checked above");
 
-            ws_chat::spawn_stream_chat_turn(ChatTurnWsParams {
+            chat::spawn_stream_chat_turn(ChatTurnWsParams {
                 cfg,
                 client: state.http_client.clone(),
                 content: p.content.clone(),

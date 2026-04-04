@@ -3,9 +3,9 @@
 use axum::extract::ws::{Message, WebSocket};
 use futures_util::{SinkExt, StreamExt};
 
-use crate::harness::ws_auth::{self, WsConnectionSession};
-use crate::harness::ws_dispatch;
-use crate::harness::ws_outbound::send_error;
+use crate::harness::ws::auth::{self, WsConnectionSession};
+use crate::harness::ws::dispatch;
+use crate::harness::ws::outbound::send_error;
 use crate::state::AppState;
 
 pub(crate) async fn run_socket(
@@ -28,11 +28,11 @@ pub(crate) async fn run_socket(
     let secret = secret.as_slice();
 
     let mut session: Option<WsConnectionSession> =
-        ws_auth::session_from_query_access_token(query_token.as_deref(), secret);
+        auth::session_from_query_access_token(query_token.as_deref(), secret);
 
     let (out_tx, mut out_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
 
-    ws_auth::subscribe_notify_for_session(&mut session, &state, &out_tx).await;
+    auth::subscribe_notify_for_session(&mut session, &state, &out_tx).await;
 
     loop {
         tokio::select! {
@@ -49,7 +49,7 @@ pub(crate) async fn run_socket(
 
                 match msg {
                     Message::Text(text) => {
-                        ws_dispatch::dispatch_client_text(
+                        dispatch::dispatch_client_text(
                             text.to_string(),
                             &mut session,
                             secret,
@@ -78,5 +78,5 @@ pub(crate) async fn run_socket(
         }
     }
 
-    ws_auth::unsubscribe_notify_if_any(session.as_ref(), &state).await;
+    auth::unsubscribe_notify_if_any(session.as_ref(), &state).await;
 }
