@@ -1,9 +1,12 @@
 //! Polls `queued` jobs and runs a minimal in-process worker (MVP). Scales with `FOR UPDATE SKIP LOCKED`.
+//! Running jobs can be cancelled via REST; finish updates use `WHERE status = 'running'` so they never
+//! overwrite `cancelled`.
 
 use std::time::Duration;
 
 use serde_json::json;
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::jobs::{envelope_generation_job_updated, JobRow};
 use crate::state::AppState;
@@ -24,6 +27,11 @@ pub async fn run(state: AppState) {
     }
 }
 
+enum JobRunError {
+    Failed(String),
+    Cancelled,
+}
+
 async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Error> {
     let Some(row) = claim_next_job(pool).await? else {
         return Ok(());
@@ -38,41 +46,52 @@ async fn process_one_job(state: &AppState, pool: &PgPool) -> Result<(), sqlx::Er
     let owner = row.owner_user_id;
     let id = row.id;
 
-    let outcome = execute_kind(&row).await;
+    let outcome = execute_kind(pool, id, &row).await;
 
-    let final_row = match outcome {
+    match outcome {
         Ok(result) => {
-            sqlx::query_as::<_, JobRow>(
+            let updated = sqlx::query_as::<_, JobRow>(
                 r#"
                 UPDATE app_generation_job
                 SET status = 'succeeded', result = $1, error_message = NULL, updated_at = NOW()
-                WHERE id = $2
+                WHERE id = $2 AND status = 'running'
                 RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
                 "#,
             )
             .bind(result)
             .bind(id)
-            .fetch_one(pool)
-            .await?
+            .fetch_optional(pool)
+            .await?;
+
+            if let Some(final_row) = updated {
+                let text = envelope_generation_job_updated(&final_row);
+                state.notify.broadcast_to_user(owner, text).await;
+            }
+            // If None: row was cancelled; cancel_job already sent WS.
         }
-        Err(msg) => {
-            sqlx::query_as::<_, JobRow>(
+        Err(JobRunError::Cancelled) => {
+            // Status is already `cancelled`; client was notified by cancel endpoint.
+        }
+        Err(JobRunError::Failed(msg)) => {
+            let updated = sqlx::query_as::<_, JobRow>(
                 r#"
                 UPDATE app_generation_job
                 SET status = 'failed', error_message = $1, updated_at = NOW()
-                WHERE id = $2
+                WHERE id = $2 AND status = 'running'
                 RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, created_at, updated_at
                 "#,
             )
             .bind(msg)
             .bind(id)
-            .fetch_one(pool)
-            .await?
-        }
-    };
+            .fetch_optional(pool)
+            .await?;
 
-    let text = envelope_generation_job_updated(&final_row);
-    state.notify.broadcast_to_user(owner, text).await;
+            if let Some(final_row) = updated {
+                let text = envelope_generation_job_updated(&final_row);
+                state.notify.broadcast_to_user(owner, text).await;
+            }
+        }
+    }
 
     Ok(())
 }
@@ -101,12 +120,30 @@ async fn claim_next_job(pool: &PgPool) -> Result<Option<JobRow>, sqlx::Error> {
     Ok(row)
 }
 
-async fn execute_kind(row: &JobRow) -> Result<serde_json::Value, String> {
+async fn execute_kind(
+    pool: &PgPool,
+    id: Uuid,
+    row: &JobRow,
+) -> Result<serde_json::Value, JobRunError> {
     match row.kind.as_str() {
         "flutter.probe" => {
-            tokio::time::sleep(Duration::from_millis(150)).await;
+            // ~1s total; poll so running cancel can land cooperatively.
+            for _ in 0..20 {
+                tokio::time::sleep(Duration::from_millis(50)).await;
+                let st: String =
+                    sqlx::query_scalar("SELECT status::text FROM app_generation_job WHERE id = $1")
+                        .bind(id)
+                        .fetch_one(pool)
+                        .await
+                        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+                if st == "cancelled" {
+                    return Err(JobRunError::Cancelled);
+                }
+            }
             Ok(json!({ "ok": true, "probe": true }))
         }
-        other => Err(format!("unsupported job kind for worker: {other}")),
+        other => Err(JobRunError::Failed(format!(
+            "unsupported job kind for worker: {other}"
+        ))),
     }
 }

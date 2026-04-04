@@ -42,6 +42,8 @@ Pushed when a row in `app_generation_job` owned by the caller transitions (for e
 
 The server registers the connection for push after auth (`?access_token=` or `session.auth`).
 
+Cancelling a **`running`** job via REST sets `cancelled` immediately; the in-process worker will not apply `succeeded` / `failed` if the row is no longer `running`.
+
 ### `session.ack` (server → client)
 
 Generic success for attach / context update / cancel; carries `request_id` when the client sent one.

@@ -320,7 +320,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _cancelQueuedJob(JobRow j) async {
     final token = _session?.accessToken;
-    if (token == null || j.status != 'queued') return;
+    if (token == null || (j.status != 'queued' && j.status != 'running')) {
+      return;
+    }
     setState(() {
       _cancellingJobId = j.id;
       _error = null;
@@ -1099,7 +1101,7 @@ class _HomePageState extends State<HomePage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text('${j.kind} · ${j.status}'),
                         subtitle: Text(j.id),
-                        trailing: j.status == 'queued'
+                        trailing: (j.status == 'queued' || j.status == 'running')
                             ? TextButton(
                                 onPressed: _cancellingJobId == j.id
                                     ? null
