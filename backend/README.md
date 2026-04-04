@@ -18,6 +18,8 @@ supabase status   # 复制 DB URL、JWT secret
 ```bash
 cd backend
 cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选）OPENAI_API_KEY
+# 可选：在 **编译** 前导出 TOONFLOW_GIT_SHA，则 GET /api/v1/version 的 JSON 会带 git_sha（运行时 .env 不会注入该项）
+# export TOONFLOW_GIT_SHA=$(git rev-parse HEAD)
 cargo run
 ```
 

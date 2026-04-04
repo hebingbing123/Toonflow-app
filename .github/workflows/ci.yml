@@ -29,6 +29,8 @@ jobs:
           channel: stable
           cache: true
       - name: scripts/refactor-check.sh (same as yarn refactor:check)
+        env:
+          TOONFLOW_GIT_SHA: ${{ github.sha }}
         run: bash scripts/refactor-check.sh
 
   supabase-migrations:

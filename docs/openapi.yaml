@@ -87,6 +87,7 @@ paths:
       operationId: versionV1
       description: |
         Public, no auth. Aligns with legacy **`/api/other/getVersion`** use cases for client compatibility checks.
+        When the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).
       responses:
         "200":
           description: OK
@@ -1619,6 +1620,10 @@ components:
         version:
           type: string
           description: Rust crate / binary version (`CARGO_PKG_VERSION`)
+        git_sha:
+          type: string
+          description: |
+            Optional. Embedded at **compile time** when `TOONFLOW_GIT_SHA` was set for `cargo build` / `cargo test` (not read from runtime `.env`).
 
     ModelListEntry:
       type: object

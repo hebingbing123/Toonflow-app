@@ -38,6 +38,9 @@ struct HealthResponse {
 struct VersionResponse {
     service: &'static str,
     version: &'static str,
+    /// Present when the binary was built with env **`TOONFLOW_GIT_SHA`** set (compile-time `option_env!`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    git_sha: Option<&'static str>,
 }
 
 #[derive(Serialize)]
@@ -77,6 +80,7 @@ async fn version() -> Json<VersionResponse> {
     Json(VersionResponse {
         service: "toonflow-server",
         version: env!("CARGO_PKG_VERSION"),
+        git_sha: option_env!("TOONFLOW_GIT_SHA"),
     })
 }
 
