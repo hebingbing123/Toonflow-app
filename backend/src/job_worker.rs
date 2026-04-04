@@ -8,6 +8,7 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::harness::observe;
 use crate::jobs::{envelope_generation_job_updated, JobRow};
 use crate::state::AppState;
 use crate::usage;
@@ -50,6 +51,8 @@ async fn process_one_job(
     let Some(row) = claim_next_job(pool, worker_id).await? else {
         return Ok(());
     };
+
+    observe::generation_job(row.owner_user_id, row.id, "claimed");
 
     let text = envelope_generation_job_updated(&row);
     state

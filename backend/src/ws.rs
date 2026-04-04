@@ -1,6 +1,8 @@
 use crate::auth::verify_supabase_user_jwt;
-use crate::harness::wire::{HarnessAgentRunPayload, HarnessToolInvokePayload};
-use crate::harness::{invoke, observe, permissions, HarnessContext};
+use crate::harness::wire::HarnessAgentRunPayload;
+use crate::harness::ws_agent::{self, HarnessAgentWsParams};
+use crate::harness::ws_tool;
+use crate::harness::{observe, permissions, HarnessContext};
 use crate::llm;
 use crate::state::AppState;
 
@@ -53,7 +55,7 @@ struct Session {
     ws_notify: Option<(Uuid, Uuid)>,
 }
 
-async fn send_envelope(
+pub(crate) async fn send_envelope(
     socket: &mut WebSocket,
     msg_type: &str,
     schema_version: i32,
@@ -74,7 +76,7 @@ async fn send_envelope(
     socket.send(Message::Text(text.into())).await.is_ok()
 }
 
-async fn send_error(
+pub(crate) async fn send_error(
     socket: &mut WebSocket,
     code: &str,
     message: &str,
@@ -90,7 +92,7 @@ async fn send_error(
     send_envelope(socket, "error.occurred", 1, payload, request_id).await
 }
 
-fn error_occurred_json(code: &str, message: &str, request_id: Option<&str>) -> String {
+pub(crate) fn error_occurred_json(code: &str, message: &str, request_id: Option<&str>) -> String {
     let mut inner = json!({
         "code": code,
         "message": message,
@@ -393,55 +395,14 @@ async fn dispatch_client_text(
             .await;
         }
         "harness.tool.invoke" => {
-            if env.schema_version != 1 {
-                let _ = send_error(
-                    socket,
-                    "unsupported_schema",
-                    "harness.tool.invoke requires schema_version 1",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
-            }
-            let Ok(p) = serde_json::from_value::<HarnessToolInvokePayload>(env.payload.clone())
-            else {
-                let _ = send_error(
-                    socket,
-                    "invalid_payload",
-                    "need payload.name (string) and optional payload.arguments (object)",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
-            };
-            let name = p.name.trim();
-            if name.is_empty() {
-                let _ = send_error(
-                    socket,
-                    "invalid_payload",
-                    "payload.name must be a non-empty string",
-                    env.request_id.as_deref(),
-                )
-                .await;
-                return;
-            }
-            let args = p.arguments.unwrap_or_else(|| json!({}));
-            match invoke::invoke_tool_async(&ctx, name, &args).await {
-                Ok(result) => {
-                    let _ = send_envelope(
-                        socket,
-                        "harness.tool.result",
-                        1,
-                        json!({ "name": name, "result": result }),
-                        env.request_id.as_deref(),
-                    )
-                    .await;
-                }
-                Err(e) => {
-                    let _ =
-                        send_error(socket, e.code(), &e.message(), env.request_id.as_deref()).await;
-                }
-            }
+            ws_tool::handle_harness_tool_invoke(
+                socket,
+                &ctx,
+                env.schema_version,
+                &env.payload,
+                env.request_id.as_deref(),
+            )
+            .await;
         }
         "harness.agent.run" => {
             if sess.channel.is_none() {
@@ -488,8 +449,6 @@ async fn dispatch_client_text(
                 return;
             };
 
-            observe::agent_llm_turn_requested(sess.user_id, content.len());
-
             sess.llm_cancel.cancel();
             sess.llm_cancel = CancellationToken::new();
             let cancel = sess.llm_cancel.clone();
@@ -500,30 +459,17 @@ async fn dispatch_client_text(
                 None => unreachable!(),
             };
 
-            let client = state.http_client.clone();
-            let owned_content = content.to_string();
             let max_rounds = p.max_tool_rounds.clamp(1, 32);
-            let req_id = env.request_id.clone();
-            let tx = out_tx.clone();
-            let user_id = sess.user_id;
-
-            tokio::spawn(async move {
-                let ctx = HarnessContext::new(user_id);
-                if let Err(e) = llm::harness_agent_run(
-                    &cfg,
-                    &client,
-                    &owned_content,
-                    assistant_name,
-                    &ctx,
-                    max_rounds,
-                    cancel,
-                    tx.clone(),
-                    req_id.as_deref(),
-                )
-                .await
-                {
-                    let _ = tx.send(error_occurred_json("llm_error", &e, req_id.as_deref()));
-                }
+            ws_agent::spawn_harness_agent_run(HarnessAgentWsParams {
+                cfg,
+                client: state.http_client.clone(),
+                content: content.to_string(),
+                assistant_name,
+                user_id: sess.user_id,
+                max_rounds,
+                cancel,
+                out_tx: out_tx.clone(),
+                request_id: env.request_id.clone(),
             });
         }
         "agent.chat.send" => {

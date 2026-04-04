@@ -9,6 +9,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::harness::observe;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -159,6 +160,8 @@ async fn query_memory(
 
     ensure_project_owned(pool, uid, body.project_id).await?;
 
+    observe::memory_http(uid, body.project_id, "query");
+
     let rows = sqlx::query_as::<_, MessageRow>(
         r#"
         SELECT id, role, name, content, create_time_ms
@@ -216,6 +219,8 @@ async fn clear_memory(
     let agent_type = parse_agent_type(&body.agent_type)?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
+
+    observe::memory_http(uid, body.project_id, "clear");
 
     let mut tx = pool
         .begin()
@@ -346,6 +351,8 @@ async fn append_memory(
     }
 
     ensure_project_owned(pool, uid, body.project_id).await?;
+
+    observe::memory_http(uid, body.project_id, "append");
 
     let create_time_ms = body
         .create_time

@@ -16,3 +16,13 @@ pub fn harness_tool_invoke(ctx: &HarnessContext, tool_name: &str) {
 pub fn harness_tools_catalog_http(user_id: Uuid) {
     tracing::debug!(%user_id, "harness.http.tools_catalog");
 }
+
+/// REST **`/api/v1/agents/memory/*`** (parity with legacy agent memory).
+pub fn memory_http(user_id: Uuid, legacy_project_id: i32, op: &'static str) {
+    tracing::debug!(%user_id, legacy_project_id, %op, "harness.memory.http");
+}
+
+/// Worker claimed or finished a row in **`app_generation_job`** (best-effort tracing).
+pub fn generation_job(user_id: Uuid, job_id: Uuid, phase: &'static str) {
+    tracing::debug!(%user_id, %job_id, %phase, "harness.job");
+}
