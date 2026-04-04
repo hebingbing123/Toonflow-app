@@ -345,4 +345,39 @@ mod contract_smoke_tests {
             "repo ships backend/data/skills markdown"
         );
     }
+
+    #[tokio::test]
+    async fn models_detail_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = "/api/v1/models/detail?model_id=1%3Agpt-4o-mini";
+        let (status, v) = get_json_bearer(uri, &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["model_name"], "gpt-4o-mini");
+        assert_eq!(v["vendor_id"], 1);
+        assert_eq!(v["type"], "text");
+    }
+
+    #[tokio::test]
+    async fn skills_list_ok_with_jwt_when_skills_tree_present() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/skills", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        let arr = v.as_array().expect("skills list is array");
+        assert!(!arr.is_empty());
+        assert!(arr.iter().any(|e| {
+            e.get("path")
+                .and_then(Value::as_str)
+                .is_some_and(|p| p.ends_with(".md"))
+        }));
+    }
+
+    #[tokio::test]
+    async fn skill_content_ok_with_jwt_for_known_file() {
+        let token = test_jwt(Uuid::nil());
+        let uri = "/api/v1/skills/content?path=script_execution_script.md";
+        let (status, v) = get_json_bearer(uri, &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["path"], "script_execution_script.md");
+        assert!(v["content"].as_str().is_some_and(|s| !s.trim().is_empty()));
+    }
 }
