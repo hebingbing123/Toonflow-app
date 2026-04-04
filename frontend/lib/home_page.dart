@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingMe = false;
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
+  bool _loadingWsSkillsRead = false;
   final List<String> _wsLog = [];
 
   bool _loadingProjects = false;
@@ -74,6 +75,21 @@ class _HomePageState extends State<HomePage> {
 
   Session? get _session =>
       kSupabaseConfigured ? Supabase.instance.client.auth.currentSession : null;
+
+  bool get _wsProbesBusy =>
+      _loadingWs || _loadingWsHarness || _loadingWsSkillsRead;
+
+  void _appendWsLog(String raw) {
+    const maxChars = 12000;
+    final line = raw.length > maxChars
+        ? '${raw.substring(0, maxChars)}… (+${raw.length - maxChars} chars)'
+        : raw;
+    if (!mounted) return;
+    setState(() {
+      _wsLog.insert(0, line);
+      if (_wsLog.length > 16) _wsLog.removeLast();
+    });
+  }
 
   Future<void> _pingHealth() async {
     setState(() {
@@ -947,13 +963,7 @@ class _HomePageState extends State<HomePage> {
       _ws = channel;
 
       _wsSub = channel.stream.listen(
-        (message) {
-          if (!mounted) return;
-          setState(() {
-            _wsLog.insert(0, message.toString());
-            if (_wsLog.length > 16) _wsLog.removeLast();
-          });
-        },
+        (message) => _appendWsLog(message.toString()),
         onError: (Object e) {
           if (mounted) setState(() => _error = 'ws: $e');
         },
@@ -962,6 +972,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _loadingWs = false;
               _loadingWsHarness = false;
+              _loadingWsSkillsRead = false;
             });
           }
         },
@@ -1016,13 +1027,7 @@ class _HomePageState extends State<HomePage> {
       _ws = channel;
 
       _wsSub = channel.stream.listen(
-        (message) {
-          if (!mounted) return;
-          setState(() {
-            _wsLog.insert(0, message.toString());
-            if (_wsLog.length > 16) _wsLog.removeLast();
-          });
-        },
+        (message) => _appendWsLog(message.toString()),
         onError: (Object e) {
           if (mounted) setState(() => _error = 'ws: $e');
         },
@@ -1031,6 +1036,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _loadingWs = false;
               _loadingWsHarness = false;
+              _loadingWsSkillsRead = false;
             });
           }
         },
@@ -1057,6 +1063,66 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _error = e.toString();
           _loadingWsHarness = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testHarnessSkillsReadWebSocket() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+
+    _wsSub?.cancel();
+    await _ws?.sink.close();
+
+    setState(() {
+      _loadingWsSkillsRead = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    final path = _skillPathCtrl.text.trim().isEmpty
+        ? 'script_execution_script.md'
+        : _skillPathCtrl.text.trim();
+
+    try {
+      final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
+      final channel = WebSocketChannel.connect(uri);
+      _ws = channel;
+
+      _wsSub = channel.stream.listen(
+        (message) => _appendWsLog(message.toString()),
+        onError: (Object e) {
+          if (mounted) setState(() => _error = 'ws: $e');
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+              _loadingWsSkillsRead = false;
+            });
+          }
+        },
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': 'skills.read',
+            'arguments': {'path': path},
+          },
+        }),
+      );
+
+      if (mounted) setState(() => _loadingWsSkillsRead = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loadingWsSkillsRead = false;
         });
       }
     }
@@ -1288,19 +1354,23 @@ class _HomePageState extends State<HomePage> {
                 runSpacing: 8,
                 children: [
                   FilledButton.tonal(
-                    onPressed: (_loadingWs || _loadingWsHarness)
-                        ? null
-                        : _testWebSocket,
+                    onPressed: _wsProbesBusy ? null : _testWebSocket,
                     child: Text(
                       _loadingWs ? '…' : 'WebSocket: attach + LLM stream',
                     ),
                   ),
                   FilledButton.tonal(
-                    onPressed: (_loadingWs || _loadingWsHarness)
-                        ? null
-                        : _testHarnessToolWebSocket,
+                    onPressed: _wsProbesBusy ? null : _testHarnessToolWebSocket,
                     child: Text(
                       _loadingWsHarness ? '…' : 'WS: harness.tool.invoke (echo)',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _wsProbesBusy ? null : _testHarnessSkillsReadWebSocket,
+                    child: Text(
+                      _loadingWsSkillsRead
+                          ? '…'
+                          : 'WS: skills.read (path field)',
                     ),
                   ),
                 ],

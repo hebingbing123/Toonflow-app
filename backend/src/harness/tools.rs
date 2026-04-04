@@ -17,7 +17,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "skills.read",
         description:
-            "Read-only access to Markdown skills under backend/data/skills (via HTTP helpers).",
+            "Read one Markdown skill under backend/data/skills; WS/args: { \"path\": \"relative/path.md\" } (same rules as GET /api/v1/skills/content).",
     },
 ];
 

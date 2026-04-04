@@ -26,4 +26,4 @@ flutter run -d chrome \
   --dart-define=SUPABASE_ANON_KEY=eyJ...你的anon密钥
 ```
 
-首页提供：`GET /api/v1/health`、邮箱密码登录/注册、`GET /api/v1/me`（Bearer）、`WebSocket` 探针（`?access_token=` + `agent.script.attach` + `agent.chat.send`，以及 **`harness.tool.invoke`（echo）** 无需 attach）。
+首页提供：`GET /api/v1/health`、邮箱密码登录/注册、`GET /api/v1/me`（Bearer）、`WebSocket` 探针（`?access_token=` + `agent.script.attach` + `agent.chat.send`，以及 **`harness.tool.invoke`**：`echo`、**`skills.read`**（使用上方 Skill path 输入框，默认同 REST 示例路径））。

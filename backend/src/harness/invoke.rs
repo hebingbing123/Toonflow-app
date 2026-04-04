@@ -2,6 +2,8 @@
 
 use serde_json::Value;
 
+use crate::skills::SkillReadError;
+
 use super::observe;
 use super::permissions;
 use super::HarnessContext;
@@ -9,7 +11,29 @@ use super::HarnessContext;
 #[derive(Debug)]
 pub enum InvokeError {
     UnknownTool(String),
-    NotImplemented { tool: String, hint: String },
+    NotImplemented {
+        tool: String,
+        hint: String,
+    },
+    /// Tool-specific argument validation (maps to `invalid_payload` over WS).
+    InvalidArgs(String),
+    SkillNotFound,
+    SkillBadRequest(String),
+    SkillUnavailable,
+}
+
+impl From<SkillReadError> for InvokeError {
+    fn from(e: SkillReadError) -> Self {
+        match e {
+            SkillReadError::BadPath(m) => InvokeError::SkillBadRequest(m),
+            SkillReadError::SkillsDirMissing => InvokeError::SkillUnavailable,
+            SkillReadError::NotFound => InvokeError::SkillNotFound,
+            SkillReadError::TooLarge => {
+                InvokeError::SkillBadRequest("skill file exceeds maximum allowed size".into())
+            }
+            SkillReadError::Io(m) => InvokeError::SkillBadRequest(m),
+        }
+    }
 }
 
 impl InvokeError {
@@ -18,6 +42,10 @@ impl InvokeError {
         match self {
             InvokeError::UnknownTool(_) => "unknown_tool",
             InvokeError::NotImplemented { .. } => "tool_not_implemented",
+            InvokeError::InvalidArgs(_) => "invalid_payload",
+            InvokeError::SkillNotFound => "not_found",
+            InvokeError::SkillBadRequest(_) => "invalid_payload",
+            InvokeError::SkillUnavailable => "skill_unavailable",
         }
     }
 
@@ -26,6 +54,12 @@ impl InvokeError {
         match self {
             InvokeError::UnknownTool(n) => format!("unknown or unregistered tool: {n}"),
             InvokeError::NotImplemented { tool, hint } => format!("{tool}: {hint}"),
+            InvokeError::InvalidArgs(m) => m.clone(),
+            InvokeError::SkillNotFound => "skill file not found".into(),
+            InvokeError::SkillBadRequest(m) => m.clone(),
+            InvokeError::SkillUnavailable => {
+                "skills directory is not available on this server".into()
+            }
         }
     }
 }
@@ -44,10 +78,22 @@ pub fn invoke_tool(
 
     match name {
         "echo" => Ok(arguments.clone()),
-        "skills.read" => Err(InvokeError::NotImplemented {
-            tool: name.to_string(),
-            hint: "use GET /api/v1/skills/content with Bearer JWT".to_string(),
-        }),
+        "skills.read" => {
+            let path = arguments
+                .get("path")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .ok_or_else(|| {
+                    InvokeError::InvalidArgs(
+                        "skills.read requires arguments.path (non-empty string)".into(),
+                    )
+                })?;
+            let doc = crate::skills::read_skill_markdown(path).map_err(InvokeError::from)?;
+            serde_json::to_value(&doc).map_err(|_| {
+                InvokeError::SkillBadRequest("failed to serialize skill content".into())
+            })
+        }
         _ => Err(InvokeError::NotImplemented {
             tool: name.to_string(),
             hint: "registered in catalog but execution is not wired yet".to_string(),
@@ -79,8 +125,25 @@ mod tests {
     }
 
     #[test]
-    fn skills_read_not_implemented_on_invoke_path() {
+    fn skills_read_requires_path() {
         let err = invoke_tool(&ctx(), "skills.read", &json!({})).unwrap_err();
-        assert_eq!(err.code(), "tool_not_implemented");
+        assert_eq!(err.code(), "invalid_payload");
+    }
+
+    #[test]
+    fn skills_read_loads_known_file() {
+        let out = invoke_tool(
+            &ctx(),
+            "skills.read",
+            &json!({ "path": "script_execution_script.md" }),
+        )
+        .unwrap();
+        let path = out.get("path").and_then(Value::as_str).unwrap();
+        assert!(
+            path.ends_with("script_execution_script.md"),
+            "unexpected path: {path}"
+        );
+        let content = out.get("content").and_then(Value::as_str).unwrap();
+        assert!(!content.is_empty());
     }
 }

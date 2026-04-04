@@ -9,7 +9,7 @@ todos:
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
     status: completed
   - id: harness-rust-core
-    content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（`echo` 可跑通；`skills.read` 引导用 REST）
+    content: 在 Rust 中落地 Harness 分层（工具/权限/观测/Agent 循环），替换 vm2 类沙箱为进程或 WASM 等硬隔离方案；**进度**：`ToolRegistry` 静态目录、`GET /api/v1/harness/tools`、只读 `GET /api/v1/skills*`、**WS** `harness.tool.invoke` / `harness.tool.result`（**`echo`**、**`skills.read`** 与 REST 同路径安全规则）
     status: pending
   - id: rust-backend-mvp
     content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（分镜列表+按 legacy `GET/PATCH`）；**任务**：`app_generation_job` + REST + **进程内 worker**、取消/重试/幂等、**WS** `generation.job.updated`；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；仍缺分布式队列、Harness 硬隔离与契约测试固化
@@ -21,7 +21,7 @@ todos:
     content: Supabase Auth：v1 无 BFF；supabase_flutter + Bearer 调 Rust；环境切换；HTTPS+PKCE；见 §4.2
     status: completed
   - id: flutter-shell
-    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/探针创建，与 **skills / harness/tools** 只读探针、**WS** `harness.tool.invoke`（echo）探针
+    content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/探针创建，与 **skills / harness/tools** 只读探针、**WS** `harness.tool.invoke`（**echo**、**skills.read**，与 Skill path 联动）
     status: completed
   - id: decommission-electron
     content: 功能 parity 与灰度后下线 Electron + Node 服务端路径

@@ -20,25 +20,75 @@ use crate::state::AppState;
 const MAX_SKILL_BYTES: u64 = 2_000_000;
 const MAX_SKILL_FILES: usize = 20_000;
 
+/// Filesystem errors when resolving or reading a skill (shared by HTTP and Harness `skills.read`).
+#[derive(Debug)]
+pub(crate) enum SkillReadError {
+    BadPath(String),
+    SkillsDirMissing,
+    NotFound,
+    TooLarge,
+    Io(String),
+}
+
+impl SkillReadError {
+    fn into_api_error(self) -> ApiError {
+        match self {
+            SkillReadError::BadPath(m) => ApiError::BadRequest(m),
+            SkillReadError::SkillsDirMissing => ApiError::BadRequest(
+                "skills directory missing (expected backend/data/skills)".into(),
+            ),
+            SkillReadError::NotFound => ApiError::NotFound,
+            SkillReadError::TooLarge => {
+                ApiError::BadRequest(format!("skill file exceeds {MAX_SKILL_BYTES} bytes"))
+            }
+            SkillReadError::Io(m) => ApiError::BadRequest(m),
+        }
+    }
+}
+
 fn skills_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("data/skills")
 }
 
 /// Reject `..` and absolute-ish segments; build path under `root`.
-fn safe_join_under_root(root: &Path, relative: &str) -> Result<PathBuf, ApiError> {
+fn safe_join_under_root(root: &Path, relative: &str) -> Result<PathBuf, SkillReadError> {
     let mut p = root.to_path_buf();
     for segment in relative.split(['/', '\\']) {
         if segment.is_empty() || segment == "." {
             continue;
         }
         if segment == ".." {
-            return Err(ApiError::BadRequest(
+            return Err(SkillReadError::BadPath(
                 "path must not contain parent segments".into(),
             ));
         }
         p.push(segment);
     }
     Ok(p)
+}
+
+/// Read a single Markdown skill by path relative to `data/skills` (same rules as HTTP `GET .../skills/content`).
+pub(crate) fn read_skill_markdown(relative: &str) -> Result<SkillContentResponse, SkillReadError> {
+    let root = skills_root();
+    if !root.is_dir() {
+        return Err(SkillReadError::SkillsDirMissing);
+    }
+    let resolved = safe_join_under_root(&root, relative)?;
+    if !resolved.is_file() {
+        return Err(SkillReadError::NotFound);
+    }
+    let meta = std::fs::metadata(&resolved)
+        .map_err(|e| SkillReadError::Io(format!("cannot stat skill: {e}")))?;
+    if meta.len() > MAX_SKILL_BYTES {
+        return Err(SkillReadError::TooLarge);
+    }
+    let content = std::fs::read_to_string(&resolved)
+        .map_err(|e| SkillReadError::Io(format!("cannot read skill: {e}")))?;
+    let rel = resolved
+        .strip_prefix(&root)
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|_| relative.to_string());
+    Ok(SkillContentResponse { path: rel, content })
 }
 
 #[derive(Serialize)]
@@ -116,25 +166,8 @@ async fn get_skill_content(
     Query(q): Query<SkillContentQuery>,
 ) -> Result<Json<SkillContentResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
-    let root = skills_root();
-    let resolved = safe_join_under_root(&root, q.path.trim())?;
-    if !resolved.is_file() {
-        return Err(ApiError::NotFound);
-    }
-    let meta = std::fs::metadata(&resolved)
-        .map_err(|e| ApiError::BadRequest(format!("cannot stat skill: {e}")))?;
-    if meta.len() > MAX_SKILL_BYTES {
-        return Err(ApiError::BadRequest(format!(
-            "skill file exceeds {MAX_SKILL_BYTES} bytes"
-        )));
-    }
-    let content = std::fs::read_to_string(&resolved)
-        .map_err(|e| ApiError::BadRequest(format!("cannot read skill: {e}")))?;
-    let rel = resolved
-        .strip_prefix(&root)
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_else(|_| q.path.clone());
-    Ok(Json(SkillContentResponse { path: rel, content }))
+    let doc = read_skill_markdown(q.path.trim()).map_err(SkillReadError::into_api_error)?;
+    Ok(Json(doc))
 }
 
 async fn list_harness_tools(

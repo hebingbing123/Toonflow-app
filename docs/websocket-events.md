@@ -46,6 +46,7 @@ Requires an authenticated session (`?access_token=` or successful `session.auth`
 | `schema_version` | `1` | yes |
 | `payload.name` | string | yes (tool id from `GET /api/v1/harness/tools`) |
 | `payload.arguments` | object | no (defaults to `{}`) |
+| `payload.arguments.path` | string | required for **`skills.read`** — relative path under `data/skills` (same as REST `GET /api/v1/skills/content?path=`) |
 
 ### `harness.tool.result` (server → client)
 
@@ -54,7 +55,7 @@ Emitted when invocation succeeds.
 | Field | Notes |
 |-------|--------|
 | `payload.name` | Tool that ran |
-| `payload.result` | JSON value returned by the tool (for `echo`, mirrors `arguments`) |
+| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `skills.read`: `{ path, content }` like the REST skill body) |
 
 ### `generation.job.updated` (server → client)
 
@@ -101,7 +102,7 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
-| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — MVP: `echo` returns arguments via `harness.tool.result`; `skills.read` → `error.occurred` `tool_not_implemented` (use REST) |
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content` |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
 | `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; legacy used ack callback — use `request_id` + optional `session.ack` server message |
@@ -125,7 +126,7 @@ Content block shapes follow `src/socket/chatMessagesData.d.ts` (`text`, `markdow
 |--------|-----------|
 | `error.occurred` | `code` (string), `message` (string), optional `request_id`, optional `details` |
 
-Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no WS/runtime path yet), **`unsupported_schema`**, **`invalid_payload`**.
+Harness-related `code` values include **`unknown_tool`** (name not in catalog), **`tool_not_implemented`** (catalogued but no runtime path yet), **`invalid_payload`** (bad/missing args, path rules, oversize file), **`not_found`** (skill path missing), **`skill_unavailable`** (skills dir missing on server), **`unsupported_schema`**.
 
 Align `code` / `message` semantics with `docs/openapi.yaml` `ErrorBody` where possible.
 
