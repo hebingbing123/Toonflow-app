@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
   bool _loadingWsIsolatedEcho = false;
+  bool _loadingWsHarnessAgent = false;
   bool _loadingWsSkillsRead = false;
   final List<String> _wsLog = [];
 
@@ -109,6 +110,7 @@ class _HomePageState extends State<HomePage> {
       _loadingWs ||
       _loadingWsHarness ||
       _loadingWsIsolatedEcho ||
+      _loadingWsHarnessAgent ||
       _loadingWsSkillsRead;
 
   void _appendWsLog(String raw) {
@@ -1946,6 +1948,7 @@ class _HomePageState extends State<HomePage> {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -2011,6 +2014,7 @@ class _HomePageState extends State<HomePage> {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -2072,6 +2076,7 @@ class _HomePageState extends State<HomePage> {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -2137,6 +2142,7 @@ class _HomePageState extends State<HomePage> {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
           }
@@ -2160,6 +2166,76 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _error = e.toString();
           _loadingWsSkillsRead = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testHarnessAgentRunWebSocket() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+
+    _wsSub?.cancel();
+    await _ws?.sink.close();
+
+    setState(() {
+      _loadingWsHarnessAgent = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
+      final channel = WebSocketChannel.connect(uri);
+      _ws = channel;
+
+      _wsSub = channel.stream.listen(
+        (message) => _appendWsLog(message.toString()),
+        onError: (Object e) {
+          if (mounted) setState(() => _error = 'ws: $e');
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
+              _loadingWsHarnessAgent = false;
+              _loadingWsSkillsRead = false;
+            });
+          }
+        },
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'agent.script.attach',
+          'schema_version': 1,
+          'payload': {
+            'isolation_key': 'flutter-harness-agent',
+            'project_id': 1,
+          },
+        }),
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.agent.run',
+          'schema_version': 1,
+          'payload': {
+            'content':
+                'Call the wasm.probe tool once with empty object arguments. Reply with only the numeric value from the tool result.',
+            'max_tool_rounds': 6,
+          },
+        }),
+      );
+
+      if (mounted) setState(() => _loadingWsHarnessAgent = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loadingWsHarnessAgent = false;
         });
       }
     }
@@ -2638,6 +2714,15 @@ class _HomePageState extends State<HomePage> {
                       _loadingWsSkillsRead
                           ? '…'
                           : 'WS: skills.read (path field)',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed:
+                        _wsProbesBusy ? null : _testHarnessAgentRunWebSocket,
+                    child: Text(
+                      _loadingWsHarnessAgent
+                          ? '…'
+                          : 'WS: harness.agent.run (needs LLM key)',
                     ),
                   ),
                 ],
