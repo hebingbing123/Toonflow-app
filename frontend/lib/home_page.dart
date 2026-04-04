@@ -974,14 +974,34 @@ class _HomePageState extends State<HomePage> {
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                       ),
-                                                      onTap: () {
-                                                        Navigator.of(ctx2)
-                                                            .pop();
-                                                        _openStoryboardEditor(
-                                                          token,
-                                                          b.legacyId,
-                                                        );
-                                                      },
+                                                      onTap: creatingSb[0]
+                                                          ? null
+                                                          : () async {
+                                                              await _openStoryboardEditor(
+                                                                token,
+                                                                b.legacyId,
+                                                                onStoryboardTreeMutated:
+                                                                    () async {
+                                                                  final fresh =
+                                                                      await fetchStoryboardsForScript(
+                                                                    token,
+                                                                    scriptLegacyId,
+                                                                  );
+                                                                  if (!ctx2
+                                                                      .mounted) {
+                                                                    return;
+                                                                  }
+                                                                  boardsList
+                                                                    ..clear()
+                                                                    ..addAll(
+                                                                      fresh,
+                                                                    );
+                                                                  setBoardsState(
+                                                                    () {},
+                                                                  );
+                                                                },
+                                                              );
+                                                            },
                                                     );
                                                   },
                                                 ),
@@ -1227,7 +1247,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _openStoryboardEditor(String token, int storyLegacyId) async {
+  Future<void> _openStoryboardEditor(
+    String token,
+    int storyLegacyId, {
+    Future<void> Function()? onStoryboardTreeMutated,
+  }) async {
     final promptCtrl = TextEditingController();
     final stateCtrl = TextEditingController();
     final videoCtrl = TextEditingController();
@@ -1336,13 +1360,13 @@ class _HomePageState extends State<HomePage> {
                                 storyLegacyId,
                               );
                               if (!ctx.mounted) return;
+                              await onStoryboardTreeMutated?.call();
+                              if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    '分镜已删除；请重新打开「分镜列表」以刷新',
-                                  ),
+                                  content: Text('分镜已删除'),
                                 ),
                               );
                             } on RustApiException catch (e) {
@@ -1421,6 +1445,8 @@ class _HomePageState extends State<HomePage> {
                                       sgis.isEmpty ? null : sgi,
                                 },
                               );
+                              if (!ctx.mounted) return;
+                              await onStoryboardTreeMutated?.call();
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
                             } on RustApiException catch (e) {
