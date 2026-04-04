@@ -104,6 +104,10 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
       .toList();
 }
 
+/// `PATCH /api/v1/projects/legacy/{legacy_id}` — merge patch for `name` / `intro` only.
+///
+/// [body] must only include keys allowed by OpenAPI `PatchProjectBody` (unknown keys → HTTP 400).
+/// See `patchProjectByLegacyIdV1`.
 Future<ProjectRow> updateProjectByLegacyId(
   String accessToken,
   int legacyId,
@@ -190,6 +194,9 @@ Future<ScriptRow> fetchScriptByLegacyId(
   return ScriptRow.fromJson(map);
 }
 
+/// `PATCH /api/v1/scripts/legacy/{legacy_id}` — only `name`, `content`, `extract_state`.
+///
+/// Unknown keys → HTTP 400. See `patchScriptByLegacyIdV1`.
 Future<ScriptRow> updateScriptByLegacyId(
   String accessToken,
   int legacyId,
@@ -327,6 +334,9 @@ Future<StoryboardRow> fetchStoryboardByLegacyId(
   return StoryboardRow.fromJson(map);
 }
 
+/// `PATCH /api/v1/storyboards/legacy/{legacy_id}` — keys per OpenAPI `PatchStoryboardBody` only.
+///
+/// Unknown keys → HTTP 400. See `patchStoryboardByLegacyIdV1`.
 Future<StoryboardRow> updateStoryboardByLegacyId(
   String accessToken,
   int legacyId,

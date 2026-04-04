@@ -39,7 +39,7 @@ todos:
     content: SaaS 规格（§12）：首期 CNY 收银与 plan_tier；后期 USD（Stripe/Paddle 等）；billing_currency/provider 预留；积分与 webhook；用量/审计 Schema（§12.3）；org/合规按阶段
     status: pending
   - id: jobs-and-webhook-hardening
-    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker** + **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查除外；可选受信代理下 `Forwarded`/`X-Forwarded-For`）；**HTTP 可观测**：`X-Request-Id`、JSON 错误 `request_id`；**WS** `error.occurred` 的 **`payload.request_id`**；**契约单测**：`Idempotency-Key` 头解析/截断、`generation.job.updated` 信封、`CreateJobBody` / **`Patch*Body`** 拒未知字段；**仍缺**独立队列、分布式协调限流；计费 webhook 验签与去重（§13）
+    content: 长时生成：**进度**：`app_generation_job` + REST + **本机 worker** + **WS**；**queued/running 取消**、`failed` **重试入队**、`Idempotency-Key` 去重；**每 IP 429 + Retry-After**（健康检查除外；可选受信代理下 `Forwarded`/`X-Forwarded-For`）；**HTTP 可观测**：`X-Request-Id`、JSON 错误 `request_id`；**WS** `error.occurred` 的 **`payload.request_id`**；**契约单测**：`Idempotency-Key` 头解析/截断、`generation.job.updated` 信封、`CreateJobBody` / **`Patch*Body`** 拒未知字段、**`json_patch`** 文本/i32 字段解析；**仍缺**独立队列、分布式协调限流；计费 webhook 验签与去重（§13）
     status: pending
 isProject: false
 ---
