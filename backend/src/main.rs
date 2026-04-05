@@ -33,6 +33,7 @@ mod settings_vendors;
 mod skills;
 mod state;
 mod storyboards;
+mod tasks_legacy;
 mod usage;
 mod visual_manual;
 

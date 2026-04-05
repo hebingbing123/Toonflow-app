@@ -48,6 +48,8 @@ info:
 
     **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
+    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
+
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
 servers:
@@ -79,6 +81,8 @@ tags:
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
+  - name: tasks
+    description: Legacy Electron task center (`POST` for old `/api/task/*`); maps to projects and generation jobs where applicable
   - name: usage
     description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
   - name: prompts
@@ -5954,6 +5958,156 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/tasks/get-project:
+    post:
+      tags: [tasks]
+      summary: Legacy task center — list projects (non-empty names)
+      operationId: postTasksGetProjectV1
+      description: |
+        Parity with legacy **`POST /api/task/getProject`**. Returns **`{ "data": [ { "id", "name" } ] }`**
+        where **`id`** is **`app_project.legacy_id`** (integer project key used across v1 APIs).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksEmptyBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyTasksGetProjectResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/tasks/get-task-categories:
+    post:
+      tags: [tasks]
+      summary: Legacy task center — distinct job kinds (as taskClass)
+      operationId: postTasksGetTaskCategoriesV1
+      description: |
+        Parity with legacy **`POST /api/task/getTaskCategories`**. Returns **`{ "data": [ { "taskClass" } ] }`**
+        for each distinct non-empty **`kind`** on **`app_generation_job`** for the caller.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksEmptyBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyTasksGetTaskCategoriesResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/tasks/get-task-api:
+    post:
+      tags: [tasks]
+      summary: Legacy task center — paginated job list
+      operationId: postTasksGetTaskApiV1
+      description: |
+        Parity with legacy **`POST /api/task/getTaskApi`**. Filters **`app_generation_job`** by optional **`taskClass`** (kind),
+        **`state`** (status), and optional **`projectId`** (matches **`payload.project_legacy_id`** as a string when set on the job).
+        **`page`** is 1-based; **`limit`** is 1–100.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksGetTaskApiBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyTasksGetTaskApiResponse"
+        "400":
+          description: Invalid pagination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/tasks/task-details:
+    post:
+      tags: [tasks]
+      summary: Legacy task center — task details (not implemented)
+      operationId: postTasksTaskDetailsV1
+      description: |
+        Accepts legacy **`{ "taskId": number }`** (SQLite **`o_tasks.id`**). Returns **501** until numeric ids map to **`app_generation_job`** UUIDs; use **`GET /api/v1/jobs/{id}`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksTaskDetailsBody"
+      responses:
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Numeric task id not mapped to UUID jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -7907,6 +8061,98 @@ components:
           type: boolean
           description: |
             True when user_id and plan_tier were applied to app_user_profile (first receipt only).
+
+    LegacyTasksEmptyBody:
+      type: object
+      additionalProperties: false
+      description: Legacy **`POST /api/task/getProject`** and **`getTaskCategories`** used an empty object body.
+
+    LegacyTasksGetProjectItem:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_project.legacy_id (integer project key)
+        name:
+          type: string
+
+    LegacyTasksGetProjectResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyTasksGetProjectItem"
+
+    LegacyTasksTaskClassRow:
+      type: object
+      required: [taskClass]
+      properties:
+        taskClass:
+          type: string
+          description: Same as `app_generation_job.kind`
+
+    LegacyTasksGetTaskCategoriesResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyTasksTaskClassRow"
+
+    LegacyTasksGetTaskApiBody:
+      type: object
+      required: [page, limit]
+      additionalProperties: false
+      properties:
+        state:
+          type: string
+          nullable: true
+          description: Filters `status` when set (non-empty after trim)
+        taskClass:
+          type: string
+          nullable: true
+          description: Filters `kind` when set (non-empty after trim)
+        projectId:
+          type: integer
+          format: int32
+          nullable: true
+          description: When set, requires `payload.project_legacy_id` on the job (string match)
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+
+    LegacyTasksGetTaskApiResponse:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobRow"
+        total:
+          type: integer
+          format: int64
+          description: Total rows matching filters (not just this page)
+
+    LegacyTasksTaskDetailsBody:
+      type: object
+      required: [taskId]
+      additionalProperties: false
+      properties:
+        taskId:
+          type: integer
+          format: int32
 
     JobRow:
       type: object

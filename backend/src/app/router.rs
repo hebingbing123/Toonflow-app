@@ -26,6 +26,7 @@ use crate::settings_vendors;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
+use crate::tasks_legacy;
 use crate::usage;
 use crate::visual_manual;
 
@@ -71,6 +72,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(script_agent::router())
         .merge(script_asset_extract::router())
         .merge(storyboards::router())
+        .merge(tasks_legacy::router())
         .merge(skills::router())
         .merge(visual_manual::router())
         .merge(harness::http::router())
