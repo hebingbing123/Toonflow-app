@@ -28,6 +28,8 @@ pub enum ApiError {
     InvalidWebhookSignature,
     /// Unexpected failure (logged server-side); avoid leaking internals to clients.
     Internal,
+    /// `OPENAI_API_KEY` / `LLM_API_KEY` not set — script extract and WS agent flows need it.
+    LlmNotConfigured,
 }
 
 impl IntoResponse for ApiError {
@@ -70,6 +72,11 @@ impl IntoResponse for ApiError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "internal_error",
                 "Internal server error",
+            ),
+            ApiError::LlmNotConfigured => (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "llm_not_configured",
+                "LLM is not configured (set OPENAI_API_KEY or LLM_API_KEY)",
             ),
         };
 

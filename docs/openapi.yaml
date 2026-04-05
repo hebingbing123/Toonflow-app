@@ -920,6 +920,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/scripts/extract-assets:
+    post:
+      tags: [scripts]
+      summary: Start async script asset extraction (legacy `extractAssets` parity)
+      operationId: startScriptAssetExtractV1
+      description: |
+        Marks selected scripts **`extract_state = 2`** then **`0`** while processing, then **`1`** on success or **`-1`** on failure (same integers as legacy SQLite).
+        Work runs in a **background task** after **`200`** — response body is only **`{ "status": "accepted", "message": "…" }`** (legacy returned success text then continued in-process).
+
+        **Requires** **`DATABASE_URL`**, **`OPENAI_API_KEY`** / **`LLM_API_KEY`**, and migrated tables **`app_asset`** / **`app_script_asset`**.
+
+        System prompt: bundled default under `backend/data/prompts/script_asset_extraction.default.txt`, or override with env **`SCRIPT_ASSET_EXTRACT_PROMPT_PATH`** (absolute or cwd-relative file).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractAssetsStartBody"
+      responses:
+        "200":
+          description: Job accepted (processing continues asynchronously)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractAssetsAcceptedResponse"
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database unset, auth unset, or LLM not configured (`llm_not_configured`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/scripts/legacy/{legacy_id}:
     get:
       tags: [scripts]
@@ -2244,6 +2290,41 @@ components:
         error_reason:
           type: string
           nullable: true
+
+    ExtractAssetsStartBody:
+      type: object
+      additionalProperties: false
+      required: [project_legacy_id, script_legacy_ids]
+      properties:
+        project_legacy_id:
+          type: integer
+          format: int32
+          minimum: 1
+        script_legacy_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minimum: 1
+          minItems: 1
+          maxItems: 100
+        group_size:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 20
+          default: 5
+
+    ExtractAssetsAcceptedResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: string
+          example: accepted
+        message:
+          type: string
+          example: asset extraction started
 
     StoryboardRow:
       type: object

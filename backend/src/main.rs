@@ -15,6 +15,7 @@ mod notify_hub;
 mod projects;
 mod rate_limit;
 mod request_id_mw;
+mod script_asset_extract;
 mod scripts;
 mod skills;
 mod state;
