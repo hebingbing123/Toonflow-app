@@ -69,12 +69,23 @@ mod contract_smoke_tests {
         }
     }
 
+    /// Same as [`smoke_state`] but JWT verification is disabled (production analogue: **`SUPABASE_JWT_SECRET` unset**).
+    fn smoke_state_without_jwt_secret() -> AppState {
+        AppState {
+            pool: None,
+            jwt_secret: None,
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+        }
+    }
+
     fn test_jwt(sub: Uuid) -> String {
         jwt_fixture::encode_supabase_style(sub, TEST_JWT_SECRET)
     }
 
-    async fn oneshot_json(req: Request<Body>) -> (StatusCode, Value) {
-        let app = build_router(smoke_state());
+    async fn oneshot_json_state(state: AppState, req: Request<Body>) -> (StatusCode, Value) {
+        let app = build_router(state);
         let res = app.oneshot(req).await.unwrap();
         let status = res.status();
         let body = axum::body::to_bytes(res.into_body(), MAX_JSON)
@@ -82,6 +93,10 @@ mod contract_smoke_tests {
             .unwrap();
         let v: Value = serde_json::from_slice(&body).expect("response body is json");
         (status, v)
+    }
+
+    async fn oneshot_json(req: Request<Body>) -> (StatusCode, Value) {
+        oneshot_json_state(smoke_state(), req).await
     }
 
     async fn get_json(uri: &str) -> (StatusCode, Value) {
@@ -254,6 +269,41 @@ mod contract_smoke_tests {
         let (status, v) = get_json("/api/v1/models").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
+    }
+
+    /// With a valid-looking Bearer token, missing JWT secret must yield **503** `auth_not_configured` (not **503** `database_error`).
+    #[tokio::test]
+    async fn models_auth_not_configured_without_jwt_secret_even_with_bearer() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = oneshot_json_state(
+            smoke_state_without_jwt_secret(),
+            Request::builder()
+                .uri("/api/v1/models")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "auth_not_configured");
+    }
+
+    #[tokio::test]
+    async fn projects_summary_auth_not_configured_without_jwt_secret_even_with_bearer() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = oneshot_json_state(
+            smoke_state_without_jwt_secret(),
+            Request::builder()
+                .uri("/api/v1/projects/summary")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "auth_not_configured");
     }
 
     #[tokio::test]
