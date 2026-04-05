@@ -1181,70 +1181,76 @@ class _HomePageState extends State<HomePage> {
                                 ),
                           ),
                       ],
+                      if (scriptList.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: DropdownButton<int?>(
+                            value: assetsFilterScriptLegacyId[0],
+                            isExpanded: true,
+                            hint: const Text('按剧本筛选资产列表'),
+                            items: [
+                              const DropdownMenuItem<int?>(
+                                value: null,
+                                child: Text('（全部，不按剧本筛选）'),
+                              ),
+                              ...scriptList.map(
+                                (s) => DropdownMenuItem<int?>(
+                                  value: s.legacyId,
+                                  child: Text(
+                                    '#${s.legacyId} ${s.name ?? ""}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            onChanged: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : (v) async {
+                                    setDialogState(
+                                      () => assetsScriptFilterLoading[0] = true,
+                                    );
+                                    assetsFilterScriptLegacyId[0] = v;
+                                    if (v == null) {
+                                      assetsForScriptRef[0] = null;
+                                    }
+                                    try {
+                                      await reloadAssetsAndStats();
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => assetsScriptFilterLoading[0] =
+                                              false,
+                                        );
+                                      }
+                                    }
+                                  },
+                          ),
+                        ),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Wrap(
-                          spacing: 4,
-                          children: [
-                            TextButton(
-                              onPressed: assetsLoading[0] ||
-                                      assetsBusy[0] ||
-                                      assetsScriptFilterLoading[0] ||
-                                      scriptList.isEmpty
-                                  ? null
-                                  : () async {
-                                      assetsFilterScriptLegacyId[0] =
-                                          scriptList.first.legacyId;
+                        child: TextButton(
+                          onPressed: assetsLoading[0] ||
+                                  assetsScriptFilterLoading[0]
+                              ? null
+                              : () async {
+                                  setDialogState(() => assetsLoading[0] = true);
+                                  try {
+                                    await reloadAssetsAndStats();
+                                  } finally {
+                                    if (ctx.mounted) {
                                       setDialogState(
-                                        () => assetsScriptFilterLoading[0] = true,
+                                        () => assetsLoading[0] = false,
                                       );
-                                      try {
-                                        await reloadAssetsAndStats();
-                                      } finally {
-                                        if (ctx.mounted) {
-                                          setDialogState(
-                                            () => assetsScriptFilterLoading[0] =
-                                                false,
-                                          );
-                                        }
-                                      }
-                                    },
-                              child: const Text('按首剧本筛选资产'),
-                            ),
-                            TextButton(
-                              onPressed: assetsFilterScriptLegacyId[0] == null ||
-                                      assetsScriptFilterLoading[0]
-                                  ? null
-                                  : () {
-                                      assetsFilterScriptLegacyId[0] = null;
-                                      assetsForScriptRef[0] = null;
-                                      setDialogState(() {});
-                                    },
-                              child: const Text('清除剧本筛选'),
-                            ),
-                            TextButton(
-                              onPressed: assetsLoading[0] ||
-                                      assetsScriptFilterLoading[0]
-                                  ? null
-                                  : () async {
-                                      setDialogState(() => assetsLoading[0] = true);
-                                      try {
-                                        await reloadAssetsAndStats();
-                                      } finally {
-                                        if (ctx.mounted) {
-                                          setDialogState(
-                                            () => assetsLoading[0] = false,
-                                          );
-                                        }
-                                      }
-                                    },
-                              child: Text(
-                                assetsLoading[0]
-                                    ? '刷新资产…'
-                                    : '刷新资产列表',
-                              ),
-                            ),
-                          ],
+                                    }
+                                  }
+                                },
+                          child: Text(
+                            assetsLoading[0]
+                                ? '刷新资产…'
+                                : '刷新资产列表',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),

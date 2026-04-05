@@ -318,6 +318,30 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, assets_body) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "assets={assets_body}");
+        assert!(assets_body["items"].is_array());
+        assert_eq!(
+            assets_body["total"].as_i64().unwrap_or(-1),
+            assets_body["items"]
+                .as_array()
+                .map(|a| a.len() as i64)
+                .unwrap_or(-2),
+            "unpaged list: total matches items length"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .method(Method::DELETE)
                     .uri(format!("/api/v1/projects/legacy/{legacy_id}"))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
