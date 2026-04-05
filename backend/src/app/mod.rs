@@ -743,6 +743,28 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .uri("/api/v1/projects/summary")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, sum_mid) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "sum_mid={sum_mid}");
+        assert_eq!(sum_mid["video_count"], 0);
+        let g_role = sum_mid["role_count"].as_i64().expect("summary role_count");
+        let p_role = stats_mid["role_count"].as_i64().expect("stats role_count");
+        assert!(
+            g_role >= p_role,
+            "projects/summary role_count ({g_role}) should be >= per-project stats ({p_role})"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .uri(format!(
                         "/api/v1/projects/legacy/{legacy_id}/assets?asset_type=role&name=pg_contract"
                     ))
