@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
+  String? _skillsBinaryProbeBody;
   String? _modelsCatalogBody;
   String? _textModelDefaultBody;
   String? _modelDetailBody;
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
+  bool _loadingSkillsBinaryProbe = false;
   bool _loadingModelsCatalog = false;
   bool _loadingTextModelDefault = false;
   bool _loadingModelDetail = false;
@@ -458,6 +460,44 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingVisualManualProbe = false;
+      });
+    }
+  }
+
+  Future<void> _callSkillsBinaryProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingSkillsBinaryProbe = true;
+      _error = null;
+      _skillsBinaryProbeBody = null;
+    });
+    try {
+      const path = '_smoke/binary_probe.png';
+      final bytes = await fetchSkillsBinaryV1(token, path);
+      if (!mounted) return;
+      final head = bytes.length >= 4 ? bytes.sublist(0, 4) : bytes;
+      final magicOk = head.length == 4 &&
+          head[0] == 0x89 &&
+          head[1] == 0x50 &&
+          head[2] == 0x4e &&
+          head[3] == 0x47;
+      setState(() {
+        _skillsBinaryProbeBody =
+            'path=$path · bytes=${bytes.length} · png_magic=$magicOk';
+        _loadingSkillsBinaryProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillsBinaryProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillsBinaryProbe = false;
       });
     }
   }
@@ -3709,6 +3749,19 @@ class _HomePageState extends State<HomePage> {
               if (_visualManualProbeBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('visual-manual: $_visualManualProbeBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingSkillsBinaryProbe ? null : _callSkillsBinaryProbe,
+                child: Text(
+                  _loadingSkillsBinaryProbe
+                      ? '请求中…'
+                      : 'GET /api/v1/skills/binary (_smoke PNG)',
+                ),
+              ),
+              if (_skillsBinaryProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('skills/binary: $_skillsBinaryProbeBody'),
               ],
               const SizedBox(height: 8),
               Wrap(
