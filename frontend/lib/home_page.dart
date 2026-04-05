@@ -1062,12 +1062,33 @@ class _HomePageState extends State<HomePage> {
       final statsRef = <ProjectStats?>[statsSnap];
       final assetsRef = <ListAssetsResponse?>[assetsSnap];
       final assetsLoading = <bool>[false];
+      final assetsBusy = <bool>[false];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
+              Future<void> reloadAssetsAndStats() async {
+                try {
+                  assetsRef[0] = await fetchProjectAssetsByLegacyId(
+                    token,
+                    p.legacyId,
+                  );
+                } catch (_) {
+                  assetsRef[0] = null;
+                }
+                try {
+                  statsRef[0] = await fetchProjectStatsByLegacyId(
+                    token,
+                    p.legacyId,
+                  );
+                } catch (_) {}
+                if (ctx.mounted) {
+                  setDialogState(() {});
+                }
+              }
+
               return AlertDialog(
                 title: Text(
                   detail.project.name ?? 'legacy #${detail.project.legacyId}',
@@ -1149,6 +1170,213 @@ class _HomePageState extends State<HomePage> {
                                 : '刷新资产列表',
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 0,
+                        children: [
+                          TextButton(
+                            onPressed: assetsBusy[0] || assetsLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    try {
+                                      final ts = DateTime.now()
+                                          .millisecondsSinceEpoch;
+                                      await createProjectAssetUnderLegacy(
+                                        token,
+                                        p.legacyId,
+                                        name: 'role_probe_$ts',
+                                        type: 'role',
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('已 POST 测试资产'),
+                                          ),
+                                        );
+                                      }
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST 测试资产'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final first = assetsRef[0]!.items.first;
+                                    try {
+                                      await patchProjectAssetByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        {'name': '${first.name}·patched'},
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('已 PATCH 首条资产名称'),
+                                          ),
+                                        );
+                                      }
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('PATCH 首条'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final last = assetsRef[0]!.items.last;
+                                    try {
+                                      await deleteProjectAssetByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        last.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '已 DELETE 资产 #${last.legacyId}',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('DELETE 末条'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    scriptList.isEmpty ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final sid = scriptList.first.legacyId;
+                                    final aid = assetsRef[0]!.items.first.legacyId;
+                                    try {
+                                      await linkScriptToAssetByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        sid,
+                                        aid,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '已 PUT 关联 script#$sid · asset#$aid',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('PUT 关联首剧本·首资产'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    scriptList.isEmpty ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final sid = scriptList.first.legacyId;
+                                    final aid = assetsRef[0]!.items.first.legacyId;
+                                    try {
+                                      await unlinkScriptFromAssetByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        sid,
+                                        aid,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('已 DELETE 剧本–资产关联'),
+                                          ),
+                                        );
+                                      }
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('DELETE 取消关联'),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       Text('${scriptList.length} script(s)'),
