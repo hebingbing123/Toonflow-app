@@ -1349,3 +1349,104 @@ Future<ProjectStats> fetchProjectStatsByLegacyId(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectStats.fromJson(map);
 }
+
+/// Row from **`GET …/projects/legacy/{id}/assets`** — OpenAPI **`AssetRow`**.
+class AssetRow {
+  const AssetRow({
+    required this.id,
+    required this.legacyId,
+    required this.name,
+    required this.assetType,
+    this.description,
+    this.createTimeMs,
+  });
+
+  final String id;
+  final int legacyId;
+  final String name;
+  final String assetType;
+  final String? description;
+  final int? createTimeMs;
+
+  factory AssetRow.fromJson(Map<String, dynamic> json) {
+    return AssetRow(
+      id: json['id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String,
+      assetType: json['asset_type'] as String,
+      description: json['description'] as String?,
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+    );
+  }
+}
+
+/// Body of **`GET …/assets`** — OpenAPI **`ListAssetsResponse`**.
+class ListAssetsResponse {
+  const ListAssetsResponse({
+    required this.items,
+    required this.total,
+  });
+
+  final List<AssetRow> items;
+  final int total;
+
+  factory ListAssetsResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return ListAssetsResponse(
+      items: raw
+          .map((e) => AssetRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toInt(),
+    );
+  }
+}
+
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets` — see `listProjectAssetsByLegacyV1`.
+Future<ListAssetsResponse> fetchProjectAssetsByLegacyId(
+  String accessToken,
+  int projectLegacyId, {
+  int? scriptLegacyId,
+  String? assetType,
+  String? name,
+  int? page,
+  int? limit,
+}) async {
+  final qp = <String, String>{};
+  if (scriptLegacyId != null) {
+    qp['script_legacy_id'] = '$scriptLegacyId';
+  }
+  if (assetType != null && assetType.isNotEmpty) {
+    qp['asset_type'] = assetType;
+  }
+  if (name != null && name.isNotEmpty) {
+    qp['name'] = name;
+  }
+  if (page != null) {
+    qp['page'] = '$page';
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  var uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets',
+  );
+  if (qp.isNotEmpty) {
+    uri = uri.replace(queryParameters: qp);
+  }
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListAssetsResponse.fromJson(map);
+}

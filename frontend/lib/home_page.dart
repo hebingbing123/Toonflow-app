@@ -1052,8 +1052,16 @@ class _HomePageState extends State<HomePage> {
       } catch (_) {
         statsSnap = null;
       }
+      ListAssetsResponse? assetsSnap;
+      try {
+        assetsSnap = await fetchProjectAssetsByLegacyId(token, p.legacyId);
+      } catch (_) {
+        assetsSnap = null;
+      }
       if (!mounted) return;
       final statsRef = <ProjectStats?>[statsSnap];
+      final assetsRef = <ListAssetsResponse?>[assetsSnap];
+      final assetsLoading = <bool>[false];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -1098,6 +1106,50 @@ class _HomePageState extends State<HomePage> {
                                 color: Theme.of(ctx).colorScheme.outline,
                               ),
                         ),
+                      const SizedBox(height: 12),
+                      if (assetsRef[0] != null)
+                        Text(
+                          assetsRef[0]!.items.isEmpty
+                              ? 'GET …/assets：total=0'
+                              : 'GET …/assets：total=${assetsRef[0]!.total} · ${assetsRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsRef[0]!.items.length > 6 ? '…' : ''}',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        )
+                      else
+                        Text(
+                          'GET …/assets 未加载',
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(ctx).colorScheme.outline,
+                              ),
+                        ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: assetsLoading[0]
+                              ? null
+                              : () async {
+                                  setDialogState(() => assetsLoading[0] = true);
+                                  try {
+                                    assetsRef[0] =
+                                        await fetchProjectAssetsByLegacyId(
+                                      token,
+                                      p.legacyId,
+                                    );
+                                  } catch (_) {
+                                    assetsRef[0] = null;
+                                  }
+                                  if (ctx.mounted) {
+                                    setDialogState(
+                                      () => assetsLoading[0] = false,
+                                    );
+                                  }
+                                },
+                          child: Text(
+                            assetsLoading[0]
+                                ? '刷新资产…'
+                                : '刷新资产列表',
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       Text('${scriptList.length} script(s)'),
                       Align(

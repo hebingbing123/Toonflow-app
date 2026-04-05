@@ -28,7 +28,7 @@
 |--------|--------|-------------|------|
 | `/api/agents/clearMemory`、`getMemory` | Agent 记忆 | ✅ `POST /api/v1/agents/memory/clear`、`query`；append 见 OpenAPI | 旧「按 type 清」语义已对齐方向 |
 | `/api/artStyle/*` | 画风库 CRUD / 抽 prompt | ⏳ | 需 PG 表或并入 `metadata` 策略 |
-| `/api/assets/*` | 素材 CRUD、轮询出图等 | 🟡 | **CRUD（无出图）**：**`POST/GET/PATCH/DELETE …/projects/legacy/{id}/assets`**；**`GET` 列表**：**`{ items, total }`**，可选 **`script_legacy_id`**、**`asset_type`**、**`name`**、**`page`/`limit`**（对齐 **`getAssetsApi`** 分页/筛选；无父子资产层级）；**`stats.role_count`**；**出图轮询 / 批量生成**仍 ⏳ |
+| `/api/assets/*` | 素材 CRUD、轮询出图等 | 🟡 | **CRUD（无出图）**：**`POST/GET/PATCH/DELETE …/projects/legacy/{id}/assets`**；**`GET` 列表**：**`{ items, total }`**，可选 **`script_legacy_id`**、**`asset_type`**、**`name`**、**`page`/`limit`**（对齐 **`getAssetsApi`** 分页/筛选；无父子资产层级）；**`stats.role_count`**；Flutter **`rust_api`**：**`fetchProjectAssetsByLegacyId`** + 项目详情对话框调试行；**出图轮询 / 批量生成**仍 ⏳ |
 | `/api/assetsGenerate/*` | 素材批量生成 / polish | ⏳ | 与 jobs + LLM 管线绑定 |
 | `/api/cornerScape/getAllAssets` | 角落素材 | ⏳ | |
 | `/api/general/generalStatistics` | 多项目统计 | ✅ `GET /api/v1/projects/summary` | 单项目见 `…/stats` |
