@@ -5,6 +5,7 @@ use crate::art_styles;
 use crate::assets;
 use crate::assets_generate;
 use crate::billing;
+use crate::general_legacy;
 use crate::harness;
 use crate::jobs;
 use crate::models_catalog;
@@ -17,6 +18,7 @@ use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_agent;
 use crate::script_asset_extract;
 use crate::scripts;
+use crate::scripts_legacy;
 use crate::settings_about;
 use crate::settings_agent_deploy;
 use crate::settings_danger;
@@ -63,12 +65,14 @@ pub fn build_router(state: AppState) -> Router {
         .merge(agent_memory::router())
         .merge(models_catalog::router())
         .merge(projects::router())
+        .merge(general_legacy::router())
         .merge(art_styles::router())
         .merge(novels::router())
         .merge(production_legacy::router())
         .merge(assets::router())
         .merge(assets_generate::router())
         .merge(scripts::router())
+        .merge(scripts_legacy::router())
         .merge(script_agent::router())
         .merge(script_asset_extract::router())
         .merge(storyboards::router())
