@@ -34,7 +34,7 @@
 | `/api/general/generalStatistics` | 多项目统计 | ✅ `GET /api/v1/projects/summary` | 单项目见 `…/stats` |
 | `/api/general/getSingleProject`、`updateProject` | 项目读写 | 🟡 | 读写在 **`/api/v1/projects/legacy/{id}`** 等；旧「单项目」形态用 legacy id 映射 |
 | `/api/login/login` | 本地账号登录 | 🔀 | **Supabase Auth**（Flutter `supabase_flutter`） |
-| `/api/migrate/migrateData` | 数据迁移 | 🔀 | **`toonflow-legacy-import`** + **`promote_legacy_from_staging()`**（含 **`o_novel`→`app_novel`**；返回 **`novels_upserted`**；非 HTTP 热路径） |
+| `/api/migrate/migrateData` | 数据迁移 | 🔀 | **`toonflow-legacy-import`** + **`promote_legacy_from_staging()`**（含 **`o_novel`→`app_novel`**、**`o_assets`→`app_asset`**、**`o_scriptAssets`→`app_script_asset`**；返回 **`novels_upserted`** / **`assets_upserted`** / **`script_assets_upserted`**；非 HTTP 热路径） |
 | `/api/modelSelect/getModelList`、`getModelDetail` | 模型目录 | ✅ `GET /api/v1/models`、`/api/v1/models/detail` | 静态 JSON 嵌入 |
 | `/api/novel/*` | 小说与事件管线 | 🟡 | **`app_novel` + REST**：**`GET`/`POST …/projects/legacy/{id}/novels`**（**`search`/`page`/`limit`**）、**`GET`/`PATCH`/`DELETE …/novels/{nid}`**；Flutter **`rust_api`**：**`fetchProjectNovelsByLegacyId`**、**`fetchProjectNovelByLegacyIds`**、**`createProjectNovelUnderLegacy`**、**`patchProjectNovelByLegacyIds`**、**`deleteProjectNovelByLegacyIds`**；项目详情对话框 **GET …/novels** 摘要 + **刷新小说列表** + **POST/GET/PATCH/DELETE** 探针；**无 DB 烟雾** → **503**；**`pg_contract`** 含创建/列表/单条/补丁/删除；旧 **批量新增 + cleanNovel 事件管线**、**`o_event*`** 仍 ⏳ |
 | `/api/other/getVersion` | 版本号 | ✅ `GET /api/v1/version` | |
