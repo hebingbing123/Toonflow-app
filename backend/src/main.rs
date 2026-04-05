@@ -19,6 +19,7 @@ mod notify_hub;
 mod novels;
 mod novels_legacy;
 mod production_legacy;
+mod project_legacy;
 mod projects;
 mod prompts;
 mod rate_limit;

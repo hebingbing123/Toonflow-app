@@ -50,6 +50,8 @@ info:
 
     **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
 
+    **Legacy project list/delete (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) returns **`{ "data": [ProjectRow] }`** (same as **`GET /api/v1/projects`**). **`POST …/project/delete-project`** (**`{ "id" }`**) deletes by **`app_project.legacy_id`** like **`DELETE /api/v1/projects/legacy/{legacy_id}`**.
+
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
     **Legacy novels (read/delete):** **`POST /api/v1/novels/get-novel-data`** and **`POST …/novels/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**); the first returns full **`NovelRow`** rows, the second returns **`{ id, index, chapter }`** (legacy id + **`chapter_index`**). **`POST …/novels/batch-delete`** deletes **`app_novel`** rows by **`legacy_id`** for the caller (no SQLite **`o_event*`** cascade).
@@ -1529,6 +1531,90 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/get-project:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — list all projects for the current user
+      operationId: postProjectGetProjectV1
+      description: |
+        Parity with **`POST /api/project/getProject`**. Body **`{}`**. Returns **`{ "data": [ProjectRow] }`**
+        (same rows as **`GET /api/v1/projects`**, ordered by **`create_time_ms`** then **`legacy_id`** descending).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksEmptyBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyGeneralGetSingleProjectResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/delete-project:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — delete project by legacy id
+      operationId: postProjectDeleteProjectV1
+      description: |
+        Parity with **`POST /api/project/delProject`**. Body **`{ "id" }`** is **`app_project.legacy_id`**.
+        Same deletion semantics as **`DELETE /api/v1/projects/legacy/{legacy_id}`** (including **`app_agent_memory`** cleanup).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyProjectDeleteProjectBody"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyProjectDeleteProjectResponse"
+        "400":
+          description: Invalid id (non-positive)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No owned project with that legacy id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
           content:
             application/json:
               schema:
@@ -8436,6 +8522,24 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ProjectRow"
+
+    LegacyProjectDeleteProjectBody:
+      type: object
+      required: [id]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_project.legacy_id (SQLite o_project.id)
+
+    LegacyProjectDeleteProjectResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: 删除项目成功
 
     LegacyGeneralUpdateProjectBody:
       type: object

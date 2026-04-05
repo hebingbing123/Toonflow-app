@@ -12,6 +12,7 @@ use crate::models_catalog;
 use crate::novels;
 use crate::novels_legacy;
 use crate::production_legacy;
+use crate::project_legacy;
 use crate::projects;
 use crate::prompts;
 use crate::rate_limit::governor_layer_from_env;
@@ -66,6 +67,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(agent_memory::router())
         .merge(models_catalog::router())
         .merge(projects::router())
+        .merge(project_legacy::router())
         .merge(general_legacy::router())
         .merge(art_styles::router())
         .merge(novels::router())
