@@ -50,7 +50,7 @@ info:
 
     **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
 
-    **Legacy project list/delete (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) returns **`{ "data": [ProjectRow] }`** (same as **`GET /api/v1/projects`**). **`POST …/project/delete-project`** (**`{ "id" }`**) deletes by **`app_project.legacy_id`** like **`DELETE /api/v1/projects/legacy/{legacy_id}`**.
+    **Legacy project CRUD posts (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**. **`POST …/project/delete-project`** (**`{ "id" }`**) like **`DELETE …/projects/legacy/{id}`**. **`POST …/project/add-project`** / **`POST …/project/edit-project`**: strict camelCase bodies matching old **`addProject`** / **`editProject`** (all string fields); **`type`** is SQLite **`o_project.type`**; PG stores a single **`mode`** — non-empty **`mode`** wins, else **`type`**. Success messages align with Electron (**`新增项目成功`** / **`编辑项目成功`**).
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
@@ -1595,6 +1595,89 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LegacyProjectDeleteProjectResponse"
+        "400":
+          description: Invalid id (non-positive)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No owned project with that legacy id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/add-project:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — create project (strict string fields)
+      operationId: postProjectAddProjectV1
+      description: |
+        Parity with **`POST /api/project/addProject`**. All listed body properties are required strings (may be empty).
+        Allocates **`legacy_id`** like **`POST /api/v1/projects`** under an advisory lock. Returns **`200`** with a success **`message`** (not **`201`** + row).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyProjectAddProjectBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyProjectMutationMessageResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/edit-project:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — replace project fields by legacy id
+      operationId: postProjectEditProjectV1
+      description: |
+        Parity with **`POST /api/project/editProject`**. **`id`** is **`app_project.legacy_id`**. All other properties are required strings (may be empty); **`UPDATE`** replaces the row’s text columns (empty strings clear to **`NULL`** after trim).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyProjectEditProjectBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyProjectMutationMessageResponse"
         "400":
           description: Invalid id (non-positive)
           content:
@@ -8540,6 +8623,98 @@ components:
         message:
           type: string
           example: 删除项目成功
+
+    LegacyProjectMutationMessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    LegacyProjectAddProjectBody:
+      type: object
+      additionalProperties: false
+      required:
+        - projectType
+        - name
+        - intro
+        - type
+        - artStyle
+        - directorManual
+        - videoRatio
+        - imageModel
+        - videoModel
+        - imageQuality
+        - mode
+      properties:
+        projectType:
+          type: string
+        name:
+          type: string
+        intro:
+          type: string
+        type:
+          type: string
+          description: SQLite o_project.type; with mode maps to app_project.mode (non-empty mode wins)
+        artStyle:
+          type: string
+        directorManual:
+          type: string
+        videoRatio:
+          type: string
+        imageModel:
+          type: string
+        videoModel:
+          type: string
+        imageQuality:
+          type: string
+        mode:
+          type: string
+
+    LegacyProjectEditProjectBody:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - intro
+        - type
+        - artStyle
+        - directorManual
+        - videoRatio
+        - imageModel
+        - videoModel
+        - imageQuality
+        - projectType
+        - mode
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_project.legacy_id
+        name:
+          type: string
+        intro:
+          type: string
+        type:
+          type: string
+          description: SQLite o_project.type; with mode maps to app_project.mode (non-empty mode wins)
+        artStyle:
+          type: string
+        directorManual:
+          type: string
+        videoRatio:
+          type: string
+        imageModel:
+          type: string
+        videoModel:
+          type: string
+        imageQuality:
+          type: string
+        projectType:
+          type: string
+        mode:
+          type: string
 
     LegacyGeneralUpdateProjectBody:
       type: object

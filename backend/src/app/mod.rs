@@ -1720,6 +1720,40 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn project_add_project_unauthorized_without_bearer() {
+        let body = r#"{"projectType":"","name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","mode":""}"#;
+        let (status, v) = post_json("/api/v1/project/add-project", body).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_add_project_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let body = r#"{"projectType":"","name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","mode":""}"#;
+        let (status, v) = post_json_bearer("/api/v1/project/add-project", &token, body).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_edit_project_unauthorized_without_bearer() {
+        let body = r#"{"id":1,"name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","projectType":"","mode":""}"#;
+        let (status, v) = post_json("/api/v1/project/edit-project", body).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_edit_project_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let body = r#"{"id":1,"name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","projectType":"","mode":""}"#;
+        let (status, v) = post_json_bearer("/api/v1/project/edit-project", &token, body).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn scripts_get_script_api_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/scripts/get-script-api", r#"{"projectId":1}"#).await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
