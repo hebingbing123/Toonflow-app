@@ -25,6 +25,7 @@ mod script_asset_extract;
 mod scripts;
 mod settings_about;
 mod settings_agent_deploy;
+mod settings_danger;
 mod settings_dev;
 mod settings_memory_config;
 mod settings_vendors;

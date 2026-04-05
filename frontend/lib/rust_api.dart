@@ -671,6 +671,22 @@ Future<int> postSettingsVendorsAddV1(String accessToken, {required String tsCode
   return res.statusCode;
 }
 
+/// `POST /api/v1/settings/danger/delete-all-data` — OpenAPI `postSettingsDangerDeleteAllDataV1` (typically **501**).
+Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/danger/delete-all-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({

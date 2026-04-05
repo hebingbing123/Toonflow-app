@@ -775,6 +775,31 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_danger_delete_all_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/settings/danger/delete-all-data", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_danger_delete_all_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/settings/danger/delete-all-data", &token, "{}").await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_danger_clear_database_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/settings/danger/clear-database", &token, "{}").await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
     async fn script_agent_get_plan_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/script-agent/get-plan-data",

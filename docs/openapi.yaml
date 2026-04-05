@@ -38,6 +38,8 @@ info:
     **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields then **501** (no live LLM/image/video probe here).
     **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** accept the same *top-level* shapes as legacy **`addVendor`** / **`updateVendor`** / **`deleteVendor`** / **`enableVendor`** / **`updateCode`** / **`getCodeByLink`**, then **501** (no **`o_vendorConfig`** table, no TS/vm2, no server-side URL fetch).
 
+    **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS exposes **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** with body **`{}`** only, then **501** **`not_implemented`** — no bulk wipe endpoint (use Supabase / ops).
+
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`** (static, no Postgres). **`POST …/deploy-model`** and **`POST …/set-key`** validate bodies then **501** (no per-user deploy table / no API keys over HTTP).
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, then **501** **`not_implemented`** until **`o_agentWorkData`**-equivalent persistence exists (live flows use **Harness WS**).
@@ -839,6 +841,88 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "501":
           description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/danger/delete-all-data:
+    post:
+      tags: [settings]
+      summary: Legacy wipe all local tables (not supported)
+      operationId: postSettingsDangerDeleteAllDataV1
+      description: |
+        Bearer JWT. Body must be **`{}`** (no extra keys). Replaces legacy **`POST /api/other/deleteAllData`** intent; returns **501** **`not_implemented`** — no SQLite **`initDB(..., true)`** equivalent on the hosted API.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentDeployListBody"
+      responses:
+        "400":
+          description: Unknown JSON fields in body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Bulk wipe not supported on this API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/danger/clear-database:
+    post:
+      tags: [settings]
+      summary: Legacy drop all SQLite tables and re-init (not supported)
+      operationId: postSettingsDangerClearDatabaseV1
+      description: |
+        Bearer JWT. Body must be **`{}`**. Replaces legacy **`GET /api/setting/dbConfig/clearData`** (verb changed to **POST** for SaaS); returns **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentDeployListBody"
+      responses:
+        "400":
+          description: Unknown JSON fields in body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Bulk wipe not supported on this API
           content:
             application/json:
               schema:
