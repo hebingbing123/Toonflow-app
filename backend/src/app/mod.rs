@@ -859,6 +859,14 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn prompts_patch_unknown_legacy_returns_404_without_database() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer("/api/v1/prompts/99", &token, r#"{"data":"x"}"#).await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        assert_eq!(v["code"], "not_found");
+    }
+
+    #[tokio::test]
     async fn agents_memory_query_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -1500,6 +1508,11 @@ mod pg_contract_tests {
     const PROMO_ART_STYLE_LEG: i32 = 5_010_004;
 
     async fn cleanup_promote_staging_fixtures(pool: &PgPool) {
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let _ = sqlx::query("DELETE FROM public.app_user_prompt WHERE owner_user_id = $1")
+            .bind(sub)
+            .execute(pool)
+            .await;
         let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
             .bind(PROMO_PROJECT_LEG)
             .execute(pool)
@@ -1514,7 +1527,7 @@ mod pg_contract_tests {
             .await;
         let _ = sqlx::query(
             r#"DELETE FROM legacy_staging.snapshot
-               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style')"#,
+               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style','pg_promote_prompt')"#,
         )
         .execute(pool)
         .await;
@@ -2167,6 +2180,21 @@ mod pg_contract_tests {
         .await
         .expect("staging o_artStyle");
 
+        let o_prompt_row = serde_json::json!({
+            "id": 1,
+            "name": "事件提取",
+            "type": "eventExtraction",
+            "data": "pg_promoted_prompt_body_evt",
+        });
+        sqlx::query(
+            r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+               VALUES ('o_prompt', 'pg_promote_prompt', $1)"#,
+        )
+        .bind(Json(o_prompt_row))
+        .execute(&pool)
+        .await
+        .expect("staging o_prompt");
+
         sqlx::query("SELECT 1 FROM public.promote_legacy_from_staging() LIMIT 1")
             .execute(&pool)
             .await
@@ -2253,6 +2281,7 @@ mod pg_contract_tests {
         assert_eq!(row["asset_type"].as_str(), Some("role"));
 
         let res = app
+            .clone()
             .oneshot(
                 Request::builder()
                     .uri(format!(
@@ -2274,7 +2303,123 @@ mod pg_contract_tests {
             Some(i64::from(PROMO_ASSET_LEG))
         );
 
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, prompts_body) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "prompts={prompts_body}");
+        let parr = prompts_body.as_array().expect("prompts json array");
+        assert_eq!(parr.len(), 3);
+        let p1 = parr
+            .iter()
+            .find(|row| row["id"].as_i64() == Some(1))
+            .expect("prompt legacy id 1");
+        assert_eq!(
+            p1["data"].as_str(),
+            Some("pg_promoted_prompt_body_evt"),
+            "promoted o_prompt body should override file default"
+        );
+
         cleanup_promote_staging_fixtures(&pool).await;
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn prompts_list_patch_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        sqlx::query("DELETE FROM public.app_user_prompt WHERE owner_user_id = $1")
+            .bind(sub)
+            .execute(&pool)
+            .await
+            .expect("cleanup app_user_prompt");
+
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "list={list}");
+        let arr = list.as_array().expect("prompts array");
+        assert_eq!(arr.len(), 3);
+
+        let patch_body = r#"{"data":"pg_contract_prompt_patch_slot_2"}"#;
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri("/api/v1/prompts/2")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(patch_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, patched) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "patched={patched}");
+        assert_eq!(
+            patched["data"].as_str(),
+            Some("pg_contract_prompt_patch_slot_2")
+        );
+
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, again) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "again={again}");
+        let p2 = again
+            .as_array()
+            .expect("array")
+            .iter()
+            .find(|row| row["id"].as_i64() == Some(2))
+            .expect("id 2");
+        assert_eq!(p2["data"].as_str(), Some("pg_contract_prompt_patch_slot_2"));
+
+        let _ = sqlx::query("DELETE FROM public.app_user_prompt WHERE owner_user_id = $1")
+            .bind(sub)
+            .execute(&pool)
+            .await;
     }
 
     #[tokio::test]

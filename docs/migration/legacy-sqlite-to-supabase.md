@@ -36,8 +36,8 @@
    - `public.legacy_user_map`：旧 `o_user.id`（int）→ `auth.users.id`（uuid），用于写入 `app_project.owner_user_id`。
    - `public.app_project` / `public.app_script`：与旧 `o_project` / `o_script` 核心字段对齐；**RLS** 仅允许 `owner_user_id = auth.uid()` 的行通过 API 访问。
    - 函数 `public.promote_legacy_from_staging()`（**SECURITY DEFINER**，仅 **`service_role`** 可执行）：从 `legacy_staging.snapshot` 幂等 upsert 到 **`app_project` / `app_script`**（及后续迁移扩展的 **`app_storyboard` / `app_novel` / `app_asset` / `app_script_asset`** 等）。  
-   迁移 `20260404130000_app_storyboard_promote_v2.sql` 会重建该函数并增加 **`app_storyboard`** 提升逻辑。后续迁移（如 **`20260409120000_promote_o_novel.sql`**）增加 **`app_novel`**（源 **`o_novel`**）；**`20260410120000_promote_o_assets.sql`** 增加 **`app_asset`**（源 **`o_assets`**，`type`→`asset_type`：`character`→`role`、`prop`→`tool` 等）与 **`app_script_asset`**（源 **`o_scriptAssets`**，`scriptId`/`assetId` 经 `legacy_id` 解析，且要求 **`sc.project_id = a.project_id`**）；**`20260411140000_promote_o_art_style.sql`** 增加 **`app_art_style`**（源 **`o_artStyle`**，Knex 字段 **`fileUrl`/`label`/`prompt`**；**`owner_user_id`** 见上文）。  
-   返回值含七列：`projects_upserted`、`scripts_upserted`、`storyboards_upserted`、**`novels_upserted`**、**`assets_upserted`**、**`script_assets_upserted`**、**`art_styles_upserted`**。  
+   迁移 `20260404130000_app_storyboard_promote_v2.sql` 会重建该函数并增加 **`app_storyboard`** 提升逻辑。后续迁移（如 **`20260409120000_promote_o_novel.sql`**）增加 **`app_novel`**（源 **`o_novel`**）；**`20260410120000_promote_o_assets.sql`** 增加 **`app_asset`**（源 **`o_assets`**，`type`→`asset_type`：`character`→`role`、`prop`→`tool` 等）与 **`app_script_asset`**（源 **`o_scriptAssets`**，`scriptId`/`assetId` 经 `legacy_id` 解析，且要求 **`sc.project_id = a.project_id`**）；**`20260411140000_promote_o_art_style.sql`** 增加 **`app_art_style`**（源 **`o_artStyle`**，Knex 字段 **`fileUrl`/`label`/`prompt`**；**`owner_user_id`** 见上文）；**`20260413120000_promote_o_prompt.sql`**（在 **`app_user_prompt`** 表存在之后）增加 **`app_user_prompt`**（源 **`o_prompt`**，`id`→`legacy_id`，**`type`→`kind`**，**`data`→`body`**；仅三种已知 **`type`** 且非空 **`data`**）。  
+   返回值含八列：`projects_upserted`、`scripts_upserted`、`storyboards_upserted`、**`novels_upserted`**、**`assets_upserted`**、**`script_assets_upserted`**、**`art_styles_upserted`**、**`prompts_upserted`**（**`o_prompt`→`app_user_prompt`**）。  
    典型顺序：
    ```sql
    -- 1) 为每个 Supabase 登录用户建立映射（示例：旧 admin id=1）
@@ -45,7 +45,7 @@
    VALUES (1, '00000000-0000-0000-0000-000000000000'::uuid);  -- 换成真实 auth.users.id
 
    -- 2) 在 Dashboard SQL 或以 service_role 连接执行
-   SELECT projects_upserted, scripts_upserted, storyboards_upserted, novels_upserted, assets_upserted, script_assets_upserted, art_styles_upserted
+   SELECT projects_upserted, scripts_upserted, storyboards_upserted, novels_upserted, assets_upserted, script_assets_upserted, art_styles_upserted, prompts_upserted
    FROM public.promote_legacy_from_staging();
    ```
    未配置 `legacy_user_map` 时，项目仍会写入 **`owner_user_id` 为空**，客户端在 RLS 下**不可见**，直至补映射并再次执行 promote（`owner_user_id` 用 `COALESCE` 合并策略更新）。

@@ -142,12 +142,11 @@ async fn patch_prompt(
     Json(body): Json<PatchPromptBody>,
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    let def = slot_by_legacy_id(legacy_id).ok_or(ApiError::NotFound)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let def = slot_by_legacy_id(legacy_id).ok_or(ApiError::NotFound)?;
 
     sqlx::query(
         r#"
