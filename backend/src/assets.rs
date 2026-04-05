@@ -55,8 +55,9 @@ pub struct ListAssetsResponse {
 }
 
 /// Legacy **`POST /api/cornerScape/getAllAssets`**: top-level project assets (no child **`assetsId`** in
-/// promoted **`metadata`**), ordered **role → scene → tool**. **`history_images`** is reserved (empty until
-/// image rows exist in Postgres); **`metadata`** retains legacy snapshot fields (e.g. **`imageId`**).
+/// promoted **`metadata`**), ordered **role → scene → tool**. **`history_images`** comes from **`app_asset_image`**
+/// rows with **`state = '已完成'`** (legacy **`o_image`**), ordered by **`sort_index`**, then **`created_at`**;
+/// **`metadata`** retains legacy snapshot fields on **`app_asset`** (e.g. **`imageId`**).
 #[derive(Debug, Serialize)]
 pub struct CornerScapeAssetItem {
     pub id: Uuid,
@@ -91,6 +92,7 @@ struct CornerScapeDbRow {
     description: Option<String>,
     create_time_ms: Option<i64>,
     metadata: SqlxJson<Value>,
+    history_images: SqlxJson<Value>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -422,7 +424,31 @@ async fn list_corner_scape_assets(
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
-        SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms, a.metadata
+        SELECT
+          a.id,
+          a.legacy_id,
+          a.name,
+          a.asset_type,
+          a.description,
+          a.create_time_ms,
+          a.metadata,
+          COALESCE(
+            (
+              SELECT jsonb_agg(
+                jsonb_build_object(
+                  'id', i.id,
+                  'file_path', i.file_path,
+                  'state', i.state,
+                  'sort_index', i.sort_index
+                )
+                ORDER BY i.sort_index ASC, i.created_at ASC
+              )
+              FROM app_asset_image i
+              WHERE i.asset_id = a.id
+                AND i.state = '已完成'
+            ),
+            '[]'::jsonb
+          ) AS history_images
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.legacy_id = "#,
@@ -474,7 +500,10 @@ async fn list_corner_scape_assets(
             description: r.description,
             create_time_ms: r.create_time_ms,
             metadata: r.metadata.0,
-            history_images: Vec::new(),
+            history_images: match r.history_images.0 {
+                Value::Array(a) => a,
+                _ => Vec::new(),
+            },
         })
         .collect();
 

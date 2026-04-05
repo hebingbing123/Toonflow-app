@@ -1035,8 +1035,9 @@ paths:
         promoted snapshot has **no** JSON **`assetsId`** property, or **`assetsId`** is JSON **`null`** (child rows
         under a parent asset are excluded). Ordered **role → scene → tool**, then **`legacy_id`** (matches legacy
         **`CASE type …`** ordering for those three). Optional body **`types`** filters **`asset_type`**.
-        **`history_images`** is always **`[]`** until image history is stored in Postgres; **`metadata`** keeps
-        legacy fields (e.g. **`imageId`**) for forward-compatible clients.
+        **`history_images`** lists **`app_asset_image`** rows for that asset with **`state = '已完成'`** (legacy
+        **`o_image`** completed rows), ordered by **`sort_index`** then **`created_at`**. **`metadata`** on each
+        item is the parent **`app_asset`** JSON snapshot (e.g. **`imageId`**).
       security:
         - bearerAuth: []
       parameters:
@@ -3453,6 +3454,24 @@ components:
             enum: [role, scene, tool]
           description: When non-empty, restrict to these **`app_asset.asset_type`** values.
 
+    CornerScapeHistoryImage:
+      type: object
+      required: [id, sort_index]
+      description: One **`app_asset_image`** row (subset exposed for corner UI).
+      properties:
+        id:
+          type: string
+          format: uuid
+        file_path:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        sort_index:
+          type: integer
+          format: int32
+
     CornerScapeAssetItem:
       type: object
       required: [id, legacy_id, name, asset_type, metadata, history_images]
@@ -3481,10 +3500,9 @@ components:
           description: Legacy **`o_assets`** snapshot JSON (promoted into **`app_asset.metadata`**).
         history_images:
           type: array
-          description: Reserved; empty until image rows are modeled in Postgres.
+          description: Completed images (**`app_asset_image`** with **`state = '已完成'`**).
           items:
-            type: object
-            additionalProperties: true
+            $ref: "#/components/schemas/CornerScapeHistoryImage"
 
     CornerScapeResponse:
       type: object

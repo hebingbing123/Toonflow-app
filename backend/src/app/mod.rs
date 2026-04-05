@@ -1976,8 +1976,51 @@ mod pg_contract_tests {
             c1[0]["history_images"]
                 .as_array()
                 .is_some_and(|a| a.is_empty()),
-            "history_images placeholder"
+            "history_images empty before app_asset_image row"
         );
+
+        let role_uuid = Uuid::parse_str(c1[0]["id"].as_str().expect("role asset id")).unwrap();
+        let img_ins = sqlx::query(
+            r#"
+            INSERT INTO public.app_asset_image (asset_id, sort_index, file_path, state)
+            VALUES ($1, 0, 'pg_contract/corner_hist.png', '已完成')
+            "#,
+        )
+        .bind(role_uuid)
+        .execute(&pool_sql)
+        .await
+        .expect("insert app_asset_image");
+        assert_eq!(img_ins.rows_affected(), 1);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner1_hist) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner1_hist={corner1_hist}");
+        let c1h = corner1_hist["items"]
+            .as_array()
+            .expect("corner1_hist items");
+        assert_eq!(c1h.len(), 1);
+        let hi = c1h[0]["history_images"].as_array().expect("history");
+        assert_eq!(hi.len(), 1);
+        assert_eq!(
+            hi[0]["file_path"].as_str(),
+            Some("pg_contract/corner_hist.png")
+        );
+        assert_eq!(hi[0]["state"].as_str(), Some("已完成"));
 
         let res = app
             .clone()
@@ -2021,6 +2064,13 @@ mod pg_contract_tests {
         assert_eq!(c2.len(), 2);
         assert_eq!(c2[0]["asset_type"].as_str(), Some("role"));
         assert_eq!(c2[1]["asset_type"].as_str(), Some("scene"));
+        assert_eq!(c2[0]["history_images"].as_array().map(|a| a.len()), Some(1));
+        assert!(
+            c2[1]["history_images"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()),
+            "scene has no history row"
+        );
 
         let res = app
             .clone()
@@ -2102,6 +2152,7 @@ mod pg_contract_tests {
             ch[0]["legacy_id"].as_i64().expect("leg"),
             i64::from(asset_leg)
         );
+        assert_eq!(ch[0]["history_images"].as_array().map(|a| a.len()), Some(1));
 
         let n = sqlx::query(
             r#"
@@ -2144,6 +2195,10 @@ mod pg_contract_tests {
             corner_restored["items"].as_array().map(|a| a.len()),
             Some(2)
         );
+        let cr = corner_restored["items"]
+            .as_array()
+            .expect("corner restored items");
+        assert_eq!(cr[0]["history_images"].as_array().map(|a| a.len()), Some(1));
 
         let res = app
             .clone()
