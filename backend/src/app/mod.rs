@@ -163,6 +163,19 @@ mod contract_smoke_tests {
         .await
     }
 
+    async fn put_json(uri: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PUT)
+                .uri(uri)
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
     async fn patch_json_no_bearer(uri: &str, json_body: &str) -> (StatusCode, Value) {
         oneshot_json(
             Request::builder()
@@ -229,6 +242,20 @@ mod contract_smoke_tests {
         oneshot_json(
             Request::builder()
                 .method(Method::PATCH)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn put_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PUT)
                 .uri(uri)
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -1030,6 +1057,43 @@ mod contract_smoke_tests {
         let (status, v) = get_json("/api/v1/skills/content?path=script_execution_script.md").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_content_put_unauthorized_without_bearer() {
+        let (status, v) = put_json(
+            "/api/v1/skills/content",
+            r#"{"path":"script_execution_script.md","content":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_content_put_rejects_parent_path_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = put_json_bearer(
+            "/api/v1/skills/content",
+            &token,
+            r#"{"path":"../Cargo.toml","content":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn skill_content_put_rejects_missing_file_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = put_json_bearer(
+            "/api/v1/skills/content",
+            &token,
+            r#"{"path":"__no_such_skill_file__.md","content":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]

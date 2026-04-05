@@ -1,5 +1,6 @@
-//! Read-only HTTP surface for Markdown skills under `backend/data/skills/`.
+//! HTTP surface for Markdown skills under `backend/data/skills/`.
 //! Paths are relative to that directory; `..` segments are rejected.
+//! **`PUT /api/v1/skills/content`** overwrites an **existing** file only (parity with legacy **`saveSkillContent`**).
 
 use std::path::{Path, PathBuf};
 
@@ -41,6 +42,35 @@ impl SkillReadError {
                 ApiError::BadRequest(format!("skill file exceeds {MAX_SKILL_BYTES} bytes"))
             }
             SkillReadError::Io(m) => ApiError::BadRequest(m),
+        }
+    }
+}
+
+/// Write errors (existing file required; same path rules as read).
+#[derive(Debug)]
+pub(crate) enum SkillWriteError {
+    BadPath(String),
+    SkillsDirMissing,
+    /// Legacy **`saveSkillContent`** returned **400** when the file did not exist.
+    FileMissing,
+    TooLarge,
+    Io(String),
+}
+
+impl SkillWriteError {
+    fn into_api_error(self) -> ApiError {
+        match self {
+            SkillWriteError::BadPath(m) => ApiError::BadRequest(m),
+            SkillWriteError::SkillsDirMissing => ApiError::BadRequest(
+                "skills directory missing (expected backend/data/skills)".into(),
+            ),
+            SkillWriteError::FileMissing => {
+                ApiError::BadRequest("skill file does not exist".into())
+            }
+            SkillWriteError::TooLarge => {
+                ApiError::BadRequest(format!("skill content exceeds {MAX_SKILL_BYTES} bytes"))
+            }
+            SkillWriteError::Io(m) => ApiError::BadRequest(m),
         }
     }
 }
@@ -90,6 +120,47 @@ pub(crate) fn read_skill_markdown(relative: &str) -> Result<SkillContentResponse
     Ok(SkillContentResponse { path: rel, content })
 }
 
+/// Overwrite an existing skill file under `root` (used by HTTP and unit tests).
+pub(crate) fn write_skill_at(
+    root: &Path,
+    relative: &str,
+    content: &str,
+) -> Result<SkillContentResponse, SkillWriteError> {
+    if !root.is_dir() {
+        return Err(SkillWriteError::SkillsDirMissing);
+    }
+    let resolved = safe_join_under_root(root, relative.trim()).map_err(|e| match e {
+        SkillReadError::BadPath(m) => SkillWriteError::BadPath(m),
+        SkillReadError::SkillsDirMissing
+        | SkillReadError::NotFound
+        | SkillReadError::TooLarge
+        | SkillReadError::Io(_) => SkillWriteError::BadPath("invalid skill path".into()),
+    })?;
+    if !resolved.is_file() {
+        return Err(SkillWriteError::FileMissing);
+    }
+    let n = content.len() as u64;
+    if n > MAX_SKILL_BYTES {
+        return Err(SkillWriteError::TooLarge);
+    }
+    std::fs::write(&resolved, content).map_err(|e| SkillWriteError::Io(e.to_string()))?;
+    let rel = resolved
+        .strip_prefix(root)
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|_| relative.trim().to_string());
+    Ok(SkillContentResponse {
+        path: rel,
+        content: content.to_string(),
+    })
+}
+
+fn write_skill_markdown(
+    relative: &str,
+    content: &str,
+) -> Result<SkillContentResponse, SkillWriteError> {
+    write_skill_at(&skills_root(), relative, content)
+}
+
 #[derive(Serialize)]
 pub struct SkillFileMeta {
     pub path: String,
@@ -115,11 +186,21 @@ pub struct SkillContentQuery {
     pub path: String,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PutSkillContentBody {
+    pub path: String,
+    pub content: String,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/skills/summary", get(skills_summary))
         .route("/api/v1/skills", get(list_skills))
-        .route("/api/v1/skills/content", get(get_skill_content))
+        .route(
+            "/api/v1/skills/content",
+            get(get_skill_content).put(put_skill_content),
+        )
 }
 
 /// Walk `data/skills` for `*.md` files; stops after [`MAX_SKILL_FILES`] matches (same rule as list).
@@ -210,10 +291,29 @@ async fn get_skill_content(
     Ok(Json(doc))
 }
 
+async fn put_skill_content(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<PutSkillContentBody>,
+) -> Result<Json<SkillContentResponse>, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    let doc =
+        write_skill_markdown(&body.path, &body.content).map_err(SkillWriteError::into_api_error)?;
+    Ok(Json(doc))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::path::Path;
+
+    #[test]
+    fn put_skill_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<PutSkillContentBody>(
+            r#"{"path":"a.md","content":"x","extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
 
     #[test]
     fn safe_join_rejects_parent_segment() {
@@ -233,5 +333,26 @@ mod tests {
         let root = Path::new("/tmp/skills-root");
         let p = safe_join_under_root(root, "dir/script.md").unwrap();
         assert!(p.ends_with("dir/script.md"));
+    }
+
+    #[test]
+    fn write_skill_at_updates_existing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::write(root.join("a.md"), "old").unwrap();
+        let out = super::write_skill_at(root, "a.md", "new").unwrap();
+        assert_eq!(out.path, "a.md");
+        assert_eq!(out.content, "new");
+        assert_eq!(std::fs::read_to_string(root.join("a.md")).unwrap(), "new");
+    }
+
+    #[test]
+    fn write_skill_at_rejects_missing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        assert!(matches!(
+            super::write_skill_at(root, "nope.md", "x"),
+            Err(super::SkillWriteError::FileMissing)
+        ));
     }
 }

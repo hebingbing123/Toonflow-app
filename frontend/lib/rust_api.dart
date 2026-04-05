@@ -1589,6 +1589,34 @@ Future<SkillContentResponse> fetchSkillContent(
   return SkillContentResponse.fromJson(map);
 }
 
+/// `PUT /api/v1/skills/content` — overwrites an **existing** file only (legacy `saveSkillContent`).
+/// See `putSkillContentV1`.
+Future<SkillContentResponse> saveSkillContent(
+  String accessToken,
+  String relativePath,
+  String content,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/content');
+  final res = await http
+      .put(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'path': relativePath, 'content': content}),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SkillContentResponse.fromJson(map);
+}
+
 /// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');

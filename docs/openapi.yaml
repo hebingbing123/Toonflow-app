@@ -47,7 +47,7 @@ tags:
   - name: art_styles
     description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset without OSS image upload
   - name: skills
-    description: Read-only Markdown skills from `backend/data/skills`
+    description: Markdown skills under `backend/data/skills` (read; authenticated PUT overwrites an existing file only, parity with legacy `saveSkillContent`)
   - name: harness
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
@@ -2438,6 +2438,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    put:
+      tags: [skills]
+      summary: Overwrite an existing skill file (UTF-8 text)
+      operationId: putSkillContentV1
+      description: |
+        Same path rules as **`GET /api/v1/skills/content`**. The target file **must already exist** (legacy **`saveSkillContent`** returned **400** otherwise). Body size is capped at **2_000_000** bytes (UTF-8).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutSkillContentRequest"
+      responses:
+        "200":
+          description: OK — returns normalized relative path and written content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillContentResponse"
+        "400":
+          description: Unsafe path, skills dir missing, file does not exist, or content too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/harness/tools:
     get:
@@ -3843,6 +3876,18 @@ components:
           type: string
         content:
           type: string
+
+    PutSkillContentRequest:
+      type: object
+      required: [path, content]
+      additionalProperties: false
+      properties:
+        path:
+          type: string
+          description: Relative path under `data/skills`, e.g. `script_execution_script.md`
+        content:
+          type: string
+          description: Full file body to write (UTF-8)
 
     HarnessToolInfo:
       type: object
