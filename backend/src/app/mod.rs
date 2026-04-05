@@ -40,7 +40,7 @@ mod contract_smoke_tests {
     use axum::body::Body;
     use axum::extract::ConnectInfo;
     use axum::http::header;
-    use axum::http::{Request, StatusCode};
+    use axum::http::{Method, Request, StatusCode};
     use serde_json::Value;
     use tower::ServiceExt;
     use uuid::Uuid;
@@ -101,6 +101,20 @@ mod contract_smoke_tests {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn post_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
                 .unwrap(),
         )
         .await
@@ -213,6 +227,19 @@ mod contract_smoke_tests {
     async fn project_assets_list_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/assets", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_assets_create_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/projects/legacy/1/assets",
+            &token,
+            r#"{"name":"contract_smoke_role","type":"role"}"#,
+        )
+        .await;
         assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
         assert_eq!(v["code"], "database_error");
     }
