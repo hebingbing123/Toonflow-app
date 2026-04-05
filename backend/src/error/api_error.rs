@@ -30,6 +30,8 @@ pub enum ApiError {
     Internal,
     /// `OPENAI_API_KEY` / `LLM_API_KEY` not set — script extract and WS agent flows need it.
     LlmNotConfigured,
+    /// HTTP **501** — capability not implemented (e.g. legacy write path without Postgres backing yet).
+    NotImplemented(String),
 }
 
 impl IntoResponse for ApiError {
@@ -78,6 +80,9 @@ impl IntoResponse for ApiError {
                 "llm_not_configured",
                 "LLM is not configured (set OPENAI_API_KEY or LLM_API_KEY)",
             ),
+            ApiError::NotImplemented(msg) => {
+                (StatusCode::NOT_IMPLEMENTED, "not_implemented", msg.as_str())
+            }
         };
 
         let body = ErrorBody {

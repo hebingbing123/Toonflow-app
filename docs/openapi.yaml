@@ -29,6 +29,8 @@ info:
 
     **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`** for **`GET /api/v1/models/detail`**. Optional env **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** (composite id) when it matches the catalog.
 
+    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** reads **`TOONFLOW_SWITCH_AI_DEV_TOOL`** (**`"1"`** on, else **`"0"`**), parity with legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** then returns **501** **`not_implemented`** (no per-user SQLite **`o_setting`** persistence).
+
 servers:
   - url: http://127.0.0.1:8666
     description: Local dev (default `PORT`; override with env)
@@ -66,6 +68,8 @@ tags:
     description: Per-user agent memory (`app_agent_memory`; Postgres + RLS); legacy `/api/agents/getMemory` / `clearMemory` parity
   - name: webhooks
     description: Server-to-server billing webhooks (HMAC); not browser CORS flows
+  - name: settings
+    description: Server-backed settings without SQLite `o_setting` (env-driven or future Postgres)
 
 paths:
   /health:
@@ -240,6 +244,75 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: "`SUPABASE_JWT_SECRET` not configured, or database error when loading profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/dev/switch-ai-tool:
+    get:
+      tags: [settings]
+      summary: AI dev-tool switch (effective server value)
+      operationId: getSwitchAiDevToolV1
+      description: |
+        Bearer JWT. Effective value from env **`TOONFLOW_SWITCH_AI_DEV_TOOL`**: trimmed **`"1"`** → **`"1"`**, anything else (unset included) → **`"0"`**.
+        Legacy **`GET /api/setting/dev/getSwitchAiDevTool`** returned the same digit string inside the old success envelope.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SwitchAiDevToolResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    put:
+      tags: [settings]
+      summary: Update AI dev-tool switch (not persisted)
+      operationId: putSwitchAiDevToolV1
+      description: |
+        Validates **`value`** is **`"0"`** or **`"1"`**, then responds **501** **`not_implemented`**: Rust does not write SQLite **`o_setting`**. Operators change **`TOONFLOW_SWITCH_AI_DEV_TOOL`** and restart (or future user settings store).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SwitchAiDevToolPutRequest"
+      responses:
+        "400":
+          description: Request body value must be the strings "0" or "1"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Persisting this toggle is not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
           content:
             application/json:
               schema:
@@ -3556,6 +3629,23 @@ components:
           type: string
           description: Composite id for **`GET /api/v1/models/detail?model_id=`**
           example: "1:gpt-4o-mini"
+
+    SwitchAiDevToolResponse:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+          enum: ["0", "1"]
+          description: Legacy `o_setting.switchAiDevTool` string flag
+
+    SwitchAiDevToolPutRequest:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+          enum: ["0", "1"]
 
     ReadyResponse:
       type: object

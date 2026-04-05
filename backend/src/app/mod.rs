@@ -1401,6 +1401,48 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_dev_switch_get_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/settings/dev/switch-ai-tool").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_dev_switch_get_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/settings/dev/switch-ai-tool", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        let val = v["value"].as_str().expect("value");
+        assert!(val == "0" || val == "1");
+    }
+
+    #[tokio::test]
+    async fn settings_dev_switch_put_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = put_json_bearer(
+            "/api/v1/settings/dev/switch-ai-tool",
+            &token,
+            r#"{"value":"0"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_dev_switch_put_rejects_non_binary_value_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = put_json_bearer(
+            "/api/v1/settings/dev/switch-ai-tool",
+            &token,
+            r#"{"value":"2"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn skills_summary_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/skills/summary").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);

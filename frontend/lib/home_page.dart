@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   String? _versionBody;
   String? _readyBody;
   String? _meBody;
+  String? _devSwitchProbeBody;
   String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
@@ -44,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingVersion = false;
   bool _loadingReady = false;
   bool _loadingMe = false;
+  bool _loadingDevSwitchProbe = false;
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
@@ -354,6 +356,45 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingMe = false;
+      });
+    }
+  }
+
+  Future<void> _callDevSwitchProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingDevSwitchProbe = true;
+      _error = null;
+      _devSwitchProbeBody = null;
+    });
+    try {
+      final g = await fetchSwitchAiDevToolV1(token);
+      final putStatus = await putSwitchAiDevToolV1(token, '0');
+      if (!mounted) return;
+      if (putStatus != 501) {
+        setState(() {
+          _error = 'PUT switch-ai-tool expected 501, got $putStatus';
+          _loadingDevSwitchProbe = false;
+        });
+        return;
+      }
+      setState(() {
+        _devSwitchProbeBody =
+            'GET value=${g.value} · PUT body {value:0} -> $putStatus not_implemented';
+        _loadingDevSwitchProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingDevSwitchProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingDevSwitchProbe = false;
       });
     }
   }
@@ -3712,6 +3753,19 @@ class _HomePageState extends State<HomePage> {
               if (_meBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('/me: $_meBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingDevSwitchProbe ? null : _callDevSwitchProbe,
+                child: Text(
+                  _loadingDevSwitchProbe
+                      ? '请求中…'
+                      : 'GET+PUT /api/v1/settings/dev/switch-ai-tool',
+                ),
+              ),
+              if (_devSwitchProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('dev switch: $_devSwitchProbeBody'),
               ],
               const SizedBox(height: 8),
               FilledButton.tonal(

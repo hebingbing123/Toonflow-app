@@ -21,6 +21,7 @@ mod rate_limit;
 mod request_id_mw;
 mod script_asset_extract;
 mod scripts;
+mod settings_dev;
 mod skills;
 mod state;
 mod storyboards;

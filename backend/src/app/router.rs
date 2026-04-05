@@ -14,6 +14,7 @@ use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_asset_extract;
 use crate::scripts;
+use crate::settings_dev;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
@@ -65,6 +66,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(jobs::router())
         .merge(usage::router())
         .merge(prompts::router())
+        .merge(settings_dev::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
         .layer(governor_layer_from_env());

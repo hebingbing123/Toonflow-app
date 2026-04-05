@@ -341,6 +341,49 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
   return MeResponse.fromJson(map);
 }
 
+/// OpenAPI **`SwitchAiDevToolResponse`** — legacy **`getSwitchAiDevTool`**.
+class SwitchAiDevToolV1 {
+  const SwitchAiDevToolV1({required this.value});
+
+  final String value;
+
+  factory SwitchAiDevToolV1.fromJson(Map<String, dynamic> json) {
+    return SwitchAiDevToolV1(value: json['value'] as String);
+  }
+}
+
+/// `GET /api/v1/settings/dev/switch-ai-tool` — OpenAPI `getSwitchAiDevToolV1`.
+Future<SwitchAiDevToolV1> fetchSwitchAiDevToolV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/dev/switch-ai-tool');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SwitchAiDevToolV1.fromJson(map);
+}
+
+/// `PUT /api/v1/settings/dev/switch-ai-tool` — OpenAPI `putSwitchAiDevToolV1` (typically **501**).
+Future<int> putSwitchAiDevToolV1(String accessToken, String value) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/dev/switch-ai-tool');
+  final res = await http
+      .put(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'value': value}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// `GET /api/v1/usage/summary` — OpenAPI `UsageSummaryResponse`.
 class UsageSummaryResponse {
   const UsageSummaryResponse({
