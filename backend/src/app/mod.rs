@@ -272,6 +272,15 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn project_assets_list_pagination_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/projects/legacy/1/assets?page=1&limit=2", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_assets_create_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
