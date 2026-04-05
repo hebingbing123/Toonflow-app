@@ -774,6 +774,59 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
       .toList();
 }
 
+/// `POST /api/v1/scripts/extract-assets` — OpenAPI **`ExtractAssetsAcceptedResponse`** (async job).
+class ExtractAssetsAcceptedResponse {
+  const ExtractAssetsAcceptedResponse({
+    required this.status,
+    required this.message,
+  });
+
+  final String status;
+  final String message;
+
+  factory ExtractAssetsAcceptedResponse.fromJson(Map<String, dynamic> json) {
+    return ExtractAssetsAcceptedResponse(
+      status: json['status'] as String,
+      message: json['message'] as String,
+    );
+  }
+}
+
+/// `POST /api/v1/scripts/extract-assets` — background LLM extraction (**503** if LLM/DB unset). See `startScriptAssetExtractV1`.
+Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
+  String accessToken, {
+  required int projectLegacyId,
+  required List<int> scriptLegacyIds,
+  int? groupSize,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
+  final body = <String, dynamic>{
+    'project_legacy_id': projectLegacyId,
+    'script_legacy_ids': scriptLegacyIds,
+  };
+  if (groupSize != null) {
+    body['group_size'] = groupSize;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ExtractAssetsAcceptedResponse.fromJson(map);
+}
+
 class StoryboardRow {
   const StoryboardRow({
     required this.id,
