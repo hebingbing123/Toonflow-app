@@ -1941,6 +1941,22 @@ class AssetImageRow {
   }
 }
 
+/// OpenAPI **`ListAssetImagesResponse`**.
+class ListAssetImagesResponse {
+  const ListAssetImagesResponse({required this.items});
+
+  final List<AssetImageRow> items;
+
+  factory ListAssetImagesResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return ListAssetImagesResponse(
+      items: raw
+          .map((e) => AssetImageRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 /// OpenAPI **`CornerScapeResponse`**.
 class CornerScapeResponse {
   const CornerScapeResponse({required this.items});
@@ -1987,6 +2003,31 @@ Future<CornerScapeResponse> fetchCornerScapeAssetsByLegacyId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return CornerScapeResponse.fromJson(map);
+}
+
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `listProjectAssetImagesByLegacyIdsV1`.
+Future<ListAssetImagesResponse> fetchProjectAssetImagesByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListAssetImagesResponse.fromJson(map);
 }
 
 /// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.

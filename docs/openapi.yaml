@@ -1250,6 +1250,58 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images:
+    get:
+      tags: [assets]
+      summary: List image history rows for an asset
+      operationId: listProjectAssetImagesByLegacyIdsV1
+      description: |
+        All **`app_asset_image`** rows for the asset, ordered by **`sort_index`** then **`created_at`** (includes any **`state`**, not only corner-scape **`已完成`**).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: List (may be empty)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListAssetImagesResponse"
+        "400":
+          description: Invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project or asset not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
     post:
       tags: [assets]
       summary: Add an image history row for an asset
@@ -3668,6 +3720,15 @@ components:
           type: integer
           format: int32
           description: Defaults to **0** when omitted.
+
+    ListAssetImagesResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetImageRow"
 
     AssetImageRow:
       type: object

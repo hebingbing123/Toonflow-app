@@ -796,6 +796,31 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn asset_image_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/assets/1/images").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn asset_image_list_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/projects/legacy/1/assets/1/images", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn asset_image_list_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/projects/legacy/0/assets/1/images", &token).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn asset_image_post_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -2090,6 +2115,28 @@ mod pg_contract_tests {
         );
         assert_eq!(img_row["state"].as_str(), Some("已完成"));
 
+        let img_uuid = img_row["id"].as_str().expect("image id");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, list_img) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "list_img={list_img}");
+        let lim = list_img["items"].as_array().expect("image list items");
+        assert_eq!(lim.len(), 1);
+        assert_eq!(lim[0]["id"].as_str(), Some(img_uuid));
+
         let res = app
             .clone()
             .oneshot(
@@ -2119,8 +2166,6 @@ mod pg_contract_tests {
             Some("pg_contract/corner_hist.png")
         );
         assert_eq!(hi[0]["state"].as_str(), Some("已完成"));
-
-        let img_uuid = img_row["id"].as_str().expect("image id");
 
         let res = app
             .clone()

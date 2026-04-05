@@ -126,6 +126,11 @@ pub struct AssetImageRow {
     pub state: Option<String>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct ListAssetImagesResponse {
+    pub items: Vec<AssetImageRow>,
+}
+
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 struct CreateAssetImageBody {
@@ -164,7 +169,7 @@ pub fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images",
-            post(create_project_asset_image),
+            get(list_project_asset_images).post(create_project_asset_image),
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}",
@@ -839,6 +844,40 @@ async fn resolve_owned_asset_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     id.ok_or(ApiError::NotFound)
+}
+
+async fn list_project_asset_images(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+) -> Result<Json<ListAssetImagesResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+
+    let items = sqlx::query_as::<_, AssetImageRow>(
+        r#"
+        SELECT id, asset_id, sort_index, file_path, state
+        FROM app_asset_image
+        WHERE asset_id = $1
+        ORDER BY sort_index ASC, created_at ASC
+        "#,
+    )
+    .bind(asset_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(ListAssetImagesResponse { items }))
 }
 
 async fn create_project_asset_image(
