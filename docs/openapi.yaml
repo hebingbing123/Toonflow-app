@@ -1575,6 +1575,55 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/art-styles/extract-prompt:
+    post:
+      tags: [art_styles]
+      summary: Extract art-style prompt from images (vision LLM)
+      operationId: extractArtStylePromptV1
+      description: |
+        OpenAI-compatible **`chat/completions`** (non-streaming, multimodal). Same product intent as legacy **`/api/artStyle/extractStylePrompt`**.
+        Each **`images[]`** entry is sent as **`image_url.url`** (public **`https://`** URL or **`data:image/...;base64,...`**).
+        Requires **`OPENAI_API_KEY`** or **`LLM_API_KEY`**; model from **`LLM_MODEL`** (default **`gpt-4o-mini`**, must support vision). Does not use Postgres.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractArtStylePromptBody"
+      responses:
+        "200":
+          description: OK — extracted text (trimmed assistant message)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractArtStylePromptResponse"
+        "400":
+          description: Invalid body (e.g. empty **`images`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Upstream LLM or parse failure (details not exposed)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or LLM keys unset (**`llm_not_configured`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/art-styles/legacy/{legacy_id}:
     get:
       tags: [art_styles]
@@ -3116,6 +3165,29 @@ components:
           type: string
         prompt:
           type: string
+
+    ExtractArtStylePromptBody:
+      type: object
+      additionalProperties: false
+      required: [images]
+      properties:
+        images:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items:
+            type: string
+            description: Image URL or data URI for OpenAI **`image_url.url`**
+          description: Non-empty after trim per entry; each string capped at 20 MiB server-side
+
+    ExtractArtStylePromptResponse:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text:
+          type: string
+          description: Model output (legacy Node wrapped this in **`{ code, data, message }`**; v1 returns JSON only)
 
     PatchArtStyleBody:
       type: object

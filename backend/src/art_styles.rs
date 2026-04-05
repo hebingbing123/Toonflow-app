@@ -3,21 +3,28 @@
 use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode},
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::json_patch::{parse_optional_text_field, FieldPatch};
+use crate::llm::chat_completion_assistant_text;
 use crate::state::AppState;
 
 const ADV_LOCK_ART_STYLE_LEGACY: i64 = 884_422_008;
 const MAX_ART_STYLE_LIST: i64 = 500;
+const MAX_EXTRACT_IMAGES: usize = 16;
+/// Per-image cap for **`data:`** / URL strings (legacy **`extractStylePrompt`** had no limit).
+const MAX_IMAGE_ENTRY_BYTES: usize = 20 * 1024 * 1024;
+
+/// System prompt aligned with legacy **`src/routes/artStyle/extractStylePrompt.ts`**.
+const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提取出图片的画风提示词，用于生成图片时指定风格，要求简洁且具有艺术性,只需要画风提示词，不需要其他内容："比如：`(画风：2D动漫风格,2d animation style)`,`(画风：照片级真人超写实,photorealistic, lifelike, ultra detailed)`，`(画风：3D国创,Chinese 3D animation style)`等,如果图片风格无法描述，可以返回`无法描述`,多张图片时，只输出一个综合的画风提示词，要求包含所有图片的共同风格特征，输出格式必须严格按照示例中的格式，必须包含`画风`二字，且必须使用括号括起来，括号内必须包含中文和英文的画风描述，并用逗号分隔，英文部分需要翻译成地道的英文提示词"#;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct ArtStyleRow {
@@ -47,6 +54,17 @@ pub struct CreateArtStyleBody {
     pub prompt: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ExtractArtStylePromptBody {
+    pub images: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExtractArtStylePromptResponse {
+    pub text: String,
+}
+
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 pub struct PatchArtStyleBody {
@@ -63,6 +81,10 @@ pub struct PatchArtStyleBody {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
+            "/api/v1/art-styles/extract-prompt",
+            post(extract_style_prompt),
+        )
+        .route(
             "/api/v1/art-styles",
             get(list_art_styles).post(create_art_style),
         )
@@ -76,6 +98,55 @@ pub fn router() -> Router<AppState> {
 
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.map(|v| v.trim().to_owned()).filter(|s| !s.is_empty())
+}
+
+async fn extract_style_prompt(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ExtractArtStylePromptBody>,
+) -> Result<Json<ExtractArtStylePromptResponse>, ApiError> {
+    let _uid = require_user_uuid(&state, &headers)?;
+    let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
+
+    if body.images.is_empty() {
+        return Err(ApiError::BadRequest("images must be non-empty".into()));
+    }
+    if body.images.len() > MAX_EXTRACT_IMAGES {
+        return Err(ApiError::BadRequest(format!(
+            "at most {MAX_EXTRACT_IMAGES} images"
+        )));
+    }
+
+    let mut parts: Vec<Value> = Vec::with_capacity(body.images.len());
+    for (i, raw) in body.images.iter().enumerate() {
+        let s = raw.trim();
+        if s.is_empty() {
+            return Err(ApiError::BadRequest(format!("images[{i}] is empty")));
+        }
+        if s.len() > MAX_IMAGE_ENTRY_BYTES {
+            return Err(ApiError::BadRequest(format!(
+                "images[{i}] exceeds max length ({MAX_IMAGE_ENTRY_BYTES} bytes)"
+            )));
+        }
+        parts.push(json!({
+            "type": "image_url",
+            "image_url": { "url": s }
+        }));
+    }
+
+    let messages = vec![
+        json!({ "role": "system", "content": EXTRACT_STYLE_SYSTEM_PROMPT }),
+        json!({ "role": "user", "content": parts }),
+    ];
+
+    let text = chat_completion_assistant_text(cfg, &state.http_client, messages)
+        .await
+        .map_err(|e| {
+            tracing::warn!(error = %e, "extract_style_prompt");
+            ApiError::Internal
+        })?;
+
+    Ok(Json(ExtractArtStylePromptResponse { text }))
 }
 
 async fn list_art_styles(
@@ -345,5 +416,18 @@ mod tests {
     fn patch_art_style_body_rejects_unknown_fields() {
         let j = serde_json::json!({ "name": "x", "extra": 1 });
         assert!(serde_json::from_value::<PatchArtStyleBody>(j).is_err());
+    }
+
+    #[test]
+    fn extract_art_style_prompt_body_accepts_images() {
+        let j = serde_json::json!({ "images": ["https://example.com/a.png"] });
+        let b: ExtractArtStylePromptBody = serde_json::from_value(j).unwrap();
+        assert_eq!(b.images.len(), 1);
+    }
+
+    #[test]
+    fn extract_art_style_prompt_body_rejects_unknown_fields() {
+        let j = serde_json::json!({ "images": [], "extra": 1 });
+        assert!(serde_json::from_value::<ExtractArtStylePromptBody>(j).is_err());
     }
 }

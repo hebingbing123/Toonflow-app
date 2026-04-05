@@ -167,6 +167,17 @@ class ListArtStylesResponse {
   }
 }
 
+/// `POST /api/v1/art-styles/extract-prompt` — OpenAPI `ExtractArtStylePromptResponse`.
+class ExtractArtStylePromptResponse {
+  const ExtractArtStylePromptResponse({required this.text});
+
+  final String text;
+
+  factory ExtractArtStylePromptResponse.fromJson(Map<String, dynamic> json) {
+    return ExtractArtStylePromptResponse(text: json['text'] as String);
+  }
+}
+
 /// JSON body for **`GET /health`** and **`GET /api/v1/health`** (OpenAPI `HealthResponse`).
 class HealthResponse {
   const HealthResponse({
@@ -565,6 +576,34 @@ Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListArtStylesResponse.fromJson(map);
+}
+
+/// `POST /api/v1/art-styles/extract-prompt` — vision LLM; see `extractArtStylePromptV1`.
+///
+/// [images] are passed through as OpenAPI **`image_url.url`** strings (HTTPS or data URI).
+Future<ExtractArtStylePromptResponse> extractArtStylePrompt(
+  String accessToken,
+  List<String> images,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/extract-prompt');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'images': images}),
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ExtractArtStylePromptResponse.fromJson(map);
 }
 
 /// `POST /api/v1/projects` — optional snake_case fields; see `createProjectV1`.

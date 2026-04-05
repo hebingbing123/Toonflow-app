@@ -45,7 +45,7 @@ cargo run
 
 项目统计：**`GET /api/v1/projects/legacy/{legacy_id}/stats`**（Bearer）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
-画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{legacy_id}`**（Bearer）— **`app_art_style`**（RLS）；**`legacy_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(legacy_id)+1`**。不含旧栈 base64 图片写本地 OSS；**`extractStylePrompt`** 类多模态 LLM 仍待产品化。
+画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{legacy_id}`**（Bearer）— **`app_art_style`**（RLS）；**`legacy_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(legacy_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**，需配置 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
 
 新建剧本：**`POST /api/v1/projects/legacy/{project_legacy_id}/scripts`**（Bearer，JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`legacy_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
 
@@ -57,7 +57,7 @@ cargo run
 
 ### LLM（WebSocket `agent.chat.send`）
 
-设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。
+设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。**`POST /api/v1/art-styles/extract-prompt`** 使用同一密钥走**非流式**多模态 **`chat/completions`**（需 vision 模型，如默认 **`gpt-4o-mini`**）。
 
 健康检查：
 

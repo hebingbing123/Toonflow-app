@@ -31,6 +31,82 @@ impl LlmConfig {
     }
 }
 
+/// Parses `choices[0].message.content` from a non-streaming chat completion JSON body.
+fn parse_assistant_content(v: &Value) -> Result<String, String> {
+    let choice0 = v
+        .get("choices")
+        .and_then(|c| c.as_array())
+        .and_then(|a| a.first())
+        .ok_or_else(|| "missing choices[0]".to_string())?;
+    let content = choice0
+        .get("message")
+        .and_then(|m| m.get("content"))
+        .ok_or_else(|| "missing message.content".to_string())?;
+    match content {
+        Value::String(s) => {
+            let t = s.trim().to_owned();
+            if t.is_empty() {
+                Err("empty assistant content".into())
+            } else {
+                Ok(t)
+            }
+        }
+        Value::Array(parts) => {
+            let mut out = String::new();
+            for p in parts {
+                if p.get("type").and_then(|t| t.as_str()) == Some("text") {
+                    if let Some(t) = p.get("text").and_then(|x| x.as_str()) {
+                        out.push_str(t);
+                    }
+                }
+            }
+            let t = out.trim().to_owned();
+            if t.is_empty() {
+                Err("empty text content in message.parts".into())
+            } else {
+                Ok(t)
+            }
+        }
+        Value::Null => Err("message.content is null".into()),
+        _ => Err(format!("unexpected message.content type: {content}")),
+    }
+}
+
+/// Non-streaming chat completion; returns trimmed assistant text (no tools).
+pub async fn chat_completion_assistant_text(
+    cfg: &LlmConfig,
+    client: &reqwest::Client,
+    messages: Vec<Value>,
+) -> Result<String, String> {
+    let url = format!("{}/chat/completions", cfg.base_url);
+    let body = json!({
+        "model": cfg.model,
+        "stream": false,
+        "messages": messages,
+    });
+    let response = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", cfg.api_key))
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| format!("llm request: {e}"))?;
+    if !response.status().is_success() {
+        let status = response.status();
+        let text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "(empty body)".into());
+        return Err(format!("llm HTTP {status}: {text}"));
+    }
+    let v: Value = response
+        .json()
+        .await
+        .map_err(|e| format!("llm json: {e}"))?;
+    parse_assistant_content(&v)
+}
+
 /// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
 pub async fn stream_chat_turn(
     cfg: &LlmConfig,
@@ -182,5 +258,20 @@ mod tests {
     fn sse_done() {
         let line = "data: [DONE]";
         assert_eq!(parse_sse_data_line(line).as_deref(), Some(""));
+    }
+
+    #[test]
+    fn parses_assistant_string_content() {
+        let v = json!({"choices":[{"message":{"content":"  hello  "}}]});
+        assert_eq!(parse_assistant_content(&v).unwrap(), "hello");
+    }
+
+    #[test]
+    fn parses_assistant_text_parts() {
+        let v = json!({"choices":[{"message":{"content":[
+            {"type":"text","text":"ab"},
+            {"type":"text","text":" cd "}
+        ]}}]});
+        assert_eq!(parse_assistant_content(&v).unwrap(), "ab cd");
     }
 }
