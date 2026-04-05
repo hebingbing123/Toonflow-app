@@ -2034,6 +2034,69 @@ Future<AssetImageRow> createProjectAssetImage(
   return AssetImageRow.fromJson(map);
 }
 
+/// `PATCH /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `patchProjectAssetImageByLegacyIdsV1`.
+///
+/// [body] must match OpenAPI **`PatchAssetImageBody`** (at least one of **`file_path`**, **`state`**, **`sort_index`**).
+Future<AssetImageRow> patchProjectAssetImageByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+  String imageId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
+  );
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return AssetImageRow.fromJson(map);
+}
+
+/// `DELETE /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `deleteProjectAssetImageByLegacyIdsV1`.
+Future<void> deleteProjectAssetImageByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+  String imageId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
+  );
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 /// `GET /api/v1/projects/legacy/{project_legacy_id}/assets` — see `listProjectAssetsByLegacyV1`.
 Future<ListAssetsResponse> fetchProjectAssetsByLegacyId(
   String accessToken,

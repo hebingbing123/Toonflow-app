@@ -3,7 +3,7 @@
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
-    routing::{get, post, put},
+    routing::{get, patch, post, put},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::json_patch::{parse_optional_text_field, FieldPatch};
+use crate::json_patch::{parse_optional_i32_field, parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
 const ADV_LOCK_ASSET_LEGACY: i64 = 884_422_004;
@@ -137,6 +137,17 @@ struct CreateAssetImageBody {
     sort_index: Option<i32>,
 }
 
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct PatchAssetImageBody {
+    #[serde(default)]
+    file_path: Option<Value>,
+    #[serde(default)]
+    state: Option<Value>,
+    #[serde(default)]
+    sort_index: Option<Value>,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
@@ -146,6 +157,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/corner-scape",
             post(list_corner_scape_assets),
+        )
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}",
+            patch(patch_project_asset_image).delete(delete_project_asset_image),
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images",
@@ -879,6 +894,133 @@ async fn create_project_asset_image(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
+async fn patch_project_asset_image(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id, image_id)): Path<(i32, i32, Uuid)>,
+    headers: HeaderMap,
+    Json(body): Json<PatchAssetImageBody>,
+) -> Result<Json<AssetImageRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+
+    let fp_patch = parse_optional_text_field(body.file_path, "file_path")?;
+    let st_patch = parse_optional_text_field(body.state, "state")?;
+    let si_patch = parse_optional_i32_field(body.sort_index, "sort_index")?;
+
+    if matches!(fp_patch, FieldPatch::Absent)
+        && matches!(st_patch, FieldPatch::Absent)
+        && matches!(si_patch, FieldPatch::Absent)
+    {
+        return Err(ApiError::BadRequest(
+            "expected at least one of: file_path, state, sort_index".into(),
+        ));
+    }
+
+    let current = sqlx::query_as::<_, AssetImageRow>(
+        r#"
+        SELECT id, asset_id, sort_index, file_path, state
+        FROM app_asset_image
+        WHERE id = $1 AND asset_id = $2
+        "#,
+    )
+    .bind(image_id)
+    .bind(asset_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let new_file = match &fp_patch {
+        FieldPatch::Absent => current.file_path.clone(),
+        FieldPatch::Set(v) => v.clone(),
+    };
+
+    let new_state = match &st_patch {
+        FieldPatch::Absent => current.state.clone(),
+        FieldPatch::Set(v) => v.clone(),
+    };
+
+    let new_sort = match &si_patch {
+        FieldPatch::Absent => current.sort_index,
+        FieldPatch::Set(Some(v)) => *v,
+        FieldPatch::Set(None) => {
+            return Err(ApiError::BadRequest(
+                "sort_index cannot be null; omit to leave unchanged".into(),
+            ));
+        }
+    };
+
+    let row = sqlx::query_as::<_, AssetImageRow>(
+        r#"
+        UPDATE app_asset_image
+        SET file_path = $1,
+            state = $2,
+            sort_index = $3,
+            updated_at = NOW()
+        WHERE id = $4 AND asset_id = $5
+        RETURNING id, asset_id, sort_index, file_path, state
+        "#,
+    )
+    .bind(new_file)
+    .bind(new_state)
+    .bind(new_sort)
+    .bind(image_id)
+    .bind(asset_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(row))
+}
+
+async fn delete_project_asset_image(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id, image_id)): Path<(i32, i32, Uuid)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+
+    let res = sqlx::query(
+        r#"
+        DELETE FROM app_asset_image
+        WHERE id = $1 AND asset_id = $2
+        "#,
+    )
+    .bind(image_id)
+    .bind(asset_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
 fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
     let p = parse_optional_text_field(v, "asset_type")?;
     match &p {
@@ -1101,5 +1243,16 @@ mod tests {
         assert!(b.file_path.is_none());
         assert!(b.state.is_none());
         assert!(b.sort_index.is_none());
+    }
+
+    #[test]
+    fn patch_asset_image_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<PatchAssetImageBody>(r#"{"state":"x","x":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
     }
 }

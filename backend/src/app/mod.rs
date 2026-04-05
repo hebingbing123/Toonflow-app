@@ -814,6 +814,65 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn asset_image_patch_unauthorized_without_bearer() {
+        let (status, v) = patch_json_no_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+            r#"{"sort_index":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn asset_image_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+            &token,
+            r#"{"sort_index":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn asset_image_patch_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer(
+            "/api/v1/projects/legacy/0/assets/1/images/00000000-0000-0000-0000-000000000000",
+            &token,
+            r#"{"sort_index":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn asset_image_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn asset_image_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_assets_list_query_unauthorized_without_bearer() {
         let (status, v) =
             get_json("/api/v1/projects/legacy/1/assets?script_legacy_id=1&page=1&limit=10").await;
@@ -2060,6 +2119,75 @@ mod pg_contract_tests {
             Some("pg_contract/corner_hist.png")
         );
         assert_eq!(hi[0]["state"].as_str(), Some("已完成"));
+
+        let img_uuid = img_row["id"].as_str().expect("image id");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"state":""}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, patched) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "patched={patched}");
+        assert!(patched["state"].is_null());
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_no_hist) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner_no_hist={corner_no_hist}");
+        let cn = corner_no_hist["items"].as_array().expect("items");
+        assert_eq!(cn.len(), 1);
+        assert!(
+            cn[0]["history_images"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()),
+            "NULL state excludes row from corner-scape history"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"state":"已完成"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, restored) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "restored={restored}");
+        assert_eq!(restored["state"].as_str(), Some("已完成"));
 
         let res = app
             .clone()

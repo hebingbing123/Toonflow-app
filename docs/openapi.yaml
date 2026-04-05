@@ -1309,6 +1309,125 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}:
+    patch:
+      tags: [assets]
+      summary: Update an asset image row
+      operationId: patchProjectAssetImageByLegacyIdsV1
+      description: |
+        Partial update of **`file_path`**, **`state`**, **`sort_index`**. At least one field required.
+        **`file_path`** / **`state`**: **`null`** or **`""`** → SQL **`NULL`**. **`sort_index`** cannot be **`null`** (omit to leave unchanged).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: image_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchAssetImageBody"
+      responses:
+        "200":
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetImageRow"
+        "400":
+          description: Invalid body, empty patch, or invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project, asset, or image not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [assets]
+      summary: Delete an asset image row
+      operationId: deleteProjectAssetImageByLegacyIdsV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: image_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "400":
+          description: Invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project, asset, or image not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}:
     put:
       tags: [assets]
@@ -3553,7 +3672,7 @@ components:
     AssetImageRow:
       type: object
       required: [id, asset_id, sort_index]
-      description: Full **`app_asset_image`** row subset after **`POST …/images`**.
+      description: Full **`app_asset_image`** row subset after **`POST …/images`** or **`PATCH …/images/{image_id}`**.
       properties:
         id:
           type: string
@@ -3570,6 +3689,24 @@ components:
         state:
           type: string
           nullable: true
+
+    PatchAssetImageBody:
+      type: object
+      additionalProperties: false
+      description: "At least one of file_path, state, sort_index required."
+      properties:
+        file_path:
+          type: string
+          nullable: true
+          description: "Trimmed; null or empty string clears to SQL NULL."
+        state:
+          type: string
+          nullable: true
+          description: "null or empty string clears to SQL NULL."
+        sort_index:
+          type: integer
+          format: int32
+          description: "Cannot be null in JSON; omit field to leave unchanged."
 
     CornerScapeAssetItem:
       type: object
