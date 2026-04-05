@@ -3,7 +3,7 @@ name: Rust 与 Harness 评估
 overview: 在 Toonflow-app 现状评估基础上，确认目标形态为「**单仓** `backend/` + `frontend/`；Harness + Supabase；**第一版不上 BFF**；HTTP **`/api/v1`**、WebSocket **`/api/v1/ws`**；默认端口 8666；工程默认 §11；**异步任务以 Postgres 为队列真源（不急上 Redis 等旁路组件，见 §7.1）**；**SaaS：Free 默认可用；付费以 CNY 主卖，后期里程碑支持 USD 收银（§12.0）**；**实施第一步拉分支**；**推荐实施顺序见 YAML `implementation-order` todo**」，并给出与当前 Electron/Node 栈的差异、风险与推荐迁移节奏。
 todos:
   - id: implementation-order
-    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp（**PG 主库 + PG 任务队列**，旧 SQLite 仅迁移源）+ harness-rust-core（首条端到端竖切）→ flutter-shell；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入；decommission-electron 置于功能 parity 与灰度之后；**少加中间件**（§6、§7.1）
+    content: 推荐实施顺序（与文首阅读顺序、§7–§9 一致；§8 为拉分支专节）：git-branch → monorepo-layout → api-contract → postgres-ops 与 supabase-auth → rust-backend-mvp（**PG 主库 + PG 任务队列**，旧 SQLite 仅迁移源）+ harness-rust-core（首条端到端竖切）→ flutter-shell；**`product-shipping-bar`** 贯穿 **parity / 回归 / 上线门禁**，目标完成态与 **`decommission-electron`** 对齐；jobs-and-webhook-hardening、saas-product-spec、quality-bar 按里程碑并行接入（其中 blocking 项纳入 shipping bar）；decommission-electron 置于功能 parity 与灰度之后；**少加中间件**（§6、§7.1）
     status: pending
   - id: api-contract
     content: 冻结契约：REST `/api/v1`、WS `/api/v1/ws`、OpenAPI、websocket-events 文档、鉴权与错误码
@@ -13,6 +13,9 @@ todos:
     status: completed
   - id: rust-backend-mvp
     content: Rust 后端 MVP：**主库仅为 Supabase Postgres**（§4.1；SQLx 直连）；旧 SQLite 仅迁移源；AI Provider 流式；**竖切**：Flutter 已接项目/剧本/分镜 REST（**`POST` 新建项目**、**`POST` 项目下新建剧本**、**`POST` 剧本下新建分镜**、列表+按 legacy `GET/PATCH`、**`DELETE` 项目/剧本/分镜**）；**项目统计**：**`GET /api/v1/projects/summary`**（用户维度项目/剧本/分镜总数）、**`GET /api/v1/projects/legacy/{id}/stats`**（单项目；角色/视频占位 0，对齐旧 **`generalStatistics`**）；**静态模型目录**：**`GET /api/v1/models`** / **`GET /api/v1/models/detail`**（`data/models_catalog.json` 编译嵌入；旧 **`modelSelect`** 过滤语义）；**任务**：`app_generation_job` + REST（**`GET /api/v1/jobs`** 可选 **`kind`**/**`status`** query）+ **`jobs::worker`**（**PG + SKIP LOCKED** 已可多实例）、取消/重试/幂等、**WS** `generation.job.updated`；**GET /api/v1/me** 含 **`plan_tier`**；**用量**：`app_usage_event` + **`GET /api/v1/usage/summary`**（总量 + **`event_counts_last_7d`**）；**Agent 记忆**：`app_agent_memory` + **`POST /api/v1/agents/memory/query|clear|append`**（旧 getMemory/clearMemory 语义；append 无自动摘要）；**可观测**：`X-Request-Id` + 错误 JSON `request_id`；**`GET /api/v1/version`** 可选编译期 **`git_sha`**（**`TOONFLOW_GIT_SHA`**）；**契约**：OpenAPI/WS 与集成测试（isolate）；**进度**：**`backend/src/app/mod.rs`** 内 **`contract_smoke_tests`**（**无 DB**）：**`/health`**、**`/api/v1/health`**、**`/api/v1/version`**、**`/api/v1/ready`**；**Supabase 形 HS256 JWT**：**`/api/v1/models`**、**`/api/v1/models/detail`**、**`/api/v1/harness/tools`**、**`/api/v1/skills/summary`**、**`/api/v1/skills`**、**`/api/v1/skills/content`**；**`app::pg_contract_tests`**（**`#[ignore]`**，需 **`DATABASE_URL`** + **`SUPABASE_JWT_SECRET`** + 已迁移库：**`POST /api/v1/projects`** → **`GET …/stats`** → **`DELETE …`** → 404）；**不依赖 Redis 才能完成重构**；**重构分支**：`harness::ws`、`app/{handlers,router}`、`jobs/worker`、`billing/*`、`state/*`、`auth/*`、`error/*`、`llm/envelope` 等已模块化；**仍缺**更广的端到端契约回归矩阵与业务域全覆盖
+    status: pending
+  - id: product-shipping-bar
+    content: **完整产品切换**总验收（**不等于**仅 `rust-backend-mvp`）：相对旧 Electron/Node 维护 **功能 parity 清单**（建议落 `docs/plans/` 或 `docs/` 独立表）；扩充 **端到端契约 + 集成回归**（无 DB 烟雾、需 PG 的测试、关键用户路径）；将 **`jobs-and-webhook-hardening`**、**`saas-product-spec`**、**`quality-bar`** 中 **blocking 上线** 的子项纳入同一门禁；**灰度与回滚**策略可执行；**完成态** = **`decommission-electron`** 具备条件（旧栈可下线）。**进度**：以 `rust-backend-mvp` + `flutter-shell` 为底座，parity 与回归随竖切增量补齐
     status: pending
   - id: postgres-ops
     content: Supabase：dev 本地 supabase start；prod 托管；连接串/迁移/备份；私有化备选自管 PG
@@ -46,7 +49,7 @@ isProject: false
 
 # Toonflow-app 技术 review 与 Rust / Harness Engineering 路线评估
 
-**建议阅读顺序**：**§0–§6**（目标与取舍）→ **§11**（单仓与 API/WS/CI 默认）→ **§7–§9**（已确认前提、仍待拍板、速查索引）→ **§8**（分支）→ **§12–§13**（SaaS/计费与工程加深项）。**§4.x** 在涉及库与 Auth 时细读。
+**建议阅读顺序**：**§0–§6**（目标与取舍）→ **§11**（单仓与 API/WS/CI 默认）→ **§7–§9**（已确认前提、仍待拍板、速查索引）→ **§8**（分支）→ **§12–§13**（SaaS/计费与工程加深项）。**§4.x** 在涉及库与 Auth 时细读。文首 YAML 的 **`product-shipping-bar`** 汇总「完整产品切换」门禁（parity、回归、blocking 子项、灰度），**完成态与 `decommission-electron` 对齐**，与 **`rust-backend-mvp`**（后端首条验收）区分。
 
 ## 0. 目标架构（已确认）
 
