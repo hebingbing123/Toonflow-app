@@ -35,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
+  String? _directorManualProbeBody;
   String? _skillsBinaryProbeBody;
   String? _modelsCatalogBody;
   String? _textModelDefaultBody;
@@ -53,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
+  bool _loadingDirectorManualProbe = false;
   bool _loadingSkillsBinaryProbe = false;
   bool _loadingModelsCatalog = false;
   bool _loadingTextModelDefault = false;
@@ -615,6 +617,51 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingVisualManualProbe = false;
+      });
+    }
+  }
+
+  Future<void> _callDirectorManualProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingDirectorManualProbe = true;
+      _error = null;
+      _directorManualProbeBody = null;
+    });
+    try {
+      final list = await postProjectQueryDirectorManual(token);
+      if (!mounted) return;
+      var slotChars = 0;
+      var imagePaths = 0;
+      for (final row in list.data) {
+        imagePaths += row.image.length;
+        for (final slot in row.data) {
+          slotChars += slot.data.length;
+        }
+      }
+      final sample = list.data
+          .take(3)
+          .map((r) => '${r.directorManual}:${r.name}')
+          .join(', ');
+      setState(() {
+        _directorManualProbeBody =
+            'folders=${list.data.length} · slot_data_chars=$slotChars · '
+            'image_paths=$imagePaths'
+            '${sample.isEmpty ? '' : ' · sample: $sample'}';
+        _loadingDirectorManualProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingDirectorManualProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingDirectorManualProbe = false;
       });
     }
   }
@@ -4538,6 +4585,23 @@ class _HomePageState extends State<HomePage> {
               if (_visualManualProbeBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('visual-manual: $_visualManualProbeBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingDirectorManualProbe
+                    ? null
+                    : _callDirectorManualProbe,
+                child: Text(
+                  _loadingDirectorManualProbe
+                      ? '请求中…'
+                      : 'POST …/project/query-director-manual',
+                ),
+              ),
+              if (_directorManualProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  'director-manual: $_directorManualProbeBody',
+                ),
               ],
               const SizedBox(height: 8),
               FilledButton.tonal(
