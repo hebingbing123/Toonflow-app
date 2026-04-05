@@ -46,6 +46,8 @@ info:
 
     **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`**, **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** match legacy **`/api/assetsGenerate/*`** request bodies, then **501** **`not_implemented`** until **`app_generation_job`** + image providers are wired end-to-end.
 
+    **Production / workbench (Electron-only pipeline):** A **subset** of legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`** with validated JSON bodies, then **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). See operationIds **`postProductionGetProductionDataV1`**, **`getFlowData`**, **`saveFlowData`**, **`workbenchGenerateVideo`**, **`storyboardPollingImage`**, **`exportImage`**.
+
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
 servers:
@@ -65,6 +67,8 @@ tags:
     description: Scripts under owned projects (Postgres + RLS)
   - name: storyboards
     description: Storyboards under owned scripts (Postgres + RLS)
+  - name: production
+    description: Legacy Electron production workbench (video timeline, flow save); most routes are stubs until jobs + object storage
   - name: novels
     description: Novel source chapters per project (`app_novel`; Postgres + RLS)
   - name: art_styles
@@ -3378,6 +3382,252 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/production/get-production-data:
+    post:
+      tags: [production]
+      summary: Load production bundle for storyboard ids (legacy `getProductionData`)
+      operationId: postProductionGetProductionDataV1
+      description: |
+        Bearer JWT. Validates **`ids`** (legacy **`o_storyboard` id** list), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionStoryboardIdsBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/get-flow-data:
+    post:
+      tags: [production]
+      summary: Load production agent flow data (legacy `getFlowData`)
+      operationId: postProductionGetFlowDataV1
+      description: |
+        Bearer JWT. Validates **`projectId`** + **`episodesId`**, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionGetFlowDataBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/save-flow-data:
+    post:
+      tags: [production]
+      summary: Save production flow JSON (legacy `saveFlowData`)
+      operationId: postProductionSaveFlowDataV1
+      description: |
+        Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`**, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionSaveFlowDataBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/generate-video:
+    post:
+      tags: [production]
+      summary: Enqueue video generation (legacy `generateVideo`)
+      operationId: postProductionWorkbenchGenerateVideoV1
+      description: |
+        Bearer JWT. Validates legacy **`generateVideo`** body, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionWorkbenchGenerateVideoBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/polling-image:
+    post:
+      tags: [production]
+      summary: Poll storyboard image generation state (legacy `pollingImage`)
+      operationId: postProductionStoryboardPollingImageV1
+      description: |
+        Bearer JWT. Validates **`ids`**, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionStoryboardIdsBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/export-image:
+    post:
+      tags: [production]
+      summary: ZIP storyboard frames for export (legacy `exportImage`)
+      operationId: postProductionExportImageV1
+      description: |
+        Bearer JWT. Validates **`shotId`** array, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionExportImageBody"
+      responses:
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/scripts/export:
     post:
       tags: [scripts]
@@ -5119,6 +5369,106 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/BatchPolishAssetsItem"
+
+    ProductionStoryboardIdsBody:
+      type: object
+      required: [ids]
+      additionalProperties: false
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+    ProductionGetFlowDataBody:
+      type: object
+      required: [projectId, episodesId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        episodesId:
+          type: integer
+          format: int32
+
+    ProductionSaveFlowDataBody:
+      type: object
+      required: [projectId, episodesId, data]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        episodesId:
+          type: integer
+          format: int32
+        data:
+          type: object
+          description: Legacy flow JSON (structure defined in TS **`flowDataSchema`**)
+          additionalProperties: true
+
+    ProductionWorkbenchGenerateVideoUploadItem:
+      type: object
+      required: [id, sources]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        sources:
+          type: string
+
+    ProductionWorkbenchGenerateVideoBody:
+      type: object
+      required:
+        [projectId, scriptId, uploadData, prompt, model, mode, resolution, duration, trackId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        uploadData:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionWorkbenchGenerateVideoUploadItem"
+        prompt:
+          type: string
+        model:
+          type: string
+        mode:
+          type: string
+        resolution:
+          type: string
+        duration:
+          type: number
+        audio:
+          type: boolean
+        trackId:
+          type: integer
+          format: int32
+
+    ProductionExportImageShotRef:
+      type: object
+      required: [id]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+
+    ProductionExportImageBody:
+      type: object
+      required: [shotId]
+      additionalProperties: false
+      properties:
+        shotId:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionExportImageShotRef"
 
     AboutCheckUpdateSource:
       type: string

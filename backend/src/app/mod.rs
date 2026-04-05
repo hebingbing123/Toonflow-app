@@ -800,6 +800,92 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn production_get_production_data_unauthorized_without_bearer() {
+        let (status, v) =
+            post_json("/api/v1/production/get-production-data", r#"{"ids":[1]}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn production_get_production_data_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/get-production-data",
+            &token,
+            r#"{"ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn production_get_flow_data_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/get-flow-data",
+            &token,
+            r#"{"projectId":1,"episodesId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn production_save_flow_data_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/save-flow-data",
+            &token,
+            r#"{"projectId":1,"episodesId":1,"data":{}}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn production_workbench_generate_video_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/workbench/generate-video",
+            &token,
+            r#"{"projectId":1,"scriptId":1,"uploadData":[{"id":1,"sources":"assets"}],"prompt":"p","model":"1:x","mode":"std","resolution":"720p","duration":5,"trackId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_polling_image_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/polling-image",
+            &token,
+            r#"{"ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn production_export_image_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/export-image",
+            &token,
+            r#"{"shotId":[{"id":"1"}]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
     async fn script_agent_get_plan_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/script-agent/get-plan-data",

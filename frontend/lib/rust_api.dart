@@ -687,6 +687,25 @@ Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {
   return res.statusCode;
 }
 
+/// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (typically **501**).
+Future<int> postProductionGetProductionDataV1(
+  String accessToken, {
+  required List<int> storyboardIds,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-production-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ids': storyboardIds}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({

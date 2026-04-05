@@ -9,6 +9,7 @@ use crate::harness;
 use crate::jobs;
 use crate::models_catalog;
 use crate::novels;
+use crate::production_legacy;
 use crate::projects;
 use crate::prompts;
 use crate::rate_limit::governor_layer_from_env;
@@ -63,6 +64,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(projects::router())
         .merge(art_styles::router())
         .merge(novels::router())
+        .merge(production_legacy::router())
         .merge(assets::router())
         .merge(assets_generate::router())
         .merge(scripts::router())
