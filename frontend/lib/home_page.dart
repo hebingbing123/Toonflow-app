@@ -1625,6 +1625,7 @@ class _HomePageState extends State<HomePage> {
       final scriptProbeBusy = <bool>[false];
       final generalLegacyBusy = <bool>[false];
       final tasksLegacyBusy = <bool>[false];
+      final projectLegacyBusy = <bool>[false];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -1703,7 +1704,8 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             TextButton(
                               onPressed: generalLegacyBusy[0] ||
-                                      tasksLegacyBusy[0]
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
                                   ? null
                                   : () async {
                                       setDialogState(
@@ -1757,7 +1759,60 @@ class _HomePageState extends State<HomePage> {
                             ),
                             TextButton(
                               onPressed: generalLegacyBusy[0] ||
-                                      tasksLegacyBusy[0]
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
+                                        () => projectLegacyBusy[0] = true,
+                                      );
+                                      try {
+                                        final rows =
+                                            await postProjectGetProject(token);
+                                        if (!ctx.mounted) return;
+                                        final line = rows.isEmpty
+                                            ? '0 项'
+                                            : rows
+                                                .map(
+                                                  (r) =>
+                                                      '#${r.legacyId} ${r.name ?? ""}',
+                                                )
+                                                .join('; ');
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'POST …/project/get-project：$line',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                projectLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                projectLegacyBusy[0]
+                                    ? 'project…'
+                                    : 'POST project get-project',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
                                   ? null
                                   : () async {
                                       setDialogState(
@@ -1807,7 +1862,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             TextButton(
                               onPressed: generalLegacyBusy[0] ||
-                                      tasksLegacyBusy[0]
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
                                   ? null
                                   : () async {
                                       setDialogState(
@@ -1856,7 +1912,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             TextButton(
                               onPressed: generalLegacyBusy[0] ||
-                                      tasksLegacyBusy[0]
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
                                   ? null
                                   : () async {
                                       setDialogState(
@@ -1904,7 +1961,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             TextButton(
                               onPressed: generalLegacyBusy[0] ||
-                                      tasksLegacyBusy[0]
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
                                   ? null
                                   : () async {
                                       setDialogState(
