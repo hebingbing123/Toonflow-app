@@ -1578,6 +1578,31 @@ Future<ListAssetsResponse> fetchProjectAssetsByLegacyId(
   return ListAssetsResponse.fromJson(map);
 }
 
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}` — see `getProjectAssetByLegacyIdsV1`.
+Future<AssetRow> fetchProjectAssetByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return AssetRow.fromJson(map);
+}
+
 /// `POST /api/v1/projects/legacy/{project_legacy_id}/assets` — see `createProjectAssetByLegacyV1`.
 Future<AssetRow> createProjectAssetUnderLegacy(
   String accessToken,

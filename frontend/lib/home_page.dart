@@ -134,16 +134,16 @@ class _HomePageState extends State<HomePage> {
     try {
       final h = await fetchHealthV1();
       if (!mounted) return;
-      setState(() {
+        setState(() {
         _healthBody = 'status=${h.status} service=${h.service}';
-        _loadingHealth = false;
-      });
+          _loadingHealth = false;
+        });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() {
+        setState(() {
         _error = e.toString();
-        _loadingHealth = false;
-      });
+          _loadingHealth = false;
+        });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -292,16 +292,16 @@ class _HomePageState extends State<HomePage> {
       if (r.billingProvider != null && r.billingProvider!.isNotEmpty) {
         parts.add('billing_provider=${r.billingProvider}');
       }
-      setState(() {
+        setState(() {
         _meBody = parts.join(' · ');
-        _loadingMe = false;
-      });
+          _loadingMe = false;
+        });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() {
+        setState(() {
         _error = e.toString();
-        _loadingMe = false;
-      });
+          _loadingMe = false;
+        });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -1309,6 +1309,45 @@ class _HomePageState extends State<HomePage> {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final first = assetsRef[0]!.items.first;
                                     try {
+                                      final row = await fetchProjectAssetByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'GET …/assets/${first.legacyId}：'
+                                            '${row.name} (${row.assetType})',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('GET 首条资产详情'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final first = assetsRef[0]!.items.first;
+                                    try {
                                       await patchProjectAssetByLegacyIds(
                                         token,
                                         p.legacyId,
@@ -1903,20 +1942,20 @@ class _HomePageState extends State<HomePage> {
                                               title: Text(
                                                 '分镜 (${boardsList.length})',
                                               ),
-                                              content: SizedBox(
-                                                width: double.maxFinite,
-                                                child: ListView.builder(
-                                                  shrinkWrap: true,
+                                        content: SizedBox(
+                                          width: double.maxFinite,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
                                                   itemCount: boardsList.length,
-                                                  itemBuilder: (_, i) {
+                                            itemBuilder: (_, i) {
                                                     final b = boardsList[i];
-                                                    return ListTile(
-                                                      title: Text(
-                                                        '#${b.legacyId} ${b.state ?? ""}',
-                                                      ),
-                                                      subtitle: Text(
-                                                        b.prompt ?? '',
-                                                        maxLines: 2,
+                                              return ListTile(
+                                                title: Text(
+                                                  '#${b.legacyId} ${b.state ?? ""}',
+                                                ),
+                                                subtitle: Text(
+                                                  b.prompt ?? '',
+                                                  maxLines: 2,
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                       ),
@@ -1924,8 +1963,8 @@ class _HomePageState extends State<HomePage> {
                                                           ? null
                                                           : () async {
                                                               await _openStoryboardEditor(
-                                                                token,
-                                                                b.legacyId,
+                                                    token,
+                                                    b.legacyId,
                                                                 onStoryboardTreeMutated:
                                                                     () async {
                                                                   final fresh =
@@ -1946,13 +1985,13 @@ class _HomePageState extends State<HomePage> {
                                                                     () {},
                                                                   );
                                                                 },
-                                                              );
-                                                            },
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              actions: [
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        actions: [
                                                 TextButton(
                                                   onPressed: creatingSb[0]
                                                       ? null
@@ -2018,12 +2057,12 @@ class _HomePageState extends State<HomePage> {
                                                         : 'POST 空分镜',
                                                   ),
                                                 ),
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(ctx2).pop(),
-                                                  child: const Text('Close'),
-                                                ),
-                                              ],
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.of(ctx2).pop(),
+                                            child: const Text('Close'),
+                                          ),
+                                        ],
                                             );
                                           },
                                         );
@@ -2774,9 +2813,9 @@ class _HomePageState extends State<HomePage> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              FilledButton(
-                onPressed: _loadingHealth ? null : _pingHealth,
-                child: Text(_loadingHealth ? '请求中…' : 'GET /api/v1/health'),
+          FilledButton(
+            onPressed: _loadingHealth ? null : _pingHealth,
+            child: Text(_loadingHealth ? '请求中…' : 'GET /api/v1/health'),
               ),
               FilledButton.tonal(
                 onPressed: _loadingHealthRoot ? null : _pingHealthRoot,
@@ -2914,14 +2953,14 @@ class _HomePageState extends State<HomePage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilledButton.tonal(
+              FilledButton.tonal(
                     onPressed: (_loadingProjects || _creatingProject)
                         ? null
                         : _loadProjects,
-                    child: Text(
-                      _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
-                    ),
-                  ),
+                child: Text(
+                  _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
+                ),
+              ),
                   FilledButton.tonal(
                     onPressed: (_loadingProjectsSummary || _creatingProject)
                         ? null
