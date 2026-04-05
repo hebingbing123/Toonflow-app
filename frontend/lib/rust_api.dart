@@ -1509,6 +1509,71 @@ class AssetRow {
   }
 }
 
+/// One **`app_novel`** row — OpenAPI **`NovelRow`**.
+class NovelRow {
+  NovelRow({
+    required this.id,
+    required this.legacyId,
+    required this.chapterIndex,
+    this.reel,
+    required this.chapter,
+    required this.chapterData,
+    this.event,
+    required this.eventState,
+    this.errorReason,
+    this.createTimeMs,
+  });
+
+  final String id;
+  final int legacyId;
+  final int chapterIndex;
+  final String? reel;
+  final String chapter;
+  final String chapterData;
+  final String? event;
+  final int eventState;
+  final String? errorReason;
+  final int? createTimeMs;
+
+  factory NovelRow.fromJson(Map<String, dynamic> json) {
+    return NovelRow(
+      id: json['id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      chapterIndex: (json['chapter_index'] as num).toInt(),
+      reel: json['reel'] as String?,
+      chapter: json['chapter'] as String? ?? '',
+      chapterData: json['chapter_data'] as String? ?? '',
+      event: json['event'] as String?,
+      eventState: (json['event_state'] as num).toInt(),
+      errorReason: json['error_reason'] as String?,
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+    );
+  }
+}
+
+/// Body of **`GET …/novels`** — OpenAPI **`ListNovelsResponse`**.
+class ListNovelsResponse {
+  const ListNovelsResponse({
+    required this.items,
+    required this.total,
+  });
+
+  final List<NovelRow> items;
+  final int total;
+
+  factory ListNovelsResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return ListNovelsResponse(
+      items: raw
+          .map((e) => NovelRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toInt(),
+    );
+  }
+}
+
 /// Body of **`GET …/assets`** — OpenAPI **`ListAssetsResponse`**.
 class ListAssetsResponse {
   const ListAssetsResponse({
@@ -1686,6 +1751,174 @@ Future<void> deleteProjectAssetByLegacyIds(
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId',
+  );
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/novels` — see `listProjectNovelsByLegacyV1`.
+Future<ListNovelsResponse> fetchProjectNovelsByLegacyId(
+  String accessToken,
+  int projectLegacyId, {
+  String? search,
+  int? page,
+  int? limit,
+}) async {
+  final qp = <String, String>{};
+  if (search != null && search.isNotEmpty) {
+    qp['search'] = search;
+  }
+  if (page != null) {
+    qp['page'] = '$page';
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  var uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novels',
+  );
+  if (qp.isNotEmpty) {
+    uri = uri.replace(queryParameters: qp);
+  }
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListNovelsResponse.fromJson(map);
+}
+
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/novels/{novel_legacy_id}` — see `getProjectNovelByLegacyIdsV1`.
+Future<NovelRow> fetchProjectNovelByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int novelLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novels/$novelLegacyId',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelRow.fromJson(map);
+}
+
+/// `POST /api/v1/projects/legacy/{project_legacy_id}/novels` — see `createProjectNovelByLegacyV1`.
+Future<NovelRow> createProjectNovelUnderLegacy(
+  String accessToken,
+  int projectLegacyId, {
+  int? chapterIndex,
+  String? reel,
+  String? chapter,
+  String? chapterData,
+}) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novels');
+  final body = <String, dynamic>{};
+  if (chapterIndex != null) {
+    body['chapter_index'] = chapterIndex;
+  }
+  if (reel != null) {
+    body['reel'] = reel;
+  }
+  if (chapter != null) {
+    body['chapter'] = chapter;
+  }
+  if (chapterData != null) {
+    body['chapter_data'] = chapterData;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelRow.fromJson(map);
+}
+
+/// `PATCH /api/v1/projects/legacy/{project_legacy_id}/novels/{novel_legacy_id}` — see `patchProjectNovelByLegacyIdsV1`.
+Future<NovelRow> patchProjectNovelByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int novelLegacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novels/$novelLegacyId',
+  );
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return NovelRow.fromJson(map);
+}
+
+/// `DELETE /api/v1/projects/legacy/{project_legacy_id}/novels/{novel_legacy_id}` — see `deleteProjectNovelByLegacyIdsV1`.
+Future<void> deleteProjectNovelByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int novelLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novels/$novelLegacyId',
   );
   final res = await http
       .delete(
