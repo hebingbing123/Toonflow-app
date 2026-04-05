@@ -36,6 +36,7 @@ mod jwt_fixture {
 #[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
+    use std::path::PathBuf;
     use std::sync::OnceLock;
 
     use axum::body::Body;
@@ -1094,6 +1095,65 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn skill_content_post_unauthorized_without_bearer() {
+        let (status, v) =
+            post_json("/api/v1/skills/content", r#"{"path":"x.md","content":"y"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_content_post_rejects_parent_path_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/skills/content",
+            &token,
+            r#"{"path":"../README.md","content":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn skill_content_post_conflict_when_file_exists() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/skills/content",
+            &token,
+            r#"{"path":"script_execution_script.md","content":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::CONFLICT);
+        assert_eq!(v["code"], "conflict");
+    }
+
+    #[tokio::test]
+    async fn skill_content_post_creates_file_roundtrip() {
+        let token = test_jwt(Uuid::nil());
+        let name = format!("__contract_post_skill_{}.md", Uuid::new_v4());
+        let body = serde_json::json!({
+            "path": name.clone(),
+            "content": "smoke_post_body",
+        })
+        .to_string();
+        let (status, v) = post_json_bearer("/api/v1/skills/content", &token, &body).await;
+        assert_eq!(status, StatusCode::CREATED, "v={v}");
+        assert_eq!(v["path"], name);
+        assert_eq!(v["content"], "smoke_post_body");
+
+        let uri = format!("/api/v1/skills/content?path={name}");
+        let (gstatus, gv) = get_json_bearer(&uri, &token).await;
+        assert_eq!(gstatus, StatusCode::OK, "gv={gv}");
+        assert_eq!(gv["content"], "smoke_post_body");
+
+        let skill_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("data/skills")
+            .join(&name);
+        let _ = std::fs::remove_file(&skill_path);
     }
 
     #[tokio::test]

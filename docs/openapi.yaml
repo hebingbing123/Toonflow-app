@@ -47,7 +47,7 @@ tags:
   - name: art_styles
     description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset without OSS image upload
   - name: skills
-    description: Markdown skills under `backend/data/skills` (read; authenticated PUT overwrites an existing file only, parity with legacy `saveSkillContent`)
+    description: Markdown skills under `backend/data/skills` (read; PUT overwrites an existing file; POST creates a new file and parent dirs under `data/skills`)
   - name: harness
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
@@ -2438,6 +2438,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [skills]
+      summary: Create a new skill file (UTF-8 text)
+      operationId: postSkillContentV1
+      description: |
+        Same path rules as **`GET /api/v1/skills/content`**. The file **must not exist**; if a file already exists at `path`, respond **409**. Parent directories under **`data/skills`** are created as needed. Body size is capped at **2_000_000** bytes (UTF-8).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillContentWriteRequest"
+      responses:
+        "201":
+          description: Created — returns normalized relative path and written content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillContentResponse"
+        "400":
+          description: Unsafe path, empty path, skills dir missing, path is a directory, or content too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "409":
+          description: A file already exists at `path`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
     put:
       tags: [skills]
       summary: Overwrite an existing skill file (UTF-8 text)
@@ -2451,7 +2490,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PutSkillContentRequest"
+              $ref: "#/components/schemas/SkillContentWriteRequest"
       responses:
         "200":
           description: OK — returns normalized relative path and written content
@@ -3877,7 +3916,7 @@ components:
         content:
           type: string
 
-    PutSkillContentRequest:
+    SkillContentWriteRequest:
       type: object
       required: [path, content]
       additionalProperties: false

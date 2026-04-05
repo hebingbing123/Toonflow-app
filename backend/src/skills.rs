@@ -1,12 +1,14 @@
 //! HTTP surface for Markdown skills under `backend/data/skills/`.
 //! Paths are relative to that directory; `..` segments are rejected.
 //! **`PUT /api/v1/skills/content`** overwrites an **existing** file only (parity with legacy **`saveSkillContent`**).
+//! **`POST /api/v1/skills/content`** creates a **new** file (parent directories are created under `data/skills`); existing files → **409**.
 
 use std::path::{Path, PathBuf};
 
 use axum::{
     extract::{Query, State},
-    http::HeaderMap,
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
     routing::get,
     Json, Router,
 };
@@ -71,6 +73,33 @@ impl SkillWriteError {
                 ApiError::BadRequest(format!("skill content exceeds {MAX_SKILL_BYTES} bytes"))
             }
             SkillWriteError::Io(m) => ApiError::BadRequest(m),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum SkillCreateError {
+    BadPath(String),
+    SkillsDirMissing,
+    AlreadyExists,
+    TooLarge,
+    Io(String),
+}
+
+impl SkillCreateError {
+    fn into_api_error(self) -> ApiError {
+        match self {
+            SkillCreateError::BadPath(m) => ApiError::BadRequest(m),
+            SkillCreateError::SkillsDirMissing => ApiError::BadRequest(
+                "skills directory missing (expected backend/data/skills)".into(),
+            ),
+            SkillCreateError::AlreadyExists => {
+                ApiError::Conflict("skill file already exists".into())
+            }
+            SkillCreateError::TooLarge => {
+                ApiError::BadRequest(format!("skill content exceeds {MAX_SKILL_BYTES} bytes"))
+            }
+            SkillCreateError::Io(m) => ApiError::BadRequest(m),
         }
     }
 }
@@ -161,6 +190,60 @@ fn write_skill_markdown(
     write_skill_at(&skills_root(), relative, content)
 }
 
+/// Create a new skill file under `root` (parent dirs created). Fails if path exists.
+pub(crate) fn create_skill_at(
+    root: &Path,
+    relative: &str,
+    content: &str,
+) -> Result<SkillContentResponse, SkillCreateError> {
+    if !root.is_dir() {
+        return Err(SkillCreateError::SkillsDirMissing);
+    }
+    let rel = relative.trim();
+    if rel.is_empty() {
+        return Err(SkillCreateError::BadPath("path must not be empty".into()));
+    }
+    let resolved = safe_join_under_root(root, rel).map_err(|e| match e {
+        SkillReadError::BadPath(m) => SkillCreateError::BadPath(m),
+        SkillReadError::SkillsDirMissing
+        | SkillReadError::NotFound
+        | SkillReadError::TooLarge
+        | SkillReadError::Io(_) => SkillCreateError::BadPath("invalid skill path".into()),
+    })?;
+    if resolved.exists() {
+        return if resolved.is_file() {
+            Err(SkillCreateError::AlreadyExists)
+        } else {
+            Err(SkillCreateError::BadPath(
+                "path exists and is not a file".into(),
+            ))
+        };
+    }
+    let n = content.len() as u64;
+    if n > MAX_SKILL_BYTES {
+        return Err(SkillCreateError::TooLarge);
+    }
+    if let Some(parent) = resolved.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| SkillCreateError::Io(e.to_string()))?;
+    }
+    std::fs::write(&resolved, content).map_err(|e| SkillCreateError::Io(e.to_string()))?;
+    let rel_out = resolved
+        .strip_prefix(root)
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|_| rel.to_string());
+    Ok(SkillContentResponse {
+        path: rel_out,
+        content: content.to_string(),
+    })
+}
+
+fn create_skill_markdown(
+    relative: &str,
+    content: &str,
+) -> Result<SkillContentResponse, SkillCreateError> {
+    create_skill_at(&skills_root(), relative, content)
+}
+
 #[derive(Serialize)]
 pub struct SkillFileMeta {
     pub path: String,
@@ -188,7 +271,7 @@ pub struct SkillContentQuery {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PutSkillContentBody {
+pub struct SkillContentBody {
     pub path: String,
     pub content: String,
 }
@@ -199,7 +282,9 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/skills", get(list_skills))
         .route(
             "/api/v1/skills/content",
-            get(get_skill_content).put(put_skill_content),
+            get(get_skill_content)
+                .put(put_skill_content)
+                .post(post_skill_content),
         )
 }
 
@@ -294,12 +379,23 @@ async fn get_skill_content(
 async fn put_skill_content(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<PutSkillContentBody>,
+    Json(body): Json<SkillContentBody>,
 ) -> Result<Json<SkillContentResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let doc =
         write_skill_markdown(&body.path, &body.content).map_err(SkillWriteError::into_api_error)?;
     Ok(Json(doc))
+}
+
+async fn post_skill_content(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<SkillContentBody>,
+) -> Result<impl IntoResponse, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    let doc = create_skill_markdown(&body.path, &body.content)
+        .map_err(SkillCreateError::into_api_error)?;
+    Ok((StatusCode::CREATED, Json(doc)))
 }
 
 #[cfg(test)]
@@ -308,10 +404,9 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn put_skill_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<PutSkillContentBody>(
-            r#"{"path":"a.md","content":"x","extra":1}"#,
-        );
+    fn skill_content_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<SkillContentBody>(r#"{"path":"a.md","content":"x","extra":1}"#);
         assert!(err.is_err());
     }
 
@@ -353,6 +448,30 @@ mod tests {
         assert!(matches!(
             super::write_skill_at(root, "nope.md", "x"),
             Err(super::SkillWriteError::FileMissing)
+        ));
+    }
+
+    #[test]
+    fn create_skill_at_writes_nested_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let out = super::create_skill_at(root, "nested/x.md", "hi").unwrap();
+        assert_eq!(out.path, "nested/x.md");
+        assert_eq!(out.content, "hi");
+        assert_eq!(
+            std::fs::read_to_string(root.join("nested/x.md")).unwrap(),
+            "hi"
+        );
+    }
+
+    #[test]
+    fn create_skill_at_rejects_existing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::write(root.join("b.md"), "1").unwrap();
+        assert!(matches!(
+            super::create_skill_at(root, "b.md", "2"),
+            Err(super::SkillCreateError::AlreadyExists)
         ));
     }
 }

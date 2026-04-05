@@ -1617,6 +1617,37 @@ Future<SkillContentResponse> saveSkillContent(
   return SkillContentResponse.fromJson(map);
 }
 
+/// `POST /api/v1/skills/content` — creates a new file under `data/skills` (**409** if it already exists).
+/// See `postSkillContentV1`.
+Future<SkillContentResponse> createSkillContent(
+  String accessToken,
+  String relativePath,
+  String content,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/content');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'path': relativePath, 'content': content}),
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode == 409) {
+    throw RustApiException('conflict', statusCode: 409);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SkillContentResponse.fromJson(map);
+}
+
 /// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
