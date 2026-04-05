@@ -40,7 +40,7 @@
 | `/api/other/getVersion` | 版本号 | ✅ `GET /api/v1/version` | |
 | `/api/other/deleteAllData` | 清空数据 | ⏳ | 高危；需显式策略与审计 |
 | `/api/production/**` | 分镜图/视频工作台、流、导出 | 🟡 | **Storyboard** 已有 **`app_storyboard` + REST**；**轮询出图、视频轨、export** 等仍 ⏳ |
-| `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`GET /api/v1/visual-manual`** 读 **`data/skills/art_skills/*`**（Markdown 槽位 + **`image`** 为 **`data/skills` 下相对路径**，无 OSS 署名，对齐 **`POST /api/project/getVisualManual`** 数据结构）；Flutter **`fetchVisualManualV1`** |
+| `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`GET /api/v1/visual-manual`** 读 **`data/skills/art_skills/*`**（Markdown 槽位 + **`image`** 为 **`data/skills` 下相对路径**，无 OSS 署名，对齐 **`POST /api/project/getVisualManual`** 数据结构）；Flutter **`fetchVisualManualV1`** + 首页探针 |
 | `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**export** / **poll** / **`extract-assets`** ✅；**`PUT/DELETE …/projects/legacy/{p}/scripts/{s}/assets/{a}`** 维护 **`app_script_asset`** ✅；Flutter **`exportScriptsZip`**、**`pollScriptExtractState`**、**`startScriptAssetExtract`** 项目详情探针；旧 prompt 对齐见 **`SCRIPT_ASSET_EXTRACT_PROMPT_PATH`** |
 | `/api/scriptAgent/*` | 剧本 Agent 计划数据 | ⏳ | 🔀 部分能力由 **Harness WS** 替代，持久化结构需对齐 |
 | `/api/setting/about/*` | 更新检查、安装包 | ⏳ | 多为桌面分发；Web/桌面分流 |

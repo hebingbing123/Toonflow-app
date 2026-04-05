@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   String? _meBody;
   String? _usageSummaryBody;
   String? _promptsProbeBody;
+  String? _visualManualProbeBody;
   String? _modelsCatalogBody;
   String? _modelDetailBody;
   String? _agentMemoryBody;
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingMe = false;
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
+  bool _loadingVisualManualProbe = false;
   bool _loadingModelsCatalog = false;
   bool _loadingModelDetail = false;
   bool _loadingAgentMemory = false;
@@ -412,6 +414,48 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingPromptsProbe = false;
+      });
+    }
+  }
+
+  Future<void> _callVisualManualProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingVisualManualProbe = true;
+      _error = null;
+      _visualManualProbeBody = null;
+    });
+    try {
+      final vm = await fetchVisualManualV1(token);
+      if (!mounted) return;
+      var totalChars = 0;
+      var totalImages = 0;
+      for (final s in vm.styles) {
+        totalImages += s.image.length;
+        for (final e in s.data) {
+          totalChars += e.data.length;
+        }
+      }
+      final sample =
+          vm.styles.take(4).map((s) => s.name).join(', ');
+      setState(() {
+        _visualManualProbeBody =
+            'styles=${vm.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
+            '${sample.isEmpty ? '' : ' · sample: $sample'}';
+        _loadingVisualManualProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingVisualManualProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingVisualManualProbe = false;
       });
     }
   }
@@ -3617,6 +3661,21 @@ class _HomePageState extends State<HomePage> {
               if (_promptsProbeBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('prompts: $_promptsProbeBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingVisualManualProbe
+                    ? null
+                    : _callVisualManualProbe,
+                child: Text(
+                  _loadingVisualManualProbe
+                      ? '请求中…'
+                      : 'GET /api/v1/visual-manual',
+                ),
+              ),
+              if (_visualManualProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('visual-manual: $_visualManualProbeBody'),
               ],
               const SizedBox(height: 8),
               Wrap(
