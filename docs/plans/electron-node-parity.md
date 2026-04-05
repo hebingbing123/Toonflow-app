@@ -36,7 +36,7 @@
 | `/api/login/login` | 本地账号登录 | 🔀 | **Supabase Auth**（Flutter `supabase_flutter`） |
 | `/api/migrate/migrateData` | 数据迁移 | 🔀 | **`toonflow-legacy-import`** + promote 迁移（非 HTTP 热路径） |
 | `/api/modelSelect/getModelList`、`getModelDetail` | 模型目录 | ✅ `GET /api/v1/models`、`/api/v1/models/detail` | 静态 JSON 嵌入 |
-| `/api/novel/*` | 小说与事件管线 | ⏳ | 大块域；需表设计与竖切 |
+| `/api/novel/*` | 小说与事件管线 | 🟡 | **`app_novel` + REST**：**`GET`/`POST …/projects/legacy/{id}/novels`**（**`search`/`page`/`limit`**）、**`GET`/`PATCH`/`DELETE …/novels/{nid}`**；**无 DB 烟雾** → **503**；**`pg_contract`** 含创建/列表/单条/补丁/删除；旧 **批量新增 + cleanNovel 事件管线**、**`o_event*`** 仍 ⏳ |
 | `/api/other/getVersion` | 版本号 | ✅ `GET /api/v1/version` | |
 | `/api/other/deleteAllData` | 清空数据 | ⏳ | 高危；需显式策略与审计 |
 | `/api/production/**` | 分镜图/视频工作台、流、导出 | 🟡 | **Storyboard** 已有 **`app_storyboard` + REST**；**轮询出图、视频轨、export** 等仍 ⏳ |
@@ -66,9 +66,9 @@
 
 ## 4. Rust 已暴露 HTTP 面（权威列表）
 
-以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`assets`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
+以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`novels`、`assets`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
 **WebSocket**：`externalDocs` → `docs/websocket-events.md`。  
-**可选 PG 回归**：**`backend/src/app/mod.rs`** 中 **`app::pg_contract_tests::projects_create_stats_delete_roundtrip`**（**`cargo test pg_contract -- --ignored`**）在删项目前覆盖 **创建剧本/资产、`GET …/assets/{aid}`**、**`GET …/assets` 按 **`asset_type`/`name`** 筛选（命中 1 条与 0 条）**、**`GET …/assets` 按剧本筛选、`PUT` 剧本–资产关联、分页查询、`DELETE` 取消关联后筛选为空**。**无 DB 烟雾**：**`contract_smoke_tests`** 对 **`GET`/`POST`/`PATCH`/`DELETE …/assets`（含单条路径）**、**`GET …/assets?page=1&limit=2`**、**`GET …/assets`（组合 **`script_legacy_id`/`asset_type`/`name`/`page`/`limit`**）**、**`PUT`/`DELETE …/scripts/…/assets/…`** 断言 **503** `database_error`。
+**可选 PG 回归**：**`backend/src/app/mod.rs`** 中 **`app::pg_contract_tests::projects_create_stats_delete_roundtrip`**（**`cargo test pg_contract -- --ignored`**）在删项目前覆盖 **创建剧本/资产、`GET …/assets/{aid}`**、**`GET …/assets` 按 **`asset_type`/`name`** 筛选（命中 1 条与 0 条）**、**`GET …/assets` 按剧本筛选、`PUT` 剧本–资产关联、分页查询、`DELETE` 取消关联后筛选为空**、**`POST/GET/PATCH/DELETE …/novels`**（含 **`search`+分页列表**）。**无 DB 烟雾**：**`contract_smoke_tests`** 对 **`GET`/`POST`/`PATCH`/`DELETE …/assets`（含单条路径）**、**`GET …/assets?page=1&limit=2`**、**`GET …/assets`（组合 **`script_legacy_id`/`asset_type`/`name`/`page`/`limit`**）**、**`PUT`/`DELETE …/scripts/…/assets/…`**、**`GET`/`POST`/`PATCH`/`DELETE …/novels`**（含 **`GET …/novels?page&limit`**）断言 **503** `database_error`。
 
 ## 5. 分波实施建议（把「完整后端」拆成可合并的 PR）
 
@@ -78,7 +78,7 @@
 |------|------|------|
 | **A（当前基线）** | 项目/剧本/分镜、jobs、usage、memory、models、skills 只读、harness、billing webhook、me | 已有 |
 | **B** | **Script**：export + poll + **extract-assets** ✅（**`20260406120000_app_asset.sql`**） | 任务化/可观测加固、prompt 与旧库逐字对齐可选 |
-| **C** | **Novel + event** 全表与 REST | 新迁移、RLS |
+| **C** | **Novel + event** 全表与 REST | **`app_novel` + 项目下 REST** ✅；**事件 / outline 等**仍待迁移、RLS |
 | **D** | **Assets + assetsGenerate**（含轮询出图与 PG 资产表） | D 通常依赖 C 或项目维度 |
 | **E** | **Production 剩余**：视频轨、批量出图、export 等 | jobs、对象存储、可能 CDN |
 | **F** | **Setting 云端化**：prompt、vendor（非密钥明文）、skill 写（若仍要） | `saas-product-spec`、合规 |

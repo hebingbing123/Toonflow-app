@@ -6,6 +6,7 @@ use crate::billing;
 use crate::harness;
 use crate::jobs;
 use crate::models_catalog;
+use crate::novels;
 use crate::projects;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
@@ -49,6 +50,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(agent_memory::router())
         .merge(models_catalog::router())
         .merge(projects::router())
+        .merge(novels::router())
         .merge(assets::router())
         .merge(scripts::router())
         .merge(script_asset_extract::router())

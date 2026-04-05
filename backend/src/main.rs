@@ -13,6 +13,7 @@ mod json_patch;
 mod llm;
 mod models_catalog;
 mod notify_hub;
+mod novels;
 mod projects;
 mod rate_limit;
 mod request_id_mw;

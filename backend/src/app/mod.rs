@@ -349,6 +349,65 @@ mod contract_smoke_tests {
         assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
         assert_eq!(v["code"], "database_error");
     }
+
+    #[tokio::test]
+    async fn project_novels_list_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/novels", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_novels_list_pagination_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/projects/legacy/1/novels?page=1&limit=5", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_novels_create_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/projects/legacy/1/novels",
+            &token,
+            r#"{"chapter":"smoke"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_novel_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/novels/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_novel_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer(
+            "/api/v1/projects/legacy/1/novels/1",
+            &token,
+            r#"{"chapter":"x"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_novel_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer("/api/v1/projects/legacy/1/novels/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
 }
 
 /// Postgres-backed contract checks (opt-in: **`#[ignore]`** so default **`cargo test`** stays DB-free).
@@ -677,6 +736,118 @@ mod pg_contract_tests {
         let (status, unlinked) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "unlinked={unlinked}");
         assert_eq!(unlinked["total"], 0);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/novels"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"chapter":"pg_contract_chap"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, novel_row) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "novel_row={novel_row}");
+        let novel_leg = novel_row["legacy_id"].as_i64().expect("novel legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/novels?search=pg_contract&page=1&limit=10"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, novel_list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "novel_list={novel_list}");
+        assert!(novel_list["total"].as_i64().unwrap_or(0) >= 1);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, one_novel) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "one_novel={one_novel}");
+        assert_eq!(one_novel["chapter"].as_str(), Some("pg_contract_chap"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"chapter":"pg_contract_patched"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, patched_novel) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "patched={patched_novel}");
+        assert_eq!(
+            patched_novel["chapter"].as_str(),
+            Some("pg_contract_patched")
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, del_novel) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NO_CONTENT, "del_novel={del_novel}");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, novel_gone) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NOT_FOUND, "novel_gone={novel_gone}");
 
         let res = app
             .clone()
