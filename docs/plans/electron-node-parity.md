@@ -40,7 +40,7 @@
 | `/api/other/getVersion` | 版本号 | ✅ `GET /api/v1/version` | |
 | `/api/other/deleteAllData` | 清空数据 | ⏳ | 高危；需显式策略与审计 |
 | `/api/production/**` | 分镜图/视频工作台、流、导出 | 🟡 | **Storyboard** 已有 **`app_storyboard` + REST**；**轮询出图、视频轨、export** 等仍 ⏳ |
-| `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`GET /api/v1/visual-manual`** 读 **`data/skills/art_skills/*`**（Markdown 槽位 + **`image`** 为 **`data/skills` 下相对路径**，无 OSS 署名，对齐 **`POST /api/project/getVisualManual`** 数据结构）；Flutter **`fetchVisualManualV1`** + 首页探针 |
+| `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`GET /api/v1/visual-manual`** 读 **`data/skills/art_skills/*`**（Markdown 槽位 + **`image`** 为 **`data/skills` 下相对路径**，无 OSS 署名，对齐 **`POST /api/project/getVisualManual`** 数据结构；配图请求 **`GET /api/v1/skills/binary?path=`**）；Flutter **`fetchVisualManualV1`** + 首页探针 |
 | `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**export** / **poll** / **`extract-assets`** ✅；**`PUT/DELETE …/projects/legacy/{p}/scripts/{s}/assets/{a}`** 维护 **`app_script_asset`** ✅；Flutter **`exportScriptsZip`**、**`pollScriptExtractState`**、**`startScriptAssetExtract`** 项目详情探针；旧 prompt 对齐见 **`SCRIPT_ASSET_EXTRACT_PROMPT_PATH`** |
 | `/api/scriptAgent/*` | 剧本 Agent 计划数据 | ⏳ | 🔀 部分能力由 **Harness WS** 替代，持久化结构需对齐 |
 | `/api/setting/about/*` | 更新检查、安装包 | ⏳ | 多为桌面分发；Web/桌面分流 |
@@ -52,7 +52,7 @@
 | `/api/setting/loginConfig/*` | 用户密码 | 🔀 | Supabase 账户体系 |
 | `/api/setting/memoryConfig/*` | 记忆配置 UI | 🟡 | 读写在 Rust 为 **`agents/memory/*`**；配置项细表可 ⏳ |
 | `/api/setting/promptManage/*` | Prompt 模板 | 🟡 | **`app_user_prompt` + REST**：**`GET /api/v1/prompts`**（恒为 **3** 条，**`id`** **1–3** 对齐旧 **`o_prompt.id`**；无行时 **`data`** 来自服务端默认文件 **`backend/data/prompt_defaults/*.txt`**，与 **`initDB`** 种子一致）；**`GET /api/v1/prompts/{legacy_id}`** 单条（合并规则同列表）；**`PATCH /api/v1/prompts/{legacy_id}`** 仅更新 **`data`**（**upsert**）；Flutter **`fetchPromptsV1`** / **`fetchPromptByLegacyIdV1`** 首页探针；**无 DB 烟雾** → **503**；**`pg_contract`** **`prompts_list_patch_roundtrip`**（含 **`GET …/prompts/2`**） |
-| `/api/setting/skillManagement/*` | Skills 列表/读写 | 🟡 | Rust：**`GET /api/v1/skills*`** + **`PUT /api/v1/skills/content`**（覆盖已存在文件，对齐 **`saveSkillContent`**）+ **`POST /api/v1/skills/content`**（**新建**文件，父目录自动建；已存在 → **409**）+ **`DELETE /api/v1/skills/content`**（删单个文件 → **204**；不存在 → **404**；目录/非文件 → **400**） |
+| `/api/setting/skillManagement/*` | Skills 列表/读写 | 🟡 | Rust：**`GET /api/v1/skills*`** + **`PUT /api/v1/skills/content`**（覆盖已存在文件，对齐 **`saveSkillContent`**）+ **`POST /api/v1/skills/content`**（**新建**文件，父目录自动建；已存在 → **409**）+ **`DELETE /api/v1/skills/content`**（删单个文件 → **204**；不存在 → **404**；目录/非文件 → **400**）+ **`GET /api/v1/skills/binary?path=`**（**`data/skills` 下图片**原始字节 + **`Content-Type`**，供 **`visual-manual`** 的 **`image`** 相对路径替代旧 OSS URL；**png/jpeg/gif/webp/svg**，上限 **25MB**） |
 | `/api/setting/vendorConfig/*` | 供应商与密钥 | ⏳ | SaaS 下多为 **服务端 env + billing**；见 **`saas-product-spec`** |
 | `/api/task/getProject`、`getTaskApi`、`getTaskCategories`、`taskDetails` | 任务中心 | 🟡 | **`GET /api/v1/jobs*`** + 聚合 **`kinds`/`status` summary**；旧「任务分类」映射需产品确认 |
 | `/api/test/test` | 测试路由 | ✅ | **`GET /api/v1/ping`** — JSON **`{"ok":true}`**（旧栈为纯文本 **`ok`**） |

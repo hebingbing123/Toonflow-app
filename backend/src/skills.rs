@@ -7,8 +7,9 @@
 use std::path::{Path, PathBuf};
 
 use axum::{
+    body::Body,
     extract::{Query, State},
-    http::{HeaderMap, StatusCode},
+    http::{header, HeaderMap, StatusCode},
     response::IntoResponse,
     routing::get,
     Json, Router,
@@ -21,6 +22,8 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 const MAX_SKILL_BYTES: u64 = 2_000_000;
+/// Bundled reference images (e.g. visual manual) may be larger than Markdown skills.
+const MAX_SKILL_BINARY_BYTES: u64 = 25_000_000;
 const MAX_SKILL_FILES: usize = 20_000;
 
 /// Filesystem errors when resolving or reading a skill (shared by HTTP and Harness `skills.read`).
@@ -30,6 +33,7 @@ pub(crate) enum SkillReadError {
     SkillsDirMissing,
     NotFound,
     TooLarge,
+    TooLargeBinary,
     Io(String),
 }
 
@@ -44,6 +48,9 @@ impl SkillReadError {
             SkillReadError::TooLarge => {
                 ApiError::BadRequest(format!("skill file exceeds {MAX_SKILL_BYTES} bytes"))
             }
+            SkillReadError::TooLargeBinary => ApiError::BadRequest(format!(
+                "skill binary file exceeds {MAX_SKILL_BINARY_BYTES} bytes"
+            )),
             SkillReadError::Io(m) => ApiError::BadRequest(m),
         }
     }
@@ -173,6 +180,43 @@ pub(crate) fn read_skill_markdown(relative: &str) -> Result<SkillContentResponse
     Ok(SkillContentResponse { path: rel, content })
 }
 
+fn mime_for_skill_image(path: &std::path::Path) -> Option<&'static str> {
+    let ext = path.extension()?.to_str()?;
+    Some(match ext.to_ascii_lowercase().as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "svg" => "image/svg+xml",
+        _ => return None,
+    })
+}
+
+/// Read a regular file under `data/skills` as bytes (images only). Same path safety as Markdown reads.
+pub(crate) fn read_skill_binary(relative: &str) -> Result<(Vec<u8>, &'static str), SkillReadError> {
+    let root = skills_root();
+    if !root.is_dir() {
+        return Err(SkillReadError::SkillsDirMissing);
+    }
+    let resolved = safe_join_under_root(&root, relative)?;
+    if !resolved.is_file() {
+        return Err(SkillReadError::NotFound);
+    }
+    let mime = mime_for_skill_image(&resolved).ok_or_else(|| {
+        SkillReadError::BadPath(
+            "only image files are allowed (png, jpg, jpeg, gif, webp, svg)".into(),
+        )
+    })?;
+    let meta = std::fs::metadata(&resolved)
+        .map_err(|e| SkillReadError::Io(format!("cannot stat skill file: {e}")))?;
+    if meta.len() > MAX_SKILL_BINARY_BYTES {
+        return Err(SkillReadError::TooLargeBinary);
+    }
+    let content = std::fs::read(&resolved)
+        .map_err(|e| SkillReadError::Io(format!("cannot read skill file: {e}")))?;
+    Ok((content, mime))
+}
+
 /// Overwrite an existing skill file under `root` (used by HTTP and unit tests).
 pub(crate) fn write_skill_at(
     root: &Path,
@@ -187,6 +231,7 @@ pub(crate) fn write_skill_at(
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
         | SkillReadError::TooLarge
+        | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillWriteError::BadPath("invalid skill path".into()),
     })?;
     if !resolved.is_file() {
@@ -232,6 +277,7 @@ pub(crate) fn create_skill_at(
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
         | SkillReadError::TooLarge
+        | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillCreateError::BadPath("invalid skill path".into()),
     })?;
     if resolved.exists() {
@@ -281,6 +327,7 @@ pub(crate) fn delete_skill_at(root: &Path, relative: &str) -> Result<(), SkillDe
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
         | SkillReadError::TooLarge
+        | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillDeleteError::BadPath("invalid skill path".into()),
     })?;
     if !resolved.exists() {
@@ -333,6 +380,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/skills/summary", get(skills_summary))
         .route("/api/v1/skills", get(list_skills))
+        .route("/api/v1/skills/binary", get(get_skill_binary))
         .route(
             "/api/v1/skills/content",
             get(get_skill_content)
@@ -428,6 +476,20 @@ async fn get_skill_content(
     let _ = require_user_uuid(&state, &headers)?;
     let doc = read_skill_markdown(q.path.trim()).map_err(SkillReadError::into_api_error)?;
     Ok(Json(doc))
+}
+
+async fn get_skill_binary(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(q): Query<SkillContentQuery>,
+) -> Result<axum::response::Response, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    let (bytes, mime) = read_skill_binary(q.path.trim()).map_err(SkillReadError::into_api_error)?;
+    axum::response::Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, mime)
+        .body(Body::from(bytes))
+        .map_err(|_| ApiError::Internal)
 }
 
 async fn put_skill_content(
@@ -555,6 +617,21 @@ mod tests {
         assert!(matches!(
             super::delete_skill_at(root, "gone.md"),
             Err(super::SkillDeleteError::NotFound)
+        ));
+    }
+
+    #[test]
+    fn read_skill_binary_smoke_fixture_is_png() {
+        let got = super::read_skill_binary("_smoke/binary_probe.png").unwrap();
+        assert_eq!(got.1, "image/png");
+        assert!(got.0.starts_with(&[0x89, b'P', b'N', b'G']));
+    }
+
+    #[test]
+    fn read_skill_binary_rejects_markdown_extension() {
+        assert!(matches!(
+            super::read_skill_binary("script_execution_script.md"),
+            Err(super::SkillReadError::BadPath(_))
         ));
     }
 }

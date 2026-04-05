@@ -1,5 +1,6 @@
 //! Parity with legacy **`POST /api/project/getVisualManual`**: read bundled **`art_skills`** tree (Markdown + image paths).
-//! **`image`** entries are **relative paths** under **`data/skills`** (no OSS signing; clients resolve URLs if needed).
+//! **`image`** entries are **relative paths** under **`data/skills`** (no OSS signing). Clients load bytes via
+//! **`GET /api/v1/skills/binary?path=`** with the same relative path (JWT required).
 
 use std::path::{Path, PathBuf};
 

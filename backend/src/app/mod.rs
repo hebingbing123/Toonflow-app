@@ -56,6 +56,8 @@ mod contract_smoke_tests {
 
     /// Large enough for **`GET /api/v1/visual-manual`** (many bundled Markdown files).
     const MAX_JSON: usize = 2 * 1024 * 1024;
+    /// Response bodies for **`GET /api/v1/skills/binary`** smoke (single reference image).
+    const MAX_PROBE_BYTES: usize = 512 * 1024;
     /// Shared with [`jwt_fixture::encode_supabase_style`]; must satisfy Supabase-style `aud` + HS256 verify.
     const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
     const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
@@ -135,6 +137,31 @@ mod contract_smoke_tests {
                 .unwrap(),
         )
         .await
+    }
+
+    async fn get_bytes_bearer(uri: &str, token: &str) -> (StatusCode, Vec<u8>, Option<String>) {
+        let app = build_router(smoke_state());
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .uri(uri)
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let status = res.status();
+        let ct = res
+            .headers()
+            .get(header::CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_string);
+        let body = axum::body::to_bytes(res.into_body(), MAX_PROBE_BYTES)
+            .await
+            .unwrap();
+        (status, body.to_vec(), ct)
     }
 
     async fn post_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
@@ -571,6 +598,25 @@ mod contract_smoke_tests {
         assert_eq!(status, StatusCode::OK);
         assert_eq!(v["path"], "script_execution_script.md");
         assert!(v["content"].as_str().is_some_and(|s| !s.trim().is_empty()));
+    }
+
+    #[tokio::test]
+    async fn skill_binary_ok_with_jwt_for_smoke_png() {
+        let token = test_jwt(Uuid::nil());
+        let uri = "/api/v1/skills/binary?path=_smoke/binary_probe.png";
+        let (status, body, ct) = get_bytes_bearer(uri, &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(ct.as_deref(), Some("image/png"));
+        assert!(body.starts_with(&[0x89, b'P', b'N', b'G']));
+    }
+
+    #[tokio::test]
+    async fn skill_binary_rejects_markdown_extension_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = "/api/v1/skills/binary?path=script_execution_script.md";
+        let (status, v) = get_json_bearer(uri, &token).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]
@@ -1336,6 +1382,13 @@ mod contract_smoke_tests {
     #[tokio::test]
     async fn skill_content_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/skills/content?path=script_execution_script.md").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_binary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/skills/binary?path=_smoke/binary_probe.png").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
     }
