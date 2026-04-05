@@ -17,6 +17,12 @@ pub(super) struct HealthResponse {
     pub service: &'static str,
 }
 
+/// Minimal JSON probe; replaces legacy **`GET /api/test/test`** (`"ok"` plain text).
+#[derive(Serialize)]
+pub(super) struct PingResponse {
+    pub ok: bool,
+}
+
 #[derive(Serialize)]
 pub(super) struct VersionResponse {
     pub service: &'static str,
@@ -57,6 +63,10 @@ pub(super) async fn health() -> Json<HealthResponse> {
         status: "ok",
         service: "toonflow-server",
     })
+}
+
+pub(super) async fn ping() -> Json<PingResponse> {
+    Json(PingResponse { ok: true })
 }
 
 pub(super) async fn version() -> Json<VersionResponse> {

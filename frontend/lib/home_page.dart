@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   String? _healthBody;
   String? _healthRootBody;
+  String? _pingBody;
   String? _versionBody;
   String? _readyBody;
   String? _meBody;
@@ -36,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   bool _loadingHealth = false;
   bool _loadingHealthRoot = false;
+  bool _loadingPing = false;
   bool _loadingVersion = false;
   bool _loadingReady = false;
   bool _loadingMe = false;
@@ -188,6 +190,34 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingHealthRoot = false;
+      });
+    }
+  }
+
+  Future<void> _pingPing() async {
+    setState(() {
+      _loadingPing = true;
+      _error = null;
+      _pingBody = null;
+    });
+    try {
+      final p = await fetchPingV1();
+      if (!mounted) return;
+      setState(() {
+        _pingBody = 'ok=${p.ok}';
+        _loadingPing = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingPing = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingPing = false;
       });
     }
   }
@@ -3400,6 +3430,12 @@ class _HomePageState extends State<HomePage> {
                   _loadingHealthRoot ? '请求中…' : 'GET /health',
                 ),
               ),
+              FilledButton.tonal(
+                onPressed: _loadingPing ? null : _pingPing,
+                child: Text(
+                  _loadingPing ? '请求中…' : 'GET /api/v1/ping',
+                ),
+              ),
             ],
           ),
           if (_healthBody != null) ...[
@@ -3409,6 +3445,10 @@ class _HomePageState extends State<HomePage> {
           if (_healthRootBody != null) ...[
             const SizedBox(height: 8),
             Text('health (root): $_healthRootBody'),
+          ],
+          if (_pingBody != null) ...[
+            const SizedBox(height: 8),
+            Text('ping: $_pingBody'),
           ],
           const SizedBox(height: 12),
           FilledButton.tonal(

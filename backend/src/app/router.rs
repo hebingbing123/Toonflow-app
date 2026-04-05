@@ -72,6 +72,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(billing::router())
         .route("/health", get(handlers::health))
         .route("/api/v1/health", get(handlers::health))
+        .route("/api/v1/ping", get(handlers::ping))
         .route("/api/v1/version", get(handlers::version))
         .route("/api/v1/ready", get(handlers::ready))
         .with_state(state)

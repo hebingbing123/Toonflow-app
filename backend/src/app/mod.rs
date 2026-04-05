@@ -355,6 +355,13 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn ping_ok_without_database() {
+        let (status, v) = get_json("/api/v1/ping").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["ok"], true);
+    }
+
+    #[tokio::test]
     async fn version_shape_matches_contract() {
         let (status, v) = get_json("/api/v1/version").await;
         assert_eq!(status, StatusCode::OK);

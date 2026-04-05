@@ -218,6 +218,28 @@ Future<HealthResponse> fetchHealthRoot() async {
   return HealthResponse.fromJson(map);
 }
 
+/// OpenAPI `PingResponse` — legacy **`GET /api/test/test`** (`ok` text) as JSON.
+class PingResponse {
+  const PingResponse({required this.ok});
+
+  final bool ok;
+
+  factory PingResponse.fromJson(Map<String, dynamic> json) {
+    return PingResponse(ok: json['ok'] as bool);
+  }
+}
+
+/// `GET /api/v1/ping` — no auth.
+Future<PingResponse> fetchPingV1() async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/ping');
+  final res = await http.get(uri).timeout(const Duration(seconds: 5));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PingResponse.fromJson(map);
+}
+
 /// `GET /api/v1/version` — no auth; OpenAPI `VersionResponse`.
 class VersionResponse {
   const VersionResponse({
