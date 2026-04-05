@@ -876,6 +876,156 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
+      final saSet = await postScriptAgentSetPlanDataV1(token, projectId: 1);
+      if (!mounted) return;
+      if (saSet != 501) {
+        setState(() {
+          _error =
+              'POST script-agent/set-plan-data expected 501, got $saSet';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final saUpd = await postScriptAgentUpdateDataV1(token, id: 1);
+      if (!mounted) return;
+      if (saUpd != 501) {
+        setState(() {
+          _error =
+              'POST script-agent/update-data expected 501, got $saUpd';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final agPol = await postAssetsGeneratePolishPromptV1(
+        token,
+        assetsId: 1,
+        projectId: 1,
+        type: 'role',
+        name: 'n',
+        describe: 'd',
+      );
+      if (!mounted) return;
+      if (agPol != 501) {
+        setState(() {
+          _error =
+              'POST assets-generate/polish-prompt expected 501, got $agPol';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final agBat = await postAssetsGenerateBatchGenerateV1(
+        token,
+        projectId: 1,
+        model: '1:x',
+        resolution: '1024x1024',
+        items: const [
+          {'id': 1, 'type': 'role', 'name': 'n', 'prompt': 'p'},
+        ],
+      );
+      if (!mounted) return;
+      if (agBat != 501) {
+        setState(() {
+          _error =
+              'POST assets-generate/batch-generate expected 501, got $agBat';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final agBap = await postAssetsGenerateBatchPolishV1(
+        token,
+        projectId: 1,
+        items: const [
+          {'assetsId': 1, 'type': 'role', 'name': 'n', 'describe': 'd'},
+        ],
+      );
+      if (!mounted) return;
+      if (agBap != 501) {
+        setState(() {
+          _error =
+              'POST assets-generate/batch-polish expected 501, got $agBap';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prFlow = await postProductionGetFlowDataV1(
+        token,
+        projectId: 1,
+        episodesId: 1,
+      );
+      if (!mounted) return;
+      if (prFlow != 501) {
+        setState(() {
+          _error =
+              'POST production/get-flow-data expected 501, got $prFlow';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prSave = await postProductionSaveFlowDataV1(
+        token,
+        projectId: 1,
+        episodesId: 1,
+      );
+      if (!mounted) return;
+      if (prSave != 501) {
+        setState(() {
+          _error =
+              'POST production/save-flow-data expected 501, got $prSave';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prVid = await postProductionWorkbenchGenerateVideoV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        uploadData: const [
+          {'id': 1, 'sources': 'assets'},
+        ],
+        prompt: 'p',
+        model: '1:x',
+        mode: 'std',
+        resolution: '720p',
+        duration: 5,
+        trackId: 1,
+      );
+      if (!mounted) return;
+      if (prVid != 501) {
+        setState(() {
+          _error =
+              'POST production/workbench/generate-video expected 501, got $prVid';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prPoll = await postProductionStoryboardPollingImageV1(
+        token,
+        ids: const [1],
+      );
+      if (!mounted) return;
+      if (prPoll != 501) {
+        setState(() {
+          _error =
+              'POST production/storyboard/polling-image expected 501, got $prPoll';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prExp = await postProductionExportImageV1(
+        token,
+        shotId: const [
+          {'id': '1'},
+        ],
+      );
+      if (!mounted) return;
+      if (prExp != 501) {
+        setState(() {
+          _error =
+              'POST production/export-image expected 501, got $prExp';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       setState(() {
         final sample = list
             .take(4)
@@ -889,7 +1039,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });

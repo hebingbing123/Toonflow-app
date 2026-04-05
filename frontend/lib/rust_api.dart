@@ -798,6 +798,67 @@ Future<int> postScriptAgentGetPlanDataV1(
   return res.statusCode;
 }
 
+/// `POST /api/v1/script-agent/set-plan-data` — OpenAPI `postScriptAgentSetPlanDataV1` (typically **501**).
+Future<int> postScriptAgentSetPlanDataV1(
+  String accessToken, {
+  required int projectId,
+  String storySkeleton = '',
+  String adaptationStrategy = '',
+  List<Map<String, dynamic>> script = const [],
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/script-agent/set-plan-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'agentType': 'scriptAgent',
+          'data': {
+            'storySkeleton': storySkeleton,
+            'adaptationStrategy': adaptationStrategy,
+            'script': script,
+          },
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/script-agent/update-data` — OpenAPI `postScriptAgentUpdateDataV1` (typically **501**).
+Future<int> postScriptAgentUpdateDataV1(
+  String accessToken, {
+  required int id,
+  String storySkeleton = '',
+  String adaptationStrategy = '',
+  List<Map<String, dynamic>> script = const [
+    {'id': 1, 'content': ''},
+  ],
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/script-agent/update-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'id': id,
+          'data': {
+            'storySkeleton': storySkeleton,
+            'adaptationStrategy': adaptationStrategy,
+            'script': script,
+          },
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1` (typically **501**).
 Future<int> postAssetsGenerateGenerateV1(
   String accessToken, {
@@ -826,6 +887,91 @@ Future<int> postAssetsGenerateGenerateV1(
           'name': name,
           'prompt': prompt,
         }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/assets-generate/polish-prompt` — OpenAPI `postAssetsGeneratePolishPromptV1` (typically **501**).
+Future<int> postAssetsGeneratePolishPromptV1(
+  String accessToken, {
+  required int assetsId,
+  required int projectId,
+  required String type,
+  required String name,
+  required String describe,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/polish-prompt');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'assetsId': assetsId,
+          'projectId': projectId,
+          'type': type,
+          'name': name,
+          'describe': describe,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/assets-generate/batch-generate` — OpenAPI `postAssetsGenerateBatchGenerateV1` (typically **501**).
+Future<int> postAssetsGenerateBatchGenerateV1(
+  String accessToken, {
+  required int projectId,
+  required String model,
+  required String resolution,
+  required List<Map<String, dynamic>> items,
+  int? concurrentCount,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/batch-generate');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'model': model,
+    'resolution': resolution,
+    'items': items,
+  };
+  if (concurrentCount != null) body['concurrentCount'] = concurrentCount;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/assets-generate/batch-polish` — OpenAPI `postAssetsGenerateBatchPolishV1` (typically **501**).
+Future<int> postAssetsGenerateBatchPolishV1(
+  String accessToken, {
+  required int projectId,
+  required List<Map<String, dynamic>> items,
+  int? concurrentCount,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/batch-polish');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'items': items,
+  };
+  if (concurrentCount != null) body['concurrentCount'] = concurrentCount;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -893,6 +1039,157 @@ Future<int> postProductionGetProductionDataV1(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({'ids': storyboardIds}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/get-flow-data` — OpenAPI `postProductionGetFlowDataV1` (typically **501**).
+Future<int> postProductionGetFlowDataV1(
+  String accessToken, {
+  required int projectId,
+  required int episodesId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-flow-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'episodesId': episodesId,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/save-flow-data` — OpenAPI `postProductionSaveFlowDataV1` (typically **501**).
+Future<int> postProductionSaveFlowDataV1(
+  String accessToken, {
+  required int projectId,
+  required int episodesId,
+  Map<String, dynamic> data = const {},
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/save-flow-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'episodesId': episodesId,
+          'data': data,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/workbench/generate-video` — OpenAPI `postProductionWorkbenchGenerateVideoV1` (typically **501**).
+Future<int> postProductionWorkbenchGenerateVideoV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required List<Map<String, dynamic>> uploadData,
+  required String prompt,
+  required String model,
+  required String mode,
+  required String resolution,
+  required int duration,
+  bool? audio,
+  required int trackId,
+}) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/production/workbench/generate-video');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'scriptId': scriptId,
+    'uploadData': uploadData,
+    'prompt': prompt,
+    'model': model,
+    'mode': mode,
+    'resolution': resolution,
+    'duration': duration,
+    'trackId': trackId,
+  };
+  if (audio != null) body['audio'] = audio;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1` (typically **501**).
+Future<int> postProductionStoryboardPollingImageV1(
+  String accessToken, {
+  required List<int> ids,
+}) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/polling-image');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ids': ids}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/export-image` — OpenAPI `postProductionExportImageV1` (typically **501**).
+Future<int> postProductionExportImageV1(
+  String accessToken, {
+  required List<Map<String, dynamic>> shotId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'shotId': shotId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/production/*` legacy JSON-object stub — **400** if body is not a JSON object; **501** when object (**OpenAPI** `ProductionLegacyJsonStubBody`).
+Future<int> postProductionLegacyJsonStubV1(
+  String accessToken,
+  String path, {
+  Map<String, dynamic> body = const {},
+}) async {
+  if (!path.startsWith('/api/v1/production/')) {
+    throw ArgumentError.value(path, 'path', 'must start with /api/v1/production/');
+  }
+  final uri = Uri.parse('$kApiBaseUrl$path');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
