@@ -35,11 +35,11 @@ cargo run
 2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
 3. `cargo run --bin toonflow-legacy-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
 
-填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script`。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
+填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script` / `app_storyboard` / **`app_novel`**（返回值四列含 **`novels_upserted`**）。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
 
 新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`legacy_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`** 分配，避免并发撞号。
 
-项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** 随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
+项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
 全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 当前用户跨所有项目的 **`app_project`** / **`app_script`** / **`app_storyboard`** / **`app_asset`** 总行数（单次查询）。
 
