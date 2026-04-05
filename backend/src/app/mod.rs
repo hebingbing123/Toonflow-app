@@ -53,6 +53,7 @@ mod contract_smoke_tests {
     const MAX_JSON: usize = 65_536;
     /// Shared with [`jwt_fixture::encode_supabase_style`]; must satisfy Supabase-style `aud` + HS256 verify.
     const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
+    const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
     fn test_addr() -> SocketAddr {
         SocketAddr::from(([127, 0, 0, 1], 42_042))
@@ -128,6 +129,55 @@ mod contract_smoke_tests {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn patch_json_no_bearer(uri: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PATCH)
+                .uri(uri)
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn post_empty_no_bearer(uri: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn put_empty_no_bearer(uri: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PUT)
+                .uri(uri)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn delete_empty_no_bearer(uri: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::DELETE)
+                .uri(uri)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -573,6 +623,215 @@ mod contract_smoke_tests {
     #[tokio::test]
     async fn storyboard_by_legacy_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/storyboards/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn me_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/me").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skills_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/skills/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skills_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/skills").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_content_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/skills/content?path=script_execution_script.md").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn harness_tools_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/harness/tools").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn job_by_id_unauthorized_without_bearer() {
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}");
+        let (status, v) = get_json(&uri).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn job_cancel_unauthorized_without_bearer() {
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/cancel");
+        let (status, v) = post_empty_no_bearer(&uri).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn job_retry_unauthorized_without_bearer() {
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/retry");
+        let (status, v) = post_empty_no_bearer(&uri).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_by_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_patch_unauthorized_without_bearer() {
+        let (status, v) = patch_json_no_bearer("/api/v1/projects/legacy/1", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/projects/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novels_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/novels").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novels_create_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/projects/legacy/1/novels", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novel_by_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/novels/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novel_patch_unauthorized_without_bearer() {
+        let (status, v) =
+            patch_json_no_bearer("/api/v1/projects/legacy/1/novels/1", r#"{"chapter":"x"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novel_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/projects/legacy/1/novels/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn create_script_under_project_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/projects/legacy/1/scripts", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn script_by_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/scripts/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn script_patch_unauthorized_without_bearer() {
+        let (status, v) = patch_json_no_bearer("/api/v1/scripts/legacy/1", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn script_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/scripts/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboard_create_under_script_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/scripts/legacy/1/storyboards", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboard_patch_unauthorized_without_bearer() {
+        let (status, v) = patch_json_no_bearer("/api/v1/storyboards/legacy/1", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboard_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/storyboards/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn art_styles_create_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/art-styles", r#"{"name":"smoke"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_clear_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/agents/memory/clear",
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_append_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/agents/memory/append",
+            r#"{"projectId":1,"agentType":"scriptAgent","content":"hi"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn script_asset_link_put_unauthorized_without_bearer() {
+        let (status, v) = put_empty_no_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn script_asset_unlink_delete_unauthorized_without_bearer() {
+        let (status, v) =
+            delete_empty_no_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
     }
