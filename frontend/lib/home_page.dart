@@ -1966,6 +1966,136 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Legacy POST …/novels/*（Electron 形）',
+                        style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(ctx).colorScheme.outline,
+                            ),
+                      ),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 0,
+                        children: [
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
+                                      final pg = await postLegacyNovelsGetNovel(
+                                        token,
+                                        p.legacyId,
+                                        page: 1,
+                                        limit: 10,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      final first = pg.data.isNotEmpty
+                                          ? pg.data.first
+                                          : null;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            first != null
+                                                ? 'POST …/novels/get-novel：total=${pg.total} · 首行 #${first.legacyId} ${first.chapter}'
+                                                : 'POST …/novels/get-novel：total=${pg.total}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST get-novel'),
+                          ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
+                                      final rows =
+                                          await postLegacyNovelsGetNovelData(
+                                        token,
+                                        p.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/novels/get-novel-data：${rows.length} 条',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST get-novel-data'),
+                          ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
+                                      final msg = await postLegacyNovelsAddNovel(
+                                        token,
+                                        p.legacyId,
+                                        const [],
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/novels/add-novel 空 data：$msg',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST add-novel []'),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 12),
                       if (assetsRef[0] != null)
                         Text(
