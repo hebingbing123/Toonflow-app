@@ -3,7 +3,7 @@
 use axum::{
     extract::{Path, State},
     http::HeaderMap,
-    routing::{get, patch},
+    routing::get,
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -78,11 +78,30 @@ pub struct PatchPromptBody {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/prompts", get(list_prompts))
-        .route("/api/v1/prompts/{legacy_id}", patch(patch_prompt))
+        .route(
+            "/api/v1/prompts/{legacy_id}",
+            get(get_prompt).patch(patch_prompt),
+        )
 }
 
 fn slot_by_legacy_id(id: i32) -> Option<&'static DefaultSlot> {
     DEFAULT_SLOTS.iter().find(|s| s.legacy_id == id)
+}
+
+fn merge_slot(def: &'static DefaultSlot, row: Option<&UserPromptRow>) -> PromptTemplateJson {
+    let name = row
+        .and_then(|r| r.name.as_deref())
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or(def.name)
+        .to_string();
+    let prompt_type = row.map(|r| r.kind.as_str()).unwrap_or(def.kind).to_string();
+    let data = row.map(|r| r.body.as_str()).unwrap_or(def.body).to_string();
+    PromptTemplateJson {
+        id: def.legacy_id,
+        name,
+        prompt_type,
+        data,
+    }
 }
 
 async fn list_prompts(
@@ -111,28 +130,38 @@ async fn list_prompts(
     let mut out = Vec::with_capacity(DEFAULT_SLOTS.len());
     for def in &DEFAULT_SLOTS {
         let merged = rows.iter().find(|r| r.legacy_id == def.legacy_id);
-        let name = merged
-            .and_then(|r| r.name.as_deref())
-            .filter(|s| !s.trim().is_empty())
-            .unwrap_or(def.name)
-            .to_string();
-        let prompt_type = merged
-            .map(|r| r.kind.as_str())
-            .unwrap_or(def.kind)
-            .to_string();
-        let data = merged
-            .map(|r| r.body.as_str())
-            .unwrap_or(def.body)
-            .to_string();
-        out.push(PromptTemplateJson {
-            id: def.legacy_id,
-            name,
-            prompt_type,
-            data,
-        });
+        out.push(merge_slot(def, merged));
     }
 
     Ok(Json(out))
+}
+
+async fn get_prompt(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(legacy_id): Path<i32>,
+) -> Result<Json<PromptTemplateJson>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let def = slot_by_legacy_id(legacy_id).ok_or(ApiError::NotFound)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let row: Option<UserPromptRow> = sqlx::query_as(
+        r#"
+        SELECT legacy_id, name, kind, body
+        FROM app_user_prompt
+        WHERE owner_user_id = $1 AND legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(merge_slot(def, row.as_ref())))
 }
 
 async fn patch_prompt(

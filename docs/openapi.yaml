@@ -23,7 +23,7 @@ info:
 
     **Usage (MVP):** Successful generation jobs append **`app_usage_event`** (`generation_job.succeeded`). **`GET /api/v1/usage/summary`** returns per-user counts (24h / 7d) for fair-use dashboards.
 
-    **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, legacy **`o_prompt`** parity); **`PATCH /api/v1/prompts/{legacy_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
+    **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, legacy **`o_prompt`** parity); **`GET /api/v1/prompts/{legacy_id}`** returns one merged row (**`legacy_id`** must be **1**, **2**, or **3**); **`PATCH /api/v1/prompts/{legacy_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
 
 servers:
   - url: http://127.0.0.1:8666
@@ -280,7 +280,7 @@ paths:
       description: |
         Returns **three** rows with stable integer **`id`** (**`1`**, **`2`**, **`3`**) matching legacy SQLite **`o_prompt.id`**.
         When the user has no **`app_user_prompt`** rows yet, **`name`**, **`type`**, and **`data`** come from server defaults (same content as legacy **`initDB`** seeds).
-        **`PATCH /api/v1/prompts/{legacy_id}`** upserts **`data`** into **`app_user_prompt`**.
+        **`GET /api/v1/prompts/{legacy_id}`** returns one row (same merge rules as list). **`PATCH /api/v1/prompts/{legacy_id}`** upserts **`data`** into **`app_user_prompt`**.
       security:
         - bearerAuth: []
       responses:
@@ -306,6 +306,45 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/prompts/{legacy_id}:
+    get:
+      tags: [prompts]
+      summary: Get one prompt template by legacy id
+      operationId: getPromptByLegacyIdV1
+      description: "Same merged shape as list items; legacy_id must be 1, 2, or 3."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptTemplateRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Unknown legacy_id (not 1–3)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
     patch:
       tags: [prompts]
       summary: Update prompt template body by legacy id

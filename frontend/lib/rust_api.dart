@@ -429,6 +429,28 @@ Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
       .toList();
 }
 
+/// `GET /api/v1/prompts/{legacy_id}` — OpenAPI `getPromptByLegacyIdV1`.
+Future<PromptTemplateRowV1> fetchPromptByLegacyIdV1(
+  String accessToken,
+  int legacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$legacyId');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PromptTemplateRowV1.fromJson(map);
+}
+
 /// Row from `GET /api/v1/models` — OpenAPI `ModelListEntry`.
 class ModelListEntry {
   const ModelListEntry({

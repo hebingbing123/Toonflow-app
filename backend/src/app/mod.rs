@@ -968,6 +968,13 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn prompts_get_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/prompts/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn agents_memory_query_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/agents/memory/query",
@@ -1112,6 +1119,14 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn prompts_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/prompts/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn prompts_patch_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -1124,6 +1139,14 @@ mod contract_smoke_tests {
     async fn prompts_patch_unknown_legacy_returns_404_without_database() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = patch_json_bearer("/api/v1/prompts/99", &token, r#"{"data":"x"}"#).await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        assert_eq!(v["code"], "not_found");
+    }
+
+    #[tokio::test]
+    async fn prompts_get_unknown_legacy_returns_404_without_database() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/prompts/99", &token).await;
         assert_eq!(status, StatusCode::NOT_FOUND);
         assert_eq!(v["code"], "not_found");
     }
@@ -3371,6 +3394,26 @@ mod pg_contract_tests {
         assert_eq!(status, StatusCode::OK, "patched={patched}");
         assert_eq!(
             patched["data"].as_str(),
+            Some("pg_contract_prompt_patch_slot_2")
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts/2")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, one) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "get one={one}");
+        assert_eq!(one["id"].as_i64(), Some(2));
+        assert_eq!(
+            one["data"].as_str(),
             Some("pg_contract_prompt_patch_slot_2")
         );
 
