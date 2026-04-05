@@ -506,6 +506,78 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn jobs_kinds_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/jobs/kinds").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn jobs_kinds_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/jobs/kinds/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn jobs_status_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/jobs/status/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn jobs_create_unauthorized_without_bearer() {
+        let (status, v) =
+            post_json("/api/v1/jobs", r#"{"kind":"flutter.probe","payload":{}}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn projects_create_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/projects", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn scripts_extract_state_poll_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/scripts/extract-state/poll",
+            r#"{"legacy_ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn scripts_extract_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/scripts/extract-assets",
+            r#"{"project_legacy_id":1,"script_legacy_ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboards_by_script_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/scripts/legacy/1/storyboards").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboard_by_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/storyboards/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn art_styles_list_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/art-styles", &token).await;
