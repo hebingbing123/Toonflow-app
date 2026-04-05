@@ -106,7 +106,6 @@ async fn extract_style_prompt(
     Json(body): Json<ExtractArtStylePromptBody>,
 ) -> Result<Json<ExtractArtStylePromptResponse>, ApiError> {
     let _uid = require_user_uuid(&state, &headers)?;
-    let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
     if body.images.is_empty() {
         return Err(ApiError::BadRequest("images must be non-empty".into()));
@@ -133,6 +132,8 @@ async fn extract_style_prompt(
             "image_url": { "url": s }
         }));
     }
+
+    let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
     let messages = vec![
         json!({ "role": "system", "content": EXTRACT_STYLE_SYSTEM_PROMPT }),

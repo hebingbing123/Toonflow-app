@@ -1583,7 +1583,8 @@ paths:
       description: |
         OpenAI-compatible **`chat/completions`** (non-streaming, multimodal). Same product intent as legacy **`/api/artStyle/extractStylePrompt`**.
         Each **`images[]`** entry is sent as **`image_url.url`** (public **`https://`** URL or **`data:image/...;base64,...`**).
-        Requires **`OPENAI_API_KEY`** or **`LLM_API_KEY`**; model from **`LLM_MODEL`** (default **`gpt-4o-mini`**, must support vision). Does not use Postgres.
+        Empty **`images`** or blank entries (after trim) yield **`400`** before the LLM is consulted.
+        Requires **`OPENAI_API_KEY`** or **`LLM_API_KEY`** for valid payloads; model from **`LLM_MODEL`** (default **`gpt-4o-mini`**, must support vision). Does not use Postgres.
       security:
         - bearerAuth: []
       requestBody:
@@ -1600,7 +1601,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ExtractArtStylePromptResponse"
         "400":
-          description: Invalid body (e.g. empty **`images`**)
+          description: Invalid body (e.g. empty **`images`** or blank entries after trim)
           content:
             application/json:
               schema:
