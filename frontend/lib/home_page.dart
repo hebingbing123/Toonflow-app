@@ -1061,7 +1061,10 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       final statsRef = <ProjectStats?>[statsSnap];
       final assetsRef = <ListAssetsResponse?>[assetsSnap];
+      final assetsForScriptRef = <ListAssetsResponse?>[null];
+      final assetsFilterScriptLegacyId = <int?>[null];
       final assetsLoading = <bool>[false];
+      final assetsScriptFilterLoading = <bool>[false];
       final assetsBusy = <bool>[false];
       await showDialog<void>(
         context: context,
@@ -1077,6 +1080,18 @@ class _HomePageState extends State<HomePage> {
                   );
                 } catch (_) {
                   assetsRef[0] = null;
+                }
+                final sid = assetsFilterScriptLegacyId[0];
+                if (sid != null) {
+                  try {
+                    assetsForScriptRef[0] = await fetchProjectAssetsByLegacyId(
+                      token,
+                      p.legacyId,
+                      scriptLegacyId: sid,
+                    );
+                  } catch (_) {
+                    assetsForScriptRef[0] = null;
+                  }
                 }
                 try {
                   statsRef[0] = await fetchProjectStatsByLegacyId(
@@ -1142,33 +1157,94 @@ class _HomePageState extends State<HomePage> {
                                 color: Theme.of(ctx).colorScheme.outline,
                               ),
                         ),
+                      if (assetsFilterScriptLegacyId[0] != null) ...[
+                        const SizedBox(height: 6),
+                        if (assetsScriptFilterLoading[0])
+                          Text(
+                            'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} …',
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(ctx).colorScheme.outline,
+                                ),
+                          )
+                        else if (assetsForScriptRef[0] != null)
+                          Text(
+                            assetsForScriptRef[0]!.items.isEmpty
+                                ? 'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]}：total=0'
+                                : 'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]}：total=${assetsForScriptRef[0]!.total} · ${assetsForScriptRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsForScriptRef[0]!.items.length > 6 ? '…' : ''}',
+                            style: Theme.of(ctx).textTheme.bodySmall,
+                          )
+                        else
+                          Text(
+                            'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} 未加载',
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(ctx).colorScheme.outline,
+                                ),
+                          ),
+                      ],
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: assetsLoading[0]
-                              ? null
-                              : () async {
-                                  setDialogState(() => assetsLoading[0] = true);
-                                  try {
-                                    assetsRef[0] =
-                                        await fetchProjectAssetsByLegacyId(
-                                      token,
-                                      p.legacyId,
-                                    );
-                                  } catch (_) {
-                                    assetsRef[0] = null;
-                                  }
-                                  if (ctx.mounted) {
-                                    setDialogState(
-                                      () => assetsLoading[0] = false,
-                                    );
-                                  }
-                                },
-                          child: Text(
-                            assetsLoading[0]
-                                ? '刷新资产…'
-                                : '刷新资产列表',
-                          ),
+                        child: Wrap(
+                          spacing: 4,
+                          children: [
+                            TextButton(
+                              onPressed: assetsLoading[0] ||
+                                      assetsBusy[0] ||
+                                      assetsScriptFilterLoading[0] ||
+                                      scriptList.isEmpty
+                                  ? null
+                                  : () async {
+                                      assetsFilterScriptLegacyId[0] =
+                                          scriptList.first.legacyId;
+                                      setDialogState(
+                                        () => assetsScriptFilterLoading[0] = true,
+                                      );
+                                      try {
+                                        await reloadAssetsAndStats();
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () => assetsScriptFilterLoading[0] =
+                                                false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: const Text('按首剧本筛选资产'),
+                            ),
+                            TextButton(
+                              onPressed: assetsFilterScriptLegacyId[0] == null ||
+                                      assetsScriptFilterLoading[0]
+                                  ? null
+                                  : () {
+                                      assetsFilterScriptLegacyId[0] = null;
+                                      assetsForScriptRef[0] = null;
+                                      setDialogState(() {});
+                                    },
+                              child: const Text('清除剧本筛选'),
+                            ),
+                            TextButton(
+                              onPressed: assetsLoading[0] ||
+                                      assetsScriptFilterLoading[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(() => assetsLoading[0] = true);
+                                      try {
+                                        await reloadAssetsAndStats();
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () => assetsLoading[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                assetsLoading[0]
+                                    ? '刷新资产…'
+                                    : '刷新资产列表',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1177,7 +1253,9 @@ class _HomePageState extends State<HomePage> {
                         runSpacing: 0,
                         children: [
                           TextButton(
-                            onPressed: assetsBusy[0] || assetsLoading[0]
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
@@ -1216,6 +1294,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty
                                 ? null
@@ -1255,6 +1334,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty
                                 ? null
@@ -1295,6 +1375,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
                                     scriptList.isEmpty ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty
@@ -1338,6 +1419,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
                                     scriptList.isEmpty ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty
