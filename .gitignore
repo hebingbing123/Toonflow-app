@@ -70,3 +70,16 @@ frontend/.packages
 
 # Cursor IDE (local)
 .cursor/
+
+# Optional local agent / Codex installer bundle under scripts/ (tracked files such as
+# scripts/refactor-check.sh and Electron glue remain in Git; see package.json "refactor:check").
+scripts/ci/
+scripts/codemaps/
+scripts/codex-git-hooks/
+scripts/codex/
+scripts/hooks/
+scripts/lib/
+scripts/*.js
+scripts/orchestrate-codex-worker.sh
+scripts/release.sh
+scripts/sync-ecc-to-codex.sh
