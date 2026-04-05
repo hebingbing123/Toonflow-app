@@ -1482,6 +1482,104 @@ class ScriptRow {
   }
 }
 
+/// Linked asset brief on **`POST /api/v1/scripts/get-script-api`** — JSON **`id`** = **`app_asset.legacy_id`**.
+class LegacyScriptRelatedAssetBrief {
+  const LegacyScriptRelatedAssetBrief({
+    required this.legacyId,
+    required this.name,
+  });
+
+  final int legacyId;
+  final String name;
+
+  factory LegacyScriptRelatedAssetBrief.fromJson(Map<String, dynamic> json) {
+    return LegacyScriptRelatedAssetBrief(
+      legacyId: (json['id'] as num).toInt(),
+      name: json['name'] as String? ?? '',
+    );
+  }
+}
+
+/// One script row from **`POST /api/v1/scripts/get-script-api`** (camelCase **`extractState`**, **`relatedAssets`**, …).
+class LegacyScriptsGetScriptApiItem {
+  const LegacyScriptsGetScriptApiItem({
+    required this.legacyId,
+    this.name,
+    this.content,
+    this.extractState,
+    this.errorReason,
+    this.createTime,
+    required this.relatedAssets,
+  });
+
+  final int legacyId;
+  final String? name;
+  final String? content;
+  final int? extractState;
+  final String? errorReason;
+  final int? createTime;
+  final List<LegacyScriptRelatedAssetBrief> relatedAssets;
+
+  factory LegacyScriptsGetScriptApiItem.fromJson(Map<String, dynamic> json) {
+    final raw = json['relatedAssets'] as List<dynamic>? ?? [];
+    return LegacyScriptsGetScriptApiItem(
+      legacyId: (json['id'] as num).toInt(),
+      name: json['name'] as String?,
+      content: json['content'] as String?,
+      extractState: json['extractState'] == null
+          ? null
+          : (json['extractState'] as num).toInt(),
+      errorReason: json['errorReason'] as String?,
+      createTime: json['createTime'] == null
+          ? null
+          : (json['createTime'] as num).toInt(),
+      relatedAssets: raw
+          .map(
+            (e) => LegacyScriptRelatedAssetBrief.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+/// `POST /api/v1/scripts/get-script-api` — legacy **`getScrptApi`** list + **`relatedAssets`**.
+Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApi(
+  String accessToken,
+  int projectId, {
+  String? name,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/get-script-api');
+  final body = <String, dynamic>{'projectId': projectId};
+  if (name != null && name.isNotEmpty) {
+    body['name'] = name;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  final data = map['data'] as List<dynamic>;
+  return data
+      .map(
+        (e) => LegacyScriptsGetScriptApiItem.fromJson(e as Map<String, dynamic>),
+      )
+      .toList();
+}
+
 /// `GET /api/v1/scripts/legacy/{legacy_id}`. See `getScriptByLegacyIdV1`.
 Future<ScriptRow> fetchScriptByLegacyId(
   String accessToken,

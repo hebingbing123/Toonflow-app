@@ -2067,6 +2067,44 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => novelsBusy[0] = true);
                                     try {
+                                      final idx =
+                                          await postLegacyNovelsGetNovelIndex(
+                                        token,
+                                        p.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/novels/get-novel-index：'
+                                            '${idx.length} 条',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST get-novel-index'),
+                          ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
                                       final msg = await postLegacyNovelsAddNovel(
                                         token,
                                         p.legacyId,
@@ -2671,6 +2709,47 @@ class _HomePageState extends State<HomePage> {
                         spacing: 4,
                         runSpacing: 0,
                         children: [
+                          TextButton(
+                            onPressed:
+                                scriptProbeBusy[0] || saving[0] ? null : () async {
+                              setDialogState(() => scriptProbeBusy[0] = true);
+                              try {
+                                final rows = await postScriptsGetScriptApi(
+                                  token,
+                                  p.legacyId,
+                                );
+                                if (!ctx.mounted) return;
+                                final sample = rows.isEmpty
+                                    ? '0 条'
+                                    : rows
+                                        .take(2)
+                                        .map(
+                                          (r) =>
+                                              '#${r.legacyId} rel=${r.relatedAssets.length}',
+                                        )
+                                        .join('; ');
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'POST …/scripts/get-script-api：'
+                                      '${rows.length} 条 · $sample',
+                                    ),
+                                  ),
+                                );
+                              } on RustApiException catch (e) {
+                                if (ctx.mounted) {
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              } finally {
+                                if (ctx.mounted) {
+                                  setDialogState(() => scriptProbeBusy[0] = false);
+                                }
+                              }
+                            },
+                            child: const Text('POST get-script-api'),
+                          ),
                           TextButton(
                             onPressed: scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
