@@ -25,7 +25,7 @@ info:
 
     **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, legacy **`o_prompt`** parity); **`GET /api/v1/prompts/{legacy_id}`** returns one merged row (**`legacy_id`** must be **1**, **2**, or **3**); **`PATCH /api/v1/prompts/{legacy_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
 
-    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches legacy **`POST /api/project/getVisualManual`** verb; body ignored). **`image`** paths are relative under **`data/skills`** (no OSS signing).
+    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches legacy **`POST /api/project/getVisualManual`**; body ignored). **`POST /api/v1/project/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** mirror **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`** (same 12 Markdown slots as **`GET`**). **`image`** paths stay relative under **`data/skills`** (no OSS signing).
 
     **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`** for **`GET /api/v1/models/detail`**. Optional env **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** (composite id) when it matches the catalog.
 
@@ -50,7 +50,7 @@ info:
 
     **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
 
-    **Legacy project CRUD posts (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**. **`POST …/project/delete-project`** (**`{ "id" }`**) like **`DELETE …/projects/legacy/{id}`**. **`POST …/project/add-project`** / **`POST …/project/edit-project`**: strict camelCase bodies matching old **`addProject`** / **`editProject`**. **Director manual (`story_skills`):** **`POST …/project/query-director-manual`** (**`{}`**) lists folders like legacy **`queryDirectorManual`** (**`image`** = relative paths under **`data/skills`**). **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`** mirror **`addDirectorManual`** / **`editDirectorlManual`** / **`deleteDirectorManual`** (filesystem under **`backend/data/skills/story_skills`**; **`driector_skills`** spelling preserved).
+    **Legacy project CRUD posts (`/api/project/*`):** **`POST …/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**; **`POST …/delete-project`** / **`add-project`** / **`edit-project`** (PG **`app_project`**). **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
@@ -1815,6 +1815,111 @@ paths:
       operationId: postProjectDeleteDirectorManualV1
       description: |
         Parity with **`POST /api/project/deleteDirectorManual`**. **`name`** is the folder under **`story_skills`**. Returns **`200`** with **`message`** even when the folder is already absent (matches best-effort Electron behavior after validation).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyDirectorManualDeleteBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyDirectorManualDeleteResponse"
+        "400":
+          description: Invalid folder name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/add-visual-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — create visual manual (art_skills folder)
+      operationId: postProjectAddVisualManualV1
+      description: |
+        Parity with **`POST /api/project/addVisualManual`**. Creates **`data/skills/art_skills/{stylePath}`** with the same Markdown slots as **`GET /api/v1/visual-manual`** and optional base64 or http **`images`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyVisualManualAddBody"
+      responses:
+        "200":
+          description: OK (empty JSON object)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyEmptyObjectResponse"
+        "400":
+          description: Invalid name, duplicate folder, oversized slot, or bad image payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/edit-visual-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — update visual manual folder
+      operationId: postProjectEditVisualManualV1
+      description: |
+        Parity with **`POST /api/project/editVisualManual`**. **`README`** is stored as **`{name}\\n{data}`**. Folder must exist under **`art_skills`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyVisualManualEditBody"
+      responses:
+        "200":
+          description: OK (empty JSON object)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyEmptyObjectResponse"
+        "400":
+          description: Invalid name, missing folder, oversized slot, or bad image payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/delete-visual-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — delete visual manual folder
+      operationId: postProjectDeleteVisualManualV1
+      description: |
+        Parity with **`POST /api/project/deleteVisualManual`**. **`name`** is the folder under **`art_skills`**. Returns **`200`** with **`message`** after best-effort removal.
       security:
         - bearerAuth: []
       requestBody:
@@ -8966,6 +9071,46 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LegacyDirectorManualStyleRow"
+
+    LegacyVisualManualAddBody:
+      type: object
+      additionalProperties: false
+      required: [name, images, stylePath, data]
+      properties:
+        name:
+          type: string
+        stylePath:
+          type: string
+          description: New folder name under art_skills
+        images:
+          type: array
+          items:
+            type: string
+            description: http(s) URL or data URI base64
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualDataSlot"
+
+    LegacyVisualManualEditBody:
+      type: object
+      additionalProperties: false
+      required: [name, stylePath, images, data]
+      properties:
+        name:
+          type: string
+          description: Display title; prefixed to README body on edit
+        stylePath:
+          type: string
+          description: Existing folder under art_skills
+        images:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualDataSlot"
 
     LegacyGeneralUpdateProjectBody:
       type: object
