@@ -1424,6 +1424,51 @@ class _HomePageState extends State<HomePage> {
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
+                                    assetsFilterScriptLegacyId[0] == null
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final sid = assetsFilterScriptLegacyId[0]!;
+                                    try {
+                                      final pg = await fetchProjectAssetsByLegacyId(
+                                        token,
+                                        p.legacyId,
+                                        scriptLegacyId: sid,
+                                        page: 1,
+                                        limit: 2,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      final ids = pg.items
+                                          .map((a) => '#${a.legacyId}:${a.assetType}')
+                                          .join(', ');
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'GET …/assets?script_legacy_id=$sid'
+                                            '&page=1&limit=2：total=${pg.total}，'
+                                            '本页 ${pg.items.length} 条'
+                                            '${ids.isEmpty ? '' : ' · $ids'}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('GET 当前剧本+分页'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty
                                 ? null
