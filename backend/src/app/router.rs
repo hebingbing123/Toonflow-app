@@ -10,6 +10,7 @@ use crate::harness;
 use crate::jobs;
 use crate::models_catalog;
 use crate::novels;
+use crate::novels_legacy;
 use crate::production_legacy;
 use crate::projects;
 use crate::prompts;
@@ -68,6 +69,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(general_legacy::router())
         .merge(art_styles::router())
         .merge(novels::router())
+        .merge(novels_legacy::router())
         .merge(production_legacy::router())
         .merge(assets::router())
         .merge(assets_generate::router())
