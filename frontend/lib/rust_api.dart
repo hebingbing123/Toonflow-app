@@ -516,6 +516,7 @@ class ProjectsSummary {
     required this.scriptCount,
     required this.storyboardCount,
     required this.novelCount,
+    required this.roleCount,
     required this.artStyleCount,
     required this.assetCount,
   });
@@ -524,6 +525,7 @@ class ProjectsSummary {
   final int scriptCount;
   final int storyboardCount;
   final int novelCount;
+  final int roleCount;
   final int artStyleCount;
   final int assetCount;
 
@@ -535,6 +537,9 @@ class ProjectsSummary {
       storyboardCount: n('storyboard_count'),
       novelCount: json['novel_count'] != null
           ? (json['novel_count'] as num).toInt()
+          : 0,
+      roleCount: json['role_count'] != null
+          ? (json['role_count'] as num).toInt()
           : 0,
       artStyleCount: json['art_style_count'] != null
           ? (json['art_style_count'] as num).toInt()
