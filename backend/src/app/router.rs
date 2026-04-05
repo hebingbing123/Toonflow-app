@@ -5,6 +5,7 @@ use crate::art_styles;
 use crate::assets;
 use crate::assets_generate;
 use crate::billing;
+use crate::director_manual;
 use crate::general_legacy;
 use crate::harness;
 use crate::jobs;
@@ -68,6 +69,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(models_catalog::router())
         .merge(projects::router())
         .merge(project_legacy::router())
+        .merge(director_manual::router())
         .merge(general_legacy::router())
         .merge(art_styles::router())
         .merge(novels::router())

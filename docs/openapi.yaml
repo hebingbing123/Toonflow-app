@@ -50,7 +50,7 @@ info:
 
     **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
 
-    **Legacy project CRUD posts (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**. **`POST …/project/delete-project`** (**`{ "id" }`**) like **`DELETE …/projects/legacy/{id}`**. **`POST …/project/add-project`** / **`POST …/project/edit-project`**: strict camelCase bodies matching old **`addProject`** / **`editProject`** (all string fields); **`type`** is SQLite **`o_project.type`**; PG stores a single **`mode`** — non-empty **`mode`** wins, else **`type`**. Success messages align with Electron (**`新增项目成功`** / **`编辑项目成功`**).
+    **Legacy project CRUD posts (`/api/project/*` besides visual manual):** **`POST /api/v1/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**. **`POST …/project/delete-project`** (**`{ "id" }`**) like **`DELETE …/projects/legacy/{id}`**. **`POST …/project/add-project`** / **`POST …/project/edit-project`**: strict camelCase bodies matching old **`addProject`** / **`editProject`**. **Director manual (`story_skills`):** **`POST …/project/query-director-manual`** (**`{}`**) lists folders like legacy **`queryDirectorManual`** (**`image`** = relative paths under **`data/skills`**). **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`** mirror **`addDirectorManual`** / **`editDirectorlManual`** / **`deleteDirectorManual`** (filesystem under **`backend/data/skills/story_skills`**; **`driector_skills`** spelling preserved).
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
@@ -1698,6 +1698,146 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/query-director-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — list director manuals (story_skills)
+      operationId: postProjectQueryDirectorManualV1
+      description: |
+        Parity with **`POST /api/project/queryDirectorManual`**. Body **`{}`**. Each row includes **`directorManual`** (folder key), **`name`** (README first line), **`image`** (relative paths under **`data/skills`**, e.g. **`story_skills/{key}/images/a.png`**), and **`data`** slots (**`README`**, **`director_planning_narrative`**, **`director_storyboard_table_narrative`**).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyTasksEmptyBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyDirectorManualListResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "400":
+          description: Bundled **`story_skills`** tree missing or unreadable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/add-director-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — create director manual folder
+      operationId: postProjectAddDirectorManualV1
+      description: |
+        Parity with **`POST /api/project/addDirectorManual`**. Writes Markdown slots and optional base64 images under **`data/skills/story_skills/{directorManual}`**. **`name`** and **`directorManual`** must not contain path separators or be pure digits.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyDirectorManualAddBody"
+      responses:
+        "200":
+          description: OK (empty JSON object)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyEmptyObjectResponse"
+        "400":
+          description: Invalid name, duplicate folder, oversized slot, or bad image payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/edit-director-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — update director manual folder
+      operationId: postProjectEditDirectorManualV1
+      description: |
+        Parity with **`POST /api/project/editDirectorlManual`**. **`README`** body is stored as **`{name}\\n{data}`** (same as Electron). Folder must already exist.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyDirectorManualEditBody"
+      responses:
+        "200":
+          description: OK (empty JSON object)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyEmptyObjectResponse"
+        "400":
+          description: Invalid name, missing folder, oversized slot, or bad image payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/project/delete-director-manual:
+    post:
+      tags: [projects]
+      summary: Legacy Electron — delete director manual folder
+      operationId: postProjectDeleteDirectorManualV1
+      description: |
+        Parity with **`POST /api/project/deleteDirectorManual`**. **`name`** is the folder under **`story_skills`**. Returns **`200`** with **`message`** even when the folder is already absent (matches best-effort Electron behavior after validation).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyDirectorManualDeleteBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyDirectorManualDeleteResponse"
+        "400":
+          description: Invalid folder name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
           content:
             application/json:
               schema:
@@ -8715,6 +8855,117 @@ components:
           type: string
         mode:
           type: string
+
+    LegacyEmptyObjectResponse:
+      type: object
+      additionalProperties: false
+      description: Legacy Electron **`success()`** with no payload; Rust returns **`{}`**.
+
+    LegacyDirectorManualDataSlot:
+      type: object
+      required: [label, value, data]
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+        data:
+          type: string
+
+    LegacyDirectorManualAddBody:
+      type: object
+      additionalProperties: false
+      required: [name, images, directorManual, data]
+      properties:
+        name:
+          type: string
+        directorManual:
+          type: string
+          description: New folder name under story_skills
+        images:
+          type: array
+          items:
+            type: string
+            description: http(s) URL or data URI base64
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualDataSlot"
+
+    LegacyDirectorManualEditBody:
+      type: object
+      additionalProperties: false
+      required: [name, directorManual, images, data]
+      properties:
+        name:
+          type: string
+          description: Display title; prefixed to README body on edit
+        directorManual:
+          type: string
+          description: Existing folder name under story_skills
+        images:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualDataSlot"
+
+    LegacyDirectorManualDeleteBody:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Folder name under story_skills
+
+    LegacyDirectorManualDeleteResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: 删除成功
+
+    LegacyDirectorManualSlotRow:
+      type: object
+      required: [label, value, data]
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+        data:
+          type: string
+
+    LegacyDirectorManualStyleRow:
+      type: object
+      required: [name, image, directorManual, data]
+      properties:
+        name:
+          type: string
+        image:
+          type: array
+          items:
+            type: string
+        directorManual:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualSlotRow"
+
+    LegacyDirectorManualListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyDirectorManualStyleRow"
 
     LegacyGeneralUpdateProjectBody:
       type: object

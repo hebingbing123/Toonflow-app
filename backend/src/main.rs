@@ -8,6 +8,7 @@ mod assets;
 mod assets_generate;
 mod auth;
 mod billing;
+mod director_manual;
 mod error;
 mod general_legacy;
 mod harness;
