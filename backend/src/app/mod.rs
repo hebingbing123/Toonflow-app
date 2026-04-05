@@ -451,6 +451,60 @@ mod contract_smoke_tests {
         assert_eq!(v["code"], "unauthorized");
     }
 
+    /// Missing **`Authorization`** must yield **401** before any Postgres pool access (no **503** `database_error` when `DATABASE_URL` is unset).
+    #[tokio::test]
+    async fn art_styles_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/art-styles").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn art_style_by_legacy_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/art-styles/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_assets_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/assets").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn jobs_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/jobs").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn usage_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/usage/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_query_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/agents/memory/query",
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn scripts_export_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/scripts/export", r#"{"legacy_ids":[1]}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
     #[tokio::test]
     async fn art_styles_list_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
