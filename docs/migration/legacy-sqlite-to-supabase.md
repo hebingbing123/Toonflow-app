@@ -21,7 +21,7 @@
 ## 推荐阶段（标准交付节奏）
 
 1. **盘点与契约**：按业务域分组表（用户/项目/剧本/分镜/素材/任务），与 Supabase Auth 的 `user_id`（UUID）对齐方式写清（旧 `o_user.id` 为整型，需 **`legacy_user_map`**）。
-2. **PG 目标模型**：`app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`**（及 **`app_script_asset`** 关联）与 RLS 由迁移提供；更多实体后续迭代追加。
+2. **PG 目标模型**：`app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`**（及 **`app_script_asset`** 关联）/ **`app_art_style`**（用户画风库）与 RLS 由迁移提供；**`o_artStyle` → promote** 与更多实体可后续迭代追加。
 3. **ETL 工具（仓库内原型）**：在应用 `supabase/migrations` 中的 `legacy_staging.snapshot` 表之后，可用 Rust CLI 将旧库 **按行快照为 JSONB**（不做业务域映射）：
    ```bash
    cd backend

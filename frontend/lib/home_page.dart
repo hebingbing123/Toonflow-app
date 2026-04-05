@@ -51,9 +51,11 @@ class _HomePageState extends State<HomePage> {
 
   bool _loadingProjects = false;
   bool _loadingProjectsSummary = false;
+  bool _loadingArtStyles = false;
   bool _creatingProject = false;
   List<ProjectRow>? _projects;
   String? _projectsSummaryLine;
+  String? _artStylesLine;
 
   bool _loadingJobs = false;
   bool _loadingJobKinds = false;
@@ -1031,6 +1033,37 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingProjectsSummary = false;
+      });
+    }
+  }
+
+  Future<void> _loadArtStyles() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingArtStyles = true;
+      _error = null;
+      _artStylesLine = null;
+    });
+    try {
+      final r = await fetchArtStyles(token);
+      if (!mounted) return;
+      setState(() {
+        _artStylesLine =
+            'total=${r.total} · ${r.items.take(5).map((s) => '#${s.legacyId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
+        _loadingArtStyles = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingArtStyles = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingArtStyles = false;
       });
     }
   }
@@ -3376,6 +3409,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed: (_loadingArtStyles || _creatingProject)
+                        ? null
+                        : _loadArtStyles,
+                    child: Text(
+                      _loadingArtStyles ? '加载中…' : 'GET …/art-styles',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: (_loadingProjects || _creatingProject)
                         ? null
                         : _createEmptyProject,
@@ -3388,6 +3429,10 @@ class _HomePageState extends State<HomePage> {
               if (_projectsSummaryLine != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('summary: $_projectsSummaryLine'),
+              ],
+              if (_artStylesLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('art-styles: $_artStylesLine'),
               ],
               if (_projects != null) ...[
                 const SizedBox(height: 12),

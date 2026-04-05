@@ -117,6 +117,56 @@ class ProjectStats {
   }
 }
 
+/// One row from **`GET /api/v1/art-styles`** (`ArtStyleRow` in OpenAPI).
+class ArtStyleRow {
+  const ArtStyleRow({
+    required this.id,
+    required this.legacyId,
+    required this.name,
+    this.fileUrl,
+    this.label,
+    this.prompt,
+  });
+
+  final String id;
+  final int legacyId;
+  final String name;
+  final String? fileUrl;
+  final String? label;
+  final String? prompt;
+
+  factory ArtStyleRow.fromJson(Map<String, dynamic> json) {
+    return ArtStyleRow(
+      id: json['id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String,
+      fileUrl: json['file_url'] as String?,
+      label: json['label'] as String?,
+      prompt: json['prompt'] as String?,
+    );
+  }
+}
+
+/// **`GET /api/v1/art-styles`** list envelope.
+class ListArtStylesResponse {
+  const ListArtStylesResponse({
+    required this.items,
+    required this.total,
+  });
+
+  final List<ArtStyleRow> items;
+  final int total;
+
+  factory ListArtStylesResponse.fromJson(Map<String, dynamic> json) {
+    return ListArtStylesResponse(
+      items: (json['items'] as List<dynamic>)
+          .map((e) => ArtStyleRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toInt(),
+    );
+  }
+}
+
 /// JSON body for **`GET /health`** and **`GET /api/v1/health`** (OpenAPI `HealthResponse`).
 class HealthResponse {
   const HealthResponse({
@@ -494,6 +544,22 @@ Future<ProjectsSummary> fetchProjectsSummary(String accessToken) async {
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ProjectsSummary.fromJson(map);
+}
+
+/// `GET /api/v1/art-styles` — see `listArtStylesV1`.
+Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListArtStylesResponse.fromJson(map);
 }
 
 /// `POST /api/v1/projects` — optional snake_case fields; see `createProjectV1`.
