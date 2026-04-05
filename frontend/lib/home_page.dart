@@ -76,14 +76,20 @@ class _HomePageState extends State<HomePage> {
 
   final _skillPathCtrl =
       TextEditingController(text: 'script_execution_script.md');
+  final _skillContentCtrl =
+      TextEditingController(text: '# flutter probe\n');
 
   bool _loadingHarnessTools = false;
   bool _loadingSkillsSummary = false;
   bool _loadingSkillList = false;
   bool _loadingSkillPreview = false;
+  bool _loadingSkillPut = false;
+  bool _loadingSkillPost = false;
+  bool _loadingSkillDelete = false;
   String? _harnessToolsLine;
   String? _skillsAggregateLine;
   String? _skillsListSummary;
+  String? _skillMutationLine;
 
   @override
   void initState() {
@@ -104,6 +110,7 @@ class _HomePageState extends State<HomePage> {
     _password.dispose();
     _jobIdCtrl.dispose();
     _skillPathCtrl.dispose();
+    _skillContentCtrl.dispose();
     super.dispose();
   }
 
@@ -673,6 +680,104 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingSkillPreview = false;
+      });
+    }
+  }
+
+  Future<void> _putSkillProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final path = _skillPathCtrl.text.trim();
+    if (path.isEmpty) return;
+    setState(() {
+      _loadingSkillPut = true;
+      _error = null;
+      _skillMutationLine = null;
+    });
+    try {
+      final r = await saveSkillContent(token, path, _skillContentCtrl.text);
+      if (!mounted) return;
+      setState(() {
+        _loadingSkillPut = false;
+        _skillMutationLine =
+            'PUT 200: ${r.path} (${r.content.length} chars written)';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPut = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPut = false;
+      });
+    }
+  }
+
+  Future<void> _postSkillProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final path = _skillPathCtrl.text.trim();
+    if (path.isEmpty) return;
+    setState(() {
+      _loadingSkillPost = true;
+      _error = null;
+      _skillMutationLine = null;
+    });
+    try {
+      final r = await createSkillContent(token, path, _skillContentCtrl.text);
+      if (!mounted) return;
+      setState(() {
+        _loadingSkillPost = false;
+        _skillMutationLine =
+            'POST 201: ${r.path} (${r.content.length} chars written)';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPost = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillPost = false;
+      });
+    }
+  }
+
+  Future<void> _deleteSkillProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final path = _skillPathCtrl.text.trim();
+    if (path.isEmpty) return;
+    setState(() {
+      _loadingSkillDelete = true;
+      _error = null;
+      _skillMutationLine = null;
+    });
+    try {
+      await deleteSkillContent(token, path);
+      if (!mounted) return;
+      setState(() {
+        _loadingSkillDelete = false;
+        _skillMutationLine = 'DELETE 204: $path';
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillDelete = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingSkillDelete = false;
       });
     }
   }
@@ -3665,7 +3770,7 @@ class _HomePageState extends State<HomePage> {
               ],
               const SizedBox(height: 16),
               Text(
-                'Harness / skills (read-only)',
+                'Harness / skills',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -3722,15 +3827,61 @@ class _HomePageState extends State<HomePage> {
                 controller: _skillPathCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Skill relative path',
+                  helperText:
+                      'POST needs a path that does not exist yet under data/skills',
                 ),
               ),
               const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingSkillPreview ? null : _previewSkillFile,
-                child: Text(
-                  _loadingSkillPreview ? '加载中…' : 'GET /api/v1/skills/content',
+              TextField(
+                controller: _skillContentCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Body for PUT / POST',
                 ),
+                maxLines: 4,
               ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonal(
+                    onPressed:
+                        _loadingSkillPreview ? null : _previewSkillFile,
+                    child: Text(
+                      _loadingSkillPreview
+                          ? '…'
+                          : 'GET /api/v1/skills/content',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingSkillPut ? null : _putSkillProbe,
+                    child: Text(
+                      _loadingSkillPut ? '…' : 'PUT /api/v1/skills/content',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingSkillPost ? null : _postSkillProbe,
+                    child: Text(
+                      _loadingSkillPost ? '…' : 'POST /api/v1/skills/content',
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _loadingSkillDelete ? null : _deleteSkillProbe,
+                    child: Text(
+                      _loadingSkillDelete
+                          ? '…'
+                          : 'DELETE /api/v1/skills/content',
+                    ),
+                  ),
+                ],
+              ),
+              if (_skillMutationLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  _skillMutationLine!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
