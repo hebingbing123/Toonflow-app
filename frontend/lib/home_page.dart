@@ -1746,6 +1746,42 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     try {
+                                      final r =
+                                          await fetchCornerScapeAssetsByLegacyId(
+                                        token,
+                                        p.legacyId,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/assets/corner-scape：'
+                                            '${r.items.length} 条',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST corner-scape'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    try {
                                       final ts = DateTime.now()
                                           .millisecondsSinceEpoch;
                                       await createProjectAssetUnderLegacy(

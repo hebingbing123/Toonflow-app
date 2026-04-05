@@ -1874,6 +1874,94 @@ class ListAssetsResponse {
   }
 }
 
+/// One row from **`POST …/assets/corner-scape`** — OpenAPI **`CornerScapeAssetItem`**.
+class CornerScapeAssetItem {
+  const CornerScapeAssetItem({
+    required this.id,
+    required this.legacyId,
+    required this.name,
+    required this.assetType,
+    this.description,
+    this.createTimeMs,
+    required this.metadata,
+    required this.historyImages,
+  });
+
+  final String id;
+  final int legacyId;
+  final String name;
+  final String assetType;
+  final String? description;
+  final int? createTimeMs;
+  final Map<String, dynamic> metadata;
+  final List<dynamic> historyImages;
+
+  factory CornerScapeAssetItem.fromJson(Map<String, dynamic> json) {
+    final hist = json['history_images'] as List<dynamic>? ?? const [];
+    final meta = json['metadata'];
+    return CornerScapeAssetItem(
+      id: json['id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String,
+      assetType: json['asset_type'] as String,
+      description: json['description'] as String?,
+      createTimeMs: (json['create_time_ms'] as num?)?.toInt(),
+      metadata: meta is Map<String, dynamic>
+          ? meta
+          : <String, dynamic>{},
+      historyImages: hist,
+    );
+  }
+}
+
+/// OpenAPI **`CornerScapeResponse`**.
+class CornerScapeResponse {
+  const CornerScapeResponse({required this.items});
+
+  final List<CornerScapeAssetItem> items;
+
+  factory CornerScapeResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return CornerScapeResponse(
+      items: raw
+          .map(
+            (e) => CornerScapeAssetItem.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    );
+  }
+}
+
+/// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/corner-scape` — see `listCornerScapeAssetsByLegacyV1`.
+Future<CornerScapeResponse> fetchCornerScapeAssetsByLegacyId(
+  String accessToken,
+  int projectLegacyId, {
+  List<String>? types,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/corner-scape',
+  );
+  final body = <String, dynamic>{};
+  if (types != null && types.isNotEmpty) {
+    body['types'] = types;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return CornerScapeResponse.fromJson(map);
+}
+
 /// `GET /api/v1/projects/legacy/{project_legacy_id}/assets` — see `listProjectAssetsByLegacyV1`.
 Future<ListAssetsResponse> fetchProjectAssetsByLegacyId(
   String accessToken,

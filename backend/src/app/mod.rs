@@ -756,6 +756,39 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn corner_scape_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/projects/legacy/1/assets/corner-scape", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn corner_scape_assets_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/projects/legacy/1/assets/corner-scape",
+            &token,
+            "{}",
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn corner_scape_assets_rejects_bad_types_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/projects/legacy/1/assets/corner-scape",
+            &token,
+            r#"{"types":["clip"]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn project_assets_list_query_unauthorized_without_bearer() {
         let (status, v) =
             get_json("/api/v1/projects/legacy/1/assets?script_legacy_id=1&page=1&limit=10").await;
