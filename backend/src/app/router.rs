@@ -9,6 +9,7 @@ use crate::jobs;
 use crate::models_catalog;
 use crate::novels;
 use crate::projects;
+use crate::prompts;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_asset_extract;
@@ -61,6 +62,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(harness::http::router())
         .merge(jobs::router())
         .merge(usage::router())
+        .merge(prompts::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
         .layer(governor_layer_from_env());

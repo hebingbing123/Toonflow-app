@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   String? _readyBody;
   String? _meBody;
   String? _usageSummaryBody;
+  String? _promptsProbeBody;
   String? _modelsCatalogBody;
   String? _modelDetailBody;
   String? _agentMemoryBody;
@@ -39,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingReady = false;
   bool _loadingMe = false;
   bool _loadingUsageSummary = false;
+  bool _loadingPromptsProbe = false;
   bool _loadingModelsCatalog = false;
   bool _loadingModelDetail = false;
   bool _loadingAgentMemory = false;
@@ -340,6 +342,39 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingUsageSummary = false;
+      });
+    }
+  }
+
+  Future<void> _callPromptsProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingPromptsProbe = true;
+      _error = null;
+      _promptsProbeBody = null;
+    });
+    try {
+      final rows = await fetchPromptsV1(token);
+      if (!mounted) return;
+      final types = rows.map((r) => r.type).join(', ');
+      final totalChars = rows.fold<int>(0, (a, r) => a + r.data.length);
+      setState(() {
+        _promptsProbeBody =
+            'count=${rows.length} · types=$types · data_chars_total=$totalChars';
+        _loadingPromptsProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingPromptsProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingPromptsProbe = false;
       });
     }
   }
@@ -3348,6 +3383,17 @@ class _HomePageState extends State<HomePage> {
               if (_usageSummaryBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('usage: $_usageSummaryBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingPromptsProbe ? null : _callPromptsProbe,
+                child: Text(
+                  _loadingPromptsProbe ? '请求中…' : 'GET /api/v1/prompts',
+                ),
+              ),
+              if (_promptsProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('prompts: $_promptsProbeBody'),
               ],
               const SizedBox(height: 8),
               Wrap(

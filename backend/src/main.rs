@@ -16,6 +16,7 @@ mod models_catalog;
 mod notify_hub;
 mod novels;
 mod projects;
+mod prompts;
 mod rate_limit;
 mod request_id_mw;
 mod script_asset_extract;

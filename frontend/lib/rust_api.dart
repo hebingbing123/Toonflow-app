@@ -365,6 +365,48 @@ Future<UsageSummaryResponse> fetchUsageSummary(String accessToken) async {
   return UsageSummaryResponse.fromJson(map);
 }
 
+/// One row from **`GET /api/v1/prompts`** (`PromptTemplateRow` in OpenAPI).
+class PromptTemplateRowV1 {
+  const PromptTemplateRowV1({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.data,
+  });
+
+  final int id;
+  final String name;
+  final String type;
+  final String data;
+
+  factory PromptTemplateRowV1.fromJson(Map<String, dynamic> json) {
+    return PromptTemplateRowV1(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      type: json['type'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
+/// `GET /api/v1/prompts` — OpenAPI `listPromptsV1`.
+Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 60));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final raw = jsonDecode(res.body) as List<dynamic>;
+  return raw
+      .map((e) => PromptTemplateRowV1.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
 /// Row from `GET /api/v1/models` — OpenAPI `ModelListEntry`.
 class ModelListEntry {
   const ModelListEntry({
