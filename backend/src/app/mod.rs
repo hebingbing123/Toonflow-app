@@ -483,10 +483,15 @@ mod pg_contract_tests {
     const PROMO_PROJECT_LEG: i32 = 5_010_001;
     const PROMO_SCRIPT_LEG: i32 = 5_010_002;
     const PROMO_ASSET_LEG: i32 = 5_010_003;
+    const PROMO_ART_STYLE_LEG: i32 = 5_010_004;
 
     async fn cleanup_promote_staging_fixtures(pool: &PgPool) {
         let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
             .bind(PROMO_PROJECT_LEG)
+            .execute(pool)
+            .await;
+        let _ = sqlx::query("DELETE FROM public.app_art_style WHERE legacy_id = $1")
+            .bind(PROMO_ART_STYLE_LEG)
             .execute(pool)
             .await;
         let _ = sqlx::query("DELETE FROM public.legacy_user_map WHERE legacy_user_id = $1")
@@ -495,7 +500,7 @@ mod pg_contract_tests {
             .await;
         let _ = sqlx::query(
             r#"DELETE FROM legacy_staging.snapshot
-               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset')"#,
+               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style')"#,
         )
         .execute(pool)
         .await;
@@ -1092,6 +1097,22 @@ mod pg_contract_tests {
         .await
         .expect("staging o_scriptAssets");
 
+        let art_style = serde_json::json!({
+            "id": PROMO_ART_STYLE_LEG,
+            "name": "pg_promote_style",
+            "fileUrl": "/art/promo.jpg",
+            "label": "pg_label",
+            "prompt": "pg_prompt",
+        });
+        sqlx::query(
+            r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+               VALUES ('o_artStyle', 'pg_promote_art_style', $1)"#,
+        )
+        .bind(Json(art_style))
+        .execute(&pool)
+        .await
+        .expect("staging o_artStyle");
+
         sqlx::query("SELECT 1 FROM public.promote_legacy_from_staging() LIMIT 1")
             .execute(&pool)
             .await
@@ -1119,8 +1140,38 @@ mod pg_contract_tests {
         .expect("count script_asset link");
         assert_eq!(link_rows, 1, "expected one promoted app_script_asset row");
 
+        let style_rows: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*)::bigint FROM public.app_art_style WHERE legacy_id = $1",
+        )
+        .bind(PROMO_ART_STYLE_LEG)
+        .fetch_one(&pool)
+        .await
+        .expect("count app_art_style");
+        assert_eq!(style_rows, 1, "expected one promoted app_art_style row");
+
         let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
         let app = build_router(contract_state(pool.clone(), secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/art-styles")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, styles_body) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "art_styles={styles_body}");
+        let sitems = styles_body["items"].as_array().expect("style items");
+        let sfound = sitems
+            .iter()
+            .find(|row| row["legacy_id"].as_i64() == Some(i64::from(PROMO_ART_STYLE_LEG)));
+        let srow = sfound.expect("promoted art style in list");
+        assert_eq!(srow["name"].as_str(), Some("pg_promote_style"));
 
         let res = app
             .clone()
