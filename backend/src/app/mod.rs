@@ -188,6 +188,19 @@ mod contract_smoke_tests {
         .await
     }
 
+    async fn post_empty_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
     async fn put_empty_no_bearer(uri: &str) -> (StatusCode, Value) {
         oneshot_json(
             Request::builder()
@@ -620,6 +633,14 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn projects_list_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_stats_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/projects/legacy/1/stats").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -725,6 +746,169 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn jobs_list_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/jobs", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn jobs_list_filtered_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/jobs?kind=flutter.probe&status=queued", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn jobs_create_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/jobs",
+            &token,
+            r#"{"kind":"flutter.probe","payload":{}}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn job_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}");
+        let (status, v) = get_json_bearer(&uri, &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn job_cancel_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/cancel");
+        let (status, v) = post_empty_bearer(&uri, &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn job_retry_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/retry");
+        let (status, v) = post_empty_bearer(&uri, &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn jobs_kinds_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/jobs/kinds", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn jobs_kinds_summary_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/jobs/kinds/summary", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn jobs_status_summary_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/jobs/status/summary", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn usage_summary_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/usage/summary", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_query_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/agents/memory/query",
+            &token,
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_clear_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/agents/memory/clear",
+            &token,
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn agents_memory_append_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/agents/memory/append",
+            &token,
+            r#"{"projectId":1,"agentType":"scriptAgent","content":"smoke"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn scripts_export_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/scripts/export", &token, r#"{"legacy_ids":[1]}"#).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn scripts_extract_state_poll_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/scripts/extract-state/poll",
+            &token,
+            r#"{"legacy_ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn scripts_extract_assets_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/scripts/extract-assets",
+            &token,
+            r#"{"project_legacy_id":1,"script_legacy_ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn projects_create_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/projects", "{}").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -780,6 +964,19 @@ mod contract_smoke_tests {
         let (status, v) = get_json("/api/v1/me").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
+    }
+
+    /// **`/api/v1/me`** does not require a Postgres pool: without **`DATABASE_URL`** it still returns **200** with default **`plan_tier`** (differs from most authenticated routes that return **503** `database_error`).
+    #[tokio::test]
+    async fn me_ok_without_pool_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/me", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["plan_tier"], "free");
+        assert!(
+            v["sub"].as_str().is_some_and(|s| !s.is_empty()),
+            "expected sub in me response"
+        );
     }
 
     #[tokio::test]
