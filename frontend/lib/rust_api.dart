@@ -1264,6 +1264,64 @@ Future<List<ProjectRow>> fetchProjects(String accessToken) async {
       .toList();
 }
 
+/// `POST /api/v1/general/get-single-project` — legacy **`getSingleProject`**; **`id`** = **`app_project.legacy_id`**.
+Future<List<ProjectRow>> postGeneralGetSingleProject(
+  String accessToken,
+  int legacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/general/get-single-project');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id': legacyId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  final data = map['data'] as List<dynamic>;
+  return data
+      .map((e) => ProjectRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+/// `POST /api/v1/general/update-project` — legacy **`updateProject`**.
+///
+/// [body] must include **`id`** (legacy project id) and at least one of **`intro`**,
+/// **`type`**, **`artStyle`**, **`videoRatio`**, **`projectType`** (use JSON **`null`** in the map to clear).
+Future<String> postGeneralUpdateProject(
+  String accessToken,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/general/update-project');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['message'] as String? ?? '';
+}
+
 class ProjectsSummary {
   const ProjectsSummary({
     required this.projectCount,

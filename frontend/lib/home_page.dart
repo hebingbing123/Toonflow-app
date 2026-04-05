@@ -1623,6 +1623,7 @@ class _HomePageState extends State<HomePage> {
       final novelsLoading = <bool>[false];
       final novelsBusy = <bool>[false];
       final scriptProbeBusy = <bool>[false];
+      final generalLegacyBusy = <bool>[false];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -1690,6 +1691,69 @@ class _HomePageState extends State<HomePage> {
                         maxLines: 3,
                         decoration: const InputDecoration(
                           labelText: 'Intro (empty = clear)',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 4,
+                          runSpacing: 0,
+                          children: [
+                            TextButton(
+                              onPressed: generalLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
+                                        () => generalLegacyBusy[0] = true,
+                                      );
+                                      try {
+                                        final rows =
+                                            await postGeneralGetSingleProject(
+                                          token,
+                                          p.legacyId,
+                                        );
+                                        if (!ctx.mounted) return;
+                                        final line = rows.isEmpty
+                                            ? '0 行'
+                                            : rows
+                                                .map(
+                                                  (r) =>
+                                                      '#${r.legacyId} ${r.name ?? ""}',
+                                                )
+                                                .join('; ');
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'POST …/general/get-single-project：$line',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                generalLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                generalLegacyBusy[0]
+                                    ? 'general…'
+                                    : 'POST general get-single-project',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 12),
