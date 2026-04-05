@@ -1819,6 +1819,7 @@ mod pg_contract_tests {
             .connect(&url)
             .await
             .expect("connect DATABASE_URL");
+        let pool_sql = pool.clone();
 
         let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
         let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -1945,6 +1946,204 @@ mod pg_contract_tests {
             i64::from(asset_leg)
         );
         assert_eq!(one_asset["name"].as_str(), Some("pg_contract_role_asset"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner1) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner1={corner1}");
+        let c1 = corner1["items"].as_array().expect("corner1 items");
+        assert_eq!(c1.len(), 1);
+        assert_eq!(
+            c1[0]["legacy_id"].as_i64().expect("leg"),
+            i64::from(asset_leg)
+        );
+        assert_eq!(c1[0]["asset_type"].as_str(), Some("role"));
+        assert!(
+            c1[0]["history_images"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()),
+            "history_images placeholder"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"name":"pg_contract_scene_asset","type":"scene"}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, scene_row) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "scene_row={scene_row}");
+        let scene_leg = scene_row["legacy_id"].as_i64().expect("scene legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner2) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner2={corner2}");
+        let c2 = corner2["items"].as_array().expect("corner2 items");
+        assert_eq!(c2.len(), 2);
+        assert_eq!(c2[0]["asset_type"].as_str(), Some("role"));
+        assert_eq!(c2[1]["asset_type"].as_str(), Some("scene"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"types":["scene"]}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_scene_only) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "corner_scene_only={corner_scene_only}"
+        );
+        let cs = corner_scene_only["items"]
+            .as_array()
+            .expect("corner scene filter");
+        assert_eq!(cs.len(), 1);
+        assert_eq!(
+            cs[0]["legacy_id"].as_i64().expect("leg"),
+            i64::from(scene_leg)
+        );
+
+        let n = sqlx::query(
+            r#"
+            UPDATE app_asset a
+            SET metadata = jsonb_build_object('assetsId', 999999)
+            FROM app_project p
+            WHERE a.project_id = p.id
+              AND p.legacy_id = $1
+              AND p.owner_user_id = $2
+              AND a.legacy_id = $3
+            "#,
+        )
+        .bind(legacy_id)
+        .bind(sub)
+        .bind(scene_leg)
+        .execute(&pool_sql)
+        .await
+        .expect("mark scene row as child asset via metadata.assetsId");
+        assert_eq!(n.rows_affected(), 1, "expected one scene row updated");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_child_hidden) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "corner_child_hidden={corner_child_hidden}"
+        );
+        let ch = corner_child_hidden["items"]
+            .as_array()
+            .expect("corner after child metadata");
+        assert_eq!(ch.len(), 1);
+        assert_eq!(
+            ch[0]["legacy_id"].as_i64().expect("leg"),
+            i64::from(asset_leg)
+        );
+
+        let n = sqlx::query(
+            r#"
+            UPDATE app_asset a
+            SET metadata = '{}'::jsonb
+            FROM app_project p
+            WHERE a.project_id = p.id
+              AND p.legacy_id = $1
+              AND p.owner_user_id = $2
+              AND a.legacy_id = $3
+            "#,
+        )
+        .bind(legacy_id)
+        .bind(sub)
+        .bind(scene_leg)
+        .execute(&pool_sql)
+        .await
+        .expect("reset scene metadata");
+        assert_eq!(n.rows_affected(), 1);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_restored) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner_restored={corner_restored}");
+        assert_eq!(
+            corner_restored["items"].as_array().map(|a| a.len()),
+            Some(2)
+        );
 
         let res = app
             .clone()
