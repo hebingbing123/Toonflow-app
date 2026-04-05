@@ -1019,7 +1019,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         _projectsSummaryLine =
-            'projects=${s.projectCount} scripts=${s.scriptCount} storyboards=${s.storyboardCount} novels=${s.novelCount} assets=${s.assetCount}';
+            'projects=${s.projectCount} scripts=${s.scriptCount} storyboards=${s.storyboardCount} novels=${s.novelCount} art_styles=${s.artStyleCount} assets=${s.assetCount}';
         _loadingProjectsSummary = false;
       });
     } on RustApiException catch (e) {

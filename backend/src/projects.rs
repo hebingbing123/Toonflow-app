@@ -62,6 +62,7 @@ struct ProjectsSummaryResponse {
     script_count: i64,
     storyboard_count: i64,
     novel_count: i64,
+    art_style_count: i64,
     asset_count: i64,
 }
 
@@ -253,7 +254,7 @@ async fn projects_summary(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let uid = require_user_uuid(&state, &headers)?;
 
-    let row: (i64, i64, i64, i64, i64) = sqlx::query_as(
+    let row: (i64, i64, i64, i64, i64, i64) = sqlx::query_as(
         r#"
         SELECT
             (SELECT COUNT(*)::bigint FROM app_project WHERE owner_user_id = $1),
@@ -270,6 +271,7 @@ async fn projects_summary(
              FROM app_novel n
              INNER JOIN app_project p ON p.id = n.project_id
              WHERE p.owner_user_id = $1),
+            (SELECT COUNT(*)::bigint FROM app_art_style WHERE owner_user_id = $1),
             (SELECT COUNT(*)::bigint
              FROM app_asset a
              INNER JOIN app_project p ON p.id = a.project_id
@@ -286,7 +288,8 @@ async fn projects_summary(
         script_count: row.1,
         storyboard_count: row.2,
         novel_count: row.3,
-        asset_count: row.4,
+        art_style_count: row.4,
+        asset_count: row.5,
     }))
 }
 
