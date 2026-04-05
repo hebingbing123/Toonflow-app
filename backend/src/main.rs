@@ -19,6 +19,7 @@ mod projects;
 mod prompts;
 mod rate_limit;
 mod request_id_mw;
+mod script_agent;
 mod script_asset_extract;
 mod scripts;
 mod settings_about;

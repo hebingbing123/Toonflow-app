@@ -39,6 +39,8 @@ info:
 
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`** (static, no Postgres). **`POST …/deploy-model`** and **`POST …/set-key`** validate bodies then **501** (no per-user deploy table / no API keys over HTTP).
 
+    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, then **501** **`not_implemented`** until **`o_agentWorkData`**-equivalent persistence exists (live flows use **Harness WS**).
+
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
 servers:
@@ -2762,6 +2764,123 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/script-agent/get-plan-data:
+    post:
+      tags: [scripts]
+      summary: Load script agent plan (legacy `getPlanData` parity)
+      operationId: postScriptAgentGetPlanDataV1
+      description: |
+        Bearer JWT. Validates legacy **`projectId`** + **`agentType: scriptAgent`**, then **501** **`not_implemented`** (no Postgres **`o_agentWorkData`** equivalent yet).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetScriptAgentPlanBody"
+      responses:
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented (use Harness WS for live agent)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/script-agent/set-plan-data:
+    post:
+      tags: [scripts]
+      summary: Save script agent plan and sync scripts (legacy `setPlanData` parity)
+      operationId: postScriptAgentSetPlanDataV1
+      description: |
+        Bearer JWT. Validates legacy body (**`data.storySkeleton`**, **`data.adaptationStrategy`**, optional **`data.script`** rows), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetScriptAgentPlanBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/script-agent/update-data:
+    post:
+      tags: [scripts]
+      summary: Patch agent work row by id (legacy `updateData` parity)
+      operationId: postScriptAgentUpdateDataV1
+      description: |
+        Bearer JWT. Validates **`id`** and **`data`** (**`storySkeleton`**, **`adaptationStrategy`**, **`script`** with **`id`** + **`content`**), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateScriptAgentDataBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/scripts/export:
     post:
       tags: [scripts]
@@ -4222,6 +4341,96 @@ components:
         key:
           type: string
           description: Optional legacy field; never persisted on this API
+
+    ScriptAgentTypeV1:
+      type: string
+      enum: [scriptAgent]
+      description: Legacy **`agentType`**; only **`scriptAgent`** is accepted
+
+    GetScriptAgentPlanBody:
+      type: object
+      required: [projectId, agentType]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        agentType:
+          $ref: "#/components/schemas/ScriptAgentTypeV1"
+
+    SetScriptAgentPlanScriptRow:
+      type: object
+      required: [name, content]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+
+    SetScriptAgentPlanData:
+      type: object
+      required: [storySkeleton, adaptationStrategy]
+      additionalProperties: false
+      properties:
+        storySkeleton:
+          type: string
+        adaptationStrategy:
+          type: string
+        script:
+          type: array
+          items:
+            $ref: "#/components/schemas/SetScriptAgentPlanScriptRow"
+          default: []
+
+    SetScriptAgentPlanBody:
+      type: object
+      required: [projectId, agentType, data]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        agentType:
+          $ref: "#/components/schemas/ScriptAgentTypeV1"
+        data:
+          $ref: "#/components/schemas/SetScriptAgentPlanData"
+
+    UpdateScriptAgentScriptRow:
+      type: object
+      required: [id, content]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        content:
+          type: string
+
+    UpdateScriptAgentDataPayload:
+      type: object
+      required: [storySkeleton, adaptationStrategy, script]
+      additionalProperties: false
+      properties:
+        storySkeleton:
+          type: string
+        adaptationStrategy:
+          type: string
+        script:
+          type: array
+          items:
+            $ref: "#/components/schemas/UpdateScriptAgentScriptRow"
+
+    UpdateScriptAgentDataBody:
+      type: object
+      required: [id, data]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        data:
+          $ref: "#/components/schemas/UpdateScriptAgentDataPayload"
 
     AboutCheckUpdateSource:
       type: string

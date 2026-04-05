@@ -12,6 +12,7 @@ use crate::projects;
 use crate::prompts;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
+use crate::script_agent;
 use crate::script_asset_extract;
 use crate::scripts;
 use crate::settings_about;
@@ -62,6 +63,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(novels::router())
         .merge(assets::router())
         .merge(scripts::router())
+        .merge(script_agent::router())
         .merge(script_asset_extract::router())
         .merge(storyboards::router())
         .merge(skills::router())

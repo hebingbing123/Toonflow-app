@@ -675,10 +675,18 @@ class _HomePageState extends State<HomePage> {
         type: 'text',
         id: '1',
       );
+      final sap = await postScriptAgentGetPlanDataV1(token, projectId: 1);
       if (!mounted) return;
       if (mt != 501) {
         setState(() {
           _error = 'POST vendors/model-test expected 501, got $mt';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      if (sap != 501) {
+        setState(() {
+          _error = 'POST script-agent/get-plan-data expected 501, got $sap';
           _loadingModelsCatalog = false;
         });
         return;
@@ -696,7 +704,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · model-test -> $mt';
+            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
@@ -3991,7 +3999,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       _loadingModelsCatalog
                           ? '请求中…'
-                          : 'models + vendors/summary + agent-deploy + model-test',
+                          : 'models + vendors + agent-deploy + model-test + script-agent',
                     ),
                   ),
                   FilledButton.tonal(

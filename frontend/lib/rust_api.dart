@@ -600,6 +600,28 @@ Future<int> postSettingsVendorModelTestV1(
   return res.statusCode;
 }
 
+/// `POST /api/v1/script-agent/get-plan-data` — OpenAPI `postScriptAgentGetPlanDataV1` (typically **501**).
+Future<int> postScriptAgentGetPlanDataV1(
+  String accessToken, {
+  required int projectId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/script-agent/get-plan-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'agentType': 'scriptAgent',
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({
