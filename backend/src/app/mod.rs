@@ -208,6 +208,14 @@ mod contract_smoke_tests {
         assert_eq!(v["path"], "script_execution_script.md");
         assert!(v["content"].as_str().is_some_and(|s| !s.trim().is_empty()));
     }
+
+    #[tokio::test]
+    async fn project_assets_list_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/assets", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
 }
 
 /// Postgres-backed contract checks (opt-in: **`#[ignore]`** so default **`cargo test`** stays DB-free).
