@@ -15,6 +15,7 @@ use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_asset_extract;
 use crate::scripts;
 use crate::settings_about;
+use crate::settings_agent_deploy;
 use crate::settings_dev;
 use crate::settings_memory_config;
 use crate::settings_vendors;
@@ -70,6 +71,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(usage::router())
         .merge(prompts::router())
         .merge(settings_about::router())
+        .merge(settings_agent_deploy::router())
         .merge(settings_dev::router())
         .merge(settings_memory_config::router())
         .merge(settings_vendors::router())

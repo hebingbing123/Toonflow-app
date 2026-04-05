@@ -35,6 +35,9 @@ info:
     **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
 
     **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of legacy **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
+    **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields then **501** (no live LLM/image/video probe here).
+
+    **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`** (static, no Postgres). **`POST …/deploy-model`** and **`POST …/set-key`** validate bodies then **501** (no per-user deploy table / no API keys over HTTP).
 
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
@@ -544,6 +547,172 @@ paths:
                 $ref: "#/components/schemas/VendorsSummaryResponse"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/vendors/model-test:
+    post:
+      tags: [settings]
+      summary: Live vendor model smoke test (not implemented)
+      operationId: postSettingsVendorModelTestV1
+      description: |
+        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), then **501** **`not_implemented`**: the Rust API does not run the legacy **`modelTest`** LLM/OSS probe.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorModelTestBody"
+      responses:
+        "400":
+          description: Invalid **`type`** or empty **`modelName`** / **`id`**
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Live probe not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/agent-deploy/list:
+    post:
+      tags: [settings]
+      summary: List default agent deploy rows (static)
+      operationId: postSettingsAgentDeployListV1
+      description: |
+        Bearer JWT. Body must be **`{}`** (no extra keys). Returns the four **`initDB`** **`o_agentDeploy`** defaults (**`scriptAgent`**, **`productionAgent`**, **`universalAi`**, **`ttsDubbing`**) with empty **`model`/`modelName`**, **`icon`** always **`""`** (no SQLite join).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentDeployListBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentDeployListItem"
+        "400":
+          description: Unknown JSON fields in body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/agent-deploy/deploy-model:
+    post:
+      tags: [settings]
+      summary: Update agent deploy row (not persisted)
+      operationId: postSettingsAgentDeployModelV1
+      description: |
+        Bearer JWT. Validates legacy **`deployAgentModel`** body, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeployAgentModelBody"
+      responses:
+        "400":
+          description: Bad JSON or unknown fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not persisted on this API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/agent-deploy/set-key:
+    post:
+      tags: [settings]
+      summary: Set vendor API key (not supported)
+      operationId: postSettingsAgentDeploySetKeyV1
+      description: |
+        Bearer JWT. Optional **`key`** in body (legacy **`agentSetKey`**). Always **501** **`not_implemented`**: API keys are not accepted over HTTP.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentSetKeyBody"
+      responses:
+        "400":
+          description: Unknown fields in body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Keys must be configured server-side
           content:
             application/json:
               schema:
@@ -3980,6 +4149,79 @@ components:
           type: string
           enum: [static_catalog]
           description: Always static embed; not per-user SQLite
+
+    VendorModelTestBody:
+      type: object
+      required: [modelName, type, id]
+      additionalProperties: false
+      properties:
+        modelName:
+          type: string
+        type:
+          type: string
+          enum: [text, image, video]
+        id:
+          type: string
+          description: Legacy vendor id string (e.g. OpenAI vendor row key)
+
+    AgentDeployListBody:
+      type: object
+      additionalProperties: false
+      description: Empty object `{}` only
+
+    AgentDeployListItem:
+      type: object
+      required:
+        [id, model, key, modelName, vendorId, desc, name, disabled, icon]
+      properties:
+        id:
+          type: integer
+          format: int32
+        model:
+          type: string
+        key:
+          type: string
+        modelName:
+          type: string
+        vendorId:
+          type: string
+          nullable: true
+        desc:
+          type: string
+        name:
+          type: string
+        disabled:
+          type: boolean
+        icon:
+          type: string
+
+    DeployAgentModelBody:
+      type: object
+      required: [id, name, model, modelName, desc]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        model:
+          type: string
+        modelName:
+          type: string
+        vendorId:
+          type: string
+          nullable: true
+        desc:
+          type: string
+
+    AgentSetKeyBody:
+      type: object
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+          description: Optional legacy field; never persisted on this API
 
     AboutCheckUpdateSource:
       type: string

@@ -668,7 +668,21 @@ class _HomePageState extends State<HomePage> {
     try {
       final list = await fetchModelsCatalog(token, typeFilter: 'all');
       final vs = await fetchVendorsSummaryV1(token);
+      final ad = await postAgentDeployListV1(token);
+      final mt = await postSettingsVendorModelTestV1(
+        token,
+        modelName: 'gpt-4o-mini',
+        type: 'text',
+        id: '1',
+      );
       if (!mounted) return;
+      if (mt != 501) {
+        setState(() {
+          _error = 'POST vendors/model-test expected 501, got $mt';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       setState(() {
         final sample = list
             .take(4)
@@ -681,7 +695,9 @@ class _HomePageState extends State<HomePage> {
         final vendorsBit = v0 == null
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
-        _modelsCatalogBody = '$modelsLine · $vendorsBit';
+        final adBit =
+            'agent-deploy: ${ad.length} rows · model-test -> $mt';
+        _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
     } on RustApiException catch (e) {
@@ -3975,7 +3991,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       _loadingModelsCatalog
                           ? '请求中…'
-                          : 'GET /api/v1/models?type=all',
+                          : 'models + vendors/summary + agent-deploy + model-test',
                     ),
                   ),
                   FilledButton.tonal(
