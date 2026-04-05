@@ -738,6 +738,7 @@ mod pg_contract_tests {
         assert_eq!(stats_mid["storyboard_count"], 0);
         assert_eq!(stats_mid["role_count"], 1);
         assert_eq!(stats_mid["novel_count"], 0);
+        assert_eq!(stats_mid["video_count"], 0);
 
         let res = app
             .clone()
@@ -759,6 +760,23 @@ mod pg_contract_tests {
         assert!(
             g_role >= p_role,
             "projects/summary role_count ({g_role}) should be >= per-project stats ({p_role})"
+        );
+        let g_script = sum_mid["script_count"]
+            .as_i64()
+            .expect("summary script_count");
+        let p_script = stats_mid["script_count"]
+            .as_i64()
+            .expect("stats script_count");
+        assert!(
+            g_script >= p_script,
+            "projects/summary script_count ({g_script}) should be >= per-project stats ({p_script})"
+        );
+        let g_asset = sum_mid["asset_count"]
+            .as_i64()
+            .expect("summary asset_count");
+        assert!(
+            g_asset >= 1,
+            "expected at least one app_asset row in summary"
         );
 
         let res = app
