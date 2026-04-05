@@ -17,6 +17,7 @@ use crate::scripts;
 use crate::settings_about;
 use crate::settings_dev;
 use crate::settings_memory_config;
+use crate::settings_vendors;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
@@ -71,6 +72,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings_about::router())
         .merge(settings_dev::router())
         .merge(settings_memory_config::router())
+        .merge(settings_vendors::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
         .layer(governor_layer_from_env());

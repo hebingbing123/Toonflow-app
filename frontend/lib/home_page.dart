@@ -667,15 +667,21 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       final list = await fetchModelsCatalog(token, typeFilter: 'all');
+      final vs = await fetchVendorsSummaryV1(token);
       if (!mounted) return;
       setState(() {
         final sample = list
             .take(4)
             .map((m) => '${m.value}(${m.type})')
             .join(', ');
-        _modelsCatalogBody = list.isEmpty
+        final modelsLine = list.isEmpty
             ? '(empty)'
             : '${list.length} models${sample.isEmpty ? '' : '; sample: $sample'}';
+        final v0 = vs.vendors.isEmpty ? null : vs.vendors.first;
+        final vendorsBit = v0 == null
+            ? 'vendors: (empty)'
+            : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
+        _modelsCatalogBody = '$modelsLine · $vendorsBit';
         _loadingModelsCatalog = false;
       });
     } on RustApiException catch (e) {

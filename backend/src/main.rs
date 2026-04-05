@@ -24,6 +24,7 @@ mod scripts;
 mod settings_about;
 mod settings_dev;
 mod settings_memory_config;
+mod settings_vendors;
 mod skills;
 mod state;
 mod storyboards;

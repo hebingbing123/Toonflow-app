@@ -575,6 +575,26 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_vendors_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/settings/vendors/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_summary_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/settings/vendors/summary", &token).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["source"], "static_catalog");
+        let arr = v["vendors"].as_array().expect("vendors array");
+        assert!(!arr.is_empty());
+        assert!(arr[0]["id"].is_number());
+        assert!(arr[0]["name"].as_str().is_some_and(|s| !s.is_empty()));
+        assert!(arr[0]["modelCount"].as_i64().is_some_and(|n| n > 0));
+    }
+
+    #[tokio::test]
     async fn skills_list_ok_with_jwt_when_skills_tree_present() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/skills", &token).await;

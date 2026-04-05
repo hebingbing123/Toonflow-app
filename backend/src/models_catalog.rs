@@ -89,6 +89,33 @@ fn normalize_filter(raw: Option<String>) -> Result<String, ApiError> {
     }
 }
 
+/// One vendor row for **`GET /api/v1/settings/vendors/summary`** (no API keys; not **`o_vendorConfig`**).
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct VendorCatalogSummary {
+    pub(crate) id: i32,
+    pub(crate) name: String,
+    pub(crate) model_count: usize,
+    /// Sorted unique **`type`** values from embedded catalog models.
+    pub(crate) model_kinds: Vec<String>,
+}
+
+pub(crate) fn vendor_catalog_summaries() -> Vec<VendorCatalogSummary> {
+    let mut out = Vec::with_capacity(CATALOG.vendors.len());
+    for v in &CATALOG.vendors {
+        let mut kinds: Vec<String> = v.models.iter().map(|m| m.kind.clone()).collect();
+        kinds.sort();
+        kinds.dedup();
+        out.push(VendorCatalogSummary {
+            id: v.id,
+            name: v.name.clone(),
+            model_count: v.models.len(),
+            model_kinds: kinds,
+        });
+    }
+    out
+}
+
 fn list_filtered(filter: &str) -> Vec<ModelListEntry> {
     let mut out = Vec::new();
     for v in &CATALOG.vendors {
@@ -223,5 +250,15 @@ mod tests {
     #[test]
     fn first_text_model_is_gpt4o_mini() {
         assert_eq!(super::first_text_model_composite_id(), "1:gpt-4o-mini");
+    }
+
+    #[test]
+    fn vendor_catalog_summaries_non_empty() {
+        let s = super::vendor_catalog_summaries();
+        assert!(!s.is_empty());
+        let openai = s.iter().find(|v| v.id == 1).expect("vendor 1");
+        assert!(!openai.name.is_empty());
+        assert!(openai.model_count > 0);
+        assert!(!openai.model_kinds.is_empty());
     }
 }

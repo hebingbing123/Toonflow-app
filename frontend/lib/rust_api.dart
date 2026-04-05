@@ -900,6 +900,76 @@ Future<List<ModelListEntry>> fetchModelsCatalog(
       .toList();
 }
 
+/// OpenAPI **`VendorCatalogSummary`** — keyless vendor row from static catalog.
+class VendorCatalogSummaryV1 {
+  const VendorCatalogSummaryV1({
+    required this.id,
+    required this.name,
+    required this.modelCount,
+    required this.modelKinds,
+  });
+
+  final int id;
+  final String name;
+  final int modelCount;
+  final List<String> modelKinds;
+
+  factory VendorCatalogSummaryV1.fromJson(Map<String, dynamic> json) {
+    final kinds = json['modelKinds'];
+    return VendorCatalogSummaryV1(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      modelCount: (json['modelCount'] as num).toInt(),
+      modelKinds: (kinds is List)
+          ? kinds.map((e) => e.toString()).toList()
+          : <String>[],
+    );
+  }
+}
+
+/// OpenAPI **`VendorsSummaryResponse`**.
+class VendorsSummaryResponseV1 {
+  const VendorsSummaryResponseV1({
+    required this.vendors,
+    required this.source,
+  });
+
+  final List<VendorCatalogSummaryV1> vendors;
+  final String source;
+
+  factory VendorsSummaryResponseV1.fromJson(Map<String, dynamic> json) {
+    final raw = json['vendors'];
+    final list = <VendorCatalogSummaryV1>[];
+    if (raw is List) {
+      for (final e in raw) {
+        if (e is Map<String, dynamic>) {
+          list.add(VendorCatalogSummaryV1.fromJson(e));
+        }
+      }
+    }
+    return VendorsSummaryResponseV1(
+      vendors: list,
+      source: json['source'] as String,
+    );
+  }
+}
+
+/// `GET /api/v1/settings/vendors/summary` — OpenAPI `getSettingsVendorsSummaryV1`.
+Future<VendorsSummaryResponseV1> fetchVendorsSummaryV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/summary');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VendorsSummaryResponseV1.fromJson(map);
+}
+
 /// `GET /api/v1/models/detail?model_id=…` — Bearer; see `modelDetailV1`.
 Future<ModelDetailResponse> fetchModelDetail(
   String accessToken, {
