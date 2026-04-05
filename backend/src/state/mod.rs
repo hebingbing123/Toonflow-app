@@ -1,11 +1,17 @@
 //! Shared application state (DB pool, auth secret, LLM config, outbound HTTP, notify hub).
 
 mod from_env;
+mod memory_config;
+
+use std::sync::Arc;
 
 use sqlx::PgPool;
+use tokio::sync::RwLock;
 
 use crate::llm::LlmConfig;
 use crate::notify_hub::WsNotifyHub;
+
+pub use memory_config::MemoryConfig;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -14,6 +20,8 @@ pub struct AppState {
     pub llm: Option<LlmConfig>,
     pub http_client: reqwest::Client,
     pub notify: WsNotifyHub,
+    /// Legacy **`o_setting`** memory/RAG limits; in-process until a user settings table exists.
+    pub memory_config: Arc<RwLock<MemoryConfig>>,
 }
 
 impl AppState {

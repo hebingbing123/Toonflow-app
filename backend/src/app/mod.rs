@@ -36,6 +36,7 @@ mod jwt_fixture {
 #[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
+    use std::sync::Arc;
     use std::sync::OnceLock;
 
     use axum::body::Body;
@@ -43,13 +44,14 @@ mod contract_smoke_tests {
     use axum::http::header;
     use axum::http::{Method, Request, StatusCode};
     use serde_json::Value;
+    use tokio::sync::RwLock;
     use tower::ServiceExt;
     use uuid::Uuid;
 
     use super::build_router;
     use super::jwt_fixture;
     use crate::notify_hub::WsNotifyHub;
-    use crate::state::AppState;
+    use crate::state::{AppState, MemoryConfig};
     use axum::http::HeaderValue;
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
@@ -83,6 +85,7 @@ mod contract_smoke_tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
         }
     }
 
@@ -94,6 +97,7 @@ mod contract_smoke_tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
         }
     }
 
@@ -1443,6 +1447,59 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_memory_config_get_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/settings/memory-config").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_memory_config_get_post_roundtrip_same_state() {
+        let state = smoke_state();
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = oneshot_json_state(
+            state.clone(),
+            Request::builder()
+                .uri("/api/v1/settings/memory-config")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["messagesPerSummary"], 10);
+        assert_eq!(v["ragLimit"], 3);
+        let body = r#"{"messagesPerSummary":10,"shortTermLimit":5,"summaryMaxLength":500,"summaryLimit":10,"ragLimit":42,"deepRetrieveSummaryLimit":5,"modelOnnxFile":["all-MiniLM-L6-v2","onnx","model_fp16.onnx"],"modelDtype":"fp16"}"#;
+        let (status2, v2) = oneshot_json_state(
+            state.clone(),
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/settings/memory-config")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status2, StatusCode::OK);
+        assert_eq!(v2["message"], "保存设置成功");
+        let (status3, v3) = oneshot_json_state(
+            state,
+            Request::builder()
+                .uri("/api/v1/settings/memory-config")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status3, StatusCode::OK);
+        assert_eq!(v3["ragLimit"], 42);
+    }
+
+    #[tokio::test]
     async fn skills_summary_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/skills/summary").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -2043,6 +2100,7 @@ mod contract_smoke_tests {
 #[cfg(test)]
 mod pg_contract_tests {
     use std::net::SocketAddr;
+    use std::sync::Arc;
 
     use axum::body::Body;
     use axum::extract::ConnectInfo;
@@ -2053,13 +2111,14 @@ mod pg_contract_tests {
     use sqlx::postgres::PgPoolOptions;
     use sqlx::types::Json;
     use sqlx::PgPool;
+    use tokio::sync::RwLock;
     use tower::ServiceExt;
     use uuid::Uuid;
 
     use super::build_router;
     use super::jwt_fixture;
     use crate::notify_hub::WsNotifyHub;
-    use crate::state::AppState;
+    use crate::state::{AppState, MemoryConfig};
 
     const MAX_JSON: usize = 65_536;
     /// JWT `sub` and `app_project.owner_user_id` for this run.
@@ -2123,6 +2182,7 @@ mod pg_contract_tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
         }
     }
 

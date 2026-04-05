@@ -22,6 +22,7 @@ mod request_id_mw;
 mod script_asset_extract;
 mod scripts;
 mod settings_dev;
+mod settings_memory_config;
 mod skills;
 mod state;
 mod storyboards;

@@ -4,10 +4,13 @@ use std::time::Duration;
 
 use sqlx::postgres::PgPoolOptions;
 
+use std::sync::Arc;
+
+use tokio::sync::RwLock;
+
+use super::{AppState, MemoryConfig};
 use crate::llm::LlmConfig;
 use crate::notify_hub::WsNotifyHub;
-
-use super::AppState;
 
 pub(super) async fn load() -> Result<AppState, sqlx::Error> {
     let pool = match std::env::var("DATABASE_URL") {
@@ -59,5 +62,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         llm,
         http_client,
         notify: WsNotifyHub::new(),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
     })
 }

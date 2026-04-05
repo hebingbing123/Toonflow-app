@@ -67,7 +67,11 @@ mod tests {
 
     use crate::app::build_router;
     use crate::notify_hub::WsNotifyHub;
-    use crate::state::AppState;
+    use std::sync::Arc;
+
+    use tokio::sync::RwLock;
+
+    use crate::state::{AppState, MemoryConfig};
 
     fn test_addr() -> SocketAddr {
         SocketAddr::from(([127, 0, 0, 1], 9_001))
@@ -80,6 +84,7 @@ mod tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
         }
     }
 

@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   String? _readyBody;
   String? _meBody;
   String? _devSwitchProbeBody;
+  String? _memoryConfigProbeBody;
   String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingReady = false;
   bool _loadingMe = false;
   bool _loadingDevSwitchProbe = false;
+  bool _loadingMemoryConfigProbe = false;
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
@@ -395,6 +397,58 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingDevSwitchProbe = false;
+      });
+    }
+  }
+
+  Future<void> _callMemoryConfigProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingMemoryConfigProbe = true;
+      _error = null;
+      _memoryConfigProbeBody = null;
+    });
+    try {
+      final orig = await fetchMemoryConfigV1(token);
+      final probeRag = orig.ragLimit == 42 ? 43 : 42;
+      final patched = orig.copyWith(ragLimit: probeRag);
+      final msg = await postMemoryConfigV1(token, patched);
+      final mid = await fetchMemoryConfigV1(token);
+      await postMemoryConfigV1(token, orig);
+      final fin = await fetchMemoryConfigV1(token);
+      if (!mounted) return;
+      if (mid.ragLimit != probeRag) {
+        setState(() {
+          _error = 'memory-config POST did not stick: ragLimit ${mid.ragLimit}';
+          _loadingMemoryConfigProbe = false;
+        });
+        return;
+      }
+      if (fin.ragLimit != orig.ragLimit) {
+        setState(() {
+          _error =
+              'memory-config restore failed: expected ragLimit ${orig.ragLimit}, got ${fin.ragLimit}';
+          _loadingMemoryConfigProbe = false;
+        });
+        return;
+      }
+      setState(() {
+        _memoryConfigProbeBody =
+            'GET ragLimit=${orig.ragLimit} · POST -> "$msg" · GET ragLimit=${mid.ragLimit} · restored';
+        _loadingMemoryConfigProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingMemoryConfigProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingMemoryConfigProbe = false;
       });
     }
   }
@@ -3766,6 +3820,21 @@ class _HomePageState extends State<HomePage> {
               if (_devSwitchProbeBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('dev switch: $_devSwitchProbeBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingMemoryConfigProbe
+                    ? null
+                    : _callMemoryConfigProbe,
+                child: Text(
+                  _loadingMemoryConfigProbe
+                      ? '请求中…'
+                      : 'GET+POST /api/v1/settings/memory-config',
+                ),
+              ),
+              if (_memoryConfigProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('memory-config: $_memoryConfigProbeBody'),
               ],
               const SizedBox(height: 8),
               FilledButton.tonal(

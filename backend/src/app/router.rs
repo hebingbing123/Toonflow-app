@@ -15,6 +15,7 @@ use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_asset_extract;
 use crate::scripts;
 use crate::settings_dev;
+use crate::settings_memory_config;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
@@ -67,6 +68,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(usage::router())
         .merge(prompts::router())
         .merge(settings_dev::router())
+        .merge(settings_memory_config::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
         .layer(governor_layer_from_env());
