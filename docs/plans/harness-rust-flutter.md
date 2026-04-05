@@ -27,7 +27,7 @@ todos:
     content: Flutter 桌面+Web 均以可配置 baseUrl 连接 Rust；默认端口 8666；dev 例 http://127.0.0.1:8666，prod 为部署 URL；CORS/WebSocket/鉴权与后端一致；**竖切**：首页调试区已接项目/剧本/分镜 REST、**jobs** 列表/**`GET /api/v1/jobs/{id}`**/**`GET jobs?kind=flutter.probe`**/**`GET jobs?status=failed`**/**`GET jobs?kind=flutter.probe&status=queued`**/**`GET /api/v1/jobs/kinds`**/**`kinds/summary`**/**`status/summary`**/探针创建，与 **`GET /api/v1/skills/summary`** / **skills** / **harness/tools** 只读探针、**WS** `harness.tool.invoke` / **`harness.agent.run`**（Flutter 探针：attach + 多轮工具；**echo**、**isolated.echo**、**skills.read**、**wasm.probe**，与 Skill path 联动）；调试区含 **`/health`**、**`/api/v1/health`**、**`/api/v1/version`**、**`/api/v1/ready`**、**`/api/v1/usage/summary`**、**`GET /api/v1/models`** / **`models/detail`**（静态目录）、**`agents/memory/query`**（首项目 legacy id）；**`POST /api/v1/projects`** 空项目探针；**`GET …/projects/summary`** 汇总探针；项目详情对话框展示 **`GET …/projects/legacy/{id}/stats`** 并在增删剧本后尝试刷新；可 **`POST 空剧本`**、**`DELETE`** 项目；剧本编辑对话框可 **`DELETE`** 剧本；分镜列表对话框可 **`POST 空分镜`**；分镜编辑对话框可 **`DELETE`** 分镜
     status: completed
   - id: decommission-electron
-    content: 功能 parity 与灰度后下线 Electron + Node 服务端路径
+    content: 功能 parity 与灰度后 **下线** Electron + Node 服务端路径；**并清理仓库内旧实现**（见 **§11.1.1**、**[`electron-node-parity.md`](./electron-node-parity.md)** §7）：删或归档 **`src/`** 下 Express/Socket.IO 服务端、根 **`package.json`** 中仅旧栈的依赖与 scripts、仅旧栈的 CI job；**保留**仍需要的 **`toonflow-legacy-import`** 等迁移工具至明确路径；README/发布以 **`backend/` + `frontend/`** 为准
     status: pending
   - id: quality-bar
     content: 短剧生成质量验收：人工抽检维度、bad case 集、分环节通过率；与 Harness 观测/trace 挂钩，技能版本可对比回归
@@ -319,7 +319,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 - **契约冻结**可与拉分支同一迭代内完成，但 **物理分支应先存在**，使后续提交均有明确归属。
 - **主分支**在合并前仍保持现有产品可发布；重构分支可频繁 `rebase`/`merge` 主分支以减少最终冲突（策略由团队定）；合并回主分支以 **PR + 评审 + CI 通过** 为前提。
 
-以上确定后，可将路线图拆成 **可验收的里程碑**（**实施伊始拉分支** → 契约冻结 → Rust Harness MVP → Flutter 主壳 → 模块迁移 → **短剧质量门槛与 bad case 回归** → 下线旧栈 → **合并主分支**）。**与 YAML 中 `git-branch`、`implementation-order` 对齐。**
+以上确定后，可将路线图拆成 **可验收的里程碑**（**实施伊始拉分支** → 契约冻结 → Rust Harness MVP → Flutter 主壳 → 模块迁移 → **短剧质量门槛与 bad case 回归** → 下线旧栈并 **按 §11.1.1 清理旧 Node/Electron 服务端代码** → **合并主分支**）。**与 YAML 中 `git-branch`、`implementation-order`、`decommission-electron` 对齐。**
 
 ---
 
@@ -347,6 +347,20 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 - **技能与后端数据（已确认）**：`**backend/data/skills/`** 存放 Markdown 技能（Harness 只读此处，职责在 backend）；其它运行时数据由 backend 配置约定，**不**放入 `frontend/`。
 - **可选**：根目录 `**docs/`**（OpenAPI、WS 事件表、架构图）；**`docs/plans/`**（**路线图/架构计划** 的 Git 快照，与 §7.2「计划入仓」约定一致）；`**supabase/`**（CLI 的 `config.toml`、migrations）；`**.github/workflows/**` CI。
 - **与旧代码**：历史 `**src/`（Node）** 在过渡期可保留于 **根目录** 或子目录，直至下线；**新实现仅进 `backend/`、`frontend/`**，避免混放。
+
+### 11.1.1 重构完成后的旧代码清理（`decommission-electron`）
+
+**时机**：**`product-shipping-bar`** 达标、灰度结束、产品确认 **不再** 以 Electron 内嵌 Node 为交付路径之后，与 YAML **`decommission-electron`** 同一迭代执行（可先标记 deprecated 一至两个版本再物理删除）。
+
+**建议清理范围（按仓库实际结构调整）**
+
+1. **Node / Express 服务端**：`**src/app.ts**`、`**src/router.ts**`、`**src/routes/**`**、`**src/socket/**`**、`**src/core.ts**`（路由生成）等仅用于旧 HTTP/WS 的代码；Electron **主进程里拉起上述服务**的胶水代码。
+2. **依赖与脚本**：根 **`package.json`** / **`yarn.lock`** 中 **仅旧桌面服务端** 使用的依赖与 `scripts`；若整仓仍需 Node（例如文档脚本、Codex 工具链），**保留**与 **`backend/` / `frontend/`** 无关的工具依赖，但 **删除** 已无人调用的旧 serve/build 脚本。
+3. **CI**：**`.github/workflows/`** 里 **只测旧栈**、且与 **`refactor-monorepo`** 重复的 job — 下线或改为只跑 `refactor-check` + 新栈发布。
+4. **文档与入口**：根 **README**、贡献指南、内部 runbook 改为默认 **`backend/` + `frontend/`**；旧「本地 10588」等端口说明删除或改为历史附录。
+5. **刻意保留（直至迁移窗口结束）**：**`toonflow-legacy-import`**（`backend/src/bin/legacy_import.rs`）等 **SQLite → Postgres** 工具可暂留；若不再执行迁移，再移至 **`scripts/`** 或单独 repo 并更新文档。
+
+**原则**：清理的是 **已替换路径的实现**，不是「删 git 历史」；大删前 **tag 一个可检出旧栈的 commit**，便于法务/客户需要时取证。
 
 ### 11.2 HTTP / API（推荐默认）
 

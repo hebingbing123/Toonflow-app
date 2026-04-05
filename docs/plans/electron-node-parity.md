@@ -86,7 +86,22 @@
 
 完成 **A–H** 中与产品 PRD **blocking** 的条目 + **`quality-bar`** 验收 + 灰度后，才可把 **`decommission-electron`** 标为完成。
 
-## 6. 与本仓库其它文档的关系
+## 6. 重构完成后的旧代码清理
+
+与 **`harness-rust-flutter.md`** YAML **`decommission-electron`**、**§11.1.1** 一致：**parity 与灰度完成后**，应 **下线并删除或归档** 旧 Electron + Node 服务端实现，避免双栈长期共存、文档与 CI 分叉。
+
+| 类别 | 建议动作 |
+|------|----------|
+| 旧 HTTP/WS | 移除 **`src/routes/**`**、**`src/socket/**`**、**`src/app.ts`**、**`src/router.ts`**、**`src/core.ts`** 等（以仓库为准） |
+| 根 Node 元数据 | 收缩 **`package.json`** 中仅服务旧栈的 **dependencies / scripts** |
+| CI | 去掉仅旧栈的 workflow；保留 **`refactor-monorepo`** / **`refactor-check`** 与新发布链路 |
+| 迁移工具 | **`legacy_import`** 等可暂留；迁移期结束后再归档或迁出 |
+| 安全网 | 大删前打 **git tag** 保留可检出旧栈的提交 |
+
+**新栈唯一主路径**：**`backend/`**（Rust + Harness）+ **`frontend/`**（Flutter）。
+
+## 7. 与本仓库其它文档的关系
 
 - **`docs/plans/harness-rust-flutter.md`**：总路线图；**`rust-backend-mvp`** 是后端 **首条验收条**，不是完整 parity。
 - **`product-shipping-bar`**：本文件为其 **parity 主表**；回归矩阵与灰度方案可另起 `docs/plans/` 短文或在 CI 中编码。
+- **旧代码清理**：见上文 **§6** 与主计划 **§11.1.1**、**`decommission-electron`**。
