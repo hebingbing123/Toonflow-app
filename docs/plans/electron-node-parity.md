@@ -67,7 +67,8 @@
 ## 4. Rust 已暴露 HTTP 面（权威列表）
 
 以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`assets`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
-**WebSocket**：`externalDocs` → `docs/websocket-events.md`。
+**WebSocket**：`externalDocs` → `docs/websocket-events.md`。  
+**可选 PG 回归**：**`backend/src/app/mod.rs`** 中 **`app::pg_contract_tests::projects_create_stats_delete_roundtrip`**（**`cargo test pg_contract -- --ignored`**）在删项目前覆盖 **创建剧本/资产、`GET …/assets` 筛选、`PUT` 剧本–资产关联、分页查询**。
 
 ## 5. 分波实施建议（把「完整后端」拆成可合并的 PR）
 

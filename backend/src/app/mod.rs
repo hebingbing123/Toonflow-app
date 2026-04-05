@@ -342,6 +342,105 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/scripts"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, script_row) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "script={script_row}");
+        let script_leg = script_row["legacy_id"].as_i64().expect("script legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"name":"pg_contract_role_asset","type":"role"}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, asset_row) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "asset={asset_row}");
+        let asset_leg = asset_row["legacy_id"].as_i64().expect("asset legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, linked_before) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "linked_before={linked_before}");
+        assert_eq!(linked_before["total"], 0);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PUT)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/scripts/{script_leg}/assets/{asset_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, empty_put) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NO_CONTENT, "put body={empty_put}");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}&limit=10&page=1"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, linked_after) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "linked_after={linked_after}");
+        assert_eq!(linked_after["total"], 1);
+        assert_eq!(
+            linked_after["items"]
+                .as_array()
+                .map(|a| a.len())
+                .unwrap_or(0),
+            1
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .method(Method::DELETE)
                     .uri(format!("/api/v1/projects/legacy/{legacy_id}"))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
