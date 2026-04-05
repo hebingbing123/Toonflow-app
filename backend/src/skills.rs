@@ -2,6 +2,7 @@
 //! Paths are relative to that directory; `..` segments are rejected.
 //! **`PUT /api/v1/skills/content`** overwrites an **existing** file only (parity with legacy **`saveSkillContent`**).
 //! **`POST /api/v1/skills/content`** creates a **new** file (parent directories are created under `data/skills`); existing files → **409**.
+//! **`DELETE /api/v1/skills/content?path=`** removes one **file** (not directories).
 
 use std::path::{Path, PathBuf};
 
@@ -100,6 +101,29 @@ impl SkillCreateError {
                 ApiError::BadRequest(format!("skill content exceeds {MAX_SKILL_BYTES} bytes"))
             }
             SkillCreateError::Io(m) => ApiError::BadRequest(m),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum SkillDeleteError {
+    BadPath(String),
+    SkillsDirMissing,
+    NotFound,
+    NotAFile,
+    Io(String),
+}
+
+impl SkillDeleteError {
+    fn into_api_error(self) -> ApiError {
+        match self {
+            SkillDeleteError::BadPath(m) => ApiError::BadRequest(m),
+            SkillDeleteError::SkillsDirMissing => ApiError::BadRequest(
+                "skills directory missing (expected backend/data/skills)".into(),
+            ),
+            SkillDeleteError::NotFound => ApiError::NotFound,
+            SkillDeleteError::NotAFile => ApiError::BadRequest("path is not a regular file".into()),
+            SkillDeleteError::Io(m) => ApiError::BadRequest(m),
         }
     }
 }
@@ -244,6 +268,35 @@ fn create_skill_markdown(
     create_skill_at(&skills_root(), relative, content)
 }
 
+pub(crate) fn delete_skill_at(root: &Path, relative: &str) -> Result<(), SkillDeleteError> {
+    if !root.is_dir() {
+        return Err(SkillDeleteError::SkillsDirMissing);
+    }
+    let rel = relative.trim();
+    if rel.is_empty() {
+        return Err(SkillDeleteError::BadPath("path must not be empty".into()));
+    }
+    let resolved = safe_join_under_root(root, rel).map_err(|e| match e {
+        SkillReadError::BadPath(m) => SkillDeleteError::BadPath(m),
+        SkillReadError::SkillsDirMissing
+        | SkillReadError::NotFound
+        | SkillReadError::TooLarge
+        | SkillReadError::Io(_) => SkillDeleteError::BadPath("invalid skill path".into()),
+    })?;
+    if !resolved.exists() {
+        return Err(SkillDeleteError::NotFound);
+    }
+    if !resolved.is_file() {
+        return Err(SkillDeleteError::NotAFile);
+    }
+    std::fs::remove_file(&resolved).map_err(|e| SkillDeleteError::Io(e.to_string()))?;
+    Ok(())
+}
+
+fn delete_skill_markdown(relative: &str) -> Result<(), SkillDeleteError> {
+    delete_skill_at(&skills_root(), relative)
+}
+
 #[derive(Serialize)]
 pub struct SkillFileMeta {
     pub path: String,
@@ -284,7 +337,8 @@ pub fn router() -> Router<AppState> {
             "/api/v1/skills/content",
             get(get_skill_content)
                 .put(put_skill_content)
-                .post(post_skill_content),
+                .post(post_skill_content)
+                .delete(delete_skill_content),
         )
 }
 
@@ -398,6 +452,16 @@ async fn post_skill_content(
     Ok((StatusCode::CREATED, Json(doc)))
 }
 
+async fn delete_skill_content(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(q): Query<SkillContentQuery>,
+) -> Result<StatusCode, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    delete_skill_markdown(q.path.trim()).map_err(SkillDeleteError::into_api_error)?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -472,6 +536,25 @@ mod tests {
         assert!(matches!(
             super::create_skill_at(root, "b.md", "2"),
             Err(super::SkillCreateError::AlreadyExists)
+        ));
+    }
+
+    #[test]
+    fn delete_skill_at_removes_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::write(root.join("d.md"), "z").unwrap();
+        super::delete_skill_at(root, "d.md").unwrap();
+        assert!(!root.join("d.md").exists());
+    }
+
+    #[test]
+    fn delete_skill_at_not_found() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        assert!(matches!(
+            super::delete_skill_at(root, "gone.md"),
+            Err(super::SkillDeleteError::NotFound)
         ));
     }
 }

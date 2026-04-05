@@ -36,7 +36,6 @@ mod jwt_fixture {
 #[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
-    use std::path::PathBuf;
     use std::sync::OnceLock;
 
     use axum::body::Body;
@@ -291,6 +290,58 @@ mod contract_smoke_tests {
                 .unwrap(),
         )
         .await
+    }
+
+    /// DELETE responses may be **204** with an empty body (e.g. **`/api/v1/skills/content`**).
+    async fn delete_json_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        let app = build_router(smoke_state());
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(uri)
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let status = res.status();
+        let body = axum::body::to_bytes(res.into_body(), MAX_JSON)
+            .await
+            .unwrap();
+        let v = if body.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_slice(&body).expect("non-empty delete response must be json")
+        };
+        (status, v)
+    }
+
+    async fn delete_json_no_bearer(uri: &str) -> (StatusCode, Value) {
+        let app = build_router(smoke_state());
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(uri)
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let status = res.status();
+        let body = axum::body::to_bytes(res.into_body(), MAX_JSON)
+            .await
+            .unwrap();
+        let v = if body.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_slice(&body).expect("non-empty delete response must be json")
+        };
+        (status, v)
     }
 
     #[tokio::test]
@@ -1132,7 +1183,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn skill_content_post_creates_file_roundtrip() {
+    async fn skill_content_post_get_delete_roundtrip() {
         let token = test_jwt(Uuid::nil());
         let name = format!("__contract_post_skill_{}.md", Uuid::new_v4());
         let body = serde_json::json!({
@@ -1150,10 +1201,41 @@ mod contract_smoke_tests {
         assert_eq!(gstatus, StatusCode::OK, "gv={gv}");
         assert_eq!(gv["content"], "smoke_post_body");
 
-        let skill_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("data/skills")
-            .join(&name);
-        let _ = std::fs::remove_file(&skill_path);
+        let (dstatus, dv) = delete_json_bearer(&uri, &token).await;
+        assert_eq!(dstatus, StatusCode::NO_CONTENT, "dv={dv}");
+        assert!(dv.is_null());
+
+        let (gone_status, _) = get_json_bearer(&uri, &token).await;
+        assert_eq!(gone_status, StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn skill_content_delete_unauthorized_without_bearer() {
+        let (status, v) =
+            delete_json_no_bearer("/api/v1/skills/content?path=script_execution_script.md").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn skill_content_delete_rejects_parent_path_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            delete_json_bearer("/api/v1/skills/content?path=../Cargo.toml", &token).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn skill_content_delete_not_found_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_json_bearer(
+            "/api/v1/skills/content?path=__no_such_skill_for_delete__.md",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        assert_eq!(v["code"], "not_found");
     }
 
     #[tokio::test]

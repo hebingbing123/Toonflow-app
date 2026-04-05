@@ -1648,6 +1648,32 @@ Future<SkillContentResponse> createSkillContent(
   return SkillContentResponse.fromJson(map);
 }
 
+/// `DELETE /api/v1/skills/content?path=…` — removes a regular file only (**204** empty body).
+/// See `deleteSkillContentV1`.
+Future<void> deleteSkillContent(
+  String accessToken,
+  String relativePath,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/skills/content').replace(
+    queryParameters: {'path': relativePath},
+  );
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 /// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
 Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
