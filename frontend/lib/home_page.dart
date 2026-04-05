@@ -1777,6 +1777,48 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final first = assetsRef[0]!.items.first;
+                                    try {
+                                      final ts = DateTime.now()
+                                          .millisecondsSinceEpoch;
+                                      final row = await createProjectAssetImage(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        filePath: 'probe/hist_$ts.png',
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/assets/${first.legacyId}/images：'
+                                            '${row.id.substring(0, 8)}…',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST 首条资产图片'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {

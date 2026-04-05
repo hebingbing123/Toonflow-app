@@ -789,6 +789,31 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn asset_image_post_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/projects/legacy/1/assets/1/images", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn asset_image_post_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/projects/legacy/1/assets/1/images", &token, "{}").await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn asset_image_post_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/projects/legacy/0/assets/1/images", &token, "{}").await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn project_assets_list_query_unauthorized_without_bearer() {
         let (status, v) =
             get_json("/api/v1/projects/legacy/1/assets?script_legacy_id=1&page=1&limit=10").await;
@@ -1979,18 +2004,31 @@ mod pg_contract_tests {
             "history_images empty before app_asset_image row"
         );
 
-        let role_uuid = Uuid::parse_str(c1[0]["id"].as_str().expect("role asset id")).unwrap();
-        let img_ins = sqlx::query(
-            r#"
-            INSERT INTO public.app_asset_image (asset_id, sort_index, file_path, state)
-            VALUES ($1, 0, 'pg_contract/corner_hist.png', '已完成')
-            "#,
-        )
-        .bind(role_uuid)
-        .execute(&pool_sql)
-        .await
-        .expect("insert app_asset_image");
-        assert_eq!(img_ins.rows_affected(), 1);
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"file_path":"pg_contract/corner_hist.png","state":"已完成","sort_index":0}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, img_row) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "img_row={img_row}");
+        assert_eq!(
+            img_row["file_path"].as_str(),
+            Some("pg_contract/corner_hist.png")
+        );
+        assert_eq!(img_row["state"].as_str(), Some("已完成"));
 
         let res = app
             .clone()

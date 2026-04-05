@@ -1249,6 +1249,66 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images:
+    post:
+      tags: [assets]
+      summary: Add an image history row for an asset
+      operationId: createProjectAssetImageByLegacyIdsV1
+      description: |
+        Inserts **`app_asset_image`** for the asset (**`asset_legacy_id`** in the project). Omitted **`state`** defaults to **`已完成`** (corner-scape **`history_images`**); send **`state`**: **`""`** to store SQL **`NULL`**. **`sort_index`** defaults to **0**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssetImageBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetImageRow"
+        "400":
+          description: Invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project or asset not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}:
     put:
       tags: [assets]
@@ -3471,6 +3531,45 @@ components:
         sort_index:
           type: integer
           format: int32
+
+    CreateAssetImageBody:
+      type: object
+      additionalProperties: false
+      description: All fields optional; **`{}`** creates a completed-history row (**`state`** **`已完成`**, **`sort_index`** **0**).
+      properties:
+        file_path:
+          type: string
+          nullable: true
+          description: Trimmed; empty or omitted → SQL **`NULL`**.
+        state:
+          type: string
+          nullable: true
+          description: Omitted → **`已完成`**; empty string → SQL **`NULL`**.
+        sort_index:
+          type: integer
+          format: int32
+          description: Defaults to **0** when omitted.
+
+    AssetImageRow:
+      type: object
+      required: [id, asset_id, sort_index]
+      description: Full **`app_asset_image`** row subset after **`POST …/images`**.
+      properties:
+        id:
+          type: string
+          format: uuid
+        asset_id:
+          type: string
+          format: uuid
+        sort_index:
+          type: integer
+          format: int32
+        file_path:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
 
     CornerScapeAssetItem:
       type: object

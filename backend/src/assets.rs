@@ -116,6 +116,27 @@ struct PatchAssetBody {
     asset_type: Option<Value>,
 }
 
+/// One **`app_asset_image`** row returned after create (**`POST …/images`**).
+#[derive(Debug, FromRow, Serialize)]
+pub struct AssetImageRow {
+    pub id: Uuid,
+    pub asset_id: Uuid,
+    pub sort_index: i32,
+    pub file_path: Option<String>,
+    pub state: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct CreateAssetImageBody {
+    #[serde(default)]
+    file_path: Option<String>,
+    #[serde(default)]
+    state: Option<String>,
+    #[serde(default)]
+    sort_index: Option<i32>,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
@@ -125,6 +146,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/corner-scape",
             post(list_corner_scape_assets),
+        )
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images",
+            post(create_project_asset_image),
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}",
@@ -776,6 +801,84 @@ async fn get_project_asset_by_legacy(
     Ok(Json(row))
 }
 
+async fn resolve_owned_asset_id(
+    pool: &PgPool,
+    uid: Uuid,
+    project_legacy_id: i32,
+    asset_legacy_id: i32,
+) -> Result<Uuid, ApiError> {
+    let id: Option<Uuid> = sqlx::query_scalar(
+        r#"
+        SELECT a.id
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    id.ok_or(ApiError::NotFound)
+}
+
+async fn create_project_asset_image(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+    Json(body): Json<CreateAssetImageBody>,
+) -> Result<(StatusCode, Json<AssetImageRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+
+    let file_path = body
+        .file_path
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_string());
+
+    let sort_index = body.sort_index.unwrap_or(0);
+
+    let state_val: Option<String> = match &body.state {
+        None => Some("已完成".into()),
+        Some(s) if s.trim().is_empty() => None,
+        Some(s) => Some(s.trim().to_string()),
+    };
+
+    let row = sqlx::query_as::<_, AssetImageRow>(
+        r#"
+        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, asset_id, sort_index, file_path, state
+        "#,
+    )
+    .bind(asset_id)
+    .bind(sort_index)
+    .bind(file_path)
+    .bind(state_val)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or_else(|| ApiError::DatabaseError("insert app_asset_image failed".into()))?;
+
+    Ok((StatusCode::CREATED, Json(row)))
+}
+
 fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
     let p = parse_optional_text_field(v, "asset_type")?;
     match &p {
@@ -980,5 +1083,23 @@ mod tests {
         let b: CreateAssetBody = serde_json::from_str(r#"{"name":"Hero","type":"role"}"#).unwrap();
         assert_eq!(b.name, "Hero");
         assert_eq!(b.asset_type, "role");
+    }
+
+    #[test]
+    fn create_asset_image_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<CreateAssetImageBody>(r#"{"x":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn create_asset_image_body_accepts_empty_object() {
+        let b: CreateAssetImageBody = serde_json::from_str("{}").unwrap();
+        assert!(b.file_path.is_none());
+        assert!(b.state.is_none());
+        assert!(b.sort_index.is_none());
     }
 }

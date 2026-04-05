@@ -1914,6 +1914,33 @@ class CornerScapeAssetItem {
   }
 }
 
+/// OpenAPI **`AssetImageRow`** — response from **`POST …/assets/{aid}/images`**.
+class AssetImageRow {
+  const AssetImageRow({
+    required this.id,
+    required this.assetId,
+    required this.sortIndex,
+    this.filePath,
+    this.state,
+  });
+
+  final String id;
+  final String assetId;
+  final int sortIndex;
+  final String? filePath;
+  final String? state;
+
+  factory AssetImageRow.fromJson(Map<String, dynamic> json) {
+    return AssetImageRow(
+      id: json['id'] as String,
+      assetId: json['asset_id'] as String,
+      sortIndex: (json['sort_index'] as num).toInt(),
+      filePath: json['file_path'] as String?,
+      state: json['state'] as String?,
+    );
+  }
+}
+
 /// OpenAPI **`CornerScapeResponse`**.
 class CornerScapeResponse {
   const CornerScapeResponse({required this.items});
@@ -1960,6 +1987,51 @@ Future<CornerScapeResponse> fetchCornerScapeAssetsByLegacyId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return CornerScapeResponse.fromJson(map);
+}
+
+/// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.
+Future<AssetImageRow> createProjectAssetImage(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId, {
+  String? filePath,
+  String? state,
+  int? sortIndex,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images',
+  );
+  final body = <String, dynamic>{};
+  if (filePath != null) {
+    body['file_path'] = filePath;
+  }
+  if (state != null) {
+    body['state'] = state;
+  }
+  if (sortIndex != null) {
+    body['sort_index'] = sortIndex;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return AssetImageRow.fromJson(map);
 }
 
 /// `GET /api/v1/projects/legacy/{project_legacy_id}/assets` — see `listProjectAssetsByLegacyV1`.
