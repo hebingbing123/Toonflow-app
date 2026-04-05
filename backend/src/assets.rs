@@ -1,0 +1,505 @@
+//! Project-scoped **`app_asset`** HTTP API (legacy **`getAssetsApi`** / listing parity).
+
+use axum::{
+    extract::{Path, Query, State},
+    http::{HeaderMap, StatusCode},
+    routing::get,
+    Json, Router,
+};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::FromRow;
+use uuid::Uuid;
+
+use crate::auth::require_user_uuid;
+use crate::error::ApiError;
+use crate::json_patch::{parse_optional_text_field, FieldPatch};
+use crate::state::AppState;
+
+const ADV_LOCK_ASSET_LEGACY: i64 = 884_422_004;
+
+#[derive(Debug, FromRow, Serialize)]
+pub struct AssetRow {
+    pub id: Uuid,
+    pub legacy_id: i32,
+    pub name: String,
+    pub asset_type: String,
+    pub description: Option<String>,
+    pub create_time_ms: Option<i64>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ListAssetsQuery {
+    /// When set, only assets linked to this script (**`app_script.legacy_id`**) within the project.
+    #[serde(default)]
+    pub script_legacy_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct CreateAssetBody {
+    name: String,
+    #[serde(rename = "type")]
+    asset_type: String,
+    #[serde(default)]
+    description: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct PatchAssetBody {
+    #[serde(default)]
+    name: Option<Value>,
+    #[serde(default)]
+    description: Option<Value>,
+    #[serde(default)]
+    asset_type: Option<Value>,
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new()
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/assets",
+            get(list_project_assets).post(create_project_asset),
+        )
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}",
+            get(get_project_asset_by_legacy)
+                .patch(patch_project_asset_by_legacy)
+                .delete(delete_project_asset_by_legacy),
+        )
+}
+
+async fn create_project_asset(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<CreateAssetBody>,
+) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "project_legacy_id must be positive".into(),
+        ));
+    }
+
+    let name = body.name.trim().to_string();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("name must not be empty".into()));
+    }
+
+    let t = body.asset_type.trim().to_lowercase();
+    if t != "role" && t != "tool" && t != "scene" {
+        return Err(ApiError::BadRequest(
+            "type must be role, tool, or scene".into(),
+        ));
+    }
+
+    let desc = body
+        .description
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty());
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_uuid: Uuid = sqlx::query_scalar(
+        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let exists: bool = sqlx::query_scalar(
+        r#"SELECT EXISTS (SELECT 1 FROM app_asset WHERE project_id = $1 AND name = $2)"#,
+    )
+    .bind(project_uuid)
+    .bind(&name)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if exists {
+        tx.rollback().await.ok();
+        return Err(ApiError::Conflict(
+            "an asset with this name already exists in the project".into(),
+        ));
+    }
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_ASSET_LEGACY)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_legacy: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+
+    let row = sqlx::query_as::<_, AssetRow>(
+        r#"
+        INSERT INTO app_asset (
+          project_id, legacy_id, name, asset_type, description, create_time_ms, metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
+        RETURNING id, legacy_id, name, asset_type, description, create_time_ms
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(next_legacy)
+    .bind(&name)
+    .bind(&t)
+    .bind(desc)
+    .bind(now_ms)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok((StatusCode::CREATED, Json(row)))
+}
+
+async fn list_project_assets(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    Query(query): Query<ListAssetsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<AssetRow>>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "project_legacy_id must be positive".into(),
+        ));
+    }
+
+    if let Some(sid) = query.script_legacy_id {
+        if sid <= 0 {
+            return Err(ApiError::BadRequest(
+                "script_legacy_id must be positive when set".into(),
+            ));
+        }
+        let script_ok: bool = sqlx::query_scalar(
+            r#"
+            SELECT EXISTS (
+              SELECT 1
+              FROM app_script s
+              INNER JOIN app_project p ON p.id = s.project_id
+              WHERE p.legacy_id = $1
+                AND p.owner_user_id = $2
+                AND s.legacy_id = $3
+            )
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(uid)
+        .bind(sid)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if !script_ok {
+            return Err(ApiError::NotFound);
+        }
+    }
+
+    let rows: Vec<AssetRow> = if let Some(sid) = query.script_legacy_id {
+        sqlx::query_as::<_, AssetRow>(
+            r#"
+            SELECT DISTINCT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+            FROM app_asset a
+            INNER JOIN app_project p ON p.id = a.project_id
+            INNER JOIN app_script_asset sa ON sa.asset_id = a.id
+            INNER JOIN app_script s ON s.id = sa.script_id AND s.project_id = a.project_id
+            WHERE p.legacy_id = $1
+              AND p.owner_user_id = $2
+              AND s.legacy_id = $3
+            ORDER BY a.legacy_id ASC
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(uid)
+        .bind(sid)
+        .fetch_all(pool)
+        .await
+    } else {
+        sqlx::query_as::<_, AssetRow>(
+            r#"
+            SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+            FROM app_asset a
+            INNER JOIN app_project p ON p.id = a.project_id
+            WHERE p.legacy_id = $1 AND p.owner_user_id = $2
+            ORDER BY a.legacy_id ASC
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(uid)
+        .fetch_all(pool)
+        .await
+    }
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(rows))
+}
+
+async fn get_project_asset_by_legacy(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+) -> Result<Json<AssetRow>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let row = sqlx::query_as::<_, AssetRow>(
+        r#"
+        SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(row))
+}
+
+fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
+    let p = parse_optional_text_field(v, "asset_type")?;
+    match &p {
+        FieldPatch::Absent => Ok(FieldPatch::Absent),
+        FieldPatch::Set(None) => Err(ApiError::BadRequest(
+            "asset_type cannot be null; omit or set role|tool|scene".into(),
+        )),
+        FieldPatch::Set(Some(s)) => {
+            let t = s.trim().to_lowercase();
+            if t != "role" && t != "tool" && t != "scene" {
+                return Err(ApiError::BadRequest(
+                    "asset_type must be role, tool, or scene".into(),
+                ));
+            }
+            Ok(FieldPatch::Set(Some(t)))
+        }
+    }
+}
+
+async fn patch_project_asset_by_legacy(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+    Json(body): Json<PatchAssetBody>,
+) -> Result<Json<AssetRow>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let name_patch = parse_optional_text_field(body.name, "name")?;
+    let desc_patch = parse_optional_text_field(body.description, "description")?;
+    let type_patch = parse_asset_type_patch(body.asset_type)?;
+
+    if matches!(name_patch, FieldPatch::Absent)
+        && matches!(desc_patch, FieldPatch::Absent)
+        && matches!(type_patch, FieldPatch::Absent)
+    {
+        return Err(ApiError::BadRequest(
+            "expected at least one of: name, description, asset_type".into(),
+        ));
+    }
+
+    let current = sqlx::query_as::<_, AssetRow>(
+        r#"
+        SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let new_name = match &name_patch {
+        FieldPatch::Absent => current.name.clone(),
+        FieldPatch::Set(v) => v.clone().unwrap_or_default(),
+    };
+    if new_name.trim().is_empty() {
+        return Err(ApiError::BadRequest("name cannot be empty".into()));
+    }
+
+    let new_desc = match &desc_patch {
+        FieldPatch::Absent => current.description.clone(),
+        FieldPatch::Set(v) => v.clone(),
+    };
+
+    let new_type = match &type_patch {
+        FieldPatch::Absent => current.asset_type.clone(),
+        FieldPatch::Set(Some(t)) => t.clone(),
+        FieldPatch::Set(None) => {
+            return Err(ApiError::BadRequest(
+                "asset_type cannot be null; omit or set role|tool|scene".into(),
+            ));
+        }
+    };
+
+    if matches!(&name_patch, FieldPatch::Set(_)) && new_name != current.name {
+        let clash: bool = sqlx::query_scalar(
+            r#"
+            SELECT EXISTS (
+              SELECT 1
+              FROM app_asset a
+              INNER JOIN app_project p ON p.id = a.project_id
+              WHERE p.legacy_id = $1
+                AND p.owner_user_id = $2
+                AND a.name = $3
+                AND a.legacy_id <> $4
+            )
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(uid)
+        .bind(&new_name)
+        .bind(asset_legacy_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        if clash {
+            return Err(ApiError::Conflict(
+                "another asset in this project already uses that name".into(),
+            ));
+        }
+    }
+
+    let row = sqlx::query_as::<_, AssetRow>(
+        r#"
+        UPDATE app_asset a
+        SET name = $1,
+            description = $2,
+            asset_type = $3,
+            updated_at = NOW()
+        FROM app_project p
+        WHERE a.project_id = p.id
+          AND p.legacy_id = $4
+          AND p.owner_user_id = $5
+          AND a.legacy_id = $6
+        RETURNING a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+        "#,
+    )
+    .bind(&new_name)
+    .bind(&new_desc)
+    .bind(&new_type)
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(row))
+}
+
+async fn delete_project_asset_by_legacy(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let res = sqlx::query(
+        r#"
+        DELETE FROM app_asset a
+        USING app_project p
+        WHERE a.project_id = p.id
+          AND p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn patch_asset_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<PatchAssetBody>(r#"{"name":"a","x":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn create_asset_body_accepts_minimal() {
+        let b: CreateAssetBody = serde_json::from_str(r#"{"name":"Hero","type":"role"}"#).unwrap();
+        assert_eq!(b.name, "Hero");
+        assert_eq!(b.asset_type, "role");
+    }
+}

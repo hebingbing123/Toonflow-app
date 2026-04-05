@@ -3,6 +3,7 @@
 
 mod agent_memory;
 mod app;
+mod assets;
 mod auth;
 mod billing;
 mod error;

@@ -28,7 +28,7 @@
 |--------|--------|-------------|------|
 | `/api/agents/clearMemory`、`getMemory` | Agent 记忆 | ✅ `POST /api/v1/agents/memory/clear`、`query`；append 见 OpenAPI | 旧「按 type 清」语义已对齐方向 |
 | `/api/artStyle/*` | 画风库 CRUD / 抽 prompt | ⏳ | 需 PG 表或并入 `metadata` 策略 |
-| `/api/assets/*` | 素材 CRUD、轮询出图等 | ⏳ | 依赖 `o_assets` 类模型；stats 中 role 占位 0 直至等价表 |
+| `/api/assets/*` | 素材 CRUD、轮询出图等 | 🟡 | **CRUD（无出图）**：**`POST/GET/PATCH/DELETE …/projects/legacy/{id}/assets`**；列表可选 **`script_legacy_id`**；**`stats.role_count`**；**出图轮询 / 批量生成**仍 ⏳ |
 | `/api/assetsGenerate/*` | 素材批量生成 / polish | ⏳ | 与 jobs + LLM 管线绑定 |
 | `/api/cornerScape/getAllAssets` | 角落素材 | ⏳ | |
 | `/api/general/generalStatistics` | 多项目统计 | ✅ `GET /api/v1/projects/summary` | 单项目见 `…/stats` |
@@ -66,7 +66,7 @@
 
 ## 4. Rust 已暴露 HTTP 面（权威列表）
 
-以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
+以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`assets`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
 **WebSocket**：`externalDocs` → `docs/websocket-events.md`。
 
 ## 5. 分波实施建议（把「完整后端」拆成可合并的 PR）

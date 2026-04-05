@@ -1,6 +1,7 @@
 //! Composes domain routers, rate limiting, middleware, and CORS.
 
 use crate::agent_memory;
+use crate::assets;
 use crate::billing;
 use crate::harness;
 use crate::jobs;
@@ -48,6 +49,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(agent_memory::router())
         .merge(models_catalog::router())
         .merge(projects::router())
+        .merge(assets::router())
         .merge(scripts::router())
         .merge(script_asset_extract::router())
         .merge(storyboards::router())
