@@ -596,6 +596,53 @@ Future<List<AgentDeployListItemV1>> postAgentDeployListV1(String accessToken) as
       .toList();
 }
 
+/// `POST /api/v1/settings/agent-deploy/deploy-model` — OpenAPI `postSettingsAgentDeployModelV1` (typically **501**).
+Future<int> postSettingsAgentDeployModelV1(
+  String accessToken, {
+  required int id,
+  required String name,
+  required String model,
+  required String modelName,
+  String? vendorId,
+  required String desc,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/agent-deploy/deploy-model');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'id': id,
+          'name': name,
+          'model': model,
+          'modelName': modelName,
+          'vendorId': vendorId,
+          'desc': desc,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/agent-deploy/set-key` — OpenAPI `postSettingsAgentDeploySetKeyV1` (typically **501**).
+Future<int> postSettingsAgentDeploySetKeyV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/agent-deploy/set-key');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// `POST /api/v1/settings/vendors/model-test` — OpenAPI `postSettingsVendorModelTestV1` (typically **501**).
 Future<int> postSettingsVendorModelTestV1(
   String accessToken, {
@@ -616,6 +663,114 @@ Future<int> postSettingsVendorModelTestV1(
           'type': type,
           'id': id,
         }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/vendors/update` — OpenAPI `postSettingsVendorsUpdateV1` (typically **501**).
+Future<int> postSettingsVendorsUpdateV1(
+  String accessToken, {
+  required String id,
+  Map<String, String>? inputValues,
+  List<dynamic> inputs = const [],
+  List<dynamic> models = const [],
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/update');
+  final body = <String, dynamic>{
+    'id': id,
+    'inputs': inputs,
+    'models': models,
+  };
+  if (inputValues != null) {
+    body['inputValues'] = inputValues;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/vendors/delete` — OpenAPI `postSettingsVendorsDeleteV1` (typically **501**).
+Future<int> postSettingsVendorsDeleteV1(
+  String accessToken, {
+  required String id,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/delete');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id': id}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/vendors/enable` — OpenAPI `postSettingsVendorsEnableV1` (typically **501**).
+Future<int> postSettingsVendorsEnableV1(
+  String accessToken, {
+  required String id,
+  required num enable,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/enable');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id': id, 'enable': enable}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/vendors/update-code` — OpenAPI `postSettingsVendorsUpdateCodeV1` (typically **501**).
+Future<int> postSettingsVendorsUpdateCodeV1(
+  String accessToken, {
+  required String id,
+  required String tsCode,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/update-code');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id': id, 'tsCode': tsCode}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/vendors/code-from-link` — OpenAPI `postSettingsVendorsCodeFromLinkV1` (typically **501**).
+Future<int> postSettingsVendorsCodeFromLinkV1(
+  String accessToken, {
+  required String link,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/code-from-link');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'link': link}),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -695,6 +850,22 @@ Future<int> postSettingsVendorsAddV1(String accessToken, {required String tsCode
 /// `POST /api/v1/settings/danger/delete-all-data` — OpenAPI `postSettingsDangerDeleteAllDataV1` (typically **501**).
 Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/danger/delete-all-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
+/// `POST /api/v1/settings/danger/clear-database` — OpenAPI `postSettingsDangerClearDatabaseV1` (typically **501**).
+Future<int> postSettingsDangerClearDatabaseV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/danger/clear-database');
   final res = await http
       .post(
         uri,

@@ -780,6 +780,102 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
+      final clearDb = await postSettingsDangerClearDatabaseV1(token);
+      if (!mounted) return;
+      if (clearDb != 501) {
+        setState(() {
+          _error = 'POST settings/danger/clear-database expected 501, got $clearDb';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final deployM = await postSettingsAgentDeployModelV1(
+        token,
+        id: 1,
+        name: '剧本Agent',
+        model: 'x',
+        modelName: 'y',
+        vendorId: null,
+        desc: 'z',
+      );
+      if (!mounted) return;
+      if (deployM != 501) {
+        setState(() {
+          _error =
+              'POST settings/agent-deploy/deploy-model expected 501, got $deployM';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final setKey = await postSettingsAgentDeploySetKeyV1(token);
+      if (!mounted) return;
+      if (setKey != 501) {
+        setState(() {
+          _error =
+              'POST settings/agent-deploy/set-key expected 501, got $setKey';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vUp = await postSettingsVendorsUpdateV1(
+        token,
+        id: 'openai',
+        inputs: const [],
+        models: const [],
+      );
+      if (!mounted) return;
+      if (vUp != 501) {
+        setState(() {
+          _error = 'POST settings/vendors/update expected 501, got $vUp';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vDel = await postSettingsVendorsDeleteV1(token, id: 'openai');
+      if (!mounted) return;
+      if (vDel != 501) {
+        setState(() {
+          _error = 'POST settings/vendors/delete expected 501, got $vDel';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vEn = await postSettingsVendorsEnableV1(token, id: 'openai', enable: 1);
+      if (!mounted) return;
+      if (vEn != 501) {
+        setState(() {
+          _error = 'POST settings/vendors/enable expected 501, got $vEn';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vCode = await postSettingsVendorsUpdateCodeV1(
+        token,
+        id: 'openai',
+        tsCode: '//',
+      );
+      if (!mounted) return;
+      if (vCode != 501) {
+        setState(() {
+          _error =
+              'POST settings/vendors/update-code expected 501, got $vCode';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vLink = await postSettingsVendorsCodeFromLinkV1(
+        token,
+        link: 'https://example.com/a.ts',
+      );
+      if (!mounted) return;
+      if (vLink != 501) {
+        setState(() {
+          _error =
+              'POST settings/vendors/code-from-link expected 501, got $vLink';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       setState(() {
         final sample = list
             .take(4)
@@ -793,7 +889,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag · vendors/add -> $vadd · danger/delete-all -> $danger · production/get-data -> $prod';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
