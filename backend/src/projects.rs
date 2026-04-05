@@ -66,6 +66,8 @@ struct ProjectsSummaryResponse {
     role_count: i64,
     art_style_count: i64,
     asset_count: i64,
+    /// Same as per-project **`GET …/stats`**: **`0`** until video rows exist in Postgres.
+    video_count: i64,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -297,6 +299,7 @@ async fn projects_summary(
         role_count: row.4,
         art_style_count: row.5,
         asset_count: row.6,
+        video_count: 0,
     }))
 }
 

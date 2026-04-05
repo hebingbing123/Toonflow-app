@@ -496,10 +496,11 @@ paths:
   /api/v1/projects/summary:
     get:
       tags: [projects]
-      summary: Aggregate project, script, storyboard, novel, role, art-style, and asset counts for the current user
+      summary: Aggregate project, script, storyboard, novel, role, art-style, asset, and video counts for the current user
       operationId: getProjectsSummaryV1
       description: |
         One round-trip totals for **`owner_user_id = JWT sub`**: rows in **`app_project`**, **`app_script`** (via owned projects), **`app_storyboard`** (via owned script trees), **`app_novel`** (via owned projects), **`app_asset`** with **`asset_type = 'role'`** (same rule as **`GET …/stats`** **`role_count`**), **`app_art_style`** (user-wide presets), and all **`app_asset`** rows (via owned projects).
+        **`video_count`** is **`0`** until video rows are modeled in Postgres (same placeholder as **`GET …/stats`**).
         Complements per-project **`GET /api/v1/projects/legacy/{legacy_id}/stats`**.
       security:
         - bearerAuth: []
@@ -3003,6 +3004,7 @@ components:
           role_count,
           art_style_count,
           asset_count,
+          video_count,
         ]
       properties:
         project_count:
@@ -3030,6 +3032,10 @@ components:
           type: integer
           format: int64
           description: Total **`app_asset`** rows across the user's projects
+        video_count:
+          type: integer
+          format: int64
+          description: Placeholder **`0`** until video rows are modeled in Postgres (aligns with **`GET …/stats`**)
 
     ProjectStatsResponse:
       type: object
