@@ -46,7 +46,7 @@ info:
 
     **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`**, **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** match legacy **`/api/assetsGenerate/*`** request bodies, then **501** **`not_implemented`** until **`app_generation_job`** + image providers are wired end-to-end.
 
-    **Production / workbench (Electron-only pipeline):** A **subset** of legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`** with validated JSON bodies, then **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). See operationIds **`postProductionGetProductionDataV1`**, **`getFlowData`**, **`saveFlowData`**, **`workbenchGenerateVideo`**, **`storyboardPollingImage`**, **`exportImage`**.
+    **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
@@ -3628,6 +3628,1155 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/production/assets/batch-generate-assets-image:
+    post:
+      tags: [production]
+      summary: Legacy `batchGenerateAssetsImage` stub
+      operationId: postProductionAssetsBatchGenerateImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`batchGenerateAssetsImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/assets/delete-assets-derivative:
+    post:
+      tags: [production]
+      summary: Legacy `deleteAssetsDireve` stub
+      operationId: postProductionAssetsDeleteDerivativeV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`deleteAssetsDireve`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/assets/get-assets-data:
+    post:
+      tags: [production]
+      summary: Legacy `getAssetsData` stub
+      operationId: postProductionAssetsGetAssetsDataV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getAssetsData`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/assets/polling-image:
+    post:
+      tags: [production]
+      summary: Legacy `assets/pollingImage` stub
+      operationId: postProductionAssetsPollingImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`assets/pollingImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/assets/update-assets-url:
+    post:
+      tags: [production]
+      summary: Legacy `updateAssetsUrl` stub
+      operationId: postProductionAssetsUpdateUrlV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`updateAssetsUrl`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/edit-image/generate-flow-image:
+    post:
+      tags: [production]
+      summary: Legacy `generateFlowImage` stub
+      operationId: postProductionEditImageGenerateFlowImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`generateFlowImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/edit-image/get-image-default-model:
+    post:
+      tags: [production]
+      summary: Legacy `getImageDefaultModle` stub
+      operationId: postProductionEditImageGetDefaultModelV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getImageDefaultModle`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/edit-image/get-image-flow:
+    post:
+      tags: [production]
+      summary: Legacy `getImageFlow` stub
+      operationId: postProductionEditImageGetFlowV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/edit-image/save-image-flow:
+    post:
+      tags: [production]
+      summary: Legacy `saveImageFlow` stub
+      operationId: postProductionEditImageSaveFlowV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`saveImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/edit-image/update-image-flow:
+    post:
+      tags: [production]
+      summary: Legacy `updateImageFlow` stub
+      operationId: postProductionEditImageUpdateFlowV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`updateImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/get-storyboard-data:
+    post:
+      tags: [production]
+      summary: Legacy `getStoryboardData (top-level)` stub
+      operationId: postProductionGetStoryboardDataV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getStoryboardData (top-level)`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/add:
+    post:
+      tags: [production]
+      summary: Legacy `addStoryboard` stub
+      operationId: postProductionStoryboardAddV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`addStoryboard`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/batch-add-info:
+    post:
+      tags: [production]
+      summary: Legacy `batchAddStoryboardInfo` stub
+      operationId: postProductionStoryboardBatchAddInfoV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`batchAddStoryboardInfo`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/batch-generate-image:
+    post:
+      tags: [production]
+      summary: Legacy `batchGenerateImage` stub
+      operationId: postProductionStoryboardBatchGenerateImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`batchGenerateImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/down-preview-image:
+    post:
+      tags: [production]
+      summary: Legacy `downPreviewImage` stub
+      operationId: postProductionStoryboardDownPreviewImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`downPreviewImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/edit-info:
+    post:
+      tags: [production]
+      summary: Legacy `editStoryboardInfo` stub
+      operationId: postProductionStoryboardEditInfoV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`editStoryboardInfo`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/get-data:
+    post:
+      tags: [production]
+      summary: Legacy `storyboard/getStoryboardData` stub
+      operationId: postProductionStoryboardGetDataV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`storyboard/getStoryboardData`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/preview-image:
+    post:
+      tags: [production]
+      summary: Legacy `previewImage` stub
+      operationId: postProductionStoryboardPreviewImageV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`previewImage`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/remove-frame:
+    post:
+      tags: [production]
+      summary: Legacy `removeFrame` stub
+      operationId: postProductionStoryboardRemoveFrameV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`removeFrame`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/storyboard/update-url:
+    post:
+      tags: [production]
+      summary: Legacy `updateStoryboardUrl` stub
+      operationId: postProductionStoryboardUpdateUrlV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`updateStoryboardUrl`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/add-track:
+    post:
+      tags: [production]
+      summary: Legacy `addTrack` stub
+      operationId: postProductionWorkbenchAddTrackV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`addTrack`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/delete-track:
+    post:
+      tags: [production]
+      summary: Legacy `deleteTrack` stub
+      operationId: postProductionWorkbenchDeleteTrackV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`deleteTrack`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/delete-video:
+    post:
+      tags: [production]
+      summary: Legacy `delVideo` stub
+      operationId: postProductionWorkbenchDeleteVideoV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`delVideo`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/generate-video-prompt:
+    post:
+      tags: [production]
+      summary: Legacy `generateVideoPrompt` stub
+      operationId: postProductionWorkbenchGenerateVideoPromptV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`generateVideoPrompt`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/get-generate-data:
+    post:
+      tags: [production]
+      summary: Legacy `getGenerateData` stub
+      operationId: postProductionWorkbenchGetGenerateDataV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getGenerateData`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/get-video-list:
+    post:
+      tags: [production]
+      summary: Legacy `getVideoList` stub
+      operationId: postProductionWorkbenchGetVideoListV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getVideoList`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/get-video-model-detail:
+    post:
+      tags: [production]
+      summary: Legacy `getVideoModelDetail` stub
+      operationId: postProductionWorkbenchGetVideoModelDetailV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`getVideoModelDetail`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/production/workbench/select-video:
+    post:
+      tags: [production]
+      summary: Legacy `selectVideo` stub
+      operationId: postProductionWorkbenchSelectVideoV1
+      description: |
+        Bearer JWT. Body must be a JSON **object** (legacy **`selectVideo`** shape not fully validated here), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+      responses:
+        "400":
+          description: Body is not a JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+
   /api/v1/scripts/export:
     post:
       tags: [scripts]
@@ -5469,6 +6618,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ProductionExportImageShotRef"
+
+    ProductionLegacyJsonStubBody:
+      type: object
+      description: |
+        Loose stub schema for remaining legacy **`/api/production/*`** routes: any JSON **object** (not `null`, array, or scalar).
+        Typed parity for **`get-production-data`**, **`get-flow-data`**, **`save-flow-data`**, **`workbench/generate-video`**, **`storyboard/polling-image`**, **`export-image`** uses dedicated schemas.
+      additionalProperties: true
 
     AboutCheckUpdateSource:
       type: string

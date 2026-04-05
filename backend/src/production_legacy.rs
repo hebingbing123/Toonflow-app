@@ -1,5 +1,6 @@
 //! Legacy **`/api/production/*`**: SQLite **`o_video`**, **`o_videoConfig`**, **`o_agentWorkData`** (production flow), OSS paths.
-//! SaaS: selected **POST** bodies match old **`validateFields`** shapes; handlers return **501** until video pipeline + storage exist.
+//! SaaS: six routes use **strict** serde bodies; all other legacy **`POST`** paths share **`post_production_legacy_json_stub`**
+//! (**JSON object** only, then **501**) until video pipeline + storage exist.
 
 use axum::{
     extract::{Json, State},
@@ -9,6 +10,7 @@ use axum::{
     Router,
 };
 use serde::Deserialize;
+use serde_json::Value;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -19,6 +21,23 @@ fn not_implemented() -> ApiError {
         "production workbench / video pipeline is not implemented; use storyboard REST and generation jobs when wired"
             .into(),
     )
+}
+
+fn require_json_object(body: &Value) -> Result<(), ApiError> {
+    if body.as_object().is_none() {
+        return Err(ApiError::BadRequest("body must be a JSON object".into()));
+    }
+    Ok(())
+}
+
+async fn post_production_legacy_json_stub(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<Value>,
+) -> Result<Response, ApiError> {
+    let _ = require_user_uuid(&state, &headers)?;
+    require_json_object(&body)?;
+    Err(not_implemented())
 }
 
 #[allow(dead_code)]
@@ -144,8 +163,39 @@ async fn post_export_image(
     Err(not_implemented())
 }
 
+const LEGACY_JSON_STUB_PATHS: &[&str] = &[
+    "/api/v1/production/assets/batch-generate-assets-image",
+    "/api/v1/production/assets/delete-assets-derivative",
+    "/api/v1/production/assets/get-assets-data",
+    "/api/v1/production/assets/polling-image",
+    "/api/v1/production/assets/update-assets-url",
+    "/api/v1/production/edit-image/generate-flow-image",
+    "/api/v1/production/edit-image/get-image-default-model",
+    "/api/v1/production/edit-image/get-image-flow",
+    "/api/v1/production/edit-image/save-image-flow",
+    "/api/v1/production/edit-image/update-image-flow",
+    "/api/v1/production/get-storyboard-data",
+    "/api/v1/production/storyboard/add",
+    "/api/v1/production/storyboard/batch-add-info",
+    "/api/v1/production/storyboard/batch-generate-image",
+    "/api/v1/production/storyboard/down-preview-image",
+    "/api/v1/production/storyboard/edit-info",
+    "/api/v1/production/storyboard/get-data",
+    "/api/v1/production/storyboard/preview-image",
+    "/api/v1/production/storyboard/remove-frame",
+    "/api/v1/production/storyboard/update-url",
+    "/api/v1/production/workbench/add-track",
+    "/api/v1/production/workbench/delete-track",
+    "/api/v1/production/workbench/delete-video",
+    "/api/v1/production/workbench/generate-video-prompt",
+    "/api/v1/production/workbench/get-generate-data",
+    "/api/v1/production/workbench/get-video-list",
+    "/api/v1/production/workbench/get-video-model-detail",
+    "/api/v1/production/workbench/select-video",
+];
+
 pub fn router() -> Router<AppState> {
-    Router::new()
+    let mut r = Router::new()
         .route(
             "/api/v1/production/get-production-data",
             post(post_get_production_data),
@@ -163,5 +213,9 @@ pub fn router() -> Router<AppState> {
             "/api/v1/production/storyboard/polling-image",
             post(post_storyboard_polling_image),
         )
-        .route("/api/v1/production/export-image", post(post_export_image))
+        .route("/api/v1/production/export-image", post(post_export_image));
+    for path in LEGACY_JSON_STUB_PATHS {
+        r = r.route(path, post(post_production_legacy_json_stub));
+    }
+    r
 }
