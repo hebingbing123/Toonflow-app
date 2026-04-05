@@ -487,6 +487,33 @@ Future<String> postMemoryConfigV1(
   return map['message'] as String;
 }
 
+/// `POST /api/v1/settings/memory-config/clear-agent-memories` — OpenAPI `postSettingsClearAgentMemoriesV1` (often **503** without DB).
+Future<int> postSettingsClearAgentMemoriesV1(
+  String accessToken, {
+  required int projectId,
+  required String agentType,
+  int? episodesId,
+}) async {
+  final uri =
+      Uri.parse('$kApiBaseUrl/api/v1/settings/memory-config/clear-agent-memories');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'agentType': agentType,
+    'episodesId': ?episodesId,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({

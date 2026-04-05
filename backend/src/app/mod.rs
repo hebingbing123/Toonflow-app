@@ -1500,6 +1500,30 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_memory_config_clear_agent_memories_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/settings/memory-config/clear-agent-memories",
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_memory_config_clear_agent_memories_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/memory-config/clear-agent-memories",
+            &token,
+            r#"{"projectId":1,"agentType":"scriptAgent"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn settings_about_check_update_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/settings/about/check-update",

@@ -4,7 +4,7 @@
 use axum::{extract::State, http::HeaderMap, routing::post, Json, Router};
 use chrono::{TimeZone, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool};
+use sqlx::{FromRow, PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -94,8 +94,8 @@ struct AppendMemoryResponse {
 }
 
 #[derive(Serialize)]
-struct ClearMemoryResponse {
-    ok: bool,
+pub(crate) struct ClearMemoryResponse {
+    pub(crate) ok: bool,
 }
 
 pub fn router() -> Router<AppState> {
@@ -105,7 +105,7 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/agents/memory/append", post(append_memory))
 }
 
-fn parse_agent_type(raw: &str) -> Result<&'static str, ApiError> {
+pub(crate) fn parse_agent_type(raw: &str) -> Result<&'static str, ApiError> {
     match raw {
         "scriptAgent" => Ok("scriptAgent"),
         "productionAgent" => Ok("productionAgent"),
@@ -122,7 +122,7 @@ fn normalize_role(role: Option<String>) -> String {
     }
 }
 
-async fn ensure_project_owned(
+pub(crate) async fn ensure_project_owned(
     pool: &PgPool,
     uid: Uuid,
     legacy_project_id: i32,
@@ -143,6 +143,33 @@ async fn ensure_project_owned(
     if !ok {
         return Err(ApiError::NotFound);
     }
+    Ok(())
+}
+
+/// Same **`DELETE`** scope as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
+pub(crate) async fn delete_all_agent_memory_rows(
+    tx: &mut Transaction<'_, Postgres>,
+    uid: Uuid,
+    project_id: i32,
+    agent_type: &'static str,
+    episodes_id: Option<i32>,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND legacy_project_id = $2
+          AND agent_type = $3
+          AND episodes_id IS NOT DISTINCT FROM $4
+        "#,
+    )
+    .bind(uid)
+    .bind(project_id)
+    .bind(agent_type)
+    .bind(episodes_id)
+    .execute(&mut **tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(())
 }
 
@@ -229,22 +256,14 @@ async fn clear_memory(
 
     match body.clear_type.as_str() {
         "all" => {
-            sqlx::query(
-                r#"
-                DELETE FROM app_agent_memory
-                WHERE owner_user_id = $1
-                  AND legacy_project_id = $2
-                  AND agent_type = $3
-                  AND episodes_id IS NOT DISTINCT FROM $4
-                "#,
+            delete_all_agent_memory_rows(
+                &mut tx,
+                uid,
+                body.project_id,
+                agent_type,
+                body.episodes_id,
             )
-            .bind(uid)
-            .bind(body.project_id)
-            .bind(agent_type)
-            .bind(body.episodes_id)
-            .execute(&mut *tx)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            .await?;
         }
         "message" => {
             sqlx::query(

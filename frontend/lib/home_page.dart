@@ -435,9 +435,24 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
+      final line =
+          'GET ragLimit=${orig.ragLimit} · POST -> "$msg" · GET ragLimit=${mid.ragLimit} · restored';
+      final clr = await postSettingsClearAgentMemoriesV1(
+        token,
+        projectId: 1,
+        agentType: 'scriptAgent',
+      );
+      if (!mounted) return;
+      if (clr != 503) {
+        setState(() {
+          _error =
+              'POST clear-agent-memories expected 503 (no DB), got $clr';
+          _loadingMemoryConfigProbe = false;
+        });
+        return;
+      }
       setState(() {
-        _memoryConfigProbeBody =
-            'GET ragLimit=${orig.ragLimit} · POST -> "$msg" · GET ragLimit=${mid.ragLimit} · restored';
+        _memoryConfigProbeBody = '$line · clear-agent-memories -> $clr';
         _loadingMemoryConfigProbe = false;
       });
     } on RustApiException catch (e) {
@@ -3874,7 +3889,7 @@ class _HomePageState extends State<HomePage> {
                 child: Text(
                   _loadingMemoryConfigProbe
                       ? '请求中…'
-                      : 'GET+POST /api/v1/settings/memory-config',
+                      : 'memory-config GET+POST + clear-agent-memories',
                 ),
               ),
               if (_memoryConfigProbeBody != null) ...[

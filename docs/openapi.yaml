@@ -32,6 +32,7 @@ info:
     **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** reads **`TOONFLOW_SWITCH_AI_DEV_TOOL`** (**`"1"`** on, else **`"0"`**), parity with legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** then returns **501** **`not_implemented`** (no per-user SQLite **`o_setting`** persistence).
 
     **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values are held in server memory per process (not Postgres); restart resets to defaults.
+    **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
 
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
@@ -386,6 +387,54 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/memory-config/clear-agent-memories:
+    post:
+      tags: [settings]
+      summary: Clear all agent memory for a project (legacy delAllMemory scope)
+      operationId: postSettingsClearAgentMemoriesV1
+      description: |
+        Bearer JWT. Deletes all **`app_agent_memory`** rows for **`owner_user_id = JWT sub`**, **`legacy_project_id`**, **`agent_type`**, and optional **`episodes_id`** — identical to **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
+        Legacy **`POST /api/setting/memoryConfig/delAllMemory`** wiped the entire SQLite **`memories`** table with no body; the Rust API requires **`projectId`** and **`agentType`** for multi-tenant safety.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsClearAgentMemoriesBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearAgentMemoryResponse"
+        "400":
+          description: Invalid **`agentType`** or bad JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned by the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
           content:
             application/json:
               schema:
@@ -3849,6 +3898,24 @@ components:
           type: string
           description: Legacy sureMemory success text
           example: 保存设置成功
+
+    SettingsClearAgentMemoriesBody:
+      type: object
+      required: [projectId, agentType]
+      additionalProperties: false
+      description: |
+        Legacy **`delAllMemory`** had no body and cleared all SQLite **`memories`**; Rust requires project + agent scope (see **`postSettingsClearAgentMemoriesV1`**).
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        agentType:
+          type: string
+          enum: [scriptAgent, productionAgent]
+        episodesId:
+          type: integer
+          format: int32
+          nullable: true
 
     AboutCheckUpdateSource:
       type: string
