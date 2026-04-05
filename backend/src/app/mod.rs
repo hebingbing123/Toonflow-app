@@ -547,8 +547,23 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn project_assets_list_query_unauthorized_without_bearer() {
+        let (status, v) =
+            get_json("/api/v1/projects/legacy/1/assets?script_legacy_id=1&page=1&limit=10").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn jobs_list_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/jobs").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn jobs_list_filtered_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/jobs?kind=flutter.probe&status=queued").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
     }
@@ -733,6 +748,14 @@ mod contract_smoke_tests {
     #[tokio::test]
     async fn project_novels_list_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/projects/legacy/1/novels").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_novels_list_search_unauthorized_without_bearer() {
+        let (status, v) =
+            get_json("/api/v1/projects/legacy/1/novels?search=smoke&page=1&limit=10").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
     }
