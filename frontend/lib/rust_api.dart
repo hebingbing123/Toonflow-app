@@ -93,12 +93,14 @@ class ProjectStats {
     required this.scriptCount,
     required this.storyboardCount,
     required this.roleCount,
+    required this.novelCount,
     required this.videoCount,
   });
 
   final int scriptCount;
   final int storyboardCount;
   final int roleCount;
+  final int novelCount;
   final int videoCount;
 
   factory ProjectStats.fromJson(Map<String, dynamic> json) {
@@ -107,6 +109,9 @@ class ProjectStats {
       scriptCount: n('script_count'),
       storyboardCount: n('storyboard_count'),
       roleCount: n('role_count'),
+      novelCount: json['novel_count'] != null
+          ? (json['novel_count'] as num).toInt()
+          : 0,
       videoCount: n('video_count'),
     );
   }

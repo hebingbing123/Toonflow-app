@@ -538,6 +538,9 @@ mod pg_contract_tests {
         assert_eq!(status, StatusCode::OK, "stats={stats}");
         assert_eq!(stats["script_count"], 0);
         assert_eq!(stats["storyboard_count"], 0);
+        assert_eq!(stats["role_count"], 0);
+        assert_eq!(stats["novel_count"], 0);
+        assert_eq!(stats["video_count"], 0);
 
         let res = app
             .clone()
@@ -622,6 +625,25 @@ mod pg_contract_tests {
             i64::from(asset_leg)
         );
         assert_eq!(one_asset["name"].as_str(), Some("pg_contract_role_asset"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, stats_mid) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "stats_mid={stats_mid}");
+        assert_eq!(stats_mid["script_count"], 1);
+        assert_eq!(stats_mid["storyboard_count"], 0);
+        assert_eq!(stats_mid["role_count"], 1);
+        assert_eq!(stats_mid["novel_count"], 0);
 
         let res = app
             .clone()
@@ -784,6 +806,27 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, stats_with_novel) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "stats_with_novel={stats_with_novel}"
+        );
+        assert_eq!(stats_with_novel["novel_count"], 1);
+        assert_eq!(stats_with_novel["role_count"], 1);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .uri(format!(
                         "/api/v1/projects/legacy/{legacy_id}/novels?search=pg_contract&page=1&limit=10"
                     ))
@@ -856,6 +899,23 @@ mod pg_contract_tests {
             .unwrap();
         let (status, del_novel) = read_json_response(res).await;
         assert_eq!(status, StatusCode::NO_CONTENT, "del_novel={del_novel}");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, stats_no_novel) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "stats_no_novel={stats_no_novel}");
+        assert_eq!(stats_no_novel["novel_count"], 0);
+        assert_eq!(stats_no_novel["role_count"], 1);
 
         let res = app
             .clone()

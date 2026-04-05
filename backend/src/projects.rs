@@ -45,12 +45,13 @@ struct ProjectDetailResponse {
 }
 
 /// Per-project counts for dashboards; aligns with legacy **`generalStatistics`** shape.
-/// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`video_count`** remains **`0`** until video rows exist in Postgres.
+/// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
 #[derive(Serialize)]
 struct ProjectStatsResponse {
     script_count: i64,
     storyboard_count: i64,
     role_count: i64,
+    novel_count: i64,
     video_count: i64,
 }
 
@@ -388,10 +389,23 @@ async fn project_stats_by_legacy(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    let novel_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_novel
+        WHERE project_id = $1
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectStatsResponse {
         script_count,
         storyboard_count,
         role_count,
+        novel_count,
         video_count: 0,
     }))
 }

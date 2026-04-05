@@ -1149,8 +1149,8 @@ class _HomePageState extends State<HomePage> {
                       if (statsRef[0] != null)
                         Text(
                           'GET …/stats：剧本 ${statsRef[0]!.scriptCount} · 分镜 '
-                          '${statsRef[0]!.storyboardCount} · 角色/视频 '
-                          '${statsRef[0]!.roleCount}/${statsRef[0]!.videoCount}（占位）',
+                          '${statsRef[0]!.storyboardCount} · 小说 ${statsRef[0]!.novelCount} · 角色/视频 '
+                          '${statsRef[0]!.roleCount}/${statsRef[0]!.videoCount}（视频占位）',
                           style: Theme.of(ctx).textTheme.bodySmall,
                         )
                       else

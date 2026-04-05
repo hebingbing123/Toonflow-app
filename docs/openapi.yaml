@@ -733,6 +733,7 @@ paths:
       description: |
         Bearer JWT. Resolves **`app_project`** by **`legacy_id`** and owner; returns **`app_script`** / **`app_storyboard`** counts.
         **`role_count`** is the number of **`app_asset`** rows with **`asset_type = 'role'`** for the project.
+        **`novel_count`** is the number of **`app_novel`** rows for the project.
         **`video_count`** remains **`0`** until video rows are modeled in Postgres (legacy **`o_video`**).
       security:
         - bearerAuth: []
@@ -2768,7 +2769,7 @@ components:
     ProjectStatsResponse:
       type: object
       required:
-        [script_count, storyboard_count, role_count, video_count]
+        [script_count, storyboard_count, role_count, novel_count, video_count]
       description: |
         Field names align with legacy **`generalStatistics`** (`roleCount`, etc.) via snake_case JSON.
       properties:
@@ -2782,6 +2783,10 @@ components:
           type: integer
           format: int64
           description: Count of **`app_asset`** with **`asset_type = 'role'`** for the project
+        novel_count:
+          type: integer
+          format: int64
+          description: Count of **`app_novel`** rows for the project
         video_count:
           type: integer
           format: int64

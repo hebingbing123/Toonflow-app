@@ -43,7 +43,7 @@ cargo run
 
 全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 当前用户跨所有项目的 **`app_project`** / **`app_script`** / **`app_storyboard`** / **`app_asset`** 总行数（单次查询）。
 
-项目统计：**`GET /api/v1/projects/legacy/{legacy_id}/stats`**（Bearer）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数；**`role_count`** / **`video_count`** 暂为 **`0`**（对齐旧 **`generalStatistics`** 字段名语义，尚无 PG 版 **`o_assets`** / **`o_video`**）。
+项目统计：**`GET /api/v1/projects/legacy/{legacy_id}/stats`**（Bearer）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
 新建剧本：**`POST /api/v1/projects/legacy/{project_legacy_id}/scripts`**（Bearer，JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`legacy_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
 
