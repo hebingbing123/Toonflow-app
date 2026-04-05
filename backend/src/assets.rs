@@ -3,7 +3,7 @@
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
-    routing::{get, patch, post, put},
+    routing::{get, post, put},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -116,7 +116,7 @@ struct PatchAssetBody {
     asset_type: Option<Value>,
 }
 
-/// One **`app_asset_image`** row returned after create (**`POST …/images`**).
+/// One **`app_asset_image`** row returned after **`GET`/`POST …/images`** or **`PATCH …/images/{image_id}`**.
 #[derive(Debug, FromRow, Serialize)]
 pub struct AssetImageRow {
     pub id: Uuid,
@@ -167,7 +167,9 @@ pub fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}",
-            patch(patch_project_asset_image).delete(delete_project_asset_image),
+            get(get_project_asset_image)
+                .patch(patch_project_asset_image)
+                .delete(delete_project_asset_image),
         )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images",
@@ -881,6 +883,41 @@ async fn list_project_asset_images(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(ListAssetImagesResponse { items }))
+}
+
+async fn get_project_asset_image(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id, image_id)): Path<(i32, i32, Uuid)>,
+    headers: HeaderMap,
+) -> Result<Json<AssetImageRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+
+    let row = sqlx::query_as::<_, AssetImageRow>(
+        r#"
+        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        FROM app_asset_image
+        WHERE id = $1 AND asset_id = $2
+        "#,
+    )
+    .bind(image_id)
+    .bind(asset_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(row))
 }
 
 async fn create_project_asset_image(

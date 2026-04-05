@@ -1362,6 +1362,63 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}:
+    get:
+      tags: [assets]
+      summary: Get one asset image row by UUID
+      operationId: getProjectAssetImageByLegacyIdsV1
+      description: "Returns AssetImageRow when image_id belongs to the asset under the project."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: image_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetImageRow"
+        "400":
+          description: Invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project, asset, or image not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
     patch:
       tags: [assets]
       summary: Update an asset image row
@@ -3738,7 +3795,7 @@ components:
     AssetImageRow:
       type: object
       required: [id, asset_id, sort_index]
-      description: Full **`app_asset_image`** row subset after **`POST …/images`** or **`PATCH …/images/{image_id}`**.
+      description: Full **`app_asset_image`** row subset after **`GET`/`POST …/images`** or **`PATCH …/images/{image_id}`**.
       properties:
         id:
           type: string

@@ -2033,6 +2033,32 @@ Future<ListAssetImagesResponse> fetchProjectAssetImagesByLegacyIds(
   return ListAssetImagesResponse.fromJson(map);
 }
 
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `getProjectAssetImageByLegacyIdsV1`.
+Future<AssetImageRow> fetchProjectAssetImageByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+  String imageId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
+  );
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return AssetImageRow.fromJson(map);
+}
+
 /// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.
 Future<AssetImageRow> createProjectAssetImage(
   String accessToken,

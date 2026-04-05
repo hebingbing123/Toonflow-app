@@ -821,6 +821,40 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn asset_image_get_unauthorized_without_bearer() {
+        let (status, v) = get_json(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn asset_image_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/00000000-0000-0000-0000-000000000000",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn asset_image_get_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer(
+            "/api/v1/projects/legacy/0/assets/1/images/00000000-0000-0000-0000-000000000000",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn asset_image_post_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -2140,6 +2174,30 @@ mod pg_contract_tests {
             lim[0]["legacy_image_id"].is_null(),
             "API-created image has no legacy_image_id"
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, one_img) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "one_img={one_img}");
+        assert_eq!(one_img["id"].as_str(), Some(img_uuid));
+        assert_eq!(
+            one_img["file_path"].as_str(),
+            Some("pg_contract/corner_hist.png")
+        );
+        assert_eq!(one_img["state"].as_str(), Some("已完成"));
+        assert!(one_img["legacy_image_id"].is_null());
 
         let res = app
             .clone()
