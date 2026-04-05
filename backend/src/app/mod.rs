@@ -120,6 +120,19 @@ mod contract_smoke_tests {
         .await
     }
 
+    async fn post_json(uri: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
     async fn patch_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
         oneshot_json(
             Request::builder()
@@ -418,6 +431,13 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn projects_summary_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/summary").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn art_styles_list_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/art-styles", &token).await;
@@ -471,6 +491,17 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn art_style_extract_prompt_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/art-styles/extract-prompt",
+            r#"{"images":["https://example.com/x.png"]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
     }
 
     #[tokio::test]
