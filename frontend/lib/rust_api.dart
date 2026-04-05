@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -698,6 +699,79 @@ Future<void> deleteScriptByLegacyId(String accessToken, int legacyId) async {
   if (res.statusCode != 204) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
+}
+
+/// `POST /api/v1/scripts/export` — **`application/zip`** body. See `exportScriptsZipV1`.
+Future<Uint8List> exportScriptsZip(
+  String accessToken,
+  List<int> legacyIds,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/export');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'legacy_ids': legacyIds}),
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return res.bodyBytes;
+}
+
+/// Row from **`POST /api/v1/scripts/extract-state/poll`** — OpenAPI **`ScriptExtractStatePollRow`**.
+class ScriptExtractStatePollRow {
+  const ScriptExtractStatePollRow({
+    required this.legacyId,
+    this.extractState,
+    this.errorReason,
+  });
+
+  final int legacyId;
+  final int? extractState;
+  final String? errorReason;
+
+  factory ScriptExtractStatePollRow.fromJson(Map<String, dynamic> json) {
+    return ScriptExtractStatePollRow(
+      legacyId: (json['legacy_id'] as num).toInt(),
+      extractState: json['extract_state'] == null
+          ? null
+          : (json['extract_state'] as num).toInt(),
+      errorReason: json['error_reason'] as String?,
+    );
+  }
+}
+
+/// `POST /api/v1/scripts/extract-state/poll` — scripts with **`extract_state` ≠ 0**. See `pollScriptExtractStateV1`.
+Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
+  String accessToken,
+  List<int> legacyIds,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-state/poll');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'legacy_ids': legacyIds}),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map(
+        (e) =>
+            ScriptExtractStatePollRow.fromJson(e as Map<String, dynamic>),
+      )
+      .toList();
 }
 
 class StoryboardRow {

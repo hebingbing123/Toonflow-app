@@ -1066,6 +1066,7 @@ class _HomePageState extends State<HomePage> {
       final assetsLoading = <bool>[false];
       final assetsScriptFilterLoading = <bool>[false];
       final assetsBusy = <bool>[false];
+      final scriptProbeBusy = <bool>[false];
       await showDialog<void>(
         context: context,
         builder: (ctx) {
@@ -1468,6 +1469,108 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 12),
                       Text('${scriptList.length} script(s)'),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 0,
+                        children: [
+                          TextButton(
+                            onPressed: scriptProbeBusy[0] ||
+                                    scriptList.isEmpty ||
+                                    saving[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    try {
+                                      final ids = scriptList
+                                          .map((s) => s.legacyId)
+                                          .toList();
+                                      final zip = await exportScriptsZip(
+                                        token,
+                                        ids,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/scripts/export：${zip.length} bytes · '
+                                            '${ids.length} legacy id(s)',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => scriptProbeBusy[0] = false,
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: Text(
+                              scriptProbeBusy[0]
+                                  ? 'export…'
+                                  : 'POST scripts/export (ZIP)',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: scriptProbeBusy[0] ||
+                                    scriptList.isEmpty ||
+                                    saving[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    try {
+                                      final ids = scriptList
+                                          .map((s) => s.legacyId)
+                                          .toList();
+                                      final rows = await pollScriptExtractState(
+                                        token,
+                                        ids,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      final sample = rows.isEmpty
+                                          ? '（empty：均在提取中或 idle）'
+                                          : rows
+                                              .take(3)
+                                              .map(
+                                                (r) =>
+                                                    '#${r.legacyId} state=${r.extractState}',
+                                              )
+                                              .join('; ');
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/extract-state/poll：${rows.length} row(s) $sample',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => scriptProbeBusy[0] = false,
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: Text(
+                              scriptProbeBusy[0]
+                                  ? 'poll…'
+                                  : 'POST extract-state/poll',
+                            ),
+                          ),
+                        ],
+                      ),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
