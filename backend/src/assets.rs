@@ -124,6 +124,8 @@ pub struct AssetImageRow {
     pub sort_index: i32,
     pub file_path: Option<String>,
     pub state: Option<String>,
+    /// SQLite **`o_image.id`** when the row was inserted by **`promote_legacy_from_staging`**; **`NULL`** for API-created rows.
+    pub legacy_image_id: Option<i32>,
 }
 
 #[derive(Debug, Serialize)]
@@ -484,7 +486,8 @@ async fn list_corner_scape_assets(
                   'id', i.id,
                   'file_path', i.file_path,
                   'state', i.state,
-                  'sort_index', i.sort_index
+                  'sort_index', i.sort_index,
+                  'legacy_image_id', i.legacy_image_id
                 )
                 ORDER BY i.sort_index ASC, i.created_at ASC
               )
@@ -866,7 +869,7 @@ async fn list_project_asset_images(
 
     let items = sqlx::query_as::<_, AssetImageRow>(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state
+        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
         FROM app_asset_image
         WHERE asset_id = $1
         ORDER BY sort_index ASC, created_at ASC
@@ -918,7 +921,7 @@ async fn create_project_asset_image(
         r#"
         INSERT INTO app_asset_image (asset_id, sort_index, file_path, state)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, asset_id, sort_index, file_path, state
+        RETURNING id, asset_id, sort_index, file_path, state, legacy_image_id
         "#,
     )
     .bind(asset_id)
@@ -967,7 +970,7 @@ async fn patch_project_asset_image(
 
     let current = sqlx::query_as::<_, AssetImageRow>(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state
+        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
         FROM app_asset_image
         WHERE id = $1 AND asset_id = $2
         "#,
@@ -1007,7 +1010,7 @@ async fn patch_project_asset_image(
             sort_index = $3,
             updated_at = NOW()
         WHERE id = $4 AND asset_id = $5
-        RETURNING id, asset_id, sort_index, file_path, state
+        RETURNING id, asset_id, sort_index, file_path, state, legacy_image_id
         "#,
     )
     .bind(new_file)

@@ -2136,6 +2136,10 @@ mod pg_contract_tests {
         let lim = list_img["items"].as_array().expect("image list items");
         assert_eq!(lim.len(), 1);
         assert_eq!(lim[0]["id"].as_str(), Some(img_uuid));
+        assert!(
+            lim[0]["legacy_image_id"].is_null(),
+            "API-created image has no legacy_image_id"
+        );
 
         let res = app
             .clone()
@@ -3070,6 +3074,10 @@ mod pg_contract_tests {
             Some("/promo/history_corner.png")
         );
         assert_eq!(hist[0]["state"].as_str(), Some("已完成"));
+        assert_eq!(
+            hist[0]["legacy_image_id"].as_i64(),
+            Some(i64::from(PROMO_IMAGE_LEG))
+        );
 
         let res = app
             .clone()

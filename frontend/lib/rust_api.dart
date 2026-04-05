@@ -1922,6 +1922,7 @@ class AssetImageRow {
     required this.sortIndex,
     this.filePath,
     this.state,
+    this.legacyImageId,
   });
 
   final String id;
@@ -1929,6 +1930,7 @@ class AssetImageRow {
   final int sortIndex;
   final String? filePath;
   final String? state;
+  final int? legacyImageId;
 
   factory AssetImageRow.fromJson(Map<String, dynamic> json) {
     return AssetImageRow(
@@ -1937,6 +1939,7 @@ class AssetImageRow {
       sortIndex: (json['sort_index'] as num).toInt(),
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
+      legacyImageId: (json['legacy_image_id'] as num?)?.toInt(),
     );
   }
 }

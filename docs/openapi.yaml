@@ -3702,6 +3702,11 @@ components:
         sort_index:
           type: integer
           format: int32
+        legacy_image_id:
+          type: integer
+          format: int32
+          nullable: true
+          description: "SQLite o_image.id when promoted; omitted or null for API-only rows."
 
     CreateAssetImageBody:
       type: object
@@ -3750,6 +3755,11 @@ components:
         state:
           type: string
           nullable: true
+        legacy_image_id:
+          type: integer
+          format: int32
+          nullable: true
+          description: "SQLite o_image.id when promoted; null for API-created rows."
 
     PatchAssetImageBody:
       type: object
