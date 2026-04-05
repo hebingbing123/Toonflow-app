@@ -35,7 +35,7 @@ cargo run
 2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
 3. `cargo run --bin toonflow-legacy-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
 
-填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`** / **`app_script_asset`** / **`app_art_style`** / **`app_user_prompt`**（**`o_artStyle`**、**`o_prompt`**；**`owner_user_id`** 取映射表中 **`legacy_user_id` 最小** 的一行；返回值八列含 **`prompts_upserted`** 等）。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
+填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`** / **`app_script_asset`** / **`app_art_style`** / **`app_user_prompt`** / **`app_asset_image`**（**`o_image`**；**`owner_user_id`** 取映射表中 **`legacy_user_id` 最小** 的一行；返回值九列含 **`asset_images_upserted`** 等）。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
 
 新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`legacy_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`** 分配，避免并发撞号。
 

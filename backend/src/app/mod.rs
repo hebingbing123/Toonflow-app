@@ -1777,6 +1777,7 @@ mod pg_contract_tests {
     const PROMO_SCRIPT_LEG: i32 = 5_010_002;
     const PROMO_ASSET_LEG: i32 = 5_010_003;
     const PROMO_ART_STYLE_LEG: i32 = 5_010_004;
+    const PROMO_IMAGE_LEG: i32 = 5_010_005;
 
     async fn cleanup_promote_staging_fixtures(pool: &PgPool) {
         let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
@@ -1798,7 +1799,7 @@ mod pg_contract_tests {
             .await;
         let _ = sqlx::query(
             r#"DELETE FROM legacy_staging.snapshot
-               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style','pg_promote_prompt')"#,
+               WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style','pg_promote_prompt','pg_promote_image')"#,
         )
         .execute(pool)
         .await;
@@ -2733,6 +2734,21 @@ mod pg_contract_tests {
         .await
         .expect("staging o_prompt");
 
+        let o_image_row = serde_json::json!({
+            "id": PROMO_IMAGE_LEG,
+            "assetsId": PROMO_ASSET_LEG,
+            "filePath": "/promo/history_corner.png",
+            "state": "已完成",
+        });
+        sqlx::query(
+            r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+               VALUES ('o_image', 'pg_promote_image', $1)"#,
+        )
+        .bind(Json(o_image_row))
+        .execute(&pool)
+        .await
+        .expect("staging o_image");
+
         sqlx::query("SELECT 1 FROM public.promote_legacy_from_staging() LIMIT 1")
             .execute(&pool)
             .await
@@ -2759,6 +2775,15 @@ mod pg_contract_tests {
         .await
         .expect("count script_asset link");
         assert_eq!(link_rows, 1, "expected one promoted app_script_asset row");
+
+        let promoted_img: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*)::bigint FROM public.app_asset_image WHERE legacy_image_id = $1",
+        )
+        .bind(PROMO_IMAGE_LEG)
+        .fetch_one(&pool)
+        .await
+        .expect("count app_asset_image by legacy_image_id");
+        assert_eq!(promoted_img, 1, "expected one promoted app_asset_image row");
 
         let style_rows: i64 = sqlx::query_scalar(
             "SELECT COUNT(*)::bigint FROM public.app_art_style WHERE legacy_id = $1",
@@ -2840,6 +2865,38 @@ mod pg_contract_tests {
             linked["items"][0]["legacy_id"].as_i64(),
             Some(i64::from(PROMO_ASSET_LEG))
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/corner-scape",
+                        PROMO_PROJECT_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "corner={corner}");
+        let citems = corner["items"].as_array().expect("corner items");
+        let hero = citems
+            .iter()
+            .find(|row| row["legacy_id"].as_i64() == Some(i64::from(PROMO_ASSET_LEG)))
+            .expect("promoted asset in corner-scape");
+        let hist = hero["history_images"].as_array().expect("history_images");
+        assert_eq!(hist.len(), 1);
+        assert_eq!(
+            hist[0]["file_path"].as_str(),
+            Some("/promo/history_corner.png")
+        );
+        assert_eq!(hist[0]["state"].as_str(), Some("已完成"));
 
         let res = app
             .clone()
