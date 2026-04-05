@@ -27,6 +27,8 @@ info:
 
     **Visual manual:** **`GET /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (legacy **`POST /api/project/getVisualManual`** parity); **`image`** paths are relative under **`data/skills`** (no OSS signing).
 
+    **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`** for **`GET /api/v1/models/detail`**. Optional env **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** (composite id) when it matches the catalog.
+
 servers:
   - url: http://127.0.0.1:8666
     description: Local dev (default `PORT`; override with env)
@@ -436,6 +438,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/models/text-default:
+    get:
+      tags: [models]
+      summary: Default text model id (legacy getTextModel stub parity)
+      operationId: getTextModelDefaultV1
+      description: |
+        Bearer JWT. Legacy **`POST /api/setting/getTextModel`** returned envelope **`data`** **`"123"`** (unused stub).
+        This route keeps **`legacy_placeholder`** **`"123"`** and adds **`default_model_id`** — the first **`type: text`** model in **`models_catalog.json`** walk order, unless **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** is set to a composite id that exists in **`GET /api/v1/models/detail`**.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TextModelDefaultResponse"
         "401":
           description: Missing or invalid Bearer token
           content:
@@ -3476,6 +3508,19 @@ components:
         type:
           type: string
           enum: [text, image, video]
+
+    TextModelDefaultResponse:
+      type: object
+      required: [legacy_placeholder, default_model_id]
+      properties:
+        legacy_placeholder:
+          type: string
+          description: Same as legacy **`getTextModel`** **`data`** field (stub).
+          example: "123"
+        default_model_id:
+          type: string
+          description: Composite id for **`GET /api/v1/models/detail?model_id=`**
+          example: "1:gpt-4o-mini"
 
     ReadyResponse:
       type: object

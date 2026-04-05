@@ -658,6 +658,40 @@ Future<ModelDetailResponse> fetchModelDetail(
   return ModelDetailResponse.fromJson(map);
 }
 
+/// OpenAPI **`TextModelDefaultResponse`** — legacy **`getTextModel`** stub + default composite id.
+class TextModelDefaultV1 {
+  const TextModelDefaultV1({
+    required this.legacyPlaceholder,
+    required this.defaultModelId,
+  });
+
+  final String legacyPlaceholder;
+  final String defaultModelId;
+
+  factory TextModelDefaultV1.fromJson(Map<String, dynamic> json) {
+    return TextModelDefaultV1(
+      legacyPlaceholder: json['legacy_placeholder'] as String,
+      defaultModelId: json['default_model_id'] as String,
+    );
+  }
+}
+
+/// `GET /api/v1/models/text-default` — OpenAPI `getTextModelDefaultV1`.
+Future<TextModelDefaultV1> fetchTextModelDefaultV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models/text-default');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return TextModelDefaultV1.fromJson(map);
+}
+
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
 Future<List<dynamic>> queryAgentMemory(
   String accessToken, {

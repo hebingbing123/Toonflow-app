@@ -126,6 +126,49 @@ fn lookup_detail(model_id: &str) -> Option<ModelDetailResponse> {
     })
 }
 
+/// First **`type: text`** model in [`CATALOG`] walk order (vendor id ascending, model order as in JSON).
+fn first_text_model_composite_id() -> String {
+    for v in &CATALOG.vendors {
+        for m in &v.models {
+            if m.kind == "text" {
+                return format!("{}:{}", v.id, m.model_name);
+            }
+        }
+    }
+    "1:gpt-4o-mini".into()
+}
+
+/// Default text model id for **`GET /api/v1/models/text-default`**. Override with **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`**
+/// (must match a catalog entry for **`GET /api/v1/models/detail`**).
+fn default_text_model_composite_id() -> String {
+    if let Ok(raw) = std::env::var("TOONFLOW_DEFAULT_TEXT_MODEL_ID") {
+        let id = raw.trim();
+        if !id.is_empty() && lookup_detail(id).is_some() {
+            return id.to_string();
+        }
+    }
+    first_text_model_composite_id()
+}
+
+#[derive(Debug, Serialize)]
+struct TextModelDefaultResponse {
+    /// Legacy **`POST /api/setting/getTextModel`** returned this string as envelope **`data`** (stub).
+    legacy_placeholder: &'static str,
+    /// Composite id for **`GET /api/v1/models/detail?model_id=`**.
+    default_model_id: String,
+}
+
+async fn text_model_default(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<TextModelDefaultResponse>, ApiError> {
+    let _user = require_user_uuid(&state, &headers)?;
+    Ok(Json(TextModelDefaultResponse {
+        legacy_placeholder: "123",
+        default_model_id: default_text_model_composite_id(),
+    }))
+}
+
 async fn list_models(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -153,6 +196,7 @@ async fn model_detail(
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/models", get(list_models))
+        .route("/api/v1/models/text-default", get(text_model_default))
         .route("/api/v1/models/detail", get(model_detail))
 }
 
@@ -174,5 +218,10 @@ mod tests {
         let d = lookup_detail("1:gpt-4o-mini").expect("detail");
         assert_eq!(d.model_name, "gpt-4o-mini");
         assert_eq!(d.kind, "text");
+    }
+
+    #[test]
+    fn first_text_model_is_gpt4o_mini() {
+        assert_eq!(super::first_text_model_composite_id(), "1:gpt-4o-mini");
     }
 }

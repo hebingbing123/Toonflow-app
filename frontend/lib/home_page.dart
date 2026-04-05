@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
   String? _modelsCatalogBody;
+  String? _textModelDefaultBody;
   String? _modelDetailBody;
   String? _agentMemoryBody;
   String? _error;
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
   bool _loadingModelsCatalog = false;
+  bool _loadingTextModelDefault = false;
   bool _loadingModelDetail = false;
   bool _loadingAgentMemory = false;
   bool _loadingWs = false;
@@ -492,6 +494,37 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingModelsCatalog = false;
+      });
+    }
+  }
+
+  Future<void> _callTextModelDefault() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingTextModelDefault = true;
+      _error = null;
+      _textModelDefaultBody = null;
+    });
+    try {
+      final d = await fetchTextModelDefaultV1(token);
+      if (!mounted) return;
+      setState(() {
+        _textModelDefaultBody =
+            'legacy=${d.legacyPlaceholder} · default_model_id=${d.defaultModelId}';
+        _loadingTextModelDefault = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingTextModelDefault = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingTextModelDefault = false;
       });
     }
   }
@@ -3691,6 +3724,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FilledButton.tonal(
+                    onPressed: _loadingTextModelDefault ? null : _callTextModelDefault,
+                    child: Text(
+                      _loadingTextModelDefault
+                          ? '请求中…'
+                          : 'GET /api/v1/models/text-default',
+                    ),
+                  ),
+                  FilledButton.tonal(
                     onPressed: _loadingModelDetail ? null : _callModelDetail,
                     child: Text(
                       _loadingModelDetail
@@ -3703,6 +3744,10 @@ class _HomePageState extends State<HomePage> {
               if (_modelsCatalogBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('models: $_modelsCatalogBody'),
+              ],
+              if (_textModelDefaultBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('text-default: $_textModelDefaultBody'),
               ],
               if (_modelDetailBody != null) ...[
                 const SizedBox(height: 8),
