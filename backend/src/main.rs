@@ -5,6 +5,7 @@ mod agent_memory;
 mod app;
 mod art_styles;
 mod assets;
+mod assets_generate;
 mod auth;
 mod billing;
 mod error;

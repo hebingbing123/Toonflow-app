@@ -3,6 +3,7 @@
 use crate::agent_memory;
 use crate::art_styles;
 use crate::assets;
+use crate::assets_generate;
 use crate::billing;
 use crate::harness;
 use crate::jobs;
@@ -62,6 +63,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(art_styles::router())
         .merge(novels::router())
         .merge(assets::router())
+        .merge(assets_generate::router())
         .merge(scripts::router())
         .merge(script_agent::router())
         .merge(script_asset_extract::router())

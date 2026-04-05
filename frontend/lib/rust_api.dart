@@ -622,6 +622,39 @@ Future<int> postScriptAgentGetPlanDataV1(
   return res.statusCode;
 }
 
+/// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1` (typically **501**).
+Future<int> postAssetsGenerateGenerateV1(
+  String accessToken, {
+  required int projectId,
+  required int assetLegacyId,
+  required String model,
+  required String resolution,
+  required String type,
+  required String name,
+  required String prompt,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/generate');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'model': model,
+          'resolution': resolution,
+          'id': assetLegacyId,
+          'type': type,
+          'name': name,
+          'prompt': prompt,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({

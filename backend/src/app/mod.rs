@@ -713,6 +713,69 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_generate_generate_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/assets-generate/generate",
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"p"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_generate_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/generate",
+            &token,
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"p"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_polish_prompt_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/polish-prompt",
+            &token,
+            r#"{"assetsId":1,"projectId":1,"type":"role","name":"n","describe":"d"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_batch_generate_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/batch-generate",
+            &token,
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","items":[{"id":1,"type":"role","name":"n","prompt":"p"}]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_batch_polish_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/batch-polish",
+            &token,
+            r#"{"projectId":1,"items":[{"assetsId":1,"type":"role","name":"n","describe":"d"}]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
     async fn skills_list_ok_with_jwt_when_skills_tree_present() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/skills", &token).await;

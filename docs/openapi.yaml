@@ -41,6 +41,8 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, then **501** **`not_implemented`** until **`o_agentWorkData`**-equivalent persistence exists (live flows use **Harness WS**).
 
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`**, **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** match legacy **`/api/assetsGenerate/*`** request bodies, then **501** **`not_implemented`** until **`app_generation_job`** + image providers are wired end-to-end.
+
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
 servers:
@@ -2881,6 +2883,170 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/assets-generate/generate:
+    post:
+      tags: [assets]
+      summary: Generate one asset image (legacy `generateAssets` parity)
+      operationId: postAssetsGenerateV1
+      description: |
+        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateAssetsBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/assets-generate/polish-prompt:
+    post:
+      tags: [assets]
+      summary: Polish one asset prompt (legacy `polishAssetsPrompt` parity)
+      operationId: postAssetsPolishPromptV1
+      description: |
+        Bearer JWT. Validates legacy **`polishAssetsPrompt`** body, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolishAssetsPromptBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/assets-generate/batch-generate:
+    post:
+      tags: [assets]
+      summary: Batch-generate asset images (legacy `batchGenerateImageAssets` parity)
+      operationId: postAssetsBatchGenerateV1
+      description: |
+        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchGenerateImageAssetsBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/assets-generate/batch-polish:
+    post:
+      tags: [assets]
+      summary: Batch-polish asset prompts (legacy `batchPolishAssetsPrompt` parity)
+      operationId: postAssetsBatchPolishV1
+      description: |
+        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body, then **501** **`not_implemented`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchPolishAssetsPromptBody"
+      responses:
+        "400":
+          description: Unknown JSON fields or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/scripts/export:
     post:
       tags: [scripts]
@@ -4431,6 +4597,129 @@ components:
           format: int32
         data:
           $ref: "#/components/schemas/UpdateScriptAgentDataPayload"
+
+    AssetGenTypeV1:
+      type: string
+      enum: [role, scene, tool, storyboard]
+      description: Legacy **`generateAssets`** / batch **`items[].type`**
+
+    GenerateAssetsBody:
+      type: object
+      required: [projectId, model, resolution, id, type, name, prompt]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        model:
+          type: string
+        resolution:
+          type: string
+        id:
+          type: integer
+          format: int32
+          description: Legacy asset id (`o_assets.id`)
+        type:
+          $ref: "#/components/schemas/AssetGenTypeV1"
+        name:
+          type: string
+        prompt:
+          type: string
+        base64:
+          type: string
+          nullable: true
+          description: Optional reference image (legacy)
+
+    PolishAssetsPromptBody:
+      type: object
+      required: [assetsId, projectId, type, name, describe]
+      additionalProperties: false
+      properties:
+        assetsId:
+          type: integer
+          format: int32
+        projectId:
+          type: integer
+          format: int32
+        type:
+          type: string
+          description: Legacy **`role`** \| **`scene`** \| **`tool`**
+        name:
+          type: string
+        describe:
+          type: string
+
+    BatchGenerateImageItem:
+      type: object
+      required: [id, type, name, prompt]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        type:
+          $ref: "#/components/schemas/AssetGenTypeV1"
+        name:
+          type: string
+        prompt:
+          type: string
+        base64:
+          type: string
+          nullable: true
+
+    BatchGenerateImageAssetsBody:
+      type: object
+      required: [projectId, model, resolution, items]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        model:
+          type: string
+        resolution:
+          type: string
+        concurrentCount:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Optional; default **1** in legacy
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchGenerateImageItem"
+
+    BatchPolishAssetsItem:
+      type: object
+      required: [assetsId, type, name, describe]
+      additionalProperties: false
+      properties:
+        assetsId:
+          type: integer
+          format: int32
+        type:
+          type: string
+        name:
+          type: string
+        describe:
+          type: string
+
+    BatchPolishAssetsPromptBody:
+      type: object
+      required: [projectId, items]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        concurrentCount:
+          type: integer
+          format: int32
+          minimum: 1
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchPolishAssetsItem"
 
     AboutCheckUpdateSource:
       type: string

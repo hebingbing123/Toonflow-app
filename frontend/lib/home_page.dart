@@ -676,6 +676,16 @@ class _HomePageState extends State<HomePage> {
         id: '1',
       );
       final sap = await postScriptAgentGetPlanDataV1(token, projectId: 1);
+      final ag = await postAssetsGenerateGenerateV1(
+        token,
+        projectId: 1,
+        assetLegacyId: 1,
+        model: '1:gpt-4o-mini',
+        resolution: '1024x1024',
+        type: 'role',
+        name: 'probe',
+        prompt: 'probe',
+      );
       if (!mounted) return;
       if (mt != 501) {
         setState(() {
@@ -687,6 +697,13 @@ class _HomePageState extends State<HomePage> {
       if (sap != 501) {
         setState(() {
           _error = 'POST script-agent/get-plan-data expected 501, got $sap';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      if (ag != 501) {
+        setState(() {
+          _error = 'POST assets-generate/generate expected 501, got $ag';
           _loadingModelsCatalog = false;
         });
         return;
@@ -704,7 +721,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap';
+            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
@@ -3999,7 +4016,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       _loadingModelsCatalog
                           ? '请求中…'
-                          : 'models + vendors + agent-deploy + model-test + script-agent',
+                          : 'models + vendors + agent-deploy + model-test + script-agent + assets-gen',
                     ),
                   ),
                   FilledButton.tonal(
