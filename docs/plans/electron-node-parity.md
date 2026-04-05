@@ -41,7 +41,7 @@
 | `/api/other/deleteAllData` | 清空数据 | ⏳ | 高危；需显式策略与审计 |
 | `/api/production/**` | 分镜图/视频工作台、流、导出 | 🟡 | **Storyboard** 已有 **`app_storyboard` + REST**；**轮询出图、视频轨、export** 等仍 ⏳ |
 | `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`getVisualManual` 类「拼 skills 目录 + 图」**仍 ⏳ |
-| `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**export** / **poll** / **`POST /api/v1/scripts/extract-assets`**（异步 LLM + **`app_asset`/`app_script_asset`**）✅；细粒度与旧 **`o_prompt.scriptAssetExtraction`** 需靠 **`SCRIPT_ASSET_EXTRACT_PROMPT_PATH`** 对齐 |
+| `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**export** / **poll** / **`extract-assets`** ✅；**`PUT/DELETE …/projects/legacy/{p}/scripts/{s}/assets/{a}`** 维护 **`app_script_asset`** ✅；旧 prompt 对齐见 **`SCRIPT_ASSET_EXTRACT_PROMPT_PATH`** |
 | `/api/scriptAgent/*` | 剧本 Agent 计划数据 | ⏳ | 🔀 部分能力由 **Harness WS** 替代，持久化结构需对齐 |
 | `/api/setting/about/*` | 更新检查、安装包 | ⏳ | 多为桌面分发；Web/桌面分流 |
 | `/api/setting/agentDeploy/*` | 本地 Agent 部署配置 | ⏳ | 与「云端 Rust + 用户密钥」模型不同，需产品定稿 |

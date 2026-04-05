@@ -1,14 +1,14 @@
-//! Project-scoped **`app_asset`** HTTP API (legacy **`getAssetsApi`** / listing parity).
+//! Project-scoped **`app_asset`** HTTP API and **`app_script_asset`** links (legacy listing / **`o_scriptAssets`** parity).
 
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
-    routing::get,
+    routing::{get, put},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::FromRow;
+use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -68,6 +68,118 @@ pub fn router() -> Router<AppState> {
                 .patch(patch_project_asset_by_legacy)
                 .delete(delete_project_asset_by_legacy),
         )
+        .route(
+            "/api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
+            put(link_script_to_asset).delete(unlink_script_from_asset),
+        )
+}
+
+/// Resolves **`app_script.id`** and **`app_asset.id`** when both belong to the same owned project.
+async fn resolve_script_and_asset_in_project(
+    pool: &PgPool,
+    uid: Uuid,
+    project_legacy_id: i32,
+    script_legacy_id: i32,
+    asset_legacy_id: i32,
+) -> Result<(Uuid, Uuid), ApiError> {
+    let row: Option<(Uuid, Uuid)> = sqlx::query_as(
+        r#"
+        SELECT s.id, a.id
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        INNER JOIN app_asset a ON a.project_id = p.id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND s.legacy_id = $3
+          AND a.legacy_id = $4
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(script_legacy_id)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    row.ok_or(ApiError::NotFound)
+}
+
+async fn link_script_to_asset(
+    State(state): State<AppState>,
+    Path((project_legacy_id, script_legacy_id, asset_legacy_id)): Path<(i32, i32, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || script_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let (script_id, asset_id) = resolve_script_and_asset_in_project(
+        pool,
+        uid,
+        project_legacy_id,
+        script_legacy_id,
+        asset_legacy_id,
+    )
+    .await?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_script_asset (script_id, asset_id)
+        VALUES ($1, $2)
+        ON CONFLICT (script_id, asset_id) DO NOTHING
+        "#,
+    )
+    .bind(script_id)
+    .bind(asset_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+async fn unlink_script_from_asset(
+    State(state): State<AppState>,
+    Path((project_legacy_id, script_legacy_id, asset_legacy_id)): Path<(i32, i32, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 || script_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let (script_id, asset_id) = resolve_script_and_asset_in_project(
+        pool,
+        uid,
+        project_legacy_id,
+        script_legacy_id,
+        asset_legacy_id,
+    )
+    .await?;
+
+    let res = sqlx::query(r#"DELETE FROM app_script_asset WHERE script_id = $1 AND asset_id = $2"#)
+        .bind(script_id)
+        .bind(asset_id)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn create_project_asset(
