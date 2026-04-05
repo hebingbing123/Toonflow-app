@@ -448,11 +448,13 @@ class ProjectsSummary {
     required this.projectCount,
     required this.scriptCount,
     required this.storyboardCount,
+    required this.assetCount,
   });
 
   final int projectCount;
   final int scriptCount;
   final int storyboardCount;
+  final int assetCount;
 
   factory ProjectsSummary.fromJson(Map<String, dynamic> json) {
     int n(String k) => (json[k] as num).toInt();
@@ -460,6 +462,9 @@ class ProjectsSummary {
       projectCount: n('project_count'),
       scriptCount: n('script_count'),
       storyboardCount: n('storyboard_count'),
+      assetCount: json['asset_count'] != null
+          ? (json['asset_count'] as num).toInt()
+          : 0,
     );
   }
 }

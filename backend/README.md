@@ -41,7 +41,7 @@ cargo run
 
 项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** 随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
-全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 当前用户跨所有项目的 **`app_project`** / **`app_script`** / **`app_storyboard`** 总行数（单次查询）。
+全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 当前用户跨所有项目的 **`app_project`** / **`app_script`** / **`app_storyboard`** / **`app_asset`** 总行数（单次查询）。
 
 项目统计：**`GET /api/v1/projects/legacy/{legacy_id}/stats`**（Bearer）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数；**`role_count`** / **`video_count`** 暂为 **`0`**（对齐旧 **`generalStatistics`** 字段名语义，尚无 PG 版 **`o_assets`** / **`o_video`**）。
 
