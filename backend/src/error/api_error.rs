@@ -26,6 +26,8 @@ pub enum ApiError {
     WebhookNotConfigured,
     /// HMAC did not match body (or bad `X-Toonflow-Signature` format).
     InvalidWebhookSignature,
+    /// Unexpected failure (logged server-side); avoid leaking internals to clients.
+    Internal,
 }
 
 impl IntoResponse for ApiError {
@@ -63,6 +65,11 @@ impl IntoResponse for ApiError {
                 StatusCode::UNAUTHORIZED,
                 "invalid_webhook_signature",
                 "HMAC verification failed",
+            ),
+            ApiError::Internal => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_error",
+                "Internal server error",
             ),
         };
 

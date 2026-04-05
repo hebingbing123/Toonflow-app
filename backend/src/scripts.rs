@@ -1,12 +1,14 @@
 use axum::{
+    body::Body,
     extract::{Path, State},
-    http::{HeaderMap, StatusCode},
+    http::{header, HeaderMap, HeaderValue, StatusCode},
+    response::Response,
     routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::FromRow;
+use sqlx::{FromRow, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -50,6 +52,30 @@ struct CreateScriptBody {
 /// Advisory lock key for allocating globally unique `app_script.legacy_id`.
 const ADV_LOCK_SCRIPT_LEGACY_ID: i64 = 884_422_002;
 
+/// Legacy `exportScript` accepted an array of ids; cap to bound work per request.
+const MAX_SCRIPT_EXPORT: usize = 500;
+/// Legacy `pollScriptAssets` polled many rows; cap list size.
+const MAX_SCRIPT_EXTRACT_POLL: usize = 2_000;
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ExportScriptsBody {
+    legacy_ids: Vec<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ScriptExtractPollBody {
+    legacy_ids: Vec<i32>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+struct ScriptExtractPollRow {
+    legacy_id: i32,
+    extract_state: Option<i32>,
+    error_reason: Option<String>,
+}
+
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
         let t = v.trim();
@@ -63,6 +89,11 @@ fn trim_opt(s: Option<String>) -> Option<String> {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/scripts/export", post(export_scripts_zip))
+        .route(
+            "/api/v1/scripts/extract-state/poll",
+            post(poll_script_extract_state),
+        )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/scripts",
             post(create_script_under_project),
@@ -73,6 +104,166 @@ pub fn router() -> Router<AppState> {
                 .patch(patch_script_by_legacy)
                 .delete(delete_script_by_legacy),
         )
+}
+
+fn normalize_legacy_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32>, ApiError> {
+    ids.retain(|id| *id > 0);
+    ids.sort_unstable();
+    ids.dedup();
+    if ids.is_empty() {
+        return Err(ApiError::BadRequest(
+            "legacy_ids must be non-empty (positive integers)".into(),
+        ));
+    }
+    if ids.len() > max_len {
+        return Err(ApiError::BadRequest(format!(
+            "at most {max_len} legacy_ids per request"
+        )));
+    }
+    Ok(ids)
+}
+
+fn zip_entry_name(legacy_id: i32, name: Option<&str>) -> String {
+    let base_raw = name
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("script");
+    let safe: String = base_raw
+        .chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '\0' | '\r' | '\n' => '_',
+            c if c.is_control() => '_',
+            c => c,
+        })
+        .take(180)
+        .collect();
+    let base = if safe.is_empty() {
+        "script"
+    } else {
+        safe.as_str()
+    };
+    format!("{legacy_id}_{base}.txt")
+}
+
+fn build_scripts_zip(
+    rows: Vec<(i32, Option<String>, Option<String>)>,
+) -> Result<Vec<u8>, zip::result::ZipError> {
+    use std::io::Write;
+    use zip::write::FileOptions;
+    use zip::{CompressionMethod, ZipWriter};
+
+    let mut cursor = std::io::Cursor::new(Vec::new());
+    {
+        let mut zip = ZipWriter::new(&mut cursor);
+        let options = FileOptions::default().compression_method(CompressionMethod::Deflated);
+        for (legacy_id, name, content) in rows {
+            let path = zip_entry_name(legacy_id, name.as_deref());
+            zip.start_file(path, options)?;
+            zip.write_all(content.unwrap_or_default().as_bytes())?;
+        }
+        zip.finish()?;
+    }
+    Ok(cursor.into_inner())
+}
+
+async fn export_scripts_zip(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ExportScriptsBody>,
+) -> Result<Response, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXPORT)?;
+
+    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+        r#"
+        SELECT s.legacy_id, s.name, s.content
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = "#,
+    );
+    qb.push_bind(uid);
+    qb.push(" AND s.legacy_id IN (");
+    {
+        let mut separated = qb.separated(", ");
+        for id in &legacy_ids {
+            separated.push_bind(*id);
+        }
+    }
+    qb.push(") ORDER BY s.legacy_id");
+
+    let rows: Vec<(i32, Option<String>, Option<String>)> = qb
+        .build_query_as()
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let bytes = tokio::task::spawn_blocking(move || build_scripts_zip(rows))
+        .await
+        .map_err(|e| {
+            tracing::error!(error = %e, "scripts export zip task join");
+            ApiError::Internal
+        })?
+        .map_err(|e: zip::result::ZipError| {
+            tracing::error!(error = %e, "scripts export zip build");
+            ApiError::Internal
+        })?;
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "application/zip")
+        .header(
+            header::CONTENT_DISPOSITION,
+            HeaderValue::from_static("attachment; filename=\"scripts.zip\""),
+        )
+        .body(Body::from(bytes))
+        .map_err(|e| {
+            tracing::error!(error = %e, "scripts export response headers");
+            ApiError::Internal
+        })
+}
+
+async fn poll_script_extract_state(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ScriptExtractPollBody>,
+) -> Result<Json<Vec<ScriptExtractPollRow>>, ApiError> {
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXTRACT_POLL)?;
+
+    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+        r#"
+        SELECT s.legacy_id, s.extract_state, s.error_reason
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = "#,
+    );
+    qb.push_bind(uid);
+    qb.push(" AND s.legacy_id IN (");
+    {
+        let mut separated = qb.separated(", ");
+        for id in &legacy_ids {
+            separated.push_bind(*id);
+        }
+    }
+    qb.push(") AND (s.extract_state IS DISTINCT FROM 0) ORDER BY s.legacy_id");
+
+    let rows: Vec<ScriptExtractPollRow> = qb
+        .build_query_as()
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(rows))
 }
 
 async fn create_script_under_project(
@@ -312,5 +503,29 @@ mod tests {
                 || err.to_string().contains("unknown variant"),
             "{err}"
         );
+    }
+
+    #[test]
+    fn export_scripts_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<ExportScriptsBody>(r#"{"legacy_ids":[1],"x":1}"#).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn zip_entry_name_sanitizes_path_chars() {
+        assert_eq!(super::zip_entry_name(3, Some("a/b")), "3_a_b.txt");
+        assert_eq!(super::zip_entry_name(1, None), "1_script.txt");
+    }
+
+    #[test]
+    fn build_scripts_zip_roundtrip() {
+        let rows = vec![(1, Some("n".into()), Some("hello".into())), (2, None, None)];
+        let zip_bytes = super::build_scripts_zip(rows).expect("zip");
+        assert!(zip_bytes.len() > 20);
     }
 }

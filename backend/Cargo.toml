@@ -36,6 +36,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 walkdir = "2"
 wasmi = { version = "0.31", default-features = false }
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
 
 [build-dependencies]
 wat = "1"

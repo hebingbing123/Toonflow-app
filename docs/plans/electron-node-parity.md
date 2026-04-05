@@ -41,7 +41,7 @@
 | `/api/other/deleteAllData` | 清空数据 | ⏳ | 高危；需显式策略与审计 |
 | `/api/production/**` | 分镜图/视频工作台、流、导出 | 🟡 | **Storyboard** 已有 **`app_storyboard` + REST**；**轮询出图、视频轨、export** 等仍 ⏳ |
 | `/api/project/*` | 项目、导演/视觉手册 | 🟡 | CRUD + `director_manual` 等已在 PG；**`getVisualManual` 类「拼 skills 目录 + 图」**仍 ⏳ |
-| `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**export / extract / pollScriptAssets** ⏳ |
+| `/api/script/*` | 剧本 CRUD、导出、抽素材 | 🟡 | CRUD ✅；**`POST /api/v1/scripts/export`**（ZIP）、**`POST /api/v1/scripts/extract-state/poll`** ✅；**extractAssets**（AI+`o_assets`）⏳ |
 | `/api/scriptAgent/*` | 剧本 Agent 计划数据 | ⏳ | 🔀 部分能力由 **Harness WS** 替代，持久化结构需对齐 |
 | `/api/setting/about/*` | 更新检查、安装包 | ⏳ | 多为桌面分发；Web/桌面分流 |
 | `/api/setting/agentDeploy/*` | 本地 Agent 部署配置 | ⏳ | 与「云端 Rust + 用户密钥」模型不同，需产品定稿 |
@@ -76,7 +76,7 @@
 | 波次 | 目标 | 依赖 |
 |------|------|------|
 | **A（当前基线）** | 项目/剧本/分镜、jobs、usage、memory、models、skills 只读、harness、billing webhook、me | 已有 |
-| **B** | **Script**：export / extract / poll 等价（或改为单一 job kind + WS 进度） | 任务管线、文件存储策略 |
+| **B** | **Script**：export + extract-state poll ✅；**extractAssets** 仍依赖资产表 + LLM | 任务管线、**`app_assets`** 类迁移 |
 | **C** | **Novel + event** 全表与 REST | 新迁移、RLS |
 | **D** | **Assets + assetsGenerate**（含轮询出图与 PG 资产表） | D 通常依赖 C 或项目维度 |
 | **E** | **Production 剩余**：视频轨、批量出图、export 等 | jobs、对象存储、可能 CDN |
