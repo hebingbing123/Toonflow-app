@@ -655,6 +655,22 @@ Future<int> postAssetsGenerateGenerateV1(
   return res.statusCode;
 }
 
+/// `POST /api/v1/settings/vendors/add` — OpenAPI `postSettingsVendorsAddV1` (typically **501**).
+Future<int> postSettingsVendorsAddV1(String accessToken, {required String tsCode}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/add');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'tsCode': tsCode}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}
+
 /// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({

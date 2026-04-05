@@ -708,6 +708,15 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
+      final vadd = await postSettingsVendorsAddV1(token, tsCode: 'export {}');
+      if (!mounted) return;
+      if (vadd != 501) {
+        setState(() {
+          _error = 'POST settings/vendors/add expected 501, got $vadd';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       setState(() {
         final sample = list
             .take(4)
@@ -721,7 +730,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag';
+            'agent-deploy: ${ad.length} rows · model-test -> $mt · script-agent/get-plan -> $sap · assets-generate -> $ag · vendors/add -> $vadd';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
@@ -4016,7 +4025,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       _loadingModelsCatalog
                           ? '请求中…'
-                          : 'models + vendors + agent-deploy + model-test + script-agent + assets-gen',
+                          : 'models + vendors + vendor-add + agent-deploy + model-test + script-agent + assets-gen',
                     ),
                   ),
                   FilledButton.tonal(

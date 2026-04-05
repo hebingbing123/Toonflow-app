@@ -663,6 +663,118 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_vendors_add_unauthorized_without_bearer() {
+        let (status, v) =
+            post_json("/api/v1/settings/vendors/add", r#"{"tsCode":"export {}"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_add_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/add",
+            &token,
+            r#"{"tsCode":"export {}"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_update_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/update",
+            &token,
+            r#"{"id":"openai","inputValues":{},"inputs":[],"models":[]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_update_rejects_empty_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/update",
+            &token,
+            r#"{"id":"   ","inputValues":{},"inputs":[],"models":[]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_delete_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/delete",
+            &token,
+            r#"{"id":"openai"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_enable_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/enable",
+            &token,
+            r#"{"id":"openai","enable":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_update_code_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/update-code",
+            &token,
+            r#"{"id":"openai","tsCode":"//"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_code_from_link_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/code-from-link",
+            &token,
+            r#"{"link":"https://example.com/a.ts"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_code_from_link_rejects_empty_link_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/code-from-link",
+            &token,
+            r#"{"link":"  "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn script_agent_get_plan_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/script-agent/get-plan-data",
