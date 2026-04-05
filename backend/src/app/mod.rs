@@ -732,6 +732,14 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn projects_create_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer("/api/v1/projects", &token, "{}").await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn scripts_extract_state_poll_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/scripts/extract-state/poll",
@@ -848,6 +856,39 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn project_by_legacy_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            patch_json_bearer("/api/v1/projects/legacy/1", &token, r#"{"name":"smoke"}"#).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer("/api/v1/projects/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_stats_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/stats", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_novels_list_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/projects/legacy/1/novels").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -899,6 +940,14 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn create_script_under_project_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer("/api/v1/projects/legacy/1/scripts", &token, "{}").await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn script_by_legacy_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/scripts/legacy/1").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -920,6 +969,31 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn script_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/scripts/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn script_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            patch_json_bearer("/api/v1/scripts/legacy/1", &token, r#"{"name":"smoke"}"#).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn script_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer("/api/v1/scripts/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn storyboard_create_under_script_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/scripts/legacy/1/storyboards", "{}").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -938,6 +1012,52 @@ mod contract_smoke_tests {
         let (status, v) = delete_empty_no_bearer("/api/v1/storyboards/legacy/1").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn storyboards_list_by_script_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/scripts/legacy/1/storyboards", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn storyboard_create_under_script_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/scripts/legacy/1/storyboards", &token, "{}").await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn storyboard_get_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/storyboards/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn storyboard_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer(
+            "/api/v1/storyboards/legacy/1",
+            &token,
+            r#"{"prompt":"smoke"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn storyboard_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer("/api/v1/storyboards/legacy/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
