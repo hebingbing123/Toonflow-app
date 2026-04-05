@@ -54,7 +54,7 @@ info:
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
-    **Legacy novels (read/delete):** **`POST /api/v1/novels/get-novel-data`** and **`POST …/novels/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**); the first returns full **`NovelRow`** rows, the second returns **`{ id, index, chapter }`** (legacy id + **`chapter_index`**). **`POST …/novels/batch-delete`** deletes **`app_novel`** rows by **`legacy_id`** for the caller (no SQLite **`o_event*`** cascade).
+    **Legacy novels (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. No SQLite **`o_event*`** / **`cleanNovel`** parity.
 
     **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
 
@@ -6738,6 +6738,192 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/novels/get-novel:
+    post:
+      tags: [novels]
+      summary: Legacy — paginated novel list (legacy id + chapter fields)
+      operationId: postNovelsGetNovelV1
+      description: |
+        Parity with **`POST /api/novel/getNovel`**. **`projectId`** is **`app_project.legacy_id`**.
+        **`page`** ≥ **1**, **`limit`** ≥ **1** (capped at **200**). Optional **`search`** filters **`chapter`** (**ILIKE**).
+        Each row **`id`** is **`app_novel.legacy_id`**; **`index`** is **`chapter_index`** (**camelCase** response).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyNovelGetNovelBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelGetNovelResponse"
+        "400":
+          description: Invalid projectId, page, or limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/novels/add-novel:
+    post:
+      tags: [novels]
+      summary: Legacy — batch add novels under a project
+      operationId: postNovelsAddNovelV1
+      description: |
+        Parity with **`POST /api/novel/addNovel`**. **`projectId`** is **`app_project.legacy_id`**.
+        At most **200** items in **`data`**. Empty **`data`** returns **200** with **`message`** **`新增原文成功`** without touching the database.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyNovelAddNovelBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
+        "400":
+          description: Invalid projectId or too many rows in data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project legacy id not found for caller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/novels/delete-novel:
+    post:
+      tags: [novels]
+      summary: Legacy — delete one novel by legacy id
+      operationId: postNovelsDeleteNovelV1
+      description: |
+        Parity with **`POST /api/novel/deleteNovel`**. **`id`** is **`app_novel.legacy_id`** (must be positive).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyNovelDeleteNovelBody"
+      responses:
+        "200":
+          description: Row deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
+        "400":
+          description: Non-positive id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No matching owned row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/novels/update-novel:
+    post:
+      tags: [novels]
+      summary: Legacy — update one novel by legacy id
+      operationId: postNovelsUpdateNovelV1
+      description: |
+        Parity with **`POST /api/novel/updateNovel`**. **`id`** is **`app_novel.legacy_id`**.
+        **`index`** may be a JSON number or numeric string. Empty **`event`** clears **`event`** to null in Postgres.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyNovelUpdateNovelBody"
+      responses:
+        "200":
+          description: Row updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
+        "400":
+          description: Non-positive id or invalid index
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No matching owned row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/novels/batch-delete:
     post:
       tags: [novels]
@@ -6760,7 +6946,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LegacyNovelBatchDeleteResponse"
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
         "400":
           description: Empty ids, too many ids, or invalid payload
           content:
@@ -9261,13 +9447,136 @@ components:
             format: int32
           maxItems: 500
 
-    LegacyNovelBatchDeleteResponse:
+    LegacyNovelOkMessageResponse:
       type: object
       required: [message]
       properties:
         message:
           type: string
-          example: 删除原文成功
+          description: e.g. 新增原文成功, 删除原文成功, 更新原文成功
+
+    LegacyNovelGetNovelBody:
+      type: object
+      required: [projectId, page, limit]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Values above 200 are capped server-side
+        search:
+          type: string
+          nullable: true
+
+    LegacyNovelGetNovelPageRow:
+      type: object
+      required: [id, index, chapter, chapterData, eventState]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_novel.legacy_id
+        index:
+          type: integer
+          format: int32
+          description: chapter_index
+        reel:
+          type: string
+          nullable: true
+        chapter:
+          type: string
+        chapterData:
+          type: string
+        event:
+          type: string
+          nullable: true
+        eventState:
+          type: integer
+          format: int32
+        errorReason:
+          type: string
+          nullable: true
+
+    LegacyNovelGetNovelResponse:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyNovelGetNovelPageRow"
+        total:
+          type: integer
+          format: int64
+
+    LegacyNovelAddNovelItem:
+      type: object
+      required: [index, reel, chapter, chapterData]
+      additionalProperties: false
+      properties:
+        index:
+          type: integer
+          format: int32
+        reel:
+          type: string
+        chapter:
+          type: string
+        chapterData:
+          type: string
+
+    LegacyNovelAddNovelBody:
+      type: object
+      required: [projectId, data]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyNovelAddNovelItem"
+          maxItems: 200
+
+    LegacyNovelDeleteNovelBody:
+      type: object
+      required: [id]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_novel.legacy_id
+
+    LegacyNovelUpdateNovelBody:
+      type: object
+      required: [id, index, reel, chapter, chapterData, event]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+        index:
+          oneOf:
+            - type: integer
+              format: int32
+            - type: string
+        reel:
+          type: string
+        chapter:
+          type: string
+        chapterData:
+          type: string
+        event:
+          type: string
 
     JobRow:
       type: object
