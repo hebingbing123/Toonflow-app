@@ -128,7 +128,7 @@ impl SkillDeleteError {
     }
 }
 
-fn skills_root() -> PathBuf {
+pub(crate) fn skills_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("data/skills")
 }
 

@@ -18,6 +18,7 @@ use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
 use crate::usage;
+use crate::visual_manual;
 
 use axum::{
     http::{header, HeaderName, Method},
@@ -59,6 +60,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(script_asset_extract::router())
         .merge(storyboards::router())
         .merge(skills::router())
+        .merge(visual_manual::router())
         .merge(harness::http::router())
         .merge(jobs::router())
         .merge(usage::router())

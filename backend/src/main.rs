@@ -25,6 +25,7 @@ mod skills;
 mod state;
 mod storyboards;
 mod usage;
+mod visual_manual;
 
 use std::net::SocketAddr;
 

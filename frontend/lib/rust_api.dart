@@ -451,6 +451,87 @@ Future<PromptTemplateRowV1> fetchPromptByLegacyIdV1(
   return PromptTemplateRowV1.fromJson(map);
 }
 
+/// OpenAPI **`VisualManualEntry`**.
+class VisualManualEntryV1 {
+  const VisualManualEntryV1({
+    required this.label,
+    required this.value,
+    required this.data,
+  });
+
+  final String label;
+  final String value;
+  final String data;
+
+  factory VisualManualEntryV1.fromJson(Map<String, dynamic> json) {
+    return VisualManualEntryV1(
+      label: json['label'] as String,
+      value: json['value'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
+/// OpenAPI **`VisualManualStyle`**.
+class VisualManualStyleV1 {
+  const VisualManualStyleV1({
+    required this.name,
+    required this.image,
+    required this.stylePath,
+    required this.data,
+  });
+
+  final String name;
+  final List<String> image;
+  final String stylePath;
+  final List<VisualManualEntryV1> data;
+
+  factory VisualManualStyleV1.fromJson(Map<String, dynamic> json) {
+    final imgs = json['image'] as List<dynamic>? ?? const [];
+    final slots = json['data'] as List<dynamic>? ?? const [];
+    return VisualManualStyleV1(
+      name: json['name'] as String,
+      image: imgs.map((e) => e as String).toList(),
+      stylePath: json['stylePath'] as String,
+      data: slots
+          .map((e) => VisualManualEntryV1.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+/// OpenAPI **`VisualManualResponse`**.
+class VisualManualResponseV1 {
+  const VisualManualResponseV1({required this.styles});
+
+  final List<VisualManualStyleV1> styles;
+
+  factory VisualManualResponseV1.fromJson(Map<String, dynamic> json) {
+    final raw = json['styles'] as List<dynamic>? ?? const [];
+    return VisualManualResponseV1(
+      styles: raw
+          .map((e) => VisualManualStyleV1.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+/// `GET /api/v1/visual-manual` — OpenAPI `getVisualManualV1`.
+Future<VisualManualResponseV1> fetchVisualManualV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/visual-manual');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VisualManualResponseV1.fromJson(map);
+}
+
 /// Row from `GET /api/v1/models` — OpenAPI `ModelListEntry`.
 class ModelListEntry {
   const ModelListEntry({

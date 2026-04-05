@@ -54,7 +54,8 @@ mod contract_smoke_tests {
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
 
-    const MAX_JSON: usize = 65_536;
+    /// Large enough for **`GET /api/v1/visual-manual`** (many bundled Markdown files).
+    const MAX_JSON: usize = 2 * 1024 * 1024;
     /// Shared with [`jwt_fixture::encode_supabase_style`]; must satisfy Supabase-style `aud` + HS256 verify.
     const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
     const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
@@ -538,6 +539,28 @@ mod contract_smoke_tests {
                 .and_then(Value::as_str)
                 .is_some_and(|p| p.ends_with(".md"))
         }));
+    }
+
+    #[tokio::test]
+    async fn visual_manual_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/visual-manual").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn visual_manual_ok_with_jwt_when_art_skills_present() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/visual-manual", &token).await;
+        assert_eq!(status, StatusCode::OK, "visual_manual={v}");
+        let styles = v["styles"].as_array().expect("styles");
+        assert!(styles.len() >= 2, "expected multiple art_skills styles");
+        assert!(
+            styles
+                .iter()
+                .any(|s| s["stylePath"].as_str() == Some("2D_90s_japanese_anime")),
+            "expected 2D_90s_japanese_anime in {styles:?}"
+        );
     }
 
     #[tokio::test]
