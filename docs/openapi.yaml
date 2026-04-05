@@ -494,10 +494,10 @@ paths:
   /api/v1/projects/summary:
     get:
       tags: [projects]
-      summary: Aggregate project, script, and storyboard counts for the current user
+      summary: Aggregate project, script, storyboard, novel, and asset counts for the current user
       operationId: getProjectsSummaryV1
       description: |
-        One round-trip totals for **`owner_user_id = JWT sub`**: rows in **`app_project`**, **`app_script`** (via owned projects), **`app_storyboard`** (via owned script trees), and **`app_asset`** (via owned projects).
+        One round-trip totals for **`owner_user_id = JWT sub`**: rows in **`app_project`**, **`app_script`** (via owned projects), **`app_storyboard`** (via owned script trees), **`app_novel`** (via owned projects), and **`app_asset`** (via owned projects).
         Complements per-project **`GET /api/v1/projects/legacy/{legacy_id}/stats`**.
       security:
         - bearerAuth: []
@@ -2750,7 +2750,8 @@ components:
 
     ProjectsSummaryResponse:
       type: object
-      required: [project_count, script_count, storyboard_count, asset_count]
+      required:
+        [project_count, script_count, storyboard_count, novel_count, asset_count]
       properties:
         project_count:
           type: integer
@@ -2761,6 +2762,10 @@ components:
         storyboard_count:
           type: integer
           format: int64
+        novel_count:
+          type: integer
+          format: int64
+          description: Total **`app_novel`** rows across the user's projects
         asset_count:
           type: integer
           format: int64
