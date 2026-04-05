@@ -128,11 +128,11 @@ async fn link_script_to_asset(
     Path((project_legacy_id, script_legacy_id, asset_legacy_id)): Path<(i32, i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || script_legacy_id <= 0 || asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -168,11 +168,11 @@ async fn unlink_script_from_asset(
     Path((project_legacy_id, script_legacy_id, asset_legacy_id)): Path<(i32, i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || script_legacy_id <= 0 || asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -207,11 +207,11 @@ async fn create_project_asset(
     headers: HeaderMap,
     Json(body): Json<CreateAssetBody>,
 ) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -449,11 +449,11 @@ async fn list_project_assets(
     Query(query): Query<ListAssetsQuery>,
     headers: HeaderMap,
 ) -> Result<Json<ListAssetsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -568,11 +568,11 @@ async fn get_project_asset_by_legacy(
     Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<AssetRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -624,11 +624,11 @@ async fn patch_project_asset_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchAssetBody>,
 ) -> Result<Json<AssetRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -750,11 +750,11 @@ async fn delete_project_asset_by_legacy(
     Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));

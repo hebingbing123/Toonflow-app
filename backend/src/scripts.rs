@@ -171,11 +171,11 @@ async fn export_scripts_zip(
     headers: HeaderMap,
     Json(body): Json<ExportScriptsBody>,
 ) -> Result<Response, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXPORT)?;
 
@@ -232,11 +232,11 @@ async fn poll_script_extract_state(
     headers: HeaderMap,
     Json(body): Json<ScriptExtractPollBody>,
 ) -> Result<Json<Vec<ScriptExtractPollRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXTRACT_POLL)?;
 
@@ -272,11 +272,11 @@ async fn create_script_under_project(
     headers: HeaderMap,
     Json(body): Json<CreateScriptBody>,
 ) -> Result<(StatusCode, Json<ScriptRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let mut tx = pool
         .begin()
@@ -345,11 +345,11 @@ async fn get_script_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<ScriptRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let row = sqlx::query_as::<_, ScriptRow>(
         r#"
@@ -375,11 +375,11 @@ async fn patch_script_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchScriptBody>,
 ) -> Result<Json<ScriptRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let content_patch = parse_optional_text_field(body.content, "content")?;
@@ -447,11 +447,11 @@ async fn delete_script_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let res = sqlx::query(
         r#"

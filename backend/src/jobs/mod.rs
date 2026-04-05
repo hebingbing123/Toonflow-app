@@ -109,11 +109,11 @@ async fn list_job_kinds(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<String>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let kinds: Vec<String> = sqlx::query_scalar(
         r#"
         SELECT DISTINCT kind
@@ -133,11 +133,11 @@ async fn list_job_kind_summaries(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<JobKindSummaryRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let rows = sqlx::query_as::<_, JobKindSummaryRow>(
         r#"
         SELECT kind, COUNT(*)::bigint AS job_count
@@ -158,11 +158,11 @@ async fn list_job_status_summaries(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<JobStatusSummaryRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let rows = sqlx::query_as::<_, JobStatusSummaryRow>(
         r#"
         SELECT status, COUNT(*)::bigint AS job_count
@@ -195,11 +195,11 @@ async fn list_jobs(
     headers: HeaderMap,
     Query(q): Query<ListJobsQuery>,
 ) -> Result<Json<Vec<JobRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let kind = trim_query_opt(q.kind);
     let status = trim_query_opt(q.status);
     let rows = sqlx::query_as::<_, JobRow>(
@@ -227,11 +227,11 @@ async fn create_job(
     headers: HeaderMap,
     Json(body): Json<CreateJobBody>,
 ) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let kind = body.kind.trim();
     if kind.is_empty() {
         return Err(ApiError::BadRequest("kind must not be empty".into()));
@@ -303,11 +303,11 @@ async fn get_job(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let row = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
@@ -329,11 +329,11 @@ async fn cancel_job(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let updated = sqlx::query_as::<_, JobRow>(
         r#"
@@ -378,11 +378,11 @@ async fn retry_job(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let updated = sqlx::query_as::<_, JobRow>(
         r#"

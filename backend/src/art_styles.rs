@@ -154,11 +154,11 @@ async fn list_art_styles(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<ListArtStylesResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let total: i64 = sqlx::query_scalar(
         r#"SELECT COUNT(*)::bigint FROM app_art_style WHERE owner_user_id = $1"#,
@@ -191,11 +191,11 @@ async fn create_art_style(
     headers: HeaderMap,
     Json(body): Json<CreateArtStyleBody>,
 ) -> Result<(StatusCode, Json<ArtStyleRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let name = body.name.trim().to_string();
     if name.is_empty() {
@@ -254,11 +254,11 @@ async fn get_art_style_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy_id must be positive".into()));
@@ -287,11 +287,11 @@ async fn patch_art_style_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchArtStyleBody>,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy_id must be positive".into()));
@@ -377,11 +377,11 @@ async fn delete_art_style_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy_id must be positive".into()));

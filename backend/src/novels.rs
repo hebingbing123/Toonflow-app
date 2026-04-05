@@ -186,11 +186,11 @@ async fn list_novels(
     Query(query): Query<ListNovelsQuery>,
     headers: HeaderMap,
 ) -> Result<Json<ListNovelsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -250,11 +250,11 @@ async fn create_novel(
     headers: HeaderMap,
     Json(body): Json<CreateNovelBody>,
 ) -> Result<(StatusCode, Json<NovelRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -337,11 +337,11 @@ async fn get_novel_by_legacy(
     Path((project_legacy_id, novel_legacy_id)): Path<(i32, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<NovelRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || novel_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -375,11 +375,11 @@ async fn patch_novel_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchNovelBody>,
 ) -> Result<Json<NovelRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || novel_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
@@ -508,11 +508,11 @@ async fn delete_novel_by_legacy(
     Path((project_legacy_id, novel_legacy_id)): Path<(i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if project_legacy_id <= 0 || novel_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));

@@ -151,11 +151,11 @@ async fn query_memory(
     headers: HeaderMap,
     Json(body): Json<QueryMemoryBody>,
 ) -> Result<Json<Vec<MemoryHistoryItem>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
@@ -211,11 +211,11 @@ async fn clear_memory(
     headers: HeaderMap,
     Json(body): Json<ClearMemoryBody>,
 ) -> Result<Json<ClearMemoryResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
@@ -339,11 +339,11 @@ async fn append_memory(
     headers: HeaderMap,
     Json(body): Json<AppendMemoryBody>,
 ) -> Result<Json<AppendMemoryResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
 
     if body.content.trim().is_empty() {

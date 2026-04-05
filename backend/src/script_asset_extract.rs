@@ -51,12 +51,12 @@ async fn start_script_asset_extract(
     headers: HeaderMap,
     Json(body): Json<ExtractAssetsBody>,
 ) -> Result<Json<ExtractAcceptedResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     if body.project_legacy_id <= 0 {
         return Err(ApiError::BadRequest(

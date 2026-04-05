@@ -130,11 +130,11 @@ async fn create_under_script_legacy(
     headers: HeaderMap,
     Json(body): Json<CreateStoryboardBody>,
 ) -> Result<(StatusCode, Json<StoryboardRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let mut tx = pool
         .begin()
@@ -225,11 +225,11 @@ async fn list_by_script_legacy(
     Path(script_legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<StoryboardRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let rows = sqlx::query_as::<_, StoryboardRow>(
         r#"
@@ -258,11 +258,11 @@ async fn get_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<StoryboardRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let row = sqlx::query_as::<_, StoryboardRow>(
         r#"
@@ -292,11 +292,11 @@ async fn patch_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchStoryboardBody>,
 ) -> Result<Json<StoryboardRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let p_prompt = parse_optional_text_field(body.prompt, "prompt")?;
     let p_file = parse_optional_text_field(body.file_path, "file_path")?;
@@ -428,11 +428,11 @@ async fn delete_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let res = sqlx::query(
         r#"
