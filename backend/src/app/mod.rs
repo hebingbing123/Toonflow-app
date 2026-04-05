@@ -120,6 +120,20 @@ mod contract_smoke_tests {
         .await
     }
 
+    async fn patch_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PATCH)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
     async fn put_empty_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
         oneshot_json(
             Request::builder()
@@ -284,6 +298,35 @@ mod contract_smoke_tests {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
             delete_empty_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_asset_get_by_legacy_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/assets/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_asset_patch_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = patch_json_bearer(
+            "/api/v1/projects/legacy/1/assets/1",
+            &token,
+            r#"{"name":"patched"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn project_asset_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = delete_empty_bearer("/api/v1/projects/legacy/1/assets/1", &token).await;
         assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
         assert_eq!(v["code"], "database_error");
     }
@@ -454,6 +497,28 @@ mod pg_contract_tests {
         let (status, asset_row) = read_json_response(res).await;
         assert_eq!(status, StatusCode::CREATED, "asset={asset_row}");
         let asset_leg = asset_row["legacy_id"].as_i64().expect("asset legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, one_asset) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "one_asset={one_asset}");
+        assert_eq!(
+            one_asset["legacy_id"].as_i64().expect("legacy_id"),
+            i64::from(asset_leg)
+        );
+        assert_eq!(one_asset["name"].as_str(), Some("pg_contract_role_asset"));
 
         let res = app
             .clone()
