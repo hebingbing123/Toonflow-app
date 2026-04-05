@@ -156,11 +156,11 @@ async fn create_project(
     headers: HeaderMap,
     Json(body): Json<CreateProjectBody>,
 ) -> Result<(StatusCode, Json<ProjectRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let mut tx = pool
         .begin()
@@ -226,11 +226,11 @@ async fn list_projects(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<ProjectRow>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
     let rows = sqlx::query_as::<_, ProjectRow>(
         r#"
         SELECT id, legacy_id, name, intro, project_type,
@@ -308,11 +308,11 @@ async fn get_project_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<ProjectDetailResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
@@ -351,11 +351,11 @@ async fn project_stats_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<ProjectStatsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let project_id: Uuid = sqlx::query_scalar(
         r#"
@@ -435,11 +435,11 @@ async fn patch_project_by_legacy(
     headers: HeaderMap,
     Json(body): Json<PatchProjectBody>,
 ) -> Result<Json<ProjectRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let intro_patch = parse_optional_text_field(body.intro, "intro")?;
@@ -534,11 +534,11 @@ async fn delete_project_by_legacy(
     Path(legacy_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let uid = require_user_uuid(&state, &headers)?;
 
     let mut tx = pool
         .begin()

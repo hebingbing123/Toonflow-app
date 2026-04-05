@@ -438,6 +438,20 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn projects_list_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_stats_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/stats").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn art_styles_list_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/art-styles", &token).await;
