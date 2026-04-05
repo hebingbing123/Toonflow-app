@@ -69,6 +69,7 @@
 | **`docs/migration/`** | 旧栈 SQLite → Supabase PG 迁移说明（[`legacy-sqlite-to-supabase.md`](docs/migration/legacy-sqlite-to-supabase.md)） |
 
 > 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。  
+> 路线图中的 **Rust MVP + Flutter 壳**（`rust-backend-mvp` / `flutter-shell`）已可作为开发与契约探针基座；**完整产品切换**仍取决于 parity 与 **`product-shipping-bar`**（见 [`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)）。  
 > **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；勿反复询问「下一步」。Agent 行为约定见 **[`AGENTS.md`](AGENTS.md)**（含 **Cursor 里打开 Agent 自动运行 / allowlist** 的步骤）；若仍逐项要你点「运行」，按 `AGENTS.md` 的「希望尽量少点允许」一节检查设置。
 
 ### CI 与工程规范

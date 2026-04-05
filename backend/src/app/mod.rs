@@ -36,6 +36,7 @@ mod jwt_fixture {
 #[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
+    use std::sync::OnceLock;
 
     use axum::body::Body;
     use axum::extract::ConnectInfo;
@@ -49,11 +50,24 @@ mod contract_smoke_tests {
     use super::jwt_fixture;
     use crate::notify_hub::WsNotifyHub;
     use crate::state::AppState;
+    use axum::http::HeaderValue;
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
 
     const MAX_JSON: usize = 65_536;
     /// Shared with [`jwt_fixture::encode_supabase_style`]; must satisfy Supabase-style `aud` + HS256 verify.
     const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
     const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
+
+    /// Serialize billing webhook tests that read or write **`BILLING_WEBHOOK_SECRET`** (avoids parallel **`cargo test`** flakes).
+    static BILLING_WEBHOOK_TEST_MUTEX: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
+
+    async fn billing_webhook_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+        BILLING_WEBHOOK_TEST_MUTEX
+            .get_or_init(|| tokio::sync::Mutex::new(()))
+            .lock()
+            .await
+    }
 
     fn test_addr() -> SocketAddr {
         SocketAddr::from(([127, 0, 0, 1], 42_042))
@@ -316,6 +330,7 @@ mod contract_smoke_tests {
     /// **`POST /api/v1/webhooks/billing`** uses HMAC, not Bearer. Without **`BILLING_WEBHOOK_SECRET`** → **503** `webhook_not_configured`; with secret set but no/invalid **`X-Toonflow-Signature`** → **401** `invalid_webhook_signature` (before Postgres).
     #[tokio::test]
     async fn billing_webhook_smoke_rejects_without_valid_hmac() {
+        let _lock = billing_webhook_test_lock().await;
         let (status, v) = post_json("/api/v1/webhooks/billing", "{}").await;
         let secret_set = std::env::var("BILLING_WEBHOOK_SECRET")
             .map(|s| !s.trim().is_empty())
@@ -327,6 +342,43 @@ mod contract_smoke_tests {
             assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
             assert_eq!(v["code"], "webhook_not_configured");
         }
+    }
+
+    /// After HMAC verification, missing Postgres must surface **`database_error`** (not **200**).
+    #[tokio::test]
+    async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
+        let _lock = billing_webhook_test_lock().await;
+        let prev = std::env::var_os("BILLING_WEBHOOK_SECRET");
+        const SM_SECRET: &str = "contract-smoke-billing-hmac-secret-bytes!!";
+        std::env::set_var("BILLING_WEBHOOK_SECRET", SM_SECRET);
+
+        let body_json = r#"{"id":"evt_contract_smoke_billing_no_db"}"#;
+        let body = body_json.as_bytes();
+        let mut mac = Hmac::<Sha256>::new_from_slice(SM_SECRET.as_bytes()).expect("hmac key");
+        mac.update(body);
+        let sig = hex::encode(mac.finalize().into_bytes());
+        let sig_hdr = HeaderValue::from_str(&format!("sha256={sig}")).expect("signature header");
+
+        let (status, v) = oneshot_json_state(
+            smoke_state(),
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/webhooks/billing")
+                .header(header::CONTENT_TYPE, "application/json")
+                .header("x-toonflow-signature", sig_hdr)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(body_json.to_string()))
+                .unwrap(),
+        )
+        .await;
+
+        match &prev {
+            Some(p) => std::env::set_var("BILLING_WEBHOOK_SECRET", p),
+            None => std::env::remove_var("BILLING_WEBHOOK_SECRET"),
+        }
+
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
