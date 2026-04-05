@@ -2167,9 +2167,14 @@ mod pg_contract_tests {
             .unwrap();
         let (status, list_img) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "list_img={list_img}");
+        assert!(
+            list_img["cover_legacy_image_id"].is_null(),
+            "API-created asset has no metadata.imageId cover"
+        );
         let lim = list_img["items"].as_array().expect("image list items");
         assert_eq!(lim.len(), 1);
         assert_eq!(lim[0]["id"].as_str(), Some(img_uuid));
+        assert_eq!(lim[0]["selected"], false);
         assert!(
             lim[0]["legacy_image_id"].is_null(),
             "API-created image has no legacy_image_id"
@@ -2915,6 +2920,7 @@ mod pg_contract_tests {
             "name": "pg_promote_hero",
             "type": "character",
             "describe": "promoted lead",
+            "imageId": PROMO_IMAGE_LEG,
         });
         sqlx::query(
             r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
@@ -3134,6 +3140,37 @@ mod pg_contract_tests {
         assert_eq!(hist[0]["state"].as_str(), Some("已完成"));
         assert_eq!(
             hist[0]["legacy_image_id"].as_i64(),
+            Some(i64::from(PROMO_IMAGE_LEG))
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/{}/images",
+                        PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, promo_list_img) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "promo_list_img={promo_list_img}");
+        assert_eq!(
+            promo_list_img["cover_legacy_image_id"].as_i64(),
+            Some(i64::from(PROMO_IMAGE_LEG))
+        );
+        let plim = promo_list_img["items"]
+            .as_array()
+            .expect("promoted image list items");
+        assert_eq!(plim.len(), 1);
+        assert_eq!(plim[0]["selected"], true);
+        assert_eq!(
+            plim[0]["legacy_image_id"].as_i64(),
             Some(i64::from(PROMO_IMAGE_LEG))
         );
 

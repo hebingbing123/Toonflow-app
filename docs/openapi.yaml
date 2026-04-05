@@ -1256,6 +1256,7 @@ paths:
       operationId: listProjectAssetImagesByLegacyIdsV1
       description: |
         All **`app_asset_image`** rows for the asset, ordered by **`sort_index`** then **`created_at`** (includes any **`state`**, not only corner-scape **`已完成`**).
+        **`cover_legacy_image_id`** is **`app_asset.metadata.imageId`** (legacy **`o_assets.imageId`**); each item includes **`selected`** when **`legacy_image_id`** matches (**`getImage`** **`tempAssets`** parity; file URLs are not signed in this API).
       security:
         - bearerAuth: []
       parameters:
@@ -3787,10 +3788,25 @@ components:
       type: object
       required: [items]
       properties:
+        cover_legacy_image_id:
+          type: integer
+          format: int32
+          nullable: true
+          description: "Legacy o_assets.imageId from app_asset.metadata.imageId; null if unset."
         items:
           type: array
           items:
-            $ref: "#/components/schemas/AssetImageRow"
+            $ref: "#/components/schemas/AssetImageListItem"
+
+    AssetImageListItem:
+      allOf:
+        - $ref: "#/components/schemas/AssetImageRow"
+        - type: object
+          required: [selected]
+          properties:
+            selected:
+              type: boolean
+              description: True when legacy_image_id equals cover_legacy_image_id.
 
     AssetImageRow:
       type: object

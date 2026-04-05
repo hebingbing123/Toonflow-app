@@ -128,9 +128,19 @@ pub struct AssetImageRow {
     pub legacy_image_id: Option<i32>,
 }
 
+/// **`GET …/images`** list item: same row shape as **`AssetImageRow`** plus **`selected`** (legacy **`/api/assets/getImage`** **`tempAssets[].selected`**).
+#[derive(Debug, Serialize)]
+pub struct AssetImageListItem {
+    #[serde(flatten)]
+    pub row: AssetImageRow,
+    pub selected: bool,
+}
+
 #[derive(Debug, Serialize)]
 pub struct ListAssetImagesResponse {
-    pub items: Vec<AssetImageRow>,
+    /// Legacy **`o_assets.imageId`** read from **`app_asset.metadata.imageId`** after promote (or manual JSON); **`null`** if unset.
+    pub cover_legacy_image_id: Option<i32>,
+    pub items: Vec<AssetImageListItem>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -851,6 +861,46 @@ async fn resolve_owned_asset_id(
     id.ok_or(ApiError::NotFound)
 }
 
+fn metadata_cover_legacy_image_id(metadata: &Value) -> Option<i32> {
+    let v = metadata.get("imageId")?;
+    if v.is_null() {
+        return None;
+    }
+    if let Some(n) = v.as_i64() {
+        return i32::try_from(n).ok();
+    }
+    if let Some(n) = v.as_u64() {
+        return i32::try_from(n).ok();
+    }
+    v.as_str().and_then(|s| s.trim().parse::<i32>().ok())
+}
+
+async fn resolve_owned_asset_id_and_metadata(
+    pool: &PgPool,
+    uid: Uuid,
+    project_legacy_id: i32,
+    asset_legacy_id: i32,
+) -> Result<(Uuid, Value), ApiError> {
+    let row: Option<(Uuid, SqlxJson<Value>)> = sqlx::query_as(
+        r#"
+        SELECT a.id, a.metadata
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let (id, meta) = row.ok_or(ApiError::NotFound)?;
+    Ok((id, meta.0))
+}
+
 async fn list_project_asset_images(
     State(state): State<AppState>,
     Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
@@ -867,9 +917,11 @@ async fn list_project_asset_images(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let asset_id = resolve_owned_asset_id(pool, uid, project_legacy_id, asset_legacy_id).await?;
+    let (asset_id, metadata) =
+        resolve_owned_asset_id_and_metadata(pool, uid, project_legacy_id, asset_legacy_id).await?;
+    let cover_legacy_image_id = metadata_cover_legacy_image_id(&metadata);
 
-    let items = sqlx::query_as::<_, AssetImageRow>(
+    let rows = sqlx::query_as::<_, AssetImageRow>(
         r#"
         SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
         FROM app_asset_image
@@ -882,7 +934,18 @@ async fn list_project_asset_images(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(ListAssetImagesResponse { items }))
+    let items: Vec<AssetImageListItem> = rows
+        .into_iter()
+        .map(|row| {
+            let selected = cover_legacy_image_id.is_some_and(|c| row.legacy_image_id == Some(c));
+            AssetImageListItem { row, selected }
+        })
+        .collect();
+
+    Ok(Json(ListAssetImagesResponse {
+        cover_legacy_image_id,
+        items,
+    }))
 }
 
 async fn get_project_asset_image(

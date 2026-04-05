@@ -1914,7 +1914,7 @@ class CornerScapeAssetItem {
   }
 }
 
-/// OpenAPI **`AssetImageRow`** — response from **`POST …/assets/{aid}/images`**.
+/// OpenAPI **`AssetImageRow`** — response from **`POST …/assets/{aid}/images`** (and list items share these fields).
 class AssetImageRow {
   const AssetImageRow({
     required this.id,
@@ -1923,6 +1923,7 @@ class AssetImageRow {
     this.filePath,
     this.state,
     this.legacyImageId,
+    this.selected,
   });
 
   final String id;
@@ -1931,6 +1932,8 @@ class AssetImageRow {
   final String? filePath;
   final String? state;
   final int? legacyImageId;
+  /// Present on **`GET …/images`** list items only (`AssetImageListItem`).
+  final bool? selected;
 
   factory AssetImageRow.fromJson(Map<String, dynamic> json) {
     return AssetImageRow(
@@ -1940,19 +1943,25 @@ class AssetImageRow {
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
       legacyImageId: (json['legacy_image_id'] as num?)?.toInt(),
+      selected: json['selected'] as bool?,
     );
   }
 }
 
 /// OpenAPI **`ListAssetImagesResponse`**.
 class ListAssetImagesResponse {
-  const ListAssetImagesResponse({required this.items});
+  const ListAssetImagesResponse({
+    this.coverLegacyImageId,
+    required this.items,
+  });
 
+  final int? coverLegacyImageId;
   final List<AssetImageRow> items;
 
   factory ListAssetImagesResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['items'] as List<dynamic>;
     return ListAssetImagesResponse(
+      coverLegacyImageId: (json['cover_legacy_image_id'] as num?)?.toInt(),
       items: raw
           .map((e) => AssetImageRow.fromJson(e as Map<String, dynamic>))
           .toList(),
