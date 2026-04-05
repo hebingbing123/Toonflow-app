@@ -1381,6 +1381,48 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    try {
+                                      final r = await fetchProjectAssetsByLegacyId(
+                                        token,
+                                        p.legacyId,
+                                        assetType: 'role',
+                                        name: 'probe',
+                                      );
+                                      if (!ctx.mounted) return;
+                                      final ids = r.items
+                                          .take(4)
+                                          .map((a) => '#${a.legacyId}:${a.name}')
+                                          .join(', ');
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'GET …/assets?asset_type=role&name=probe：'
+                                            'total=${r.total}，返回 ${r.items.length} 条'
+                                            '${ids.isEmpty ? '' : ' · $ids'}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('GET 筛选 type+name'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
                                     assetsRef[0]!.items.isEmpty

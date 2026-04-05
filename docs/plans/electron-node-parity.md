@@ -28,7 +28,7 @@
 |--------|--------|-------------|------|
 | `/api/agents/clearMemory`、`getMemory` | Agent 记忆 | ✅ `POST /api/v1/agents/memory/clear`、`query`；append 见 OpenAPI | 旧「按 type 清」语义已对齐方向 |
 | `/api/artStyle/*` | 画风库 CRUD / 抽 prompt | ⏳ | 需 PG 表或并入 `metadata` 策略 |
-| `/api/assets/*` | 素材 CRUD、轮询出图等 | 🟡 | **CRUD（无出图）**：**`POST/GET/PATCH/DELETE …/projects/legacy/{id}/assets`**；**`GET` 列表**：**`{ items, total }`**，可选 **`script_legacy_id`**、**`asset_type`**、**`name`**、**`page`/`limit`**（对齐 **`getAssetsApi`** 分页/筛选；无父子资产层级）；**`stats.role_count`**；Flutter **`rust_api`**：**`fetchProjectAssetsByLegacyId`**（含 **`page`/`limit`**）、**`fetchProjectAssetByLegacyIds`**、**`createProjectAssetUnderLegacy`**、**`patchProjectAssetByLegacyIds`**、**`deleteProjectAssetByLegacyIds`**、**`linkScriptToAssetByLegacyIds`** / **`unlinkScriptFromAssetByLegacyIds`**；项目详情对话框探针（**`script_legacy_id`** 下拉筛选 + 列表行 + **GET 首条资产详情** + **GET 分页 page=1&limit=2**）；**无 DB 烟雾**：**`GET …/assets?page=1&limit=2`** → **503** **`database_error`**；**出图轮询 / 批量生成**仍 ⏳ |
+| `/api/assets/*` | 素材 CRUD、轮询出图等 | 🟡 | **CRUD（无出图）**：**`POST/GET/PATCH/DELETE …/projects/legacy/{id}/assets`**；**`GET` 列表**：**`{ items, total }`**，可选 **`script_legacy_id`**、**`asset_type`**、**`name`**、**`page`/`limit`**（对齐 **`getAssetsApi`** 分页/筛选；无父子资产层级）；**`stats.role_count`**；Flutter **`rust_api`**：**`fetchProjectAssetsByLegacyId`**（含 **`page`/`limit`**）、**`fetchProjectAssetByLegacyIds`**、**`createProjectAssetUnderLegacy`**、**`patchProjectAssetByLegacyIds`**、**`deleteProjectAssetByLegacyIds`**、**`linkScriptToAssetByLegacyIds`** / **`unlinkScriptFromAssetByLegacyIds`**；项目详情对话框探针（**`script_legacy_id`** 下拉筛选 + 列表行 + **GET 首条资产详情** + **GET 分页 page=1&limit=2** + **GET 筛选 asset_type+name**）；**无 DB 烟雾**：**`GET …/assets?page=1&limit=2`**、**`GET …/assets?script_legacy_id&asset_type&name&page&limit`** → **503** **`database_error`**；**出图轮询 / 批量生成**仍 ⏳ |
 | `/api/assetsGenerate/*` | 素材批量生成 / polish | ⏳ | 与 jobs + LLM 管线绑定 |
 | `/api/cornerScape/getAllAssets` | 角落素材 | ⏳ | |
 | `/api/general/generalStatistics` | 多项目统计 | ✅ `GET /api/v1/projects/summary` | 单项目见 `…/stats` |
@@ -68,7 +68,7 @@
 
 以 **`docs/openapi.yaml`** 为准（节选标签）：`system`、`session`、`projects`、`assets`、`scripts`、`storyboards`、`skills`、`harness`、`jobs`、`usage`、`models`、`agents`、`webhooks`。  
 **WebSocket**：`externalDocs` → `docs/websocket-events.md`。  
-**可选 PG 回归**：**`backend/src/app/mod.rs`** 中 **`app::pg_contract_tests::projects_create_stats_delete_roundtrip`**（**`cargo test pg_contract -- --ignored`**）在删项目前覆盖 **创建剧本/资产、`GET …/assets/{aid}`**、**`GET …/assets` 筛选、`PUT` 剧本–资产关联、分页查询、`DELETE` 取消关联后筛选为空**。**无 DB 烟雾**：**`contract_smoke_tests`** 对 **`GET`/`POST`/`PATCH`/`DELETE …/assets`（含单条路径）**、**`GET …/assets?page=1&limit=2`**、**`PUT`/`DELETE …/scripts/…/assets/…`** 断言 **503** `database_error`。
+**可选 PG 回归**：**`backend/src/app/mod.rs`** 中 **`app::pg_contract_tests::projects_create_stats_delete_roundtrip`**（**`cargo test pg_contract -- --ignored`**）在删项目前覆盖 **创建剧本/资产、`GET …/assets/{aid}`**、**`GET …/assets` 筛选、`PUT` 剧本–资产关联、分页查询、`DELETE` 取消关联后筛选为空**。**无 DB 烟雾**：**`contract_smoke_tests`** 对 **`GET`/`POST`/`PATCH`/`DELETE …/assets`（含单条路径）**、**`GET …/assets?page=1&limit=2`**、**`GET …/assets`（组合 **`script_legacy_id`/`asset_type`/`name`/`page`/`limit`**）**、**`PUT`/`DELETE …/scripts/…/assets/…`** 断言 **503** `database_error`。
 
 ## 5. 分波实施建议（把「完整后端」拆成可合并的 PR）
 

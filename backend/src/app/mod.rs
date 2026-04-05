@@ -280,6 +280,16 @@ mod contract_smoke_tests {
         assert_eq!(v["code"], "database_error");
     }
 
+    /// Combined list filters (parity with legacy **`getAssetsApi`** query surface).
+    #[tokio::test]
+    async fn project_assets_list_combined_filters_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let uri = "/api/v1/projects/legacy/1/assets?script_legacy_id=1&asset_type=role&name=probe&page=1&limit=2";
+        let (status, v) = get_json_bearer(uri, &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
     #[tokio::test]
     async fn project_assets_create_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
