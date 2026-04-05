@@ -25,7 +25,7 @@ info:
 
     **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, legacy **`o_prompt`** parity); **`GET /api/v1/prompts/{legacy_id}`** returns one merged row (**`legacy_id`** must be **1**, **2**, or **3**); **`PATCH /api/v1/prompts/{legacy_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
 
-    **Visual manual:** **`GET /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (legacy **`POST /api/project/getVisualManual`** parity); **`image`** paths are relative under **`data/skills`** (no OSS signing).
+    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches legacy **`POST /api/project/getVisualManual`** verb; body ignored). **`image`** paths are relative under **`data/skills`** (no OSS signing).
 
     **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`** for **`GET /api/v1/models/detail`**. Optional env **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** (composite id) when it matches the catalog.
 
@@ -51,7 +51,7 @@ tags:
   - name: art_styles
     description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset without OSS image upload
   - name: skills
-    description: Markdown skills under `backend/data/skills` (read; PUT overwrite; POST create; DELETE remove one file); visual manual (`GET /api/v1/visual-manual`) from bundled `art_skills`
+    description: Markdown skills under `backend/data/skills` (read; PUT overwrite; POST create; DELETE remove one file); visual manual (`GET`/`POST /api/v1/visual-manual`) from bundled `art_skills`
   - name: harness
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
@@ -2787,9 +2787,44 @@ paths:
       operationId: getVisualManualV1
       description: |
         Reads each subdirectory of **`data/skills/art_skills/`** (sorted by name). For every style: first line of **`README.md`** as **`name`** (legacy strips `--`), optional **`images/*.png`** etc. as relative paths, and fixed Markdown slots (**`README`**, **`prefix`**, **`art_prompt/*`**, **`driector_skills/*`**) matching legacy **`DATA_MAP`**.
-        Does not require Postgres.
+        Does not require Postgres. Prefer **GET** for new clients; **`POST /api/v1/visual-manual`** returns the same JSON for legacy **`POST /api/project/getVisualManual`** callers.
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisualManualResponse"
+        "400":
+          description: Skills tree missing or unreadable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [skills]
+      summary: Same as GET — legacy POST verb for getVisualManual
+      operationId: postVisualManualV1
+      description: |
+        Identical JSON to **`GET /api/v1/visual-manual`**. Accepts any JSON body (including **`{}`**); body is **ignored**.
+        Use when migrating clients that called legacy **`POST /api/project/getVisualManual`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Ignored; may be empty **`{}`**
       responses:
         "200":
           description: OK

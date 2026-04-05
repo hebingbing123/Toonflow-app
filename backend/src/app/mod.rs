@@ -607,6 +607,25 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn visual_manual_post_ok_with_jwt_when_art_skills_present() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer("/api/v1/visual-manual", &token, "{}").await;
+        assert_eq!(status, StatusCode::OK, "visual_manual_post={v}");
+        let styles = v["styles"].as_array().expect("styles");
+        assert!(styles.len() >= 2);
+        assert!(styles
+            .iter()
+            .any(|s| s["stylePath"].as_str() == Some("2D_90s_japanese_anime")));
+    }
+
+    #[tokio::test]
+    async fn visual_manual_post_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/visual-manual", "{}").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn skill_content_ok_with_jwt_for_known_file() {
         let token = test_jwt(Uuid::nil());
         let uri = "/api/v1/skills/content?path=script_execution_script.md";

@@ -111,7 +111,10 @@ pub struct VisualManualResponse {
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/api/v1/visual-manual", get(get_visual_manual))
+    Router::new().route(
+        "/api/v1/visual-manual",
+        get(get_visual_manual).post(post_visual_manual),
+    )
 }
 
 fn is_safe_style_component(name: &str) -> bool {
@@ -264,6 +267,14 @@ async fn get_visual_manual(
 ) -> Result<Json<VisualManualResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     Ok(Json(load_visual_manual()?))
+}
+
+/// Same payload as [`get_visual_manual`]; **POST** matches legacy **`POST /api/project/getVisualManual`** (body ignored).
+async fn post_visual_manual(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<VisualManualResponse>, ApiError> {
+    get_visual_manual(State(state), headers).await
 }
 
 #[cfg(test)]
