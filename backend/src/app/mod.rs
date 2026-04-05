@@ -120,6 +120,32 @@ mod contract_smoke_tests {
         .await
     }
 
+    async fn put_empty_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::PUT)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn delete_empty_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::DELETE)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
     #[tokio::test]
     async fn health_routes_ok_without_database() {
         for uri in ["/health", "/api/v1/health"] {
@@ -240,6 +266,24 @@ mod contract_smoke_tests {
             r#"{"name":"contract_smoke_role","type":"role"}"#,
         )
         .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn script_asset_link_put_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            put_empty_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn script_asset_unlink_delete_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            delete_empty_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1", &token).await;
         assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
         assert_eq!(v["code"], "database_error");
     }
@@ -471,6 +515,42 @@ mod pg_contract_tests {
                 .unwrap_or(0),
             1
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/scripts/{script_leg}/assets/{asset_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, empty_unlink) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NO_CONTENT, "unlink={empty_unlink}");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, unlinked) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "unlinked={unlinked}");
+        assert_eq!(unlinked["total"], 0);
 
         let res = app
             .clone()
