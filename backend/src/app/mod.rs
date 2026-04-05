@@ -544,6 +544,48 @@ mod pg_contract_tests {
             .oneshot(
                 Request::builder()
                     .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets?asset_type=role&name=pg_contract"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, by_type_name) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "by_type_name={by_type_name}");
+        assert_eq!(by_type_name["total"], 1);
+        let items = by_type_name["items"].as_array().expect("items");
+        assert_eq!(items.len(), 1);
+        assert_eq!(
+            items[0]["legacy_id"].as_i64().expect("legacy_id"),
+            i64::from(asset_leg)
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets?asset_type=tool&name=pg_contract"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, wrong_type) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "wrong_type={wrong_type}");
+        assert_eq!(wrong_type["total"], 0);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
                         "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}"
                     ))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
