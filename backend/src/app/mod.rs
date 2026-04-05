@@ -263,6 +263,22 @@ mod contract_smoke_tests {
         assert_eq!(v["code"], "unauthorized");
     }
 
+    /// **`POST /api/v1/webhooks/billing`** uses HMAC, not Bearer. Without **`BILLING_WEBHOOK_SECRET`** → **503** `webhook_not_configured`; with secret set but no/invalid **`X-Toonflow-Signature`** → **401** `invalid_webhook_signature` (before Postgres).
+    #[tokio::test]
+    async fn billing_webhook_smoke_rejects_without_valid_hmac() {
+        let (status, v) = post_json("/api/v1/webhooks/billing", "{}").await;
+        let secret_set = std::env::var("BILLING_WEBHOOK_SECRET")
+            .map(|s| !s.trim().is_empty())
+            .unwrap_or(false);
+        if secret_set {
+            assert_eq!(status, StatusCode::UNAUTHORIZED);
+            assert_eq!(v["code"], "invalid_webhook_signature");
+        } else {
+            assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+            assert_eq!(v["code"], "webhook_not_configured");
+        }
+    }
+
     #[tokio::test]
     async fn models_list_ok_with_supabase_style_jwt() {
         let token = test_jwt(Uuid::nil());
