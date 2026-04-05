@@ -257,6 +257,13 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn models_detail_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/models/detail?model_id=1%3Agpt-4o-mini").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn models_list_ok_with_supabase_style_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/models", &token).await;
@@ -795,6 +802,54 @@ mod contract_smoke_tests {
     #[tokio::test]
     async fn art_styles_create_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/art-styles", r#"{"name":"smoke"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn art_style_patch_unauthorized_without_bearer() {
+        let (status, v) =
+            patch_json_no_bearer("/api/v1/art-styles/legacy/1", r#"{"label":"x"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn art_style_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/art-styles/legacy/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_asset_create_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/projects/legacy/1/assets",
+            r#"{"name":"smoke","type":"role"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_asset_get_unauthorized_without_bearer() {
+        let (status, v) = get_json("/api/v1/projects/legacy/1/assets/1").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_asset_patch_unauthorized_without_bearer() {
+        let (status, v) =
+            patch_json_no_bearer("/api/v1/projects/legacy/1/assets/1", r#"{"name":"x"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn project_asset_delete_unauthorized_without_bearer() {
+        let (status, v) = delete_empty_no_bearer("/api/v1/projects/legacy/1/assets/1").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert_eq!(v["code"], "unauthorized");
     }
