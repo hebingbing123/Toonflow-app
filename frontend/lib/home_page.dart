@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   String? _meBody;
   String? _devSwitchProbeBody;
   String? _memoryConfigProbeBody;
+  String? _aboutProbeBody;
   String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingMe = false;
   bool _loadingDevSwitchProbe = false;
   bool _loadingMemoryConfigProbe = false;
+  bool _loadingAboutProbe = false;
   bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
@@ -449,6 +451,49 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _error = e.toString();
         _loadingMemoryConfigProbe = false;
+      });
+    }
+  }
+
+  Future<void> _callAboutProbe() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    setState(() {
+      _loadingAboutProbe = true;
+      _error = null;
+      _aboutProbeBody = null;
+    });
+    try {
+      final cu = await postAboutCheckUpdateV1(token, 'toonflow');
+      final dl = await postAboutDownloadAppV1(
+        token,
+        url: 'https://example.com/toonflow-setup.dmg',
+        reinstall: true,
+      );
+      if (!mounted) return;
+      if (dl != 501) {
+        setState(() {
+          _error = 'POST download-app expected 501, got $dl';
+          _loadingAboutProbe = false;
+        });
+        return;
+      }
+      setState(() {
+        _aboutProbeBody =
+            'check-update: needUpdate=${cu.needUpdate} latest=${cu.latestVersion} · download-app -> $dl';
+        _loadingAboutProbe = false;
+      });
+    } on RustApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingAboutProbe = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loadingAboutProbe = false;
       });
     }
   }
@@ -3835,6 +3880,19 @@ class _HomePageState extends State<HomePage> {
               if (_memoryConfigProbeBody != null) ...[
                 const SizedBox(height: 8),
                 SelectableText('memory-config: $_memoryConfigProbeBody'),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: _loadingAboutProbe ? null : _callAboutProbe,
+                child: Text(
+                  _loadingAboutProbe
+                      ? '请求中…'
+                      : 'POST …/settings/about/check-update + download-app',
+                ),
+              ),
+              if (_aboutProbeBody != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('about: $_aboutProbeBody'),
               ],
               const SizedBox(height: 8),
               FilledButton.tonal(

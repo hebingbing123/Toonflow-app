@@ -1500,6 +1500,60 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_about_check_update_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/settings/about/check-update",
+            r#"{"source":"toonflow"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn settings_about_check_update_stub_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/about/check-update",
+            &token,
+            r#"{"source":"github"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["needUpdate"], false);
+        assert_eq!(v["reinstall"], false);
+        assert!(v["latestVersion"].as_str().is_some_and(|s| !s.is_empty()));
+        assert!(v["time"].as_str().is_some_and(|s| !s.is_empty()));
+        assert!(v.get("url").is_none() || v["url"].is_null());
+    }
+
+    #[tokio::test]
+    async fn settings_about_download_app_not_implemented_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/about/download-app",
+            &token,
+            r#"{"url":"https://example.com/app.dmg","reinstall":true}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_about_download_app_rejects_bad_url_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/about/download-app",
+            &token,
+            r#"{"url":"not-a-url","reinstall":false}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn skills_summary_unauthorized_without_bearer() {
         let (status, v) = get_json("/api/v1/skills/summary").await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);

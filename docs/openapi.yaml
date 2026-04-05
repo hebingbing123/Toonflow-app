@@ -33,6 +33,8 @@ info:
 
     **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values are held in server memory per process (not Postgres); restart resets to defaults.
 
+    **About / updates (desktop legacy):** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** **`not_implemented`** (local installer / zip apply is Electron-only).
+
 servers:
   - url: http://127.0.0.1:8666
     description: Local dev (default `PORT`; override with env)
@@ -378,6 +380,89 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/about/check-update:
+    post:
+      tags: [settings]
+      summary: Desktop update check (SaaS stub)
+      operationId: postAboutCheckUpdateV1
+      description: |
+        Bearer JWT. Body **`source`** matches legacy **`POST /api/setting/about/checkUpdate`** (**`toonflow`**, **`github`**, **`gitee`**, **`atomgit`**).
+        Does not call the legacy OSS manifest: responds **`needUpdate: false`**, **`latestVersion`** = server **`CARGO_PKG_VERSION`**, **`reinstall: false`**, **`time`** = current UTC RFC3339, no **`url`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AboutCheckUpdateRequest"
+      responses:
+        "200":
+          description: OK (stub — no remote version comparison)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AboutCheckUpdateResponse"
+        "400":
+          description: Invalid JSON or unknown fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/about/download-app:
+    post:
+      tags: [settings]
+      summary: Download and run installer (not supported)
+      operationId: postAboutDownloadAppV1
+      description: |
+        Bearer JWT. Validates **`url`** (**http** or **https**) and **`reinstall`**, then **501** **`not_implemented`**: the Rust API does not download binaries or mutate local **`serve`/`web`/`skills`/`models`** trees (legacy Electron **`downloadApp`**).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AboutDownloadAppRequest"
+      responses:
+        "400":
+          description: Missing/invalid **`url`** or bad JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Local download/install is not implemented on this API
           content:
             application/json:
               schema:
@@ -3764,6 +3849,48 @@ components:
           type: string
           description: Legacy sureMemory success text
           example: 保存设置成功
+
+    AboutCheckUpdateSource:
+      type: string
+      enum: [toonflow, github, gitee, atomgit]
+      description: Legacy checkUpdate **`source`** field
+
+    AboutCheckUpdateRequest:
+      type: object
+      required: [source]
+      properties:
+        source:
+          $ref: "#/components/schemas/AboutCheckUpdateSource"
+
+    AboutCheckUpdateResponse:
+      type: object
+      required: [needUpdate, latestVersion, reinstall, time]
+      properties:
+        needUpdate:
+          type: boolean
+        latestVersion:
+          type: string
+          description: Server crate version when using the SaaS stub
+        reinstall:
+          type: boolean
+        time:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp (stub uses response time, not remote manifest)
+        url:
+          type: string
+          format: uri
+          description: Present only when an update would include a download URL (stub omits)
+
+    AboutDownloadAppRequest:
+      type: object
+      required: [url, reinstall]
+      properties:
+        url:
+          type: string
+          format: uri
+        reinstall:
+          type: boolean
 
     ReadyResponse:
       type: object
