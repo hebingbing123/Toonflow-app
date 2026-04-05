@@ -2291,7 +2291,7 @@ Future<AssetRow> createProjectAssetUnderLegacy(
 
 /// `PATCH /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}` — see `patchProjectAssetByLegacyIdsV1`.
 ///
-/// [body] must match OpenAPI **`PatchAssetBody`** (only **`name`** / **`description`** / **`asset_type`**).
+/// [body] must match OpenAPI **`PatchAssetBody`** (**`name`** / **`description`** / **`asset_type`** / **`cover_legacy_image_id`**).
 Future<AssetRow> patchProjectAssetByLegacyIds(
   String accessToken,
   int projectLegacyId,

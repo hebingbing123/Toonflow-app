@@ -3681,7 +3681,7 @@ components:
     PatchAssetBody:
       type: object
       additionalProperties: false
-      description: At least one property required; unknown properties rejected (**400**).
+      description: "At least one property required; unknown properties rejected (400). cover_legacy_image_id maps to app_asset.metadata.imageId (legacy o_assets.imageId); when a number, must match app_asset_image.legacy_image_id for this asset."
       properties:
         name:
           type: string
@@ -3692,6 +3692,11 @@ components:
         asset_type:
           type: string
           enum: [role, tool, scene]
+        cover_legacy_image_id:
+          type: integer
+          format: int32
+          nullable: true
+          description: "Set or clear cover selection for image list parity; null removes metadata.imageId."
 
     AssetRow:
       type: object

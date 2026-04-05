@@ -114,6 +114,9 @@ struct PatchAssetBody {
     description: Option<Value>,
     #[serde(default)]
     asset_type: Option<Value>,
+    /// Maps to **`app_asset.metadata.imageId`** (legacy **`o_assets.imageId`**); **`null`** clears. Must match an existing **`app_asset_image.legacy_image_id`** for this asset when set to a number.
+    #[serde(default)]
+    cover_legacy_image_id: Option<Value>,
 }
 
 /// One **`app_asset_image`** row returned after **`GET`/`POST …/images`** or **`PATCH …/images/{image_id}`**.
@@ -1163,6 +1166,45 @@ async fn delete_project_asset_image(
     Ok(StatusCode::NO_CONTENT)
 }
 
+fn merge_metadata_image_id(mut meta: Value, patch: &FieldPatch<i32>) -> Value {
+    if !meta.is_object() {
+        meta = Value::Object(Default::default());
+    }
+    if let Some(obj) = meta.as_object_mut() {
+        match patch {
+            FieldPatch::Absent => {}
+            FieldPatch::Set(None) => {
+                obj.remove("imageId");
+            }
+            FieldPatch::Set(Some(n)) => {
+                obj.insert("imageId".into(), serde_json::json!(n));
+            }
+        }
+    }
+    meta
+}
+
+async fn cover_legacy_image_exists_for_asset(
+    pool: &PgPool,
+    asset_id: Uuid,
+    legacy_image_id: i32,
+) -> Result<bool, ApiError> {
+    let ok: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS (
+          SELECT 1 FROM app_asset_image
+          WHERE asset_id = $1 AND legacy_image_id = $2
+        )
+        "#,
+    )
+    .bind(asset_id)
+    .bind(legacy_image_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(ok)
+}
+
 fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
     let p = parse_optional_text_field(v, "asset_type")?;
     match &p {
@@ -1180,6 +1222,15 @@ fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiErr
             Ok(FieldPatch::Set(Some(t)))
         }
     }
+}
+
+#[derive(Debug, FromRow)]
+struct AssetPatchCurrent {
+    id: Uuid,
+    name: String,
+    asset_type: String,
+    description: Option<String>,
+    metadata: SqlxJson<Value>,
 }
 
 async fn patch_project_asset_by_legacy(
@@ -1201,19 +1252,22 @@ async fn patch_project_asset_by_legacy(
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let desc_patch = parse_optional_text_field(body.description, "description")?;
     let type_patch = parse_asset_type_patch(body.asset_type)?;
+    let cover_patch =
+        parse_optional_i32_field(body.cover_legacy_image_id, "cover_legacy_image_id")?;
 
     if matches!(name_patch, FieldPatch::Absent)
         && matches!(desc_patch, FieldPatch::Absent)
         && matches!(type_patch, FieldPatch::Absent)
+        && matches!(cover_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one of: name, description, asset_type".into(),
+            "expected at least one of: name, description, asset_type, cover_legacy_image_id".into(),
         ));
     }
 
-    let current = sqlx::query_as::<_, AssetRow>(
+    let current = sqlx::query_as::<_, AssetPatchCurrent>(
         r#"
-        SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+        SELECT a.id, a.name, a.asset_type, a.description, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.legacy_id = $1
@@ -1228,6 +1282,16 @@ async fn patch_project_asset_by_legacy(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
+
+    if let FieldPatch::Set(Some(leg)) = &cover_patch {
+        if !cover_legacy_image_exists_for_asset(pool, current.id, *leg).await? {
+            return Err(ApiError::BadRequest(
+                "cover_legacy_image_id must match an app_asset_image row for this asset".into(),
+            ));
+        }
+    }
+
+    let new_metadata = merge_metadata_image_id(current.metadata.0.clone(), &cover_patch);
 
     let new_name = match &name_patch {
         FieldPatch::Absent => current.name.clone(),
@@ -1286,18 +1350,20 @@ async fn patch_project_asset_by_legacy(
         SET name = $1,
             description = $2,
             asset_type = $3,
+            metadata = $4,
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.legacy_id = $4
-          AND p.owner_user_id = $5
-          AND a.legacy_id = $6
+          AND p.legacy_id = $5
+          AND p.owner_user_id = $6
+          AND a.legacy_id = $7
         RETURNING a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
         "#,
     )
     .bind(&new_name)
     .bind(&new_desc)
     .bind(&new_type)
+    .bind(SqlxJson(new_metadata))
     .bind(project_legacy_id)
     .bind(uid)
     .bind(asset_legacy_id)
@@ -1359,6 +1425,16 @@ mod tests {
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),
             "{err}"
+        );
+    }
+
+    #[test]
+    fn patch_asset_body_accepts_cover_legacy_image_id_only() {
+        let b: PatchAssetBody = serde_json::from_str(r#"{"cover_legacy_image_id":42}"#).unwrap();
+        assert!(b.name.is_none());
+        assert_eq!(
+            crate::json_patch::parse_optional_i32_field(b.cover_legacy_image_id, "c").unwrap(),
+            FieldPatch::Set(Some(42))
         );
     }
 

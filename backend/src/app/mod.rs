@@ -2208,6 +2208,26 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"cover_legacy_image_id":424242}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, bad_cov) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "bad_cov={bad_cov}");
+        assert_eq!(bad_cov["code"].as_str(), Some("bad_request"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .method(Method::POST)
                     .uri(format!(
                         "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
@@ -3173,6 +3193,94 @@ mod pg_contract_tests {
             plim[0]["legacy_image_id"].as_i64(),
             Some(i64::from(PROMO_IMAGE_LEG))
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/{}",
+                        PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"cover_legacy_image_id":null}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "clear cover via PATCH");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/{}/images",
+                        PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, cleared_list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "cleared_list={cleared_list}");
+        assert!(cleared_list["cover_legacy_image_id"].is_null());
+        let clim = cleared_list["items"].as_array().expect("cleared items");
+        assert_eq!(clim[0]["selected"], false);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/{}",
+                        PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"cover_legacy_image_id":{}}}"#,
+                        PROMO_IMAGE_LEG
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "restore cover via PATCH");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{}/assets/{}/images",
+                        PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, restored_list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "restored_list={restored_list}");
+        assert_eq!(
+            restored_list["cover_legacy_image_id"].as_i64(),
+            Some(i64::from(PROMO_IMAGE_LEG))
+        );
+        let rlim = restored_list["items"].as_array().expect("restored items");
+        assert_eq!(rlim[0]["selected"], true);
 
         let res = app
             .clone()
