@@ -2240,6 +2240,58 @@ class _HomePageState extends State<HomePage> {
                                   ? null
                                   : () async {
                                       setDialogState(
+                                        () => generalLegacyBusy[0] = true,
+                                      );
+                                      final pr = detail.project;
+                                      try {
+                                        final updated =
+                                            await updateProjectByLegacyId(
+                                          token,
+                                          p.legacyId,
+                                          <String, dynamic>{
+                                            'name': pr.name ?? '',
+                                          },
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'PATCH …/projects/legacy/${p.legacyId} '
+                                              'name noop → ${updated.name ?? "(null)"}',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                generalLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                generalLegacyBusy[0]
+                                    ? 'general…'
+                                    : 'PATCH projects/legacy (name noop)',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
                                         () => projectLegacyBusy[0] = true,
                                       );
                                       try {
