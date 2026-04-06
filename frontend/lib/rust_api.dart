@@ -1375,6 +1375,35 @@ Future<PromptTemplateRowV1> fetchPromptByLegacyIdV1(
   return PromptTemplateRowV1.fromJson(map);
 }
 
+/// `PATCH /api/v1/prompts/{legacy_id}` — OpenAPI `patchPromptByLegacyIdV1` (**`data`** only).
+///
+/// **`legacy_id`** must be **1**, **2**, or **3**. Returns the updated row (same shape as GET).
+Future<PromptTemplateRowV1> patchPromptByLegacyIdV1(
+  String accessToken,
+  int legacyId,
+  String data,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$legacyId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'data': data}),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PromptTemplateRowV1.fromJson(map);
+}
+
 /// OpenAPI **`VisualManualEntry`**.
 class VisualManualEntryV1 {
   const VisualManualEntryV1({

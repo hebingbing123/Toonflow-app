@@ -559,9 +559,22 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       final types = rows.map((r) => r.type).join(', ');
       final totalChars = rows.fold<int>(0, (a, r) => a + r.data.length);
+      var roundtrip = '';
+      final r1s = rows.where((r) => r.id == 1);
+      if (r1s.isNotEmpty) {
+        final r1 = r1s.first;
+        try {
+          await fetchPromptByLegacyIdV1(token, 1);
+          final patched = await patchPromptByLegacyIdV1(token, 1, r1.data);
+          roundtrip =
+              ' · GET/1+PATCH/1 ok (data_len=${patched.data.length})';
+        } on RustApiException catch (e) {
+          roundtrip = ' · GET/1+PATCH/1 -> ${e.statusCode}';
+        }
+      }
       setState(() {
         _promptsProbeBody =
-            'count=${rows.length} · types=$types · data_chars_total=$totalChars';
+            'count=${rows.length} · types=$types · data_chars_total=$totalChars$roundtrip';
         _loadingPromptsProbe = false;
       });
     } on RustApiException catch (e) {
@@ -4810,7 +4823,9 @@ class _HomePageState extends State<HomePage> {
               FilledButton.tonal(
                 onPressed: _loadingPromptsProbe ? null : _callPromptsProbe,
                 child: Text(
-                  _loadingPromptsProbe ? '请求中…' : 'GET /api/v1/prompts',
+                  _loadingPromptsProbe
+                      ? '请求中…'
+                      : 'GET /api/v1/prompts + GET/1 + PATCH/1',
                 ),
               ),
               if (_promptsProbeBody != null) ...[
