@@ -11,6 +11,9 @@ pub struct ErrorBody {
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub request_id: Option<String>,
+    /// Milliseconds until the rate-limit / quota window resets. Present on **429** responses.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retry_after_ms: Option<u64>,
 }
 
 #[derive(Debug)]
@@ -33,7 +36,7 @@ pub enum ApiError {
     /// HTTP **501** — capability not implemented (e.g. legacy write path without Postgres backing yet).
     NotImplemented(String),
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
-    /// Automatically adds `Retry-After` header with seconds until UTC midnight.
+    /// Automatically adds `Retry-After` header (seconds) and `retry_after_ms` in body.
     QuotaExceeded(String),
 }
 
@@ -105,17 +108,24 @@ impl IntoResponse for ApiError {
             ),
         };
 
+        let is_quota = matches!(self, ApiError::QuotaExceeded(_));
+        let retry_secs = if is_quota {
+            Some(secs_until_utc_midnight())
+        } else {
+            None
+        };
+
         let body = ErrorBody {
             code: code.to_string(),
             message: message.to_string(),
             request_id: None,
+            retry_after_ms: retry_secs.map(|s| s * 1_000),
         };
 
         let mut resp = (status, Json(body)).into_response();
 
-        // Attach Retry-After for quota errors so clients know when the daily window resets.
-        if matches!(self, ApiError::QuotaExceeded(_)) {
-            let secs = secs_until_utc_midnight();
+        // Also set the standard Retry-After header (seconds) for HTTP clients.
+        if let Some(secs) = retry_secs {
             if let Ok(val) = HeaderValue::from_str(&secs.to_string()) {
                 resp.headers_mut().insert(header::RETRY_AFTER, val);
             }
@@ -131,14 +141,14 @@ mod tests {
     use axum::response::IntoResponse;
 
     #[test]
-    fn quota_exceeded_has_retry_after_header() {
+    fn quota_exceeded_has_retry_after_header_and_body_ms() {
         let resp = ApiError::QuotaExceeded("limit reached".into()).into_response();
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
-        let retry = resp
+        let retry_hdr = resp
             .headers()
             .get(header::RETRY_AFTER)
             .expect("Retry-After header present");
-        let secs: u64 = retry.to_str().unwrap().parse().expect("numeric");
+        let secs: u64 = retry_hdr.to_str().unwrap().parse().expect("numeric");
         assert!(secs > 0 && secs <= 86_400, "secs={secs}");
     }
 
