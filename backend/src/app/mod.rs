@@ -2550,49 +2550,20 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_memory_config_get_post_roundtrip_same_state() {
-        let state = smoke_state();
+    async fn settings_memory_config_get_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
-        let (status, v) = oneshot_json_state(
-            state.clone(),
-            Request::builder()
-                .uri("/api/v1/settings/memory-config")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await;
-        assert_eq!(status, StatusCode::OK);
-        assert_eq!(v["messagesPerSummary"], 10);
-        assert_eq!(v["ragLimit"], 3);
-        let body = r#"{"messagesPerSummary":10,"shortTermLimit":5,"summaryMaxLength":500,"summaryLimit":10,"ragLimit":42,"deepRetrieveSummaryLimit":5,"modelOnnxFile":["all-MiniLM-L6-v2","onnx","model_fp16.onnx"],"modelDtype":"fp16"}"#;
-        let (status2, v2) = oneshot_json_state(
-            state.clone(),
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/settings/memory-config")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(body.to_string()))
-                .unwrap(),
-        )
-        .await;
-        assert_eq!(status2, StatusCode::OK);
-        assert_eq!(v2["message"], "保存设置成功");
-        let (status3, v3) = oneshot_json_state(
-            state,
-            Request::builder()
-                .uri("/api/v1/settings/memory-config")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await;
-        assert_eq!(status3, StatusCode::OK);
-        assert_eq!(v3["ragLimit"], 42);
+        let (status, v) = get_json_bearer("/api/v1/settings/memory-config", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn settings_memory_config_post_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let body = r#"{"messagesPerSummary":10,"shortTermLimit":5,"summaryMaxLength":500,"summaryLimit":10,"ragLimit":3,"deepRetrieveSummaryLimit":5,"modelOnnxFile":["all-MiniLM-L6-v2","onnx","model_fp16.onnx"],"modelDtype":"fp16"}"#;
+        let (status, v) = post_json_bearer("/api/v1/settings/memory-config", &token, body).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
