@@ -2100,6 +2100,73 @@ class _HomePageState extends State<HomePage> {
                                   ? null
                                   : () async {
                                       setDialogState(
+                                        () => generalLegacyBusy[0] = true,
+                                      );
+                                      try {
+                                        final origIntro = introCtrl.text;
+                                        final probeIntro = origIntro.isEmpty
+                                            ? '[flutter general probe]'
+                                            : '$origIntro [flutter general probe]';
+                                        final msg1 =
+                                            await postGeneralUpdateProject(
+                                          token,
+                                          <String, dynamic>{
+                                            'id': p.legacyId,
+                                            'intro': probeIntro,
+                                          },
+                                        );
+                                        final restoreBody =
+                                            <String, dynamic>{
+                                          'id': p.legacyId,
+                                          if (origIntro.isEmpty)
+                                            'intro': null
+                                          else
+                                            'intro': origIntro,
+                                        };
+                                        final msg2 =
+                                            await postGeneralUpdateProject(
+                                          token,
+                                          restoreBody,
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'POST …/general/update-project：$msg1 → restored ($msg2)',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                generalLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                generalLegacyBusy[0]
+                                    ? 'general…'
+                                    : 'POST general update-project',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
                                         () => projectLegacyBusy[0] = true,
                                       );
                                       try {
