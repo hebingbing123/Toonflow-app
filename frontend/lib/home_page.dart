@@ -4134,6 +4134,48 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => scriptProbeBusy[0] = true);
                                     try {
+                                      final sid = scriptList.first.legacyId;
+                                      final row = await fetchScriptByLegacyId(
+                                        token,
+                                        sid,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'GET …/scripts/legacy/$sid：'
+                                            '${row.name ?? "(null)"}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => scriptProbeBusy[0] = false,
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: Text(
+                              scriptProbeBusy[0]
+                                  ? 'script…'
+                                  : 'GET scripts/legacy (首条)',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: scriptProbeBusy[0] ||
+                                    scriptList.isEmpty ||
+                                    saving[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    try {
                                       final ids = scriptList
                                           .map((s) => s.legacyId)
                                           .toList();
