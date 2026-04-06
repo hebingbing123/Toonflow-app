@@ -291,6 +291,21 @@ async fn projects_summary(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    // Count succeeded video jobs across all user projects.
+    let video_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+          AND status = 'succeeded'
+          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
+        "#,
+    )
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectsSummaryResponse {
         project_count: row.0,
         script_count: row.1,
@@ -299,7 +314,7 @@ async fn projects_summary(
         role_count: row.4,
         art_style_count: row.5,
         asset_count: row.6,
-        video_count: 0,
+        video_count,
     }))
 }
 
@@ -420,12 +435,32 @@ async fn project_stats_by_legacy(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    // Count succeeded video-generation jobs whose payload references this project.
+    // Matches kinds containing "video" or "workbench" (production workbench pipeline).
+    let video_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_generation_job
+        WHERE owner_user_id = $2
+          AND status = 'succeeded'
+          AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
+          AND payload->>'project_legacy_id' = (
+              SELECT legacy_id::text FROM app_project WHERE id = $1
+          )
+        "#,
+    )
+    .bind(project_id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(Json(ProjectStatsResponse {
         script_count,
         storyboard_count,
         role_count,
         novel_count,
-        video_count: 0,
+        video_count,
     }))
 }
 
