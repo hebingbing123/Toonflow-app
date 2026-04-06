@@ -1764,6 +1764,84 @@ Future<List<dynamic>> queryAgentMemory(
   return jsonDecode(res.body) as List<dynamic>;
 }
 
+/// `POST /api/v1/agents/memory/clear` — OpenAPI `clearAgentMemoryV1` (**`clearType`**: `all` | `message` | `summary`).
+///
+/// Legacy **`type`** is also accepted by the server as an alias for **`clearType`**.
+Future<bool> clearAgentMemory(
+  String accessToken, {
+  required int projectId,
+  required String agentType,
+  int? episodesId,
+  String clearType = 'all',
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/clear');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'agentType': agentType,
+    'clearType': clearType,
+  };
+  if (episodesId != null) body['episodesId'] = episodesId;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['ok'] == true;
+}
+
+/// `POST /api/v1/agents/memory/append` — OpenAPI `appendAgentMemoryV1`; returns new message UUID.
+Future<String> appendAgentMemory(
+  String accessToken, {
+  required int projectId,
+  required String agentType,
+  required String content,
+  int? episodesId,
+  String role = 'user',
+  String? name,
+  int? createTime,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/append');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'agentType': agentType,
+    'content': content,
+    'role': role,
+  };
+  if (episodesId != null) body['episodesId'] = episodesId;
+  if (name != null) body['name'] = name;
+  if (createTime != null) body['createTime'] = createTime;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['id'] as String;
+}
+
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
@@ -2513,6 +2591,39 @@ Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ListArtStylesResponse.fromJson(map);
+}
+
+/// `POST /api/v1/art-styles` — OpenAPI `createArtStyleV1` (**201** + row).
+Future<ArtStyleRow> createArtStyle(
+  String accessToken, {
+  required String name,
+  String? fileUrl,
+  String? label,
+  String? prompt,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles');
+  final body = <String, dynamic>{'name': name};
+  if (fileUrl != null) body['file_url'] = fileUrl;
+  if (label != null) body['label'] = label;
+  if (prompt != null) body['prompt'] = prompt;
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ArtStyleRow.fromJson(map);
 }
 
 /// `POST /api/v1/art-styles/extract-prompt` — vision LLM; see `extractArtStylePromptV1`.

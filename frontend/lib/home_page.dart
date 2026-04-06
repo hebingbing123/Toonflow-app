@@ -1154,8 +1154,22 @@ class _HomePageState extends State<HomePage> {
         agentType: 'scriptAgent',
       );
       if (!mounted) return;
+      var appendBit = '';
+      try {
+        final id = await appendAgentMemory(
+          token,
+          projectId: legacyId,
+          agentType: 'scriptAgent',
+          content: '[flutter probe] ${DateTime.now().toIso8601String()}',
+        );
+        final short = id.length > 8 ? '${id.substring(0, 8)}…' : id;
+        appendBit = ' · append id=$short';
+      } on RustApiException catch (e) {
+        appendBit = ' · append -> ${e.statusCode}';
+      }
       setState(() {
-        _agentMemoryBody = '${rows.length} message(s) for project $legacyId';
+        _agentMemoryBody =
+            '${rows.length} message(s) for project $legacyId$appendBit';
         _loadingAgentMemory = false;
       });
     } on RustApiException catch (e) {
