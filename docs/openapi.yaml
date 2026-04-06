@@ -27,7 +27,7 @@ info:
 
     **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches legacy **`POST /api/project/getVisualManual`**; body ignored). **`POST /api/v1/project/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** mirror **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`** (same 12 Markdown slots as **`GET`**). **`image`** paths stay relative under **`data/skills`** (no OSS signing).
 
-    **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`** for **`GET /api/v1/models/detail`**. Optional env **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** (composite id) when it matches the catalog.
+    **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`**. Priority: per-user preference (set via **`PATCH /api/v1/models/text-default`** → `app_user_profile.preferred_text_model_id`) → **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env → first catalog text model.
 
     **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** reads **`TOONFLOW_SWITCH_AI_DEV_TOOL`** (**`"1"`** on, else **`"0"`**), parity with legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** then returns **501** **`not_implemented`** (no per-user SQLite **`o_setting`** persistence).
 
@@ -1289,7 +1289,10 @@ paths:
       operationId: getTextModelDefaultV1
       description: |
         Bearer JWT. Legacy **`POST /api/setting/getTextModel`** returned envelope **`data`** **`"123"`** (unused stub).
-        This route keeps **`legacy_placeholder`** **`"123"`** and adds **`default_model_id`** — the first **`type: text`** model in **`models_catalog.json`** walk order, unless **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** is set to a composite id that exists in **`GET /api/v1/models/detail`**.
+        This route keeps **`legacy_placeholder`** **`"123"`** and adds **`default_model_id`** — resolved in priority order:
+        1. Per-user preference stored via **`PATCH /api/v1/models/text-default`** (if still valid in catalog).
+        2. **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env (composite id matching catalog).
+        3. First **`type: text`** model in **`models_catalog.json`** walk order.
       security:
         - bearerAuth: []
       responses:
@@ -1307,6 +1310,47 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [models]
+      summary: Set or reset per-user preferred text model
+      operationId: patchTextModelDefaultV1
+      description: |
+        Bearer JWT. Persists **`model_id`** to **`app_user_profile.preferred_text_model_id`**.
+        Pass **`null`** to reset to server default. The composite id must exist in **`GET /api/v1/models/detail`** or the request is rejected with **400**.
+        Returns the resolved **`default_model_id`** (same shape as **`GET`**).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchTextModelDefaultBody"
+      responses:
+        "200":
+          description: OK — preference saved; returns resolved default
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TextModelDefaultResponse"
+        "400":
+          description: model_id not found in catalog or empty string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
           content:
             application/json:
               schema:
@@ -7068,6 +7112,18 @@ components:
         default_model_id:
           type: string
           description: Composite id for **`GET /api/v1/models/detail?model_id=`**
+          example: "1:gpt-4o-mini"
+
+    PatchTextModelDefaultBody:
+      type: object
+      properties:
+        model_id:
+          type: string
+          nullable: true
+          description: |
+            Composite id `{vendor_id}:{model_name}` (e.g. `1:gpt-4o-mini`).
+            Must exist in **`GET /api/v1/models/detail`** catalog.
+            Pass `null` to reset to server default.
           example: "1:gpt-4o-mini"
 
     SwitchAiDevToolResponse:

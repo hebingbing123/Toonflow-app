@@ -16,6 +16,14 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PatchTextModelDefaultBody {
+    /// Composite id `{vendor_id}:{model_name}` — must exist in the catalog.
+    /// Pass `null` to reset to server default.
+    model_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
 struct CatalogFile {
     vendors: Vec<VendorDef>,
 }
@@ -189,10 +197,88 @@ async fn text_model_default(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<TextModelDefaultResponse>, ApiError> {
-    let _user = require_user_uuid(&state, &headers)?;
+    let uid = require_user_uuid(&state, &headers)?;
+
+    // Try to load per-user preference from DB.
+    let user_pref: Option<String> = if let Some(pool) = state.pool.as_ref() {
+        sqlx::query_scalar(
+            r#"SELECT preferred_text_model_id FROM app_user_profile WHERE user_id = $1"#,
+        )
+        .bind(uid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .flatten()
+    } else {
+        None
+    };
+
+    // Validate the stored preference is still in the catalog; fall back to server default if not.
+    let default_model_id = user_pref
+        .as_deref()
+        .filter(|id| lookup_detail(id).is_some())
+        .map(str::to_string)
+        .unwrap_or_else(default_text_model_composite_id);
+
     Ok(Json(TextModelDefaultResponse {
         legacy_placeholder: "123",
-        default_model_id: default_text_model_composite_id(),
+        default_model_id,
+    }))
+}
+
+async fn patch_text_model_default(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<PatchTextModelDefaultBody>,
+) -> Result<Json<TextModelDefaultResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    // Validate model_id BEFORE touching the pool so bad requests get 400 even without DB.
+    if let Some(ref id) = body.model_id {
+        let id = id.trim();
+        if id.is_empty() {
+            return Err(ApiError::BadRequest(
+                "model_id must be non-empty or null to reset".into(),
+            ));
+        }
+        if lookup_detail(id).is_none() {
+            return Err(ApiError::BadRequest(format!(
+                "model_id '{id}' not found in catalog; use GET /api/v1/models/detail to verify"
+            )));
+        }
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let model_id_to_store = body.model_id.as_deref().map(str::trim).map(str::to_string);
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_user_profile (user_id, preferred_text_model_id, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          preferred_text_model_id = EXCLUDED.preferred_text_model_id,
+          updated_at = NOW()
+        "#,
+    )
+    .bind(uid)
+    .bind(model_id_to_store.as_deref())
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let default_model_id = model_id_to_store
+        .as_deref()
+        .filter(|id| lookup_detail(id).is_some())
+        .map(str::to_string)
+        .unwrap_or_else(default_text_model_composite_id);
+
+    Ok(Json(TextModelDefaultResponse {
+        legacy_placeholder: "123",
+        default_model_id,
     }))
 }
 
@@ -223,7 +309,10 @@ async fn model_detail(
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/models", get(list_models))
-        .route("/api/v1/models/text-default", get(text_model_default))
+        .route(
+            "/api/v1/models/text-default",
+            get(text_model_default).patch(patch_text_model_default),
+        )
         .route("/api/v1/models/detail", get(model_detail))
 }
 
@@ -260,5 +349,30 @@ mod tests {
         assert!(!openai.name.is_empty());
         assert!(openai.model_count > 0);
         assert!(!openai.model_kinds.is_empty());
+    }
+
+    #[test]
+    fn patch_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<PatchTextModelDefaultBody>(r#"{"model_id":"1:x","extra":1}"#)
+                .unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field"),
+            "expected unknown field error, got: {err}"
+        );
+    }
+
+    #[test]
+    fn patch_body_accepts_null_model_id() {
+        let b: PatchTextModelDefaultBody =
+            serde_json::from_str(r#"{"model_id":null}"#).expect("parse");
+        assert!(b.model_id.is_none());
+    }
+
+    #[test]
+    fn patch_body_accepts_valid_model_id() {
+        let b: PatchTextModelDefaultBody =
+            serde_json::from_str(r#"{"model_id":"1:gpt-4o-mini"}"#).expect("parse");
+        assert_eq!(b.model_id.as_deref(), Some("1:gpt-4o-mini"));
     }
 }
