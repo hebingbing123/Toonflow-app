@@ -300,6 +300,16 @@ async fn create_job(
         Err(e) => return Err(ApiError::DatabaseError(e.to_string())),
     };
 
+    // Best-effort usage event — log on failure, never fail the request.
+    if let Err(e) = crate::usage::record_generation_job_created(pool, uid, row.id, &row.kind).await
+    {
+        tracing::warn!(
+            error = %e,
+            job_id = %row.id,
+            "app_usage_event insert failed for generation_job.created (job still created)"
+        );
+    }
+
     Ok(Json(row))
 }
 

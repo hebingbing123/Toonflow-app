@@ -22,6 +22,26 @@ pub async fn record_generation_job_succeeded(
     job_id: Uuid,
     job_kind: &str,
 ) -> Result<(), sqlx::Error> {
+    record_job_event(pool, user_id, job_id, job_kind, "generation_job.succeeded").await
+}
+
+/// Called when a new generation job is created (best-effort; used for quota audit trail).
+pub async fn record_generation_job_created(
+    pool: &PgPool,
+    user_id: Uuid,
+    job_id: Uuid,
+    job_kind: &str,
+) -> Result<(), sqlx::Error> {
+    record_job_event(pool, user_id, job_id, job_kind, "generation_job.created").await
+}
+
+async fn record_job_event(
+    pool: &PgPool,
+    user_id: Uuid,
+    job_id: Uuid,
+    job_kind: &str,
+    event_type: &str,
+) -> Result<(), sqlx::Error> {
     let payload = json!({ "kind": job_kind });
     sqlx::query(
         r#"
@@ -30,7 +50,7 @@ pub async fn record_generation_job_succeeded(
         "#,
     )
     .bind(user_id)
-    .bind("generation_job.succeeded")
+    .bind(event_type)
     .bind(job_id)
     .bind(payload)
     .execute(pool)

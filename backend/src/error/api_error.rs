@@ -1,5 +1,5 @@
 use axum::{
-    http::StatusCode,
+    http::{header, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
     Json,
 };
@@ -33,7 +33,20 @@ pub enum ApiError {
     /// HTTP **501** — capability not implemented (e.g. legacy write path without Postgres backing yet).
     NotImplemented(String),
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
+    /// Automatically adds `Retry-After` header with seconds until UTC midnight.
     QuotaExceeded(String),
+}
+
+/// Seconds remaining until the next UTC midnight (quota reset point).
+fn secs_until_utc_midnight() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let secs_in_day: u64 = 86_400;
+    let elapsed_today = now % secs_in_day;
+    secs_in_day - elapsed_today
 }
 
 impl IntoResponse for ApiError {
@@ -98,6 +111,40 @@ impl IntoResponse for ApiError {
             request_id: None,
         };
 
-        (status, Json(body)).into_response()
+        let mut resp = (status, Json(body)).into_response();
+
+        // Attach Retry-After for quota errors so clients know when the daily window resets.
+        if matches!(self, ApiError::QuotaExceeded(_)) {
+            let secs = secs_until_utc_midnight();
+            if let Ok(val) = HeaderValue::from_str(&secs.to_string()) {
+                resp.headers_mut().insert(header::RETRY_AFTER, val);
+            }
+        }
+
+        resp
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::response::IntoResponse;
+
+    #[test]
+    fn quota_exceeded_has_retry_after_header() {
+        let resp = ApiError::QuotaExceeded("limit reached".into()).into_response();
+        assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
+        let retry = resp
+            .headers()
+            .get(header::RETRY_AFTER)
+            .expect("Retry-After header present");
+        let secs: u64 = retry.to_str().unwrap().parse().expect("numeric");
+        assert!(secs > 0 && secs <= 86_400, "secs={secs}");
+    }
+
+    #[test]
+    fn other_errors_have_no_retry_after_header() {
+        let resp = ApiError::NotFound.into_response();
+        assert!(resp.headers().get(header::RETRY_AFTER).is_none());
     }
 }
