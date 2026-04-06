@@ -23,6 +23,7 @@ mod production_legacy;
 mod project_legacy;
 mod projects;
 mod prompts;
+mod quota;
 mod rate_limit;
 mod request_id_mw;
 mod script_agent;

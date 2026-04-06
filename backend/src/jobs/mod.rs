@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::quota;
 use crate::state::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
@@ -255,6 +256,10 @@ async fn create_job(
             return Ok(Json(row));
         }
     }
+
+    // Quota check: idempotent re-submissions (key already seen above) bypass this.
+    // New jobs must pass the daily cap before insertion.
+    quota::check_daily_job_quota(pool, uid).await?;
 
     let insert = sqlx::query_as::<_, JobRow>(
         r#"

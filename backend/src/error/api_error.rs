@@ -32,6 +32,8 @@ pub enum ApiError {
     LlmNotConfigured,
     /// HTTP **501** — capability not implemented (e.g. legacy write path without Postgres backing yet).
     NotImplemented(String),
+    /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
+    QuotaExceeded(String),
 }
 
 impl IntoResponse for ApiError {
@@ -83,6 +85,11 @@ impl IntoResponse for ApiError {
             ApiError::NotImplemented(msg) => {
                 (StatusCode::NOT_IMPLEMENTED, "not_implemented", msg.as_str())
             }
+            ApiError::QuotaExceeded(msg) => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "quota_exceeded",
+                msg.as_str(),
+            ),
         };
 
         let body = ErrorBody {
