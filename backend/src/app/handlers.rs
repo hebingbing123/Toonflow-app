@@ -2,7 +2,7 @@
 
 use crate::auth::require_claims;
 use crate::error::ApiError;
-use crate::state::AppState;
+use crate::state::{AppState, MemoryConfig};
 
 use axum::extract::State;
 use axum::http::HeaderMap;
@@ -55,6 +55,9 @@ pub(super) struct MeResponse {
     /// Number of generation jobs created today (UTC natural day). Present when DB is connected.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jobs_today: Option<i64>,
+    /// User memory/RAG configuration from `app_user_profile.memory_config` (or server defaults).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub memory_config: Option<MemoryConfig>,
 }
 
 #[derive(FromRow)]
@@ -63,6 +66,7 @@ struct UserProfileRow {
     billing_currency: Option<String>,
     billing_provider: Option<String>,
     daily_job_quota: Option<i64>,
+    memory_config: Option<sqlx::types::Json<MemoryConfig>>,
 }
 
 pub(super) async fn health() -> Json<HealthResponse> {
@@ -110,46 +114,54 @@ pub(super) async fn me(
     let claims = require_claims(&state, &headers)?;
     let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
 
-    let (plan_tier, billing_currency, billing_provider, per_user_quota, jobs_today) =
+    let (plan_tier, billing_currency, billing_provider, per_user_quota, jobs_today, memory_cfg) =
         if let Some(pool) = state.pool.as_ref() {
             let row = sqlx::query_as::<_, UserProfileRow>(
                 r#"
-                SELECT plan_tier, billing_currency, billing_provider, daily_job_quota
-                FROM app_user_profile
-                WHERE user_id = $1
-                "#,
+            SELECT plan_tier, billing_currency, billing_provider, daily_job_quota, memory_config
+            FROM app_user_profile
+            WHERE user_id = $1
+            "#,
             )
             .bind(sub)
             .fetch_optional(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-            let (tier, currency, provider, per_user_quota) = match row {
+            let (tier, currency, provider, per_user_quota, mem_cfg) = match row {
                 Some(r) => (
                     r.plan_tier,
                     r.billing_currency,
                     r.billing_provider,
                     r.daily_job_quota,
+                    r.memory_config.map(|j| j.0),
                 ),
-                None => ("free".to_string(), None, None, None),
+                None => ("free".to_string(), None, None, None, None),
             };
 
             let today: i64 = sqlx::query_scalar(
                 r#"
-                SELECT COUNT(*)::bigint
-                FROM app_generation_job
-                WHERE owner_user_id = $1
-                  AND created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
-                "#,
+            SELECT COUNT(*)::bigint
+            FROM app_generation_job
+            WHERE owner_user_id = $1
+              AND created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+            "#,
             )
             .bind(sub)
             .fetch_one(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-            (tier, currency, provider, per_user_quota, Some(today))
+            (
+                tier,
+                currency,
+                provider,
+                per_user_quota,
+                Some(today),
+                mem_cfg,
+            )
         } else {
-            ("free".to_string(), None, None, None, None)
+            ("free".to_string(), None, None, None, None, None)
         };
 
     // Resolve effective quota using same logic as quota::effective_daily_job_quota
@@ -172,6 +184,15 @@ pub(super) async fn me(
         }
     };
 
+    // Resolve memory_config (use DB value or fall back to server defaults).
+    let memory_config = if memory_cfg.is_some() {
+        memory_cfg
+    } else if state.pool.is_none() {
+        Some(state.memory_config.read().await.clone())
+    } else {
+        None // DB connected but user has no custom config; don't leak server defaults.
+    };
+
     Ok(Json(MeResponse {
         sub,
         email: claims.email,
@@ -180,5 +201,6 @@ pub(super) async fn me(
         billing_provider,
         daily_job_quota,
         jobs_today,
+        memory_config,
     }))
 }
