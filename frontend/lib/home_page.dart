@@ -1065,15 +1065,38 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
+      // Keep in sync with `LEGACY_JSON_STUB_PATHS` in `backend/src/production_legacy.rs`.
       const productionLooseStubPaths = <String>[
-        '/api/v1/production/get-storyboard-data',
+        '/api/v1/production/assets/batch-generate-assets-image',
+        '/api/v1/production/assets/delete-assets-derivative',
         '/api/v1/production/assets/get-assets-data',
-        '/api/v1/production/storyboard/get-data',
-        '/api/v1/production/workbench/add-track',
+        '/api/v1/production/assets/polling-image',
+        '/api/v1/production/assets/update-assets-url',
+        '/api/v1/production/edit-image/generate-flow-image',
+        '/api/v1/production/edit-image/get-image-default-model',
         '/api/v1/production/edit-image/get-image-flow',
+        '/api/v1/production/edit-image/save-image-flow',
+        '/api/v1/production/edit-image/update-image-flow',
+        '/api/v1/production/get-storyboard-data',
+        '/api/v1/production/storyboard/add',
+        '/api/v1/production/storyboard/batch-add-info',
+        '/api/v1/production/storyboard/batch-generate-image',
+        '/api/v1/production/storyboard/down-preview-image',
+        '/api/v1/production/storyboard/edit-info',
+        '/api/v1/production/storyboard/get-data',
+        '/api/v1/production/storyboard/preview-image',
+        '/api/v1/production/storyboard/remove-frame',
+        '/api/v1/production/storyboard/update-url',
+        '/api/v1/production/workbench/add-track',
+        '/api/v1/production/workbench/delete-track',
+        '/api/v1/production/workbench/delete-video',
+        '/api/v1/production/workbench/generate-video-prompt',
+        '/api/v1/production/workbench/get-generate-data',
+        '/api/v1/production/workbench/get-video-list',
+        '/api/v1/production/workbench/get-video-model-detail',
+        '/api/v1/production/workbench/select-video',
       ];
       const prodPrefix = '/api/v1/production/';
-      final prodStubBits = <String>[];
       for (final path in productionLooseStubPaths) {
         final code = await postProductionLegacyJsonStubV1(token, path);
         if (!mounted) return;
@@ -1088,9 +1111,6 @@ class _HomePageState extends State<HomePage> {
           });
           return;
         }
-        prodStubBits.add(
-          '${path.substring(prodPrefix.length)}->$code',
-        );
       }
       setState(() {
         final sample = list
@@ -1105,7 +1125,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${prodStubBits.join(" · ")}';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${productionLooseStubPaths.length}×501';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
