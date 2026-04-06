@@ -1864,8 +1864,28 @@ class _HomePageState extends State<HomePage> {
       _error = null;
     });
     try {
-      await createJob(token, 'flutter.probe');
+      final key =
+          'flutter-probe-idem-${DateTime.now().millisecondsSinceEpoch}';
+      final j1 = await createJob(
+        token,
+        'flutter.probe',
+        idempotencyKey: key,
+      );
+      final j2 = await createJob(
+        token,
+        'flutter.probe',
+        idempotencyKey: key,
+      );
       if (!mounted) return;
+      if (j1.id != j2.id) {
+        setState(() {
+          _error =
+              'POST /api/v1/jobs idempotency: expected same id, got '
+              '${j1.id} vs ${j2.id}';
+          _creatingJob = false;
+        });
+        return;
+      }
       setState(() => _creatingJob = false);
       await _loadJobs();
     } on RustApiException catch (e) {
