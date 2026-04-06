@@ -26,10 +26,12 @@
 
 | 符号 | 行数 | 含义 |
 |------|------|------|
-| ✅ | **5** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**、**`getVersion`**、**`test`**） |
+| ✅ | **5** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`getVersion`**、**`test`**） |
 | 🔀 | **4** | 换设计、不逐路径复刻（**`login`**、**`migrate`**、**`openFolder`**、**`loginConfig`**） |
-| 🟡 | **21** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、视频轨、OSS、事件管线等）待产品里程碑 |
+| 🟡 | **20** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、视频轨、OSS、事件管线等）待产品里程碑 |
 | §3.1 Socket | **2** 行（均为 🔀） | 旧 **Socket.IO** 由 **`/api/v1/ws` + Harness** 承接，非 REST 一对一 |
+
+**计数说明**：**一行**对应 **旧 `src/router.ts` 上一类前缀**（§3 左列），**不是**「二十一个独立产品模块」。**🟡** 表示该前缀下仍有 **501**、**⏳** 等待里程碑；合并同源前缀（如 **`/api/setting/getTextModel`** 并入 **`modelSelect`**）会减少 🟡 行数。
 
 **⏳**：多数字段内嵌在 **🟡** 行备注（未单独成行）。更新 §3 表后应同步校正上表。
 
@@ -46,7 +48,7 @@
 | `/api/general/getSingleProject`、`updateProject` | 项目读写 | 🟡 | **`GET`/`PATCH …/projects/legacy/{id}`** 为主；另 **`POST /api/v1/general/get-single-project`**（**`{ id }`**）→ **`{ data: [ProjectRow] }`**；**`POST …/general/update-project`** 补丁 **`intro`**、**`type`**（写入 **`mode`**）、**`artStyle`**、**`videoRatio`**、**`projectType`**（至少一项）；Flutter **`postGeneralGetSingleProject`**、**`postGeneralUpdateProject`**、**`updateProjectByLegacyId`**（**`PATCH …/projects/legacy/{id}`**）；项目详情探针 **POST general get-single-project** + **`update-project`**（**`intro`** 写后缀后 **`intro:null`/原文** 恢复）+ **`PATCH …/projects/legacy/{id}`**（**`name`** 与当前 **`ProjectRow`** 同值 noop，含 **`name` 空串** 与库内 **`null`** 对齐） |
 | `/api/login/login` | 本地账号登录 | 🔀 | **Supabase Auth**（Flutter `supabase_flutter`） |
 | `/api/migrate/migrateData` | 数据迁移 | 🔀 | **`toonflow-legacy-import`** + **`promote_legacy_from_staging()`**（含 **`o_novel`→`app_novel`**、**`o_assets`→`app_asset`**、**`o_scriptAssets`→`app_script_asset`**、**`o_artStyle`→`app_art_style`**、**`o_prompt`→`app_user_prompt`**、**`o_image`→`app_asset_image`**（**`legacy_image_id`** 幂等）；返回 **`asset_images_upserted`** 等九列；非 HTTP 热路径） |
-| `/api/modelSelect/getModelList`、`getModelDetail` | 模型目录 | ✅ `GET /api/v1/models`、`/api/v1/models/detail`、**`GET /api/v1/models/text-default`**（旧 **`getTextModel`** 占位 **`"123"`** + 目录默认 **`default_model_id`**；可选 **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`**） | 静态 JSON 嵌入 |
+| `/api/modelSelect/getModelList`、`getModelDetail`；**`/api/setting/getTextModel`**（并入） | 模型目录 + 文本模型默认 | ✅ `GET /api/v1/models`、`/api/v1/models/detail`、**`GET /api/v1/models/text-default`**（旧 **`getTextModel`** 占位 **`"123"`** 与旧 **`/api/setting/getTextModel`** 均由 **`legacy_placeholder`** + **`default_model_id`** 替代；可选 **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`**）；Flutter **`fetchTextModelDefaultV1`**（首页 **`text-default`** 探针） | 静态 JSON 嵌入；per-user 文本模型偏好持久化仍可与 **`vendorConfig`** 合并 ⏳ |
 | `/api/novel/*` | 小说与事件管线 | 🟡 | **`app_novel` + REST**：**`GET`/`POST …/projects/legacy/{id}/novels`**、**`GET`/`PATCH`/`DELETE …/novels/{nid}`**；**`POST …/novels/get-novel-data`**、**`get-novel-index`**、**`get-novel`**（分页 **`{ data, total }`**，**`id`** = **`legacy_id`**）、**`add-novel`**（**`data`** ≤ **200**；空 **`data`** → **200** 不落库）、**`delete-novel`** / **`update-novel`**（**`id`** = **`legacy_id`**）、**`batch-delete`**；无 **`o_event*`** / **`cleanNovel`**；Flutter **`rust_api`**：**`postLegacyNovelsGetNovelData`**、**`postLegacyNovelsGetNovelIndex`**、**`postLegacyNovelsGetNovel`**、**`postLegacyNovelsAddNovel`**、**`postLegacyNovelsUpdateNovel`**、**`postLegacyNovelsDeleteNovel`**、**`postLegacyNovelsBatchDelete`**（及既有 **`fetchProjectNovelsByLegacyId`** 等 REST）；项目详情 **Legacy POST …/novels/** 区：**`batch-delete []`**/**`delete-novel id=0`** → **400** 探针；**`update-novel (noop)`**（首条同字段回写）；**无 DB 烟雾** → **503**（空 **`add-novel`** 除外）；**`pg_contract`** 含 REST + legacy **POST**；旧 **事件 outline 管线** 仍 ⏳ |
 | `/api/other/getVersion` | 版本号 | ✅ `GET /api/v1/version` | |
 | `/api/other/deleteAllData` | 清空数据 | 🟡 | **`POST /api/v1/settings/danger/delete-all-data`**：体 **`{}`**，JWT 后 **501**（无本地 SQLite 全表清） |
@@ -59,7 +61,6 @@
 | `/api/setting/dbConfig/clearData` | 清库 | 🟡 | **`POST /api/v1/settings/danger/clear-database`**（旧为 **GET**；SaaS 用 **POST** 体 **`{}`**）：JWT 后 **501**；Flutter **`postSettingsDangerClearDatabaseV1`** |
 | `/api/setting/dev/*` | Dev 开关 | 🟡 | **`GET /api/v1/settings/dev/switch-ai-tool`**（**`value`** **`"0"`**/**`"1"`**，来自 **`TOONFLOW_SWITCH_AI_DEV_TOOL`**，对齐 **`getSwitchAiDevTool`**）；**`PUT`** 校验后 **501** **`not_implemented`**（无 **`o_setting`** 写入；对齐 **`updateSwitchAiDevTool`** 动词，运维改 env）；OpenAPI **`getSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`**；Flutter **`fetchSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`** + 首页探针 |
 | `/api/setting/fileManagement/openFolder` | 打开本地目录 | 🔀 | 桌面端本地能力，非 HTTP |
-| `/api/setting/getTextModel` | 文本模型配置 | 🟡 | 旧实现仅为占位 **`data: "123"`**；Rust **`GET /api/v1/models/text-default`** 保留 **`legacy_placeholder`** 并返回可用 **`default_model_id`**（见模型目录行）； per-user 持久化仍可与 **`vendorConfig`** 合并设计 |
 | `/api/setting/loginConfig/*` | 用户密码 | 🔀 | Supabase 账户体系 |
 | `/api/setting/memoryConfig/*` | 记忆配置 UI | 🟡 | **RAG / 摘要数值与 ONNX 路径**：**`GET`/`POST /api/v1/settings/memory-config`**（**camelCase**，默认同 **`initDB`** **`o_setting`**；进程内 **`RwLock`**，重启复位）；**`delAllMemory`** → **`POST /api/v1/settings/memory-config/clear-agent-memories`**（需 **`projectId`+`agentType`**，等同 **`agents/memory/clear`** **`clearType: all`**，非 SQLite 全表删）；OpenAPI **`postSettingsClearAgentMemoriesV1`** 等；Flutter 探针（**`clear-agent-memories`**：无 DB **503**；有 DB 且命中项目 **200**；无该项目 **404**；优先 **`GET /api/v1/projects`** 首条 **`legacy_id`** 否则 **`1`**） |
 | `/api/setting/promptManage/*` | Prompt 模板 | 🟡 | **`app_user_prompt` + REST**：**`GET /api/v1/prompts`**（恒为 **3** 条，**`id`** **1–3** 对齐旧 **`o_prompt.id`**；无行时 **`data`** 来自服务端默认文件 **`backend/data/prompt_defaults/*.txt`**，与 **`initDB`** 种子一致）；**`GET /api/v1/prompts/{legacy_id}`** 单条（合并规则同列表）；**`PATCH /api/v1/prompts/{legacy_id}`** 仅更新 **`data`**（**upsert**）；Flutter **`fetchPromptsV1`**、**`fetchPromptByLegacyIdV1`**、**`patchPromptByLegacyIdV1`**；首页探针 **GET 列表 + GET/1 + PATCH/1**（同内容回写）；**无 DB 烟雾** → **503**；**`pg_contract`** **`prompts_list_patch_roundtrip`**（含 **`GET …/prompts/2`**） |
