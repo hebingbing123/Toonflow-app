@@ -2245,6 +2245,125 @@ class _HomePageState extends State<HomePage> {
                                   ? null
                                   : () async {
                                       setDialogState(
+                                        () => projectLegacyBusy[0] = true,
+                                      );
+                                      try {
+                                        await postProjectDeleteProject(
+                                          token,
+                                          0,
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'POST …/project/delete-project：unexpected 200',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (!ctx.mounted) return;
+                                        if (e.statusCode == 400) {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'POST …/project/delete-project id=0 -> 400 (expected)',
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                projectLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                projectLegacyBusy[0]
+                                    ? 'project…'
+                                    : 'POST project delete id=0',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
+                                        () => projectLegacyBusy[0] = true,
+                                      );
+                                      try {
+                                        await postProjectEditProject(
+                                          token,
+                                          id: 0,
+                                          name: '',
+                                          intro: '',
+                                          type: '',
+                                          artStyle: '',
+                                          directorManual: '',
+                                          videoRatio: '',
+                                          imageModel: '',
+                                          videoModel: '',
+                                          imageQuality: '',
+                                          projectType: '',
+                                          mode: '',
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'POST …/project/edit-project：unexpected 200',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (!ctx.mounted) return;
+                                        if (e.statusCode == 400) {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'POST …/project/edit-project id=0 -> 400 (expected)',
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                projectLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                projectLegacyBusy[0]
+                                    ? 'project…'
+                                    : 'POST project edit id=0',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
                                         () => tasksLegacyBusy[0] = true,
                                       );
                                       try {
