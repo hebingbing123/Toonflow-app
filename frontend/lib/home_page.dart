@@ -2364,6 +2364,85 @@ class _HomePageState extends State<HomePage> {
                                   ? null
                                   : () async {
                                       setDialogState(
+                                        () => projectLegacyBusy[0] = true,
+                                      );
+                                      final probeName =
+                                          '[flutter legacy add-probe] ${DateTime.now().toIso8601String()}';
+                                      try {
+                                        await postProjectAddProject(
+                                          token,
+                                          projectType: '',
+                                          name: probeName,
+                                          intro: '',
+                                          type: '',
+                                          artStyle: '',
+                                          directorManual: '',
+                                          videoRatio: '',
+                                          imageModel: '',
+                                          videoModel: '',
+                                          imageQuality: '',
+                                          mode: '',
+                                        );
+                                        final all =
+                                            await postProjectGetProject(token);
+                                        if (!ctx.mounted) return;
+                                        ProjectRow? match;
+                                        for (final r in all) {
+                                          if (r.name == probeName) {
+                                            match = r;
+                                            break;
+                                          }
+                                        }
+                                        if (match == null) {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'add-project ok but get-project missing name="$probeName"',
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        await postProjectDeleteProject(
+                                          token,
+                                          match.legacyId,
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'POST add-project → delete legacy#${match.legacyId} ok',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            SnackBar(content: Text(e.toString())),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                projectLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                projectLegacyBusy[0]
+                                    ? 'project…'
+                                    : 'POST project add→del',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
                                         () => tasksLegacyBusy[0] = true,
                                       );
                                       try {
