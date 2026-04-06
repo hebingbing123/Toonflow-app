@@ -7234,11 +7234,75 @@ components:
         vendors:
           type: array
           items:
-            $ref: "#/components/schemas/VendorCatalogSummary"
+            $ref: "#/components/schemas/VendorSummaryItem"
         source:
           type: string
-          enum: [static_catalog]
-          description: Always static embed; not per-user SQLite
+          enum: [static_catalog_with_user_config]
+          description: Static catalog merged with per-user vendor_config from app_user_profile
+
+    VendorSummaryItem:
+      type: object
+      required: [id, name, modelCount, modelKinds]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Vendor ID from static catalog
+        name:
+          type: string
+        modelCount:
+          type: integer
+          format: int32
+        modelKinds:
+          type: array
+          items:
+            type: string
+        userConfig:
+          $ref: "#/components/schemas/VendorConfigEntry"
+          description: User configuration for this vendor (if any)
+
+    VendorConfigEntry:
+      type: object
+      required: [vendorId]
+      properties:
+        vendorId:
+          type: string
+          description: Vendor ID from the static catalog
+        displayName:
+          type: string
+          nullable: true
+          description: User-defined display name override
+        enabled:
+          type: boolean
+          description: Whether this vendor is enabled for this user
+        selectedModels:
+          type: array
+          items:
+            type: string
+          description: Selected model IDs from this vendor
+        settings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional non-sensitive config (API keys excluded)
+
+    VendorConfig:
+      type: object
+      properties:
+        vendors:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/VendorConfigEntry"
+          description: Per-vendor configurations keyed by vendor_id
+        defaultTextVendorId:
+          type: string
+          nullable: true
+        defaultImageVendorId:
+          type: string
+          nullable: true
+        defaultVideoVendorId:
+          type: string
+          nullable: true
 
     VendorModelTestBody:
       type: object
@@ -7265,24 +7329,36 @@ components:
 
     VendorUpdateBody:
       type: object
-      required: [id, inputs, models]
+      required: [id]
       additionalProperties: false
       properties:
         id:
           type: string
-        inputValues:
+          description: Vendor ID from static catalog
+        displayName:
+          type: string
+          description: User-defined display name (optional)
+        selectedModels:
+          type: array
+          items:
+            type: string
+          description: Selected model IDs from this vendor
+        settings:
           type: object
           additionalProperties:
             type: string
-          description: Optional in legacy; may be omitted or empty
-        inputs:
-          type: array
-          description: Legacy input field definitions (JSON array)
-          items: {}
-        models:
-          type: array
-          description: Legacy model rows (JSON array; discriminated union in TS)
-          items: {}
+          description: Non-sensitive settings only (API keys excluded for security)
+
+    VendorUpdateResponse:
+      type: object
+      required: [vendorId, message]
+      properties:
+        vendorId:
+          type: string
+          description: Vendor ID that was updated
+        message:
+          type: string
+          description: Confirmation message
 
     VendorIdBody:
       type: object
