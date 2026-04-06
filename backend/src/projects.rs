@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
     routing::get,
     Json, Router,
@@ -151,6 +151,16 @@ pub fn router() -> Router<AppState> {
         )
 }
 
+/// Query parameters for `GET /api/v1/projects` pagination.
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct ListProjectsQuery {
+    #[serde(default)]
+    limit: Option<i64>,
+    #[serde(default)]
+    offset: Option<i64>,
+}
+
 async fn create_project(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -225,12 +235,17 @@ async fn create_project(
 async fn list_projects(
     State(state): State<AppState>,
     headers: HeaderMap,
+    Query(query): Query<ListProjectsQuery>,
 ) -> Result<Json<Vec<ProjectRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let limit = query.limit.unwrap_or(20).clamp(1, 100);
+    let offset = query.offset.unwrap_or(0).max(0);
+
     let rows = sqlx::query_as::<_, ProjectRow>(
         r#"
         SELECT id, legacy_id, name, intro, project_type,
@@ -239,9 +254,12 @@ async fn list_projects(
         FROM app_project
         WHERE owner_user_id = $1
         ORDER BY create_time_ms DESC NULLS LAST, legacy_id DESC
+        LIMIT $2 OFFSET $3
         "#,
     )
     .bind(uid)
+    .bind(limit)
+    .bind(offset)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
