@@ -724,7 +724,7 @@ mod contract_smoke_tests {
         let token = test_jwt(Uuid::nil());
         let (status, v) = get_json_bearer("/api/v1/settings/vendors/summary", &token).await;
         assert_eq!(status, StatusCode::OK);
-        assert_eq!(v["source"], "static_catalog");
+        assert_eq!(v["source"], "static_catalog_with_user_config");
         let arr = v["vendors"].as_array().expect("vendors array");
         assert!(!arr.is_empty());
         assert!(arr[0]["id"].is_number());
@@ -822,16 +822,16 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendors_update_not_implemented_with_jwt() {
+    async fn settings_vendors_update_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/update",
             &token,
-            r#"{"id":"openai","inputValues":{},"inputs":[],"models":[]}"#,
+            r#"{"id":"1","displayName":"OpenAI Custom","selectedModels":["gpt-4o-mini"],"settings":{}}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
@@ -840,7 +840,7 @@ mod contract_smoke_tests {
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/update",
             &token,
-            r#"{"id":"   ","inputValues":{},"inputs":[],"models":[]}"#,
+            r#"{"id":"   ","displayName":"x"}"#,
         )
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -861,16 +861,16 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendors_enable_not_implemented_with_jwt() {
+    async fn settings_vendors_enable_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/enable",
             &token,
-            r#"{"id":"openai","enable":1}"#,
+            r#"{"id":"1","enable":1}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]

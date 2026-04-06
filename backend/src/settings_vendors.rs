@@ -1,7 +1,9 @@
 //! Legacy **`POST /api/setting/vendorConfig/getVendorList`** returned SQLite **`o_vendorConfig`** rows (including **`inputValues`** secrets).
-//! SaaS exposes only a **static**, **keyless** vendor summary from the same embedded JSON as **`GET /api/v1/models`**.
+//! SaaS: **`GET …/vendors/summary`** merges static catalog with per-user **`vendor_config`** from `app_user_profile`.
+//! **`POST …/vendors/enable`** persists enable/disable state; **`POST …/vendors/update`** persists display name and settings (no API keys).
 //! **`POST …/model-test`** validates the legacy body then **501** (no LLM/OSS probe on this API).
-//! **`addVendor`** / **`updateVendor`** / **`deleteVendor`** / **`enableVendor`** / **`updateCode`** / **`getCodeByLink`**: validate top-level JSON then **501** (no per-user vendor table, no TS/vm2, no outbound fetch).
+//! **`addVendor`** / **`deleteVendor`** / **`updateCode`** / **`getCodeByLink`**: validate then **501** (no custom vendor creation, no TS/vm2 execution, no outbound fetch).
+//! API keys (`inputValues`) are intentionally NOT stored; use server env or vault.
 
 use std::collections::HashMap;
 
@@ -17,13 +19,24 @@ use serde::{Deserialize, Serialize};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::models_catalog::vendor_catalog_summaries;
-use crate::state::AppState;
+use crate::state::{AppState, VendorConfig};
+use uuid::Uuid;
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct VendorSummaryItem {
+    #[serde(flatten)]
+    catalog: crate::models_catalog::VendorCatalogSummary,
+    /// User configuration for this vendor (if any).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    user_config: Option<crate::state::VendorConfigEntry>,
+}
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct VendorsSummaryResponse {
-    vendors: Vec<crate::models_catalog::VendorCatalogSummary>,
-    /// Always **`static_catalog`** — not per-user **`o_vendorConfig`**.
+    vendors: Vec<VendorSummaryItem>,
+    /// **`static_catalog`** merged with per-user **`vendor_config`**.
     source: &'static str,
 }
 
@@ -31,10 +44,32 @@ async fn get_vendors_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<VendorsSummaryResponse>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
+    let uid = require_user_uuid(&state, &headers)?;
+    let catalog = vendor_catalog_summaries();
+
+    // Load user config if DB is available
+    let user_cfg = if let Some(pool) = state.pool.as_ref() {
+        load_vendor_config(pool, uid).await.ok()
+    } else {
+        None
+    };
+
+    let vendors = catalog
+        .into_iter()
+        .map(|c| {
+            let user_config = user_cfg
+                .as_ref()
+                .and_then(|cfg| cfg.get_vendor(&c.id.to_string()).cloned());
+            VendorSummaryItem {
+                catalog: c,
+                user_config,
+            }
+        })
+        .collect();
+
     Ok(Json(VendorsSummaryResponse {
-        vendors: vendor_catalog_summaries(),
-        source: "static_catalog",
+        vendors,
+        source: "static_catalog_with_user_config",
     }))
 }
 
@@ -70,6 +105,39 @@ async fn post_vendor_model_test(
     ))
 }
 
+async fn load_vendor_config(pool: &sqlx::PgPool, uid: Uuid) -> Result<VendorConfig, ApiError> {
+    let row: Option<sqlx::types::Json<VendorConfig>> = sqlx::query_scalar(
+        r#"
+        SELECT vendor_config FROM app_user_profile WHERE user_id = $1
+        "#,
+    )
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(row.map(|j| j.0).unwrap_or_default())
+}
+
+async fn save_vendor_config(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    cfg: &VendorConfig,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        INSERT INTO app_user_profile (user_id, vendor_config)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id) DO UPDATE SET vendor_config = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(sqlx::types::Json(cfg))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 fn vendor_writes_not_implemented() -> ApiError {
     ApiError::NotImplemented(
         "per-user vendor config and provider scripts are not persisted on the Rust API; use static catalog and server env"
@@ -84,15 +152,26 @@ struct AddVendorBody {
     ts_code: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct UpdateVendorBody {
     id: String,
+    /// User-defined display name (optional).
     #[serde(default)]
-    input_values: HashMap<String, String>,
-    inputs: Vec<serde_json::Value>,
-    models: Vec<serde_json::Value>,
+    display_name: Option<String>,
+    /// Selected model IDs from this vendor.
+    #[serde(default)]
+    selected_models: Vec<String>,
+    /// Additional non-sensitive settings key-value pairs.
+    #[serde(default)]
+    settings: HashMap<String, String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdateVendorResponse {
+    vendor_id: String,
+    message: &'static str,
 }
 
 #[allow(dead_code)]
@@ -139,13 +218,44 @@ async fn post_update_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    if body.id.trim().is_empty() {
+) -> Result<Json<UpdateVendorResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = body.id.trim();
+    if vendor_id.is_empty() {
         return Err(ApiError::BadRequest("id must be non-empty".into()));
     }
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    let entry = cfg.get_or_insert_vendor(vendor_id);
+    if let Some(name) = body.display_name {
+        entry.display_name = Some(name);
+    }
+    if !body.selected_models.is_empty() {
+        entry.selected_models = body.selected_models;
+    }
+    if !body.settings.is_empty() {
+        // Merge settings - intentionally exclude any key that looks like an API key
+        for (k, v) in body.settings {
+            let key_lower = k.to_lowercase();
+            if !key_lower.contains("key")
+                && !key_lower.contains("secret")
+                && !key_lower.contains("token")
+                && !key_lower.contains("password")
+            {
+                entry.settings.insert(k, v);
+            }
+        }
+    }
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    Ok(Json(UpdateVendorResponse {
+        vendor_id: vendor_id.to_string(),
+        message: "Vendor settings saved (API keys excluded)",
+    }))
 }
 
 async fn post_delete_vendor(
@@ -162,10 +272,26 @@ async fn post_enable_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EnableVendorBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = body.id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("id must be non-empty".into()));
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    cfg.set_vendor_enabled(vendor_id, body.enable != 0);
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "enabled": body.enable != 0,
+        "message": "Vendor enable state saved"
+    })))
 }
 
 async fn post_update_vendor_code(

@@ -2,6 +2,7 @@
 
 mod from_env;
 mod memory_config;
+mod vendor_config;
 
 use std::sync::Arc;
 
@@ -12,6 +13,7 @@ use crate::llm::LlmConfig;
 use crate::notify_hub::WsNotifyHub;
 
 pub use memory_config::MemoryConfig;
+pub use vendor_config::{VendorConfig, VendorConfigEntry};
 
 #[derive(Clone)]
 pub struct AppState {
