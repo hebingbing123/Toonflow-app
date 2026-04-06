@@ -2864,6 +2864,141 @@ class _HomePageState extends State<HomePage> {
                                   },
                             child: const Text('POST add-novel []'),
                           ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
+                                      await postLegacyNovelsBatchDelete(
+                                        token,
+                                        const [],
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'POST …/novels/batch-delete：unexpected 200',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (!ctx.mounted) return;
+                                      if (e.statusCode == 400) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'POST …/novels/batch-delete [] -> 400 (expected)',
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST batch-delete []'),
+                          ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    try {
+                                      await postLegacyNovelsDeleteNovel(
+                                        token,
+                                        0,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'POST …/novels/delete-novel：unexpected 200',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (!ctx.mounted) return;
+                                      if (e.statusCode == 400) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'POST …/novels/delete-novel id=0 -> 400 (expected)',
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST delete-novel id=0'),
+                          ),
+                          TextButton(
+                            onPressed: novelsBusy[0] ||
+                                    novelsLoading[0] ||
+                                    assetsBusy[0] ||
+                                    assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
+                                    novelsRef[0] == null ||
+                                    novelsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => novelsBusy[0] = true);
+                                    final n = novelsRef[0]!.items.first;
+                                    try {
+                                      final msg =
+                                          await postLegacyNovelsUpdateNovel(
+                                        token,
+                                        id: n.legacyId,
+                                        index: n.chapterIndex,
+                                        reel: n.reel ?? '',
+                                        chapter: n.chapter,
+                                        chapterData: n.chapterData,
+                                        event: n.event ?? '',
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/novels/update-novel noop #${n.legacyId}：$msg',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => novelsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST update-novel (noop)'),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
