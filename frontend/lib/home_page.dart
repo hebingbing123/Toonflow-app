@@ -619,7 +619,16 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       final vm = await fetchVisualManualV1(token);
+      final vmPost = await fetchVisualManualPostV1(token);
       if (!mounted) return;
+      if (vm.styles.length != vmPost.styles.length) {
+        setState(() {
+          _error =
+              'visual-manual GET/POST style count mismatch: ${vm.styles.length} vs ${vmPost.styles.length}';
+          _loadingVisualManualProbe = false;
+        });
+        return;
+      }
       var totalChars = 0;
       var totalImages = 0;
       for (final s in vm.styles) {
@@ -632,7 +641,7 @@ class _HomePageState extends State<HomePage> {
           vm.styles.take(4).map((s) => s.name).join(', ');
       setState(() {
         _visualManualProbeBody =
-            'styles=${vm.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
+            'GET+POST styles=${vm.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
             '${sample.isEmpty ? '' : ' · sample: $sample'}';
         _loadingVisualManualProbe = false;
       });
@@ -5089,7 +5098,7 @@ class _HomePageState extends State<HomePage> {
                 child: Text(
                   _loadingVisualManualProbe
                       ? '请求中…'
-                      : 'GET /api/v1/visual-manual',
+                      : 'GET+POST /api/v1/visual-manual',
                 ),
               ),
               if (_visualManualProbeBody != null) ...[
