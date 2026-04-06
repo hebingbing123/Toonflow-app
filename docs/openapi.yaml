@@ -260,6 +260,7 @@ paths:
       operationId: meV1
       description: |
         Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).
+        Also returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.
       security:
         - bearerAuth: []
       responses:
@@ -7719,6 +7720,22 @@ components:
         billing_provider:
           type: string
           nullable: true
+        daily_job_quota:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Effective daily generation-job cap for this user (UTC natural day).
+            `null` = unlimited (enterprise tier or per-user override set to unlimited).
+            Derived from `plan_tier` defaults or `app_user_profile.daily_job_quota` override.
+            Absent when `DATABASE_URL` is unset (falls back to free-tier default in that case).
+        jobs_today:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Number of generation jobs created today (UTC midnight to now).
+            Absent when `DATABASE_URL` is unset.
 
     UsageSummaryResponse:
       type: object

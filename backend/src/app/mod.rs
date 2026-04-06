@@ -2441,6 +2441,15 @@ mod contract_smoke_tests {
             v["sub"].as_str().is_some_and(|s| !s.is_empty()),
             "expected sub in me response"
         );
+        // Without pool: daily_job_quota is the free-tier default (positive), jobs_today absent.
+        assert!(
+            v["daily_job_quota"].as_i64().is_some_and(|n| n > 0),
+            "expected positive daily_job_quota without pool"
+        );
+        assert!(
+            v["jobs_today"].is_null(),
+            "jobs_today should be absent without pool"
+        );
     }
 
     #[tokio::test]
