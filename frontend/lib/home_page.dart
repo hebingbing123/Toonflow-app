@@ -4176,6 +4176,55 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => scriptProbeBusy[0] = true);
                                     try {
+                                      final sid = scriptList.first.legacyId;
+                                      final cur = await fetchScriptByLegacyId(
+                                        token,
+                                        sid,
+                                      );
+                                      final patched = await updateScriptByLegacyId(
+                                        token,
+                                        sid,
+                                        <String, dynamic>{
+                                          'name': cur.name ?? '',
+                                        },
+                                      );
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'PATCH …/scripts/legacy/$sid name noop → '
+                                            '${patched.name ?? "(null)"}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => scriptProbeBusy[0] = false,
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: Text(
+                              scriptProbeBusy[0]
+                                  ? 'script…'
+                                  : 'PATCH scripts/legacy (name noop)',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: scriptProbeBusy[0] ||
+                                    scriptList.isEmpty ||
+                                    saving[0]
+                                ? null
+                                : () async {
+                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    try {
                                       final ids = scriptList
                                           .map((s) => s.legacyId)
                                           .toList();
