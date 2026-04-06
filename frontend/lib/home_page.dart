@@ -3525,6 +3525,69 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final first = assetsRef[0]!.items.first;
+                                    try {
+                                      final ts = DateTime.now()
+                                          .millisecondsSinceEpoch;
+                                      final row =
+                                          await createProjectAssetImage(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        filePath: 'probe/patch_del_$ts.png',
+                                      );
+                                      final patched =
+                                          await patchProjectAssetImageByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        row.id,
+                                        {
+                                          'state': '已完成',
+                                          'sort_index': row.sortIndex + 1,
+                                        },
+                                      );
+                                      await deleteProjectAssetImageByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        row.id,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      await reloadAssetsAndStats();
+                                      if (!ctx.mounted) return;
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST→PATCH→DEL 资产图片：'
+                                            'sort ${row.sortIndex}→${patched.sortIndex} '
+                                            'state=${patched.state ?? "-"} 已删',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('POST→PATCH→DEL 图'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
