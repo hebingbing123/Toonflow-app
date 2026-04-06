@@ -1882,9 +1882,25 @@ class _HomePageState extends State<HomePage> {
     try {
       final r = await fetchArtStyles(token);
       if (!mounted) return;
+      var line =
+          'total=${r.total} · ${r.items.take(5).map((s) => '#${s.legacyId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
+      try {
+        final probeName =
+            '[flutter probe art-style] ${DateTime.now().toIso8601String()}';
+        final created = await createArtStyle(token, name: probeName);
+        await fetchArtStyleByLegacyId(token, legacyId: created.legacyId);
+        await patchArtStyleByLegacyId(
+          token,
+          created.legacyId,
+          <String, dynamic>{'label': 'probe'},
+        );
+        await deleteArtStyleByLegacyId(token, created.legacyId);
+        line += ' · create→get→patch→del ok (#${created.legacyId})';
+      } on RustApiException catch (e) {
+        line += ' · crud -> ${e.statusCode}';
+      }
       setState(() {
-        _artStylesLine =
-            'total=${r.total} · ${r.items.take(5).map((s) => '#${s.legacyId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
+        _artStylesLine = line;
         _loadingArtStyles = false;
       });
     } on RustApiException catch (e) {
@@ -4967,7 +4983,9 @@ class _HomePageState extends State<HomePage> {
                         ? null
                         : _loadArtStyles,
                     child: Text(
-                      _loadingArtStyles ? '加载中…' : 'GET …/art-styles',
+                      _loadingArtStyles
+                          ? '加载中…'
+                          : 'GET …/art-styles + CRUD 探针',
                     ),
                   ),
                   FilledButton.tonal(

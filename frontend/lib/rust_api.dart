@@ -2626,6 +2626,78 @@ Future<ArtStyleRow> createArtStyle(
   return ArtStyleRow.fromJson(map);
 }
 
+/// `GET /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `getArtStyleByLegacyIdV1`.
+Future<ArtStyleRow> fetchArtStyleByLegacyId(
+  String accessToken, {
+  required int legacyId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ArtStyleRow.fromJson(map);
+}
+
+/// `PATCH /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `patchArtStyleByLegacyIdV1`.
+///
+/// [body] uses **snake_case** keys only: **`name`**, **`file_url`**, **`label`**, **`prompt`**.
+/// At least one key is required; use JSON **`null`** or empty string for optional fields to clear them.
+Future<ArtStyleRow> patchArtStyleByLegacyId(
+  String accessToken,
+  int legacyId,
+  Map<String, dynamic> body,
+) async {
+  if (body.isEmpty) {
+    throw ArgumentError('patch body must include at least one allowed field');
+  }
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ArtStyleRow.fromJson(map);
+}
+
+/// `DELETE /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `deleteArtStyleByLegacyIdV1` (**204**).
+Future<void> deleteArtStyleByLegacyId(String accessToken, int legacyId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+  final res = await http
+      .delete(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
 /// `POST /api/v1/art-styles/extract-prompt` — vision LLM; see `extractArtStylePromptV1`.
 ///
 /// [images] are passed through as OpenAPI **`image_url.url`** strings (HTTPS or data URI).
