@@ -1065,57 +1065,32 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      final prStoryData = await postProductionLegacyJsonStubV1(
-        token,
+      const productionLooseStubPaths = <String>[
         '/api/v1/production/get-storyboard-data',
-      );
-      if (!mounted) return;
-      if (prStoryData != 501) {
-        setState(() {
-          _error =
-              'POST production/get-storyboard-data stub expected 501, got $prStoryData';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final prAssetsData = await postProductionLegacyJsonStubV1(
-        token,
         '/api/v1/production/assets/get-assets-data',
-      );
-      if (!mounted) return;
-      if (prAssetsData != 501) {
-        setState(() {
-          _error =
-              'POST production/assets/get-assets-data stub expected 501, got $prAssetsData';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final prSbGetData = await postProductionLegacyJsonStubV1(
-        token,
         '/api/v1/production/storyboard/get-data',
-      );
-      if (!mounted) return;
-      if (prSbGetData != 501) {
-        setState(() {
-          _error =
-              'POST production/storyboard/get-data stub expected 501, got $prSbGetData';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final prWbAddTrack = await postProductionLegacyJsonStubV1(
-        token,
         '/api/v1/production/workbench/add-track',
-      );
-      if (!mounted) return;
-      if (prWbAddTrack != 501) {
-        setState(() {
-          _error =
-              'POST production/workbench/add-track stub expected 501, got $prWbAddTrack';
-          _loadingModelsCatalog = false;
-        });
-        return;
+        '/api/v1/production/edit-image/get-image-flow',
+      ];
+      const prodPrefix = '/api/v1/production/';
+      final prodStubBits = <String>[];
+      for (final path in productionLooseStubPaths) {
+        final code = await postProductionLegacyJsonStubV1(token, path);
+        if (!mounted) return;
+        if (code != 501) {
+          final rel = path.startsWith(prodPrefix)
+              ? path.substring(prodPrefix.length)
+              : path;
+          setState(() {
+            _error =
+                'POST production/$rel loose stub expected 501, got $code';
+            _loadingModelsCatalog = false;
+          });
+          return;
+        }
+        prodStubBits.add(
+          '${path.substring(prodPrefix.length)}->$code',
+        );
       }
       setState(() {
         final sample = list
@@ -1130,7 +1105,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/get-storyboard-data -> $prStoryData · prod/assets/get-assets-data -> $prAssetsData · prod/storyboard/get-data -> $prSbGetData · prod/workbench/add-track -> $prWbAddTrack';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${prodStubBits.join(" · ")}';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
