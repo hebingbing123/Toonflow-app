@@ -28,14 +28,14 @@ fn free_daily_jobs_limit() -> i64 {
         .unwrap_or(DEFAULT_FREE_DAILY_JOBS)
 }
 
-/// Resolve the effective daily-job quota for a user.
+/// Resolve the effective daily-job quota for a user (public for usage summary).
 ///
 /// Priority:
-/// 1. `app_user_profile.daily_job_quota` (per-user override, if column exists and non-NULL)
+/// 1. `app_user_profile.daily_job_quota` (per-user override, if non-NULL)
 /// 2. Tier default from env / constant
 ///
 /// Returns `None` if the user has an unlimited quota (e.g. `enterprise` tier with no cap).
-async fn effective_daily_job_quota(
+pub async fn effective_daily_job_quota_for_user(
     pool: &PgPool,
     user_id: Uuid,
 ) -> Result<Option<i64>, sqlx::Error> {
@@ -92,7 +92,7 @@ async fn jobs_today(pool: &PgPool, user_id: Uuid) -> Result<i64, sqlx::Error> {
 ///
 /// Returns `Ok(())` if allowed, or `Err(ApiError::QuotaExceeded)` if the daily cap is reached.
 pub async fn check_daily_job_quota(pool: &PgPool, user_id: Uuid) -> Result<(), ApiError> {
-    let cap = effective_daily_job_quota(pool, user_id)
+    let cap = effective_daily_job_quota_for_user(pool, user_id)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 

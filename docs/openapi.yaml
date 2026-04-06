@@ -7795,7 +7795,7 @@ components:
 
     UsageSummaryResponse:
       type: object
-      required: [events_last_24h, events_last_7d, event_counts_last_7d]
+      required: [events_last_24h, events_last_7d, event_counts_last_7d, jobs_today, daily_job_quota]
       properties:
         events_last_24h:
           type: integer
@@ -7811,6 +7811,22 @@ components:
             type: integer
             format: int64
           description: Per `event_type` counts in the rolling last 7 days (empty object when no rows)
+        jobs_today:
+          type: integer
+          format: int64
+          description: Generation jobs created today (UTC natural day) — same counter used by quota enforcement
+        daily_job_quota:
+          type: integer
+          format: int64
+          nullable: true
+          description: Effective daily job cap for this user (`null` = unlimited, e.g. enterprise tier)
+        quota_remaining:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Remaining jobs allowed today (`null` = unlimited). `0` means quota is exhausted.
+            Absent when `daily_job_quota` is `null`.
 
     PatchPromptBody:
       type: object

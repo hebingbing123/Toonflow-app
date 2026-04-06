@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::quota;
 use crate::state::AppState;
 
 /// Called when a generation job reaches `succeeded` (best-effort; failures are logged only).
@@ -64,6 +65,13 @@ struct UsageSummaryResponse {
     events_last_7d: i64,
     /// Per-`event_type` counts in the rolling last 7 days (same window as `events_last_7d`).
     event_counts_last_7d: HashMap<String, i64>,
+    /// Jobs created today (UTC natural day) — same counter used by quota enforcement.
+    jobs_today: i64,
+    /// Effective daily job cap for this user (`null` = unlimited).
+    daily_job_quota: Option<i64>,
+    /// Remaining jobs allowed today (`null` = unlimited). `0` means quota is exhausted.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    quota_remaining: Option<i64>,
 }
 
 pub fn router() -> Router<AppState> {
@@ -80,6 +88,7 @@ async fn usage_summary(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    // Event counts (24h / 7d).
     let row: (i64, i64) = sqlx::query_as(
         r#"
         SELECT
@@ -113,9 +122,33 @@ async fn usage_summary(
 
     let event_counts_last_7d: HashMap<String, i64> = breakdown.into_iter().collect();
 
+    // Jobs created today (UTC midnight to now) — used for quota display.
+    let jobs_today: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+          AND created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+        "#,
+    )
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    // Effective quota for this user.
+    let daily_job_quota = quota::effective_daily_job_quota_for_user(pool, uid)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let quota_remaining = daily_job_quota.map(|cap| (cap - jobs_today).max(0));
+
     Ok(Json(UsageSummaryResponse {
         events_last_24h: row.0,
         events_last_7d: row.1,
         event_counts_last_7d,
+        jobs_today,
+        daily_job_quota,
+        quota_remaining,
     }))
 }
