@@ -2247,6 +2247,63 @@ class _HomePageState extends State<HomePage> {
                                       setDialogState(
                                         () => projectLegacyBusy[0] = true,
                                       );
+                                      final pr = detail.project;
+                                      try {
+                                        final msg =
+                                            await postProjectEditProject(
+                                          token,
+                                          id: pr.legacyId,
+                                          name: pr.name ?? '',
+                                          intro: pr.intro ?? '',
+                                          type: pr.mode ?? '',
+                                          artStyle: pr.artStyle ?? '',
+                                          directorManual:
+                                              pr.directorManual ?? '',
+                                          videoRatio: pr.videoRatio ?? '',
+                                          imageModel: pr.imageModel ?? '',
+                                          videoModel: pr.videoModel ?? '',
+                                          imageQuality: pr.imageQuality ?? '',
+                                          projectType: pr.projectType ?? '',
+                                          mode: pr.mode ?? '',
+                                        );
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'POST …/project/edit-project noop #${pr.legacyId}：$msg',
+                                            ),
+                                          ),
+                                        );
+                                      } on RustApiException catch (e) {
+                                        if (ctx.mounted) {
+                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                            SnackBar(content: Text(e.toString())),
+                                          );
+                                        }
+                                      } finally {
+                                        if (ctx.mounted) {
+                                          setDialogState(
+                                            () =>
+                                                projectLegacyBusy[0] = false,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: Text(
+                                projectLegacyBusy[0]
+                                    ? 'project…'
+                                    : 'POST project edit (noop)',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: generalLegacyBusy[0] ||
+                                      tasksLegacyBusy[0] ||
+                                      projectLegacyBusy[0]
+                                  ? null
+                                  : () async {
+                                      setDialogState(
+                                        () => projectLegacyBusy[0] = true,
+                                      );
                                       try {
                                         await postProjectDeleteProject(
                                           token,
