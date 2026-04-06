@@ -3462,6 +3462,69 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: assetsBusy[0] ||
                                     assetsLoading[0] ||
+                                    assetsScriptFilterLoading[0] ||
+                                    assetsRef[0] == null ||
+                                    assetsRef[0]!.items.isEmpty
+                                ? null
+                                : () async {
+                                    setDialogState(() => assetsBusy[0] = true);
+                                    final first = assetsRef[0]!.items.first;
+                                    try {
+                                      final list =
+                                          await fetchProjectAssetImagesByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                      );
+                                      if (list.items.isEmpty) {
+                                        if (!ctx.mounted) return;
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'GET …/images：0 条，可先点「POST 首条资产图片」',
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      final img = list.items.first;
+                                      final one =
+                                          await fetchProjectAssetImageByLegacyIds(
+                                        token,
+                                        p.legacyId,
+                                        first.legacyId,
+                                        img.id,
+                                      );
+                                      if (!ctx.mounted) return;
+                                      final idShort = one.id.length <= 8
+                                          ? one.id
+                                          : '${one.id.substring(0, 8)}…';
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'GET …/images/$idShort：'
+                                            'sort=${one.sortIndex} '
+                                            'state=${one.state ?? "-"}',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(() => assetsBusy[0] = false);
+                                      }
+                                    }
+                                  },
+                            child: const Text('GET 资产图片(单条)'),
+                          ),
+                          TextButton(
+                            onPressed: assetsBusy[0] ||
+                                    assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
