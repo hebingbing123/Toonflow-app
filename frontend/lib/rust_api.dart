@@ -4404,6 +4404,39 @@ Future<Uint8List> fetchProjectAssetImageFileByLegacyIds(
   return res.bodyBytes;
 }
 
+/// Loads image bytes for a corner-scape **`history_images`** row.
+///
+/// **`file_path`** starting with **`http://`** / **`https://`**: plain **GET** (provider URLs).
+/// Otherwise: **[fetchProjectAssetImageFileByLegacyIds]** (JWT; **307** follow, **local** PNG, etc.).
+/// Returns **`null`** on missing path or transport/HTTP failure.
+Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+  CornerScapeHistoryImage img,
+) async {
+  final fp = img.filePath;
+  if (fp == null || fp.isEmpty) return null;
+  final t = fp.trim();
+  if (t.startsWith('http://') || t.startsWith('https://')) {
+    final res = await http
+        .get(Uri.parse(t))
+        .timeout(const Duration(seconds: 120));
+    if (res.statusCode != 200) return null;
+    return res.bodyBytes;
+  }
+  try {
+    return await fetchProjectAssetImageFileByLegacyIds(
+      accessToken,
+      projectLegacyId,
+      assetLegacyId,
+      img.id,
+    );
+  } on RustApiException {
+    return null;
+  }
+}
+
 /// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.
 Future<AssetImageRow> createProjectAssetImage(
   String accessToken,

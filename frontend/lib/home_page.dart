@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -3528,16 +3529,55 @@ class _HomePageState extends State<HomePage> {
                                         token,
                                         p.legacyId,
                                       );
+                                      Uint8List? cornerThumb;
+                                      if (r.items.isNotEmpty &&
+                                          r.items.first.historyImages.isNotEmpty) {
+                                        final a = r.items.first;
+                                        cornerThumb =
+                                            await fetchCornerScapeHistoryImagePreviewBytes(
+                                          token,
+                                          p.legacyId,
+                                          a.legacyId,
+                                          a.historyImages.first,
+                                        );
+                                      }
                                       if (!ctx.mounted) return;
                                       final h0 = r.items.isEmpty
                                           ? 0
                                           : r.items.first.historyImages.length;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            'POST …/assets/corner-scape：'
-                                            '${r.items.length} 条'
-                                            '${r.items.isEmpty ? "" : "，首条 history_images=$h0"}',
+                                          duration: const Duration(seconds: 6),
+                                          content: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (cornerThumb != null) ...[
+                                                SizedBox(
+                                                  width: 56,
+                                                  height: 56,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4),
+                                                    child: Image.memory(
+                                                      cornerThumb,
+                                                      fit: BoxFit.cover,
+                                                      gaplessPlayback: true,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                              ],
+                                              Expanded(
+                                                child: Text(
+                                                  'POST …/assets/corner-scape：'
+                                                  '${r.items.length} 条'
+                                                  '${r.items.isEmpty ? "" : "，首条 history_images=$h0"}'
+                                                  '${cornerThumb == null ? "" : "（预览）"}',
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       );
