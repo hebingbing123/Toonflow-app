@@ -18,6 +18,7 @@ part 'jobs_api.dart';
 part 'novels_api.dart';
 part 'project_overview.dart';
 part 'projects_legacy.dart';
+part 'quality_reviews.dart';
 part 'scripts_storyboards.dart';
 part 'script_agent.dart';
 part 'skills_api.dart';
