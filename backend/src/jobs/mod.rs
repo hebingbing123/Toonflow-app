@@ -43,6 +43,12 @@ struct ListJobsQuery {
     /// Exact match on `status` when set (after trim; empty omitted).
     #[serde(default)]
     status: Option<String>,
+    /// Page size (1–100). Omitted → 100.
+    #[serde(default)]
+    limit: Option<i64>,
+    /// Rows to skip (>= 0). Omitted → 0.
+    #[serde(default)]
+    offset: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -208,6 +214,25 @@ fn normalize_job_list_status_filter(raw: Option<String>) -> Result<Option<String
     }
 }
 
+fn list_jobs_limit_offset(limit: Option<i64>, offset: Option<i64>) -> Result<(i64, i64), ApiError> {
+    let limit = match limit {
+        None => 100,
+        Some(x) if (1..=100).contains(&x) => x,
+        Some(_) => {
+            return Err(ApiError::BadRequest(
+                "limit must be between 1 and 100".into(),
+            ));
+        }
+    };
+    let offset = offset.unwrap_or(0);
+    if offset < 0 {
+        return Err(ApiError::BadRequest(
+            "offset must be greater than or equal to 0".into(),
+        ));
+    }
+    Ok((limit, offset))
+}
+
 async fn list_jobs(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -216,6 +241,7 @@ async fn list_jobs(
     let uid = require_user_uuid(&state, &headers)?;
     let kind = trim_query_opt(q.kind);
     let status = normalize_job_list_status_filter(q.status)?;
+    let (limit, offset) = list_jobs_limit_offset(q.limit, q.offset)?;
     let pool = state
         .pool
         .as_ref()
@@ -228,12 +254,14 @@ async fn list_jobs(
           AND ($2::text IS NULL OR kind = $2)
           AND ($3::text IS NULL OR status = $3)
         ORDER BY created_at DESC
-        LIMIT 100
+        LIMIT $4 OFFSET $5
         "#,
     )
     .bind(uid)
     .bind(kind)
     .bind(status)
+    .bind(limit)
+    .bind(offset)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -562,5 +590,21 @@ mod tests {
             Some("running")
         );
         assert!(super::normalize_job_list_status_filter(Some("nope".into())).is_err());
+    }
+
+    #[test]
+    fn list_jobs_limit_offset_defaults_and_validates() {
+        assert_eq!(super::list_jobs_limit_offset(None, None).unwrap(), (100, 0));
+        assert_eq!(
+            super::list_jobs_limit_offset(Some(1), Some(0)).unwrap(),
+            (1, 0)
+        );
+        assert_eq!(
+            super::list_jobs_limit_offset(Some(100), None).unwrap(),
+            (100, 0)
+        );
+        assert!(super::list_jobs_limit_offset(Some(0), None).is_err());
+        assert!(super::list_jobs_limit_offset(Some(101), None).is_err());
+        assert!(super::list_jobs_limit_offset(None, Some(-1)).is_err());
     }
 }

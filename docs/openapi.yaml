@@ -6305,7 +6305,8 @@ paths:
       summary: List generation jobs for the current user
       operationId: listJobsV1
       description: |
-        Returns up to 100 `app_generation_job` rows for `owner_user_id = JWT sub`, newest first.
+        Returns `app_generation_job` rows for `owner_user_id = JWT sub`, newest first.
+        Optional **`limit`** (default **100**, max **100**) and **`offset`** (default **0**, must be **>= 0**) control pagination; invalid values → **400**.
         Optional query **`kind`** and **`status`**: when set (non-empty after trim), rows must match **exactly** (AND). Omitted or blank → no filter on that dimension.
         **`status`** is normalized to ASCII lowercase and must be one of **`queued`**, **`running`**, **`succeeded`**, **`failed`**, **`cancelled`**; otherwise **400**.
         Requires `DATABASE_URL` on the server.
@@ -6325,6 +6326,25 @@ paths:
             type: string
             enum: [queued, running, succeeded, failed, cancelled]
           description: Exact `status` filter
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 100
+          description: Page size (1–100). Omitted → 100.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            default: 0
+          description: Rows to skip. Omitted → 0.
       responses:
         "200":
           description: OK
@@ -6335,7 +6355,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/JobRow"
         "400":
-          description: Invalid `status` query (not a known job status)
+          description: Invalid `status`, `limit`, or `offset` query
           content:
             application/json:
               schema:

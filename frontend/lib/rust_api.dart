@@ -3483,13 +3483,16 @@ class JobRow {
   }
 }
 
-/// `GET /api/v1/jobs` — up to 100 jobs for the caller, newest first. See `listJobsV1`.
+/// `GET /api/v1/jobs` — jobs for the caller, newest first (default [limit] 100). See `listJobsV1`.
 ///
 /// [kind] and [status] are optional exact-match query filters (non-empty only).
+/// [limit] must be 1–100 when set; [offset] must be >= 0 when set.
 Future<List<JobRow>> fetchJobs(
   String accessToken, {
   String? kind,
   String? status,
+  int? limit,
+  int? offset,
 }) async {
   final qp = <String, String>{};
   if (kind != null && kind.trim().isNotEmpty) {
@@ -3497,6 +3500,12 @@ Future<List<JobRow>> fetchJobs(
   }
   if (status != null && status.trim().isNotEmpty) {
     qp['status'] = status.trim();
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  if (offset != null) {
+    qp['offset'] = '$offset';
   }
   final uri = Uri.parse('$kApiBaseUrl/api/v1/jobs').replace(
     queryParameters: qp.isEmpty ? null : qp,
