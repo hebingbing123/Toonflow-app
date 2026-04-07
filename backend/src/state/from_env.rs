@@ -12,6 +12,15 @@ use super::{AppState, MemoryConfig};
 use crate::llm::LlmConfig;
 use crate::notify_hub::WsNotifyHub;
 
+const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
+
+fn switch_ai_dev_tool_from_env() -> String {
+    match std::env::var(ENV_SWITCH_AI_DEV_TOOL) {
+        Ok(s) if s.trim() == "1" => "1".into(),
+        _ => "0".into(),
+    }
+}
+
 pub(super) async fn load() -> Result<AppState, sqlx::Error> {
     let pool = match std::env::var("DATABASE_URL") {
         Ok(url) => {
@@ -74,6 +83,7 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         http_client,
         notify: WsNotifyHub::new(),
         memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        switch_ai_dev_tool: Arc::new(RwLock::new(switch_ai_dev_tool_from_env())),
         local_asset_image_dir,
     })
 }

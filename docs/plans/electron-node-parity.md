@@ -26,9 +26,9 @@
 
 | 符号 | 行数 | 含义 |
 |------|------|------|
-| ✅ | **5** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`getVersion`**、**`test`**） |
+| ✅ | **6** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`getVersion`**、**`test`**、**`setting/dev`**） |
 | 🔀 | **4** | 换设计、不逐路径复刻（**`login`**、**`migrate`**、**`openFolder`**、**`loginConfig`**） |
-| 🟡 | **20** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、视频轨、OSS、事件管线等）待产品里程碑 |
+| 🟡 | **19** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、视频轨、OSS、事件管线等）待产品里程碑 |
 | §3.1 Socket | **2** 行（均为 🔀） | 旧 **Socket.IO** 由 **`/api/v1/ws` + Harness** 承接，非 REST 一对一 |
 
 **计数说明**：**一行**对应 **旧 `src/router.ts` 上一类前缀**（§3 左列），**不是**「二十一个独立产品模块」。**🟡** 表示该前缀下仍有 **501**、**⏳** 等待里程碑；合并同源前缀（如 **`/api/setting/getTextModel`** 并入 **`modelSelect`**）会减少 🟡 行数。
@@ -59,7 +59,7 @@
 | `/api/setting/about/*` | 更新检查、安装包 | 🟡 | **`POST /api/v1/settings/about/check-update`**：**`source`** 同旧枚举，**不拉 OSS**，**`needUpdate: false`**、**`latestVersion`** = 服务端 **`CARGO_PKG_VERSION`**；**`POST …/download-app`** 校验 **`url`** 后 **501**（本地安装/解压仅 Electron）；OpenAPI **`postAboutCheckUpdateV1`** / **`postAboutDownloadAppV1`**；Flutter 探针 |
 | `/api/setting/agentDeploy/*` | 本地 Agent 部署配置 | 🟡 | **`POST /api/v1/settings/agent-deploy/list`**：**`{}`** 体返回 **`initDB`** 四条默认行（静态，无 PG）；**`POST …/deploy-model`**、**`POST …/set-key`** 校验后 **501**（不落库、HTTP 不写密钥）；Flutter **`postAgentDeployListV1`**、**`postSettingsAgentDeployModelV1`**、**`postSettingsAgentDeploySetKeyV1`**；OpenAPI **`postSettingsAgentDeployListV1`** 等；首页 models 探针串 **501** |
 | `/api/setting/dbConfig/clearData` | 清库 | 🟡 | **`POST /api/v1/settings/danger/clear-database`**（旧为 **GET**；SaaS 用 **POST** 体 **`{}`**）：JWT 后 **501**；Flutter **`postSettingsDangerClearDatabaseV1`** |
-| `/api/setting/dev/*` | Dev 开关 | 🟡 | **`GET /api/v1/settings/dev/switch-ai-tool`**（**`value`** **`"0"`**/**`"1"`**，来自 **`TOONFLOW_SWITCH_AI_DEV_TOOL`**，对齐 **`getSwitchAiDevTool`**）；**`PUT`** 校验后 **501** **`not_implemented`**（无 **`o_setting`** 写入；对齐 **`updateSwitchAiDevTool`** 动词，运维改 env）；OpenAPI **`getSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`**；Flutter **`fetchSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`** + 首页探针 |
+| `/api/setting/dev/*` | Dev 开关 | ✅ | **`GET /api/v1/settings/dev/switch-ai-tool`**（**`value`** **`"0"`**/**`"1"`**）返回当前进程内生效值；**`PUT`** 校验后更新同一进程内 override，并可立即 **GET** 回读，对齐 **`getSwitchAiDevTool`** / **`updateSwitchAiDevTool`** 的开关语义。服务启动时以 **`TOONFLOW_SWITCH_AI_DEV_TOOL`** 为初值，重启后回到 env/default；OpenAPI **`getSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`**；Flutter **`fetchSwitchAiDevToolV1`** / **`putSwitchAiDevToolV1`** + 首页探针 |
 | `/api/setting/fileManagement/openFolder` | 打开本地目录 | 🔀 | 桌面端本地能力，非 HTTP |
 | `/api/setting/loginConfig/*` | 用户密码 | 🔀 | Supabase 账户体系 |
 | `/api/setting/memoryConfig/*` | 记忆配置 UI | 🟡 | **RAG / 摘要数值与 ONNX 路径**：**`GET`/`POST /api/v1/settings/memory-config`**（**camelCase**，默认同 **`initDB`** **`o_setting`**；进程内 **`RwLock`**，重启复位）；**`delAllMemory`** → **`POST /api/v1/settings/memory-config/clear-agent-memories`**（需 **`projectId`+`agentType`**，等同 **`agents/memory/clear`** **`clearType: all`**，非 SQLite 全表删）；OpenAPI **`postSettingsClearAgentMemoriesV1`** 等；Flutter 探针（**`clear-agent-memories`**：无 DB **503**；有 DB 且命中项目 **200**；无该项目 **404**；优先 **`GET /api/v1/projects`** 首条 **`legacy_id`** 否则 **`1`**） |

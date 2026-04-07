@@ -178,8 +178,11 @@ Future<SwitchAiDevToolV1> fetchSwitchAiDevToolV1(String accessToken) async {
   return SwitchAiDevToolV1.fromJson(map);
 }
 
-/// `PUT /api/v1/settings/dev/switch-ai-tool` — OpenAPI `putSwitchAiDevToolV1` (typically **501**).
-Future<int> putSwitchAiDevToolV1(String accessToken, String value) async {
+/// `PUT /api/v1/settings/dev/switch-ai-tool` — OpenAPI `putSwitchAiDevToolV1`.
+Future<SwitchAiDevToolV1> putSwitchAiDevToolV1(
+  String accessToken,
+  String value,
+) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/dev/switch-ai-tool');
   final res = await http
       .put(
@@ -191,7 +194,11 @@ Future<int> putSwitchAiDevToolV1(String accessToken, String value) async {
         body: jsonEncode({'value': value}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return SwitchAiDevToolV1.fromJson(map);
 }
 
 /// OpenAPI **`MemoryConfig`** — legacy **`getMemory`** / **`sureMemory`** (**camelCase**).

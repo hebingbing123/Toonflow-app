@@ -29,7 +29,7 @@ info:
 
     **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`**. Priority: per-user preference (set via **`PATCH /api/v1/models/text-default`** → `app_user_profile.preferred_text_model_id`) → **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env → first catalog text model.
 
-    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** reads **`TOONFLOW_SWITCH_AI_DEV_TOOL`** (**`"1"`** on, else **`"0"`**), parity with legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** then returns **501** **`not_implemented`** (no per-user SQLite **`o_setting`** persistence).
+    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** returns the process-local effective value for legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** (**`"0"`** / **`"1"`**) and updates the in-process override; startup bootstraps from **`TOONFLOW_SWITCH_AI_DEV_TOOL`**, and restart resets to env/default.
 
     **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values are held in server memory per process (not Postgres); restart resets to defaults.
     **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).

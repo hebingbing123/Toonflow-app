@@ -86,6 +86,7 @@ mod contract_smoke_tests {
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
         }
     }
@@ -99,6 +100,7 @@ mod contract_smoke_tests {
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
         }
     }
@@ -2816,16 +2818,36 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_dev_switch_put_not_implemented_with_jwt() {
+    async fn settings_dev_switch_put_updates_process_local_value_with_jwt() {
+        let state = smoke_state();
         let token = test_jwt(Uuid::nil());
-        let (status, v) = put_json_bearer(
-            "/api/v1/settings/dev/switch-ai-tool",
-            &token,
-            r#"{"value":"0"}"#,
+        let (status, v) = oneshot_json_state(
+            state.clone(),
+            Request::builder()
+                .method(Method::PUT)
+                .uri("/api/v1/settings/dev/switch-ai-tool")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(r#"{"value":"1"}"#.to_string()))
+                .unwrap(),
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["value"], "1");
+
+        let (status, v) = oneshot_json_state(
+            state,
+            Request::builder()
+                .uri("/api/v1/settings/dev/switch-ai-tool")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["value"], "1");
     }
 
     #[tokio::test]
@@ -3646,6 +3668,7 @@ mod pg_contract_tests {
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
         }
     }
@@ -3662,6 +3685,7 @@ mod pg_contract_tests {
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: Some(dir),
         }
     }
@@ -6614,6 +6638,7 @@ mod pg_contract_tests {
             http_client: reqwest::Client::new(),
             notify: crate::notify_hub::WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
         }
     }

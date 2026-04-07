@@ -1,5 +1,5 @@
 //! Legacy **`/api/setting/dev/getSwitchAiDevTool`** / **`updateSwitchAiDevTool`**: AI dev-tool toggle was SQLite **`o_setting`**.
-//! Rust exposes the **effective** value from server env; **PUT** does not persist (use **`TOONFLOW_SWITCH_AI_DEV_TOOL`** or future user settings).
+//! Rust keeps a process-local override with env bootstrap; restart falls back to **`TOONFLOW_SWITCH_AI_DEV_TOOL`**.
 
 use axum::{
     extract::{Json, State},
@@ -13,8 +13,6 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
-
 #[derive(Debug, Serialize)]
 pub struct SwitchAiDevToolResponse {
     /// **`"0"`** off, **`"1"`** on — same string legacy stored in **`o_setting.value`**.
@@ -27,21 +25,13 @@ struct SwitchAiDevToolPutBody {
     value: String,
 }
 
-fn switch_value_from_env() -> String {
-    match std::env::var(ENV_SWITCH_AI_DEV_TOOL) {
-        Ok(s) if s.trim() == "1" => "1".into(),
-        _ => "0".into(),
-    }
-}
-
 async fn get_switch_ai_dev_tool(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<SwitchAiDevToolResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
-    Ok(Json(SwitchAiDevToolResponse {
-        value: switch_value_from_env(),
-    }))
+    let value = state.switch_ai_dev_tool.read().await.clone();
+    Ok(Json(SwitchAiDevToolResponse { value }))
 }
 
 async fn put_switch_ai_dev_tool(
@@ -54,10 +44,11 @@ async fn put_switch_ai_dev_tool(
     if v != "0" && v != "1" {
         return Err(ApiError::BadRequest("value must be \"0\" or \"1\"".into()));
     }
-    Err(ApiError::NotImplemented(format!(
-        "persisting dev switch is not supported; set {} on the server (current effective value unchanged)",
-        ENV_SWITCH_AI_DEV_TOOL
-    )))
+    let mut current = state.switch_ai_dev_tool.write().await;
+    *current = v.to_string();
+    Ok(Json(SwitchAiDevToolResponse {
+        value: current.clone(),
+    }))
 }
 
 pub fn router() -> Router<AppState> {
@@ -87,14 +78,6 @@ mod tests {
     fn switch_ai_dev_tool_put_body_accepts_zero() {
         let b: SwitchAiDevToolPutBody = serde_json::from_str(r#"{"value":"0"}"#).unwrap();
         assert_eq!(b.value, "0");
-    }
-
-    #[test]
-    fn switch_value_from_env_returns_zero_when_unset() {
-        // This test assumes the env var is not set in test environment
-        // or set to a value other than "1"
-        let val = switch_value_from_env();
-        assert!(val == "0" || val == "1");
     }
 
     #[test]

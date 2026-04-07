@@ -53,18 +53,21 @@ extension _HomePageSystemProbesController on _HomePageState {
     });
     try {
       final g = await fetchSwitchAiDevToolV1(token);
-      final putStatus = await putSwitchAiDevToolV1(token, '0');
+      final target = g.value == '1' ? '0' : '1';
+      final put = await putSwitchAiDevToolV1(token, target);
+      final after = await fetchSwitchAiDevToolV1(token);
       if (!mounted) return;
-      if (putStatus != 501) {
+      if (put.value != target || after.value != target) {
         setState(() {
-          _error = 'PUT switch-ai-tool expected 501, got $putStatus';
+          _error =
+              'PUT switch-ai-tool expected value=$target, got put=${put.value} get=${after.value}';
           _loadingDevSwitchProbe = false;
         });
         return;
       }
       setState(() {
         _devSwitchProbeBody =
-            'GET value=${g.value} · PUT body {value:0} -> $putStatus not_implemented';
+            'GET value=${g.value} · PUT body {value:$target} -> ${put.value} · GET value=${after.value}';
         _loadingDevSwitchProbe = false;
       });
     } on RustApiException catch (e) {
