@@ -22,6 +22,7 @@ part 'home_page/quality_reviews_controller.dart';
 part 'home_page/system_probes_controller.dart';
 part 'home_page/system_probes_models_catalog.dart';
 part 'home_page/system_probes_account.dart';
+part 'home_page/system_probes_content.dart';
 part 'home_page/auth_session_controller.dart';
 part 'home_page/overview_controller.dart';
 part 'home_page/build_sections.dart';
