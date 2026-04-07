@@ -54,3 +54,27 @@ pub fn router() -> Router<AppState> {
             post(post_clear_database),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_danger_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<EmptyDangerBody>(r#"{"extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn empty_danger_body_accepts_empty() {
+        let b: EmptyDangerBody = serde_json::from_str(r#"{}"#).unwrap();
+        // EmptyDangerBody has no fields, so just parsing successfully is the test
+        let _ = b;
+    }
+
+    #[test]
+    fn wipe_not_supported_returns_not_implemented() {
+        let err = wipe_not_supported();
+        assert!(matches!(err, ApiError::NotImplemented(_)));
+    }
+}
