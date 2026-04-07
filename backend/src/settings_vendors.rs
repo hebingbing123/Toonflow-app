@@ -553,10 +553,8 @@ mod tests {
 
     #[test]
     fn vendor_model_test_body_accepts_valid() {
-        let b: VendorModelTestBody = serde_json::from_str(
-            r#"{"modelName":"gpt-4","type":"text","id":"vendor-1"}"#,
-        )
-        .unwrap();
+        let b: VendorModelTestBody =
+            serde_json::from_str(r#"{"modelName":"gpt-4","type":"text","id":"vendor-1"}"#).unwrap();
         assert_eq!(b.model_name, "gpt-4");
         assert_eq!(b.kind, "text");
         assert_eq!(b.id, "vendor-1");
@@ -645,8 +643,7 @@ mod tests {
 
     #[test]
     fn enable_vendor_body_accepts_valid() {
-        let b: EnableVendorBody =
-            serde_json::from_str(r#"{"id":"v1","enable":1}"#).unwrap();
+        let b: EnableVendorBody = serde_json::from_str(r#"{"id":"v1","enable":1}"#).unwrap();
         assert_eq!(b.id, "v1");
         assert_eq!(b.enable, 1);
     }

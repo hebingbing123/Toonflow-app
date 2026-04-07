@@ -310,16 +310,13 @@ mod tests {
 
     #[test]
     fn get_task_api_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<GetTaskApiBody>(
-            r#"{"page":1,"limit":20,"extra":1}"#,
-        );
+        let err = serde_json::from_str::<GetTaskApiBody>(r#"{"page":1,"limit":20,"extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn get_task_api_body_accepts_minimal() {
-        let b: GetTaskApiBody =
-            serde_json::from_str(r#"{"page":1,"limit":20}"#).unwrap();
+        let b: GetTaskApiBody = serde_json::from_str(r#"{"page":1,"limit":20}"#).unwrap();
         assert_eq!(b.page, 1);
         assert_eq!(b.limit, 20);
         assert_eq!(b.state, None);
@@ -350,10 +347,8 @@ mod tests {
 
     #[test]
     fn task_details_body_accepts_uuid_string() {
-        let b: TaskDetailsBody = serde_json::from_str(
-            r#"{"taskId":"550e8400-e29b-41d4-a716-446655440000"}"#,
-        )
-        .unwrap();
+        let b: TaskDetailsBody =
+            serde_json::from_str(r#"{"taskId":"550e8400-e29b-41d4-a716-446655440000"}"#).unwrap();
         match b.task_id {
             Value::String(s) => assert_eq!(s, "550e8400-e29b-41d4-a716-446655440000"),
             _ => panic!("Expected string"),

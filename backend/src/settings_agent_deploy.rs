@@ -159,8 +159,7 @@ mod tests {
 
     #[test]
     fn agent_deploy_list_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<AgentDeployListBody>(r#"{"extra":1}"#);
+        let err = serde_json::from_str::<AgentDeployListBody>(r#"{"extra":1}"#);
         assert!(err.is_err());
     }
 
@@ -202,15 +201,13 @@ mod tests {
 
     #[test]
     fn agent_set_key_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<AgentSetKeyBody>(r#"{"key":"secret","extra":1}"#);
+        let err = serde_json::from_str::<AgentSetKeyBody>(r#"{"key":"secret","extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn agent_set_key_body_accepts_key() {
-        let b: AgentSetKeyBody =
-            serde_json::from_str(r#"{"key":"my-api-key"}"#).unwrap();
+        let b: AgentSetKeyBody = serde_json::from_str(r#"{"key":"my-api-key"}"#).unwrap();
         assert_eq!(b.key, Some("my-api-key".to_string()));
     }
 

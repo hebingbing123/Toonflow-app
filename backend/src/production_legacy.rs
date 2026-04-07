@@ -472,30 +472,26 @@ mod tests {
 
     #[test]
     fn storyboard_id_list_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<StoryboardIdListBody>(r#"{"ids":[1,2],"extra":1}"#);
+        let err = serde_json::from_str::<StoryboardIdListBody>(r#"{"ids":[1,2],"extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn storyboard_id_list_body_accepts_valid() {
-        let b: StoryboardIdListBody =
-            serde_json::from_str(r#"{"ids":[1,2,3]}"#).unwrap();
+        let b: StoryboardIdListBody = serde_json::from_str(r#"{"ids":[1,2,3]}"#).unwrap();
         assert_eq!(b.ids, vec![1, 2, 3]);
     }
 
     #[test]
     fn get_flow_data_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<GetFlowDataBody>(
-            r#"{"projectId":1,"episodesId":5,"extra":1}"#,
-        );
+        let err =
+            serde_json::from_str::<GetFlowDataBody>(r#"{"projectId":1,"episodesId":5,"extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn get_flow_data_body_accepts_valid() {
-        let b: GetFlowDataBody =
-            serde_json::from_str(r#"{"projectId":1,"episodesId":5}"#).unwrap();
+        let b: GetFlowDataBody = serde_json::from_str(r#"{"projectId":1,"episodesId":5}"#).unwrap();
         assert_eq!(b.project_id, 1);
         assert_eq!(b.episodes_id, 5);
     }
@@ -510,10 +506,9 @@ mod tests {
 
     #[test]
     fn save_flow_data_body_accepts_valid() {
-        let b: SaveFlowDataBody = serde_json::from_str(
-            r#"{"projectId":1,"episodesId":5,"data":{"key":"value"}}"#,
-        )
-        .unwrap();
+        let b: SaveFlowDataBody =
+            serde_json::from_str(r#"{"projectId":1,"episodesId":5,"data":{"key":"value"}}"#)
+                .unwrap();
         assert_eq!(b.project_id, 1);
         assert_eq!(b.episodes_id, 5);
         assert!(b.data.is_object());
@@ -567,32 +562,26 @@ mod tests {
 
     #[test]
     fn export_image_shot_ref_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<ExportImageShotRef>(r#"{"id":"1","extra":1}"#);
+        let err = serde_json::from_str::<ExportImageShotRef>(r#"{"id":"1","extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn export_image_shot_ref_accepts_valid() {
-        let b: ExportImageShotRef =
-            serde_json::from_str(r#"{"id":"123"}"#).unwrap();
+        let b: ExportImageShotRef = serde_json::from_str(r#"{"id":"123"}"#).unwrap();
         assert_eq!(b.id, "123");
     }
 
     #[test]
     fn export_image_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<ExportImageBody>(
-            r#"{"shotId":[{"id":"1"}],"extra":1}"#,
-        );
+        let err = serde_json::from_str::<ExportImageBody>(r#"{"shotId":[{"id":"1"}],"extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn export_image_body_accepts_valid() {
-        let b: ExportImageBody = serde_json::from_str(
-            r#"{"shotId":[{"id":"1"},{"id":"2"}]}"#,
-        )
-        .unwrap();
+        let b: ExportImageBody =
+            serde_json::from_str(r#"{"shotId":[{"id":"1"},{"id":"2"}]}"#).unwrap();
         assert_eq!(b.shot_id.len(), 2);
         assert_eq!(b.shot_id[0].id, "1");
     }

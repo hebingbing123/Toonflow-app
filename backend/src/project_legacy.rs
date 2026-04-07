@@ -334,8 +334,7 @@ mod tests {
 
     #[test]
     fn delete_project_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<DeleteProjectBody>(r#"{"id":1,"extra":1}"#);
+        let err = serde_json::from_str::<DeleteProjectBody>(r#"{"id":1,"extra":1}"#);
         assert!(err.is_err());
     }
 
@@ -410,10 +409,7 @@ mod tests {
 
     #[test]
     fn effective_mode_falls_back_to_type() {
-        assert_eq!(
-            effective_mode("novel", ""),
-            Some("novel".to_string())
-        );
+        assert_eq!(effective_mode("novel", ""), Some("novel".to_string()));
         assert_eq!(effective_mode("  novel  ", ""), Some("novel".to_string()));
     }
 
