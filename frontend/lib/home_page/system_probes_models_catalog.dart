@@ -425,6 +425,157 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         });
         return;
       }
+      final prStoryboardData = await productionAssetsProbeStatus(
+        () => postProductionGetStoryboardDataV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardData)) {
+        setState(() {
+          _error =
+              'POST production/get-storyboard-data expected 200/404/503, got $prStoryboardData';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardAdd = await productionAssetsProbeStatus(
+        () => postStoryboardAddV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          prompt: 'probe storyboard',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardAdd)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/add expected 200/404/503, got $prStoryboardAdd';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardBatchAdd = await productionAssetsProbeStatus(
+        () => postStoryboardBatchAddInfoV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          storyboards: const [
+            StoryboardBatchAddInfoItem(prompt: 'probe storyboard'),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardBatchAdd)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/batch-add-info expected 200/404/503, got $prStoryboardBatchAdd';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardBatchGenerate = await productionAssetsProbeStatus(
+        () => postStoryboardBatchGenerateImageV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          items: const [
+            BatchGenerateImageItem(storyboardId: 1, prompt: 'probe storyboard'),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardBatchGenerate)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/batch-generate-image expected 200/404/503, got $prStoryboardBatchGenerate';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardDownPreview = await productionAssetsProbeStatus(
+        () => postStoryboardDownPreviewImageV1(token, storyboardId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardDownPreview)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/down-preview-image expected 200/404/503, got $prStoryboardDownPreview';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardEdit = await productionAssetsProbeStatus(
+        () => postStoryboardEditInfoV1(
+          token,
+          storyboardId: 1,
+          prompt: 'probe storyboard',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardEdit)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/edit-info expected 200/404/503, got $prStoryboardEdit';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardGet = await productionAssetsProbeStatus(
+        () => postStoryboardGetDataV1(token, storyboardId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardGet)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/get-data expected 200/404/503, got $prStoryboardGet';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardPreview = await productionAssetsProbeStatus(
+        () => postStoryboardPreviewImageV1(token, storyboardId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardPreview)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/preview-image expected 200/404/503, got $prStoryboardPreview';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardRemove = await productionAssetsProbeStatus(
+        () => postStoryboardRemoveFrameV1(token, storyboardId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardRemove)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/remove-frame expected 200/404/503, got $prStoryboardRemove';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prStoryboardUrl = await productionAssetsProbeStatus(
+        () => postStoryboardUpdateUrlV1(
+          token,
+          storyboardId: 1,
+          imageUrl: 'https://example.com/probe.png',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prStoryboardUrl)) {
+        setState(() {
+          _error =
+              'POST production/storyboard/update-url expected 200/404/503, got $prStoryboardUrl';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       const productionBodies = <String, Map<String, dynamic>>{
         '/api/v1/production/edit-image/generate-flow-image': {
           'flowId': 'img-flow-001',
@@ -442,41 +593,6 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
           'flowId': 'img-flow-001',
           'stepId': 'upload',
           'updates': {},
-        },
-        '/api/v1/production/get-storyboard-data': {
-          'projectId': 1,
-          'scriptId': 1,
-        },
-        '/api/v1/production/storyboard/add': {
-          'projectId': 1,
-          'scriptId': 1,
-          'prompt': 'probe storyboard',
-        },
-        '/api/v1/production/storyboard/batch-add-info': {
-          'projectId': 1,
-          'scriptId': 1,
-          'storyboards': [
-            {'prompt': 'probe storyboard'},
-          ],
-        },
-        '/api/v1/production/storyboard/batch-generate-image': {
-          'projectId': 1,
-          'scriptId': 1,
-          'items': [
-            {'storyboardId': 1, 'prompt': 'probe storyboard'},
-          ],
-        },
-        '/api/v1/production/storyboard/down-preview-image': {'storyboardId': 1},
-        '/api/v1/production/storyboard/edit-info': {
-          'storyboardId': 1,
-          'prompt': 'probe storyboard',
-        },
-        '/api/v1/production/storyboard/get-data': {'storyboardId': 1},
-        '/api/v1/production/storyboard/preview-image': {'storyboardId': 1},
-        '/api/v1/production/storyboard/remove-frame': {'storyboardId': 1},
-        '/api/v1/production/storyboard/update-url': {
-          'storyboardId': 1,
-          'imageUrl': 'https://example.com/probe.png',
         },
         '/api/v1/production/workbench/add-track': {
           'projectId': 1,
@@ -531,7 +647,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         }
       }
       setState(() {
-        const typedProductionAssetsCount = 5;
+        const typedProductionAssetsCount = 15;
         final sample = list.take(4).map((m) => '${m.value}(${m.type})').join(', ');
         final modelsLine = list.isEmpty
             ? '(empty)'
@@ -541,7 +657,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/storyboard typed -> $prStoryboardData/$prStoryboardAdd/$prStoryboardBatchAdd/$prStoryboardBatchGenerate/$prStoryboardDownPreview/$prStoryboardEdit/$prStoryboardGet/$prStoryboardPreview/$prStoryboardRemove/$prStoryboardUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
