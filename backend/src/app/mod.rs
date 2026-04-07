@@ -6861,6 +6861,4 @@ mod pg_contract_tests {
             .await;
     }
 
-    #[tokio::test]
-    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
-}
+    fn contract_state_without_pool(secret: String) -> AppState {
