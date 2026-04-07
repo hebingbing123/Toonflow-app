@@ -6754,13 +6754,35 @@ mod pg_contract_tests {
             )
             .await
             .unwrap();
-        let (status, _) = read_json_response(res).await;
-        assert_eq!(status, StatusCode::OK, "restore original");
+        let status = res.status();
+        assert_eq!(status, StatusCode::NO_CONTENT, "delete should return 204");
 
-        // Cleanup
-        let _ = sqlx::query("DELETE FROM public.app_user_prompt WHERE owner_user_id = $1 AND legacy_id = 1")
-            .bind(sub)
-            .execute(&pool)
-            .await;
+        // Verify deletion
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/skills/content?path={}", test_path))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NOT_FOUND, "deleted skill should not exist");
+    }
+
+    fn contract_state_without_pool(secret: String) -> AppState {
+        AppState {
+            pool: None,
+            jwt_secret: Some(secret.into_bytes()),
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: crate::notify_hub::WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            local_asset_image_dir: None,
+        }
     }
 }
