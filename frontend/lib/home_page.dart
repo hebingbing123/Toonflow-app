@@ -21,6 +21,10 @@ bool _assetsGenerateSingleJobProbeOk(int status) =>
 bool _vendorModelTestProbeOk(int status) =>
     status == 200 || status == 429 || status == 503;
 
+/// Legacy production probes: allow implemented **200**, placeholder **501**, or **503** when DB-gated routes run without pool.
+bool _productionProbeOk(int status) =>
+    status == 200 || status == 501 || status == 503;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -828,9 +832,10 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      if (prod != 501) {
+      if (!_productionProbeOk(prod)) {
         setState(() {
-          _error = 'POST production/get-production-data expected 501, got $prod';
+          _error =
+              'POST production/get-production-data expected 200/501/503, got $prod';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1008,10 +1013,10 @@ class _HomePageState extends State<HomePage> {
         episodesId: 1,
       );
       if (!mounted) return;
-      if (prFlow != 501) {
+      if (!_productionProbeOk(prFlow)) {
         setState(() {
           _error =
-              'POST production/get-flow-data expected 501, got $prFlow';
+              'POST production/get-flow-data expected 200/501/503, got $prFlow';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1022,10 +1027,10 @@ class _HomePageState extends State<HomePage> {
         episodesId: 1,
       );
       if (!mounted) return;
-      if (prSave != 501) {
+      if (!_productionProbeOk(prSave)) {
         setState(() {
           _error =
-              'POST production/save-flow-data expected 501, got $prSave';
+              'POST production/save-flow-data expected 200/501/503, got $prSave';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1045,10 +1050,10 @@ class _HomePageState extends State<HomePage> {
         trackId: 1,
       );
       if (!mounted) return;
-      if (prVid != 501) {
+      if (!_productionProbeOk(prVid)) {
         setState(() {
           _error =
-              'POST production/workbench/generate-video expected 501, got $prVid';
+              'POST production/workbench/generate-video expected 200/501/503, got $prVid';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1058,10 +1063,10 @@ class _HomePageState extends State<HomePage> {
         ids: const [1],
       );
       if (!mounted) return;
-      if (prPoll != 501) {
+      if (!_productionProbeOk(prPoll)) {
         setState(() {
           _error =
-              'POST production/storyboard/polling-image expected 501, got $prPoll';
+              'POST production/storyboard/polling-image expected 200/501/503, got $prPoll';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1073,10 +1078,10 @@ class _HomePageState extends State<HomePage> {
         ],
       );
       if (!mounted) return;
-      if (prExp != 501) {
+      if (!_productionProbeOk(prExp)) {
         setState(() {
           _error =
-              'POST production/export-image expected 501, got $prExp';
+              'POST production/export-image expected 200/501/503, got $prExp';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1116,13 +1121,13 @@ class _HomePageState extends State<HomePage> {
       for (final path in productionLooseStubPaths) {
         final code = await postProductionLegacyJsonStubV1(token, path);
         if (!mounted) return;
-        if (code != 501) {
+        if (!_productionProbeOk(code)) {
           final rel = path.startsWith(prodPrefix)
               ? path.substring(prodPrefix.length)
               : path;
           setState(() {
             _error =
-                'POST production/$rel loose stub expected 501, got $code';
+                'POST production/$rel loose stub expected 200/501/503, got $code';
             _loadingModelsCatalog = false;
           });
           return;
@@ -1141,7 +1146,7 @@ class _HomePageState extends State<HomePage> {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${productionLooseStubPaths.length}×501';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${productionLooseStubPaths.length}×(200/501/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
