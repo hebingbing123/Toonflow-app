@@ -56,7 +56,7 @@
 
 ---
 
-## Monorepo（Rust + Flutter，与现有 Electron/Node 并行）
+## Monorepo（Rust + Flutter）
 
 | 目录 | 说明 |
 |------|------|
@@ -64,13 +64,11 @@
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
 | **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
-| **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件与旧版 Socket.IO 对照 |
+| **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件 |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
-| **`docs/migration/`** | 旧栈 SQLite → Supabase PG 迁移说明（[`legacy-sqlite-to-supabase.md`](docs/migration/legacy-sqlite-to-supabase.md)） |
 
-> 当前 **主产品** 仍为根目录 Electron + `src/` Node 服务；`backend/` / `frontend/` 为新栈竖切起点。  
-> 路线图中的 **Rust MVP + Flutter 壳**（`rust-backend-mvp` / `flutter-shell`）已可作为开发与契约探针基座；**完整产品切换**仍取决于 parity 与 **`product-shipping-bar`**（见 [`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)）。  
-> **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；勿反复询问「下一步」。Agent 行为约定见 **[`AGENTS.md`](AGENTS.md)**（含 **Cursor 里打开 Agent 自动运行 / allowlist** 的步骤）；若仍逐项要你点「运行」，按 `AGENTS.md` 的「希望尽量少点允许」一节检查设置。
+> **重构完成**：旧 Electron + Node 栈已下线（`decommission-electron`）。当前主产品为 `backend/` + `frontend/` 新栈。  
+> **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；Agent 行为约定见 **[`AGENTS.md`](AGENTS.md)**。
 
 ### CI 与工程规范
 
