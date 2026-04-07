@@ -17,6 +17,7 @@ use crate::production_legacy;
 use crate::project_legacy;
 use crate::projects;
 use crate::prompts;
+use crate::quality_review;
 use crate::rate_limit::governor_layer_from_env;
 use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_agent;
@@ -91,6 +92,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(jobs::router())
         .merge(usage::router())
         .merge(prompts::router())
+        .merge(quality_review::routes())
         .merge(settings_about::router())
         .merge(settings_agent_deploy::router())
         .merge(settings_danger::router())
