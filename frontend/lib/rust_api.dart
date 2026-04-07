@@ -4419,11 +4419,15 @@ Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
   if (fp == null || fp.isEmpty) return null;
   final t = fp.trim();
   if (t.startsWith('http://') || t.startsWith('https://')) {
-    final res = await http
-        .get(Uri.parse(t))
-        .timeout(const Duration(seconds: 120));
-    if (res.statusCode != 200) return null;
-    return res.bodyBytes;
+    try {
+      final res = await http
+          .get(Uri.parse(t))
+          .timeout(const Duration(seconds: 120));
+      if (res.statusCode != 200) return null;
+      return res.bodyBytes;
+    } catch (_) {
+      return null;
+    }
   }
   try {
     return await fetchProjectAssetImageFileByLegacyIds(
