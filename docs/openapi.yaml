@@ -4381,7 +4381,10 @@ paths:
       summary: Poll storyboard image generation state (legacy `pollingImage`)
       operationId: postProductionStoryboardPollingImageV1
       description: |
-        Bearer JWT. Validates **`ids`**, then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`ids`** (non-empty, positive), then returns:
+        - **200** when all storyboard ids are owned by this user
+        - **404** when any id is missing / not owned
+        - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
       requestBody:
@@ -4391,6 +4394,8 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductionStoryboardIdsBody"
       responses:
+        "200":
+          description: OK (empty body)
         "400":
           description: Invalid body
           content:
@@ -4403,14 +4408,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: One or more storyboard ids are not owned / not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:

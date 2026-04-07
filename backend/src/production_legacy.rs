@@ -4,7 +4,7 @@
 
 use axum::{
     extract::{Json, State},
-    http::HeaderMap,
+    http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
     routing::post,
     Json as JsonResponse, Router,
@@ -211,9 +211,46 @@ async fn post_storyboard_polling_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.ids.is_empty() {
+        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
+    }
+    if body.ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest("ids must be positive integers".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Minimal "poll": verify all requested storyboard ids are owned by this user.
+    // Real image-generation queue + `should_generate_image` updates will be added later.
+    let mut uniq = body.ids.clone();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(DISTINCT sb.legacy_id)
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND sb.legacy_id = ANY($2::int4[])
+        "#,
+    )
+    .bind(uid)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::OK.into_response())
 }
 
 async fn post_export_image(

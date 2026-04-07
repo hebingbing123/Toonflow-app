@@ -1144,7 +1144,8 @@ Future<int> postProductionWorkbenchGenerateVideoV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1` (typically **501**).
+/// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1`
+/// (implemented; returns **200** or **404** / **503** when DB-gated).
 Future<int> postProductionStoryboardPollingImageV1(
   String accessToken, {
   required List<int> ids,
