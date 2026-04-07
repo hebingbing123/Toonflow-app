@@ -6307,6 +6307,7 @@ paths:
       description: |
         Returns up to 100 `app_generation_job` rows for `owner_user_id = JWT sub`, newest first.
         Optional query **`kind`** and **`status`**: when set (non-empty after trim), rows must match **exactly** (AND). Omitted or blank → no filter on that dimension.
+        **`status`** is normalized to ASCII lowercase and must be one of **`queued`**, **`running`**, **`succeeded`**, **`failed`**, **`cancelled`**; otherwise **400**.
         Requires `DATABASE_URL` on the server.
       security:
         - bearerAuth: []
@@ -6333,6 +6334,12 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/JobRow"
+        "400":
+          description: Invalid `status` query (not a known job status)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
           content:

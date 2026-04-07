@@ -191,18 +191,35 @@ fn trim_query_opt(s: Option<String>) -> Option<String> {
     })
 }
 
+fn normalize_job_list_status_filter(raw: Option<String>) -> Result<Option<String>, ApiError> {
+    let Some(s) = trim_query_opt(raw) else {
+        return Ok(None);
+    };
+    let s = s.to_ascii_lowercase();
+    if matches!(
+        s.as_str(),
+        "queued" | "running" | "succeeded" | "failed" | "cancelled"
+    ) {
+        Ok(Some(s))
+    } else {
+        Err(ApiError::BadRequest(
+            "status must be one of: queued, running, succeeded, failed, cancelled".into(),
+        ))
+    }
+}
+
 async fn list_jobs(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(q): Query<ListJobsQuery>,
 ) -> Result<Json<Vec<JobRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    let kind = trim_query_opt(q.kind);
+    let status = normalize_job_list_status_filter(q.status)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let kind = trim_query_opt(q.kind);
-    let status = trim_query_opt(q.status);
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
@@ -529,5 +546,21 @@ mod tests {
             super::trim_query_opt(Some("  flutter.probe  ".into())),
             Some("flutter.probe".into())
         );
+    }
+
+    #[test]
+    fn normalize_job_list_status_filter_accepts_known_statuses_case_insensitive() {
+        assert_eq!(super::normalize_job_list_status_filter(None).unwrap(), None);
+        assert_eq!(
+            super::normalize_job_list_status_filter(Some(String::new())).unwrap(),
+            None
+        );
+        assert_eq!(
+            super::normalize_job_list_status_filter(Some("  RUNNING  ".into()))
+                .unwrap()
+                .as_deref(),
+            Some("running")
+        );
+        assert!(super::normalize_job_list_status_filter(Some("nope".into())).is_err());
     }
 }
