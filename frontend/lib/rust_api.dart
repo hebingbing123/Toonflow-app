@@ -4333,6 +4333,44 @@ Future<AssetImageRow> fetchProjectAssetImageByLegacyIds(
   return AssetImageRow.fromJson(map);
 }
 
+/// Builds `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}/file` — OpenAPI `getProjectAssetImageFileByLegacyIdsV1`.
+Uri projectAssetImageFileV1Uri(
+  int projectLegacyId,
+  int assetLegacyId,
+  String imageId,
+) {
+  return Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId/file',
+  );
+}
+
+/// Fetches image bytes from [`projectAssetImageFileV1Uri`].
+///
+/// When **`file_path`** is **`https?`**, the server responds with **307**; this client follows redirects and returns the final body (**`200`**).
+/// Rows without **`https?`** **`file_path`** and without **`metadata.storage == local`** typically yield **404** from this route.
+Future<Uint8List> fetchProjectAssetImageFileByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int assetLegacyId,
+  String imageId,
+) async {
+  final uri =
+      projectAssetImageFileV1Uri(projectLegacyId, assetLegacyId, imageId);
+  final res = await http
+      .get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode != 200) {
+    throw RustApiException(
+      res.body.isNotEmpty ? res.body : 'binary response ${res.statusCode}',
+      statusCode: res.statusCode,
+    );
+  }
+  return res.bodyBytes;
+}
+
 /// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.
 Future<AssetImageRow> createProjectAssetImage(
   String accessToken,

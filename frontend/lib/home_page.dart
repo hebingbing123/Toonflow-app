@@ -3629,6 +3629,21 @@ class _HomePageState extends State<HomePage> {
                                         first.legacyId,
                                         img.id,
                                       );
+                                      var fileSuffix = '';
+                                      try {
+                                        final bytes =
+                                            await fetchProjectAssetImageFileByLegacyIds(
+                                          token,
+                                          p.legacyId,
+                                          first.legacyId,
+                                          one.id,
+                                        );
+                                        fileSuffix =
+                                            ' …/file ${bytes.length}B';
+                                      } on RustApiException catch (fe) {
+                                        fileSuffix =
+                                            ' …/file ${fe.statusCode ?? "?"}';
+                                      }
                                       if (!ctx.mounted) return;
                                       final idShort = one.id.length <= 8
                                           ? one.id
@@ -3638,7 +3653,8 @@ class _HomePageState extends State<HomePage> {
                                           content: Text(
                                             'GET …/images/$idShort：'
                                             'sort=${one.sortIndex} '
-                                            'state=${one.state ?? "-"}',
+                                            'state=${one.state ?? "-"}'
+                                            '$fileSuffix',
                                           ),
                                         ),
                                       );
