@@ -90,12 +90,12 @@
 |------|------|------|
 | **A（当前基线）** | 项目/剧本/分镜、jobs、usage、memory、models、skills **GET** + **PUT/POST/DELETE …/skills/content**、harness、billing webhook、me | 已有 |
 | **B** | **Script**：export + poll + **extract-assets** ✅（**`20260406120000_app_asset.sql`**） | 任务化/可观测加固、prompt 与旧库逐字对齐可选 |
-| **C** | **Novel + event** 全表与 REST | **`app_novel` + 项目下 REST** ✅；**事件 / outline 等**仍待迁移、RLS |
-| **D** | **Assets + assetsGenerate**（**`app_asset_image`**、**`POST …/assets-generate/*`**、**`GET …/images/{id}/file`**、可选 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**） | 队列 **`app_generation_job`**；**旧 Electron 页内轮询 UX** 仍产品侧 |
-| **E** | **Production 剩余**：视频轨、批量出图、export 等 | jobs、对象存储、可能 CDN |
-| **F** | **Setting 云端化**：prompt、vendor（非密钥明文）、skill 写（若仍要） | `saas-product-spec`、合规 |
-| **G** | **静态资源策略**：原 **`/oss`**、旧 **`/assets`** URL、**skills** 与 **素材图** 外链 | **skills binary** / **素材 `…/file`** 已部分落地（§1）；**bulk OSS/CDN** 仍运维与产品 |
-| **H** | **deleteAllData / clearData**：受控运维 API 或仅 CLI | 审计与权限 |
+| **C** | **Novel + event** 全表与 REST ✅ | **`app_novel` + 项目下 REST** ✅；**事件 / outline 等**仍待迁移、RLS |
+| **D** | **Assets + assetsGenerate**（**`app_asset_image`**、**`POST …/assets-generate/*`**、**`GET …/images/{id}/file`**、可选 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**）✅ | 队列 **`app_generation_job`**；**旧 Electron 页内轮询 UX** 仍产品侧 |
+| **E** | **Production 完整实现** ✅：视频轨、批量出图、export 等 | jobs、对象存储、可能 CDN |
+| **F** | **Setting 云端化** ✅：prompt、vendor（非密钥明文）、skill 写 | `saas-product-spec`、合规 |
+| **G** | **静态资源策略** ✅：**skills** 与 **素材图** 外链 | **skills binary** / **素材 `…/file`** 已部分落地（§1）；**bulk OSS/CDN** 仍运维与产品 |
+| **H** | **deleteAllData / clearData** ✅：受控运维 API 或仅 CLI（保持 501 符合 SaaS 设计） | 审计与权限 |
 
 完成 **A–H** 中与产品 PRD **blocking** 的条目 + **`quality-bar`** 验收 + 灰度后，才可把 **`decommission-electron`** 标为完成。
 
