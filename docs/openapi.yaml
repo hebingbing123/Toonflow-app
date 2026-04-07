@@ -44,7 +44,7 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`asset.polish.prompt`** jobs **`succeeded`** with **`result.polished_prompt`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured; otherwise **`failed`**. **`asset.generate.*`** and **`asset.polish.batch`** workers still **`failed`** until image/batch pipelines exist.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`asset.polish.prompt`** **`succeeded`** with **`result.polished_prompt`**; **`asset.polish.batch`** **`succeeded`** with **`result.items`** (each **`polished_prompt`**) when **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured; otherwise those jobs **`failed`**. **`asset.generate.*`** workers still **`failed`** until image pipelines exist.
 
     **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
@@ -4094,7 +4094,7 @@ paths:
       summary: Batch-polish asset prompts (legacy `batchPolishAssetsPrompt` parity)
       operationId: postAssetsBatchPolishV1
       description: |
-        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. Worker fails until pipeline exists.
+        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker runs one chat completion per **`items[]`** and **`succeeded`** with **`result.items`** (**`asset_legacy_id`** + **`polished_prompt`** each); otherwise **`failed`**.
       security:
         - bearerAuth: []
       requestBody:

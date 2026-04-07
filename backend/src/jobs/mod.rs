@@ -77,7 +77,7 @@ pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
 /// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker fails until pipeline exists.
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
-/// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker fails until pipeline exists.
+/// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker runs **`chat_completion_assistant_text`** per item when **`LlmConfig`** is set (cooperative cancel between items), else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 /// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker fails until live LLM/OSS probe exists.
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";

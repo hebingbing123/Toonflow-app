@@ -958,7 +958,8 @@ Future<int> postAssetsGenerateBatchGenerateV1(
 }
 
 /// `POST /api/v1/assets-generate/batch-polish` — OpenAPI `postAssetsGenerateBatchPolishV1`.
-/// **200** = **`queued`** **`JobRow`** (**`asset.polish.batch`**).
+/// **200** = **`queued`** **`JobRow`** (**`asset.polish.batch`**); worker **`succeeded`** with
+/// **`result.items`** (each **`polished_prompt`**) when the server has **`OPENAI_API_KEY`/`LLM_API_KEY`**.
 Future<int> postAssetsGenerateBatchPolishV1(
   String accessToken, {
   required int projectId,
