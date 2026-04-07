@@ -6860,15 +6860,4 @@ mod pg_contract_tests {
             .await;
     }
 
-    fn contract_state_without_pool(secret: String) -> AppState {
-        AppState {
-            pool: None,
-            jwt_secret: Some(secret.into_bytes()),
-            llm: None,
-            http_client: reqwest::Client::new(),
-            notify: crate::notify_hub::WsNotifyHub::new(),
-            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
-            local_asset_image_dir: None,
-        }
-    }
 }
