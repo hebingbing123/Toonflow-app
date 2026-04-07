@@ -48,7 +48,7 @@ info:
 
     **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
-    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** validates **`taskId`** then **501** — numeric SQLite **`o_tasks.id`** does not map to UUID **`app_generation_job.id`**; use **`GET /api/v1/jobs/{id}`**.
+    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`**: **`taskId`** as **UUID string** returns the same **`JobRow`** as **`GET /api/v1/jobs/{id}`**; **`taskId`** as **integer** → **501** (legacy SQLite **`o_tasks.id`** has no mapping).
 
     **Legacy project CRUD posts (`/api/project/*`):** **`POST …/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**; **`POST …/delete-project`** / **`add-project`** / **`edit-project`** (PG **`app_project`**). **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
@@ -6804,10 +6804,10 @@ paths:
   /api/v1/tasks/task-details:
     post:
       tags: [tasks]
-      summary: Legacy task center — task details (not implemented)
+      summary: Legacy task center — task details (UUID job row or legacy int stub)
       operationId: postTasksTaskDetailsV1
       description: |
-        Accepts legacy **`{ "taskId": number }`** (SQLite **`o_tasks.id`**). Returns **501** until numeric ids map to **`app_generation_job`** UUIDs; use **`GET /api/v1/jobs/{id}`**.
+        **`taskId`** as **UUID string**: load **`app_generation_job`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer**: **501** — legacy SQLite **`o_tasks.id`** does not map to UUIDs.
       security:
         - bearerAuth: []
       requestBody:
@@ -6817,20 +6817,38 @@ paths:
             schema:
               $ref: "#/components/schemas/LegacyTasksTaskDetailsBody"
       responses:
+        "200":
+          description: Job row (**`taskId`** was a UUID)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
+        "400":
+          description: Invalid **`taskId`** type or non-UUID string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Unknown job id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "501":
-          description: Numeric task id not mapped to UUID jobs
+          description: Numeric legacy **`taskId`** (not mapped)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or database error
           content:
             application/json:
               schema:
@@ -9558,8 +9576,13 @@ components:
       additionalProperties: false
       properties:
         taskId:
-          type: integer
-          format: int32
+          description: UUID string (**`app_generation_job.id`**) or legacy positive integer (**501**)
+          oneOf:
+            - type: string
+              format: uuid
+            - type: integer
+              format: int32
+              minimum: 1
 
     LegacyGeneralGetSingleProjectBody:
       type: object

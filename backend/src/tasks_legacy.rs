@@ -1,5 +1,5 @@
 //! Legacy **`/api/task/*`** (Electron task center) as **`POST /api/v1/tasks/*`**.
-//! Maps to **`app_project`** / **`app_generation_job`** where shapes align; **`task-details`** stays **501** (numeric **`o_tasks.id`** has no UUID mapping).
+//! Maps to **`app_project`** / **`app_generation_job`** where shapes align; **`task-details`** accepts **`taskId`** as a **UUID string** (same row as **`GET /api/v1/jobs/{id}`**) or legacy **integer** (**501** — SQLite **`o_tasks.id`** has no mapping).
 
 use axum::{
     extract::{Json, State},
@@ -8,6 +8,8 @@ use axum::{
     Json as JsonResponse, Router,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -62,9 +64,8 @@ struct LegacyGetTaskApiResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct TaskDetailsBody {
-    /// Legacy **`o_tasks.id`**; SaaS jobs use UUID (**`501`** until a mapping exists).
-    #[allow(dead_code)]
-    task_id: i32,
+    /// **`taskId`**: UUID string → load **`app_generation_job`**; positive integer → **501** (legacy SQLite id).
+    task_id: Value,
 }
 
 fn trim_opt(s: Option<String>) -> Option<String> {
@@ -235,10 +236,49 @@ async fn post_get_task_api(
 async fn post_task_details(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(_body): Json<TaskDetailsBody>,
+    Json(body): Json<TaskDetailsBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    Err(task_details_not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+
+    match body.task_id {
+        Value::Number(n) => {
+            let legacy = n.as_i64().ok_or_else(|| {
+                ApiError::BadRequest("taskId integer out of supported range".into())
+            })?;
+            if legacy <= 0 {
+                return Err(ApiError::BadRequest("taskId must be positive".into()));
+            }
+            Err(task_details_not_implemented())
+        }
+        Value::String(s) => {
+            let id = Uuid::parse_str(s.trim()).map_err(|_| {
+                ApiError::BadRequest(
+                    "taskId string must be a valid UUID (app_generation_job.id)".into(),
+                )
+            })?;
+            let pool = state
+                .pool
+                .as_ref()
+                .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+            let row = sqlx::query_as::<_, JobRow>(
+                r#"
+                SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                FROM app_generation_job
+                WHERE id = $1 AND owner_user_id = $2
+                "#,
+            )
+            .bind(id)
+            .bind(uid)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+            .ok_or(ApiError::NotFound)?;
+            Ok(JsonResponse(row))
+        }
+        _ => Err(ApiError::BadRequest(
+            "taskId must be a UUID string or a positive integer".into(),
+        )),
+    }
 }
 
 pub fn router() -> Router<AppState> {

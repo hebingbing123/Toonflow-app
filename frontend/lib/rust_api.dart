@@ -2049,8 +2049,9 @@ Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
   return LegacyTasksGetTaskApiResult.fromJson(map);
 }
 
-/// `POST /api/v1/tasks/task-details` — completes without error only when the server returns **501**
-/// (numeric legacy `taskId` does not map to `app_generation_job` UUIDs).
+/// `POST /api/v1/tasks/task-details` with numeric [taskId] — completes without error when the server
+/// returns **501** (legacy SQLite `o_tasks.id` does not map to job UUIDs). For a job UUID, call
+/// [fetchJob] or POST the same path with `{"taskId":"<uuid>"}` and expect **200**/404/503.
 Future<void> postTasksTaskDetails(
   String accessToken,
   int taskId,

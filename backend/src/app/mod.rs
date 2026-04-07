@@ -1934,6 +1934,32 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn tasks_task_details_bad_request_non_uuid_string_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/tasks/task-details",
+            &token,
+            r#"{"taskId":"not-a-uuid"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn tasks_task_details_requires_database_for_uuid_task_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/tasks/task-details",
+            &token,
+            r#"{"taskId":"550e8400-e29b-41d4-a716-446655440000"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn general_get_single_project_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/general/get-single-project", r#"{"id":1}"#).await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
