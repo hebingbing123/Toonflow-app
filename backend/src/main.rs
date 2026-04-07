@@ -17,6 +17,7 @@ mod json_patch;
 mod llm;
 mod models_catalog;
 mod notify_hub;
+mod novel_events;
 mod novels;
 mod novels_legacy;
 mod production_legacy;
