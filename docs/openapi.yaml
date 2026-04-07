@@ -520,7 +520,9 @@ paths:
       summary: Update AI dev-tool switch (not persisted)
       operationId: putSwitchAiDevToolV1
       description: |
-        Validates **`value`** is **`"0"`** or **`"1"`**, then responds **501** **`not_implemented`**: Rust does not write SQLite **`o_setting`**. Operators change **`TOONFLOW_SWITCH_AI_DEV_TOOL`** and restart (or future user settings store).
+        Bearer JWT. Validates **`value`** is **`"0"`** or **`"1"`**, updates the current process-local override,
+        and returns the effective value immediately. Restarting the service falls back to **`TOONFLOW_SWITCH_AI_DEV_TOOL`**
+        (or the default when the env var is unset).
       security:
         - bearerAuth: []
       requestBody:
@@ -530,6 +532,12 @@ paths:
             schema:
               $ref: "#/components/schemas/SwitchAiDevToolPutRequest"
       responses:
+        "200":
+          description: Updated process-local value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SwitchAiDevToolResponse"
         "400":
           description: Request body value must be the strings "0" or "1"
           content:
@@ -538,12 +546,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Persisting this toggle is not implemented
           content:
             application/json:
               schema:
@@ -5305,10 +5307,11 @@ paths:
   /api/v1/production/workbench/add-track:
     post:
       tags: [production]
-      summary: Legacy `addTrack` stub
+      summary: Add a virtual video track (legacy `addTrack`)
       operationId: postProductionWorkbenchAddTrackV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`addTrack`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`trackName`**,
+        checks that the script belongs to the caller, then returns the next virtual **`trackId`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -5316,10 +5319,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchAddTrackBody"
       responses:
+        "200":
+          description: Track created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchAddTrackResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5330,14 +5339,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5346,10 +5355,11 @@ paths:
   /api/v1/production/workbench/delete-track:
     post:
       tags: [production]
-      summary: Legacy `deleteTrack` stub
+      summary: Delete a virtual video track (legacy `deleteTrack`)
       operationId: postProductionWorkbenchDeleteTrackV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`deleteTrack`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`trackId`**, then clears that
+        track assignment from owned storyboards in the script.
       security:
         - bearerAuth: []
       requestBody:
@@ -5357,10 +5367,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchDeleteTrackBody"
       responses:
+        "200":
+          description: Track deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchDeleteTrackResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5371,14 +5387,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Track/script/project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5387,10 +5403,11 @@ paths:
   /api/v1/production/workbench/delete-video:
     post:
       tags: [production]
-      summary: Legacy `delVideo` stub
+      summary: Delete a selected storyboard video (legacy `delVideo`)
       operationId: postProductionWorkbenchDeleteVideoV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`delVideo`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`storyboardId`**, then clears
+        the owned storyboard's selected video URL and state.
       security:
         - bearerAuth: []
       requestBody:
@@ -5398,10 +5415,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchDeleteVideoBody"
       responses:
+        "200":
+          description: Video deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchDeleteVideoResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5412,14 +5435,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard/script/project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5428,10 +5451,11 @@ paths:
   /api/v1/production/workbench/generate-video-prompt:
     post:
       tags: [production]
-      summary: Legacy `generateVideoPrompt` stub
+      summary: Generate a default video prompt (legacy `generateVideoPrompt`)
       operationId: postProductionWorkbenchGenerateVideoPromptV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`generateVideoPrompt`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** and **`scriptId`**, checks ownership, then returns
+        a generated default cinematic prompt. When **`description`** is present, it is folded into the prompt text.
       security:
         - bearerAuth: []
       requestBody:
@@ -5439,10 +5463,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchGenerateVideoPromptBody"
       responses:
+        "200":
+          description: Prompt generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchGenerateVideoPromptResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5453,14 +5483,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Script/project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5469,10 +5499,11 @@ paths:
   /api/v1/production/workbench/get-generate-data:
     post:
       tags: [production]
-      summary: Legacy `getGenerateData` stub
+      summary: Load generated videos and active jobs (legacy `getGenerateData`)
       operationId: postProductionWorkbenchGetGenerateDataV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getGenerateData`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** and **`scriptId`**, then returns completed
+        video rows plus recent active **`video.generate`** jobs for the caller.
       security:
         - bearerAuth: []
       requestBody:
@@ -5480,10 +5511,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchGetGenerateDataBody"
       responses:
+        "200":
+          description: Current generated videos and active jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchGetGenerateDataResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5494,14 +5531,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5510,10 +5541,11 @@ paths:
   /api/v1/production/workbench/get-video-list:
     post:
       tags: [production]
-      summary: Legacy `getVideoList` stub
+      summary: List generated storyboard videos (legacy `getVideoList`)
       operationId: postProductionWorkbenchGetVideoListV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getVideoList`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, optional **`trackId`**, and pagination fields,
+        then returns owned storyboard rows whose file path looks like a generated video.
       security:
         - bearerAuth: []
       requestBody:
@@ -5521,10 +5553,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchGetVideoListBody"
       responses:
+        "200":
+          description: Matching videos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchGetVideoListResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5535,14 +5573,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5551,39 +5583,21 @@ paths:
   /api/v1/production/workbench/get-video-model-detail:
     post:
       tags: [production]
-      summary: Legacy `getVideoModelDetail` stub
+      summary: Get default video model details (legacy `getVideoModelDetail`)
       operationId: postProductionWorkbenchGetVideoModelDetailV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getVideoModelDetail`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Returns the current built-in default video model metadata for the workbench.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
       responses:
-        "400":
-          description: Body is not a JSON object
+        "200":
+          description: Default video model metadata
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorBody"
+                $ref: "#/components/schemas/ProductionWorkbenchVideoModelDetailResponse"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured
           content:
             application/json:
               schema:
@@ -5592,10 +5606,11 @@ paths:
   /api/v1/production/workbench/select-video:
     post:
       tags: [production]
-      summary: Legacy `selectVideo` stub
+      summary: Select a generated video for a storyboard (legacy `selectVideo`)
       operationId: postProductionWorkbenchSelectVideoV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`selectVideo`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, and non-empty **`videoUrl`**,
+        then stores the selected video on the owned storyboard and marks it completed.
       security:
         - bearerAuth: []
       requestBody:
@@ -5603,10 +5618,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionWorkbenchSelectVideoBody"
       responses:
+        "200":
+          description: Video selected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionWorkbenchSelectVideoResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5617,14 +5638,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard/script/project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -8868,11 +8889,270 @@ components:
           items:
             $ref: "#/components/schemas/ProductionExportImageShotRef"
 
+    ProductionWorkbenchGetVideoListBody:
+      type: object
+      required: [projectId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        trackId:
+          type: integer
+          format: int32
+          nullable: true
+        limit:
+          type: integer
+          format: int64
+          nullable: true
+          description: Optional; server clamps to 1..100 and defaults to 50.
+        offset:
+          type: integer
+          format: int64
+          nullable: true
+          description: Optional; defaults to 0.
+
+    VideoItem:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+          nullable: true
+        prompt:
+          type: string
+          nullable: true
+        videoUrl:
+          type: string
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        trackId:
+          type: integer
+          format: int32
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ProductionWorkbenchGetVideoListResponse:
+      type: object
+      required: [videos, total]
+      properties:
+        videos:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoItem"
+        total:
+          type: integer
+          format: int64
+
+    ProductionWorkbenchAddTrackBody:
+      type: object
+      required: [projectId, scriptId, trackName]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        trackName:
+          type: string
+        trackType:
+          type: string
+          nullable: true
+
+    ProductionWorkbenchAddTrackResponse:
+      type: object
+      required: [trackId, trackName, message]
+      properties:
+        trackId:
+          type: integer
+          format: int32
+        trackName:
+          type: string
+        message:
+          type: string
+
+    ProductionWorkbenchDeleteTrackBody:
+      type: object
+      required: [projectId, scriptId, trackId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        trackId:
+          type: integer
+          format: int32
+
+    ProductionWorkbenchDeleteTrackResponse:
+      type: object
+      required: [trackId, message]
+      properties:
+        trackId:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProductionWorkbenchDeleteVideoBody:
+      type: object
+      required: [projectId, scriptId, storyboardId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        storyboardId:
+          type: integer
+          format: int32
+
+    ProductionWorkbenchDeleteVideoResponse:
+      type: object
+      required: [storyboardId, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProductionWorkbenchGenerateVideoPromptBody:
+      type: object
+      required: [projectId, scriptId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+
+    ProductionWorkbenchGenerateVideoPromptResponse:
+      type: object
+      required: [prompt, model, duration]
+      properties:
+        prompt:
+          type: string
+        model:
+          type: string
+        duration:
+          type: integer
+          format: int32
+
+    ProductionWorkbenchGetGenerateDataBody:
+      type: object
+      required: [projectId, scriptId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+
+    ProductionWorkbenchGetGenerateDataResponse:
+      type: object
+      required: [projectId, scriptId, generatedVideos, generatingJobs]
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        generatedVideos:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoItem"
+        generatingJobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobRow"
+
+    ProductionWorkbenchVideoModelDetailResponse:
+      type: object
+      required: [modelId, modelName, provider, maxDuration, resolutions, features]
+      properties:
+        modelId:
+          type: string
+        modelName:
+          type: string
+        provider:
+          type: string
+        maxDuration:
+          type: integer
+          format: int32
+        resolutions:
+          type: array
+          items:
+            type: string
+        features:
+          type: array
+          items:
+            type: string
+
+    ProductionWorkbenchSelectVideoBody:
+      type: object
+      required: [projectId, scriptId, storyboardId, videoUrl]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        storyboardId:
+          type: integer
+          format: int32
+        videoUrl:
+          type: string
+
+    ProductionWorkbenchSelectVideoResponse:
+      type: object
+      required: [storyboardId, videoUrl, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        videoUrl:
+          type: string
+        message:
+          type: string
+
     ProductionLegacyJsonStubBody:
       type: object
       description: |
         Loose stub schema for remaining legacy **`/api/production/*`** routes: any JSON **object** (not `null`, array, or scalar).
-        Typed parity for **`get-production-data`**, **`get-flow-data`**, **`save-flow-data`**, **`workbench/generate-video`**, **`storyboard/polling-image`**, **`export-image`** uses dedicated schemas.
+        Typed parity for **`get-production-data`**, **`get-flow-data`**, **`save-flow-data`**, **`workbench/generate-video`**, **`workbench/*`** documented here,
+        **`storyboard/polling-image`**, and **`export-image`** uses dedicated schemas.
       additionalProperties: true
 
     AboutCheckUpdateSource:
