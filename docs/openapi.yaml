@@ -31,7 +31,7 @@ info:
 
     **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** returns the process-local effective value for legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** (**`"0"`** / **`"1"`**) and updates the in-process override; startup bootstraps from **`TOONFLOW_SWITCH_AI_DEV_TOOL`**, and restart resets to env/default.
 
-    **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values are held in server memory per process (not Postgres); restart resets to defaults.
+    **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values persist per user in **`app_user_profile.memory_config`** with server defaults as fallback; when **`DATABASE_URL`** is unset these endpoints return **503** **`database_error`** instead of using process-local storage.
     **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
 
     **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of legacy **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
@@ -562,7 +562,7 @@ paths:
       operationId: getMemoryConfigV1
       description: |
         Bearer JWT. Returns the current memory configuration (**camelCase** keys), same fields as legacy **`GET /api/setting/memoryConfig/getMemory`** **`data`**.
-        Defaults match legacy SQLite **`initDB`** **`o_setting`** seeds. Stored in process memory until a user settings table exists.
+        Defaults match legacy SQLite **`initDB`** **`o_setting`** seeds. Persisted per user in **`app_user_profile.memory_config`**; when **`DATABASE_URL`** is unset, this endpoint returns **503** **`database_error`**.
       security:
         - bearerAuth: []
       responses:
