@@ -3506,6 +3506,10 @@ mod pg_contract_tests {
 
     use super::build_router;
     use super::jwt_fixture;
+    use crate::jobs::{
+        JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
+        JOB_KIND_ASSET_POLISH_PROMPT,
+    };
     use crate::notify_hub::WsNotifyHub;
     use crate::state::{AppState, MemoryConfig};
 
@@ -4699,6 +4703,130 @@ mod pg_contract_tests {
             .unwrap();
         let (status, err) = read_json_response(res).await;
         assert_eq!(status, StatusCode::NOT_FOUND, "err={err}");
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn assets_generate_enqueue_four_kinds() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool, secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "body={created}");
+        let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        let gen_body = format!(
+            r#"{{"projectId":{legacy_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe"}}"#
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/assets-generate/generate")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(gen_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "generate body={job}");
+        assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_IMAGE));
+        assert_eq!(job["status"].as_str(), Some("queued"));
+
+        let pol_body = format!(
+            r#"{{"assetsId":1,"projectId":{legacy_id},"type":"role","name":"n","describe":"d"}}"#
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/assets-generate/polish-prompt")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(pol_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "polish body={job}");
+        assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_POLISH_PROMPT));
+        assert_eq!(job["status"].as_str(), Some("queued"));
+
+        let bat_gen = format!(
+            r#"{{"projectId":{legacy_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p"}}]}}"#
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/assets-generate/batch-generate")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(bat_gen))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "batch-generate body={job}");
+        assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_BATCH));
+        assert_eq!(job["status"].as_str(), Some("queued"));
+
+        let bat_pol = format!(
+            r#"{{"projectId":{legacy_id},"items":[{{"assetsId":1,"type":"role","name":"n","describe":"d"}}]}}"#
+        );
+        let res = app
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/assets-generate/batch-polish")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(bat_pol))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "batch-polish body={job}");
+        assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_POLISH_BATCH));
+        assert_eq!(job["status"].as_str(), Some("queued"));
     }
 
     #[tokio::test]
