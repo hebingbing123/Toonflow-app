@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// `POST /api/v1/script-agent/get-plan-data` — OpenAPI `postScriptAgentGetPlanDataV1` (typically **501**).
+/// `POST /api/v1/script-agent/get-plan-data` — OpenAPI `postScriptAgentGetPlanDataV1` (**200**/**404**/**503**).
 Future<int> postScriptAgentGetPlanDataV1(
   String accessToken, {
   required int projectId,
@@ -19,7 +19,7 @@ Future<int> postScriptAgentGetPlanDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/script-agent/set-plan-data` — OpenAPI `postScriptAgentSetPlanDataV1` (typically **501**).
+/// `POST /api/v1/script-agent/set-plan-data` — OpenAPI `postScriptAgentSetPlanDataV1` (**200**/**404**/**503**).
 Future<int> postScriptAgentSetPlanDataV1(
   String accessToken, {
   required int projectId,
@@ -49,7 +49,7 @@ Future<int> postScriptAgentSetPlanDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/script-agent/update-data` — OpenAPI `postScriptAgentUpdateDataV1` (typically **501**).
+/// `POST /api/v1/script-agent/update-data` — OpenAPI `postScriptAgentUpdateDataV1` (**200**/**404**/**503**).
 Future<int> postScriptAgentUpdateDataV1(
   String accessToken, {
   required int id,

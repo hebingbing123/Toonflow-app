@@ -65,7 +65,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
       if (!_scriptAgentCatalogProbeOk(sap)) {
         setState(() {
           _error =
-              'POST script-agent/get-plan-data expected 200/404/501/503, got $sap';
+              'POST script-agent/get-plan-data expected 200/404/503, got $sap';
           _loadingModelsCatalog = false;
         });
         return;
@@ -230,7 +230,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
       if (!_scriptAgentCatalogProbeOk(saSet)) {
         setState(() {
           _error =
-              'POST script-agent/set-plan-data expected 200/404/501/503, got $saSet';
+              'POST script-agent/set-plan-data expected 200/404/503, got $saSet';
           _loadingModelsCatalog = false;
         });
         return;
@@ -240,7 +240,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
       if (!_scriptAgentCatalogProbeOk(saUpd)) {
         setState(() {
           _error =
-              'POST script-agent/update-data expected 200/404/501/503, got $saUpd';
+              'POST script-agent/update-data expected 200/404/503, got $saUpd';
           _loadingModelsCatalog = false;
         });
         return;

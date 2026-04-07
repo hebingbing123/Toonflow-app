@@ -34,9 +34,9 @@ part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
 
-/// Script-agent REST hits Postgres; catalog probe allows 501 stub, 503 no pool, 404 missing project, or 200 OK.
+/// Script-agent REST hits Postgres; catalog probe allows 200 OK, 404 missing project, or 503 without pool.
 bool _scriptAgentCatalogProbeOk(int status) =>
-    status == 200 || status == 404 || status == 501 || status == 503;
+    status == 200 || status == 404 || status == 503;
 
 /// **`assets-generate`** single + batch routes: **200** queued job, **404** project, **429** quota, **503** no DB.
 bool _assetsGenerateSingleJobProbeOk(int status) =>
