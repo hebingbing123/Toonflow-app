@@ -6786,14 +6786,14 @@ mod pg_contract_tests {
             .await
             .unwrap();
         let status = res.status();
-        assert_eq!(status, StatusCode::NO_CONTENT, "delete should return 204");
+        assert_eq!(status, StatusCode::OK, "patch back should return 200");
 
-        // Verify deletion
+        // Verify patch back persisted
         let res = app
             .clone()
             .oneshot(
                 Request::builder()
-                    .uri(format!("/api/v1/skills/content?path={}", test_path))
+                    .uri("/api/v1/prompts/1")
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::empty())
@@ -6801,12 +6801,9 @@ mod pg_contract_tests {
             )
             .await
             .unwrap();
-        let (status, _) = read_json_response(res).await;
-        assert_eq!(
-            status,
-            StatusCode::NOT_FOUND,
-            "deleted skill should not exist"
-        );
+        let (status, restored) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "verify restored prompt");
+        assert_eq!(restored["data"].as_str(), Some(original_data));
     }
 
     fn contract_state_without_pool(secret: String) -> AppState {
