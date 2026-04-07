@@ -291,3 +291,152 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/tasks/get-task-api", post(post_get_task_api))
         .route("/api/v1/tasks/task-details", post(post_task_details))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn legacy_empty_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<LegacyEmptyBody>(r#"{"extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn legacy_empty_body_accepts_empty() {
+        let b: LegacyEmptyBody = serde_json::from_str(r#"{}"#).unwrap();
+        let _ = b;
+    }
+
+    #[test]
+    fn get_task_api_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<GetTaskApiBody>(
+            r#"{"page":1,"limit":20,"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn get_task_api_body_accepts_minimal() {
+        let b: GetTaskApiBody =
+            serde_json::from_str(r#"{"page":1,"limit":20}"#).unwrap();
+        assert_eq!(b.page, 1);
+        assert_eq!(b.limit, 20);
+        assert_eq!(b.state, None);
+        assert_eq!(b.task_class, None);
+        assert_eq!(b.project_id, None);
+    }
+
+    #[test]
+    fn get_task_api_body_accepts_full() {
+        let b: GetTaskApiBody = serde_json::from_str(
+            r#"{"page":2,"limit":50,"state":"running","taskClass":"image.generate","projectId":5}"#,
+        )
+        .unwrap();
+        assert_eq!(b.page, 2);
+        assert_eq!(b.limit, 50);
+        assert_eq!(b.state, Some("running".to_string()));
+        assert_eq!(b.task_class, Some("image.generate".to_string()));
+        assert_eq!(b.project_id, Some(5));
+    }
+
+    #[test]
+    fn task_details_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<TaskDetailsBody>(
+            r#"{"taskId":"550e8400-e29b-41d4-a716-446655440000","extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn task_details_body_accepts_uuid_string() {
+        let b: TaskDetailsBody = serde_json::from_str(
+            r#"{"taskId":"550e8400-e29b-41d4-a716-446655440000"}"#,
+        )
+        .unwrap();
+        match b.task_id {
+            Value::String(s) => assert_eq!(s, "550e8400-e29b-41d4-a716-446655440000"),
+            _ => panic!("Expected string"),
+        }
+    }
+
+    #[test]
+    fn task_details_body_accepts_integer() {
+        let b: TaskDetailsBody = serde_json::from_str(r#"{"taskId":123}"#).unwrap();
+        match b.task_id {
+            Value::Number(n) => assert_eq!(n.as_i64(), Some(123)),
+            _ => panic!("Expected number"),
+        }
+    }
+
+    #[test]
+    fn trim_opt_returns_none_for_none() {
+        assert_eq!(trim_opt(None), None);
+    }
+
+    #[test]
+    fn trim_opt_returns_none_for_empty() {
+        assert_eq!(trim_opt(Some("".to_string())), None);
+        assert_eq!(trim_opt(Some("   ".to_string())), None);
+    }
+
+    #[test]
+    fn trim_opt_returns_trimmed() {
+        assert_eq!(
+            trim_opt(Some("  hello  ".to_string())),
+            Some("hello".to_string())
+        );
+        assert_eq!(trim_opt(Some("test".to_string())), Some("test".to_string()));
+    }
+
+    #[test]
+    fn task_details_not_implemented_returns_error() {
+        let err = task_details_not_implemented();
+        assert!(matches!(err, ApiError::NotImplemented(_)));
+    }
+
+    #[test]
+    fn legacy_task_project_item_serialize() {
+        let item = LegacyTaskProjectItem {
+            id: 1,
+            name: "Test Project".to_string(),
+        };
+        let json = serde_json::to_string(&item).unwrap();
+        assert!(json.contains("\"id\":1"));
+        assert!(json.contains("\"name\":\"Test Project\""));
+    }
+
+    #[test]
+    fn legacy_get_project_response_serialize() {
+        let resp = LegacyGetProjectResponse { data: vec![] };
+        let json = serde_json::to_string(&resp).unwrap();
+        assert!(json.contains("\"data\":[]"));
+    }
+
+    #[test]
+    fn task_class_row_serialize() {
+        let row = TaskClassRow {
+            task_class: "image.generate".to_string(),
+        };
+        let json = serde_json::to_string(&row).unwrap();
+        assert!(json.contains("\"taskClass\":\"image.generate\""));
+    }
+
+    #[test]
+    fn legacy_get_task_categories_response_serialize() {
+        let resp = LegacyGetTaskCategoriesResponse { data: vec![] };
+        let json = serde_json::to_string(&resp).unwrap();
+        assert!(json.contains("\"data\":[]"));
+    }
+
+    #[test]
+    fn legacy_get_task_api_response_serialize() {
+        let resp = LegacyGetTaskApiResponse {
+            data: vec![],
+            total: 0,
+        };
+        let json = serde_json::to_string(&resp).unwrap();
+        assert!(json.contains("\"data\":[]"));
+        assert!(json.contains("\"total\":0"));
+    }
+}
