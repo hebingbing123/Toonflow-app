@@ -159,10 +159,8 @@ mod tests {
 
     #[test]
     fn clear_agent_memories_body_accepts_valid() {
-        let b: ClearAgentMemoriesSettingsBody = serde_json::from_str(
-            r#"{"projectId":1,"agentType":"script"}"#,
-        )
-        .unwrap();
+        let b: ClearAgentMemoriesSettingsBody =
+            serde_json::from_str(r#"{"projectId":1,"agentType":"script"}"#).unwrap();
         assert_eq!(b.project_id, 1);
         assert_eq!(b.agent_type, "script");
         assert_eq!(b.episodes_id, None);
@@ -170,10 +168,8 @@ mod tests {
 
     #[test]
     fn clear_agent_memories_body_accepts_with_episodes() {
-        let b: ClearAgentMemoriesSettingsBody = serde_json::from_str(
-            r#"{"projectId":1,"agentType":"script","episodesId":5}"#,
-        )
-        .unwrap();
+        let b: ClearAgentMemoriesSettingsBody =
+            serde_json::from_str(r#"{"projectId":1,"agentType":"script","episodesId":5}"#).unwrap();
         assert_eq!(b.project_id, 1);
         assert_eq!(b.agent_type, "script");
         assert_eq!(b.episodes_id, Some(5));
@@ -181,7 +177,9 @@ mod tests {
 
     #[test]
     fn memory_config_saved_response_has_expected_message() {
-        let resp = MemoryConfigSavedResponse { message: "保存设置成功" };
+        let resp = MemoryConfigSavedResponse {
+            message: "保存设置成功",
+        };
         assert_eq!(resp.message, "保存设置成功");
     }
 }

@@ -6175,9 +6175,15 @@ mod pg_contract_tests {
 
         // Create temp directory for local asset image storage
         let temp_dir = std::env::temp_dir().join(format!("toonflow_test_{}", Uuid::new_v4()));
-        tokio::fs::create_dir_all(&temp_dir).await.expect("create temp dir");
+        tokio::fs::create_dir_all(&temp_dir)
+            .await
+            .expect("create temp dir");
 
-        let app = build_router(contract_state_with_local_dir(pool.clone(), secret, temp_dir.clone()));
+        let app = build_router(contract_state_with_local_dir(
+            pool.clone(),
+            secret,
+            temp_dir.clone(),
+        ));
 
         // Create project
         let res = app
@@ -6246,17 +6252,22 @@ mod pg_contract_tests {
             0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
             0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
             0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1 pixel
-            0x08, 0x00, 0x00, 0x00, 0x00, 0x7B, 0x9C, 0xB4, // bit depth, color type, compression
+            0x08, 0x00, 0x00, 0x00, 0x00, 0x7B, 0x9C,
+            0xB4, // bit depth, color type, compression
             0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41, 0x54, // IDAT chunk
             0x78, 0x9C, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02, // compressed data
-            0x00, 0x01, 0xE2, 0x21, 0xBC, 0x33,             // checksum
+            0x00, 0x01, 0xE2, 0x21, 0xBC, 0x33, // checksum
             0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, // IEND chunk
-            0xAE, 0x42, 0x60, 0x82,                         // IEND checksum
+            0xAE, 0x42, 0x60, 0x82, // IEND checksum
         ];
         let user_dir = temp_dir.join(sub.to_string());
-        tokio::fs::create_dir_all(&user_dir).await.expect("create user dir");
+        tokio::fs::create_dir_all(&user_dir)
+            .await
+            .expect("create user dir");
         let file_path = user_dir.join(format!("{img_uuid}.png"));
-        tokio::fs::write(&file_path, &png_bytes).await.expect("write test png");
+        tokio::fs::write(&file_path, &png_bytes)
+            .await
+            .expect("write test png");
 
         // Update image metadata to mark as local storage
         let res = app
@@ -6304,9 +6315,17 @@ mod pg_contract_tests {
             .unwrap();
         let (status, body, ct) = read_bytes_response(res, 65_536).await;
         assert_eq!(status, StatusCode::OK, "file endpoint should return 200");
-        assert_eq!(ct.as_deref(), Some("image/png"), "content-type should be image/png");
+        assert_eq!(
+            ct.as_deref(),
+            Some("image/png"),
+            "content-type should be image/png"
+        );
         assert!(!body.is_empty(), "response body should not be empty");
-        assert_eq!(&body[..8], &[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], "should be PNG");
+        assert_eq!(
+            &body[..8],
+            &[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
+            "should be PNG"
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_dir_all(&temp_dir).await;
@@ -6343,7 +6362,10 @@ mod pg_contract_tests {
         let app = build_router(contract_state(pool.clone(), secret));
 
         // Set encryption key for test
-        std::env::set_var("TOONFLOW_VENDOR_CREDENTIAL_KEY", "test-encryption-key-for-contract-tests");
+        std::env::set_var(
+            "TOONFLOW_VENDOR_CREDENTIAL_KEY",
+            "test-encryption-key-for-contract-tests",
+        );
 
         let vendor_id = "openai";
 
@@ -6379,10 +6401,7 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
-                    .uri(format!(
-                        "/api/v1/settings/vendors/credential/{}",
-                        vendor_id
-                    ))
+                    .uri(format!("/api/v1/settings/vendors/credential/{}", vendor_id))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::empty())
@@ -6403,10 +6422,7 @@ mod pg_contract_tests {
             .oneshot(
                 Request::builder()
                     .method(Method::DELETE)
-                    .uri(format!(
-                        "/api/v1/settings/vendors/credential/{}",
-                        vendor_id
-                    ))
+                    .uri(format!("/api/v1/settings/vendors/credential/{}", vendor_id))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::empty())
@@ -6424,10 +6440,7 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
-                    .uri(format!(
-                        "/api/v1/settings/vendors/credential/{}",
-                        vendor_id
-                    ))
+                    .uri(format!("/api/v1/settings/vendors/credential/{}", vendor_id))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::empty())
@@ -6436,7 +6449,11 @@ mod pg_contract_tests {
             .await
             .unwrap();
         let (status, _) = read_json_response(res).await;
-        assert_eq!(status, StatusCode::NOT_FOUND, "credential should be deleted");
+        assert_eq!(
+            status,
+            StatusCode::NOT_FOUND,
+            "credential should be deleted"
+        );
 
         // Cleanup
         let _ = sqlx::query("DELETE FROM public.app_vendor_credential WHERE owner_user_id = $1")
@@ -6532,7 +6549,10 @@ mod pg_contract_tests {
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
-                    .body(Body::from(format!(r#"{{"projectId":{},"episodesId":1}}"#, project_id)))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{},"episodesId":1}}"#,
+                        project_id
+                    )))
                     .unwrap(),
             )
             .await
@@ -6551,7 +6571,10 @@ mod pg_contract_tests {
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
-                    .body(Body::from(format!(r#"{{"projectId":{},"episodesId":1,"data":{{}}}}"#, project_id)))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{},"episodesId":1,"data":{{}}}}"#,
+                        project_id
+                    )))
                     .unwrap(),
             )
             .await
@@ -6634,7 +6657,11 @@ mod pg_contract_tests {
             .await
             .unwrap();
         let (status, body) = read_json_response(res).await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED, "stub should return 501");
+        assert_eq!(
+            status,
+            StatusCode::NOT_IMPLEMENTED,
+            "stub should return 501"
+        );
         assert_eq!(body["code"].as_str(), Some("not_implemented"));
 
         // Cleanup
@@ -6681,7 +6708,11 @@ mod pg_contract_tests {
             .unwrap();
         let (status, list) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "list prompts");
-        assert_eq!(list.as_array().map(|a| a.len()), Some(3), "should have 3 default prompts");
+        assert_eq!(
+            list.as_array().map(|a| a.len()),
+            Some(3),
+            "should have 3 default prompts"
+        );
 
         // Get single prompt
         let res = app
@@ -6771,7 +6802,11 @@ mod pg_contract_tests {
             .await
             .unwrap();
         let (status, _) = read_json_response(res).await;
-        assert_eq!(status, StatusCode::NOT_FOUND, "deleted skill should not exist");
+        assert_eq!(
+            status,
+            StatusCode::NOT_FOUND,
+            "deleted skill should not exist"
+        );
     }
 
     fn contract_state_without_pool(secret: String) -> AppState {
@@ -6925,7 +6960,9 @@ mod pg_contract_tests {
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
-                    .body(Body::from(r#"{"name":"test_script","content":"script content"}"#))
+                    .body(Body::from(
+                        r#"{"name":"test_script","content":"script content"}"#,
+                    ))
                     .unwrap(),
             )
             .await

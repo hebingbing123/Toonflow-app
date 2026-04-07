@@ -134,10 +134,9 @@ mod tests {
 
     #[test]
     fn download_app_body_accepts_valid() {
-        let b: DownloadAppBody = serde_json::from_str(
-            r#"{"url":"http://example.com/app.zip","reinstall":false}"#,
-        )
-        .unwrap();
+        let b: DownloadAppBody =
+            serde_json::from_str(r#"{"url":"http://example.com/app.zip","reinstall":false}"#)
+                .unwrap();
         assert_eq!(b.url, "http://example.com/app.zip");
         assert!(!b.reinstall);
     }
