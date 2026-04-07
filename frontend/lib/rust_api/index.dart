@@ -11,6 +11,7 @@ export 'production.dart';
 
 part 'catalog_memory.dart';
 part 'assets_api.dart';
+part 'harness_api.dart';
 part 'jobs_api.dart';
 part 'novels_api.dart';
 part 'projects_legacy.dart';
@@ -405,47 +406,6 @@ Future<int> postAssetsGenerateBatchPolishV1(
 // --- Legacy `POST /api/v1/tasks/*` (Electron task center) ---
 
 // --- Legacy `POST /api/v1/project/*` (Electron project CRUD helpers) ---
-
-class HarnessToolInfo {
-  const HarnessToolInfo({required this.name, required this.description});
-
-  final String name;
-  final String description;
-
-  factory HarnessToolInfo.fromJson(Map<String, dynamic> json) {
-    return HarnessToolInfo(
-      name: json['name'] as String,
-      description: json['description'] as String,
-    );
-  }
-}
-
-class HarnessToolsResponse {
-  const HarnessToolsResponse({required this.tools});
-
-  final List<HarnessToolInfo> tools;
-
-  factory HarnessToolsResponse.fromJson(Map<String, dynamic> json) {
-    return HarnessToolsResponse(
-      tools: (json['tools'] as List<dynamic>)
-          .map((e) => HarnessToolInfo.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
-}
-
-/// `GET /api/v1/harness/tools`. See `listHarnessToolsV1`.
-Future<HarnessToolsResponse> fetchHarnessTools(String accessToken) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/harness/tools');
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return HarnessToolsResponse.fromJson(map);
-}
 
 /// `GET /api/v1/projects/legacy/{legacy_id}` — project plus script briefs. See `getProjectByLegacyIdV1`.
 Future<ProjectDetail> fetchProjectByLegacyId(
