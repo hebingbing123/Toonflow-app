@@ -22,6 +22,7 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST};
 use crate::models_catalog::vendor_catalog_summaries;
 use crate::state::{AppState, VendorConfig};
+use crate::vendor_credential::{encrypt, is_encryption_configured, key_hint};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
@@ -343,6 +344,172 @@ async fn post_vendor_code_from_link(
     Err(vendor_writes_not_implemented())
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct StoreCredentialBody {
+    vendor_id: String,
+    api_key: Option<String>,
+    api_secret: Option<String>,
+    api_token: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CredentialResponse {
+    vendor_id: String,
+    key_hint: Option<String>,
+    has_secret: bool,
+    has_token: bool,
+    message: &'static str,
+}
+
+async fn post_store_credential(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<StoreCredentialBody>,
+) -> Result<Json<CredentialResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = body.vendor_id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("vendorId must be non-empty".into()));
+    }
+
+    if !is_encryption_configured() {
+        return Err(ApiError::NotImplemented(
+            "Credential encryption not configured (set TOONFLOW_VENDOR_CREDENTIAL_KEY)".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Encrypt credentials
+    let api_key_encrypted = body.api_key.as_ref().and_then(|k| encrypt(k));
+    let api_secret_encrypted = body.api_secret.as_ref().and_then(|s| encrypt(s));
+    let api_token_encrypted = body.api_token.as_ref().and_then(|t| encrypt(t));
+
+    let key_hint_value = body.api_key.as_ref().map(|k| key_hint(k));
+
+    // Upsert credential record
+    sqlx::query(
+        r#"
+        INSERT INTO app_vendor_credential (
+            owner_user_id, vendor_id, api_key_encrypted, api_secret_encrypted, 
+            api_token_encrypted, key_hint, metadata, updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb, NOW())
+        ON CONFLICT (owner_user_id, vendor_id) 
+        DO UPDATE SET 
+            api_key_encrypted = COALESCE($3, app_vendor_credential.api_key_encrypted),
+            api_secret_encrypted = COALESCE($4, app_vendor_credential.api_secret_encrypted),
+            api_token_encrypted = COALESCE($5, app_vendor_credential.api_token_encrypted),
+            key_hint = COALESCE($6, app_vendor_credential.key_hint),
+            updated_at = NOW()
+        "#,
+    )
+    .bind(uid)
+    .bind(vendor_id)
+    .bind(api_key_encrypted)
+    .bind(api_secret_encrypted)
+    .bind(api_token_encrypted)
+    .bind(key_hint_value.clone())
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(CredentialResponse {
+        vendor_id: vendor_id.to_string(),
+        key_hint: key_hint_value,
+        has_secret: body.api_secret.is_some(),
+        has_token: body.api_token.is_some(),
+        message: "Credential stored securely",
+    }))
+}
+
+#[allow(clippy::type_complexity)]
+async fn get_credential(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    axum::extract::Path(vendor_id): axum::extract::Path<String>,
+) -> Result<Json<CredentialResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = vendor_id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("vendorId must be non-empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let row: Option<(Option<String>, Option<Vec<u8>>, Option<Vec<u8>>)> = sqlx::query_as(
+        r#"
+        SELECT key_hint, api_secret_encrypted, api_token_encrypted
+        FROM app_vendor_credential
+        WHERE owner_user_id = $1 AND vendor_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(vendor_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let (key_hint, has_secret, has_token) = match row {
+        Some((hint, secret, token)) => (hint, secret.is_some(), token.is_some()),
+        None => return Err(ApiError::NotFound),
+    };
+
+    Ok(Json(CredentialResponse {
+        vendor_id: vendor_id.to_string(),
+        key_hint,
+        has_secret,
+        has_token,
+        message: "Credential metadata retrieved (keys not exposed via HTTP)",
+    }))
+}
+
+async fn delete_credential(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    axum::extract::Path(vendor_id): axum::extract::Path<String>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = vendor_id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("vendorId must be non-empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let result = sqlx::query(
+        r#"
+        DELETE FROM app_vendor_credential
+        WHERE owner_user_id = $1 AND vendor_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(vendor_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if result.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "message": "Credential deleted"
+    })))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/settings/vendors/summary", get(get_vendors_summary))
@@ -361,5 +528,13 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/settings/vendors/code-from-link",
             post(post_vendor_code_from_link),
+        )
+        .route(
+            "/api/v1/settings/vendors/credential",
+            post(post_store_credential),
+        )
+        .route(
+            "/api/v1/settings/vendors/credential/{vendor_id}",
+            get(get_credential).delete(delete_credential),
         )
 }
