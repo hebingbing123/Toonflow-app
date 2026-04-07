@@ -15,6 +15,7 @@ part 'home_page/projects_controller.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/skills_harness_controller.dart';
 part 'home_page/system_probes_controller.dart';
+part 'home_page/auth_session_controller.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
 
@@ -327,56 +328,6 @@ class _HomePageState extends State<HomePage> {
         _loadingReady = false;
       });
     }
-  }
-
-  Future<void> _signIn() async {
-    setState(() => _error = null);
-    try {
-      await Supabase.instance.client.auth.signInWithPassword(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } catch (e) {
-      setState(() => _error = e.toString());
-    }
-  }
-
-  Future<void> _signUp() async {
-    setState(() => _error = null);
-    try {
-      await Supabase.instance.client.auth.signUp(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } catch (e) {
-      setState(() => _error = e.toString());
-    }
-  }
-
-  Future<void> _signOut() async {
-    await Supabase.instance.client.auth.signOut();
-    _wsSub?.cancel();
-    _ws?.sink.close();
-    _ws = null;
-    _wsSub = null;
-    setState(() {
-      _wsLog.clear();
-      _projects = null;
-      _creatingProject = false;
-      _jobs = null;
-      _jobByIdLine = null;
-      _usageSummaryBody = null;
-      _agentMemoryBody = null;
-      _versionBody = null;
-      _readyBody = null;
-      _harnessToolsLine = null;
-      _skillsAggregateLine = null;
-      _skillsListSummary = null;
-    });
   }
 
   @override
