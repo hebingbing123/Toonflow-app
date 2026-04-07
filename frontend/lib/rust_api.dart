@@ -1036,7 +1036,7 @@ Future<int> postSettingsDangerClearDatabaseV1(String accessToken) async {
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (typically **501**).
+/// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
   required List<int> storyboardIds,

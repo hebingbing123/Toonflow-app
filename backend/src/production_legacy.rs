@@ -5,12 +5,13 @@
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
-    response::Response,
+    response::{IntoResponse, Response},
     routing::post,
-    Router,
+    Json as JsonResponse, Router,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sqlx::FromRow;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -45,6 +46,31 @@ async fn post_production_legacy_json_stub(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct StoryboardIdListBody {
     ids: Vec<i32>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct ProductionStoryboardItem {
+    id: i32,
+    #[sqlx(rename = "script_id")]
+    script_id: Option<i32>,
+    prompt: Option<String>,
+    #[sqlx(rename = "url")]
+    file_path: Option<String>,
+    duration: Option<String>,
+    state: Option<String>,
+    #[sqlx(rename = "track_id")]
+    track_id: Option<i32>,
+    #[sqlx(rename = "flow_id")]
+    flow_id: Option<i32>,
+    #[sqlx(rename = "sb_index")]
+    sb_index: Option<i32>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProductionGetProductionDataResponse {
+    data: Vec<ProductionStoryboardItem>,
 }
 
 #[allow(dead_code)]
@@ -108,9 +134,46 @@ async fn post_get_production_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.ids.is_empty() {
+        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
+    }
+    if body.ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest("ids must be positive integers".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
+        r#"
+        SELECT
+          sb.legacy_id AS id,
+          sb.legacy_script_id AS script_id,
+          sb.prompt,
+          sb.file_path AS url,
+          sb.duration,
+          sb.state,
+          sb.track_id,
+          sb.flow_id,
+          sb.sb_index
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND sb.legacy_id = ANY($2::int4[])
+        ORDER BY array_position($2::int4[], sb.legacy_id)
+        "#,
+    )
+    .bind(uid)
+    .bind(&body.ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(JsonResponse(ProductionGetProductionDataResponse { data: rows }).into_response())
 }
 
 async fn post_get_flow_data(

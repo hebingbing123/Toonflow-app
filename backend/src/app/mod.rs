@@ -948,7 +948,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_get_production_data_not_implemented_with_jwt() {
+    async fn production_get_production_data_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/get-production-data",
@@ -956,8 +956,21 @@ mod contract_smoke_tests {
             r#"{"ids":[1]}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_get_production_data_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/get-production-data",
+            &token,
+            r#"{"ids":[0]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]
