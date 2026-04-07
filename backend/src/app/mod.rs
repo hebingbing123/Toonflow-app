@@ -811,7 +811,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendors_add_not_implemented_with_jwt() {
+    async fn settings_vendors_add_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/add",
@@ -819,8 +819,8 @@ mod contract_smoke_tests {
             r#"{"tsCode":"export {}"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
@@ -850,16 +850,16 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendors_delete_not_implemented_with_jwt() {
+    async fn settings_vendors_delete_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/delete",
             &token,
-            r#"{"id":"openai"}"#,
+            r#"{"id":"custom-123"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
@@ -876,29 +876,29 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendors_update_code_not_implemented_with_jwt() {
+    async fn settings_vendors_update_code_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/update-code",
             &token,
-            r#"{"id":"openai","tsCode":"//"}"#,
+            r#"{"id":"custom-123","tsCode":"export {}"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
-    async fn settings_vendors_code_from_link_not_implemented_with_jwt() {
+    async fn settings_vendors_code_from_link_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/code-from-link",
             &token,
-            r#"{"link":"https://example.com/a.ts"}"#,
+            r#"{"link":"https://example.com/code.ts"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]

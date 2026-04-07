@@ -10,7 +10,6 @@ use std::collections::HashMap;
 use axum::{
     extract::State,
     http::HeaderMap,
-    response::Response,
     routing::{get, post},
     Json, Router,
 };
@@ -165,14 +164,6 @@ async fn save_vendor_config(
     Ok(())
 }
 
-fn vendor_writes_not_implemented() -> ApiError {
-    ApiError::NotImplemented(
-        "per-user vendor config and provider scripts are not persisted on the Rust API; use static catalog and server env"
-            .into(),
-    )
-}
-
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct AddVendorBody {
@@ -201,14 +192,12 @@ struct UpdateVendorResponse {
     message: &'static str,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct DeleteVendorBody {
     id: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct EnableVendorBody {
@@ -216,7 +205,6 @@ struct EnableVendorBody {
     enable: i64,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct UpdateVendorCodeBody {
@@ -224,7 +212,6 @@ struct UpdateVendorCodeBody {
     ts_code: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct VendorCodeFromLinkBody {
@@ -235,10 +222,41 @@ async fn post_add_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddVendorBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.ts_code.trim().is_empty() {
+        return Err(ApiError::BadRequest("tsCode must be non-empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Generate a new vendor ID
+    let vendor_id = format!(
+        "custom-{}",
+        Uuid::new_v4()
+            .to_string()
+            .split('-')
+            .next()
+            .unwrap_or("vendor")
+    );
+
+    // Store custom vendor in vendor_config (metadata only, no code execution)
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    let entry = cfg.get_or_insert_vendor(&vendor_id);
+    entry.display_name = Some(format!("Custom Vendor {}", &vendor_id[..8]));
+    entry.settings.insert("ts_code".to_string(), body.ts_code);
+    entry
+        .settings
+        .insert("is_custom".to_string(), "true".to_string());
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "message": "Custom vendor added (code stored, not executed)",
+    })))
 }
 
 async fn post_update_vendor(
@@ -289,10 +307,42 @@ async fn post_delete_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteVendorBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = body.id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("id must be non-empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Remove vendor from config
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    if cfg.vendors.remove(vendor_id).is_none() {
+        return Err(ApiError::NotFound);
+    }
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    // Also delete any stored credentials
+    sqlx::query(
+        r#"
+        DELETE FROM app_vendor_credential
+        WHERE owner_user_id = $1 AND vendor_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(vendor_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "message": "Vendor deleted",
+    })))
 }
 
 async fn post_enable_vendor(
@@ -325,23 +375,83 @@ async fn post_update_vendor_code(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorCodeBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let vendor_id = body.id.trim();
+    if vendor_id.is_empty() {
+        return Err(ApiError::BadRequest("id must be non-empty".into()));
+    }
+    if body.ts_code.trim().is_empty() {
+        return Err(ApiError::BadRequest("tsCode must be non-empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Update vendor code in config (store only, no execution)
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    let entry = cfg.get_or_insert_vendor(vendor_id);
+    entry.settings.insert("ts_code".to_string(), body.ts_code);
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "message": "Vendor code updated (stored, not executed)",
+    })))
 }
 
 async fn post_vendor_code_from_link(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorCodeFromLinkBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    if body.link.trim().is_empty() {
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let link = body.link.trim();
+    if link.is_empty() {
         return Err(ApiError::BadRequest("link must be non-empty".into()));
     }
-    let _ = body;
-    Err(vendor_writes_not_implemented())
+
+    // Validate link format
+    if !link.starts_with("http://") && !link.starts_with("https://") {
+        return Err(ApiError::BadRequest(
+            "link must be a valid HTTP(S) URL".into(),
+        ));
+    }
+
+    // For security, we don't actually fetch external links in the backend
+    // Instead, we store the link reference and let the frontend/client fetch if needed
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let vendor_id = format!(
+        "linked-{}",
+        Uuid::new_v4()
+            .to_string()
+            .split('-')
+            .next()
+            .unwrap_or("vendor")
+    );
+
+    let mut cfg = load_vendor_config(pool, uid).await?;
+    let entry = cfg.get_or_insert_vendor(&vendor_id);
+    entry.display_name = Some(format!("Linked Vendor {}", &vendor_id[..8]));
+    entry
+        .settings
+        .insert("code_link".to_string(), link.to_string());
+    entry
+        .settings
+        .insert("is_linked".to_string(), "true".to_string());
+    save_vendor_config(pool, uid, &cfg).await?;
+
+    Ok(Json(serde_json::json!({
+        "vendorId": vendor_id,
+        "link": link,
+        "message": "Vendor code link stored (fetch and execution on client side)",
+    })))
 }
 
 #[derive(Debug, Deserialize)]
