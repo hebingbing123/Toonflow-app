@@ -1055,7 +1055,8 @@ Future<int> postProductionGetProductionDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/get-flow-data` — OpenAPI `postProductionGetFlowDataV1` (typically **501**).
+/// `POST /api/v1/production/get-flow-data` — OpenAPI `postProductionGetFlowDataV1`
+/// (implemented in Rust; returns **200/404/503** when DB-gated).
 Future<int> postProductionGetFlowDataV1(
   String accessToken, {
   required int projectId,
@@ -1078,7 +1079,8 @@ Future<int> postProductionGetFlowDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/save-flow-data` — OpenAPI `postProductionSaveFlowDataV1` (typically **501**).
+/// `POST /api/v1/production/save-flow-data` — OpenAPI `postProductionSaveFlowDataV1`
+/// (implemented in Rust; returns **200/404/503** when DB-gated).
 Future<int> postProductionSaveFlowDataV1(
   String accessToken, {
   required int projectId,

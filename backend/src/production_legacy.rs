@@ -181,9 +181,41 @@ async fn post_get_flow_data(
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.episodes_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and episodesId must be positive integers".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Minimal "flow" poll: verify the project exists and user owns at least one storyboard.
+    // (Real episode/flow JSON pipeline will be added later.)
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::OK.into_response())
 }
 
 async fn post_save_flow_data(
@@ -191,9 +223,43 @@ async fn post_save_flow_data(
     headers: HeaderMap,
     Json(body): Json<SaveFlowDataBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.episodes_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and episodesId must be positive integers".into(),
+        ));
+    }
+    if body.data.as_object().is_none() {
+        return Err(ApiError::BadRequest("data must be a JSON object".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Minimal save: verify user owns the project (has at least one storyboard).
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::OK.into_response())
 }
 
 async fn post_workbench_generate_video(

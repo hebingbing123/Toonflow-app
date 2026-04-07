@@ -4258,7 +4258,10 @@ paths:
       summary: Load production agent flow data (legacy `getFlowData`)
       operationId: postProductionGetFlowDataV1
       description: |
-        Bearer JWT. Validates **`projectId`** + **`episodesId`**, then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** + **`episodesId`**, then returns:
+        - **200** when user owns the project (has at least one storyboard)
+        - **404** when no owned project/storyboard is found
+        - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
       requestBody:
@@ -4268,6 +4271,8 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductionGetFlowDataBody"
       responses:
+        "200":
+          description: OK (empty body)
         "400":
           description: Invalid body
           content:
@@ -4280,14 +4285,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4299,7 +4304,10 @@ paths:
       summary: Save production flow JSON (legacy `saveFlowData`)
       operationId: postProductionSaveFlowDataV1
       description: |
-        Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`**, then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`** (must be JSON object), then returns:
+        - **200** when user owns the project (has at least one storyboard)
+        - **404** when no owned project/storyboard is found
+        - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
       requestBody:
@@ -4309,6 +4317,8 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductionSaveFlowDataBody"
       responses:
+        "200":
+          description: OK (empty body)
         "400":
           description: Invalid body
           content:
@@ -4321,14 +4331,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
