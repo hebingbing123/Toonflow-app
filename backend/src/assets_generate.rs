@@ -1,5 +1,5 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
-//! **`POST …/generate`** enqueues **`app_generation_job`** (**`asset.generate.image`**); the worker fails fast until the image pipeline exists. Other routes stay **501**.
+//! **`POST …/generate`** / **`POST …/polish-prompt`** enqueue **`app_generation_job`** (**`asset.generate.image`** / **`asset.polish.prompt`**); workers fail fast until pipelines exist. Batch routes stay **501**.
 
 use axum::{
     extract::{Json, State},
@@ -14,7 +14,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_IMAGE};
+use crate::jobs::{
+    enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_PROMPT,
+};
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -44,7 +46,6 @@ struct GenerateAssetsBody {
     base64: Option<String>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct PolishAssetsPromptBody {
@@ -103,10 +104,7 @@ struct BatchPolishAssetsPromptBody {
 }
 
 fn not_implemented() -> ApiError {
-    ApiError::NotImplemented(
-        "asset image generation and prompt polish are not implemented; use generation jobs when wired"
-            .into(),
-    )
+    ApiError::NotImplemented("batch asset generate and batch polish are not implemented".into())
 }
 
 fn asset_type_str(k: &AssetGenKind) -> &'static str {
@@ -131,6 +129,8 @@ const MAX_RESOLUTION_LEN: usize = 128;
 const MAX_NAME_LEN: usize = 512;
 const MAX_PROMPT_LEN: usize = 48_000;
 const MAX_BASE64_HINT_LEN: usize = 24_000_000;
+const MAX_ASSET_TYPE_LEN: usize = 64;
+const MAX_DESCRIBE_LEN: usize = 48_000;
 
 async fn resolve_owned_project_uuid(
     pool: &PgPool,
@@ -229,9 +229,50 @@ async fn post_polish_assets_prompt(
     headers: HeaderMap,
     Json(body): Json<PolishAssetsPromptBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    if body.assets_id <= 0 {
+        return Err(ApiError::BadRequest("assetsId must be positive".into()));
+    }
+    let asset_type = trim_non_empty(body.asset_type, "type")?;
+    let name = trim_non_empty(body.name, "name")?;
+    let describe = trim_non_empty(body.describe, "describe")?;
+    if asset_type.len() > MAX_ASSET_TYPE_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "type must be at most {MAX_ASSET_TYPE_LEN} chars"
+        )));
+    }
+    if name.len() > MAX_NAME_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "name must be at most {MAX_NAME_LEN} chars"
+        )));
+    }
+    if describe.len() > MAX_DESCRIBE_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "describe must be at most {MAX_DESCRIBE_LEN} chars"
+        )));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+
+    let payload = json!({
+        "source": "assets-generate.polish-prompt",
+        "project_legacy_id": body.project_id,
+        "asset_legacy_id": body.assets_id,
+        "asset_type": asset_type,
+        "name": name,
+        "describe": describe,
+    });
+
+    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_POLISH_PROMPT, payload).await?;
+    Ok(JsonResponse(row))
 }
 
 async fn post_batch_generate_image_assets(

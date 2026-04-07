@@ -1146,7 +1146,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn assets_generate_polish_prompt_not_implemented_with_jwt() {
+    async fn assets_generate_polish_prompt_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/assets-generate/polish-prompt",
@@ -1154,8 +1154,21 @@ mod contract_smoke_tests {
             r#"{"assetsId":1,"projectId":1,"type":"role","name":"n","describe":"d"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_polish_prompt_bad_request_empty_describe_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/polish-prompt",
+            &token,
+            r#"{"assetsId":1,"projectId":1,"type":"role","name":"n","describe":"  "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]

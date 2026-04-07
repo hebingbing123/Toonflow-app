@@ -12,8 +12,8 @@ import 'rust_api.dart';
 bool _scriptAgentCatalogProbeOk(int status) =>
     status == 200 || status == 404 || status == 501 || status == 503;
 
-/// Single **`assets-generate/generate`**: **200** queued job, **404** project, **429** quota, **503** no DB.
-bool _assetsGenerateGenerateProbeOk(int status) =>
+/// **`assets-generate/generate`** and **`polish-prompt`**: **200** queued job, **404** project, **429** quota, **503** no DB.
+bool _assetsGenerateSingleJobProbeOk(int status) =>
     status == 200 || status == 404 || status == 429 || status == 503;
 
 class HomePage extends StatefulWidget {
@@ -796,7 +796,7 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      if (!_assetsGenerateGenerateProbeOk(ag)) {
+      if (!_assetsGenerateSingleJobProbeOk(ag)) {
         setState(() {
           _error =
               'POST assets-generate/generate expected 200/404/429/503, got $ag';
@@ -954,10 +954,10 @@ class _HomePageState extends State<HomePage> {
         describe: 'd',
       );
       if (!mounted) return;
-      if (agPol != 501) {
+      if (!_assetsGenerateSingleJobProbeOk(agPol)) {
         setState(() {
           _error =
-              'POST assets-generate/polish-prompt expected 501, got $agPol';
+              'POST assets-generate/polish-prompt expected 200/404/429/503, got $agPol';
           _loadingModelsCatalog = false;
         });
         return;

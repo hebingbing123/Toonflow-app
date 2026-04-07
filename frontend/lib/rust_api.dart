@@ -893,7 +893,8 @@ Future<int> postAssetsGenerateGenerateV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/assets-generate/polish-prompt` — OpenAPI `postAssetsGeneratePolishPromptV1` (typically **501**).
+/// `POST /api/v1/assets-generate/polish-prompt` — OpenAPI `postAssetsGeneratePolishPromptV1`.
+/// **200** = **`queued`** **`JobRow`**; **404**/**429**/**503** as for **`generate`**.
 Future<int> postAssetsGeneratePolishPromptV1(
   String accessToken, {
   required int assetsId,
