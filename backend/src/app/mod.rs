@@ -3592,6 +3592,7 @@ mod pg_contract_tests {
     use crate::state::{AppState, MemoryConfig};
 
     const MAX_JSON: usize = 65_536;
+    const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
     /// JWT `sub` and `app_project.owner_user_id` for this run.
     const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
@@ -3671,6 +3672,79 @@ mod pg_contract_tests {
             switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
         }
+    }
+
+    fn smoke_state() -> AppState {
+        AppState {
+            pool: None,
+            jwt_secret: Some(TEST_JWT_SECRET.to_vec()),
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
+            local_asset_image_dir: None,
+        }
+    }
+
+    fn test_jwt(sub: Uuid) -> String {
+        jwt_fixture::encode_supabase_style(sub, TEST_JWT_SECRET)
+    }
+
+    async fn oneshot_json(req: Request<Body>) -> (StatusCode, Value) {
+        let app = build_router(smoke_state());
+        let res = app.oneshot(req).await.unwrap();
+        read_json_response(res).await
+    }
+
+    async fn get_json(uri: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .uri(uri)
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn get_json_bearer(uri: &str, token: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn post_json(uri: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
+    }
+
+    async fn post_json_bearer(uri: &str, token: &str, json_body: &str) -> (StatusCode, Value) {
+        oneshot_json(
+            Request::builder()
+                .method(Method::POST)
+                .uri(uri)
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(json_body.to_string()))
+                .unwrap(),
+        )
+        .await
     }
 
     fn contract_state_with_local_dir(
@@ -6868,5 +6942,85 @@ mod pg_contract_tests {
             .bind(project_id)
             .execute(&pool)
             .await;
+    }
+
+    #[tokio::test]
+    async fn quality_reviews_require_bearer_token() {
+        let (status, body) =
+            post_json("/api/v1/quality/reviews", r#"{"targetType":"script"}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
+
+        let (status, body) = get_json("/api/v1/quality/reviews").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
+
+        let (status, body) = get_json("/api/v1/quality/stats").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
+
+        let (status, body) = get_json("/api/v1/quality/stage-pass-rate").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED, "body={body}");
+    }
+
+    #[tokio::test]
+    async fn quality_review_create_validates_payload_before_db_access() {
+        let token = test_jwt(Uuid::new_v4());
+
+        let (status, body) = post_json_bearer(
+            "/api/v1/quality/reviews",
+            &token,
+            r#"{"targetType":"chapter"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
+        assert_eq!(body["code"], "bad_request");
+
+        let (status, body) = post_json_bearer(
+            "/api/v1/quality/reviews",
+            &token,
+            r#"{"targetType":"script","source":"robot"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
+        assert_eq!(body["code"], "bad_request");
+
+        let (status, body) = post_json_bearer(
+            "/api/v1/quality/reviews",
+            &token,
+            r#"{"targetType":"script","isBadCase":true,"badCaseCategory":"typo"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
+        assert_eq!(body["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn quality_endpoints_return_database_error_without_pool() {
+        let token = test_jwt(Uuid::new_v4());
+        let review_id = Uuid::nil();
+
+        let (status, body) = post_json_bearer(
+            "/api/v1/quality/reviews",
+            &token,
+            r#"{"targetType":"script"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+        assert_eq!(body["code"], "database_error");
+
+        let (status, body) = get_json_bearer("/api/v1/quality/reviews", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+        assert_eq!(body["code"], "database_error");
+
+        let (status, body) =
+            get_json_bearer(&format!("/api/v1/quality/reviews/{review_id}"), &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+        assert_eq!(body["code"], "database_error");
+
+        let (status, body) = get_json_bearer("/api/v1/quality/stats", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+        assert_eq!(body["code"], "database_error");
+
+        let (status, body) = get_json_bearer("/api/v1/quality/stage-pass-rate", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE, "body={body}");
+        assert_eq!(body["code"], "database_error");
     }
 }

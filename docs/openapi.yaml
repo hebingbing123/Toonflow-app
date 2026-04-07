@@ -7862,6 +7862,211 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/quality/reviews:
+    get:
+      tags: [quality]
+      summary: List quality reviews for the current user
+      operationId: listQualityReviewsV1
+      description: |
+        Returns the caller's quality review rows ordered by **`created_at DESC`**.
+        Supports filtering by **`targetType`**, **`targetId`**, **`jobId`**, and **`isBadCase`**.
+        **`limit`** defaults to **100** and clamps to **1..=500**; **`offset`** defaults to **0**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: targetType
+          in: query
+          schema:
+            type: string
+            enum: [storyboard, script, video, asset, output]
+        - name: targetId
+          in: query
+          schema:
+            type: string
+        - name: jobId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: isBadCase
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Matching quality reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QualityReview"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [quality]
+      summary: Create a quality review for the current user
+      operationId: createQualityReviewV1
+      description: |
+        Persists one **`app_quality_review`** row.
+        **`targetType`** must be one of **`storyboard`**, **`script`**, **`video`**, **`asset`**, **`output`**.
+        **`source`** defaults to **`manual`** and may also be **`auto`**.
+        **`badCaseCategory`** is optional but, when present, must match the allowed enum.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQualityReviewBody"
+      responses:
+        "200":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityReview"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/quality/reviews/{id}:
+    get:
+      tags: [quality]
+      summary: Get one quality review for the current user
+      operationId: getQualityReviewV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Review found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityReview"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/quality/stats:
+    get:
+      tags: [quality]
+      summary: Aggregate quality review stats by target type
+      operationId: getQualityStatsV1
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Aggregated stats for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QualityStatsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/quality/stage-pass-rate:
+    get:
+      tags: [quality]
+      summary: Aggregate pass rate by target type and review date
+      operationId: getQualityStagePassRateV1
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Daily pass rate entries for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StagePassRateItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   securitySchemes:
     bearerAuth:
@@ -11008,6 +11213,259 @@ components:
           type: object
           additionalProperties: true
           description: Optional structured detail (validation fields, etc.)
+
+    QualityReview:
+      type: object
+      required:
+        [
+          id,
+          createdAt,
+          updatedAt,
+          userId,
+          targetType,
+          source,
+          isBadCase,
+        ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+        projectId:
+          type: integer
+          nullable: true
+        scriptId:
+          type: integer
+          nullable: true
+        jobId:
+          type: string
+          format: uuid
+          nullable: true
+        targetType:
+          type: string
+          enum: [storyboard, script, video, asset, output]
+        targetId:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum: [manual, auto]
+        plotCoherence:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        characterConsistency:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        dialogueNaturalness:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        pacing:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        faithfulness:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        visualQuality:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        overallScore:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+        passed:
+          type: boolean
+          nullable: true
+        comments:
+          type: string
+          nullable: true
+        skillVersion:
+          type: string
+          nullable: true
+        modelName:
+          type: string
+          nullable: true
+        modelParams:
+          type: object
+          nullable: true
+          additionalProperties: true
+        reviewerId:
+          type: string
+          format: uuid
+          nullable: true
+        isBadCase:
+          type: boolean
+        badCaseCategory:
+          type: string
+          nullable: true
+          enum:
+            [
+              plot_hole,
+              character_break,
+              storyboard_mismatch,
+              dialogue_issue,
+              visual_error,
+              pacing_issue,
+              other,
+            ]
+
+    CreateQualityReviewBody:
+      type: object
+      required: [targetType]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+        scriptId:
+          type: integer
+        jobId:
+          type: string
+          format: uuid
+        targetType:
+          type: string
+          enum: [storyboard, script, video, asset, output]
+        targetId:
+          type: string
+        source:
+          type: string
+          enum: [manual, auto]
+          description: Defaults to `manual`.
+        plotCoherence:
+          type: integer
+          minimum: 1
+          maximum: 10
+        characterConsistency:
+          type: integer
+          minimum: 1
+          maximum: 10
+        dialogueNaturalness:
+          type: integer
+          minimum: 1
+          maximum: 10
+        pacing:
+          type: integer
+          minimum: 1
+          maximum: 10
+        faithfulness:
+          type: integer
+          minimum: 1
+          maximum: 10
+        visualQuality:
+          type: integer
+          minimum: 1
+          maximum: 10
+        overallScore:
+          type: integer
+          minimum: 1
+          maximum: 10
+        passed:
+          type: boolean
+        comments:
+          type: string
+        skillVersion:
+          type: string
+        modelName:
+          type: string
+        modelParams:
+          type: object
+          additionalProperties: true
+        isBadCase:
+          type: boolean
+        badCaseCategory:
+          type: string
+          enum:
+            [
+              plot_hole,
+              character_break,
+              storyboard_mismatch,
+              dialogue_issue,
+              visual_error,
+              pacing_issue,
+              other,
+            ]
+
+    QualityStatsResponse:
+      type: object
+      required:
+        [
+          targetType,
+          totalReviews,
+          passedCount,
+          failedCount,
+          badCaseCount,
+          passRatePercent,
+          avgOverallScore,
+        ]
+      properties:
+        targetType:
+          type: string
+          enum: [storyboard, script, video, asset, output]
+        totalReviews:
+          type: integer
+        passedCount:
+          type: integer
+        failedCount:
+          type: integer
+        badCaseCount:
+          type: integer
+        passRatePercent:
+          type: number
+          format: double
+        avgOverallScore:
+          type: number
+          format: double
+
+    StagePassRateItem:
+      type: object
+      required:
+        [
+          targetType,
+          reviewDate,
+          totalReviews,
+          passedCount,
+          badCaseCount,
+        ]
+      properties:
+        targetType:
+          type: string
+          enum: [storyboard, script, video, asset, output]
+        reviewDate:
+          type: string
+          format: date-time
+        totalReviews:
+          type: integer
+        passedCount:
+          type: integer
+        badCaseCount:
+          type: integer
+        passRatePercent:
+          type: number
+          format: double
+          nullable: true
+        avgScore:
+          type: number
+          format: double
+          nullable: true
 
     RateLimitError:
       allOf:

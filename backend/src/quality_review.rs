@@ -12,6 +12,18 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+const VALID_TARGET_TYPES: &[&str] = &["storyboard", "script", "video", "asset", "output"];
+const VALID_SOURCES: &[&str] = &["manual", "auto"];
+const VALID_BAD_CASE_CATEGORIES: &[&str] = &[
+    "plot_hole",
+    "character_break",
+    "storyboard_mismatch",
+    "dialogue_issue",
+    "visual_error",
+    "pacing_issue",
+    "other",
+];
+
 // ============================================================================
 // 数据模型
 // ============================================================================
@@ -111,6 +123,35 @@ pub struct StagePassRateItem {
     pub avg_score: Option<f64>,
 }
 
+fn validate_create_review_body(body: &CreateQualityReviewBody) -> Result<(), ApiError> {
+    if !VALID_TARGET_TYPES.contains(&body.target_type.as_str()) {
+        return Err(ApiError::BadRequest(format!(
+            "Invalid target_type: {}, must be one of {:?}",
+            body.target_type, VALID_TARGET_TYPES
+        )));
+    }
+
+    if let Some(source) = body.source.as_deref() {
+        if !VALID_SOURCES.contains(&source) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid source: {}, must be one of {:?}",
+                source, VALID_SOURCES
+            )));
+        }
+    }
+
+    if let Some(cat) = body.bad_case_category.as_deref() {
+        if !VALID_BAD_CASE_CATEGORIES.contains(&cat) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid bad_case_category: {}, must be one of {:?}",
+                cat, VALID_BAD_CASE_CATEGORIES
+            )));
+        }
+    }
+
+    Ok(())
+}
+
 // ============================================================================
 // 路由
 // ============================================================================
@@ -137,38 +178,11 @@ async fn create_review(
     Json(body): Json<CreateQualityReviewBody>,
 ) -> Result<Json<QualityReview>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
+    validate_create_review_body(&body)?;
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    // 验证 target_type
-    let valid_types = ["storyboard", "script", "video", "asset", "output"];
-    if !valid_types.contains(&body.target_type.as_str()) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid target_type: {}, must be one of {:?}",
-            body.target_type, valid_types
-        )));
-    }
-
-    // 验证 bad_case_category
-    if let Some(ref cat) = body.bad_case_category {
-        let valid_cats = [
-            "plot_hole",
-            "character_break",
-            "storyboard_mismatch",
-            "dialogue_issue",
-            "visual_error",
-            "pacing_issue",
-            "other",
-        ];
-        if !valid_cats.contains(&cat.as_str()) {
-            return Err(ApiError::BadRequest(format!(
-                "Invalid bad_case_category: {}, must be one of {:?}",
-                cat, valid_cats
-            )));
-        }
-    }
 
     let source = body.source.as_deref().unwrap_or("manual");
     let is_bad_case = body.is_bad_case.unwrap_or(false);
@@ -451,5 +465,26 @@ mod tests {
         let body: CreateQualityReviewBody = serde_json::from_value(json).unwrap();
         assert_eq!(body.target_type, "output");
         assert_eq!(body.source, None);
+    }
+
+    #[test]
+    fn validate_create_review_body_rejects_invalid_source() {
+        let body = CreateQualityReviewBody {
+            target_type: "script".to_string(),
+            source: Some("robot".to_string()),
+            ..Default::default()
+        };
+        let err = validate_create_review_body(&body).expect_err("invalid source");
+        assert!(matches!(err, ApiError::BadRequest(_)));
+    }
+
+    #[test]
+    fn validate_create_review_body_rejects_invalid_target_type() {
+        let body = CreateQualityReviewBody {
+            target_type: "chapter".to_string(),
+            ..Default::default()
+        };
+        let err = validate_create_review_body(&body).expect_err("invalid target_type");
+        assert!(matches!(err, ApiError::BadRequest(_)));
     }
 }
