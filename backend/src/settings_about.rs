@@ -1,6 +1,6 @@
 //! Legacy **`/api/setting/about/checkUpdate`** (remote **`update.json`**) and **`downloadApp`** (local installer / zip apply).
 //! SaaS Rust API does not fetch the desktop manifest: **`check-update`** returns **`needUpdate: false`** with the server crate version.
-//! **`download-app`** validates **`url`** then responds **501** **`not_implemented`**.
+//! **`download-app`** validates **`url`** then responds **501** — Flutter apps use platform stores/installers, not this legacy endpoint.
 
 use axum::{
     extract::{Json, State},
@@ -85,8 +85,7 @@ async fn post_download_app(
     }
     let _ = body.reinstall;
     Err(ApiError::NotImplemented(
-        "local download and installer execution are not supported on the Rust API (desktop Electron only)"
-            .into(),
+        "legacy download-app not implemented; Flutter apps use platform stores/installers".into(),
     ))
 }
 
