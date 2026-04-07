@@ -1725,6 +1725,21 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn asset_image_file_get_rejects_malformed_image_id_uuid_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, body, _) = get_bytes_bearer(
+            "/api/v1/projects/legacy/1/assets/1/images/not-a-uuid/file",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert!(
+            !body.is_empty(),
+            "expected error body for invalid uuid path segment"
+        );
+    }
+
+    #[tokio::test]
     async fn project_assets_list_query_unauthorized_without_bearer() {
         let (status, v) =
             get_json("/api/v1/projects/legacy/1/assets?script_legacy_id=1&page=1&limit=10").await;
