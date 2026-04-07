@@ -32,7 +32,7 @@ async fn load_memory_config(
     defaults: MemoryConfig,
 ) -> Result<MemoryConfig, ApiError> {
     let row: Option<(Option<SqlxJson<MemoryConfig>>,)> =
-        sqlx::query_as(r#"SELECT memory_config FROM app_user_profile WHERE id = $1"#)
+        sqlx::query_as(r#"SELECT memory_config FROM app_user_profile WHERE user_id = $1"#)
             .bind(uid)
             .fetch_optional(pool)
             .await
@@ -50,9 +50,9 @@ async fn save_memory_config(
     let cfg_json = SqlxJson(cfg.clone());
     sqlx::query(
         r#"
-        INSERT INTO app_user_profile (id, memory_config, updated_at)
+        INSERT INTO app_user_profile (user_id, memory_config, updated_at)
         VALUES ($1, $2, NOW())
-        ON CONFLICT (id) DO UPDATE SET memory_config = EXCLUDED.memory_config, updated_at = NOW()
+        ON CONFLICT (user_id) DO UPDATE SET memory_config = EXCLUDED.memory_config, updated_at = NOW()
         "#,
     )
     .bind(uid)

@@ -6890,12 +6890,13 @@ mod pg_contract_tests {
         assert_eq!(fetched_cfg["shortTermLimit"].as_i64(), Some(7));
         assert_eq!(fetched_cfg["modelDtype"].as_str(), Some("int8"));
 
-        let stored_cfg: Option<Json<MemoryConfig>> =
-            sqlx::query_scalar("SELECT memory_config FROM public.app_user_profile WHERE id = $1")
-                .bind(sub)
-                .fetch_optional(&pool)
-                .await
-                .expect("select memory_config");
+        let stored_cfg: Option<Json<MemoryConfig>> = sqlx::query_scalar(
+            "SELECT memory_config FROM public.app_user_profile WHERE user_id = $1",
+        )
+        .bind(sub)
+        .fetch_optional(&pool)
+        .await
+        .expect("select memory_config");
         let stored_cfg = stored_cfg.expect("stored memory_config").0;
         assert_eq!(stored_cfg.messages_per_summary, 12);
         assert_eq!(stored_cfg.model_dtype, "int8");
@@ -7033,7 +7034,7 @@ mod pg_contract_tests {
             .bind(project_id)
             .execute(&pool)
             .await;
-        let _ = sqlx::query("DELETE FROM public.app_user_profile WHERE id = $1")
+        let _ = sqlx::query("DELETE FROM public.app_user_profile WHERE user_id = $1")
             .bind(sub)
             .execute(&pool)
             .await;
