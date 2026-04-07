@@ -1,5 +1,37 @@
 part of 'index.dart';
 
+/// Row from **`GET …/projects/legacy/{id}/assets`** — OpenAPI **`AssetRow`**.
+class AssetRow {
+  const AssetRow({
+    required this.id,
+    required this.legacyId,
+    required this.name,
+    required this.assetType,
+    this.description,
+    this.createTimeMs,
+  });
+
+  final String id;
+  final int legacyId;
+  final String name;
+  final String assetType;
+  final String? description;
+  final int? createTimeMs;
+
+  factory AssetRow.fromJson(Map<String, dynamic> json) {
+    return AssetRow(
+      id: json['id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String,
+      assetType: json['asset_type'] as String,
+      description: json['description'] as String?,
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+    );
+  }
+}
+
 /// Body of **`GET …/assets`** — OpenAPI **`ListAssetsResponse`**.
 class ListAssetsResponse {
   const ListAssetsResponse({required this.items, required this.total});
@@ -561,6 +593,48 @@ Future<void> deleteProjectAssetByLegacyIds(
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId',
+  );
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
+/// `PUT …/scripts/{script_legacy_id}/assets/{asset_legacy_id}` — link script to asset (`app_script_asset`).
+Future<void> linkScriptToAssetByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int scriptLegacyId,
+  int assetLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/scripts/$scriptLegacyId/assets/$assetLegacyId',
+  );
+  final res = await http
+      .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
+/// `DELETE …/scripts/{script_legacy_id}/assets/{asset_legacy_id}` — remove link (404 if link absent).
+Future<void> unlinkScriptFromAssetByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int scriptLegacyId,
+  int assetLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/scripts/$scriptLegacyId/assets/$assetLegacyId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
