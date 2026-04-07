@@ -1098,7 +1098,10 @@ async fn get_project_asset_image_file(
 
     Ok((
         StatusCode::OK,
-        [(header::CONTENT_TYPE, "image/png")],
+        [
+            (header::CONTENT_TYPE, "image/png"),
+            (header::CACHE_CONTROL, "private, max-age=300"),
+        ],
         Body::from(bytes),
     )
         .into_response())

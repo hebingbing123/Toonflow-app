@@ -2963,7 +2963,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: PNG bytes when image is stored locally
+          description: "PNG bytes when image is stored locally (response includes Cache-Control private, max-age=300)"
           content:
             image/png:
               schema:
