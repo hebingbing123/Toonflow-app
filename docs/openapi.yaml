@@ -4493,10 +4493,11 @@ paths:
   /api/v1/production/assets/batch-generate-assets-image:
     post:
       tags: [production]
-      summary: Legacy `batchGenerateAssetsImage` stub
+      summary: Batch enqueue asset image generation (legacy `batchGenerateAssetsImage`)
       operationId: postProductionAssetsBatchGenerateImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`batchGenerateAssetsImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`assetIds`**,
+        verifies ownership, then enqueues one **`asset.generate.batch`** job per asset id.
       security:
         - bearerAuth: []
       requestBody:
@@ -4504,10 +4505,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionAssetsBatchGenerateImageBody"
       responses:
+        "200":
+          description: Batch jobs enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionAssetsBatchGenerateImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4518,14 +4525,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4534,10 +4541,11 @@ paths:
   /api/v1/production/assets/delete-assets-derivative:
     post:
       tags: [production]
-      summary: Legacy `deleteAssetsDireve` stub
+      summary: Delete derivative asset images (legacy `deleteAssetsDireve`)
       operationId: postProductionAssetsDeleteDerivativeV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`deleteAssetsDireve`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then deletes owned
+        **`app_asset_image`** rows for those asset ids. Returns **200** even when nothing matched.
       security:
         - bearerAuth: []
       requestBody:
@@ -4545,10 +4553,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionAssetsDeleteDerivativeBody"
       responses:
+        "200":
+          description: Delete attempt completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionAssetsDeleteDerivativeResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4559,14 +4573,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4575,10 +4583,11 @@ paths:
   /api/v1/production/assets/get-assets-data:
     post:
       tags: [production]
-      summary: Legacy `getAssetsData` stub
+      summary: List project assets for production workbench (legacy `getAssetsData`)
       operationId: postProductionAssetsGetAssetsDataV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getAssetsData`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, optional **`assetType`**, and pagination fields,
+        then returns owned assets ordered by creation time descending.
       security:
         - bearerAuth: []
       requestBody:
@@ -4586,10 +4595,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionAssetsGetDataBody"
       responses:
+        "200":
+          description: Matching assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionAssetsGetDataResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4600,14 +4615,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4616,10 +4625,11 @@ paths:
   /api/v1/production/assets/polling-image:
     post:
       tags: [production]
-      summary: Legacy `assets/pollingImage` stub
+      summary: Poll derivative asset image status (legacy `assets/pollingImage`)
       operationId: postProductionAssetsPollingImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`assets/pollingImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then returns current
+        image counts and latest states for owned assets.
       security:
         - bearerAuth: []
       requestBody:
@@ -4627,10 +4637,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionAssetsPollingImageBody"
       responses:
+        "200":
+          description: Polling result for owned assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionAssetsPollingImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4641,14 +4657,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4657,10 +4667,11 @@ paths:
   /api/v1/production/assets/update-assets-url:
     post:
       tags: [production]
-      summary: Legacy `updateAssetsUrl` stub
+      summary: Append a generated asset image URL (legacy `updateAssetsUrl`)
       operationId: postProductionAssetsUpdateUrlV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`updateAssetsUrl`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`assetId`**, and non-empty **`imageUrl`**, then
+        inserts a completed **`app_asset_image`** row for that owned asset.
       security:
         - bearerAuth: []
       requestBody:
@@ -4668,10 +4679,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionAssetsUpdateUrlBody"
       responses:
+        "200":
+          description: Asset image URL recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionAssetsUpdateUrlResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4682,14 +4699,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Asset not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4698,10 +4715,11 @@ paths:
   /api/v1/production/edit-image/generate-flow-image:
     post:
       tags: [production]
-      summary: Legacy `generateFlowImage` stub
+      summary: Enqueue edit-image generation job (legacy `generateFlowImage`)
       operationId: postProductionEditImageGenerateFlowImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`generateFlowImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`flowId`**, non-empty **`prompt`**, and optional **`model`**,
+        then enqueues an **`asset.generate.batch`** job for the edit-image flow.
       security:
         - bearerAuth: []
       requestBody:
@@ -4709,10 +4727,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionEditImageGenerateFlowImageBody"
       responses:
+        "200":
+          description: Generation job enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionEditImageGenerateFlowImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4723,14 +4747,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4739,39 +4757,21 @@ paths:
   /api/v1/production/edit-image/get-image-default-model:
     post:
       tags: [production]
-      summary: Legacy `getImageDefaultModle` stub
+      summary: Get default model for edit-image flow (legacy `getImageDefaultModle`)
       operationId: postProductionEditImageGetDefaultModelV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getImageDefaultModle`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Returns the built-in default image model metadata for edit-image.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
       responses:
-        "400":
-          description: Body is not a JSON object
+        "200":
+          description: Default model metadata
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorBody"
+                $ref: "#/components/schemas/ProductionEditImageDefaultModelResponse"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured
           content:
             application/json:
               schema:
@@ -4780,39 +4780,21 @@ paths:
   /api/v1/production/edit-image/get-image-flow:
     post:
       tags: [production]
-      summary: Legacy `getImageFlow` stub
+      summary: Load edit-image flow template (legacy `getImageFlow`)
       operationId: postProductionEditImageGetFlowV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Returns the built-in edit-image flow template with step metadata and default model.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
       responses:
-        "400":
-          description: Body is not a JSON object
+        "200":
+          description: Flow template
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorBody"
+                $ref: "#/components/schemas/ProductionEditImageGetFlowResponse"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured
           content:
             application/json:
               schema:
@@ -4821,10 +4803,10 @@ paths:
   /api/v1/production/edit-image/save-image-flow:
     post:
       tags: [production]
-      summary: Legacy `saveImageFlow` stub
+      summary: Save edit-image flow state (legacy `saveImageFlow`)
       operationId: postProductionEditImageSaveFlowV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`saveImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`flowId`** and **`steps`**, then echoes a saved confirmation.
       security:
         - bearerAuth: []
       requestBody:
@@ -4832,28 +4814,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionEditImageSaveFlowBody"
       responses:
+        "200":
+          description: Flow state accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionEditImageSaveFlowResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured
           content:
             application/json:
               schema:
@@ -4862,10 +4838,11 @@ paths:
   /api/v1/production/edit-image/update-image-flow:
     post:
       tags: [production]
-      summary: Legacy `updateImageFlow` stub
+      summary: Update one edit-image flow step (legacy `updateImageFlow`)
       operationId: postProductionEditImageUpdateFlowV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`updateImageFlow`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`flowId`**, **`stepId`**, and JSON-object **`updates`**, then
+        echoes an updated confirmation.
       security:
         - bearerAuth: []
       requestBody:
@@ -4873,28 +4850,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionEditImageUpdateFlowBody"
       responses:
+        "200":
+          description: Flow step accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionEditImageUpdateFlowResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured
           content:
             application/json:
               schema:
@@ -4903,10 +4874,11 @@ paths:
   /api/v1/production/get-storyboard-data:
     post:
       tags: [production]
-      summary: Legacy `getStoryboardData (top-level)` stub
+      summary: List storyboards under a project/script (legacy `getStoryboardData`)
       operationId: postProductionGetStoryboardDataV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`getStoryboardData (top-level)`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`** and **`scriptId`**, then returns owned storyboard rows
+        ordered by **`sbIndex`** ascending.
       security:
         - bearerAuth: []
       requestBody:
@@ -4914,10 +4886,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardListBody"
       responses:
+        "200":
+          description: Matching storyboard rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionGetProductionDataResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4928,14 +4906,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4944,10 +4916,11 @@ paths:
   /api/v1/production/storyboard/add:
     post:
       tags: [production]
-      summary: Legacy `addStoryboard` stub
+      summary: Add one storyboard row (legacy `addStoryboard`)
       operationId: postProductionStoryboardAddV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`addStoryboard`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`prompt`**,
+        verifies ownership, then inserts one storyboard row.
       security:
         - bearerAuth: []
       requestBody:
@@ -4955,10 +4928,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardAddBody"
       responses:
+        "200":
+          description: Storyboard created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardAddResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -4969,14 +4948,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4985,10 +4964,11 @@ paths:
   /api/v1/production/storyboard/batch-add-info:
     post:
       tags: [production]
-      summary: Legacy `batchAddStoryboardInfo` stub
+      summary: Batch insert storyboard rows (legacy `batchAddStoryboardInfo`)
       operationId: postProductionStoryboardBatchAddInfoV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`batchAddStoryboardInfo`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`storyboards`**,
+        verifies ownership, then inserts all storyboard rows.
       security:
         - bearerAuth: []
       requestBody:
@@ -4996,10 +4976,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardBatchAddInfoBody"
       responses:
+        "200":
+          description: Storyboards created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardBatchAddInfoResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5010,14 +4996,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5026,10 +5012,11 @@ paths:
   /api/v1/production/storyboard/batch-generate-image:
     post:
       tags: [production]
-      summary: Legacy `batchGenerateImage` stub
+      summary: Batch enqueue storyboard image generation (legacy `batchGenerateImage`)
       operationId: postProductionStoryboardBatchGenerateImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`batchGenerateImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`items`**, verifies
+        ownership, then enqueues one **`asset.generate.batch`** job per storyboard item.
       security:
         - bearerAuth: []
       requestBody:
@@ -5037,10 +5024,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardBatchGenerateImageBody"
       responses:
+        "200":
+          description: Batch jobs enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardBatchGenerateImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5051,14 +5044,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5067,10 +5060,11 @@ paths:
   /api/v1/production/storyboard/down-preview-image:
     post:
       tags: [production]
-      summary: Legacy `downPreviewImage` stub
+      summary: Get preview/download URL for a storyboard image (legacy `downPreviewImage`)
       operationId: postProductionStoryboardDownPreviewImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`downPreviewImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
+        preview URL when present.
       security:
         - bearerAuth: []
       requestBody:
@@ -5078,10 +5072,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardIdBody"
       responses:
+        "200":
+          description: Preview URL found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardDownPreviewImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5092,14 +5092,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned / has no preview URL
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5108,10 +5108,10 @@ paths:
   /api/v1/production/storyboard/edit-info:
     post:
       tags: [production]
-      summary: Legacy `editStoryboardInfo` stub
+      summary: Update storyboard prompt/duration (legacy `editStoryboardInfo`)
       operationId: postProductionStoryboardEditInfoV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`editStoryboardInfo`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`** and update fields, then updates the owned storyboard.
       security:
         - bearerAuth: []
       requestBody:
@@ -5119,10 +5119,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardEditInfoBody"
       responses:
+        "200":
+          description: Storyboard updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardEditInfoResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5133,14 +5139,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5149,10 +5155,10 @@ paths:
   /api/v1/production/storyboard/get-data:
     post:
       tags: [production]
-      summary: Legacy `storyboard/getStoryboardData` stub
+      summary: Load one storyboard row (legacy `storyboard/getStoryboardData`)
       operationId: postProductionStoryboardGetDataV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`storyboard/getStoryboardData`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`**, then returns that owned storyboard row.
       security:
         - bearerAuth: []
       requestBody:
@@ -5160,10 +5166,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardIdBody"
       responses:
+        "200":
+          description: Storyboard found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardBundleItem"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5174,14 +5186,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5190,10 +5202,11 @@ paths:
   /api/v1/production/storyboard/preview-image:
     post:
       tags: [production]
-      summary: Legacy `previewImage` stub
+      summary: Preview current storyboard image (legacy `previewImage`)
       operationId: postProductionStoryboardPreviewImageV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`previewImage`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
+        image URL and prompt.
       security:
         - bearerAuth: []
       requestBody:
@@ -5201,10 +5214,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardIdBody"
       responses:
+        "200":
+          description: Storyboard preview payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardPreviewImageResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5215,14 +5234,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5231,10 +5250,10 @@ paths:
   /api/v1/production/storyboard/remove-frame:
     post:
       tags: [production]
-      summary: Legacy `removeFrame` stub
+      summary: Clear storyboard image selection (legacy `removeFrame`)
       operationId: postProductionStoryboardRemoveFrameV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`removeFrame`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`**, then clears the owned storyboard's current image URL/state.
       security:
         - bearerAuth: []
       requestBody:
@@ -5242,10 +5261,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardIdBody"
       responses:
+        "200":
+          description: Storyboard frame cleared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardRemoveFrameResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5256,14 +5281,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -5272,10 +5297,10 @@ paths:
   /api/v1/production/storyboard/update-url:
     post:
       tags: [production]
-      summary: Legacy `updateStoryboardUrl` stub
+      summary: Set storyboard image URL (legacy `updateStoryboardUrl`)
       operationId: postProductionStoryboardUpdateUrlV1
       description: |
-        Bearer JWT. Body must be a JSON **object** (legacy **`updateStoryboardUrl`** shape not fully validated here), then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`storyboardId`** and non-empty **`imageUrl`**, then stores it on the owned storyboard.
       security:
         - bearerAuth: []
       requestBody:
@@ -5283,10 +5308,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductionLegacyJsonStubBody"
+              $ref: "#/components/schemas/ProductionStoryboardUpdateUrlBody"
       responses:
+        "200":
+          description: Storyboard image URL updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStoryboardUpdateUrlResponse"
         "400":
-          description: Body is not a JSON object
+          description: Invalid request body
           content:
             application/json:
               schema:
@@ -5297,14 +5328,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Storyboard not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -9184,12 +9215,536 @@ components:
         message:
           type: string
 
+    ProductionAssetsBatchGenerateImageBody:
+      type: object
+      required: [projectId, scriptId, assetIds]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        assetIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            format: int32
+        model:
+          type: string
+          nullable: true
+        resolution:
+          type: string
+          nullable: true
+
+    ProductionAssetsBatchGenerateImageResponse:
+      type: object
+      required: [enqueued, total]
+      properties:
+        enqueued:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobRow"
+        total:
+          type: integer
+          format: int32
+
+    ProductionAssetsDeleteDerivativeBody:
+      type: object
+      required: [projectId, assetIds]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        assetIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            format: int32
+
+    ProductionAssetsDeleteDerivativeResponse:
+      type: object
+      required: [deleted, assetIds]
+      properties:
+        deleted:
+          type: integer
+          format: int64
+        assetIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+    ProductionAssetsGetDataBody:
+      type: object
+      required: [projectId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        assetType:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+          format: int64
+          nullable: true
+        offset:
+          type: integer
+          format: int64
+          nullable: true
+
+    ProductionAssetDataItem:
+      type: object
+      required: [id, name, type]
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        type:
+          type: string
+        describe:
+          type: string
+          nullable: true
+        coverLegacyImageId:
+          type: integer
+          format: int32
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ProductionAssetsGetDataResponse:
+      type: object
+      required: [assets, total]
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionAssetDataItem"
+        total:
+          type: integer
+          format: int64
+
+    ProductionAssetsPollingImageBody:
+      type: object
+      required: [projectId, assetIds]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        assetIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            format: int32
+
+    ProductionAssetImageStatus:
+      type: object
+      required: [assetId, imageCount]
+      properties:
+        assetId:
+          type: integer
+          format: int32
+        imageCount:
+          type: integer
+          format: int64
+        latestState:
+          type: string
+          nullable: true
+
+    ProductionAssetsPollingImageResponse:
+      type: object
+      required: [statuses]
+      properties:
+        statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionAssetImageStatus"
+
+    ProductionAssetsUpdateUrlBody:
+      type: object
+      required: [projectId, assetId, imageUrl]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        assetId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+
+    ProductionAssetsUpdateUrlResponse:
+      type: object
+      required: [assetId, imageUrl, message]
+      properties:
+        assetId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+        message:
+          type: string
+
+    ProductionEditImageFlowStep:
+      type: object
+      required: [stepId, stepName, status]
+      properties:
+        stepId:
+          type: string
+        stepName:
+          type: string
+        status:
+          type: string
+
+    ProductionEditImageGetFlowResponse:
+      type: object
+      required: [flowId, steps, defaultModel]
+      properties:
+        flowId:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionEditImageFlowStep"
+        defaultModel:
+          type: string
+
+    ProductionEditImageDefaultModelResponse:
+      type: object
+      required: [model, resolution]
+      properties:
+        model:
+          type: string
+        resolution:
+          type: string
+
+    ProductionEditImageFlowStepInput:
+      type: object
+      required: [stepId, status]
+      additionalProperties: false
+      properties:
+        stepId:
+          type: string
+        status:
+          type: string
+
+    ProductionEditImageSaveFlowBody:
+      type: object
+      required: [flowId, steps]
+      additionalProperties: false
+      properties:
+        flowId:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionEditImageFlowStepInput"
+
+    ProductionEditImageSaveFlowResponse:
+      type: object
+      required: [flowId, saved]
+      properties:
+        flowId:
+          type: string
+        saved:
+          type: boolean
+
+    ProductionEditImageUpdateFlowBody:
+      type: object
+      required: [flowId, stepId, updates]
+      additionalProperties: false
+      properties:
+        flowId:
+          type: string
+        stepId:
+          type: string
+        updates:
+          type: object
+          additionalProperties: true
+
+    ProductionEditImageUpdateFlowResponse:
+      type: object
+      required: [flowId, stepId, updated]
+      properties:
+        flowId:
+          type: string
+        stepId:
+          type: string
+        updated:
+          type: boolean
+
+    ProductionEditImageGenerateFlowImageBody:
+      type: object
+      required: [flowId, prompt]
+      additionalProperties: false
+      properties:
+        flowId:
+          type: string
+        prompt:
+          type: string
+        model:
+          type: string
+          nullable: true
+
+    ProductionEditImageGenerateFlowImageResponse:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+
+    ProductionStoryboardListBody:
+      type: object
+      required: [projectId, scriptId]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+
+    ProductionStoryboardAddBody:
+      type: object
+      required: [projectId, scriptId, prompt]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        prompt:
+          type: string
+        duration:
+          type: integer
+          format: int32
+          nullable: true
+
+    ProductionStoryboardAddResponse:
+      type: object
+      required: [storyboardId, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProductionStoryboardBatchAddInfoItem:
+      type: object
+      required: [prompt]
+      additionalProperties: false
+      properties:
+        prompt:
+          type: string
+        duration:
+          type: integer
+          format: int32
+          nullable: true
+
+    ProductionStoryboardBatchAddInfoBody:
+      type: object
+      required: [projectId, scriptId, storyboards]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        storyboards:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ProductionStoryboardBatchAddInfoItem"
+
+    ProductionStoryboardBatchAddInfoResponse:
+      type: object
+      required: [added, storyboardIds]
+      properties:
+        added:
+          type: integer
+          format: int32
+        storyboardIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+    ProductionStoryboardBatchGenerateImageItem:
+      type: object
+      required: [storyboardId, prompt]
+      additionalProperties: false
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        prompt:
+          type: string
+        negativePrompt:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        resolution:
+          type: string
+          nullable: true
+
+    ProductionStoryboardBatchGenerateImageBody:
+      type: object
+      required: [projectId, scriptId, items]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ProductionStoryboardBatchGenerateImageItem"
+        model:
+          type: string
+          nullable: true
+        resolution:
+          type: string
+          nullable: true
+
+    ProductionStoryboardBatchGenerateImageResponse:
+      type: object
+      required: [enqueued, total]
+      properties:
+        enqueued:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobRow"
+        total:
+          type: integer
+          format: int32
+
+    ProductionStoryboardIdBody:
+      type: object
+      required: [storyboardId]
+      additionalProperties: false
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+
+    ProductionStoryboardEditInfoBody:
+      type: object
+      required: [storyboardId, prompt]
+      additionalProperties: false
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        prompt:
+          type: string
+        duration:
+          type: integer
+          format: int32
+          nullable: true
+
+    ProductionStoryboardEditInfoResponse:
+      type: object
+      required: [storyboardId, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProductionStoryboardRemoveFrameResponse:
+      type: object
+      required: [storyboardId, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    ProductionStoryboardUpdateUrlBody:
+      type: object
+      required: [storyboardId, imageUrl]
+      additionalProperties: false
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+
+    ProductionStoryboardUpdateUrlResponse:
+      type: object
+      required: [storyboardId, imageUrl, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+        message:
+          type: string
+
+    ProductionStoryboardPreviewImageResponse:
+      type: object
+      required: [storyboardId]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        imageUrl:
+          type: string
+          nullable: true
+        prompt:
+          type: string
+          nullable: true
+
+    ProductionStoryboardDownPreviewImageResponse:
+      type: object
+      required: [storyboardId, message]
+      properties:
+        storyboardId:
+          type: integer
+          format: int32
+        previewUrl:
+          type: string
+          nullable: true
+        message:
+          type: string
+
     ProductionLegacyJsonStubBody:
       type: object
       description: |
-        Loose stub schema for remaining legacy **`/api/production/*`** routes: any JSON **object** (not `null`, array, or scalar).
-        Typed parity for **`get-production-data`**, **`get-flow-data`**, **`save-flow-data`**, **`workbench/generate-video`**, **`workbench/*`** documented here,
-        **`storyboard/polling-image`**, and **`export-image`** uses dedicated schemas.
+        Reserved escape-hatch schema for any future fallback **`/api/production/*`** JSON-object stub:
+        any JSON **object** (not `null`, array, or scalar). Current production routes above use
+        dedicated typed schemas.
       additionalProperties: true
 
     AboutCheckUpdateSource:

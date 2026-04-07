@@ -1551,6 +1551,27 @@ async fn post_storyboard_add(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
     // Get next legacy_id
     let next_id: i32 = sqlx::query_scalar(
         r#"
@@ -1632,11 +1653,44 @@ async fn post_storyboard_batch_add_info(
             "projectId and scriptId must be positive integers".into(),
         ));
     }
+    if body.storyboards.is_empty() {
+        return Err(ApiError::BadRequest("storyboards must not be empty".into()));
+    }
+    if body
+        .storyboards
+        .iter()
+        .any(|sb| sb.prompt.trim().is_empty())
+    {
+        return Err(ApiError::BadRequest(
+            "storyboards[*].prompt must not be empty".into(),
+        ));
+    }
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
 
     // Get base legacy_id
     let base_id: i32 = sqlx::query_scalar(
