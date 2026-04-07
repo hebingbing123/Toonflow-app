@@ -11,6 +11,7 @@ path = "src/bin/legacy_import.rs"
 
 [dependencies]
 anyhow = "1"
+aes-gcm = "0.10"
 axum = { version = "0.8", features = ["macros", "ws"] }
 base64 = "0.22"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
@@ -20,6 +21,7 @@ governor = "0.10"
 hex = "0.4"
 hmac = "0.12"
 jsonwebtoken = "9"
+rand = "0.8"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
