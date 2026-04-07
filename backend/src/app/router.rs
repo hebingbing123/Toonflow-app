@@ -18,7 +18,9 @@ use crate::project_legacy;
 use crate::projects;
 use crate::prompts;
 use crate::quality_review;
-use crate::rate_limit::governor_layer_from_env;
+use crate::rate_limit::{
+    governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
+};
 use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::script_agent;
 use crate::script_asset_extract;
@@ -66,7 +68,15 @@ pub fn build_router(state: AppState) -> Router {
         ])
         .expose_headers([HeaderName::from_static("x-request-id")]);
 
-    let rate_limited = Router::new()
+    // Layer 3: Strict endpoint rate limiting for high-frequency endpoints (~5 req/s per endpoint)
+    let strict_limited = Router::new()
+        .merge(harness::http::router())
+        .merge(jobs::router())
+        .layer(strict_endpoint_governor_layer());
+
+    // Layer 2: Per-user rate limiting (~10 req/s per user)
+    let user_limited = Router::new()
+        .merge(strict_limited)
         .merge(agent_memory::router())
         .merge(models_catalog::router())
         .merge(projects::router())
@@ -88,8 +98,6 @@ pub fn build_router(state: AppState) -> Router {
         .merge(tasks_legacy::router())
         .merge(skills::router())
         .merge(visual_manual::router())
-        .merge(harness::http::router())
-        .merge(jobs::router())
         .merge(usage::router())
         .merge(prompts::router())
         .merge(quality_review::routes())
@@ -101,10 +109,13 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings_vendors::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
-        .layer(governor_layer_from_env());
+        // Layer 1: Global IP-based rate limiting (~50 req/s per IP)
+        .layer(governor_layer_from_env())
+        // Layer 2: Per-user rate limiting applied after global
+        .layer(user_governor_layer());
 
     Router::new()
-        .merge(rate_limited)
+        .merge(user_limited)
         .merge(billing::router())
         .route("/health", get(handlers::health))
         .route("/api/v1/health", get(handlers::health))
