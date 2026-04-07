@@ -781,7 +781,8 @@ mod tests {
     #[test]
     fn update_novel_event_body_accepts_detail_clear() {
         let b: UpdateNovelEventBody = serde_json::from_str(r#"{"detail":null}"#).unwrap();
-        assert_eq!(b.detail, Some(Value::Null));
+        assert!(b.detail.is_some());
+        assert!(b.detail.unwrap().is_null());
     }
 
     #[test]
