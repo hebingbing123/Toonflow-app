@@ -18,6 +18,7 @@ part 'home_page/system_probes_controller.dart';
 part 'home_page/auth_session_controller.dart';
 part 'home_page/overview_controller.dart';
 part 'home_page/build_sections.dart';
+part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
 
@@ -158,34 +159,6 @@ class _HomePageState extends State<HomePage> {
     _skillPathCtrl.dispose();
     _skillContentCtrl.dispose();
     super.dispose();
-  }
-
-  Session? get _session =>
-      kSupabaseConfigured ? Supabase.instance.client.auth.currentSession : null;
-
-  bool get _wsProbesBusy =>
-      _loadingWs ||
-      _loadingWsHarness ||
-      _loadingWsIsolatedEcho ||
-      _loadingWsWasmProbe ||
-      _loadingWsHarnessAgent ||
-      _loadingWsSkillsRead;
-
-  void _appendWsLog(String raw) {
-    const maxChars = 12000;
-    final line = raw.length > maxChars
-        ? '${raw.substring(0, maxChars)}… (+${raw.length - maxChars} chars)'
-        : raw;
-    if (!mounted) return;
-    setState(() {
-      _wsLog.insert(0, line);
-      if (_wsLog.length > 16) _wsLog.removeLast();
-    });
-  }
-
-  void _setErrorFromException(Object error) {
-    if (!mounted) return;
-    setState(() => _error = error.toString());
   }
 
   @override
