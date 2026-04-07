@@ -24,6 +24,7 @@ mod production_legacy;
 mod project_legacy;
 mod projects;
 mod prompts;
+mod queue;
 mod quality_review;
 mod quota;
 mod rate_limit;
