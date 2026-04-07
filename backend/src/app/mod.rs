@@ -1039,7 +1039,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_assets_get_assets_data_stub_not_implemented_with_jwt() {
+    async fn production_assets_get_assets_data_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/assets/get-assets-data",
@@ -1047,15 +1047,15 @@ mod contract_smoke_tests {
             r#"{"projectId":1}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
     async fn production_legacy_json_stub_rejects_non_object_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
-            post_json_bearer("/api/v1/production/assets/get-assets-data", &token, "[]").await;
+            post_json_bearer("/api/v1/production/edit-image/get-image-flow", &token, "[]").await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
     }
