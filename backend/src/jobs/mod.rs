@@ -75,6 +75,10 @@ struct JobStatusSummaryRow {
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 /// Single prompt polish (legacy **`POST …/assets-generate/polish-prompt`**); worker fails until LLM/pipeline exists.
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
+/// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker fails until pipeline exists.
+pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
+/// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker fails until pipeline exists.
+pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
 pub async fn enqueue_generation_job(

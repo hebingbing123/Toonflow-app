@@ -923,7 +923,8 @@ Future<int> postAssetsGeneratePolishPromptV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/assets-generate/batch-generate` — OpenAPI `postAssetsGenerateBatchGenerateV1` (typically **501**).
+/// `POST /api/v1/assets-generate/batch-generate` — OpenAPI `postAssetsGenerateBatchGenerateV1`.
+/// **200** = **`queued`** **`JobRow`** (**`asset.generate.batch`**); **404**/**429**/**503** as for **`generate`**.
 Future<int> postAssetsGenerateBatchGenerateV1(
   String accessToken, {
   required int projectId,
@@ -953,7 +954,8 @@ Future<int> postAssetsGenerateBatchGenerateV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/assets-generate/batch-polish` — OpenAPI `postAssetsGenerateBatchPolishV1` (typically **501**).
+/// `POST /api/v1/assets-generate/batch-polish` — OpenAPI `postAssetsGenerateBatchPolishV1`.
+/// **200** = **`queued`** **`JobRow`** (**`asset.polish.batch`**).
 Future<int> postAssetsGenerateBatchPolishV1(
   String accessToken, {
   required int projectId,

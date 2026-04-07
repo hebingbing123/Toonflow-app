@@ -179,6 +179,12 @@ async fn execute_kind(
         "asset.polish.prompt" => Err(JobRunError::Failed(
             "asset prompt polish pipeline is not implemented yet".into(),
         )),
+        "asset.generate.batch" => Err(JobRunError::Failed(
+            "batch asset image generation pipeline is not implemented yet".into(),
+        )),
+        "asset.polish.batch" => Err(JobRunError::Failed(
+            "batch asset prompt polish pipeline is not implemented yet".into(),
+        )),
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
         ))),

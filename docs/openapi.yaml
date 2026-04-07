@@ -44,7 +44,7 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`** / **`POST …/polish-prompt`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue **`asset.generate.image`** / **`asset.polish.prompt`** (**`queued`** **`JobRow`**); workers fail those kinds until pipelines exist. **`POST …/batch-generate`**, **`POST …/batch-polish`** remain **501** until wired.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**); workers fail those kinds until pipelines exist.
 
     **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
@@ -4035,7 +4035,7 @@ paths:
       summary: Batch-generate asset images (legacy `batchGenerateImageAssets` parity)
       operationId: postAssetsBatchGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body, then **501** **`not_implemented`**.
+        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (no base64 in **`payload`**). Worker fails until pipeline exists.
       security:
         - bearerAuth: []
       requestBody:
@@ -4045,6 +4045,12 @@ paths:
             schema:
               $ref: "#/components/schemas/BatchGenerateImageAssetsBody"
       responses:
+        "200":
+          description: New **`queued`** batch job (**`JobRow`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -4057,14 +4063,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "429":
+          description: Daily generation job quota exceeded
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -4076,7 +4088,7 @@ paths:
       summary: Batch-polish asset prompts (legacy `batchPolishAssetsPrompt` parity)
       operationId: postAssetsBatchPolishV1
       description: |
-        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body, then **501** **`not_implemented`**.
+        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. Worker fails until pipeline exists.
       security:
         - bearerAuth: []
       requestBody:
@@ -4086,6 +4098,12 @@ paths:
             schema:
               $ref: "#/components/schemas/BatchPolishAssetsPromptBody"
       responses:
+        "200":
+          description: New **`queued`** batch job (**`JobRow`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -4098,14 +4116,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "429":
+          description: Daily generation job quota exceeded
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:

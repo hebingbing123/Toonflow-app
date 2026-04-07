@@ -12,7 +12,7 @@ import 'rust_api.dart';
 bool _scriptAgentCatalogProbeOk(int status) =>
     status == 200 || status == 404 || status == 501 || status == 503;
 
-/// **`assets-generate/generate`** and **`polish-prompt`**: **200** queued job, **404** project, **429** quota, **503** no DB.
+/// **`assets-generate`** single + batch routes: **200** queued job, **404** project, **429** quota, **503** no DB.
 bool _assetsGenerateSingleJobProbeOk(int status) =>
     status == 200 || status == 404 || status == 429 || status == 503;
 
@@ -972,10 +972,10 @@ class _HomePageState extends State<HomePage> {
         ],
       );
       if (!mounted) return;
-      if (agBat != 501) {
+      if (!_assetsGenerateSingleJobProbeOk(agBat)) {
         setState(() {
           _error =
-              'POST assets-generate/batch-generate expected 501, got $agBat';
+              'POST assets-generate/batch-generate expected 200/404/429/503, got $agBat';
           _loadingModelsCatalog = false;
         });
         return;
@@ -988,10 +988,10 @@ class _HomePageState extends State<HomePage> {
         ],
       );
       if (!mounted) return;
-      if (agBap != 501) {
+      if (!_assetsGenerateSingleJobProbeOk(agBap)) {
         setState(() {
           _error =
-              'POST assets-generate/batch-polish expected 501, got $agBap';
+              'POST assets-generate/batch-polish expected 200/404/429/503, got $agBap';
           _loadingModelsCatalog = false;
         });
         return;

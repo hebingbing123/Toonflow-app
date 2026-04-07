@@ -1,5 +1,5 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
-//! **`POST …/generate`** / **`POST …/polish-prompt`** enqueue **`app_generation_job`** (**`asset.generate.image`** / **`asset.polish.prompt`**); workers fail fast until pipelines exist. Batch routes stay **501**.
+//! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**); workers fail fast until pipelines exist.
 
 use axum::{
     extract::{Json, State},
@@ -15,7 +15,8 @@ use uuid::Uuid;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{
-    enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_PROMPT,
+    enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE,
+    JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
 };
 use crate::state::AppState;
 
@@ -57,7 +58,6 @@ struct PolishAssetsPromptBody {
     describe: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchGenItem {
@@ -70,7 +70,6 @@ struct BatchGenItem {
     base64: Option<String>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchGenerateImageAssetsBody {
@@ -82,7 +81,6 @@ struct BatchGenerateImageAssetsBody {
     items: Vec<BatchGenItem>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchPolishItem {
@@ -93,7 +91,6 @@ struct BatchPolishItem {
     describe: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchPolishAssetsPromptBody {
@@ -101,10 +98,6 @@ struct BatchPolishAssetsPromptBody {
     #[serde(default)]
     concurrent_count: Option<i32>,
     items: Vec<BatchPolishItem>,
-}
-
-fn not_implemented() -> ApiError {
-    ApiError::NotImplemented("batch asset generate and batch polish are not implemented".into())
 }
 
 fn asset_type_str(k: &AssetGenKind) -> &'static str {
@@ -116,12 +109,16 @@ fn asset_type_str(k: &AssetGenKind) -> &'static str {
     }
 }
 
-fn trim_non_empty(s: String, field: &'static str) -> Result<String, ApiError> {
+fn trim_non_empty_str(s: &str, field: &'static str) -> Result<String, ApiError> {
     let t = s.trim();
     if t.is_empty() {
         return Err(ApiError::BadRequest(format!("{field} must be non-empty")));
     }
     Ok(t.to_owned())
+}
+
+fn trim_non_empty(s: String, field: &'static str) -> Result<String, ApiError> {
+    trim_non_empty_str(&s, field)
 }
 
 const MAX_MODEL_LEN: usize = 512;
@@ -131,6 +128,8 @@ const MAX_PROMPT_LEN: usize = 48_000;
 const MAX_BASE64_HINT_LEN: usize = 24_000_000;
 const MAX_ASSET_TYPE_LEN: usize = 64;
 const MAX_DESCRIBE_LEN: usize = 48_000;
+/// Legacy batch calls can send many rows; cap payload size.
+const MAX_BATCH_ITEMS: usize = 50;
 
 async fn resolve_owned_project_uuid(
     pool: &PgPool,
@@ -280,9 +279,93 @@ async fn post_batch_generate_image_assets(
     headers: HeaderMap,
     Json(body): Json<BatchGenerateImageAssetsBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    if body.items.is_empty() {
+        return Err(ApiError::BadRequest("items must be non-empty".into()));
+    }
+    if body.items.len() > MAX_BATCH_ITEMS {
+        return Err(ApiError::BadRequest(format!(
+            "items must have at most {MAX_BATCH_ITEMS} rows"
+        )));
+    }
+    if let Some(n) = body.concurrent_count {
+        if n < 0 {
+            return Err(ApiError::BadRequest(
+                "concurrentCount must be non-negative".into(),
+            ));
+        }
+    }
+
+    let model = trim_non_empty(body.model, "model")?;
+    let resolution = trim_non_empty(body.resolution, "resolution")?;
+    if model.len() > MAX_MODEL_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "model must be at most {MAX_MODEL_LEN} chars"
+        )));
+    }
+    if resolution.len() > MAX_RESOLUTION_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "resolution must be at most {MAX_RESOLUTION_LEN} chars"
+        )));
+    }
+
+    let mut items_json = Vec::with_capacity(body.items.len());
+    for it in &body.items {
+        if it.id <= 0 {
+            return Err(ApiError::BadRequest(
+                "each items[].id must be positive".into(),
+            ));
+        }
+        let name = trim_non_empty_str(&it.name, "items[].name")?;
+        let prompt = trim_non_empty_str(&it.prompt, "items[].prompt")?;
+        if name.len() > MAX_NAME_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "items[].name must be at most {MAX_NAME_LEN} chars"
+            )));
+        }
+        if prompt.len() > MAX_PROMPT_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "items[].prompt must be at most {MAX_PROMPT_LEN} chars"
+            )));
+        }
+        if let Some(ref b64) = it.base64 {
+            if b64.len() > MAX_BASE64_HINT_LEN {
+                return Err(ApiError::BadRequest(format!(
+                    "items[].base64 must be at most {MAX_BASE64_HINT_LEN} chars"
+                )));
+            }
+        }
+        let asset_type = asset_type_str(&it.asset_type);
+        items_json.push(json!({
+            "asset_legacy_id": it.id,
+            "asset_type": asset_type,
+            "name": name,
+            "prompt": prompt,
+            "has_base64": it.base64.is_some(),
+        }));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+
+    let payload = json!({
+        "source": "assets-generate.batch-generate",
+        "project_legacy_id": body.project_id,
+        "model": model,
+        "resolution": resolution,
+        "concurrent_count": body.concurrent_count,
+        "items": items_json,
+    });
+
+    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
+    Ok(JsonResponse(row))
 }
 
 async fn post_batch_polish_assets_prompt(
@@ -290,9 +373,75 @@ async fn post_batch_polish_assets_prompt(
     headers: HeaderMap,
     Json(body): Json<BatchPolishAssetsPromptBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    if body.items.is_empty() {
+        return Err(ApiError::BadRequest("items must be non-empty".into()));
+    }
+    if body.items.len() > MAX_BATCH_ITEMS {
+        return Err(ApiError::BadRequest(format!(
+            "items must have at most {MAX_BATCH_ITEMS} rows"
+        )));
+    }
+    if let Some(n) = body.concurrent_count {
+        if n < 0 {
+            return Err(ApiError::BadRequest(
+                "concurrentCount must be non-negative".into(),
+            ));
+        }
+    }
+
+    let mut items_json = Vec::with_capacity(body.items.len());
+    for it in &body.items {
+        if it.assets_id <= 0 {
+            return Err(ApiError::BadRequest(
+                "each items[].assetsId must be positive".into(),
+            ));
+        }
+        let asset_type = trim_non_empty_str(&it.asset_type, "items[].type")?;
+        let name = trim_non_empty_str(&it.name, "items[].name")?;
+        let describe = trim_non_empty_str(&it.describe, "items[].describe")?;
+        if asset_type.len() > MAX_ASSET_TYPE_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "items[].type must be at most {MAX_ASSET_TYPE_LEN} chars"
+            )));
+        }
+        if name.len() > MAX_NAME_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "items[].name must be at most {MAX_NAME_LEN} chars"
+            )));
+        }
+        if describe.len() > MAX_DESCRIBE_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "items[].describe must be at most {MAX_DESCRIBE_LEN} chars"
+            )));
+        }
+        items_json.push(json!({
+            "asset_legacy_id": it.assets_id,
+            "asset_type": asset_type,
+            "name": name,
+            "describe": describe,
+        }));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+
+    let payload = json!({
+        "source": "assets-generate.batch-polish",
+        "project_legacy_id": body.project_id,
+        "concurrent_count": body.concurrent_count,
+        "items": items_json,
+    });
+
+    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_POLISH_BATCH, payload).await?;
+    Ok(JsonResponse(row))
 }
 
 pub fn router() -> Router<AppState> {
