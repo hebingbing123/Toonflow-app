@@ -861,7 +861,9 @@ Future<int> postScriptAgentUpdateDataV1(
 }
 
 /// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1`.
-/// **200** = **`queued`** **`JobRow`**; **404** unknown project; **429** daily quota; **503** no DB.
+/// **200** = **`queued`** **`JobRow`** (**`asset.generate.image`**); worker **`succeeded`** inserts
+/// **`app_asset_image`** (temporary provider **`image_url`**) when **`OPENAI_API_KEY`/`LLM_API_KEY`**
+/// is set. **404** unknown project; **429** daily quota; **503** no DB.
 Future<int> postAssetsGenerateGenerateV1(
   String accessToken, {
   required int projectId,
@@ -927,7 +929,8 @@ Future<int> postAssetsGeneratePolishPromptV1(
 }
 
 /// `POST /api/v1/assets-generate/batch-generate` — OpenAPI `postAssetsGenerateBatchGenerateV1`.
-/// **200** = **`queued`** **`JobRow`** (**`asset.generate.batch`**); **404**/**429**/**503** as for **`generate`**.
+/// **200** = **`queued`** **`JobRow`** (**`asset.generate.batch`**); worker runs **`images/generations`**
+/// per item when LLM keys are set (**`result.items`**). **404**/**429**/**503** as for **`generate`**.
 Future<int> postAssetsGenerateBatchGenerateV1(
   String accessToken, {
   required int projectId,

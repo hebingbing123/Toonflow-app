@@ -107,6 +107,106 @@ pub async fn chat_completion_assistant_text(
     parse_assistant_content(&v)
 }
 
+/// DALL-E 3 **`prompt`** cap (characters).
+const DALLE3_MAX_PROMPT_CHARS: usize = 4_000;
+
+fn clip_prompt_chars(s: &str, max_chars: usize) -> String {
+    let n = s.chars().count();
+    if n <= max_chars {
+        return s.to_string();
+    }
+    s.chars().take(max_chars).collect()
+}
+
+/// Picks an OpenAI **`images/generations`** model id from the legacy catalog string (e.g. **`1:dall-e-3`**) or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
+pub fn resolve_openai_image_model(request_model: &str) -> String {
+    let lower = request_model.to_lowercase();
+    if lower.contains("dall-e-2") || lower.contains("dalle-2") {
+        return "dall-e-2".into();
+    }
+    if lower.contains("dall-e-3") || lower.contains("dalle-3") {
+        return "dall-e-3".into();
+    }
+    std::env::var("TOONFLOW_IMAGE_MODEL")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "dall-e-3".into())
+}
+
+/// Maps legacy **`resolution`** (e.g. **`1024x1024`**) to an OpenAI **`size`** for the chosen model.
+pub fn resolve_openai_image_size(model: &str, resolution: &str) -> &'static str {
+    let m = model.to_lowercase();
+    let r = resolution.to_lowercase().replace('×', "x").replace(' ', "");
+    if m.contains("dall-e-3") || m.contains("dalle-3") {
+        return match r.as_str() {
+            "1792x1024" => "1792x1024",
+            "1024x1792" => "1024x1792",
+            _ => "1024x1024",
+        };
+    }
+    match r.as_str() {
+        "256x256" => "256x256",
+        "512x512" => "512x512",
+        "1024x1024" => "1024x1024",
+        _ => "1024x1024",
+    }
+}
+
+/// OpenAI-compatible **`POST /v1/images/generations`** with **`response_format: url`**.
+/// Returns **(image_url, revised_prompt)** — revised prompt is set for DALL-E 3.
+pub async fn images_generation_url(
+    cfg: &LlmConfig,
+    client: &reqwest::Client,
+    model: &str,
+    prompt: &str,
+    size: &str,
+) -> Result<(String, Option<String>), String> {
+    let prompt = clip_prompt_chars(prompt, DALLE3_MAX_PROMPT_CHARS);
+    let url = format!("{}/images/generations", cfg.base_url);
+    let body = json!({
+        "model": model,
+        "prompt": prompt,
+        "n": 1,
+        "size": size,
+        "response_format": "url",
+    });
+    let response = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", cfg.api_key))
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| format!("images request: {e}"))?;
+    if !response.status().is_success() {
+        let status = response.status();
+        let text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "(empty body)".into());
+        return Err(format!("images HTTP {status}: {text}"));
+    }
+    let v: Value = response
+        .json()
+        .await
+        .map_err(|e| format!("images json: {e}"))?;
+    let data0 = v
+        .get("data")
+        .and_then(|d| d.as_array())
+        .and_then(|a| a.first())
+        .ok_or_else(|| "missing data[0]".to_string())?;
+    let url_str = data0
+        .get("url")
+        .and_then(|u| u.as_str())
+        .ok_or_else(|| "missing data[0].url".to_string())?;
+    let revised = data0
+        .get("revised_prompt")
+        .and_then(|x| x.as_str())
+        .map(str::to_string);
+    Ok((url_str.to_string(), revised))
+}
+
 /// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
 pub async fn stream_chat_turn(
     cfg: &LlmConfig,
@@ -273,5 +373,40 @@ mod tests {
             {"type":"text","text":" cd "}
         ]}}]});
         assert_eq!(parse_assistant_content(&v).unwrap(), "ab cd");
+    }
+
+    #[test]
+    fn image_size_maps_dalle3() {
+        assert_eq!(
+            resolve_openai_image_size("dall-e-3", "1792x1024"),
+            "1792x1024"
+        );
+        assert_eq!(
+            resolve_openai_image_size("dall-e-3", "1024 × 1792"),
+            "1024x1792"
+        );
+        assert_eq!(
+            resolve_openai_image_size("dall-e-3", "unknown"),
+            "1024x1024"
+        );
+    }
+
+    #[test]
+    fn image_size_maps_dalle2() {
+        assert_eq!(resolve_openai_image_size("dall-e-2", "512x512"), "512x512");
+        assert_eq!(resolve_openai_image_size("dall-e-2", "bad"), "1024x1024");
+    }
+
+    #[test]
+    fn image_model_from_catalog_string() {
+        assert_eq!(
+            resolve_openai_image_model("1:dall-e-3").as_str(),
+            "dall-e-3"
+        );
+        assert_eq!(resolve_openai_image_model("dall-e-2").as_str(), "dall-e-2");
+        assert_eq!(
+            resolve_openai_image_model("unknown-catalog-id").as_str(),
+            "dall-e-3"
+        );
     }
 }

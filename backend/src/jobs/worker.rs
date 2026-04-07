@@ -8,8 +8,12 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::assets::{next_asset_image_sort_index, resolve_asset_id_for_job};
 use crate::harness::observe;
-use crate::llm::{chat_completion_assistant_text, LlmConfig};
+use crate::llm::{
+    chat_completion_assistant_text, images_generation_url, resolve_openai_image_model,
+    resolve_openai_image_size, LlmConfig,
+};
 use crate::state::AppState;
 use crate::usage;
 
@@ -179,13 +183,13 @@ async fn execute_kind(
             }
             Ok(json!({ "ok": true, "probe": true }))
         }
-        k if k == JOB_KIND_ASSET_GENERATE_IMAGE => Err(JobRunError::Failed(
-            "asset image generation pipeline is not implemented yet".into(),
-        )),
+        k if k == JOB_KIND_ASSET_GENERATE_IMAGE => {
+            run_asset_generate_image(state, pool, id, row).await
+        }
         k if k == JOB_KIND_ASSET_POLISH_PROMPT => run_asset_polish_prompt(state, row).await,
-        k if k == JOB_KIND_ASSET_GENERATE_BATCH => Err(JobRunError::Failed(
-            "batch asset image generation pipeline is not implemented yet".into(),
-        )),
+        k if k == JOB_KIND_ASSET_GENERATE_BATCH => {
+            run_asset_generate_batch(state, pool, id, row).await
+        }
         k if k == JOB_KIND_ASSET_POLISH_BATCH => run_asset_polish_batch(state, pool, id, row).await,
         k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => Err(JobRunError::Failed(
             "vendor modelTest live probe is not implemented yet".into(),
@@ -355,6 +359,265 @@ async fn run_asset_polish_batch(
     Ok(json!({
         "source": "assets-generate.batch-polish",
         "project_legacy_id": project_legacy_id,
+        "items": out,
+    }))
+}
+
+fn combine_image_prompt(name: &str, body: &str) -> String {
+    let n = name.trim();
+    let b = body.trim();
+    match (n.is_empty(), b.is_empty()) {
+        (true, true) => String::new(),
+        (true, false) => b.to_string(),
+        (false, true) => n.to_string(),
+        (false, false) => format!("{n}\n{b}"),
+    }
+}
+
+struct AssetImageGenCtx<'a> {
+    cfg: &'a LlmConfig,
+    http_client: &'a reqwest::Client,
+    pool: &'a PgPool,
+    job_id: Uuid,
+    owner: Uuid,
+    request_model: &'a str,
+    image_model: &'a str,
+    size: &'a str,
+}
+
+async fn generate_and_store_asset_image(
+    ctx: &AssetImageGenCtx<'_>,
+    project_legacy_id: i32,
+    asset_legacy_id: i32,
+    name: &str,
+    prompt: &str,
+) -> Result<serde_json::Value, JobRunError> {
+    let full_prompt = combine_image_prompt(name, prompt);
+    if full_prompt.is_empty() {
+        return Err(JobRunError::Failed("empty image prompt".into()));
+    }
+
+    let asset_id =
+        resolve_asset_id_for_job(ctx.pool, ctx.owner, project_legacy_id, asset_legacy_id)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?
+            .ok_or_else(|| {
+                JobRunError::Failed("asset not found for project or not owned".into())
+            })?;
+
+    let (url, revised) = images_generation_url(
+        ctx.cfg,
+        ctx.http_client,
+        ctx.image_model,
+        &full_prompt,
+        ctx.size,
+    )
+    .await
+    .map_err(JobRunError::Failed)?;
+
+    let sort_index = next_asset_image_sort_index(ctx.pool, asset_id)
+        .await
+        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+    let metadata = json!({
+        "source": "jobs.worker.asset_image",
+        "generation_job_id": ctx.job_id,
+        "request_model": ctx.request_model,
+        "image_model": ctx.image_model,
+        "size": ctx.size,
+        "revised_prompt": revised,
+    });
+
+    let image_row_id: Uuid = sqlx::query_scalar(
+        r#"
+        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, metadata)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
+        "#,
+    )
+    .bind(asset_id)
+    .bind(sort_index)
+    .bind(&url)
+    .bind(Some("已完成".to_string()))
+    .bind(metadata)
+    .fetch_one(ctx.pool)
+    .await
+    .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+    Ok(json!({
+        "asset_legacy_id": asset_legacy_id,
+        "asset_image_id": image_row_id,
+        "image_url": url,
+        "revised_prompt": revised,
+    }))
+}
+
+async fn run_asset_generate_image(
+    state: &AppState,
+    pool: &PgPool,
+    job_id: Uuid,
+    row: &JobRow,
+) -> Result<serde_json::Value, JobRunError> {
+    let Some(ref cfg) = state.llm else {
+        return Err(JobRunError::Failed(
+            "LLM not configured (set OPENAI_API_KEY or LLM_API_KEY)".into(),
+        ));
+    };
+
+    if generation_job_is_cancelled(pool, job_id).await? {
+        return Err(JobRunError::Cancelled);
+    }
+
+    let p = &row.payload;
+    let project_legacy_id = p
+        .get("project_legacy_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok())
+        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+    let asset_legacy_id = p
+        .get("asset_legacy_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok())
+        .ok_or_else(|| JobRunError::Failed("payload missing asset_legacy_id".into()))?;
+    let model_in = p
+        .get("model")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing model".into()))?;
+    let resolution = p
+        .get("resolution")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing resolution".into()))?;
+    let name = p.get("name").and_then(|x| x.as_str()).unwrap_or("");
+    let prompt = p
+        .get("prompt")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing prompt".into()))?;
+
+    let image_model = resolve_openai_image_model(model_in);
+    let size = resolve_openai_image_size(&image_model, resolution);
+
+    tracing::info!(
+        job_id = %row.id,
+        kind = %row.kind,
+        image_model = %image_model,
+        size = %size,
+        "asset generate image: calling images API"
+    );
+
+    let ctx = AssetImageGenCtx {
+        cfg,
+        http_client: &state.http_client,
+        pool,
+        job_id,
+        owner: row.owner_user_id,
+        request_model: model_in,
+        image_model: image_model.as_str(),
+        size,
+    };
+
+    let body =
+        generate_and_store_asset_image(&ctx, project_legacy_id, asset_legacy_id, name, prompt)
+            .await?;
+
+    Ok(json!({
+        "source": "assets-generate.generate",
+        "project_legacy_id": project_legacy_id,
+        "image_model": image_model,
+        "size": size,
+        "asset_legacy_id": asset_legacy_id,
+        "asset_image_id": body["asset_image_id"],
+        "image_url": body["image_url"],
+        "revised_prompt": body["revised_prompt"],
+    }))
+}
+
+async fn run_asset_generate_batch(
+    state: &AppState,
+    pool: &PgPool,
+    job_id: Uuid,
+    row: &JobRow,
+) -> Result<serde_json::Value, JobRunError> {
+    let Some(ref cfg) = state.llm else {
+        return Err(JobRunError::Failed(
+            "LLM not configured (set OPENAI_API_KEY or LLM_API_KEY)".into(),
+        ));
+    };
+
+    let p = &row.payload;
+    let project_legacy_id = p
+        .get("project_legacy_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok())
+        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+    let model_in = p
+        .get("model")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing model".into()))?;
+    let resolution = p
+        .get("resolution")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing resolution".into()))?;
+    let items = p
+        .get("items")
+        .and_then(|x| x.as_array())
+        .ok_or_else(|| JobRunError::Failed("payload missing items".into()))?;
+    if items.is_empty() {
+        return Err(JobRunError::Failed(
+            "payload items is empty (invalid enqueue)".into(),
+        ));
+    }
+
+    let image_model = resolve_openai_image_model(model_in);
+    let size = resolve_openai_image_size(&image_model, resolution);
+
+    tracing::info!(
+        job_id = %row.id,
+        kind = %row.kind,
+        item_count = items.len(),
+        image_model = %image_model,
+        size = %size,
+        "asset batch-generate: images API per item"
+    );
+
+    let ctx = AssetImageGenCtx {
+        cfg,
+        http_client: &state.http_client,
+        pool,
+        job_id,
+        owner: row.owner_user_id,
+        request_model: model_in,
+        image_model: image_model.as_str(),
+        size,
+    };
+
+    let mut out = Vec::with_capacity(items.len());
+    for item in items {
+        if generation_job_is_cancelled(pool, job_id).await? {
+            return Err(JobRunError::Cancelled);
+        }
+
+        let asset_legacy_id = item
+            .get("asset_legacy_id")
+            .and_then(|x| x.as_i64())
+            .and_then(|n| i32::try_from(n).ok())
+            .ok_or_else(|| JobRunError::Failed("item missing asset_legacy_id".into()))?;
+        let name = item.get("name").and_then(|x| x.as_str()).unwrap_or("");
+        let prompt = item
+            .get("prompt")
+            .and_then(|x| x.as_str())
+            .ok_or_else(|| JobRunError::Failed("item missing prompt".into()))?;
+
+        let one =
+            generate_and_store_asset_image(&ctx, project_legacy_id, asset_legacy_id, name, prompt)
+                .await?;
+        out.push(one);
+    }
+
+    Ok(json!({
+        "source": "assets-generate.batch-generate",
+        "project_legacy_id": project_legacy_id,
+        "image_model": image_model,
+        "size": size,
         "items": out,
     }))
 }
