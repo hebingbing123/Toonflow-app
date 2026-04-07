@@ -83,6 +83,10 @@ pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
 /// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
 pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
+/// Video generation (**`POST …/production/workbench/generate-video`**); worker generates video from storyboard items.
+pub const JOB_KIND_VIDEO_GENERATE: &str = "video.generate";
+/// Video export (**`POST …/production/export-image`** export as video); worker exports video file.
+pub const JOB_KIND_VIDEO_EXPORT: &str = "video.export";
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
 pub async fn enqueue_generation_job(

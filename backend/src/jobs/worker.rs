@@ -22,7 +22,8 @@ use crate::usage;
 use super::{
     envelope_generation_job_updated, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
     JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
-    JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+    JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_VIDEO_EXPORT,
+    JOB_KIND_VIDEO_GENERATE,
 };
 
 fn worker_id_label() -> String {
@@ -195,6 +196,12 @@ async fn execute_kind(
         k if k == JOB_KIND_ASSET_POLISH_BATCH => run_asset_polish_batch(state, pool, id, row).await,
         k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => Err(JobRunError::Failed(
             "vendor modelTest live probe is not implemented yet".into(),
+        )),
+        k if k == JOB_KIND_VIDEO_GENERATE => Err(JobRunError::Failed(
+            "video generation is not implemented yet; video pipeline pending".into(),
+        )),
+        k if k == JOB_KIND_VIDEO_EXPORT => Err(JobRunError::Failed(
+            "video export is not implemented yet; video pipeline pending".into(),
         )),
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
