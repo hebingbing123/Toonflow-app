@@ -7448,6 +7448,127 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
 
 
+  /api/v1/settings/vendors/credential:
+    post:
+      tags: [settings]
+      summary: Store vendor API credential (encrypted)
+      operationId: storeVendorCredentialV1
+      description: |
+        Store encrypted API key/secret/token for a vendor.
+        Requires TOONFLOW_VENDOR_CREDENTIAL_KEY env to be set.
+        Returns key hint for identification (e.g., "...1234").
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoreVendorCredentialBody"
+      responses:
+        "200":
+          description: Credential stored successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorCredentialResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "501":
+          description: Encryption not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/settings/vendors/credential/{vendor_id}:
+    get:
+      tags: [settings]
+      summary: Get vendor credential metadata
+      operationId: getVendorCredentialV1
+      description: |
+        Returns credential metadata including key hint.
+        Does NOT return the actual API key (server-side only).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Credential metadata retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorCredentialResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Credential not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [settings]
+      summary: Delete vendor credential
+      operationId: deleteVendorCredentialV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Credential deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vendorId:
+                    type: string
+                  message:
+                    type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Credential not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/novel-events:
     get:
       tags: [novel-events]
@@ -10898,3 +11019,37 @@ components:
             retry_after_ms:
               type: integer
               description: Suggested backoff in milliseconds (mirror `Retry-After` when present)
+
+    StoreVendorCredentialBody:
+      type: object
+      required: [vendorId]
+      additionalProperties: false
+      properties:
+        vendorId:
+          type: string
+          description: Vendor identifier from catalog
+        apiKey:
+          type: string
+          description: API key to encrypt and store
+        apiSecret:
+          type: string
+          description: API secret to encrypt and store
+        apiToken:
+          type: string
+          description: API token to encrypt and store
+
+    VendorCredentialResponse:
+      type: object
+      required: [vendorId, hasSecret, hasToken, message]
+      properties:
+        vendorId:
+          type: string
+        keyHint:
+          type: string
+          description: Last 4 characters of API key for identification (e.g., "...1234")
+        hasSecret:
+          type: boolean
+        hasToken:
+          type: boolean
+        message:
+          type: string
