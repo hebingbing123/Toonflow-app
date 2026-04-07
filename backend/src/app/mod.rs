@@ -6445,7 +6445,7 @@ mod pg_contract_tests {
         let (status, _) = read_json_response(res).await;
         assert_eq!(status, StatusCode::BAD_REQUEST, "empty shotId should fail");
 
-        // Test stub endpoint returns 501
+        // Test workbench/get-video-list (implemented; empty list is fine)
         let res = app
             .clone()
             .oneshot(
@@ -6461,12 +6461,8 @@ mod pg_contract_tests {
             .await
             .unwrap();
         let (status, body) = read_json_response(res).await;
-        assert_eq!(
-            status,
-            StatusCode::NOT_IMPLEMENTED,
-            "stub should return 501"
-        );
-        assert_eq!(body["code"].as_str(), Some("not_implemented"));
+        assert_eq!(status, StatusCode::OK, "get-video-list should return 200");
+        assert_eq!(body["total"].as_i64(), Some(0));
 
         // Cleanup
         let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")

@@ -496,7 +496,7 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prod)) {
         setState(() {
           _error =
-              'POST production/get-production-data expected 200/501/503, got $prod';
+              'POST production/get-production-data expected 200/404/503, got $prod';
           _loadingModelsCatalog = false;
         });
         return;
@@ -681,7 +681,7 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prFlow)) {
         setState(() {
           _error =
-              'POST production/get-flow-data expected 200/501/503, got $prFlow';
+              'POST production/get-flow-data expected 200/404/503, got $prFlow';
           _loadingModelsCatalog = false;
         });
         return;
@@ -695,7 +695,7 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prSave)) {
         setState(() {
           _error =
-              'POST production/save-flow-data expected 200/501/503, got $prSave';
+              'POST production/save-flow-data expected 200/404/503, got $prSave';
           _loadingModelsCatalog = false;
         });
         return;
@@ -718,7 +718,7 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prVid)) {
         setState(() {
           _error =
-              'POST production/workbench/generate-video expected 200/501/503, got $prVid';
+              'POST production/workbench/generate-video expected 200/404/503, got $prVid';
           _loadingModelsCatalog = false;
         });
         return;
@@ -731,7 +731,7 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prPoll)) {
         setState(() {
           _error =
-              'POST production/storyboard/polling-image expected 200/501/503, got $prPoll';
+              'POST production/storyboard/polling-image expected 200/404/503, got $prPoll';
           _loadingModelsCatalog = false;
         });
         return;
@@ -746,44 +746,125 @@ extension _HomePageSystemProbesController on _HomePageState {
       if (!_productionProbeOk(prExp)) {
         setState(() {
           _error =
-              'POST production/export-image expected 200/501/503, got $prExp';
+              'POST production/export-image expected 200/404/503, got $prExp';
           _loadingModelsCatalog = false;
         });
         return;
       }
-      const productionLooseStubPaths = <String>[
-        '/api/v1/production/assets/batch-generate-assets-image',
-        '/api/v1/production/assets/delete-assets-derivative',
-        '/api/v1/production/assets/get-assets-data',
-        '/api/v1/production/assets/polling-image',
-        '/api/v1/production/assets/update-assets-url',
-        '/api/v1/production/edit-image/generate-flow-image',
-        '/api/v1/production/edit-image/get-image-default-model',
-        '/api/v1/production/edit-image/get-image-flow',
-        '/api/v1/production/edit-image/save-image-flow',
-        '/api/v1/production/edit-image/update-image-flow',
-        '/api/v1/production/get-storyboard-data',
-        '/api/v1/production/storyboard/add',
-        '/api/v1/production/storyboard/batch-add-info',
-        '/api/v1/production/storyboard/batch-generate-image',
-        '/api/v1/production/storyboard/down-preview-image',
-        '/api/v1/production/storyboard/edit-info',
-        '/api/v1/production/storyboard/get-data',
-        '/api/v1/production/storyboard/preview-image',
-        '/api/v1/production/storyboard/remove-frame',
-        '/api/v1/production/storyboard/update-url',
-        '/api/v1/production/workbench/add-track',
-        '/api/v1/production/workbench/delete-track',
-        '/api/v1/production/workbench/delete-video',
-        '/api/v1/production/workbench/generate-video-prompt',
-        '/api/v1/production/workbench/get-generate-data',
-        '/api/v1/production/workbench/get-video-list',
-        '/api/v1/production/workbench/get-video-model-detail',
-        '/api/v1/production/workbench/select-video',
-      ];
+      const productionBodies = <String, Map<String, dynamic>>{
+        '/api/v1/production/assets/batch-generate-assets-image': {
+          'projectId': 1,
+          'scriptId': 1,
+          'assetIds': [1],
+        },
+        '/api/v1/production/assets/delete-assets-derivative': {
+          'projectId': 1,
+          'assetIds': [1],
+        },
+        '/api/v1/production/assets/get-assets-data': {'projectId': 1},
+        '/api/v1/production/assets/polling-image': {
+          'projectId': 1,
+          'assetIds': [1],
+        },
+        '/api/v1/production/assets/update-assets-url': {
+          'projectId': 1,
+          'assetId': 1,
+          'imageUrl': 'https://example.com/probe.png',
+        },
+        '/api/v1/production/edit-image/generate-flow-image': {
+          'flowId': 'img-flow-001',
+          'prompt': 'probe',
+        },
+        '/api/v1/production/edit-image/get-image-default-model': {},
+        '/api/v1/production/edit-image/get-image-flow': {},
+        '/api/v1/production/edit-image/save-image-flow': {
+          'flowId': 'img-flow-001',
+          'steps': [
+            {'stepId': 'upload', 'status': 'pending'},
+          ],
+        },
+        '/api/v1/production/edit-image/update-image-flow': {
+          'flowId': 'img-flow-001',
+          'stepId': 'upload',
+          'updates': {},
+        },
+        '/api/v1/production/get-storyboard-data': {
+          'projectId': 1,
+          'scriptId': 1,
+        },
+        '/api/v1/production/storyboard/add': {
+          'projectId': 1,
+          'scriptId': 1,
+          'prompt': 'probe storyboard',
+        },
+        '/api/v1/production/storyboard/batch-add-info': {
+          'projectId': 1,
+          'scriptId': 1,
+          'storyboards': [
+            {'prompt': 'probe storyboard'}
+          ],
+        },
+        '/api/v1/production/storyboard/batch-generate-image': {
+          'projectId': 1,
+          'scriptId': 1,
+          'items': [
+            {'storyboardId': 1, 'prompt': 'probe storyboard'}
+          ],
+        },
+        '/api/v1/production/storyboard/down-preview-image': {
+          'storyboardId': 1,
+        },
+        '/api/v1/production/storyboard/edit-info': {
+          'storyboardId': 1,
+          'prompt': 'probe storyboard',
+        },
+        '/api/v1/production/storyboard/get-data': {'storyboardId': 1},
+        '/api/v1/production/storyboard/preview-image': {'storyboardId': 1},
+        '/api/v1/production/storyboard/remove-frame': {'storyboardId': 1},
+        '/api/v1/production/storyboard/update-url': {
+          'storyboardId': 1,
+          'imageUrl': 'https://example.com/probe.png',
+        },
+        '/api/v1/production/workbench/add-track': {
+          'projectId': 1,
+          'scriptId': 1,
+          'trackName': 'probe',
+        },
+        '/api/v1/production/workbench/delete-track': {
+          'projectId': 1,
+          'scriptId': 1,
+          'trackId': 1,
+        },
+        '/api/v1/production/workbench/delete-video': {
+          'projectId': 1,
+          'scriptId': 1,
+          'storyboardId': 1,
+        },
+        '/api/v1/production/workbench/generate-video-prompt': {
+          'projectId': 1,
+          'scriptId': 1,
+        },
+        '/api/v1/production/workbench/get-generate-data': {
+          'projectId': 1,
+          'scriptId': 1,
+        },
+        '/api/v1/production/workbench/get-video-list': {'projectId': 1},
+        '/api/v1/production/workbench/get-video-model-detail': {},
+        '/api/v1/production/workbench/select-video': {
+          'projectId': 1,
+          'scriptId': 1,
+          'storyboardId': 1,
+          'videoUrl': 'https://example.com/probe.mp4',
+        },
+      };
       const prodPrefix = '/api/v1/production/';
-      for (final path in productionLooseStubPaths) {
-        final code = await postProductionLegacyJsonStubV1(token, path);
+      for (final entry in productionBodies.entries) {
+        final path = entry.key;
+        final code = await postProductionLegacyJsonStubV1(
+          token,
+          path,
+          body: entry.value,
+        );
         if (!mounted) return;
         if (!_productionProbeOk(code)) {
           final rel = path.startsWith(prodPrefix)
@@ -791,7 +872,7 @@ extension _HomePageSystemProbesController on _HomePageState {
               : path;
           setState(() {
             _error =
-                'POST production/$rel loose stub expected 200/501/503, got $code';
+                'POST production/$rel expected 200/404/503, got $code';
             _loadingModelsCatalog = false;
           });
           return;
@@ -810,7 +891,7 @@ extension _HomePageSystemProbesController on _HomePageState {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/loose ${productionLooseStubPaths.length}×(200/501/503)';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/implemented ${productionBodies.length}×(200/404/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });

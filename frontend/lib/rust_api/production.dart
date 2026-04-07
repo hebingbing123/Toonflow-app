@@ -1174,7 +1174,7 @@ Future<SelectVideoResponse> postWorkbenchSelectVideoV1(
 /// OpenAPI **`VideoModelDetail`**.
 class VideoModelDetail {
   const VideoModelDetail({
-    required this.id,
+    required this.modelId,
     required this.modelName,
     required this.provider,
     required this.maxDuration,
@@ -1182,7 +1182,7 @@ class VideoModelDetail {
     required this.features,
   });
 
-  final String id;
+  final String modelId;
   final String modelName;
   final String provider;
   final int maxDuration;
@@ -1191,7 +1191,7 @@ class VideoModelDetail {
 
   factory VideoModelDetail.fromJson(Map<String, dynamic> json) {
     return VideoModelDetail(
-      id: json['id'] as String,
+      modelId: json['modelId'] as String,
       modelName: json['modelName'] as String,
       provider: json['provider'] as String,
       maxDuration: (json['maxDuration'] as num).toInt(),
@@ -1287,21 +1287,27 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
 /// OpenAPI **`GetGenerateDataResponse`**.
 class GetGenerateDataResponse {
   const GetGenerateDataResponse({
-    required this.videos,
-    required this.activeJobs,
+    required this.projectId,
+    required this.scriptId,
+    required this.generatedVideos,
+    required this.generatingJobs,
   });
 
-  final List<VideoItem> videos;
-  final List<JobRow> activeJobs;
+  final int projectId;
+  final int scriptId;
+  final List<VideoItem> generatedVideos;
+  final List<JobRow> generatingJobs;
 
   factory GetGenerateDataResponse.fromJson(Map<String, dynamic> json) {
-    final rawVideos = json['videos'] as List<dynamic>? ?? const [];
-    final rawJobs = json['activeJobs'] as List<dynamic>? ?? const [];
+    final rawVideos = json['generatedVideos'] as List<dynamic>? ?? const [];
+    final rawJobs = json['generatingJobs'] as List<dynamic>? ?? const [];
     return GetGenerateDataResponse(
-      videos: rawVideos
+      projectId: (json['projectId'] as num).toInt(),
+      scriptId: (json['scriptId'] as num).toInt(),
+      generatedVideos: rawVideos
           .map((e) => VideoItem.fromJson(e as Map<String, dynamic>))
           .toList(),
-      activeJobs: rawJobs
+      generatingJobs: rawJobs
           .map((e) => JobRow.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -1427,10 +1433,7 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
   required int projectId,
   required int scriptId,
   required String prompt,
-  String? duration,
-  String? state,
-  int? trackId,
-  int? flowId,
+  int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/add');
   final body = <String, dynamic>{
@@ -1439,9 +1442,6 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
     'prompt': prompt,
   };
   if (duration != null) body['duration'] = duration;
-  if (state != null) body['state'] = state;
-  if (trackId != null) body['trackId'] = trackId;
-  if (flowId != null) body['flowId'] = flowId;
   final res = await http
       .post(
         uri,
@@ -1466,17 +1466,31 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
 class StoryboardBatchAddInfoResponse {
   const StoryboardBatchAddInfoResponse({
     required this.added,
-    required this.message,
+    required this.storyboardIds,
   });
 
   final int added;
-  final String message;
+  final List<int> storyboardIds;
 
   factory StoryboardBatchAddInfoResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['storyboardIds'] as List<dynamic>? ?? const [];
     return StoryboardBatchAddInfoResponse(
       added: (json['added'] as num).toInt(),
-      message: json['message'] as String,
+      storyboardIds: raw.map((e) => (e as num).toInt()).toList(),
     );
+  }
+}
+
+class StoryboardBatchAddInfoItem {
+  const StoryboardBatchAddInfoItem({required this.prompt, this.duration});
+
+  final String prompt;
+  final int? duration;
+
+  Map<String, dynamic> toJson() {
+    final body = <String, dynamic>{'prompt': prompt};
+    if (duration != null) body['duration'] = duration;
+    return body;
   }
 }
 
@@ -1485,7 +1499,7 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
   String accessToken, {
   required int projectId,
   required int scriptId,
-  required List<String> prompts,
+  required List<StoryboardBatchAddInfoItem> storyboards,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/batch-add-info',
@@ -1500,7 +1514,7 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
         body: jsonEncode({
           'projectId': projectId,
           'scriptId': scriptId,
-          'prompts': prompts,
+          'storyboards': storyboards.map((e) => e.toJson()).toList(),
         }),
       )
       .timeout(const Duration(seconds: 15));
@@ -1517,22 +1531,16 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
 /// `POST /api/v1/production/storyboard/edit-info` — OpenAPI `postStoryboardEditInfoV1`.
 Future<int> postStoryboardEditInfoV1(
   String accessToken, {
-  required int projectId,
-  required int scriptId,
   required int storyboardId,
   required String prompt,
-  String? duration,
-  String? state,
+  int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/edit-info');
   final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
     'storyboardId': storyboardId,
     'prompt': prompt,
   };
   if (duration != null) body['duration'] = duration;
-  if (state != null) body['state'] = state;
   final res = await http
       .post(
         uri,
@@ -1578,8 +1586,6 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
 /// `POST /api/v1/production/storyboard/remove-frame` — OpenAPI `postStoryboardRemoveFrameV1`.
 Future<int> postStoryboardRemoveFrameV1(
   String accessToken, {
-  required int projectId,
-  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
@@ -1592,11 +1598,7 @@ Future<int> postStoryboardRemoveFrameV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode({'storyboardId': storyboardId}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -1605,13 +1607,31 @@ Future<int> postStoryboardRemoveFrameV1(
   return res.statusCode;
 }
 
+class UpdateStoryboardUrlResponseV1 {
+  const UpdateStoryboardUrlResponseV1({
+    required this.storyboardId,
+    required this.imageUrl,
+    required this.message,
+  });
+
+  final int storyboardId;
+  final String imageUrl;
+  final String message;
+
+  factory UpdateStoryboardUrlResponseV1.fromJson(Map<String, dynamic> json) {
+    return UpdateStoryboardUrlResponseV1(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      imageUrl: json['imageUrl'] as String,
+      message: json['message'] as String,
+    );
+  }
+}
+
 /// `POST /api/v1/production/storyboard/update-url` — OpenAPI `postStoryboardUpdateUrlV1`.
-Future<int> postStoryboardUpdateUrlV1(
+Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
   String accessToken, {
-  required int projectId,
-  required int scriptId,
   required int storyboardId,
-  required String url,
+  required String imageUrl,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/update-url');
   final res = await http
@@ -1622,26 +1642,45 @@ Future<int> postStoryboardUpdateUrlV1(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
           'storyboardId': storyboardId,
-          'url': url,
+          'imageUrl': imageUrl,
         }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return res.statusCode;
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return UpdateStoryboardUrlResponseV1.fromJson(map);
+}
+
+class PreviewImageResponseV1 {
+  const PreviewImageResponseV1({
+    required this.storyboardId,
+    this.imageUrl,
+    this.prompt,
+  });
+
+  final int storyboardId;
+  final String? imageUrl;
+  final String? prompt;
+
+  factory PreviewImageResponseV1.fromJson(Map<String, dynamic> json) {
+    return PreviewImageResponseV1(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      imageUrl: json['imageUrl'] as String?,
+      prompt: json['prompt'] as String?,
+    );
+  }
 }
 
 /// `POST /api/v1/production/storyboard/preview-image` — OpenAPI `postStoryboardPreviewImageV1`.
-Future<int> postStoryboardPreviewImageV1(
+Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
   String accessToken, {
-  required int projectId,
-  required int scriptId,
   required int storyboardId,
-  required String imageUrl,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/preview-image',
@@ -1653,25 +1692,42 @@ Future<int> postStoryboardPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-          'imageUrl': imageUrl,
-        }),
+        body: jsonEncode({'storyboardId': storyboardId}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return res.statusCode;
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return PreviewImageResponseV1.fromJson(map);
+}
+
+class DownPreviewImageResponseV1 {
+  const DownPreviewImageResponseV1({
+    required this.storyboardId,
+    this.previewUrl,
+    required this.message,
+  });
+
+  final int storyboardId;
+  final String? previewUrl;
+  final String message;
+
+  factory DownPreviewImageResponseV1.fromJson(Map<String, dynamic> json) {
+    return DownPreviewImageResponseV1(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      previewUrl: json['previewUrl'] as String?,
+      message: json['message'] as String,
+    );
+  }
 }
 
 /// `POST /api/v1/production/storyboard/down-preview-image` — OpenAPI `postStoryboardDownPreviewImageV1`.
-Future<int> postStoryboardDownPreviewImageV1(
+Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
   String accessToken, {
-  required int projectId,
-  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
@@ -1684,17 +1740,17 @@ Future<int> postStoryboardDownPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-        }),
+        body: jsonEncode({'storyboardId': storyboardId}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
-  return res.statusCode;
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return DownPreviewImageResponseV1.fromJson(map);
 }
 
 /// `POST /api/v1/production/get-storyboard-data` — OpenAPI `postProductionGetStoryboardDataV1`.

@@ -34,9 +34,9 @@ bool _assetsGenerateSingleJobProbeOk(int status) =>
 bool _vendorModelTestProbeOk(int status) =>
     status == 200 || status == 429 || status == 503;
 
-/// Legacy production probes: allow implemented **200**, placeholder **501**, or **503** when DB-gated routes run without pool.
+/// Production probes: allow implemented **200**, missing owned data **404**, or **503** when DB-gated routes run without pool.
 bool _productionProbeOk(int status) =>
-    status == 200 || status == 501 || status == 503;
+    status == 200 || status == 404 || status == 503;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

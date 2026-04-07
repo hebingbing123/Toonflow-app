@@ -78,7 +78,7 @@ tags:
   - name: storyboards
     description: Storyboards under owned scripts (Postgres + RLS)
   - name: production
-    description: Legacy Electron production workbench (video timeline, flow save); most routes are stubs until jobs + object storage
+    description: Legacy Electron production workbench parity over Postgres-backed storyboards, assets, edit-image flow, and video workbench routes
   - name: novels
     description: Novel source chapters per project (`app_novel`; Postgres + RLS)
   - name: art_styles
