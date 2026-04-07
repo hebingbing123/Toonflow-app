@@ -15,6 +15,7 @@ use sqlx::FromRow;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH};
 use crate::state::AppState;
 
 fn not_implemented() -> ApiError {
@@ -409,6 +410,315 @@ async fn post_export_image(
     Ok(StatusCode::OK.into_response())
 }
 
+// =============================================================================
+// Batch Generate Image (Wave E)
+// =============================================================================
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BatchGenerateImageItem {
+    storyboard_id: i32,
+    prompt: String,
+    #[serde(default)]
+    negative_prompt: Option<String>,
+    #[serde(default)]
+    model: Option<String>,
+    #[serde(default)]
+    resolution: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BatchGenerateImageBody {
+    project_id: i32,
+    script_id: i32,
+    items: Vec<BatchGenerateImageItem>,
+    #[serde(default)]
+    model: Option<String>,
+    #[serde(default)]
+    resolution: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct BatchGenerateImageResponse {
+    enqueued: Vec<JobRow>,
+    total: usize,
+}
+
+async fn post_storyboard_batch_generate_image(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<BatchGenerateImageBody>,
+) -> Result<JsonResponse<BatchGenerateImageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and scriptId must be positive integers".into(),
+        ));
+    }
+    if body.items.is_empty() {
+        return Err(ApiError::BadRequest("items must not be empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Verify ownership
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    // Enqueue generation jobs for each storyboard
+    let default_model = body.model.as_deref().unwrap_or("dall-e-3");
+    let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
+
+    let mut enqueued = Vec::with_capacity(body.items.len());
+    for item in &body.items {
+        let payload = serde_json::json!({
+            "source": "production.storyboard.batch-generate-image",
+            "project_legacy_id": body.project_id,
+            "script_id": body.script_id,
+            "storyboard_id": item.storyboard_id,
+            "prompt": item.prompt,
+            "negative_prompt": item.negative_prompt,
+            "model": item.model.as_deref().unwrap_or(default_model),
+            "resolution": item.resolution.as_deref().unwrap_or(default_resolution),
+        });
+
+        let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
+        enqueued.push(row);
+    }
+
+    let total = enqueued.len();
+    Ok(JsonResponse(BatchGenerateImageResponse { enqueued, total }))
+}
+
+// =============================================================================
+// Video List (Wave E)
+// =============================================================================
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct VideoItem {
+    id: i32,
+    #[sqlx(rename = "legacy_script_id")]
+    script_id: Option<i32>,
+    prompt: Option<String>,
+    #[sqlx(rename = "file_path")]
+    video_url: Option<String>,
+    duration: Option<String>,
+    state: Option<String>,
+    track_id: Option<i32>,
+    created_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct VideoListResponse {
+    videos: Vec<VideoItem>,
+    total: i64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct VideoListBody {
+    project_id: i32,
+    #[serde(default)]
+    track_id: Option<i32>,
+    #[serde(default)]
+    limit: Option<i64>,
+    #[serde(default)]
+    offset: Option<i64>,
+}
+
+async fn post_workbench_get_video_list(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<VideoListBody>,
+) -> Result<JsonResponse<VideoListResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId must be a positive integer".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
+    let offset = body.offset.unwrap_or(0).max(0);
+
+    // Query videos (storyboards with video file_path)
+    let videos = sqlx::query_as::<_, VideoItem>(
+        r#"
+        SELECT
+          sb.legacy_id AS id,
+          sc.legacy_id AS script_id,
+          sb.prompt,
+          sb.file_path AS video_url,
+          sb.duration,
+          sb.state,
+          sb.track_id,
+          sb.created_at
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND sb.file_path IS NOT NULL
+          AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
+          AND ($3::int4 IS NULL OR sb.track_id = $3)
+        ORDER BY sb.created_at DESC
+        LIMIT $4 OFFSET $5
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.track_id)
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    // Get total count
+    let total: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND sb.file_path IS NOT NULL
+          AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
+          AND ($3::int4 IS NULL OR sb.track_id = $3)
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.track_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(JsonResponse(VideoListResponse { videos, total }))
+}
+
+// =============================================================================
+// Video Track Management (Wave E)
+// =============================================================================
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AddTrackBody {
+    project_id: i32,
+    script_id: i32,
+    track_name: String,
+    #[serde(default)]
+    #[allow(dead_code)]
+    track_type: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AddTrackResponse {
+    track_id: i32,
+    track_name: String,
+    message: &'static str,
+}
+
+async fn post_workbench_add_track(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<AddTrackBody>,
+) -> Result<JsonResponse<AddTrackResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and scriptId must be positive integers".into(),
+        ));
+    }
+    if body.track_name.trim().is_empty() {
+        return Err(ApiError::BadRequest("trackName must not be empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Verify ownership
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    // Get next track_id (simplified - in production would use a tracks table)
+    let next_track_id: i32 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(MAX(track_id), 0) + 1
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND sc.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(JsonResponse(AddTrackResponse {
+        track_id: next_track_id,
+        track_name: body.track_name.trim().to_string(),
+        message: "Track added (virtual track, assign storyboards to this track_id)",
+    }))
+}
+
 const LEGACY_JSON_STUB_PATHS: &[&str] = &[
     "/api/v1/production/assets/batch-generate-assets-image",
     "/api/v1/production/assets/delete-assets-derivative",
@@ -423,19 +733,16 @@ const LEGACY_JSON_STUB_PATHS: &[&str] = &[
     "/api/v1/production/get-storyboard-data",
     "/api/v1/production/storyboard/add",
     "/api/v1/production/storyboard/batch-add-info",
-    "/api/v1/production/storyboard/batch-generate-image",
     "/api/v1/production/storyboard/down-preview-image",
     "/api/v1/production/storyboard/edit-info",
     "/api/v1/production/storyboard/get-data",
     "/api/v1/production/storyboard/preview-image",
     "/api/v1/production/storyboard/remove-frame",
     "/api/v1/production/storyboard/update-url",
-    "/api/v1/production/workbench/add-track",
     "/api/v1/production/workbench/delete-track",
     "/api/v1/production/workbench/delete-video",
     "/api/v1/production/workbench/generate-video-prompt",
     "/api/v1/production/workbench/get-generate-data",
-    "/api/v1/production/workbench/get-video-list",
     "/api/v1/production/workbench/get-video-model-detail",
     "/api/v1/production/workbench/select-video",
 ];
@@ -459,7 +766,19 @@ pub fn router() -> Router<AppState> {
             "/api/v1/production/storyboard/polling-image",
             post(post_storyboard_polling_image),
         )
-        .route("/api/v1/production/export-image", post(post_export_image));
+        .route("/api/v1/production/export-image", post(post_export_image))
+        .route(
+            "/api/v1/production/storyboard/batch-generate-image",
+            post(post_storyboard_batch_generate_image),
+        )
+        .route(
+            "/api/v1/production/workbench/get-video-list",
+            post(post_workbench_get_video_list),
+        )
+        .route(
+            "/api/v1/production/workbench/add-track",
+            post(post_workbench_add_track),
+        );
     for path in LEGACY_JSON_STUB_PATHS {
         r = r.route(path, post(post_production_legacy_json_stub));
     }
