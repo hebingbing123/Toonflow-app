@@ -4893,6 +4893,11 @@ mod pg_contract_tests {
             )
             .await
             .unwrap();
+        let cache_control = res
+            .headers()
+            .get(header::CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_string);
         let (status, body, ct) = read_bytes_response(res, 512 * 1024).await;
         assert_eq!(status, StatusCode::OK, "file GET");
         assert_eq!(body, png);
@@ -4900,6 +4905,11 @@ mod pg_contract_tests {
             ct.as_deref()
                 .is_some_and(|s| s.to_lowercase().starts_with("image/png")),
             "content-type: {ct:?}"
+        );
+        assert_eq!(
+            cache_control.as_deref(),
+            Some("private, max-age=300"),
+            "cache-control: {cache_control:?}"
         );
 
         let res = app
