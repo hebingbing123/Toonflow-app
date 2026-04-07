@@ -144,3 +144,44 @@ pub fn router() -> Router<AppState> {
             axum::routing::post(post_clear_agent_memories_legacy),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clear_agent_memories_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<ClearAgentMemoriesSettingsBody>(
+            r#"{"projectId":1,"agentType":"script","extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn clear_agent_memories_body_accepts_valid() {
+        let b: ClearAgentMemoriesSettingsBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"script"}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, 1);
+        assert_eq!(b.agent_type, "script");
+        assert_eq!(b.episodes_id, None);
+    }
+
+    #[test]
+    fn clear_agent_memories_body_accepts_with_episodes() {
+        let b: ClearAgentMemoriesSettingsBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"script","episodesId":5}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, 1);
+        assert_eq!(b.agent_type, "script");
+        assert_eq!(b.episodes_id, Some(5));
+    }
+
+    #[test]
+    fn memory_config_saved_response_has_expected_message() {
+        let resp = MemoryConfigSavedResponse { message: "保存设置成功" };
+        assert_eq!(resp.message, "保存设置成功");
+    }
+}
