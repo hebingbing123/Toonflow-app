@@ -274,6 +274,7 @@ extension _HomePageSkillsHarnessController on _HomePageState {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
               _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
@@ -337,6 +338,7 @@ extension _HomePageSkillsHarnessController on _HomePageState {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
               _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
@@ -399,6 +401,7 @@ extension _HomePageSkillsHarnessController on _HomePageState {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
               _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
@@ -465,6 +468,7 @@ extension _HomePageSkillsHarnessController on _HomePageState {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
               _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });
@@ -489,6 +493,65 @@ extension _HomePageSkillsHarnessController on _HomePageState {
         setState(() {
           _error = e.toString();
           _loadingWsSkillsRead = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _testHarnessWasmProbeWebSocket() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+
+    _wsSub?.cancel();
+    await _ws?.sink.close();
+
+    setState(() {
+      _loadingWsWasmProbe = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
+      final channel = WebSocketChannel.connect(uri);
+      _ws = channel;
+
+      _wsSub = channel.stream.listen(
+        (message) => _appendWsLog(message.toString()),
+        onError: (Object e) {
+          if (mounted) setState(() => _error = 'ws: $e');
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _loadingWs = false;
+              _loadingWsHarness = false;
+              _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
+              _loadingWsHarnessAgent = false;
+              _loadingWsSkillsRead = false;
+            });
+          }
+        },
+      );
+
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': 'wasm.probe',
+            'arguments': <String, Object?>{},
+          },
+        }),
+      );
+
+      if (mounted) setState(() => _loadingWsWasmProbe = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loadingWsWasmProbe = false;
         });
       }
     }
@@ -523,6 +586,7 @@ extension _HomePageSkillsHarnessController on _HomePageState {
               _loadingWs = false;
               _loadingWsHarness = false;
               _loadingWsIsolatedEcho = false;
+              _loadingWsWasmProbe = false;
               _loadingWsHarnessAgent = false;
               _loadingWsSkillsRead = false;
             });

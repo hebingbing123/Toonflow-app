@@ -88,6 +88,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
   bool _loadingWsIsolatedEcho = false;
+  bool _loadingWsWasmProbe = false;
   bool _loadingWsHarnessAgent = false;
   bool _loadingWsSkillsRead = false;
   final List<String> _wsLog = [];
@@ -162,6 +163,7 @@ class _HomePageState extends State<HomePage> {
       _loadingWs ||
       _loadingWsHarness ||
       _loadingWsIsolatedEcho ||
+      _loadingWsWasmProbe ||
       _loadingWsHarnessAgent ||
       _loadingWsSkillsRead;
 
@@ -1397,6 +1399,7 @@ class _HomePageState extends State<HomePage> {
               loadingWs: _loadingWs,
               loadingWsHarness: _loadingWsHarness,
               loadingWsIsolatedEcho: _loadingWsIsolatedEcho,
+              loadingWsWasmProbe: _loadingWsWasmProbe,
               loadingWsSkillsRead: _loadingWsSkillsRead,
               loadingWsHarnessAgent: _loadingWsHarnessAgent,
               harnessToolsLine: _harnessToolsLine,
@@ -1417,6 +1420,7 @@ class _HomePageState extends State<HomePage> {
               onTestHarnessToolWebSocket: _testHarnessToolWebSocket,
               onTestHarnessIsolatedEchoWebSocket:
                   _testHarnessIsolatedEchoWebSocket,
+              onTestHarnessWasmProbeWebSocket: _testHarnessWasmProbeWebSocket,
               onTestHarnessSkillsReadWebSocket: _testHarnessSkillsReadWebSocket,
               onTestHarnessAgentRunWebSocket: _testHarnessAgentRunWebSocket,
             ),

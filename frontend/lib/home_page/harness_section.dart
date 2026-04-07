@@ -14,6 +14,7 @@ class HarnessSection extends StatelessWidget {
     required this.loadingWs,
     required this.loadingWsHarness,
     required this.loadingWsIsolatedEcho,
+    required this.loadingWsWasmProbe,
     required this.loadingWsSkillsRead,
     required this.loadingWsHarnessAgent,
     required this.harnessToolsLine,
@@ -33,6 +34,7 @@ class HarnessSection extends StatelessWidget {
     required this.onTestWebSocket,
     required this.onTestHarnessToolWebSocket,
     required this.onTestHarnessIsolatedEchoWebSocket,
+    required this.onTestHarnessWasmProbeWebSocket,
     required this.onTestHarnessSkillsReadWebSocket,
     required this.onTestHarnessAgentRunWebSocket,
   });
@@ -48,6 +50,7 @@ class HarnessSection extends StatelessWidget {
   final bool loadingWs;
   final bool loadingWsHarness;
   final bool loadingWsIsolatedEcho;
+  final bool loadingWsWasmProbe;
   final bool loadingWsSkillsRead;
   final bool loadingWsHarnessAgent;
   final String? harnessToolsLine;
@@ -67,6 +70,7 @@ class HarnessSection extends StatelessWidget {
   final VoidCallback onTestWebSocket;
   final VoidCallback onTestHarnessToolWebSocket;
   final VoidCallback onTestHarnessIsolatedEchoWebSocket;
+  final VoidCallback onTestHarnessWasmProbeWebSocket;
   final VoidCallback onTestHarnessSkillsReadWebSocket;
   final VoidCallback onTestHarnessAgentRunWebSocket;
 
@@ -193,6 +197,12 @@ class HarnessSection extends StatelessWidget {
                   : onTestHarnessIsolatedEchoWebSocket,
               child: Text(
                 loadingWsIsolatedEcho ? '…' : 'WS: isolated.echo (subprocess)',
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: wsProbesBusy ? null : onTestHarnessWasmProbeWebSocket,
+              child: Text(
+                loadingWsWasmProbe ? '…' : 'WS: wasm.probe (embedded)',
               ),
             ),
             FilledButton.tonal(
