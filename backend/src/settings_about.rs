@@ -101,3 +101,44 @@ pub fn router() -> Router<AppState> {
             post(post_download_app),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_update_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<CheckUpdateBody>(r#"{"source":"toonflow","extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn check_update_body_accepts_valid_source() {
+        let b: CheckUpdateBody = serde_json::from_str(r#"{"source":"toonflow"}"#).unwrap();
+        matches!(b.source, CheckUpdateSource::Toonflow);
+    }
+
+    #[test]
+    fn check_update_body_accepts_github_source() {
+        let b: CheckUpdateBody = serde_json::from_str(r#"{"source":"github"}"#).unwrap();
+        matches!(b.source, CheckUpdateSource::Github);
+    }
+
+    #[test]
+    fn download_app_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<DownloadAppBody>(
+            r#"{"url":"http://example.com","reinstall":true,"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn download_app_body_accepts_valid() {
+        let b: DownloadAppBody = serde_json::from_str(
+            r#"{"url":"http://example.com/app.zip","reinstall":false}"#,
+        )
+        .unwrap();
+        assert_eq!(b.url, "http://example.com/app.zip");
+        assert!(!b.reinstall);
+    }
+}
