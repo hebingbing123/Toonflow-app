@@ -42,7 +42,7 @@ info:
 
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`** (static, no Postgres). **`POST …/deploy-model`** and **`POST …/set-key`** validate bodies then **501** (no per-user deploy table / no API keys over HTTP).
 
-    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, then **501** **`not_implemented`** until **`o_agentWorkData`**-equivalent persistence exists (live flows use **Harness WS**).
+    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
     **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`**, **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** match legacy **`/api/assetsGenerate/*`** request bodies, then **501** **`not_implemented`** until **`app_generation_job`** + image providers are wired end-to-end.
 
@@ -3779,7 +3779,7 @@ paths:
       summary: Load script agent plan (legacy `getPlanData` parity)
       operationId: postScriptAgentGetPlanDataV1
       description: |
-        Bearer JWT. Validates legacy **`projectId`** + **`agentType: scriptAgent`**, then **501** **`not_implemented`** (no Postgres **`o_agentWorkData`** equivalent yet).
+        Bearer JWT. Validates legacy **`projectId`** + **`agentType: scriptAgent`**. Loads or creates **`app_script_agent_plan`** for the project; first visit may return flat **`data.storySkeleton`/`data.adaptationStrategy`** only; later responses nest **`data.data`** (JSON plan + **`script`** array from **`app_script`**) and **`data.id`** (plan row id).
       security:
         - bearerAuth: []
       requestBody:
@@ -3789,20 +3789,33 @@ paths:
             schema:
               $ref: "#/components/schemas/GetScriptAgentPlanBody"
       responses:
+        "200":
+          description: Legacy success envelope `{ code, data, message }` (`code` is JSON number 200)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400":
+          description: Invalid body (e.g. non-positive **`projectId`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented (use Harness WS for live agent)
+        "404":
+          description: Project not found for this user (unknown **`projectId`**)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -3814,7 +3827,7 @@ paths:
       summary: Save script agent plan and sync scripts (legacy `setPlanData` parity)
       operationId: postScriptAgentSetPlanDataV1
       description: |
-        Bearer JWT. Validates legacy body (**`data.storySkeleton`**, **`data.adaptationStrategy`**, optional **`data.script`** rows), then **501** **`not_implemented`**.
+        Bearer JWT. Upserts **`app_script_agent_plan`** (**`storySkeleton`/`adaptationStrategy`** only in JSON); for each **`data.script`** row with non-empty **`name`**, updates matching **`app_script`** by **`project_id`** + **`name`** or inserts a new row (new **`legacy_id`** under advisory lock).
       security:
         - bearerAuth: []
       requestBody:
@@ -3824,8 +3837,15 @@ paths:
             schema:
               $ref: "#/components/schemas/SetScriptAgentPlanBody"
       responses:
+        "200":
+          description: Legacy success envelope (`data` often `null`)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
         "400":
-          description: Unknown JSON fields or invalid body
+          description: Unknown JSON fields, invalid body, or empty script **`name`**
           content:
             application/json:
               schema:
@@ -3836,14 +3856,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "409":
+          description: Conflict (e.g. concurrent script **`legacy_id`** allocation)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -3855,7 +3881,7 @@ paths:
       summary: Patch agent work row by id (legacy `updateData` parity)
       operationId: postScriptAgentUpdateDataV1
       description: |
-        Bearer JWT. Validates **`id`** and **`data`** (**`storySkeleton`**, **`adaptationStrategy`**, **`script`** with **`id`** + **`content`**), then **501** **`not_implemented`**.
+        Bearer JWT. Updates **`app_script_agent_plan.plan_data`** JSON for row **`id`** owned by the caller (**`storySkeleton`**, **`adaptationStrategy`**, **`script`** snapshot with **`id`** + **`content`**). Does not sync **`app_script`** rows.
       security:
         - bearerAuth: []
       requestBody:
@@ -3865,8 +3891,15 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdateScriptAgentDataBody"
       responses:
+        "200":
+          description: Legacy success envelope (`data` is the string **`更新成功`**)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
         "400":
-          description: Unknown JSON fields or invalid body
+          description: Unknown JSON fields or invalid body (e.g. non-positive **`id`**)
           content:
             application/json:
               schema:
@@ -3877,14 +3910,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Plan row not found for this user
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:

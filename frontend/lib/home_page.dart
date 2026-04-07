@@ -8,6 +8,10 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'config.dart';
 import 'rust_api.dart';
 
+/// Script-agent REST hits Postgres; catalog probe allows 501 stub, 503 no pool, 404 missing project, or 200 OK.
+bool _scriptAgentCatalogProbeOk(int status) =>
+    status == 200 || status == 404 || status == 501 || status == 503;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -780,9 +784,10 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      if (sap != 501) {
+      if (!_scriptAgentCatalogProbeOk(sap)) {
         setState(() {
-          _error = 'POST script-agent/get-plan-data expected 501, got $sap';
+          _error =
+              'POST script-agent/get-plan-data expected 200/404/501/503, got $sap';
           _loadingModelsCatalog = false;
         });
         return;
@@ -917,20 +922,20 @@ class _HomePageState extends State<HomePage> {
       }
       final saSet = await postScriptAgentSetPlanDataV1(token, projectId: 1);
       if (!mounted) return;
-      if (saSet != 501) {
+      if (!_scriptAgentCatalogProbeOk(saSet)) {
         setState(() {
           _error =
-              'POST script-agent/set-plan-data expected 501, got $saSet';
+              'POST script-agent/set-plan-data expected 200/404/501/503, got $saSet';
           _loadingModelsCatalog = false;
         });
         return;
       }
       final saUpd = await postScriptAgentUpdateDataV1(token, id: 1);
       if (!mounted) return;
-      if (saUpd != 501) {
+      if (!_scriptAgentCatalogProbeOk(saUpd)) {
         setState(() {
           _error =
-              'POST script-agent/update-data expected 501, got $saUpd';
+              'POST script-agent/update-data expected 200/404/501/503, got $saUpd';
           _loadingModelsCatalog = false;
         });
         return;
