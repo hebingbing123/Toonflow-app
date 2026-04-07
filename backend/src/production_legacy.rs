@@ -465,3 +465,190 @@ pub fn router() -> Router<AppState> {
     }
     r
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn storyboard_id_list_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<StoryboardIdListBody>(r#"{"ids":[1,2],"extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn storyboard_id_list_body_accepts_valid() {
+        let b: StoryboardIdListBody =
+            serde_json::from_str(r#"{"ids":[1,2,3]}"#).unwrap();
+        assert_eq!(b.ids, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn get_flow_data_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<GetFlowDataBody>(
+            r#"{"projectId":1,"episodesId":5,"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn get_flow_data_body_accepts_valid() {
+        let b: GetFlowDataBody =
+            serde_json::from_str(r#"{"projectId":1,"episodesId":5}"#).unwrap();
+        assert_eq!(b.project_id, 1);
+        assert_eq!(b.episodes_id, 5);
+    }
+
+    #[test]
+    fn save_flow_data_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<SaveFlowDataBody>(
+            r#"{"projectId":1,"episodesId":5,"data":{},"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn save_flow_data_body_accepts_valid() {
+        let b: SaveFlowDataBody = serde_json::from_str(
+            r#"{"projectId":1,"episodesId":5,"data":{"key":"value"}}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, 1);
+        assert_eq!(b.episodes_id, 5);
+        assert!(b.data.is_object());
+    }
+
+    #[test]
+    fn generate_video_upload_item_rejects_unknown_fields() {
+        let err = serde_json::from_str::<GenerateVideoUploadItem>(
+            r#"{"id":1,"sources":"url","extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn generate_video_upload_item_accepts_valid() {
+        let b: GenerateVideoUploadItem =
+            serde_json::from_str(r#"{"id":1,"sources":"http://example.com"}"#).unwrap();
+        assert_eq!(b.id, 1);
+        assert_eq!(b.sources, "http://example.com");
+    }
+
+    #[test]
+    fn workbench_generate_video_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<WorkbenchGenerateVideoBody>(
+            r#"{"projectId":1,"scriptId":2,"uploadData":[],"prompt":"","model":"","mode":"","resolution":"","duration":5,"trackId":1,"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn workbench_generate_video_body_accepts_valid() {
+        let b: WorkbenchGenerateVideoBody = serde_json::from_str(
+            r#"{"projectId":1,"scriptId":2,"uploadData":[{"id":1,"sources":"url"}],"prompt":"test","model":"runway","mode":"standard","resolution":"1080p","duration":5,"trackId":1}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, 1);
+        assert_eq!(b.script_id, 2);
+        assert_eq!(b.upload_data.len(), 1);
+        assert_eq!(b.duration, 5);
+        assert_eq!(b.audio, None);
+    }
+
+    #[test]
+    fn workbench_generate_video_body_accepts_with_audio() {
+        let b: WorkbenchGenerateVideoBody = serde_json::from_str(
+            r#"{"projectId":1,"scriptId":2,"uploadData":[],"prompt":"","model":"","mode":"","resolution":"","duration":5,"audio":true,"trackId":1}"#,
+        )
+        .unwrap();
+        assert_eq!(b.audio, Some(true));
+    }
+
+    #[test]
+    fn export_image_shot_ref_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<ExportImageShotRef>(r#"{"id":"1","extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn export_image_shot_ref_accepts_valid() {
+        let b: ExportImageShotRef =
+            serde_json::from_str(r#"{"id":"123"}"#).unwrap();
+        assert_eq!(b.id, "123");
+    }
+
+    #[test]
+    fn export_image_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<ExportImageBody>(
+            r#"{"shotId":[{"id":"1"}],"extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn export_image_body_accepts_valid() {
+        let b: ExportImageBody = serde_json::from_str(
+            r#"{"shotId":[{"id":"1"},{"id":"2"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(b.shot_id.len(), 2);
+        assert_eq!(b.shot_id[0].id, "1");
+    }
+
+    #[test]
+    fn require_json_object_rejects_non_object() {
+        assert!(require_json_object(&Value::Null).is_err());
+        assert!(require_json_object(&Value::Array(vec![])).is_err());
+        assert!(require_json_object(&Value::String("test".to_string())).is_err());
+        assert!(require_json_object(&Value::Number(42.into())).is_err());
+        assert!(require_json_object(&Value::Bool(true)).is_err());
+    }
+
+    #[test]
+    fn require_json_object_accepts_object() {
+        assert!(require_json_object(&Value::Object(serde_json::Map::new())).is_ok());
+    }
+
+    #[test]
+    fn not_implemented_returns_error() {
+        let err = not_implemented();
+        assert!(matches!(err, ApiError::NotImplemented(_)));
+    }
+
+    #[test]
+    fn legacy_json_stub_paths_is_not_empty() {
+        assert!(!LEGACY_JSON_STUB_PATHS.is_empty());
+        // Verify all paths start with expected prefix
+        for path in LEGACY_JSON_STUB_PATHS {
+            assert!(path.starts_with("/api/v1/production/"));
+        }
+    }
+
+    #[test]
+    fn production_storyboard_item_serialize() {
+        let item = ProductionStoryboardItem {
+            id: 1,
+            script_id: Some(2),
+            prompt: Some("test prompt".to_string()),
+            file_path: Some("http://example.com/image.png".to_string()),
+            duration: Some("5s".to_string()),
+            state: Some("completed".to_string()),
+            track_id: Some(3),
+            flow_id: Some(4),
+            sb_index: Some(5),
+        };
+        let json = serde_json::to_string(&item).unwrap();
+        assert!(json.contains("\"id\":1"));
+        assert!(json.contains("\"scriptId\":2"));
+        assert!(json.contains("\"prompt\":\"test prompt\""));
+    }
+
+    #[test]
+    fn production_get_production_data_response_serialize() {
+        let resp = ProductionGetProductionDataResponse { data: vec![] };
+        let json = serde_json::to_string(&resp).unwrap();
+        assert!(json.contains("\"data\":[]"));
+    }
+}
