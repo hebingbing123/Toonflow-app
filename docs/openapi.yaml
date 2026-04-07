@@ -7447,6 +7447,300 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+
+  /api/v1/projects/legacy/{project_legacy_id}/novel-events:
+    get:
+      tags: [novel-events]
+      summary: List novel events with chapter associations
+      operationId: listNovelEventsV1
+      description: |
+        Returns paginated list of novel events for a project, with associated chapter indexes.
+        Supports search by event name (ILIKE).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 200
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by event name (case-insensitive substring match)
+      responses:
+        "200":
+          description: List of events with chapter associations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventListResponse"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [novel-events]
+      summary: Create a novel event with chapter associations
+      operationId: createNovelEventV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNovelEventBody"
+      responses:
+        "200":
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventCreateResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/legacy/{project_legacy_id}/novel-events/{event_legacy_id}:
+    patch:
+      tags: [novel-events]
+      summary: Update a novel event
+      operationId: updateNovelEventV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: event_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNovelEventBody"
+      responses:
+        "200":
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventOkResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [novel-events]
+      summary: Delete a novel event
+      operationId: deleteNovelEventV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: event_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Event deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventOkResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/legacy/{project_legacy_id}/novel-events/batch-delete:
+    post:
+      tags: [novel-events]
+      summary: Batch delete novel events
+      operationId: batchDeleteNovelEventsV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchDeleteNovelEventsBody"
+      responses:
+        "200":
+          description: Events deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventOkResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No matching events found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/novels/events/get-events:
+    post:
+      tags: [novel-events]
+      summary: Legacy — list novel events (old API shape)
+      operationId: postNovelEventsGetEventsV1
+      description: |
+        Parity with POST /api/novel/event/getEvent. Returns events with associated chapter indexes.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyGetEventsBody"
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelEventListResponse"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/novels/events/batch-delete:
+    post:
+      tags: [novel-events]
+      summary: Legacy — batch delete novel events
+      operationId: postNovelEventsBatchDeleteV1
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchDeleteNovelEventsBody"
+      responses:
+        "200":
+          description: Events deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelEventOkResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   securitySchemes:
     bearerAuth:
@@ -10423,6 +10717,155 @@ components:
           additionalProperties: true
           description: Defaults to `{}` when omitted
 
+
+    NovelEventListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/NovelEventWithChapters"
+        total:
+          type: integer
+          format: int64
+
+    NovelEventWithChapters:
+      type: object
+      required: [id, project_id, legacy_id, name, detail, chapter_indexes]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        legacy_id:
+          type: integer
+        name:
+          type: string
+        detail:
+          type: string
+        create_time_ms:
+          type: integer
+          format: int64
+          nullable: true
+        chapter_indexes:
+          type: array
+          items:
+            type: integer
+
+    CreateNovelEventBody:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+        detail:
+          type: string
+          nullable: true
+        chapter_ids:
+          type: array
+          items:
+            type: integer
+          description: Legacy novel ids to associate with this event
+
+    NovelEventCreateResponse:
+      type: object
+      required: [id, name, detail, message]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        detail:
+          type: string
+        message:
+          type: string
+
+    UpdateNovelEventBody:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+        detail:
+          type: string
+          nullable: true
+        chapter_ids:
+          type: array
+          items:
+            type: integer
+          description: If provided, replaces all existing associations
+
+    BatchDeleteNovelEventsBody:
+      type: object
+      required: [ids]
+      additionalProperties: false
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+          minItems: 1
+          maxItems: 500
+
+    NovelEventOkResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    LegacyGetEventsBody:
+      type: object
+      required: [project_id, page, limit]
+      additionalProperties: false
+      properties:
+        project_id:
+          type: integer
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        search:
+          type: string
+
+    LegacyNovelEventListResponse:
+      type: object
+      required: [list, total]
+      properties:
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyNovelEventRow"
+        total:
+          type: integer
+          format: int64
+
+    LegacyNovelEventRow:
+      type: object
+      required: [id, eventName, createTime, chapters]
+      properties:
+        id:
+          type: integer
+        eventName:
+          type: string
+        detail:
+          type: string
+          nullable: true
+        createTime:
+          type: integer
+          format: int64
+        chapters:
+          type: array
+          items:
+            type: integer
     ErrorBody:
       type: object
       required: [code, message]
