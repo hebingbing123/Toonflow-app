@@ -6158,8 +6158,6 @@ mod pg_contract_tests {
 
     #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
-    #[tokio::test]
-    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
     async fn vendor_credential_store_get_delete_roundtrip() {
         let _ = dotenvy::dotenv();
         let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");

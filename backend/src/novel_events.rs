@@ -71,7 +71,7 @@ pub struct ListNovelEventsResponse {
 }
 
 #[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CreateNovelEventBody {
     pub name: String,
     #[serde(default)]
@@ -81,7 +81,7 @@ pub struct CreateNovelEventBody {
 }
 
 #[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UpdateNovelEventBody {
     #[serde(default)]
     pub name: Option<String>,
