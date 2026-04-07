@@ -1,6 +1,6 @@
 //! Legacy **`/api/production/*`**: SQLite **`o_video`**, **`o_videoConfig`**, **`o_agentWorkData`** (production flow), OSS paths.
-//! SaaS: six routes use **strict** serde bodies; all other legacy **`POST`** paths share **`post_production_legacy_json_stub`**
-//! (**JSON object** only, then **501**) until video pipeline + storage exist.
+//! SaaS parity now covers the production workbench routes in this module; `LEGACY_JSON_STUB_PATHS`
+//! remains only as an explicit escape hatch if an old POST path ever needs to fall back to **501** again.
 
 use axum::{
     extract::{Json, State},
@@ -22,7 +22,7 @@ use crate::state::AppState;
 
 fn not_implemented() -> ApiError {
     ApiError::NotImplemented(
-        "production workbench / video pipeline is not implemented; use storyboard REST and generation jobs when wired"
+        "production route is not implemented in Rust yet; align the handler and OpenAPI before exposing this path"
             .into(),
     )
 }

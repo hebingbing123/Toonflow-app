@@ -974,7 +974,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_get_flow_data_not_implemented_with_jwt() {
+    async fn production_get_flow_data_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/get-flow-data",
@@ -987,7 +987,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_save_flow_data_not_implemented_with_jwt() {
+    async fn production_save_flow_data_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/save-flow-data",
@@ -1000,7 +1000,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_workbench_generate_video_not_implemented_with_jwt() {
+    async fn production_workbench_generate_video_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/workbench/generate-video",
@@ -1013,7 +1013,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_storyboard_polling_image_not_implemented_with_jwt() {
+    async fn production_storyboard_polling_image_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/storyboard/polling-image",
@@ -1026,7 +1026,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn production_export_image_not_implemented_with_jwt() {
+    async fn production_export_image_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/production/export-image",
