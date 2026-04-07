@@ -80,14 +80,30 @@ pub struct CreateNovelEventBody {
     pub chapter_ids: Vec<i32>, // legacy novel ids to associate
 }
 
+fn deserialize_some_or_null<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let v = Value::deserialize(deserializer)?;
+    // Explicit null becomes Some(Value::Null), any other value is Some(v)
+    Ok(Some(v))
+}
+
+fn default_none<T>() -> Option<T> {
+    None
+}
+
 #[derive(Debug, Deserialize, Default)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UpdateNovelEventBody {
-    #[serde(default)]
+    #[serde(default = "default_none")]
     pub name: Option<String>,
-    #[serde(default)]
-    pub detail: Option<Value>, // null to clear, string to set
-    #[serde(default)]
+    #[serde(
+        default = "default_none",
+        deserialize_with = "deserialize_some_or_null"
+    )]
+    pub detail: Option<Value>, // null to clear, string to set, missing = don't change
+    #[serde(default = "default_none")]
     pub chapter_ids: Option<Vec<i32>>, // if provided, replaces all associations
 }
 
