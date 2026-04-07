@@ -6647,4 +6647,120 @@ mod pg_contract_tests {
             .execute(&pool)
             .await;
     }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
+    async fn prompts_patch_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        // Get prompts list
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "list prompts");
+        assert_eq!(list.as_array().map(|a| a.len()), Some(3), "should have 3 default prompts");
+
+        // Get single prompt
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts/1")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, prompt) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "get prompt");
+        assert_eq!(prompt["id"].as_i64(), Some(1));
+        let original_data = prompt["data"].as_str().expect("data").to_string();
+
+        // Patch prompt
+        let new_data = "patched prompt data for testing";
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri("/api/v1/prompts/1")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"data":"{}"}}"#, new_data)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, patched) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "patch prompt");
+        assert_eq!(patched["id"].as_i64(), Some(1));
+        assert_eq!(patched["data"].as_str(), Some(new_data));
+
+        // Verify patch persisted
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/prompts/1")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, verify) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "verify patched prompt");
+        assert_eq!(verify["data"].as_str(), Some(new_data));
+
+        // Patch back to original
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri("/api/v1/prompts/1")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"data":"{}"}}"#, original_data)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "restore original");
+
+        // Cleanup
+        let _ = sqlx::query("DELETE FROM public.app_user_prompt WHERE owner_user_id = $1 AND legacy_id = 1")
+            .bind(sub)
+            .execute(&pool)
+            .await;
+    }
 }
