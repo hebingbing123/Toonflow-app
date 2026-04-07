@@ -804,19 +804,17 @@ extension _HomePageSystemProbesController on _HomePageState {
           'projectId': 1,
           'scriptId': 1,
           'storyboards': [
-            {'prompt': 'probe storyboard'}
+            {'prompt': 'probe storyboard'},
           ],
         },
         '/api/v1/production/storyboard/batch-generate-image': {
           'projectId': 1,
           'scriptId': 1,
           'items': [
-            {'storyboardId': 1, 'prompt': 'probe storyboard'}
+            {'storyboardId': 1, 'prompt': 'probe storyboard'},
           ],
         },
-        '/api/v1/production/storyboard/down-preview-image': {
-          'storyboardId': 1,
-        },
+        '/api/v1/production/storyboard/down-preview-image': {'storyboardId': 1},
         '/api/v1/production/storyboard/edit-info': {
           'storyboardId': 1,
           'prompt': 'probe storyboard',
@@ -874,8 +872,7 @@ extension _HomePageSystemProbesController on _HomePageState {
               ? path.substring(prodPrefix.length)
               : path;
           setState(() {
-            _error =
-                'POST production/$rel expected 200/404/503, got $code';
+            _error = 'POST production/$rel expected 200/404/503, got $code';
             _loadingModelsCatalog = false;
           });
           return;
@@ -922,11 +919,41 @@ extension _HomePageSystemProbesController on _HomePageState {
       _textModelDefaultBody = null;
     });
     try {
-      final d = await fetchTextModelDefaultV1(token);
+      final before = await fetchTextModelDefaultV1(token);
+      final textModels = await fetchModelsCatalog(token, typeFilter: 'text');
+      final alternative = textModels
+          .map((m) => m.value)
+          .where((id) => id != before.defaultModelId)
+          .cast<String?>()
+          .firstWhere((id) => id != null, orElse: () => null);
+      TextModelDefaultV1? patched;
+      if (alternative != null) {
+        patched = await patchTextModelDefaultV1(token, modelId: alternative);
+      }
+      final reset = await patchTextModelDefaultV1(token, modelId: null);
+      final after = await fetchTextModelDefaultV1(token);
       if (!mounted) return;
+      if (patched != null && patched.defaultModelId != alternative) {
+        setState(() {
+          _error =
+              'PATCH text-default expected $alternative, got ${patched!.defaultModelId}';
+          _loadingTextModelDefault = false;
+        });
+        return;
+      }
+      if (after.defaultModelId != reset.defaultModelId) {
+        setState(() {
+          _error =
+              'text-default reset mismatch: fetch=${after.defaultModelId} reset=${reset.defaultModelId}';
+          _loadingTextModelDefault = false;
+        });
+        return;
+      }
       setState(() {
         _textModelDefaultBody =
-            'legacy=${d.legacyPlaceholder} · default_model_id=${d.defaultModelId}';
+            'legacy=${before.legacyPlaceholder} · GET=${before.defaultModelId}'
+            '${patched == null ? ' · PATCH skipped (single text model)' : ' · PATCH=$alternative'}'
+            ' · reset=${reset.defaultModelId}';
         _loadingTextModelDefault = false;
       });
     } on RustApiException catch (e) {

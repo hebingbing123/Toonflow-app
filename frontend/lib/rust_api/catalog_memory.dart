@@ -444,6 +444,29 @@ Future<TextModelDefaultV1> fetchTextModelDefaultV1(String accessToken) async {
   return TextModelDefaultV1.fromJson(map);
 }
 
+/// `PATCH /api/v1/models/text-default` — set per-user text model preference; pass `null` to reset.
+Future<TextModelDefaultV1> patchTextModelDefaultV1(
+  String accessToken, {
+  String? modelId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models/text-default');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'model_id': modelId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return TextModelDefaultV1.fromJson(map);
+}
+
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
 Future<List<dynamic>> queryAgentMemory(
   String accessToken, {

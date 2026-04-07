@@ -277,7 +277,7 @@ class AuthSection extends StatelessWidget {
                   child: Text(
                     loadingTextModelDefault
                         ? '请求中…'
-                        : 'GET /api/v1/models/text-default',
+                        : 'GET+PATCH /api/v1/models/text-default',
                   ),
                 ),
                 FilledButton.tonal(
