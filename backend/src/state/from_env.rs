@@ -56,6 +56,17 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
             reqwest::Client::new()
         });
 
+    let local_asset_image_dir = std::env::var("TOONFLOW_LOCAL_ASSET_IMAGE_DIR")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .map(std::path::PathBuf::from);
+    if local_asset_image_dir.is_some() {
+        tracing::info!(
+            "TOONFLOW_LOCAL_ASSET_IMAGE_DIR set; asset.generate workers will persist PNGs locally"
+        );
+    }
+
     Ok(AppState {
         pool,
         jwt_secret,
@@ -63,5 +74,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         http_client,
         notify: WsNotifyHub::new(),
         memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        local_asset_image_dir,
     })
 }

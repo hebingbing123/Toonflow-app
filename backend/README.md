@@ -59,7 +59,7 @@ cargo run
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。**`POST /api/v1/art-styles/extract-prompt`** 使用同一密钥走**非流式**多模态 **`chat/completions`**（需 vision 模型，如默认 **`gpt-4o-mini`**）。
 
-**素材出图任务（`app_generation_job`）**：**`asset.generate.image`** / **`asset.generate.batch`** worker 使用同一密钥调用 **`POST {OPENAI_BASE_URL}/v1/images/generations`**（`response_format: url`），将返回的临时 **`url`** 写入 **`app_asset_image.file_path`**（**`state`** = **`已完成`**）。请求体里的 **`model`** 若不含 **`dall-e-2`** / **`dall-e-3`** 子串，则回退到环境变量 **`TOONFLOW_IMAGE_MODEL`**（默认 **`dall-e-3`**）。**`asset.polish.*`** 仍走 **`chat/completions`**。Enqueue 时的 **`base64`** 提示尚未参与生图；长期存储（自有 OSS 等）见路线图 **`electron-node-parity.md`**。
+**素材出图任务（`app_generation_job`）**：**`asset.generate.image`** / **`asset.generate.batch`** worker 使用同一密钥调用 **`POST {OPENAI_BASE_URL}/v1/images/generations`**（`response_format: url`）。未设置 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** 时，将供应商临时 **`url`** 写入 **`app_asset_image.file_path`**（**`state`** = **`已完成`**）。设置该目录后，worker 会下载 PNG（体大小上限约 **32 MB**）到 **`{dir}/{user_uuid}/{image_row_id}.png`**，**`file_path`** 设为 **`GET /api/v1/projects/legacy/{pl}/assets/{al}/images/{id}/file`** 路径，**`metadata.storage`** = **`local`**，**`metadata.provider_url`** 保留原链接；**`GET …/images/{id}/file`** 在 **`https?`** **`file_path`** 时 **307** 跳转，在 **`local`** 时返回 **`image/png`**。请求体里的 **`model`** 若不含 **`dall-e-2`** / **`dall-e-3`** 子串，则回退到环境变量 **`TOONFLOW_IMAGE_MODEL`**（默认 **`dall-e-3`**）。**`asset.polish.*`** 仍走 **`chat/completions`**。Enqueue 时的 **`base64`** 提示尚未参与生图；对象存储/CDN 仍见 **`electron-node-parity.md`**。
 
 健康检查：
 

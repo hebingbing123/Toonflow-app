@@ -85,6 +85,7 @@ mod tests {
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            local_asset_image_dir: None,
         }
     }
 

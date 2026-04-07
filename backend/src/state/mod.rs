@@ -4,6 +4,7 @@ mod from_env;
 mod memory_config;
 mod vendor_config;
 
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use sqlx::PgPool;
@@ -24,6 +25,9 @@ pub struct AppState {
     pub notify: WsNotifyHub,
     /// Legacy **`o_setting`** memory/RAG limits; in-process until a user settings table exists.
     pub memory_config: Arc<RwLock<MemoryConfig>>,
+    /// When set, **`asset.generate.*`** workers persist PNGs under **`{dir}/{user_id}/{image_row_id}.png`**
+    /// and set **`app_asset_image.file_path`** to this API’s **`…/images/{id}/file`** path.
+    pub local_asset_image_dir: Option<PathBuf>,
 }
 
 impl AppState {

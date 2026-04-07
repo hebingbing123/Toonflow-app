@@ -2931,6 +2931,75 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}/file:
+    get:
+      tags: [assets]
+      summary: Download asset image bytes or redirect to provider URL
+      operationId: getProjectAssetImageFileByLegacyIdsV1
+      description: |
+        When **`app_asset_image.file_path`** is **`http:`** or **`https:`**, responds with **307 Temporary Redirect** to that URL (OpenAI temporary link, etc.).
+        When **`metadata.storage`** is **`local`**, responds with **200** **`image/png`** from disk (**`TOONFLOW_LOCAL_ASSET_IMAGE_DIR/{user_id}/{image_id}.png`**).
+        If the row is **`local`** but the env dir is unset on this instance, **503** **`database_error`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: asset_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: image_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: PNG bytes when image is stored locally
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "307":
+          description: Redirect to provider URL
+          headers:
+            Location:
+              schema:
+                type: string
+        "400":
+          description: Invalid path ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project, asset, image not found, or local file missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, `DATABASE_URL` unset, or local storage misconfigured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}:
     get:
       tags: [assets]

@@ -2,8 +2,10 @@
 //! Running jobs can be cancelled via REST; finish updates use `WHERE status = 'running'` so they never
 //! overwrite `cancelled`.
 
+use std::path::Path;
 use std::time::Duration;
 
+use futures_util::StreamExt;
 use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -363,6 +365,42 @@ async fn run_asset_polish_batch(
     }))
 }
 
+/// Cap for **`images/generations`** URL download when persisting under **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**.
+const MAX_DOWNLOADED_ASSET_IMAGE_BYTES: u64 = 32 * 1024 * 1024;
+
+async fn download_image_bytes_capped(
+    client: &reqwest::Client,
+    url: &str,
+) -> Result<Vec<u8>, JobRunError> {
+    let resp = client
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+    if !resp.status().is_success() {
+        return Err(JobRunError::Failed(format!(
+            "image download HTTP {}",
+            resp.status()
+        )));
+    }
+    let max = MAX_DOWNLOADED_ASSET_IMAGE_BYTES as usize;
+    if let Some(cl) = resp.content_length() {
+        if cl > max as u64 {
+            return Err(JobRunError::Failed("image Content-Length too large".into()));
+        }
+    }
+    let mut stream = resp.bytes_stream();
+    let mut out = Vec::new();
+    while let Some(item) = stream.next().await {
+        let chunk = item.map_err(|e| JobRunError::Failed(e.to_string()))?;
+        if out.len().saturating_add(chunk.len()) > max {
+            return Err(JobRunError::Failed("image body too large".into()));
+        }
+        out.extend_from_slice(&chunk);
+    }
+    Ok(out)
+}
+
 fn combine_image_prompt(name: &str, body: &str) -> String {
     let n = name.trim();
     let b = body.trim();
@@ -383,6 +421,8 @@ struct AssetImageGenCtx<'a> {
     request_model: &'a str,
     image_model: &'a str,
     size: &'a str,
+    /// When set, worker downloads the provider URL and writes **`{dir}/{owner}/{id}.png`** (see env).
+    local_asset_image_dir: Option<&'a Path>,
 }
 
 async fn generate_and_store_asset_image(
@@ -419,25 +459,55 @@ async fn generate_and_store_asset_image(
         .await
         .map_err(|e| JobRunError::Failed(e.to_string()))?;
 
-    let metadata = json!({
-        "source": "jobs.worker.asset_image",
-        "generation_job_id": ctx.job_id,
-        "request_model": ctx.request_model,
-        "image_model": ctx.image_model,
-        "size": ctx.size,
-        "revised_prompt": revised,
-    });
+    let image_row_id = Uuid::new_v4();
 
-    let image_row_id: Uuid = sqlx::query_scalar(
+    let (file_path, metadata, image_url) = if let Some(root) = ctx.local_asset_image_dir {
+        let bytes = download_image_bytes_capped(ctx.http_client, &url).await?;
+        let user_dir = root.join(ctx.owner.to_string());
+        tokio::fs::create_dir_all(&user_dir)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?;
+        let disk_path = user_dir.join(format!("{image_row_id}.png"));
+        tokio::fs::write(&disk_path, &bytes)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?;
+        let api_path = format!(
+            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_row_id}/file"
+        );
+        let metadata = json!({
+            "source": "jobs.worker.asset_image",
+            "generation_job_id": ctx.job_id,
+            "request_model": ctx.request_model,
+            "image_model": ctx.image_model,
+            "size": ctx.size,
+            "revised_prompt": revised,
+            "storage": "local",
+            "provider_url": url,
+        });
+        (api_path.clone(), metadata, api_path)
+    } else {
+        let metadata = json!({
+            "source": "jobs.worker.asset_image",
+            "generation_job_id": ctx.job_id,
+            "request_model": ctx.request_model,
+            "image_model": ctx.image_model,
+            "size": ctx.size,
+            "revised_prompt": revised,
+        });
+        (url.clone(), metadata, url)
+    };
+
+    sqlx::query_scalar::<_, Uuid>(
         r#"
-        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, metadata)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO app_asset_image (id, asset_id, sort_index, file_path, state, metadata)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id
         "#,
     )
+    .bind(image_row_id)
     .bind(asset_id)
     .bind(sort_index)
-    .bind(&url)
+    .bind(&file_path)
     .bind(Some("已完成".to_string()))
     .bind(metadata)
     .fetch_one(ctx.pool)
@@ -447,7 +517,7 @@ async fn generate_and_store_asset_image(
     Ok(json!({
         "asset_legacy_id": asset_legacy_id,
         "asset_image_id": image_row_id,
-        "image_url": url,
+        "image_url": image_url,
         "revised_prompt": revised,
     }))
 }
@@ -513,6 +583,7 @@ async fn run_asset_generate_image(
         request_model: model_in,
         image_model: image_model.as_str(),
         size,
+        local_asset_image_dir: state.local_asset_image_dir.as_deref(),
     };
 
     let body =
@@ -588,6 +659,7 @@ async fn run_asset_generate_batch(
         request_model: model_in,
         image_model: image_model.as_str(),
         size,
+        local_asset_image_dir: state.local_asset_image_dir.as_deref(),
     };
 
     let mut out = Vec::with_capacity(items.len());
