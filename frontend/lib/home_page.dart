@@ -10,7 +10,9 @@ import 'config.dart';
 import 'home_page/sections.dart';
 import 'rust_api.dart';
 
-part 'home_page/editors.dart';
+part 'home_page/project_editor.dart';
+part 'home_page/script_editor.dart';
+part 'home_page/storyboard_editor.dart';
 
 /// Script-agent REST hits Postgres; catalog probe allows 501 stub, 503 no pool, 404 missing project, or 200 OK.
 bool _scriptAgentCatalogProbeOk(int status) =>
