@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 /// Trace context propagated through requests.
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct TraceContext {
     pub trace_id: String,
     pub span_id: String,
@@ -11,6 +12,7 @@ pub struct TraceContext {
     pub sampled: bool,
 }
 
+#[allow(dead_code)]
 impl TraceContext {
     /// Create new trace context with random IDs.
     pub fn new() -> Self {
@@ -76,11 +78,13 @@ pub fn generation_job(user_id: Uuid, job_id: Uuid, phase: &'static str) {
 }
 
 /// WASM invocation timing wrapper.
+#[allow(dead_code)]
 pub struct WasmInvocationTimer {
     tool_name: String,
     start: Instant,
 }
 
+#[allow(dead_code)]
 impl WasmInvocationTimer {
     pub fn start(tool_name: &str) -> Self {
         Self {
@@ -102,6 +106,7 @@ impl WasmInvocationTimer {
 }
 
 /// Extract or create trace context from HTTP request headers.
+#[allow(dead_code)]
 pub fn extract_trace_context<B>(req: &axum::http::Request<B>) -> TraceContext {
     // Try W3C TraceContext
     if let Some(traceparent) = req.headers().get("traceparent") {

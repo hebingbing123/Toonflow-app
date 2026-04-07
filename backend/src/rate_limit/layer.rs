@@ -90,8 +90,7 @@ impl KeyExtractor for UserIdKeyExtractor {
         // Try to extract user_id from Authorization header (JWT)
         if let Some(auth_header) = req.headers().get("authorization") {
             if let Ok(auth_str) = auth_header.to_str() {
-                if auth_str.starts_with("Bearer ") {
-                    let token = &auth_str[7..];
+                if let Some(token) = auth_str.strip_prefix("Bearer ") {
                     // Decode JWT payload to extract user_id
                     if let Some(user_id) = extract_user_id_from_jwt(token) {
                         return Ok(format!("user:{}", user_id));
@@ -131,12 +130,14 @@ fn extract_user_id_from_jwt(token: &str) -> Option<String> {
         .map(|s| s.to_string())
 }
 
+use base64::engine::{general_purpose::STANDARD, Engine};
+
 fn base64_url_decode(input: &str) -> Result<Vec<u8>, base64::DecodeError> {
     // Replace URL-safe characters and add padding
     let normalized = input.replace('-', "+").replace('_', "/");
     let padding_needed = (4 - normalized.len() % 4) % 4;
     let padded = format!("{}{}", normalized, "=".repeat(padding_needed));
-    base64::decode(padded)
+    STANDARD.decode(padded)
 }
 
 pub(crate) type UserRateLimitLayer =
@@ -147,13 +148,12 @@ pub(crate) type UserRateLimitLayer =
 pub(crate) fn user_governor_layer() -> UserRateLimitLayer {
     let trust_forwarded = env_truthy("RATE_LIMIT_TRUST_FORWARDED_HEADERS");
 
-    let mut builder = GovernorConfigBuilder::default();
-    builder.key_extractor(UserIdKeyExtractor::new(trust_forwarded));
-    builder.per_millisecond(100); // 10 req/s per user
-    builder.burst_size(30); // burst 30
-    builder.use_headers();
     let config: Arc<GovernorConfig<UserIdKeyExtractor, StateInformationMiddleware>> = Arc::new(
-        builder
+        GovernorConfigBuilder::default()
+            .key_extractor(UserIdKeyExtractor::new(trust_forwarded))
+            .per_millisecond(100)
+            .burst_size(30)
+            .use_headers()
             .finish()
             .expect("User rate limit config must be valid"),
     );
@@ -186,8 +186,7 @@ impl KeyExtractor for EndpointKeyExtractor {
         // Try to extract user_id from JWT
         if let Some(auth_header) = req.headers().get("authorization") {
             if let Ok(auth_str) = auth_header.to_str() {
-                if auth_str.starts_with("Bearer ") {
-                    let token = &auth_str[7..];
+                if let Some(token) = auth_str.strip_prefix("Bearer ") {
                     if let Some(user_id) = extract_user_id_from_jwt(token) {
                         return Ok(format!("{}:user:{}", endpoint, user_id));
                     }
@@ -213,13 +212,12 @@ pub(crate) type EndpointRateLimitLayer =
 pub(crate) fn strict_endpoint_governor_layer() -> EndpointRateLimitLayer {
     let trust_forwarded = env_truthy("RATE_LIMIT_TRUST_FORWARDED_HEADERS");
 
-    let mut builder = GovernorConfigBuilder::default();
-    builder.key_extractor(EndpointKeyExtractor::new(trust_forwarded));
-    builder.per_millisecond(200); // 5 req/s per endpoint
-    builder.burst_size(10); // burst 10
-    builder.use_headers();
     let config: Arc<GovernorConfig<EndpointKeyExtractor, StateInformationMiddleware>> = Arc::new(
-        builder
+        GovernorConfigBuilder::default()
+            .key_extractor(EndpointKeyExtractor::new(trust_forwarded))
+            .per_millisecond(200)
+            .burst_size(10)
+            .use_headers()
             .finish()
             .expect("Endpoint rate limit config must be valid"),
     );

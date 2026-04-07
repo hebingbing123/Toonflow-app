@@ -19,5 +19,4 @@ mod layer;
 
 pub(crate) use layer::{
     governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
-    EndpointRateLimitLayer, GovernorRateLimitLayer, UserRateLimitLayer,
 };

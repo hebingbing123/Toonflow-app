@@ -1,4 +1,5 @@
 //! Queue abstraction layer supporting PostgreSQL (default) and Redis (optional) backends.
+#![allow(dead_code)]
 //!
 //! Provides a unified interface for job queuing with automatic fallback:
 //! - If `REDIS_URL` is set and Redis is available, use Redis for faster queue operations
@@ -120,7 +121,7 @@ impl Queue for PgQueue {
                 LIMIT 1
             )
             RETURNING id, kind, user_id, payload
-            "#
+            "#,
         )
         .fetch_optional(&self.pool)
         .await?;
@@ -139,7 +140,7 @@ impl Queue for PgQueue {
             UPDATE app_generation_job
             SET status = 'completed', updated_at = now(), finished_at = now()
             WHERE id = $1
-            "#
+            "#,
         )
         .bind(job_id)
         .execute(&self.pool)
@@ -159,7 +160,7 @@ impl Queue for PgQueue {
             last_error = $2,
             updated_at = now()
             WHERE id = $1
-            "#
+            "#,
         )
         .bind(job_id)
         .bind(error)
@@ -176,7 +177,7 @@ impl Queue for PgQueue {
                 COUNT(*) FILTER (WHERE status = 'running') as running,
                 COUNT(*) FILTER (WHERE status = 'dead') as dead
             FROM app_generation_job
-            "#
+            "#,
         )
         .fetch_one(&self.pool)
         .await?;
@@ -205,7 +206,10 @@ pub async fn create_queue(pool: PgPool) -> anyhow::Result<Box<dyn Queue>> {
                 return Ok(queue);
             }
             Err(e) => {
-                tracing::warn!("Failed to connect to Redis ({}), falling back to PostgreSQL", e);
+                tracing::warn!(
+                    "Failed to connect to Redis ({}), falling back to PostgreSQL",
+                    e
+                );
             }
         }
     }
