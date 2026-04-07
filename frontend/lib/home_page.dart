@@ -11,6 +11,7 @@ import 'home_page/sections.dart';
 import 'rust_api.dart';
 
 part 'home_page/project_editor.dart';
+part 'home_page/project_editor_legacy_probes.dart';
 part 'home_page/projects_controller.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/skills_harness_controller.dart';
