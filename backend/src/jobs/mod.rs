@@ -79,6 +79,8 @@ pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
 /// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker fails until pipeline exists.
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
+/// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker fails until live LLM/OSS probe exists.
+pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
 pub async fn enqueue_generation_job(

@@ -788,7 +788,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_vendor_model_test_not_implemented_with_jwt() {
+    async fn settings_vendor_model_test_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/vendors/model-test",
@@ -796,8 +796,8 @@ mod contract_smoke_tests {
             r#"{"modelName":"gpt-4o-mini","type":"text","id":"1"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]

@@ -1,7 +1,7 @@
 //! Legacy **`POST /api/setting/vendorConfig/getVendorList`** returned SQLite **`o_vendorConfig`** rows (including **`inputValues`** secrets).
 //! SaaS: **`GET …/vendors/summary`** merges static catalog with per-user **`vendor_config`** from `app_user_profile`.
 //! **`POST …/vendors/enable`** persists enable/disable state; **`POST …/vendors/update`** persists display name and settings (no API keys).
-//! **`POST …/model-test`** validates the legacy body then **501** (no LLM/OSS probe on this API).
+//! **`POST …/model-test`** validates the legacy body, enqueues **`settings.vendor.model_test`**; worker fails until a live probe exists.
 //! **`addVendor`** / **`deleteVendor`** / **`updateCode`** / **`getCodeByLink`**: validate then **501** (no custom vendor creation, no TS/vm2 execution, no outbound fetch).
 //! API keys (`inputValues`) are intentionally NOT stored; use server env or vault.
 
@@ -15,9 +15,11 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST};
 use crate::models_catalog::vendor_catalog_summaries;
 use crate::state::{AppState, VendorConfig};
 use uuid::Uuid;
@@ -83,26 +85,50 @@ struct VendorModelTestBody {
     id: String,
 }
 
+const MAX_VENDOR_MODEL_TEST_FIELD_LEN: usize = 512;
+
 async fn post_vendor_model_test(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorModelTestBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
+) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
     let kind = body.kind.to_ascii_lowercase();
     if kind != "text" && kind != "image" && kind != "video" {
         return Err(ApiError::BadRequest(
             "type must be text, image, or video".into(),
         ));
     }
-    if body.model_name.trim().is_empty() || body.id.trim().is_empty() {
+    let model_name = body.model_name.trim();
+    let id = body.id.trim();
+    if model_name.is_empty() || id.is_empty() {
         return Err(ApiError::BadRequest(
             "modelName and id must be non-empty".into(),
         ));
     }
-    Err(ApiError::NotImplemented(
-        "vendor modelTest (live LLM/image/video probe) is not implemented on the Rust API".into(),
-    ))
+    if model_name.len() > MAX_VENDOR_MODEL_TEST_FIELD_LEN
+        || id.len() > MAX_VENDOR_MODEL_TEST_FIELD_LEN
+    {
+        return Err(ApiError::BadRequest(format!(
+            "modelName and id must be at most {MAX_VENDOR_MODEL_TEST_FIELD_LEN} chars each"
+        )));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let payload = json!({
+        "source": "settings.vendors.model-test",
+        "model_name": model_name,
+        "kind": kind,
+        "id": id,
+    });
+
+    let row =
+        enqueue_generation_job(pool, uid, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, payload).await?;
+    Ok(Json(row))
 }
 
 async fn load_vendor_config(pool: &sqlx::PgPool, uid: Uuid) -> Result<VendorConfig, ApiError> {

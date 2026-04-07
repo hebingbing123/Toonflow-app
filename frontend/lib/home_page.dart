@@ -16,6 +16,10 @@ bool _scriptAgentCatalogProbeOk(int status) =>
 bool _assetsGenerateSingleJobProbeOk(int status) =>
     status == 200 || status == 404 || status == 429 || status == 503;
 
+/// **`settings/vendors/model-test`**: **200** queued job, **429** quota, **503** no DB.
+bool _vendorModelTestProbeOk(int status) =>
+    status == 200 || status == 429 || status == 503;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -781,9 +785,10 @@ class _HomePageState extends State<HomePage> {
         prompt: 'probe',
       );
       if (!mounted) return;
-      if (mt != 501) {
+      if (!_vendorModelTestProbeOk(mt)) {
         setState(() {
-          _error = 'POST vendors/model-test expected 501, got $mt';
+          _error =
+              'POST vendors/model-test expected 200/429/503, got $mt';
           _loadingModelsCatalog = false;
         });
         return;

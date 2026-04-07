@@ -185,6 +185,9 @@ async fn execute_kind(
         "asset.polish.batch" => Err(JobRunError::Failed(
             "batch asset prompt polish pipeline is not implemented yet".into(),
         )),
+        "settings.vendor.model_test" => Err(JobRunError::Failed(
+            "vendor modelTest live probe is not implemented yet".into(),
+        )),
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
         ))),

@@ -35,7 +35,7 @@ info:
     **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
 
     **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of legacy **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
-    **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields then **501** (no live LLM/image/video probe here).
+    **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); worker fails until a live probe is implemented.
     **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** accept the same *top-level* shapes as legacy **`addVendor`** / **`updateVendor`** / **`deleteVendor`** / **`enableVendor`** / **`updateCode`** / **`getCodeByLink`**, then **501** (no **`o_vendorConfig`** table, no TS/vm2, no server-side URL fetch).
 
     **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS exposes **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** with body **`{}`** only, then **501** **`not_implemented`** — no bulk wipe endpoint (use Supabase / ops).
@@ -788,10 +788,10 @@ paths:
   /api/v1/settings/vendors/model-test:
     post:
       tags: [settings]
-      summary: Live vendor model smoke test (not implemented)
+      summary: Live vendor model smoke test (queued job; worker stub)
       operationId: postSettingsVendorModelTestV1
       description: |
-        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), then **501** **`not_implemented`**: the Rust API does not run the legacy **`modelTest`** LLM/OSS probe.
+        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), checks daily job quota, inserts **`app_generation_job`** kind **`settings.vendor.model_test`**. Worker marks **`failed`** until the legacy **`modelTest`** LLM/OSS probe is wired.
       security:
         - bearerAuth: []
       requestBody:
@@ -801,6 +801,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorModelTestBody"
       responses:
+        "200":
+          description: New **`queued`** generation job (**`JobRow`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
         "400":
           description: Invalid **`type`** or empty **`modelName`** / **`id`**
           content:
@@ -813,14 +819,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Live probe not implemented
+        "429":
+          description: Daily generation job quota exceeded
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:

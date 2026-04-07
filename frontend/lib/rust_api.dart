@@ -643,7 +643,8 @@ Future<int> postSettingsAgentDeploySetKeyV1(String accessToken) async {
   return res.statusCode;
 }
 
-/// `POST /api/v1/settings/vendors/model-test` — OpenAPI `postSettingsVendorModelTestV1` (typically **501**).
+/// `POST /api/v1/settings/vendors/model-test` — OpenAPI `postSettingsVendorModelTestV1`.
+/// **200** = **`queued`** **`JobRow`** (**`settings.vendor.model_test`**); **429**/**503** as elsewhere.
 Future<int> postSettingsVendorModelTestV1(
   String accessToken, {
   required String modelName,
