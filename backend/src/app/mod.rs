@@ -6859,5 +6859,4 @@ mod pg_contract_tests {
             .execute(&pool)
             .await;
     }
-
 }
