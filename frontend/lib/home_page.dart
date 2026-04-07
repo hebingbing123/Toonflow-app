@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'home_page/sections.dart';
 import 'rust_api.dart';
 
 /// Script-agent REST hits Postgres; catalog probe allows 501 stub, 503 no pool, 404 missing project, or 200 OK.
@@ -107,10 +108,10 @@ class _HomePageState extends State<HomePage> {
   String? _jobByIdLine;
   final _jobIdCtrl = TextEditingController();
 
-  final _skillPathCtrl =
-      TextEditingController(text: 'script_execution_script.md');
-  final _skillContentCtrl =
-      TextEditingController(text: '# flutter probe\n');
+  final _skillPathCtrl = TextEditingController(
+    text: 'script_execution_script.md',
+  );
+  final _skillContentCtrl = TextEditingController(text: '# flutter probe\n');
 
   bool _loadingHarnessTools = false;
   bool _loadingSkillsSummary = false;
@@ -178,16 +179,16 @@ class _HomePageState extends State<HomePage> {
     try {
       final h = await fetchHealthV1();
       if (!mounted) return;
-        setState(() {
+      setState(() {
         _healthBody = 'status=${h.status} service=${h.service}';
-          _loadingHealth = false;
-        });
+        _loadingHealth = false;
+      });
     } on RustApiException catch (e) {
       if (!mounted) return;
-        setState(() {
+      setState(() {
         _error = e.toString();
-          _loadingHealth = false;
-        });
+        _loadingHealth = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -265,9 +266,9 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       await _loadProjects();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已创建项目')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已创建项目')));
     } on RustApiException catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } catch (e) {
@@ -286,10 +287,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final v = await fetchVersionV1();
       if (!mounted) return;
-      final parts = <String>[
-        'service=${v.service}',
-        'version=${v.version}',
-      ];
+      final parts = <String>['service=${v.service}', 'version=${v.version}'];
       if (v.gitSha != null && v.gitSha!.isNotEmpty) {
         parts.add('git_sha=${v.gitSha}');
       }
@@ -351,10 +349,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final r = await fetchMeV1(token);
       if (!mounted) return;
-      final parts = <String>[
-        'sub=${r.sub}',
-        'plan_tier=${r.planTier}',
-      ];
+      final parts = <String>['sub=${r.sub}', 'plan_tier=${r.planTier}'];
       if (r.email != null && r.email!.isNotEmpty) {
         parts.add('email=${r.email}');
       }
@@ -364,16 +359,16 @@ class _HomePageState extends State<HomePage> {
       if (r.billingProvider != null && r.billingProvider!.isNotEmpty) {
         parts.add('billing_provider=${r.billingProvider}');
       }
-        setState(() {
+      setState(() {
         _meBody = parts.join(' · ');
-          _loadingMe = false;
-        });
+        _loadingMe = false;
+      });
     } on RustApiException catch (e) {
       if (!mounted) return;
-        setState(() {
+      setState(() {
         _error = e.toString();
-          _loadingMe = false;
-        });
+        _loadingMe = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -487,8 +482,7 @@ class _HomePageState extends State<HomePage> {
         _ => '$clr',
       };
       setState(() {
-        _memoryConfigProbeBody =
-            '$line · clear-agent-memories -> $clearNote';
+        _memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';
         _loadingMemoryConfigProbe = false;
       });
     } on RustApiException catch (e) {
@@ -600,8 +594,7 @@ class _HomePageState extends State<HomePage> {
         try {
           await fetchPromptByLegacyIdV1(token, 1);
           final patched = await patchPromptByLegacyIdV1(token, 1, r1.data);
-          roundtrip =
-              ' · GET/1+PATCH/1 ok (data_len=${patched.data.length})';
+          roundtrip = ' · GET/1+PATCH/1 ok (data_len=${patched.data.length})';
         } on RustApiException catch (e) {
           roundtrip = ' · GET/1+PATCH/1 -> ${e.statusCode}';
         }
@@ -654,8 +647,7 @@ class _HomePageState extends State<HomePage> {
           totalChars += e.data.length;
         }
       }
-      final sample =
-          vm.styles.take(4).map((s) => s.name).join(', ');
+      final sample = vm.styles.take(4).map((s) => s.name).join(', ');
       setState(() {
         _visualManualProbeBody =
             'GET+POST styles=${vm.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
@@ -735,7 +727,8 @@ class _HomePageState extends State<HomePage> {
       final bytes = await fetchSkillsBinaryV1(token, path);
       if (!mounted) return;
       final head = bytes.length >= 4 ? bytes.sublist(0, 4) : bytes;
-      final magicOk = head.length == 4 &&
+      final magicOk =
+          head.length == 4 &&
           head[0] == 0x89 &&
           head[1] == 0x50 &&
           head[2] == 0x4e &&
@@ -792,8 +785,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       if (!_vendorModelTestProbeOk(mt)) {
         setState(() {
-          _error =
-              'POST vendors/model-test expected 200/429/503, got $mt';
+          _error = 'POST vendors/model-test expected 200/429/503, got $mt';
           _loadingModelsCatalog = false;
         });
         return;
@@ -816,7 +808,10 @@ class _HomePageState extends State<HomePage> {
       }
       final vadd = await postSettingsVendorsAddV1(token, tsCode: 'export {}');
       final danger = await postSettingsDangerDeleteAllDataV1(token);
-      final prod = await postProductionGetProductionDataV1(token, storyboardIds: const [1]);
+      final prod = await postProductionGetProductionDataV1(
+        token,
+        storyboardIds: const [1],
+      );
       if (!mounted) return;
       if (vadd != 501) {
         setState(() {
@@ -827,7 +822,8 @@ class _HomePageState extends State<HomePage> {
       }
       if (danger != 501) {
         setState(() {
-          _error = 'POST settings/danger/delete-all-data expected 501, got $danger';
+          _error =
+              'POST settings/danger/delete-all-data expected 501, got $danger';
           _loadingModelsCatalog = false;
         });
         return;
@@ -844,7 +840,8 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       if (clearDb != 501) {
         setState(() {
-          _error = 'POST settings/danger/clear-database expected 501, got $clearDb';
+          _error =
+              'POST settings/danger/clear-database expected 501, got $clearDb';
           _loadingModelsCatalog = false;
         });
         return;
@@ -900,7 +897,11 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      final vEn = await postSettingsVendorsEnableV1(token, id: 'openai', enable: 1);
+      final vEn = await postSettingsVendorsEnableV1(
+        token,
+        id: 'openai',
+        enable: 1,
+      );
       if (!mounted) return;
       if (vEn != 501) {
         setState(() {
@@ -917,8 +918,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       if (vCode != 501) {
         setState(() {
-          _error =
-              'POST settings/vendors/update-code expected 501, got $vCode';
+          _error = 'POST settings/vendors/update-code expected 501, got $vCode';
           _loadingModelsCatalog = false;
         });
         return;
@@ -1232,7 +1232,10 @@ class _HomePageState extends State<HomePage> {
     if (token == null) return;
     final projects = _projects;
     if (projects == null || projects.isEmpty) {
-      setState(() => _error = 'Load projects first (agent memory needs a legacy project id).');
+      setState(
+        () => _error =
+            'Load projects first (agent memory needs a legacy project id).',
+      );
       return;
     }
     final legacyId = projects.first.legacyId;
@@ -1447,7 +1450,10 @@ class _HomePageState extends State<HomePage> {
         builder: (ctx) => AlertDialog(
           title: Text(r.path),
           content: SingleChildScrollView(
-            child: SelectableText(text, style: Theme.of(ctx).textTheme.bodySmall),
+            child: SelectableText(
+              text,
+              style: Theme.of(ctx).textTheme.bodySmall,
+            ),
           ),
           actions: [
             TextButton(
@@ -1885,18 +1891,9 @@ class _HomePageState extends State<HomePage> {
       _error = null;
     });
     try {
-      final key =
-          'flutter-probe-idem-${DateTime.now().millisecondsSinceEpoch}';
-      final j1 = await createJob(
-        token,
-        'flutter.probe',
-        idempotencyKey: key,
-      );
-      final j2 = await createJob(
-        token,
-        'flutter.probe',
-        idempotencyKey: key,
-      );
+      final key = 'flutter-probe-idem-${DateTime.now().millisecondsSinceEpoch}';
+      final j1 = await createJob(token, 'flutter.probe', idempotencyKey: key);
+      final j2 = await createJob(token, 'flutter.probe', idempotencyKey: key);
       if (!mounted) return;
       if (j1.id != j2.id) {
         setState(() {
@@ -2153,7 +2150,8 @@ class _HomePageState extends State<HomePage> {
                           runSpacing: 0,
                           children: [
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2164,18 +2162,18 @@ class _HomePageState extends State<HomePage> {
                                       try {
                                         final rows =
                                             await postGeneralGetSingleProject(
-                                          token,
-                                          p.legacyId,
-                                        );
+                                              token,
+                                              p.legacyId,
+                                            );
                                         if (!ctx.mounted) return;
                                         final line = rows.isEmpty
                                             ? '0 行'
                                             : rows
-                                                .map(
-                                                  (r) =>
-                                                      '#${r.legacyId} ${r.name ?? ""}',
-                                                )
-                                                .join('; ');
+                                                  .map(
+                                                    (r) =>
+                                                        '#${r.legacyId} ${r.name ?? ""}',
+                                                  )
+                                                  .join('; ');
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
                                             content: Text(
@@ -2185,8 +2183,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2195,8 +2194,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                generalLegacyBusy[0] = false,
+                                            () => generalLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2208,7 +2206,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2223,14 +2222,13 @@ class _HomePageState extends State<HomePage> {
                                             : '$origIntro [flutter general probe]';
                                         final msg1 =
                                             await postGeneralUpdateProject(
-                                          token,
-                                          <String, dynamic>{
-                                            'id': p.legacyId,
-                                            'intro': probeIntro,
-                                          },
-                                        );
-                                        final restoreBody =
-                                            <String, dynamic>{
+                                              token,
+                                              <String, dynamic>{
+                                                'id': p.legacyId,
+                                                'intro': probeIntro,
+                                              },
+                                            );
+                                        final restoreBody = <String, dynamic>{
                                           'id': p.legacyId,
                                           if (origIntro.isEmpty)
                                             'intro': null
@@ -2239,9 +2237,9 @@ class _HomePageState extends State<HomePage> {
                                         };
                                         final msg2 =
                                             await postGeneralUpdateProject(
-                                          token,
-                                          restoreBody,
-                                        );
+                                              token,
+                                              restoreBody,
+                                            );
                                         if (!ctx.mounted) return;
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
@@ -2252,8 +2250,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2262,8 +2261,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                generalLegacyBusy[0] = false,
+                                            () => generalLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2275,7 +2273,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2287,12 +2286,12 @@ class _HomePageState extends State<HomePage> {
                                       try {
                                         final updated =
                                             await updateProjectByLegacyId(
-                                          token,
-                                          p.legacyId,
-                                          <String, dynamic>{
-                                            'name': pr.name ?? '',
-                                          },
-                                        );
+                                              token,
+                                              p.legacyId,
+                                              <String, dynamic>{
+                                                'name': pr.name ?? '',
+                                              },
+                                            );
                                         if (!ctx.mounted) return;
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
@@ -2304,8 +2303,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2314,8 +2314,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                generalLegacyBusy[0] = false,
+                                            () => generalLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2327,7 +2326,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2342,11 +2342,11 @@ class _HomePageState extends State<HomePage> {
                                         final line = rows.isEmpty
                                             ? '0 项'
                                             : rows
-                                                .map(
-                                                  (r) =>
-                                                      '#${r.legacyId} ${r.name ?? ""}',
-                                                )
-                                                .join('; ');
+                                                  .map(
+                                                    (r) =>
+                                                        '#${r.legacyId} ${r.name ?? ""}',
+                                                  )
+                                                  .join('; ');
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
                                             content: Text(
@@ -2356,8 +2356,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2366,8 +2367,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                projectLegacyBusy[0] = false,
+                                            () => projectLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2379,7 +2379,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2391,21 +2392,22 @@ class _HomePageState extends State<HomePage> {
                                       try {
                                         final msg =
                                             await postProjectEditProject(
-                                          token,
-                                          id: pr.legacyId,
-                                          name: pr.name ?? '',
-                                          intro: pr.intro ?? '',
-                                          type: pr.mode ?? '',
-                                          artStyle: pr.artStyle ?? '',
-                                          directorManual:
-                                              pr.directorManual ?? '',
-                                          videoRatio: pr.videoRatio ?? '',
-                                          imageModel: pr.imageModel ?? '',
-                                          videoModel: pr.videoModel ?? '',
-                                          imageQuality: pr.imageQuality ?? '',
-                                          projectType: pr.projectType ?? '',
-                                          mode: pr.mode ?? '',
-                                        );
+                                              token,
+                                              id: pr.legacyId,
+                                              name: pr.name ?? '',
+                                              intro: pr.intro ?? '',
+                                              type: pr.mode ?? '',
+                                              artStyle: pr.artStyle ?? '',
+                                              directorManual:
+                                                  pr.directorManual ?? '',
+                                              videoRatio: pr.videoRatio ?? '',
+                                              imageModel: pr.imageModel ?? '',
+                                              videoModel: pr.videoModel ?? '',
+                                              imageQuality:
+                                                  pr.imageQuality ?? '',
+                                              projectType: pr.projectType ?? '',
+                                              mode: pr.mode ?? '',
+                                            );
                                         if (!ctx.mounted) return;
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
@@ -2416,15 +2418,18 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
-                                            SnackBar(content: Text(e.toString())),
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
                                           );
                                         }
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                projectLegacyBusy[0] = false,
+                                            () => projectLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2436,7 +2441,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2460,7 +2466,9 @@ class _HomePageState extends State<HomePage> {
                                       } on RustApiException catch (e) {
                                         if (!ctx.mounted) return;
                                         if (e.statusCode == 400) {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             const SnackBar(
                                               content: Text(
                                                 'POST …/project/delete-project id=0 -> 400 (expected)',
@@ -2468,7 +2476,9 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           );
                                         } else {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2477,8 +2487,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                projectLegacyBusy[0] = false,
+                                            () => projectLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2490,7 +2499,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2525,7 +2535,9 @@ class _HomePageState extends State<HomePage> {
                                       } on RustApiException catch (e) {
                                         if (!ctx.mounted) return;
                                         if (e.statusCode == 400) {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             const SnackBar(
                                               content: Text(
                                                 'POST …/project/edit-project id=0 -> 400 (expected)',
@@ -2533,7 +2545,9 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           );
                                         } else {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2542,8 +2556,7 @@ class _HomePageState extends State<HomePage> {
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                projectLegacyBusy[0] = false,
+                                            () => projectLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2555,7 +2568,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2580,8 +2594,9 @@ class _HomePageState extends State<HomePage> {
                                           imageQuality: '',
                                           mode: '',
                                         );
-                                        final all =
-                                            await postProjectGetProject(token);
+                                        final all = await postProjectGetProject(
+                                          token,
+                                        );
                                         if (!ctx.mounted) return;
                                         ProjectRow? match;
                                         for (final r in all) {
@@ -2591,7 +2606,9 @@ class _HomePageState extends State<HomePage> {
                                           }
                                         }
                                         if (match == null) {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 'add-project ok but get-project missing name="$probeName"',
@@ -2614,15 +2631,18 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx).showSnackBar(
-                                            SnackBar(content: Text(e.toString())),
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
                                           );
                                         }
                                       } finally {
                                         if (ctx.mounted) {
                                           setDialogState(
-                                            () =>
-                                                projectLegacyBusy[0] = false,
+                                            () => projectLegacyBusy[0] = false,
                                           );
                                         }
                                       }
@@ -2634,7 +2654,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2643,17 +2664,17 @@ class _HomePageState extends State<HomePage> {
                                         () => tasksLegacyBusy[0] = true,
                                       );
                                       try {
-                                        final items =
-                                            await postTasksGetProject(token);
+                                        final items = await postTasksGetProject(
+                                          token,
+                                        );
                                         if (!ctx.mounted) return;
                                         final line = items.isEmpty
                                             ? '0 项'
                                             : items
-                                                .map(
-                                                  (e) =>
-                                                      '#${e.id} ${e.name}',
-                                                )
-                                                .join('; ');
+                                                  .map(
+                                                    (e) => '#${e.id} ${e.name}',
+                                                  )
+                                                  .join('; ');
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
                                             content: Text(
@@ -2663,8 +2684,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2685,7 +2707,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2696,14 +2719,14 @@ class _HomePageState extends State<HomePage> {
                                       try {
                                         final rows =
                                             await postTasksGetTaskCategories(
-                                          token,
-                                        );
+                                              token,
+                                            );
                                         if (!ctx.mounted) return;
                                         final line = rows.isEmpty
                                             ? '0 类'
                                             : rows
-                                                .map((e) => e.taskClass)
-                                                .join(', ');
+                                                  .map((e) => e.taskClass)
+                                                  .join(', ');
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           SnackBar(
                                             content: Text(
@@ -2713,8 +2736,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2735,7 +2759,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2762,8 +2787,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2784,7 +2810,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: generalLegacyBusy[0] ||
+                              onPressed:
+                                  generalLegacyBusy[0] ||
                                       tasksLegacyBusy[0] ||
                                       projectLegacyBusy[0]
                                   ? null
@@ -2804,8 +2831,9 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       } on RustApiException catch (e) {
                                         if (ctx.mounted) {
-                                          ScaffoldMessenger.of(ctx)
-                                              .showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            ctx,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                             ),
@@ -2840,8 +2868,8 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           'GET …/stats 未加载',
                           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(ctx).colorScheme.outline,
-                              ),
+                            color: Theme.of(ctx).colorScheme.outline,
+                          ),
                         ),
                       const SizedBox(height: 12),
                       if (novelsRef[0] != null)
@@ -2855,13 +2883,14 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           'GET …/novels 未加载',
                           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(ctx).colorScheme.outline,
-                              ),
+                            color: Theme.of(ctx).colorScheme.outline,
+                          ),
                         ),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: novelsLoading[0] ||
+                          onPressed:
+                              novelsLoading[0] ||
                                   assetsBusy[0] ||
                                   assetsLoading[0] ||
                                   assetsScriptFilterLoading[0]
@@ -2878,11 +2907,7 @@ class _HomePageState extends State<HomePage> {
                                     }
                                   }
                                 },
-                          child: Text(
-                            novelsLoading[0]
-                                ? '刷新小说…'
-                                : '刷新小说列表',
-                          ),
+                          child: Text(novelsLoading[0] ? '刷新小说…' : '刷新小说列表'),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -2891,7 +2916,8 @@ class _HomePageState extends State<HomePage> {
                         runSpacing: 0,
                         children: [
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -2900,8 +2926,8 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => novelsBusy[0] = true);
                                     try {
-                                      final ts = DateTime.now()
-                                          .millisecondsSinceEpoch;
+                                      final ts =
+                                          DateTime.now().millisecondsSinceEpoch;
                                       await createProjectNovelUnderLegacy(
                                         token,
                                         p.legacyId,
@@ -2924,14 +2950,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST 测试章节'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -2945,10 +2974,10 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final row =
                                           await fetchProjectNovelByLegacyIds(
-                                        token,
-                                        p.legacyId,
-                                        first.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                            first.legacyId,
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -2966,14 +2995,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 首条小说'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -2984,12 +3016,12 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final pg =
                                           await fetchProjectNovelsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                        search: 'novel',
-                                        page: 1,
-                                        limit: 5,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                            search: 'novel',
+                                            page: 1,
+                                            limit: 5,
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3007,14 +3039,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 小说 search+分页'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3030,16 +3065,16 @@ class _HomePageState extends State<HomePage> {
                                         token,
                                         p.legacyId,
                                         first.legacyId,
-                                        {
-                                          'chapter': '${first.chapter}·patched',
-                                        },
+                                        {'chapter': '${first.chapter}·patched'},
                                       );
                                       if (!ctx.mounted) return;
                                       await reloadAssetsAndStats();
                                       if (ctx.mounted) {
                                         ScaffoldMessenger.of(ctx).showSnackBar(
                                           const SnackBar(
-                                            content: Text('已 PATCH 首条小说 chapter'),
+                                            content: Text(
+                                              '已 PATCH 首条小说 chapter',
+                                            ),
                                           ),
                                         );
                                       }
@@ -3051,14 +3086,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('PATCH 首条小说'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3094,7 +3132,9 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
@@ -3106,15 +3146,16 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         'Legacy POST …/novels/*（Electron 形）',
                         style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(ctx).colorScheme.outline,
-                            ),
+                          color: Theme.of(ctx).colorScheme.outline,
+                        ),
                       ),
                       Wrap(
                         spacing: 4,
                         runSpacing: 0,
                         children: [
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3150,14 +3191,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST get-novel'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3168,9 +3212,9 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final rows =
                                           await postLegacyNovelsGetNovelData(
-                                        token,
-                                        p.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3187,14 +3231,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST get-novel-data'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3205,9 +3252,9 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final idx =
                                           await postLegacyNovelsGetNovelIndex(
-                                        token,
-                                        p.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3225,14 +3272,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST get-novel-index'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3241,11 +3291,12 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => novelsBusy[0] = true);
                                     try {
-                                      final msg = await postLegacyNovelsAddNovel(
-                                        token,
-                                        p.legacyId,
-                                        const [],
-                                      );
+                                      final msg =
+                                          await postLegacyNovelsAddNovel(
+                                            token,
+                                            p.legacyId,
+                                            const [],
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3262,14 +3313,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST add-novel []'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3307,14 +3361,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST batch-delete []'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3352,14 +3409,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST delete-novel id=0'),
                           ),
                           TextButton(
-                            onPressed: novelsBusy[0] ||
+                            onPressed:
+                                novelsBusy[0] ||
                                     novelsLoading[0] ||
                                     assetsBusy[0] ||
                                     assetsLoading[0] ||
@@ -3373,14 +3433,14 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final msg =
                                           await postLegacyNovelsUpdateNovel(
-                                        token,
-                                        id: n.legacyId,
-                                        index: n.chapterIndex,
-                                        reel: n.reel ?? '',
-                                        chapter: n.chapter,
-                                        chapterData: n.chapterData,
-                                        event: n.event ?? '',
-                                      );
+                                            token,
+                                            id: n.legacyId,
+                                            index: n.chapterIndex,
+                                            reel: n.reel ?? '',
+                                            chapter: n.chapter,
+                                            chapterData: n.chapterData,
+                                            event: n.event ?? '',
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3397,7 +3457,9 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => novelsBusy[0] = false);
+                                        setDialogState(
+                                          () => novelsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
@@ -3417,8 +3479,8 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           'GET …/assets 未加载',
                           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(ctx).colorScheme.outline,
-                              ),
+                            color: Theme.of(ctx).colorScheme.outline,
+                          ),
                         ),
                       if (assetsFilterScriptLegacyId[0] != null) ...[
                         const SizedBox(height: 6),
@@ -3426,8 +3488,8 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} …',
                             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(ctx).colorScheme.outline,
-                                ),
+                              color: Theme.of(ctx).colorScheme.outline,
+                            ),
                           )
                         else if (assetsForScriptRef[0] != null)
                           Text(
@@ -3440,8 +3502,8 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} 未加载',
                             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(ctx).colorScheme.outline,
-                                ),
+                              color: Theme.of(ctx).colorScheme.outline,
+                            ),
                           ),
                       ],
                       if (scriptList.isNotEmpty)
@@ -3466,7 +3528,8 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ],
-                            onChanged: assetsBusy[0] ||
+                            onChanged:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
@@ -3494,8 +3557,8 @@ class _HomePageState extends State<HomePage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: assetsLoading[0] ||
-                                  assetsScriptFilterLoading[0]
+                          onPressed:
+                              assetsLoading[0] || assetsScriptFilterLoading[0]
                               ? null
                               : () async {
                                   setDialogState(() => assetsLoading[0] = true);
@@ -3509,11 +3572,7 @@ class _HomePageState extends State<HomePage> {
                                     }
                                   }
                                 },
-                          child: Text(
-                            assetsLoading[0]
-                                ? '刷新资产…'
-                                : '刷新资产列表',
-                          ),
+                          child: Text(assetsLoading[0] ? '刷新资产…' : '刷新资产列表'),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -3522,7 +3581,8 @@ class _HomePageState extends State<HomePage> {
                         runSpacing: 0,
                         children: [
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
@@ -3531,20 +3591,24 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final r =
                                           await fetchCornerScapeAssetsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                          );
                                       Uint8List? cornerThumb;
                                       if (r.items.isNotEmpty &&
-                                          r.items.first.historyImages.isNotEmpty) {
+                                          r
+                                              .items
+                                              .first
+                                              .historyImages
+                                              .isNotEmpty) {
                                         final a = r.items.first;
                                         cornerThumb =
                                             await fetchCornerScapeHistoryImagePreviewBytes(
-                                          token,
-                                          p.legacyId,
-                                          a.legacyId,
-                                          a.historyImages.first,
-                                        );
+                                              token,
+                                              p.legacyId,
+                                              a.legacyId,
+                                              a.historyImages.first,
+                                            );
                                       }
                                       if (!ctx.mounted) return;
                                       final h0 = r.items.isEmpty
@@ -3564,7 +3628,8 @@ class _HomePageState extends State<HomePage> {
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            4),
+                                                          4,
+                                                        ),
                                                     child: Image.memory(
                                                       cornerThumb,
                                                       fit: BoxFit.cover,
@@ -3594,14 +3659,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST corner-scape'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -3611,8 +3679,8 @@ class _HomePageState extends State<HomePage> {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final first = assetsRef[0]!.items.first;
                                     try {
-                                      final ts = DateTime.now()
-                                          .millisecondsSinceEpoch;
+                                      final ts =
+                                          DateTime.now().millisecondsSinceEpoch;
                                       final row = await createProjectAssetImage(
                                         token,
                                         p.legacyId,
@@ -3636,14 +3704,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST 首条资产图片'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -3655,10 +3726,10 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       final list =
                                           await fetchProjectAssetImagesByLegacyIds(
-                                        token,
-                                        p.legacyId,
-                                        first.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                            first.legacyId,
+                                          );
                                       if (list.items.isEmpty) {
                                         if (!ctx.mounted) return;
                                         ScaffoldMessenger.of(ctx).showSnackBar(
@@ -3673,22 +3744,21 @@ class _HomePageState extends State<HomePage> {
                                       final img = list.items.first;
                                       final one =
                                           await fetchProjectAssetImageByLegacyIds(
-                                        token,
-                                        p.legacyId,
-                                        first.legacyId,
-                                        img.id,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                            first.legacyId,
+                                            img.id,
+                                          );
                                       var fileSuffix = '';
                                       try {
                                         final bytes =
                                             await fetchProjectAssetImageFileByLegacyIds(
-                                          token,
-                                          p.legacyId,
-                                          first.legacyId,
-                                          one.id,
-                                        );
-                                        fileSuffix =
-                                            ' …/file ${bytes.length}B';
+                                              token,
+                                              p.legacyId,
+                                              first.legacyId,
+                                              one.id,
+                                            );
+                                        fileSuffix = ' …/file ${bytes.length}B';
                                       } on RustApiException catch (fe) {
                                         fileSuffix =
                                             ' …/file ${fe.statusCode ?? "?"}';
@@ -3715,14 +3785,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 资产图片(单条)'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -3732,10 +3805,9 @@ class _HomePageState extends State<HomePage> {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final first = assetsRef[0]!.items.first;
                                     try {
-                                      final ts = DateTime.now()
-                                          .millisecondsSinceEpoch;
-                                      final row =
-                                          await createProjectAssetImage(
+                                      final ts =
+                                          DateTime.now().millisecondsSinceEpoch;
+                                      final row = await createProjectAssetImage(
                                         token,
                                         p.legacyId,
                                         first.legacyId,
@@ -3743,15 +3815,15 @@ class _HomePageState extends State<HomePage> {
                                       );
                                       final patched =
                                           await patchProjectAssetImageByLegacyIds(
-                                        token,
-                                        p.legacyId,
-                                        first.legacyId,
-                                        row.id,
-                                        {
-                                          'state': '已完成',
-                                          'sort_index': row.sortIndex + 1,
-                                        },
-                                      );
+                                            token,
+                                            p.legacyId,
+                                            first.legacyId,
+                                            row.id,
+                                            {
+                                              'state': '已完成',
+                                              'sort_index': row.sortIndex + 1,
+                                            },
+                                          );
                                       await deleteProjectAssetImageByLegacyIds(
                                         token,
                                         p.legacyId,
@@ -3778,22 +3850,25 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST→PATCH→DEL 图'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     try {
-                                      final ts = DateTime.now()
-                                          .millisecondsSinceEpoch;
+                                      final ts =
+                                          DateTime.now().millisecondsSinceEpoch;
                                       await createProjectAssetUnderLegacy(
                                         token,
                                         p.legacyId,
@@ -3817,14 +3892,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('POST 测试资产'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -3834,11 +3912,12 @@ class _HomePageState extends State<HomePage> {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final first = assetsRef[0]!.items.first;
                                     try {
-                                      final row = await fetchProjectAssetByLegacyIds(
-                                        token,
-                                        p.legacyId,
-                                        first.legacyId,
-                                      );
+                                      final row =
+                                          await fetchProjectAssetByLegacyIds(
+                                            token,
+                                            p.legacyId,
+                                            first.legacyId,
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3856,29 +3935,36 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 首条资产详情'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     try {
-                                      final page = await fetchProjectAssetsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                        page: 1,
-                                        limit: 2,
-                                      );
+                                      final page =
+                                          await fetchProjectAssetsByLegacyId(
+                                            token,
+                                            p.legacyId,
+                                            page: 1,
+                                            limit: 2,
+                                          );
                                       if (!ctx.mounted) return;
                                       final ids = page.items
-                                          .map((a) => '#${a.legacyId}:${a.assetType}')
+                                          .map(
+                                            (a) =>
+                                                '#${a.legacyId}:${a.assetType}',
+                                          )
                                           .join(', ');
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3897,30 +3983,36 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 分页 page=1&limit=2'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0]
                                 ? null
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     try {
-                                      final r = await fetchProjectAssetsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                        assetType: 'role',
-                                        name: 'probe',
-                                      );
+                                      final r =
+                                          await fetchProjectAssetsByLegacyId(
+                                            token,
+                                            p.legacyId,
+                                            assetType: 'role',
+                                            name: 'probe',
+                                          );
                                       if (!ctx.mounted) return;
                                       final ids = r.items
                                           .take(4)
-                                          .map((a) => '#${a.legacyId}:${a.name}')
+                                          .map(
+                                            (a) => '#${a.legacyId}:${a.name}',
+                                          )
                                           .join(', ');
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3939,14 +4031,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 筛选 type+name'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsFilterScriptLegacyId[0] == null
@@ -3955,16 +4050,20 @@ class _HomePageState extends State<HomePage> {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final sid = assetsFilterScriptLegacyId[0]!;
                                     try {
-                                      final pg = await fetchProjectAssetsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                        scriptLegacyId: sid,
-                                        page: 1,
-                                        limit: 2,
-                                      );
+                                      final pg =
+                                          await fetchProjectAssetsByLegacyId(
+                                            token,
+                                            p.legacyId,
+                                            scriptLegacyId: sid,
+                                            page: 1,
+                                            limit: 2,
+                                          );
                                       if (!ctx.mounted) return;
                                       final ids = pg.items
-                                          .map((a) => '#${a.legacyId}:${a.assetType}')
+                                          .map(
+                                            (a) =>
+                                                '#${a.legacyId}:${a.assetType}',
+                                          )
                                           .join(', ');
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -3984,14 +4083,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('GET 当前剧本+分页'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -4024,14 +4126,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('PATCH 首条'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     assetsRef[0] == null ||
@@ -4065,14 +4170,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('DELETE 末条'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     scriptList.isEmpty ||
@@ -4082,7 +4190,8 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final sid = scriptList.first.legacyId;
-                                    final aid = assetsRef[0]!.items.first.legacyId;
+                                    final aid =
+                                        assetsRef[0]!.items.first.legacyId;
                                     try {
                                       await linkScriptToAssetByLegacyIds(
                                         token,
@@ -4109,14 +4218,17 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
                             child: const Text('PUT 关联首剧本·首资产'),
                           ),
                           TextButton(
-                            onPressed: assetsBusy[0] ||
+                            onPressed:
+                                assetsBusy[0] ||
                                     assetsLoading[0] ||
                                     assetsScriptFilterLoading[0] ||
                                     scriptList.isEmpty ||
@@ -4126,7 +4238,8 @@ class _HomePageState extends State<HomePage> {
                                 : () async {
                                     setDialogState(() => assetsBusy[0] = true);
                                     final sid = scriptList.first.legacyId;
-                                    final aid = assetsRef[0]!.items.first.legacyId;
+                                    final aid =
+                                        assetsRef[0]!.items.first.legacyId;
                                     try {
                                       await unlinkScriptFromAssetByLegacyIds(
                                         token,
@@ -4151,7 +4264,9 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     } finally {
                                       if (ctx.mounted) {
-                                        setDialogState(() => assetsBusy[0] = false);
+                                        setDialogState(
+                                          () => assetsBusy[0] = false,
+                                        );
                                       }
                                     }
                                   },
@@ -4166,53 +4281,62 @@ class _HomePageState extends State<HomePage> {
                         runSpacing: 0,
                         children: [
                           TextButton(
-                            onPressed:
-                                scriptProbeBusy[0] || saving[0] ? null : () async {
-                              setDialogState(() => scriptProbeBusy[0] = true);
-                              try {
-                                final rows = await postScriptsGetScriptApi(
-                                  token,
-                                  p.legacyId,
-                                );
-                                if (!ctx.mounted) return;
-                                final sample = rows.isEmpty
-                                    ? '0 条'
-                                    : rows
-                                        .take(2)
-                                        .map(
-                                          (r) =>
-                                              '#${r.legacyId} rel=${r.relatedAssets.length}',
-                                        )
-                                        .join('; ');
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'POST …/scripts/get-script-api：'
-                                      '${rows.length} 条 · $sample',
-                                    ),
-                                  ),
-                                );
-                              } on RustApiException catch (e) {
-                                if (ctx.mounted) {
-                                  ScaffoldMessenger.of(ctx).showSnackBar(
-                                    SnackBar(content: Text(e.toString())),
-                                  );
-                                }
-                              } finally {
-                                if (ctx.mounted) {
-                                  setDialogState(() => scriptProbeBusy[0] = false);
-                                }
-                              }
-                            },
+                            onPressed: scriptProbeBusy[0] || saving[0]
+                                ? null
+                                : () async {
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
+                                    try {
+                                      final rows =
+                                          await postScriptsGetScriptApi(
+                                            token,
+                                            p.legacyId,
+                                          );
+                                      if (!ctx.mounted) return;
+                                      final sample = rows.isEmpty
+                                          ? '0 条'
+                                          : rows
+                                                .take(2)
+                                                .map(
+                                                  (r) =>
+                                                      '#${r.legacyId} rel=${r.relatedAssets.length}',
+                                                )
+                                                .join('; ');
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'POST …/scripts/get-script-api：'
+                                            '${rows.length} 条 · $sample',
+                                          ),
+                                        ),
+                                      );
+                                    } on RustApiException catch (e) {
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text(e.toString())),
+                                        );
+                                      }
+                                    } finally {
+                                      if (ctx.mounted) {
+                                        setDialogState(
+                                          () => scriptProbeBusy[0] = false,
+                                        );
+                                      }
+                                    }
+                                  },
                             child: const Text('POST get-script-api'),
                           ),
                           TextButton(
-                            onPressed: scriptProbeBusy[0] ||
+                            onPressed:
+                                scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
                                     saving[0]
                                 ? null
                                 : () async {
-                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
                                     try {
                                       final sid = scriptList.first.legacyId;
                                       final row = await fetchScriptByLegacyId(
@@ -4249,25 +4373,29 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: scriptProbeBusy[0] ||
+                            onPressed:
+                                scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
                                     saving[0]
                                 ? null
                                 : () async {
-                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
                                     try {
                                       final sid = scriptList.first.legacyId;
                                       final cur = await fetchScriptByLegacyId(
                                         token,
                                         sid,
                                       );
-                                      final patched = await updateScriptByLegacyId(
-                                        token,
-                                        sid,
-                                        <String, dynamic>{
-                                          'name': cur.name ?? '',
-                                        },
-                                      );
+                                      final patched =
+                                          await updateScriptByLegacyId(
+                                            token,
+                                            sid,
+                                            <String, dynamic>{
+                                              'name': cur.name ?? '',
+                                            },
+                                          );
                                       if (!ctx.mounted) return;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
@@ -4298,12 +4426,15 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: scriptProbeBusy[0] ||
+                            onPressed:
+                                scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
                                     saving[0]
                                 ? null
                                 : () async {
-                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
                                     try {
                                       final ids = scriptList
                                           .map((s) => s.legacyId)
@@ -4342,12 +4473,15 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: scriptProbeBusy[0] ||
+                            onPressed:
+                                scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
                                     saving[0]
                                 ? null
                                 : () async {
-                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
                                     try {
                                       final ids = scriptList
                                           .map((s) => s.legacyId)
@@ -4360,12 +4494,12 @@ class _HomePageState extends State<HomePage> {
                                       final sample = rows.isEmpty
                                           ? '（empty：均在提取中或 idle）'
                                           : rows
-                                              .take(3)
-                                              .map(
-                                                (r) =>
-                                                    '#${r.legacyId} state=${r.extractState}',
-                                              )
-                                              .join('; ');
+                                                .take(3)
+                                                .map(
+                                                  (r) =>
+                                                      '#${r.legacyId} state=${r.extractState}',
+                                                )
+                                                .join('; ');
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
                                           content: Text(
@@ -4394,12 +4528,15 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: scriptProbeBusy[0] ||
+                            onPressed:
+                                scriptProbeBusy[0] ||
                                     scriptList.isEmpty ||
                                     saving[0]
                                 ? null
                                 : () async {
-                                    setDialogState(() => scriptProbeBusy[0] = true);
+                                    setDialogState(
+                                      () => scriptProbeBusy[0] = true,
+                                    );
                                     try {
                                       final ids = scriptList
                                           .map((s) => s.legacyId)
@@ -4449,9 +4586,9 @@ class _HomePageState extends State<HomePage> {
                                   try {
                                     final s =
                                         await createScriptUnderProjectLegacy(
-                                      token,
-                                      p.legacyId,
-                                    );
+                                          token,
+                                          p.legacyId,
+                                        );
                                     if (!ctx.mounted) return;
                                     scriptList.add(
                                       ScriptBrief(
@@ -4463,9 +4600,9 @@ class _HomePageState extends State<HomePage> {
                                     try {
                                       statsRef[0] =
                                           await fetchProjectStatsByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                      );
+                                            token,
+                                            p.legacyId,
+                                          );
                                     } catch (_) {}
                                     if (!ctx.mounted) return;
                                     setDialogState(() => saving[0] = false);
@@ -4508,27 +4645,27 @@ class _HomePageState extends State<HomePage> {
                           onTap: saving[0]
                               ? null
                               : () => _openScriptEditor(
-                                    token,
-                                    s.legacyId,
-                                    onScriptTreeMutated: () async {
-                                      final d = await fetchProjectByLegacyId(
-                                        token,
-                                        p.legacyId,
-                                      );
-                                      if (!ctx.mounted) return;
-                                      scriptList
-                                        ..clear()
-                                        ..addAll(d.scripts);
-                                      try {
-                                        statsRef[0] =
-                                            await fetchProjectStatsByLegacyId(
-                                          token,
-                                          p.legacyId,
-                                        );
-                                      } catch (_) {}
-                                      setDialogState(() {});
-                                    },
-                                  ),
+                                  token,
+                                  s.legacyId,
+                                  onScriptTreeMutated: () async {
+                                    final d = await fetchProjectByLegacyId(
+                                      token,
+                                      p.legacyId,
+                                    );
+                                    if (!ctx.mounted) return;
+                                    scriptList
+                                      ..clear()
+                                      ..addAll(d.scripts);
+                                    try {
+                                      statsRef[0] =
+                                          await fetchProjectStatsByLegacyId(
+                                            token,
+                                            p.legacyId,
+                                          );
+                                    } catch (_) {}
+                                    setDialogState(() {});
+                                  },
+                                ),
                         ),
                       ),
                     ],
@@ -4536,8 +4673,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed:
-                        saving[0] ? null : () => Navigator.of(ctx).pop(),
+                    onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
                     child: const Text('Close'),
                   ),
                   TextButton(
@@ -4553,13 +4689,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(false),
+                                    onPressed: () => Navigator.of(c).pop(false),
                                     child: const Text('取消'),
                                   ),
                                   FilledButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(true),
+                                    onPressed: () => Navigator.of(c).pop(true),
                                     child: const Text('删除'),
                                   ),
                                 ],
@@ -4575,9 +4709,7 @@ class _HomePageState extends State<HomePage> {
                               await _loadProjects();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('项目已删除'),
-                                ),
+                                const SnackBar(content: Text('项目已删除')),
                               );
                             } on RustApiException catch (e) {
                               if (ctx.mounted) {
@@ -4711,12 +4843,13 @@ class _HomePageState extends State<HomePage> {
                                   try {
                                     final boards =
                                         await fetchStoryboardsForScript(
-                                      token,
-                                      scriptLegacyId,
-                                    );
+                                          token,
+                                          scriptLegacyId,
+                                        );
                                     if (!mounted) return;
-                                    final boardsList =
-                                        List<StoryboardRow>.from(boards);
+                                    final boardsList = List<StoryboardRow>.from(
+                                      boards,
+                                    );
                                     await showDialog<void>(
                                       context: context,
                                       builder: (ctx2) {
@@ -4728,231 +4861,251 @@ class _HomePageState extends State<HomePage> {
                                               title: Text(
                                                 '分镜 (${boardsList.length})',
                                               ),
-                                        content: SizedBox(
-                                          width: double.maxFinite,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              ListView.builder(
-                                                shrinkWrap: true,
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemCount: boardsList.length,
-                                                itemBuilder: (_, i) {
-                                                  final b = boardsList[i];
-                                                  return ListTile(
-                                                    title: Text(
-                                                      '#${b.legacyId} ${b.state ?? ""}',
-                                                    ),
-                                                    subtitle: Text(
-                                                      b.prompt ?? '',
-                                                      maxLines: 2,
-                                                      overflow: TextOverflow
-                                                          .ellipsis,
-                                                    ),
-                                                    onTap: creatingSb[0]
-                                                        ? null
-                                                        : () async {
-                                                            await _openStoryboardEditor(
-                                                              token,
-                                                              b.legacyId,
-                                                              onStoryboardTreeMutated:
-                                                                  () async {
-                                                                final fresh =
-                                                                    await fetchStoryboardsForScript(
-                                                                  token,
-                                                                  scriptLegacyId,
-                                                                );
-                                                                if (!ctx2
-                                                                    .mounted) {
-                                                                  return;
-                                                                }
-                                                                boardsList
-                                                                  ..clear()
-                                                                  ..addAll(
-                                                                    fresh,
-                                                                  );
-                                                                setBoardsState(
-                                                                  () {},
-                                                                );
-                                                              },
-                                                            );
-                                                          },
-                                                  );
-                                                },
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Wrap(
-                                                  spacing: 4,
-                                                  runSpacing: 4,
+                                              content: SizedBox(
+                                                width: double.maxFinite,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .stretch,
                                                   children: [
-                                                    TextButton(
-                                                      onPressed: sbProbeBusy[0] ||
-                                                              creatingSb[0] ||
-                                                              boardsList.isEmpty
-                                                          ? null
-                                                          : () async {
-                                                              sbProbeBusy[0] =
-                                                                  true;
-                                                              setBoardsState(
-                                                                  () {});
-                                                              try {
-                                                                final sid =
-                                                                    boardsList
-                                                                        .first
-                                                                        .legacyId;
-                                                                final row =
-                                                                    await fetchStoryboardByLegacyId(
-                                                                  token,
-                                                                  sid,
-                                                                );
-                                                                if (!ctx2
-                                                                    .mounted) {
-                                                                  return;
-                                                                }
-                                                                ScaffoldMessenger
-                                                                        .of(ctx2)
-                                                                    .showSnackBar(
-                                                                  SnackBar(
-                                                                    content: Text(
-                                                                      'GET …/storyboards/legacy/$sid：state=${row.state ?? "(null)"}',
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              } on RustApiException catch (e) {
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger
-                                                                          .of(ctx2)
-                                                                      .showSnackBar(
-                                                                    SnackBar(
-                                                                      content:
-                                                                          Text(e
-                                                                              .toString()),
-                                                                    ),
+                                                    ListView.builder(
+                                                      shrinkWrap: true,
+                                                      physics:
+                                                          const NeverScrollableScrollPhysics(),
+                                                      itemCount:
+                                                          boardsList.length,
+                                                      itemBuilder: (_, i) {
+                                                        final b = boardsList[i];
+                                                        return ListTile(
+                                                          title: Text(
+                                                            '#${b.legacyId} ${b.state ?? ""}',
+                                                          ),
+                                                          subtitle: Text(
+                                                            b.prompt ?? '',
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          onTap: creatingSb[0]
+                                                              ? null
+                                                              : () async {
+                                                                  await _openStoryboardEditor(
+                                                                    token,
+                                                                    b.legacyId,
+                                                                    onStoryboardTreeMutated: () async {
+                                                                      final fresh =
+                                                                          await fetchStoryboardsForScript(
+                                                                            token,
+                                                                            scriptLegacyId,
+                                                                          );
+                                                                      if (!ctx2
+                                                                          .mounted) {
+                                                                        return;
+                                                                      }
+                                                                      boardsList
+                                                                        ..clear()
+                                                                        ..addAll(
+                                                                          fresh,
+                                                                        );
+                                                                      setBoardsState(
+                                                                        () {},
+                                                                      );
+                                                                    },
                                                                   );
-                                                                }
-                                                              } catch (e) {
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger
-                                                                          .of(ctx2)
-                                                                      .showSnackBar(
-                                                                    SnackBar(
-                                                                      content:
-                                                                          Text(e
-                                                                              .toString()),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                              } finally {
-                                                                sbProbeBusy[0] =
-                                                                    false;
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  setBoardsState(
-                                                                      () {});
-                                                                }
-                                                              }
-                                                            },
-                                                      child: Text(
-                                                        sbProbeBusy[0]
-                                                            ? '…'
-                                                            : 'GET storyboard/legacy (首条)',
-                                                      ),
+                                                                },
+                                                        );
+                                                      },
                                                     ),
-                                                    TextButton(
-                                                      onPressed: sbProbeBusy[0] ||
-                                                              creatingSb[0] ||
-                                                              boardsList.isEmpty
-                                                          ? null
-                                                          : () async {
-                                                              sbProbeBusy[0] =
-                                                                  true;
-                                                              setBoardsState(
-                                                                  () {});
-                                                              try {
-                                                                final first =
+                                                    const SizedBox(height: 8),
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      child: Wrap(
+                                                        spacing: 4,
+                                                        runSpacing: 4,
+                                                        children: [
+                                                          TextButton(
+                                                            onPressed:
+                                                                sbProbeBusy[0] ||
+                                                                    creatingSb[0] ||
                                                                     boardsList
-                                                                        .first;
-                                                                final patched =
-                                                                    await updateStoryboardByLegacyId(
-                                                                  token,
-                                                                  first
-                                                                      .legacyId,
-                                                                  <String,
-                                                                      dynamic>{
-                                                                    'state':
-                                                                        first.state ??
-                                                                            '',
+                                                                        .isEmpty
+                                                                ? null
+                                                                : () async {
+                                                                    sbProbeBusy[0] =
+                                                                        true;
+                                                                    setBoardsState(
+                                                                      () {},
+                                                                    );
+                                                                    try {
+                                                                      final sid = boardsList
+                                                                          .first
+                                                                          .legacyId;
+                                                                      final row =
+                                                                          await fetchStoryboardByLegacyId(
+                                                                            token,
+                                                                            sid,
+                                                                          );
+                                                                      if (!ctx2
+                                                                          .mounted) {
+                                                                        return;
+                                                                      }
+                                                                      ScaffoldMessenger.of(
+                                                                        ctx2,
+                                                                      ).showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text(
+                                                                            'GET …/storyboards/legacy/$sid：state=${row.state ?? "(null)"}',
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                    } on RustApiException catch (
+                                                                      e
+                                                                    ) {
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        ScaffoldMessenger.of(
+                                                                          ctx2,
+                                                                        ).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              e.toString(),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } catch (
+                                                                      e
+                                                                    ) {
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        ScaffoldMessenger.of(
+                                                                          ctx2,
+                                                                        ).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              e.toString(),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } finally {
+                                                                      sbProbeBusy[0] =
+                                                                          false;
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        setBoardsState(
+                                                                          () {},
+                                                                        );
+                                                                      }
+                                                                    }
                                                                   },
-                                                                );
-                                                                if (!ctx2
-                                                                    .mounted) {
-                                                                  return;
-                                                                }
-                                                                ScaffoldMessenger
-                                                                        .of(ctx2)
-                                                                    .showSnackBar(
-                                                                  SnackBar(
-                                                                    content: Text(
-                                                                      'PATCH …/storyboards/legacy/${first.legacyId} state noop → ok (legacy #${patched.legacyId})',
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              } on RustApiException catch (e) {
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger
-                                                                          .of(ctx2)
-                                                                      .showSnackBar(
-                                                                    SnackBar(
-                                                                      content:
-                                                                          Text(e
-                                                                              .toString()),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                              } catch (e) {
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  ScaffoldMessenger
-                                                                          .of(ctx2)
-                                                                      .showSnackBar(
-                                                                    SnackBar(
-                                                                      content:
-                                                                          Text(e
-                                                                              .toString()),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                              } finally {
-                                                                sbProbeBusy[0] =
-                                                                    false;
-                                                                if (ctx2
-                                                                    .mounted) {
-                                                                  setBoardsState(
-                                                                      () {});
-                                                                }
-                                                              }
-                                                            },
-                                                      child: Text(
-                                                        sbProbeBusy[0]
-                                                            ? '…'
-                                                            : 'PATCH storyboard/legacy (state noop)',
+                                                            child: Text(
+                                                              sbProbeBusy[0]
+                                                                  ? '…'
+                                                                  : 'GET storyboard/legacy (首条)',
+                                                            ),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed:
+                                                                sbProbeBusy[0] ||
+                                                                    creatingSb[0] ||
+                                                                    boardsList
+                                                                        .isEmpty
+                                                                ? null
+                                                                : () async {
+                                                                    sbProbeBusy[0] =
+                                                                        true;
+                                                                    setBoardsState(
+                                                                      () {},
+                                                                    );
+                                                                    try {
+                                                                      final first =
+                                                                          boardsList
+                                                                              .first;
+                                                                      final patched = await updateStoryboardByLegacyId(
+                                                                        token,
+                                                                        first
+                                                                            .legacyId,
+                                                                        <
+                                                                          String,
+                                                                          dynamic
+                                                                        >{
+                                                                          'state':
+                                                                              first.state ??
+                                                                              '',
+                                                                        },
+                                                                      );
+                                                                      if (!ctx2
+                                                                          .mounted) {
+                                                                        return;
+                                                                      }
+                                                                      ScaffoldMessenger.of(
+                                                                        ctx2,
+                                                                      ).showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text(
+                                                                            'PATCH …/storyboards/legacy/${first.legacyId} state noop → ok (legacy #${patched.legacyId})',
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                    } on RustApiException catch (
+                                                                      e
+                                                                    ) {
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        ScaffoldMessenger.of(
+                                                                          ctx2,
+                                                                        ).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              e.toString(),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } catch (
+                                                                      e
+                                                                    ) {
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        ScaffoldMessenger.of(
+                                                                          ctx2,
+                                                                        ).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              e.toString(),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } finally {
+                                                                      sbProbeBusy[0] =
+                                                                          false;
+                                                                      if (ctx2
+                                                                          .mounted) {
+                                                                        setBoardsState(
+                                                                          () {},
+                                                                        );
+                                                                      }
+                                                                    }
+                                                                  },
+                                                            child: Text(
+                                                              sbProbeBusy[0]
+                                                                  ? '…'
+                                                                  : 'PATCH storyboard/legacy (state noop)',
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                        actions: [
+                                              actions: [
                                                 TextButton(
                                                   onPressed: creatingSb[0]
                                                       ? null
@@ -4962,15 +5115,16 @@ class _HomePageState extends State<HomePage> {
                                                           try {
                                                             final row =
                                                                 await createStoryboardUnderScriptLegacy(
-                                                              token,
-                                                              scriptLegacyId,
-                                                            );
+                                                                  token,
+                                                                  scriptLegacyId,
+                                                                );
                                                             if (ctx2.mounted) {
-                                                              boardsList
-                                                                  .add(row);
-                                                              ScaffoldMessenger
-                                                                      .of(ctx2)
-                                                                  .showSnackBar(
+                                                              boardsList.add(
+                                                                row,
+                                                              );
+                                                              ScaffoldMessenger.of(
+                                                                ctx2,
+                                                              ).showSnackBar(
                                                                 SnackBar(
                                                                   content: Text(
                                                                     '已创建分镜 legacy #${row.legacyId}',
@@ -4978,11 +5132,13 @@ class _HomePageState extends State<HomePage> {
                                                                 ),
                                                               );
                                                             }
-                                                          } on RustApiException catch (e) {
+                                                          } on RustApiException catch (
+                                                            e
+                                                          ) {
                                                             if (ctx2.mounted) {
-                                                              ScaffoldMessenger
-                                                                      .of(ctx2)
-                                                                  .showSnackBar(
+                                                              ScaffoldMessenger.of(
+                                                                ctx2,
+                                                              ).showSnackBar(
                                                                 SnackBar(
                                                                   content: Text(
                                                                     e.toString(),
@@ -4992,9 +5148,9 @@ class _HomePageState extends State<HomePage> {
                                                             }
                                                           } catch (e) {
                                                             if (ctx2.mounted) {
-                                                              ScaffoldMessenger
-                                                                      .of(ctx2)
-                                                                  .showSnackBar(
+                                                              ScaffoldMessenger.of(
+                                                                ctx2,
+                                                              ).showSnackBar(
                                                                 SnackBar(
                                                                   content: Text(
                                                                     e.toString(),
@@ -5018,12 +5174,12 @@ class _HomePageState extends State<HomePage> {
                                                         : 'POST 空分镜',
                                                   ),
                                                 ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(ctx2).pop(),
-                                            child: const Text('Close'),
-                                          ),
-                                        ],
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(ctx2).pop(),
+                                                  child: const Text('Close'),
+                                                ),
+                                              ],
                                             );
                                           },
                                         );
@@ -5031,15 +5187,17 @@ class _HomePageState extends State<HomePage> {
                                     );
                                   } on RustApiException catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(content: Text(e.toString())),
                                       );
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(content: Text(e.toString())),
                                       );
                                     }
@@ -5053,8 +5211,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed:
-                        saving[0] ? null : () => Navigator.of(ctx).pop(),
+                    onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
                     child: const Text('Close'),
                   ),
                   TextButton(
@@ -5070,13 +5227,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(false),
+                                    onPressed: () => Navigator.of(c).pop(false),
                                     child: const Text('取消'),
                                   ),
                                   FilledButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(true),
+                                    onPressed: () => Navigator.of(c).pop(true),
                                     child: const Text('删除'),
                                   ),
                                 ],
@@ -5095,9 +5250,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('剧本已删除'),
-                                ),
+                                const SnackBar(content: Text('剧本已删除')),
                               );
                             } on RustApiException catch (e) {
                               if (ctx.mounted) {
@@ -5269,8 +5422,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed:
-                        saving[0] ? null : () => Navigator.of(ctx).pop(),
+                    onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
                     child: const Text('Close'),
                   ),
                   TextButton(
@@ -5286,13 +5438,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(false),
+                                    onPressed: () => Navigator.of(c).pop(false),
                                     child: const Text('取消'),
                                   ),
                                   FilledButton(
-                                    onPressed: () =>
-                                        Navigator.of(c).pop(true),
+                                    onPressed: () => Navigator.of(c).pop(true),
                                     child: const Text('删除'),
                                   ),
                                 ],
@@ -5311,9 +5461,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('分镜已删除'),
-                                ),
+                                const SnackBar(content: Text('分镜已删除')),
                               );
                             } on RustApiException catch (e) {
                               if (ctx.mounted) {
@@ -5387,8 +5535,9 @@ class _HomePageState extends State<HomePage> {
                                       ? null
                                       : videoCtrl.text,
                                   'sb_index': sbs.isEmpty ? null : sbIdx,
-                                  'should_generate_image':
-                                      sgis.isEmpty ? null : sgi,
+                                  'should_generate_image': sgis.isEmpty
+                                      ? null
+                                      : sgi,
                                 },
                               );
                               if (!ctx.mounted) return;
@@ -5474,10 +5623,7 @@ class _HomePageState extends State<HomePage> {
         jsonEncode({
           'type': 'agent.script.attach',
           'schema_version': 1,
-          'payload': {
-            'isolation_key': 'flutter-dev',
-            'project_id': 1,
-          },
+          'payload': {'isolation_key': 'flutter-dev', 'project_id': 1},
         }),
       );
 
@@ -5762,676 +5908,155 @@ class _HomePageState extends State<HomePage> {
     final signedIn = session != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Toonflow'),
-      ),
+      appBar: AppBar(title: const Text('Toonflow')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text('API: $kApiBaseUrl', style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-          FilledButton(
-            onPressed: _loadingHealth ? null : _pingHealth,
-            child: Text(_loadingHealth ? '请求中…' : 'GET /api/v1/health'),
-              ),
-              FilledButton.tonal(
-                onPressed: _loadingHealthRoot ? null : _pingHealthRoot,
-                child: Text(
-                  _loadingHealthRoot ? '请求中…' : 'GET /health',
-                ),
-              ),
-              FilledButton.tonal(
-                onPressed: _loadingPing ? null : _pingPing,
-                child: Text(
-                  _loadingPing ? '请求中…' : 'GET /api/v1/ping',
-                ),
-              ),
-            ],
+          OverviewSection(
+            apiBaseUrl: kApiBaseUrl,
+            loadingHealth: _loadingHealth,
+            loadingHealthRoot: _loadingHealthRoot,
+            loadingPing: _loadingPing,
+            loadingVersion: _loadingVersion,
+            loadingReady: _loadingReady,
+            healthBody: _healthBody,
+            healthRootBody: _healthRootBody,
+            pingBody: _pingBody,
+            versionBody: _versionBody,
+            readyBody: _readyBody,
+            onPingHealth: _pingHealth,
+            onPingHealthRoot: _pingHealthRoot,
+            onPingPing: _pingPing,
+            onPingVersion: _pingVersion,
+            onPingReady: _pingReady,
           ),
-          if (_healthBody != null) ...[
-            const SizedBox(height: 8),
-            Text('health (v1): $_healthBody'),
-          ],
-          if (_healthRootBody != null) ...[
-            const SizedBox(height: 8),
-            Text('health (root): $_healthRootBody'),
-          ],
-          if (_pingBody != null) ...[
-            const SizedBox(height: 8),
-            Text('ping: $_pingBody'),
-          ],
-          const SizedBox(height: 12),
-          FilledButton.tonal(
-            onPressed: _loadingVersion ? null : _pingVersion,
-            child: Text(_loadingVersion ? '请求中…' : 'GET /api/v1/version'),
+          AuthSection(
+            signedIn: signedIn,
+            session: session,
+            emailController: _email,
+            passwordController: _password,
+            loadingMe: _loadingMe,
+            loadingDevSwitchProbe: _loadingDevSwitchProbe,
+            loadingMemoryConfigProbe: _loadingMemoryConfigProbe,
+            loadingAboutProbe: _loadingAboutProbe,
+            loadingUsageSummary: _loadingUsageSummary,
+            loadingPromptsProbe: _loadingPromptsProbe,
+            loadingVisualManualProbe: _loadingVisualManualProbe,
+            loadingDirectorManualProbe: _loadingDirectorManualProbe,
+            loadingSkillsBinaryProbe: _loadingSkillsBinaryProbe,
+            loadingModelsCatalog: _loadingModelsCatalog,
+            loadingTextModelDefault: _loadingTextModelDefault,
+            loadingModelDetail: _loadingModelDetail,
+            meBody: _meBody,
+            devSwitchProbeBody: _devSwitchProbeBody,
+            memoryConfigProbeBody: _memoryConfigProbeBody,
+            aboutProbeBody: _aboutProbeBody,
+            usageSummaryBody: _usageSummaryBody,
+            promptsProbeBody: _promptsProbeBody,
+            visualManualProbeBody: _visualManualProbeBody,
+            directorManualProbeBody: _directorManualProbeBody,
+            skillsBinaryProbeBody: _skillsBinaryProbeBody,
+            modelsCatalogBody: _modelsCatalogBody,
+            textModelDefaultBody: _textModelDefaultBody,
+            modelDetailBody: _modelDetailBody,
+            onSignIn: _signIn,
+            onSignUp: _signUp,
+            onSignOut: _signOut,
+            onCallMe: _callMe,
+            onCallDevSwitchProbe: _callDevSwitchProbe,
+            onCallMemoryConfigProbe: _callMemoryConfigProbe,
+            onCallAboutProbe: _callAboutProbe,
+            onCallUsageSummary: _callUsageSummary,
+            onCallPromptsProbe: _callPromptsProbe,
+            onCallVisualManualProbe: _callVisualManualProbe,
+            onCallDirectorManualProbe: _callDirectorManualProbe,
+            onCallSkillsBinaryProbe: _callSkillsBinaryProbe,
+            onCallModelsCatalog: _callModelsCatalog,
+            onCallTextModelDefault: _callTextModelDefault,
+            onCallModelDetail: _callModelDetail,
           ),
-          if (_versionBody != null) ...[
-            const SizedBox(height: 8),
-            Text('version: $_versionBody'),
-          ],
-          const SizedBox(height: 12),
-          FilledButton.tonal(
-            onPressed: _loadingReady ? null : _pingReady,
-            child: Text(_loadingReady ? '请求中…' : 'GET /api/v1/ready'),
-          ),
-          if (_readyBody != null) ...[
-            const SizedBox(height: 8),
-            Text('ready: $_readyBody'),
-          ],
-          const Divider(height: 32),
-          Text(
-            'Supabase Auth',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          if (!kSupabaseConfigured)
-            Text(
-              '未配置：运行示例\n'
-              'flutter run --dart-define=SUPABASE_URL=... '
-              '--dart-define=SUPABASE_ANON_KEY=...',
-              style: Theme.of(context).textTheme.bodySmall,
-            )
-          else ...[
-            TextField(
-              controller: _email,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
+          if (signedIn) ...[
+            ProjectsSection(
+              loadingProjects: _loadingProjects,
+              loadingProjectsSummary: _loadingProjectsSummary,
+              loadingArtStyles: _loadingArtStyles,
+              creatingProject: _creatingProject,
+              loadingAgentMemory: _loadingAgentMemory,
+              projects: _projects,
+              projectsSummaryLine: _projectsSummaryLine,
+              artStylesLine: _artStylesLine,
+              agentMemoryBody: _agentMemoryBody,
+              onLoadProjects: _loadProjects,
+              onLoadProjectsSummary: _loadProjectsSummary,
+              onLoadArtStyles: _loadArtStyles,
+              onCreateEmptyProject: _createEmptyProject,
+              onOpenProjectDetail: _openProjectDetail,
+              onProbeAgentMemory: _probeAgentMemory,
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _password,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              autofillHints: const [AutofillHints.password],
+            JobsSection(
+              loadingJobs: _loadingJobs,
+              loadingJobKinds: _loadingJobKinds,
+              loadingJobKindSummary: _loadingJobKindSummary,
+              loadingJobStatusSummary: _loadingJobStatusSummary,
+              creatingJob: _creatingJob,
+              loadingJobById: _loadingJobById,
+              jobIdController: _jobIdCtrl,
+              jobs: _jobs,
+              jobByIdLine: _jobByIdLine,
+              jobKindsLine: _jobKindsLine,
+              jobKindSummaryLine: _jobKindSummaryLine,
+              jobStatusSummaryLine: _jobStatusSummaryLine,
+              cancellingJobId: _cancellingJobId,
+              retryingJobId: _retryingJobId,
+              onJobIdChanged: (_) => setState(() {}),
+              onLoadJobs: _loadJobs,
+              onLoadJobsKindFlutterProbe: _loadJobsKindFlutterProbe,
+              onLoadJobsStatusFailed: _loadJobsStatusFailed,
+              onLoadJobsKindProbeStatusQueued: _loadJobsKindProbeStatusQueued,
+              onLoadJobKinds: _loadJobKinds,
+              onLoadJobKindSummary: _loadJobKindSummary,
+              onLoadJobStatusSummary: _loadJobStatusSummary,
+              onCreateProbeJob: _createProbeJob,
+              onFetchJobById: _fetchJobById,
+              onSelectJob: (job) => setState(() => _jobIdCtrl.text = job.id),
+              onRetryFailedJob: _retryFailedJob,
+              onCancelQueuedJob: _cancelQueuedJob,
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton(onPressed: _signIn, child: const Text('登录')),
-                OutlinedButton(onPressed: _signUp, child: const Text('注册')),
-                if (signedIn)
-                  TextButton(onPressed: _signOut, child: const Text('退出')),
-              ],
+            HarnessSection(
+              loadingHarnessTools: _loadingHarnessTools,
+              loadingSkillsSummary: _loadingSkillsSummary,
+              loadingSkillList: _loadingSkillList,
+              loadingSkillPreview: _loadingSkillPreview,
+              loadingSkillPut: _loadingSkillPut,
+              loadingSkillPost: _loadingSkillPost,
+              loadingSkillDelete: _loadingSkillDelete,
+              wsProbesBusy: _wsProbesBusy,
+              loadingWs: _loadingWs,
+              loadingWsHarness: _loadingWsHarness,
+              loadingWsIsolatedEcho: _loadingWsIsolatedEcho,
+              loadingWsSkillsRead: _loadingWsSkillsRead,
+              loadingWsHarnessAgent: _loadingWsHarnessAgent,
+              harnessToolsLine: _harnessToolsLine,
+              skillsAggregateLine: _skillsAggregateLine,
+              skillsListSummary: _skillsListSummary,
+              skillMutationLine: _skillMutationLine,
+              skillPathController: _skillPathCtrl,
+              skillContentController: _skillContentCtrl,
+              wsLog: _wsLog,
+              onLoadHarnessTools: _loadHarnessTools,
+              onLoadSkillsAggregate: _loadSkillsAggregate,
+              onLoadSkillList: _loadSkillList,
+              onPreviewSkillFile: _previewSkillFile,
+              onPutSkillProbe: _putSkillProbe,
+              onPostSkillProbe: _postSkillProbe,
+              onDeleteSkillProbe: _deleteSkillProbe,
+              onTestWebSocket: _testWebSocket,
+              onTestHarnessToolWebSocket: _testHarnessToolWebSocket,
+              onTestHarnessIsolatedEchoWebSocket:
+                  _testHarnessIsolatedEchoWebSocket,
+              onTestHarnessSkillsReadWebSocket: _testHarnessSkillsReadWebSocket,
+              onTestHarnessAgentRunWebSocket: _testHarnessAgentRunWebSocket,
             ),
-            if (signedIn) ...[
-              const SizedBox(height: 12),
-              Text('已登录 user: ${session.user.id}'),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingMe ? null : _callMe,
-                child: Text(_loadingMe ? '请求中…' : 'GET /api/v1/me (Bearer)'),
-              ),
-              if (_meBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('/me: $_meBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingDevSwitchProbe ? null : _callDevSwitchProbe,
-                child: Text(
-                  _loadingDevSwitchProbe
-                      ? '请求中…'
-                      : 'GET+PUT /api/v1/settings/dev/switch-ai-tool',
-                ),
-              ),
-              if (_devSwitchProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('dev switch: $_devSwitchProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingMemoryConfigProbe
-                    ? null
-                    : _callMemoryConfigProbe,
-                child: Text(
-                  _loadingMemoryConfigProbe
-                      ? '请求中…'
-                      : 'memory-config GET+POST + clear-agent-memories',
-                ),
-              ),
-              if (_memoryConfigProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('memory-config: $_memoryConfigProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingAboutProbe ? null : _callAboutProbe,
-                child: Text(
-                  _loadingAboutProbe
-                      ? '请求中…'
-                      : 'POST …/settings/about/check-update + download-app',
-                ),
-              ),
-              if (_aboutProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('about: $_aboutProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingUsageSummary ? null : _callUsageSummary,
-                child: Text(
-                  _loadingUsageSummary ? '请求中…' : 'GET /api/v1/usage/summary',
-                ),
-              ),
-              if (_usageSummaryBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('usage: $_usageSummaryBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingPromptsProbe ? null : _callPromptsProbe,
-                child: Text(
-                  _loadingPromptsProbe
-                      ? '请求中…'
-                      : 'GET /api/v1/prompts + GET/1 + PATCH/1',
-                ),
-              ),
-              if (_promptsProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('prompts: $_promptsProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingVisualManualProbe
-                    ? null
-                    : _callVisualManualProbe,
-                child: Text(
-                  _loadingVisualManualProbe
-                      ? '请求中…'
-                      : 'GET+POST /api/v1/visual-manual',
-                ),
-              ),
-              if (_visualManualProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('visual-manual: $_visualManualProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingDirectorManualProbe
-                    ? null
-                    : _callDirectorManualProbe,
-                child: Text(
-                  _loadingDirectorManualProbe
-                      ? '请求中…'
-                      : 'POST …/project/query-director-manual',
-                ),
-              ),
-              if (_directorManualProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  'director-manual: $_directorManualProbeBody',
-                ),
-              ],
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _loadingSkillsBinaryProbe ? null : _callSkillsBinaryProbe,
-                child: Text(
-                  _loadingSkillsBinaryProbe
-                      ? '请求中…'
-                      : 'GET /api/v1/skills/binary (_smoke PNG)',
-                ),
-              ),
-              if (_skillsBinaryProbeBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('skills/binary: $_skillsBinaryProbeBody'),
-              ],
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _loadingModelsCatalog ? null : _callModelsCatalog,
-                    child: Text(
-                      _loadingModelsCatalog
-                          ? '请求中…'
-                          : 'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingTextModelDefault ? null : _callTextModelDefault,
-                    child: Text(
-                      _loadingTextModelDefault
-                          ? '请求中…'
-                          : 'GET /api/v1/models/text-default',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingModelDetail ? null : _callModelDetail,
-                    child: Text(
-                      _loadingModelDetail
-                          ? '请求中…'
-                          : 'GET /api/v1/models/detail (1:gpt-4o-mini)',
-                    ),
-                  ),
-                ],
-              ),
-              if (_modelsCatalogBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('models: $_modelsCatalogBody'),
-              ],
-              if (_textModelDefaultBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('text-default: $_textModelDefaultBody'),
-              ],
-              if (_modelDetailBody != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('model detail: $_modelDetailBody'),
-              ],
-              const SizedBox(height: 16),
-              Text(
-                'Projects (RLS + Postgres)',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-              FilledButton.tonal(
-                    onPressed: (_loadingProjects || _creatingProject)
-                        ? null
-                        : _loadProjects,
-                child: Text(
-                  _loadingProjects ? '加载中…' : 'GET /api/v1/projects',
-                ),
-              ),
-                  FilledButton.tonal(
-                    onPressed: (_loadingProjectsSummary || _creatingProject)
-                        ? null
-                        : _loadProjectsSummary,
-                    child: Text(
-                      _loadingProjectsSummary
-                          ? '加载中…'
-                          : 'GET …/projects/summary',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: (_loadingArtStyles || _creatingProject)
-                        ? null
-                        : _loadArtStyles,
-                    child: Text(
-                      _loadingArtStyles
-                          ? '加载中…'
-                          : 'GET …/art-styles + CRUD 探针',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: (_loadingProjects || _creatingProject)
-                        ? null
-                        : _createEmptyProject,
-                    child: Text(
-                      _creatingProject ? '创建中…' : 'POST /api/v1/projects',
-                    ),
-                  ),
-                ],
-              ),
-              if (_projectsSummaryLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('summary: $_projectsSummaryLine'),
-              ],
-              if (_artStylesLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('art-styles: $_artStylesLine'),
-              ],
-              if (_projects != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  '${_projects!.length} project(s)',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                ..._projects!.map(
-                  (p) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(p.name ?? 'legacy #${p.legacyId}'),
-                    subtitle: Text('legacy_id=${p.legacyId} · ${p.id}'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _openProjectDetail(p),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                FilledButton.tonal(
-                  onPressed: _loadingAgentMemory ? null : _probeAgentMemory,
-                  child: Text(
-                    _loadingAgentMemory
-                        ? '请求中…'
-                        : 'POST /api/v1/agents/memory/query (first project)',
-                  ),
-                ),
-                if (_agentMemoryBody != null) ...[
-                  const SizedBox(height: 8),
-                  SelectableText('agent memory: $_agentMemoryBody'),
-                ],
-              ],
-              const SizedBox(height: 16),
-              Text(
-                'Generation jobs',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _loadingJobs ? null : _loadJobs,
-                    child: Text(
-                      _loadingJobs ? '…' : 'GET /api/v1/jobs',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingJobs ? null : _loadJobsKindFlutterProbe,
-                    child: const Text('GET jobs?kind=flutter.probe'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingJobs ? null : _loadJobsStatusFailed,
-                    child: const Text('GET jobs?status=failed'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed:
-                        _loadingJobs ? null : _loadJobsKindProbeStatusQueued,
-                    child: const Text(
-                      'GET jobs?kind=flutter.probe&status=queued',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingJobKinds ? null : _loadJobKinds,
-                    child: Text(
-                      _loadingJobKinds ? '…' : 'GET /api/v1/jobs/kinds',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed:
-                        _loadingJobKindSummary ? null : _loadJobKindSummary,
-                    child: Text(
-                      _loadingJobKindSummary
-                          ? '…'
-                          : 'GET …/jobs/kinds/summary',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingJobStatusSummary
-                        ? null
-                        : _loadJobStatusSummary,
-                    child: Text(
-                      _loadingJobStatusSummary
-                          ? '…'
-                          : 'GET …/jobs/status/summary',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _creatingJob ? null : _createProbeJob,
-                    child: Text(
-                      _creatingJob ? '…' : 'POST job (flutter.probe)',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _jobIdCtrl,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  labelText: 'Job id (tap a row below to paste)',
-                ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: (_loadingJobById ||
-                        _jobIdCtrl.text.trim().isEmpty)
-                    ? null
-                    : _fetchJobById,
-                child: Text(
-                  _loadingJobById ? '…' : 'GET /api/v1/jobs/{id}',
-                ),
-              ),
-              if (_jobByIdLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  'job by id: $_jobByIdLine',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              if (_jobKindsLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('job kinds: $_jobKindsLine'),
-              ],
-              if (_jobKindSummaryLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('job kinds/summary: $_jobKindSummaryLine'),
-              ],
-              if (_jobStatusSummaryLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('job status/summary: $_jobStatusSummaryLine'),
-              ],
-              if (_jobs != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '${_jobs!.length} job(s)',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                ..._jobs!.take(8).map(
-                      (j) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text('${j.kind} · ${j.status}'),
-                        subtitle: Text(
-                          [
-                            j.id,
-                            if (j.claimedBy != null &&
-                                j.claimedBy!.isNotEmpty)
-                              'claimed_by=${j.claimedBy}',
-                          ].join(' · '),
-                        ),
-                        onTap: () =>
-                            setState(() => _jobIdCtrl.text = j.id),
-                        trailing: (j.status == 'failed' ||
-                                j.status == 'queued' ||
-                                j.status == 'running')
-                            ? Wrap(
-                                spacing: 4,
-                                children: [
-                                  if (j.status == 'failed')
-                                    TextButton(
-                                      onPressed: _retryingJobId == j.id
-                                          ? null
-                                          : () => _retryFailedJob(j),
-                                      child: Text(
-                                        _retryingJobId == j.id ? '…' : '重试',
-                                      ),
-                                    ),
-                                  if (j.status == 'queued' ||
-                                      j.status == 'running')
-                                    TextButton(
-                                      onPressed: _cancellingJobId == j.id
-                                          ? null
-                                          : () => _cancelQueuedJob(j),
-                                      child: Text(
-                                        _cancellingJobId == j.id ? '…' : '取消',
-                                      ),
-                                    ),
-                                ],
-                              )
-                            : null,
-                      ),
-                    ),
-              ],
-              const SizedBox(height: 16),
-              Text(
-                'Harness / skills',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _loadingHarnessTools ? null : _loadHarnessTools,
-                    child: Text(
-                      _loadingHarnessTools ? '…' : 'GET /api/v1/harness/tools',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed:
-                        _loadingSkillsSummary ? null : _loadSkillsAggregate,
-                    child: Text(
-                      _loadingSkillsSummary
-                          ? '…'
-                          : 'GET /api/v1/skills/summary',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingSkillList ? null : _loadSkillList,
-                    child: Text(
-                      _loadingSkillList ? '…' : 'GET /api/v1/skills',
-                    ),
-                  ),
-                ],
-              ),
-              if (_harnessToolsLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  'tools: $_harnessToolsLine',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              if (_skillsAggregateLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  'summary: $_skillsAggregateLine',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              if (_skillsListSummary != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  _skillsListSummary!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              const SizedBox(height: 8),
-              TextField(
-                controller: _skillPathCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Skill relative path',
-                  helperText:
-                      'POST needs a path that does not exist yet under data/skills',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _skillContentCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Body for PUT / POST',
-                ),
-                maxLines: 4,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed:
-                        _loadingSkillPreview ? null : _previewSkillFile,
-                    child: Text(
-                      _loadingSkillPreview
-                          ? '…'
-                          : 'GET /api/v1/skills/content',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingSkillPut ? null : _putSkillProbe,
-                    child: Text(
-                      _loadingSkillPut ? '…' : 'PUT /api/v1/skills/content',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingSkillPost ? null : _postSkillProbe,
-                    child: Text(
-                      _loadingSkillPost ? '…' : 'POST /api/v1/skills/content',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingSkillDelete ? null : _deleteSkillProbe,
-                    child: Text(
-                      _loadingSkillDelete
-                          ? '…'
-                          : 'DELETE /api/v1/skills/content',
-                    ),
-                  ),
-                ],
-              ),
-              if (_skillMutationLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  _skillMutationLine!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _wsProbesBusy ? null : _testWebSocket,
-                    child: Text(
-                      _loadingWs ? '…' : 'WebSocket: attach + LLM stream',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _wsProbesBusy ? null : _testHarnessToolWebSocket,
-                    child: Text(
-                      _loadingWsHarness ? '…' : 'WS: harness.tool.invoke (echo)',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed:
-                        _wsProbesBusy ? null : _testHarnessIsolatedEchoWebSocket,
-                    child: Text(
-                      _loadingWsIsolatedEcho
-                          ? '…'
-                          : 'WS: isolated.echo (subprocess)',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _wsProbesBusy ? null : _testHarnessSkillsReadWebSocket,
-                    child: Text(
-                      _loadingWsSkillsRead
-                          ? '…'
-                          : 'WS: skills.read (path field)',
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed:
-                        _wsProbesBusy ? null : _testHarnessAgentRunWebSocket,
-                    child: Text(
-                      _loadingWsHarnessAgent
-                          ? '…'
-                          : 'WS: harness.agent.run (needs LLM key)',
-                    ),
-                  ),
-                ],
-              ),
-              if (_wsLog.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('WS 最近消息:', style: Theme.of(context).textTheme.labelLarge),
-                ..._wsLog.map((l) => Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: SelectableText(l, style: Theme.of(context).textTheme.bodySmall),
-                    )),
-              ],
-            ],
           ],
           if (_error != null) ...[
             const SizedBox(height: 16),
