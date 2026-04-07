@@ -18,6 +18,7 @@ part 'home_page/project_editor_scripts.dart';
 part 'home_page/projects_controller.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/skills_harness_controller.dart';
+part 'home_page/quality_reviews_controller.dart';
 part 'home_page/system_probes_controller.dart';
 part 'home_page/auth_session_controller.dart';
 part 'home_page/overview_controller.dart';
@@ -125,6 +126,18 @@ class _HomePageState extends State<HomePage> {
   String? _jobByIdLine;
   final _jobIdCtrl = TextEditingController();
 
+  bool _loadingQualityReviews = false;
+  bool _loadingQualityBadCases = false;
+  bool _loadingQualityStats = false;
+  bool _loadingQualityStagePassRate = false;
+  bool _creatingQualityReview = false;
+  bool _loadingQualityReviewById = false;
+  String? _qualityStatsLine;
+  String? _qualityStagePassRateLine;
+  String? _qualityReviewByIdLine;
+  List<QualityReview>? _qualityReviews;
+  final _qualityReviewIdCtrl = TextEditingController();
+
   final _skillPathCtrl = TextEditingController(
     text: 'script_execution_script.md',
   );
@@ -160,6 +173,7 @@ class _HomePageState extends State<HomePage> {
     _email.dispose();
     _password.dispose();
     _jobIdCtrl.dispose();
+    _qualityReviewIdCtrl.dispose();
     _skillPathCtrl.dispose();
     _skillContentCtrl.dispose();
     super.dispose();

@@ -3,3 +3,4 @@ export 'harness_section.dart';
 export 'jobs_section.dart';
 export 'overview_section.dart';
 export 'projects_section.dart';
+export 'quality_reviews_section.dart';

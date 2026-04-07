@@ -272,9 +272,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       if (!ctx.mounted) return;
                       setDialogState(() => saving[0] = false);
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(
-                          content: Text('已创建剧本 legacy #${s.legacyId}'),
-                        ),
+                        SnackBar(content: Text('已创建剧本 legacy #${s.legacyId}')),
                       );
                     } on RustApiException catch (e) {
                       if (ctx.mounted) {
