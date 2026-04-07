@@ -267,9 +267,42 @@ async fn post_workbench_generate_video(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 || body.track_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId/scriptId/trackId must be positive integers".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Minimal "enqueue": verify the project + script belong to the current user.
+    // Real video-generation pipeline will come later.
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::OK.into_response())
 }
 
 async fn post_storyboard_polling_image(

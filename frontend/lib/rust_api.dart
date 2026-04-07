@@ -1105,7 +1105,8 @@ Future<int> postProductionSaveFlowDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/workbench/generate-video` — OpenAPI `postProductionWorkbenchGenerateVideoV1` (typically **501**).
+/// `POST /api/v1/production/workbench/generate-video` — OpenAPI `postProductionWorkbenchGenerateVideoV1`
+/// (implemented; returns **200** or **404** / **503** when DB-gated).
 Future<int> postProductionWorkbenchGenerateVideoV1(
   String accessToken, {
   required int projectId,

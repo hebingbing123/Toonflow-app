@@ -4350,7 +4350,10 @@ paths:
       summary: Enqueue video generation (legacy `generateVideo`)
       operationId: postProductionWorkbenchGenerateVideoV1
       description: |
-        Bearer JWT. Validates legacy **`generateVideo`** body, then **501** **`not_implemented`**.
+        Bearer JWT. Validates legacy **`generateVideo`** body, then:
+        - **200** when project+script belong to this user
+        - **404** when not owned / not found
+        - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
       requestBody:
@@ -4360,6 +4363,8 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductionWorkbenchGenerateVideoBody"
       responses:
+        "200":
+          description: OK (empty body)
         "400":
           description: Invalid body
           content:
@@ -4372,14 +4377,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project/script not found / not owned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
