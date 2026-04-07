@@ -7,6 +7,7 @@ use crate::state::{AppState, MemoryConfig};
 use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::Json;
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -49,6 +50,12 @@ pub(super) struct MeResponse {
     pub billing_currency: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub billing_provider: Option<String>,
+    /// Current subscription status derived from billing webhook profile updates.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription_status: Option<String>,
+    /// Period end timestamp of current paid subscription cycle.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription_current_period_end_at: Option<DateTime<Utc>>,
     /// Effective daily job quota for this user (null = unlimited, e.g. enterprise).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub daily_job_quota: Option<i64>,
@@ -65,6 +72,8 @@ struct UserProfileRow {
     plan_tier: String,
     billing_currency: Option<String>,
     billing_provider: Option<String>,
+    subscription_status: Option<String>,
+    subscription_current_period_end_at: Option<DateTime<Utc>>,
     daily_job_quota: Option<i64>,
     memory_config: Option<sqlx::types::Json<MemoryConfig>>,
 }
@@ -114,55 +123,82 @@ pub(super) async fn me(
     let claims = require_claims(&state, &headers)?;
     let sub = Uuid::parse_str(claims.sub.trim()).map_err(|_| ApiError::BadToken)?;
 
-    let (plan_tier, billing_currency, billing_provider, per_user_quota, jobs_today, memory_cfg) =
-        if let Some(pool) = state.pool.as_ref() {
-            let row = sqlx::query_as::<_, UserProfileRow>(
-                r#"
-            SELECT plan_tier, billing_currency, billing_provider, daily_job_quota, memory_config
+    let (
+        plan_tier,
+        billing_currency,
+        billing_provider,
+        subscription_status,
+        subscription_current_period_end_at,
+        per_user_quota,
+        jobs_today,
+        memory_cfg,
+    ) = if let Some(pool) = state.pool.as_ref() {
+        let row = sqlx::query_as::<_, UserProfileRow>(
+            r#"
+            SELECT
+              plan_tier,
+              billing_currency,
+              billing_provider,
+              subscription_status,
+              subscription_current_period_end_at,
+              daily_job_quota,
+              memory_config
             FROM app_user_profile
             WHERE user_id = $1
             "#,
-            )
-            .bind(sub)
-            .fetch_optional(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        )
+        .bind(sub)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-            let (tier, currency, provider, per_user_quota, mem_cfg) = match row {
-                Some(r) => (
-                    r.plan_tier,
-                    r.billing_currency,
-                    r.billing_provider,
-                    r.daily_job_quota,
-                    r.memory_config.map(|j| j.0),
-                ),
-                None => ("free".to_string(), None, None, None, None),
-            };
+        let (
+            tier,
+            currency,
+            provider,
+            subscription_status,
+            subscription_current_period_end_at,
+            per_user_quota,
+            mem_cfg,
+        ) = match row {
+            Some(r) => (
+                r.plan_tier,
+                r.billing_currency,
+                r.billing_provider,
+                r.subscription_status,
+                r.subscription_current_period_end_at,
+                r.daily_job_quota,
+                r.memory_config.map(|j| j.0),
+            ),
+            None => ("free".to_string(), None, None, None, None, None, None),
+        };
 
-            let today: i64 = sqlx::query_scalar(
-                r#"
+        let today: i64 = sqlx::query_scalar(
+            r#"
             SELECT COUNT(*)::bigint
             FROM app_generation_job
             WHERE owner_user_id = $1
               AND created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
             "#,
-            )
-            .bind(sub)
-            .fetch_one(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        )
+        .bind(sub)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-            (
-                tier,
-                currency,
-                provider,
-                per_user_quota,
-                Some(today),
-                mem_cfg,
-            )
-        } else {
-            ("free".to_string(), None, None, None, None, None)
-        };
+        (
+            tier,
+            currency,
+            provider,
+            subscription_status,
+            subscription_current_period_end_at,
+            per_user_quota,
+            Some(today),
+            mem_cfg,
+        )
+    } else {
+        ("free".to_string(), None, None, None, None, None, None, None)
+    };
 
     // Resolve effective quota using same logic as quota::effective_daily_job_quota
     // but inline (avoids a second DB round-trip).
@@ -199,6 +235,8 @@ pub(super) async fn me(
         plan_tier,
         billing_currency,
         billing_provider,
+        subscription_status,
+        subscription_current_period_end_at,
         daily_job_quota,
         jobs_today,
         memory_config,

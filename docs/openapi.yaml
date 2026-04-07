@@ -189,19 +189,62 @@ paths:
       summary: Ingest signed billing webhook (idempotent by JSON `id`)
       operationId: postBillingWebhookV1
       description: |
-        Verifies **HMAC-SHA256** of the **raw request body** using `BILLING_WEBHOOK_SECRET`.
-        Header **`X-Toonflow-Signature`** must be `sha256=` followed by lowercase hex (64 chars).
+        Verifies signature of the **raw request body** using `BILLING_WEBHOOK_SECRET`.
+        Supports either:
+        - **Toonflow native**: `X-Toonflow-Signature: sha256=<hex>` (HMAC-SHA256 of raw body)
+        - **Stripe native**: `Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]` (HMAC-SHA256 of `<unix>.<raw_body>`)
+        When both are present, `Stripe-Signature` takes precedence.
         Persists to `app_billing_webhook_event` when `id` is new; replays return `duplicate: true` (HTTP 200).
-        On **first** receipt only, if **`user_id`** (UUID string) and **`plan_tier`** (non-empty string) are present, upserts **`app_user_profile`** (`billing_currency` / `billing_provider` optional).
+        Deduplication key is **`<billing_provider>:<id>`** when `billing_provider` is present (lowercased), otherwise `id` as-is.
+        Server also stores best-effort metadata for audit:
+        `provider`, `raw_event_id`, `event_type`, `event_created_at`, `is_informational_event`.
+        On **first** receipt only, if **`user_id`** (UUID string) and **`plan_tier`** (non-empty string) are present, upserts **`app_user_profile`**.
+        Optional profile fields in payload: `billing_currency`, `billing_provider`, `subscription_status`,
+        `subscription_current_period_end`, `subscription_status_updated_at`.
+        When `billing_provider` is omitted, parser routing applies a currency adapter
+        (for status derivation only; dedupe namespace still requires explicit `billing_provider`).
+        Default mapping is `CNY -> alipay`, `USD -> stripe`, and can be overridden by
+        env `BILLING_CURRENCY_PROVIDER_MAP` (format `CNY=alipay,USD=stripe`).
+        For Stripe payloads, server also supports provider mapping from event envelope/object:
+        `type`, `created`, `data.object.status`, `data.object.current_period_end`.
+        Current Stripe event fallback coverage includes common subscription/invoice events such as:
+        `customer.subscription.created|updated|paused|resumed|unpaused|deleted`,
+        `invoice.payment_succeeded|paid|payment_failed|payment_reversal|overdue|payment_action_required|marked_uncollectible|voided`.
+        Non-state Stripe events in the informational whitelist (currently
+        `customer.subscription.trial_will_end`, `customer.subscription.pending_update_applied`,
+        `customer.subscription.pending_update_expired`, `invoice.finalization_failed`, `invoice.upcoming`,
+        `invoice.created`, `invoice.finalized`, `invoice.updated`, `invoice.sent`)
+        are treated as informational only (no status transition).
+        For Alipay payloads, server supports baseline mapping from:
+        `trade_status` / `type` / `notify_time`.
+        Non-state Alipay events in the informational whitelist (currently `trade.finished`)
+        are treated as informational only.
+        For Paddle payloads, server supports baseline mapping from:
+        `type` / `occurred_at` / `data.status` / `data.next_billed_at`.
+        Current Paddle event fallback coverage includes common subscription/transaction events such as:
+        `subscription.created|activated|updated|paused|resumed|past_due|canceled|expired`,
+        `transaction.completed|payment_failed|canceled`.
+        Non-state Paddle events in the informational whitelist (currently
+        `subscription.trialing`, `transaction.billed`, `transaction.created`, `transaction.updated`) are treated as informational only.
+        For subscription fields, incoming updates are guarded by `subscription_status_updated_at` to avoid
+        out-of-order webhook events overriding newer state.
         Returns **503** if `BILLING_WEBHOOK_SECRET` is unset or `DATABASE_URL` is not configured.
       security: []
       parameters:
         - name: X-Toonflow-Signature
           in: header
-          required: true
+          required: false
           schema:
             type: string
           description: Format `sha256=<hex>` (HMAC-SHA256 of raw body).
+        - name: Stripe-Signature
+          in: header
+          required: false
+          schema:
+            type: string
+          description: |
+            Stripe signature format `t=<unix>,v1=<hex>[,v1=<hex>...]`.
+            Validated with `BILLING_STRIPE_TOLERANCE_SECS` (default 300 seconds).
       requestBody:
         required: true
         content:
@@ -213,7 +256,7 @@ paths:
               properties:
                 id:
                   type: string
-                  description: Provider event id; used as deduplication key.
+                  description: Provider event id. Used in dedupe key (namespaced by `billing_provider` when present).
                 user_id:
                   type: string
                   format: uuid
@@ -226,7 +269,22 @@ paths:
                   description: Optional; e.g. `CNY`.
                 billing_provider:
                   type: string
-                  description: Optional provider name for audit.
+                  description: Optional provider name for audit (e.g. `stripe`, `alipay`, `paddle`).
+                subscription_status:
+                  type: string
+                  description: Optional normalized subscription state (`free|trialing|active|past_due|unpaid|canceled|incomplete|incomplete_expired`).
+                subscription_current_period_end:
+                  description: Optional subscription period end timestamp (Unix seconds or RFC3339 string).
+                  oneOf:
+                    - type: integer
+                      format: int64
+                    - type: string
+                subscription_status_updated_at:
+                  description: Optional provider event timestamp used for out-of-order protection (Unix seconds or RFC3339 string).
+                  oneOf:
+                    - type: integer
+                      format: int64
+                    - type: string
       responses:
         "200":
           description: Accepted (or duplicate replay)
@@ -253,6 +311,150 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/webhooks/billing/events:
+    get:
+      tags: [webhooks]
+      summary: List ingested billing webhook events (audit)
+      operationId: listBillingWebhookEventsV1
+      description: |
+        Bearer JWT required. Returns recent rows from `app_billing_webhook_event` for audit/debug.
+        Supports optional filters by `informational_event`, `provider`, created-at window
+        (`created_from` / `created_to`, RFC3339), `raw_event_id` / `raw_event_id_prefix`,
+        `event_type`, `provider_event_id_prefix`, `event_created_from` / `event_created_to`,
+        row id range (`id_min` / `id_max`, inclusive; `id_min` must be `<= id_max` when both set),
+        plus basic pagination (`limit` + `offset`).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: informational_event
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by informational whitelist classification.
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Provider filter (normalized lowercase; e.g. `stripe`, `alipay`, `paddle`).
+        - name: raw_event_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact raw event id filter (non-empty string), e.g. `evt_123`.
+        - name: raw_event_id_prefix
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Prefix match on raw event id (non-empty string), e.g. `evt_`.
+        - name: event_type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact event type filter (non-empty string), e.g. `invoice.payment_failed`.
+        - name: provider_event_id_prefix
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Prefix match on dedupe key `provider_event_id` (non-empty), e.g. `stripe:evt_`.
+        - name: provider_event_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact match on dedupe key `provider_event_id` (non-empty), e.g. `stripe:evt_123`.
+        - name: event_created_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Include rows with `event_created_at >= event_created_from` (RFC3339).
+        - name: event_created_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Include rows with `event_created_at <= event_created_to` (RFC3339).
+        - name: created_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Include rows with `created_at >= created_from` (RFC3339).
+        - name: created_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Include rows with `created_at <= created_to` (RFC3339).
+        - name: id_min
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: Include rows with `id >= id_min` (inclusive).
+        - name: id_max
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: Include rows with `id <= id_max` (inclusive). When both `id_min` and `id_max` are set, `id_min` must be `<= id_max`.
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [id_desc, id_asc]
+            default: id_desc
+          description: Sort order by row id.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingWebhookEventsResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured/reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/me:
     get:
       tags: [session]
@@ -260,6 +462,7 @@ paths:
       operationId: meV1
       description: |
         Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).
+        Includes `subscription_status` and `subscription_current_period_end_at` when present in profile.
         Also returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.
       security:
         - bearerAuth: []
@@ -7852,6 +8055,15 @@ components:
         billing_provider:
           type: string
           nullable: true
+        subscription_status:
+          type: string
+          nullable: true
+          description: Normalized subscription status from profile (`active`, `past_due`, etc.)
+        subscription_current_period_end_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Current paid subscription period end (when known)
         daily_job_quota:
           type: integer
           format: int64
@@ -9110,7 +9322,7 @@ components:
 
     BillingWebhookResponse:
       type: object
-      required: [received, duplicate]
+      required: [received, duplicate, informational_event]
       properties:
         received:
           type: boolean
@@ -9121,10 +9333,81 @@ components:
           format: int64
           description: |
             app_billing_webhook_event row id when duplicate is false.
+        provider_event_id:
+          type: string
+          description: |
+            The final deduplication key stored in app_billing_webhook_event (`<provider>:<id>` or `id`).
+          nullable: true
         profile_updated:
           type: boolean
           description: |
             True when user_id and plan_tier were applied to app_user_profile (first receipt only).
+        informational_event:
+          type: boolean
+          description: |
+            True when this webhook event type is in provider informational whitelist and does not
+            drive subscription status transitions.
+
+    BillingWebhookEventItem:
+      type: object
+      required:
+        [
+          id,
+          provider_event_id,
+          is_informational_event,
+          created_at,
+        ]
+      properties:
+        id:
+          type: integer
+          format: int64
+        provider_event_id:
+          type: string
+        provider:
+          type: string
+          nullable: true
+        raw_event_id:
+          type: string
+          nullable: true
+        event_type:
+          type: string
+          nullable: true
+        event_created_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_informational_event:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    BillingWebhookEventsResponse:
+      type: object
+      required: [items, total, limit, offset, has_more]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BillingWebhookEventItem"
+        total:
+          type: integer
+          format: int64
+          description: Total rows matching current filters before pagination.
+        limit:
+          type: integer
+          format: int64
+        offset:
+          type: integer
+          format: int64
+        has_more:
+          type: boolean
+          description: True when there are more rows after current page.
+        next_offset:
+          type: integer
+          format: int64
+          nullable: true
+          description: Next offset to request when `has_more` is true.
 
     LegacyTasksEmptyBody:
       type: object
