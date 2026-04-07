@@ -1115,6 +1115,123 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn production_assets_batch_generate_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/assets/batch-generate-assets-image",
+            &token,
+            r#"{"projectId":1,"scriptId":1,"assetIds":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_assets_delete_derivative_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/assets/delete-assets-derivative",
+            &token,
+            r#"{"projectId":1,"assetIds":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_assets_polling_image_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/assets/polling-image",
+            &token,
+            r#"{"projectId":1,"assetIds":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_assets_update_url_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/assets/update-assets-url",
+            &token,
+            r#"{"projectId":1,"assetId":1,"imageUrl":"https://example.com/a.png"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_edit_image_get_image_flow_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/edit-image/get-image-flow",
+            &token,
+            r#"{}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["flowId"], "img-flow-001");
+    }
+
+    #[tokio::test]
+    async fn production_edit_image_get_image_default_model_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/edit-image/get-image-default-model",
+            &token,
+            r#"{}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["model"], "dall-e-3");
+    }
+
+    #[tokio::test]
+    async fn production_edit_image_save_image_flow_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/edit-image/save-image-flow",
+            &token,
+            r#"{"flowId":"img-flow-001","steps":[{"stepId":"upload","status":"done"}]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["saved"], true);
+    }
+
+    #[tokio::test]
+    async fn production_edit_image_update_image_flow_ok_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/edit-image/update-image-flow",
+            &token,
+            r#"{"flowId":"img-flow-001","stepId":"generate","updates":{"status":"done"}}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(v["updated"], true);
+    }
+
+    #[tokio::test]
+    async fn production_edit_image_generate_flow_image_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/edit-image/generate-flow-image",
+            &token,
+            r#"{"flowId":"img-flow-001","prompt":"probe"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn production_storyboard_add_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -1138,6 +1255,97 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn production_get_storyboard_data_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/get-storyboard-data",
+            &token,
+            r#"{"projectId":1,"scriptId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_get_data_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/get-data",
+            &token,
+            r#"{"storyboardId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_edit_info_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/edit-info",
+            &token,
+            r#"{"storyboardId":1,"prompt":"probe"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_remove_frame_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/remove-frame",
+            &token,
+            r#"{"storyboardId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_update_url_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/update-url",
+            &token,
+            r#"{"storyboardId":1,"imageUrl":"https://example.com/frame.png"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_preview_image_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/preview-image",
+            &token,
+            r#"{"storyboardId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn production_storyboard_down_preview_image_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/storyboard/down-preview-image",
+            &token,
+            r#"{"storyboardId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
