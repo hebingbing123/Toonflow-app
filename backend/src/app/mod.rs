@@ -1107,7 +1107,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn assets_generate_generate_not_implemented_with_jwt() {
+    async fn assets_generate_generate_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/assets-generate/generate",
@@ -1115,8 +1115,34 @@ mod contract_smoke_tests {
             r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"p"}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_generate_bad_request_empty_prompt_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/generate",
+            &token,
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"  "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_generate_bad_request_non_positive_project_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/generate",
+            &token,
+            r#"{"projectId":0,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"p"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]

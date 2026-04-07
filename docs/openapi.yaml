@@ -44,7 +44,7 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`**, **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** match legacy **`/api/assetsGenerate/*`** request bodies, then **501** **`not_implemented`** until **`app_generation_job`** + image providers are wired end-to-end.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST /api/v1/assets-generate/generate`** validates the legacy body, checks project ownership, enqueues **`app_generation_job`** kind **`asset.generate.image`** (returns **`JobRow`** **`queued`**); worker fails that kind until the image pipeline exists. **`POST …/polish-prompt`**, **`POST …/batch-generate`**, **`POST …/batch-polish`** remain **501** until wired.
 
     **Production / workbench (Electron-only pipeline):** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. Six routes use **strict** request schemas; the rest accept any JSON **object** (**`ProductionLegacyJsonStubBody`**) and return **501** **`not_implemented`** (no **`o_video`** / OSS parity yet). Non-object JSON bodies return **400**.
 
@@ -3929,7 +3929,7 @@ paths:
       summary: Generate one asset image (legacy `generateAssets` parity)
       operationId: postAssetsGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), then **501** **`not_implemented`**.
+        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), resolves **`projectId`** to the caller's **`app_project`**, checks daily job quota, inserts **`app_generation_job`** with kind **`asset.generate.image`** (**`queued`**). Worker marks the job **`failed`** until the image pipeline is implemented (**`base64`** is not stored in **`payload`**, only **`has_base64`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -3939,6 +3939,12 @@ paths:
             schema:
               $ref: "#/components/schemas/GenerateAssetsBody"
       responses:
+        "200":
+          description: New **`queued`** generation job (**`JobRow`**)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobRow"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -3951,14 +3957,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Project not found for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "429":
+          description: Daily generation job quota exceeded
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:

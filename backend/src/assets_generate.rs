@@ -1,17 +1,20 @@
-//! Legacy **`/api/assetsGenerate/*`**: SQLite **`o_image`** / **`o_assets`** 出图与提示词润色。
-//! SaaS: bodies match old **`validateFields`** shapes; handlers return **501** until jobs + image pipeline exist.
+//! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
+//! **`POST …/generate`** enqueues **`app_generation_job`** (**`asset.generate.image`**); the worker fails fast until the image pipeline exists. Other routes stay **501**.
 
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
-    response::Response,
     routing::post,
-    Router,
+    Json as JsonResponse, Router,
 };
 use serde::Deserialize;
+use serde_json::json;
+use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_IMAGE};
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -26,7 +29,6 @@ enum AssetGenKind {
     Storyboard,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct GenerateAssetsBody {
@@ -107,21 +109,126 @@ fn not_implemented() -> ApiError {
     )
 }
 
+fn asset_type_str(k: &AssetGenKind) -> &'static str {
+    match k {
+        AssetGenKind::Role => "role",
+        AssetGenKind::Scene => "scene",
+        AssetGenKind::Tool => "tool",
+        AssetGenKind::Storyboard => "storyboard",
+    }
+}
+
+fn trim_non_empty(s: String, field: &'static str) -> Result<String, ApiError> {
+    let t = s.trim();
+    if t.is_empty() {
+        return Err(ApiError::BadRequest(format!("{field} must be non-empty")));
+    }
+    Ok(t.to_owned())
+}
+
+const MAX_MODEL_LEN: usize = 512;
+const MAX_RESOLUTION_LEN: usize = 128;
+const MAX_NAME_LEN: usize = 512;
+const MAX_PROMPT_LEN: usize = 48_000;
+const MAX_BASE64_HINT_LEN: usize = 24_000_000;
+
+async fn resolve_owned_project_uuid(
+    pool: &PgPool,
+    uid: Uuid,
+    project_legacy_id: i32,
+) -> Result<Uuid, ApiError> {
+    if project_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    let id: Option<Uuid> = sqlx::query_scalar(
+        r#"
+        SELECT id FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    id.ok_or(ApiError::NotFound)
+}
+
 async fn post_generate_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GenerateAssetsBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+) -> Result<JsonResponse<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest(
+            "id (asset legacy id) must be positive".into(),
+        ));
+    }
+    let model = trim_non_empty(body.model, "model")?;
+    let resolution = trim_non_empty(body.resolution, "resolution")?;
+    let name = trim_non_empty(body.name, "name")?;
+    let prompt = trim_non_empty(body.prompt, "prompt")?;
+    if model.len() > MAX_MODEL_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "model must be at most {MAX_MODEL_LEN} chars"
+        )));
+    }
+    if resolution.len() > MAX_RESOLUTION_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "resolution must be at most {MAX_RESOLUTION_LEN} chars"
+        )));
+    }
+    if name.len() > MAX_NAME_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "name must be at most {MAX_NAME_LEN} chars"
+        )));
+    }
+    if prompt.len() > MAX_PROMPT_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "prompt must be at most {MAX_PROMPT_LEN} chars"
+        )));
+    }
+    if let Some(ref b64) = body.base64 {
+        if b64.len() > MAX_BASE64_HINT_LEN {
+            return Err(ApiError::BadRequest(format!(
+                "base64 must be at most {MAX_BASE64_HINT_LEN} chars"
+            )));
+        }
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+
+    let asset_type = asset_type_str(&body.asset_type);
+    let payload = json!({
+        "source": "assets-generate.generate",
+        "project_legacy_id": body.project_id,
+        "asset_legacy_id": body.id,
+        "model": model,
+        "resolution": resolution,
+        "asset_type": asset_type,
+        "name": name,
+        "prompt": prompt,
+        "has_base64": body.base64.is_some(),
+    });
+
+    let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_IMAGE, payload).await?;
+    Ok(JsonResponse(row))
 }
 
 async fn post_polish_assets_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<PolishAssetsPromptBody>,
-) -> Result<Response, ApiError> {
+) -> Result<JsonResponse<JobRow>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let _ = body;
     Err(not_implemented())
@@ -131,7 +238,7 @@ async fn post_batch_generate_image_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchGenerateImageAssetsBody>,
-) -> Result<Response, ApiError> {
+) -> Result<JsonResponse<JobRow>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let _ = body;
     Err(not_implemented())
@@ -141,7 +248,7 @@ async fn post_batch_polish_assets_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchPolishAssetsPromptBody>,
-) -> Result<Response, ApiError> {
+) -> Result<JsonResponse<JobRow>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let _ = body;
     Err(not_implemented())

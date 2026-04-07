@@ -12,6 +12,10 @@ import 'rust_api.dart';
 bool _scriptAgentCatalogProbeOk(int status) =>
     status == 200 || status == 404 || status == 501 || status == 503;
 
+/// Single **`assets-generate/generate`**: **200** queued job, **404** project, **429** quota, **503** no DB.
+bool _assetsGenerateGenerateProbeOk(int status) =>
+    status == 200 || status == 404 || status == 429 || status == 503;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -792,9 +796,10 @@ class _HomePageState extends State<HomePage> {
         });
         return;
       }
-      if (ag != 501) {
+      if (!_assetsGenerateGenerateProbeOk(ag)) {
         setState(() {
-          _error = 'POST assets-generate/generate expected 501, got $ag';
+          _error =
+              'POST assets-generate/generate expected 200/404/429/503, got $ag';
           _loadingModelsCatalog = false;
         });
         return;

@@ -173,6 +173,9 @@ async fn execute_kind(
             }
             Ok(json!({ "ok": true, "probe": true }))
         }
+        "asset.generate.image" => Err(JobRunError::Failed(
+            "asset image generation pipeline is not implemented yet".into(),
+        )),
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
         ))),

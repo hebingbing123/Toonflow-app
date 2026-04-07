@@ -859,7 +859,8 @@ Future<int> postScriptAgentUpdateDataV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1` (typically **501**).
+/// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1`.
+/// **200** = **`queued`** **`JobRow`**; **404** unknown project; **429** daily quota; **503** no DB.
 Future<int> postAssetsGenerateGenerateV1(
   String accessToken, {
   required int projectId,

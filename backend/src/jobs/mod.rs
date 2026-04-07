@@ -11,7 +11,7 @@ use axum::{
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::FromRow;
+use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -69,6 +69,44 @@ struct JobKindSummaryRow {
 struct JobStatusSummaryRow {
     status: String,
     job_count: i64,
+}
+
+/// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker fails until pipeline exists.
+pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
+
+/// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
+pub async fn enqueue_generation_job(
+    pool: &PgPool,
+    owner_user_id: Uuid,
+    kind: &str,
+    payload: serde_json::Value,
+) -> Result<JobRow, ApiError> {
+    quota::check_daily_job_quota(pool, owner_user_id).await?;
+    let row = sqlx::query_as::<_, JobRow>(
+        r#"
+        INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
+        VALUES ($1, $2, $3, 'queued', NULL)
+        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        "#,
+    )
+    .bind(owner_user_id)
+    .bind(kind)
+    .bind(payload)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if let Err(e) =
+        crate::usage::record_generation_job_created(pool, owner_user_id, row.id, &row.kind).await
+    {
+        tracing::warn!(
+            error = %e,
+            job_id = %row.id,
+            "app_usage_event insert failed for generation_job.created (job still created)"
+        );
+    }
+
+    Ok(row)
 }
 
 /// WebSocket envelope (`docs/websocket-events.md`): full job row as `payload`.
