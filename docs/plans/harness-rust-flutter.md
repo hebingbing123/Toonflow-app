@@ -30,8 +30,8 @@ todos:
     content: 功能 parity 与灰度后 **下线** Electron + Node 服务端路径；**并清理仓库内旧实现**（见 **§11.1.1**、**[`electron-node-parity.md`](./electron-node-parity.md)** §7）：删或归档 **`src/`** 下 Express/Socket.IO 服务端、根 **`package.json`** 中仅旧栈的依赖与 scripts、仅旧栈的 CI job；**保留**仍需要的 **`toonflow-legacy-import`** 等迁移工具至明确路径；README/发布以 **`backend/` + `frontend/`** 为准。已完成：删除 src/ 目录（178 个 .ts 文件/14.4k+ 行）、scripts/main.ts & build.ts、electron-builder.yml、Dockerfile、tsconfig.json、yarn.lock、data/web/ & data/serve/；简化 package.json 至仅 lint/license/refactor:check；更新 README 反映新架构
     status: completed
   - id: quality-bar
-    content: 短剧生成质量验收：人工抽检维度、bad case 集、分环节通过率；与 Harness 观测/trace 挂钩，技能版本可对比回归。待产品侧 PRD 与 bad case 沉淀后接入
-    status: pending
+    content: 短剧生成质量验收：人工抽检维度、bad case 集、分环节通过率；与 Harness 观测/trace 挂钩，技能版本可对比回归。**已完成基础框架**：app_quality_review 表 + REST API（创建/列表/详情/统计/分环节通过率）
+    status: completed
   - id: git-branch
     content: 实施时第一步：从当前 main/master 新建并 checkout 重构分支（如 refactor/harness-rust-flutter），再写任何实现；整次重构在此分支上完成，合并前 PR+CI
     status: completed
