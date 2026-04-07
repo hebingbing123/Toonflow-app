@@ -12,6 +12,17 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
       _modelsCatalogBody = null;
     });
     try {
+      Future<int> productionAssetsProbeStatus(
+        Future<void> Function() run,
+      ) async {
+        try {
+          await run();
+          return 200;
+        } on RustApiException catch (e) {
+          return e.statusCode ?? -1;
+        }
+      }
+
       final list = await fetchModelsCatalog(token, typeFilter: 'all');
       final vs = await fetchVendorsSummaryV1(token);
       final ad = await postAgentDeployListV1(token);
@@ -336,26 +347,85 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         });
         return;
       }
+      final prAssetsBatch = await productionAssetsProbeStatus(
+        () => postProductionAssetsBatchGenerateAssetsImageV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          assetIds: const [1],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prAssetsBatch)) {
+        setState(() {
+          _error =
+              'POST production/assets/batch-generate-assets-image expected 200/404/503, got $prAssetsBatch';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prAssetsDelete = await productionAssetsProbeStatus(
+        () => postProductionAssetsDeleteAssetsDerivativeV1(
+          token,
+          projectId: 1,
+          assetIds: const [1],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prAssetsDelete)) {
+        setState(() {
+          _error =
+              'POST production/assets/delete-assets-derivative expected 200/404/503, got $prAssetsDelete';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prAssetsData = await productionAssetsProbeStatus(
+        () => postProductionAssetsGetAssetsDataV1(token, projectId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prAssetsData)) {
+        setState(() {
+          _error =
+              'POST production/assets/get-assets-data expected 200/404/503, got $prAssetsData';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prAssetsPoll = await productionAssetsProbeStatus(
+        () => postProductionAssetsPollingImageV1(
+          token,
+          projectId: 1,
+          assetIds: const [1],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prAssetsPoll)) {
+        setState(() {
+          _error =
+              'POST production/assets/polling-image expected 200/404/503, got $prAssetsPoll';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prAssetsUrl = await productionAssetsProbeStatus(
+        () => postProductionAssetsUpdateAssetsUrlV1(
+          token,
+          projectId: 1,
+          assetId: 1,
+          imageUrl: 'https://example.com/probe.png',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prAssetsUrl)) {
+        setState(() {
+          _error =
+              'POST production/assets/update-assets-url expected 200/404/503, got $prAssetsUrl';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
       const productionBodies = <String, Map<String, dynamic>>{
-        '/api/v1/production/assets/batch-generate-assets-image': {
-          'projectId': 1,
-          'scriptId': 1,
-          'assetIds': [1],
-        },
-        '/api/v1/production/assets/delete-assets-derivative': {
-          'projectId': 1,
-          'assetIds': [1],
-        },
-        '/api/v1/production/assets/get-assets-data': {'projectId': 1},
-        '/api/v1/production/assets/polling-image': {
-          'projectId': 1,
-          'assetIds': [1],
-        },
-        '/api/v1/production/assets/update-assets-url': {
-          'projectId': 1,
-          'assetId': 1,
-          'imageUrl': 'https://example.com/probe.png',
-        },
         '/api/v1/production/edit-image/generate-flow-image': {
           'flowId': 'img-flow-001',
           'prompt': 'probe',
@@ -461,6 +531,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         }
       }
       setState(() {
+        const typedProductionAssetsCount = 5;
         final sample = list.take(4).map((m) => '${m.value}(${m.type})').join(', ');
         final modelsLine = list.isEmpty
             ? '(empty)'
@@ -470,7 +541,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/implemented ${productionBodies.length}x(200/404/503)';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });
