@@ -1054,8 +1054,12 @@ mod contract_smoke_tests {
     #[tokio::test]
     async fn production_legacy_json_stub_rejects_non_object_with_jwt() {
         let token = test_jwt(Uuid::nil());
-        let (status, v) =
-            post_json_bearer("/api/v1/production/edit-image/get-image-flow", &token, "[]").await;
+        let (status, v) = post_json_bearer(
+            "/api/v1/production/workbench/get-generate-data",
+            &token,
+            "[]",
+        )
+        .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
     }
