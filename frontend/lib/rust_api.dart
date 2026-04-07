@@ -4139,6 +4139,33 @@ class ListAssetsResponse {
   }
 }
 
+/// One **`app_asset_image`** row in **`POST …/assets/corner-scape`** — OpenAPI **`CornerScapeHistoryImage`**.
+class CornerScapeHistoryImage {
+  const CornerScapeHistoryImage({
+    required this.id,
+    required this.sortIndex,
+    this.filePath,
+    this.state,
+    this.legacyImageId,
+  });
+
+  final String id;
+  final int sortIndex;
+  final String? filePath;
+  final String? state;
+  final int? legacyImageId;
+
+  factory CornerScapeHistoryImage.fromJson(Map<String, dynamic> json) {
+    return CornerScapeHistoryImage(
+      id: json['id'] as String,
+      sortIndex: (json['sort_index'] as num).toInt(),
+      filePath: json['file_path'] as String?,
+      state: json['state'] as String?,
+      legacyImageId: (json['legacy_image_id'] as num?)?.toInt(),
+    );
+  }
+}
+
 /// One row from **`POST …/assets/corner-scape`** — OpenAPI **`CornerScapeAssetItem`**.
 class CornerScapeAssetItem {
   const CornerScapeAssetItem({
@@ -4159,10 +4186,16 @@ class CornerScapeAssetItem {
   final String? description;
   final int? createTimeMs;
   final Map<String, dynamic> metadata;
-  final List<dynamic> historyImages;
+  final List<CornerScapeHistoryImage> historyImages;
 
   factory CornerScapeAssetItem.fromJson(Map<String, dynamic> json) {
-    final hist = json['history_images'] as List<dynamic>? ?? const [];
+    final histRaw = json['history_images'] as List<dynamic>? ?? const [];
+    final hist = histRaw
+        .map(
+          (e) =>
+              CornerScapeHistoryImage.fromJson(e as Map<String, dynamic>),
+        )
+        .toList();
     final meta = json['metadata'];
     return CornerScapeAssetItem(
       id: json['id'] as String,

@@ -3529,11 +3529,15 @@ class _HomePageState extends State<HomePage> {
                                         p.legacyId,
                                       );
                                       if (!ctx.mounted) return;
+                                      final h0 = r.items.isEmpty
+                                          ? 0
+                                          : r.items.first.historyImages.length;
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             'POST …/assets/corner-scape：'
-                                            '${r.items.length} 条',
+                                            '${r.items.length} 条'
+                                            '${r.items.isEmpty ? "" : "，首条 history_images=$h0"}',
                                           ),
                                         ),
                                       );
