@@ -18,6 +18,7 @@ part 'home_page/project_editor_scripts.dart';
 part 'home_page/projects_controller.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/skills_harness_controller.dart';
+part 'home_page/script_editor_storyboards.dart';
 part 'home_page/quality_reviews_controller.dart';
 part 'home_page/system_probes_controller.dart';
 part 'home_page/system_probes_models_catalog.dart';
