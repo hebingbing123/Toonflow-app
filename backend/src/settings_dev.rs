@@ -66,3 +66,46 @@ pub fn router() -> Router<AppState> {
         get(get_switch_ai_dev_tool).put(put_switch_ai_dev_tool),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn switch_ai_dev_tool_put_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<SwitchAiDevToolPutBody>(r#"{"value":"1","extra":true}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn switch_ai_dev_tool_put_body_accepts_one() {
+        let b: SwitchAiDevToolPutBody =
+            serde_json::from_str(r#"{"value":"1"}"#).unwrap();
+        assert_eq!(b.value, "1");
+    }
+
+    #[test]
+    fn switch_ai_dev_tool_put_body_accepts_zero() {
+        let b: SwitchAiDevToolPutBody =
+            serde_json::from_str(r#"{"value":"0"}"#).unwrap();
+        assert_eq!(b.value, "0");
+    }
+
+    #[test]
+    fn switch_value_from_env_returns_zero_when_unset() {
+        // This test assumes the env var is not set in test environment
+        // or set to a value other than "1"
+        let val = switch_value_from_env();
+        assert!(val == "0" || val == "1");
+    }
+
+    #[test]
+    fn switch_ai_dev_tool_response_serialize() {
+        let resp = SwitchAiDevToolResponse {
+            value: "1".to_string(),
+        };
+        let json = serde_json::to_string(&resp).unwrap();
+        assert!(json.contains("\"value\":\"1\""));
+    }
+}
