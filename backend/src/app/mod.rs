@@ -6618,7 +6618,7 @@ mod pg_contract_tests {
             .unwrap();
         let (status, restored) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "verify restored prompt");
-        assert_eq!(restored["data"].as_str(), Some(original_data));
+        assert_eq!(restored["data"].as_str(), Some(original_data.as_str()));
     }
 
     fn contract_state_without_pool(secret: String) -> AppState {
