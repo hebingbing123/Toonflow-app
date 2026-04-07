@@ -17,6 +17,7 @@ part 'home_page/project_editor_assets.dart';
 part 'home_page/project_editor_scripts.dart';
 part 'home_page/projects_controller.dart';
 part 'home_page/jobs_controller.dart';
+part 'home_page/task_center_controller.dart';
 part 'home_page/skills_harness_controller.dart';
 part 'home_page/script_editor_storyboards.dart';
 part 'home_page/quality_reviews_controller.dart';
@@ -132,6 +133,19 @@ class _HomePageState extends State<HomePage> {
   String? _jobByIdLine;
   final _jobIdCtrl = TextEditingController();
 
+  bool _loadingTaskProjects = false;
+  bool _loadingTaskCategories = false;
+  bool _loadingTaskApi = false;
+  bool _loadingTaskDetailsLegacy = false;
+  bool _loadingTaskDetailsUuid = false;
+  List<LegacyTasksProjectItem>? _taskProjects;
+  List<JobRow>? _taskApiJobs;
+  String? _taskCategoriesLine;
+  String? _taskApiSummaryLine;
+  String? _taskDetailLegacyLine;
+  String? _taskDetailUuidLine;
+  final _taskDetailJobIdCtrl = TextEditingController();
+
   bool _loadingQualityReviews = false;
   bool _loadingQualityBadCases = false;
   bool _loadingQualityStats = false;
@@ -179,6 +193,7 @@ class _HomePageState extends State<HomePage> {
     _email.dispose();
     _password.dispose();
     _jobIdCtrl.dispose();
+    _taskDetailJobIdCtrl.dispose();
     _qualityReviewIdCtrl.dispose();
     _skillPathCtrl.dispose();
     _skillContentCtrl.dispose();

@@ -43,6 +43,12 @@ extension _HomePageAuthSessionController on _HomePageState {
       _creatingProject = false;
       _jobs = null;
       _jobByIdLine = null;
+      _taskProjects = null;
+      _taskApiJobs = null;
+      _taskCategoriesLine = null;
+      _taskApiSummaryLine = null;
+      _taskDetailLegacyLine = null;
+      _taskDetailUuidLine = null;
       _usageSummaryBody = null;
       _agentMemoryBody = null;
       _versionBody = null;

@@ -143,3 +143,29 @@ Future<void> postTasksTaskDetails(String accessToken, int taskId) async {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
 }
+
+/// `POST /api/v1/tasks/task-details` with a UUID [taskId] — same job payload as `GET /api/v1/jobs/{id}`.
+Future<JobRow> postTasksTaskDetailsByJobId(
+  String accessToken,
+  String taskId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/task-details');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'taskId': taskId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
+}
