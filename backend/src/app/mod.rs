@@ -6863,6 +6863,442 @@ mod pg_contract_tests {
     }
 
     #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn production_workbench_video_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "created={created}");
+        let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{project_id}/scripts"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"name":"pg_video_script"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, script) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "script={script}");
+        let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}/storyboards"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"prompt":"pg_video_storyboard","duration":"5","track_id":7,"flow_id":21,"sb_index":1}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, storyboard) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "storyboard={storyboard}");
+        let storyboard_id = storyboard["legacy_id"]
+            .as_i64()
+            .expect("storyboard legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/get-production-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, production_data) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "production_data={production_data}");
+        assert_eq!(
+            production_data["data"][0]["id"].as_i64(),
+            Some(i64::from(storyboard_id))
+        );
+        assert_eq!(
+            production_data["data"][0]["trackId"].as_i64(),
+            Some(7),
+            "storyboard create should persist track"
+        );
+        assert_eq!(
+            production_data["data"][0]["flowId"].as_i64(),
+            Some(21),
+            "storyboard create should persist flow"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/get-flow-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"episodesId":1}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            res.status(),
+            StatusCode::OK,
+            "get-flow-data should see storyboard-backed project"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/save-flow-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"episodesId":1,"data":{{"nodes":[{{"id":"n1"}}]}}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            res.status(),
+            StatusCode::OK,
+            "save-flow-data should accept owned project"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/storyboard/polling-image")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            res.status(),
+            StatusCode::OK,
+            "polling-image should accept owned storyboard"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/export-image")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"shotId":[{{"id":"{storyboard_id}"}}]}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            res.status(),
+            StatusCode::OK,
+            "export-image should accept owned storyboard"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/add-track")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"scriptId":{script_id},"trackName":"B-roll"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, add_track) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "add_track={add_track}");
+        assert_eq!(
+            add_track["track_id"].as_i64(),
+            Some(8),
+            "add-track should allocate next track id"
+        );
+
+        let selected_video_url = "https://cdn.example.com/pg-contract-video.mp4";
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/select-video")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"scriptId":{script_id},"storyboardId":{storyboard_id},"videoUrl":"{selected_video_url}"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, selected) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "selected={selected}");
+        assert_eq!(selected["video_url"].as_str(), Some(selected_video_url));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/get-video-list")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"trackId":7}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, track_videos) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "track_videos={track_videos}");
+        assert_eq!(track_videos["total"].as_i64(), Some(1));
+        assert_eq!(
+            track_videos["videos"][0]["id"].as_i64(),
+            Some(i64::from(storyboard_id))
+        );
+        assert_eq!(
+            track_videos["videos"][0]["video_url"].as_str(),
+            Some(selected_video_url)
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/delete-track")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"scriptId":{script_id},"trackId":7}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, deleted_track) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "deleted_track={deleted_track}");
+        assert_eq!(deleted_track["track_id"].as_i64(), Some(7));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/get-production-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, cleared_track_data) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "cleared_track_data={cleared_track_data}"
+        );
+        assert!(
+            cleared_track_data["data"][0]["trackId"].is_null(),
+            "delete-track should clear storyboard track assignment"
+        );
+        assert_eq!(
+            cleared_track_data["data"][0]["url"].as_str(),
+            Some(selected_video_url),
+            "delete-track must not remove selected video"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/get-video-list")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"trackId":7}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, filtered_after_delete_track) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "filtered_after_delete_track={filtered_after_delete_track}"
+        );
+        assert_eq!(filtered_after_delete_track["total"].as_i64(), Some(0));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/get-video-list")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"projectId":{project_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, all_videos_before_delete_video) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "all_videos_before_delete_video={all_videos_before_delete_video}"
+        );
+        assert_eq!(all_videos_before_delete_video["total"].as_i64(), Some(1));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/delete-video")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"scriptId":{script_id},"storyboardId":{storyboard_id}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, deleted_video) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "deleted_video={deleted_video}");
+        assert_eq!(
+            deleted_video["storyboard_id"].as_i64(),
+            Some(i64::from(storyboard_id))
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/get-production-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, after_delete_video) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "after_delete_video={after_delete_video}"
+        );
+        assert!(after_delete_video["data"][0]["url"].is_null());
+        assert!(after_delete_video["data"][0]["state"].is_null());
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/workbench/get-video-list")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"projectId":{project_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, all_videos_after_delete_video) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "all_videos_after_delete_video={all_videos_after_delete_video}"
+        );
+        assert_eq!(all_videos_after_delete_video["total"].as_i64(), Some(0));
+
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+            .bind(project_id)
+            .execute(&pool)
+            .await;
+    }
+
+    #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
     async fn prompts_patch_roundtrip() {
         let _ = dotenvy::dotenv();
