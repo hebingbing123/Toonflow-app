@@ -4427,7 +4427,10 @@ paths:
       summary: ZIP storyboard frames for export (legacy `exportImage`)
       operationId: postProductionExportImageV1
       description: |
-        Bearer JWT. Validates **`shotId`** array, then **501** **`not_implemented`**.
+        Bearer JWT. Validates **`shotId`** array, then:
+        - **200** when all referenced storyboard ids are owned by this user
+        - **404** when any id is missing / not owned
+        - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
       requestBody:
@@ -4437,6 +4440,8 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductionExportImageBody"
       responses:
+        "200":
+          description: OK (empty body)
         "400":
           description: Invalid body
           content:
@@ -4449,14 +4454,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: One or more storyboard ids are not owned / not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:

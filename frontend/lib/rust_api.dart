@@ -1165,7 +1165,8 @@ Future<int> postProductionStoryboardPollingImageV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/production/export-image` — OpenAPI `postProductionExportImageV1` (typically **501**).
+/// `POST /api/v1/production/export-image` — OpenAPI `postProductionExportImageV1`
+/// (implemented; returns **200** or **404** / **503** when DB-gated).
 Future<int> postProductionExportImageV1(
   String accessToken, {
   required List<Map<String, dynamic>> shotId,

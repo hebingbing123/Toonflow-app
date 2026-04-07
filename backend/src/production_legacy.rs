@@ -258,9 +258,56 @@ async fn post_export_image(
     headers: HeaderMap,
     Json(body): Json<ExportImageBody>,
 ) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(not_implemented())
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.shot_id.is_empty() {
+        return Err(ApiError::BadRequest(
+            "shotId must be a non-empty array".into(),
+        ));
+    }
+
+    let mut uniq = Vec::with_capacity(body.shot_id.len());
+    for s in body.shot_id {
+        let t = s.id.trim();
+        let parsed: i32 = t
+            .parse()
+            .map_err(|_| ApiError::BadRequest("shotId.id must be a positive integer".into()))?;
+        if parsed <= 0 {
+            return Err(ApiError::BadRequest(
+                "shotId.id must be a positive integer".into(),
+            ));
+        }
+        uniq.push(parsed);
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(DISTINCT sb.legacy_id)
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND sb.legacy_id = ANY($2::int4[])
+        "#,
+    )
+    .bind(uid)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::OK.into_response())
 }
 
 const LEGACY_JSON_STUB_PATHS: &[&str] = &[
