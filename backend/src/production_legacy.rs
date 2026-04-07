@@ -719,6 +719,217 @@ async fn post_workbench_add_track(
     }))
 }
 
+// =============================================================================
+// Delete Track (Wave E)
+// =============================================================================
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DeleteTrackBody {
+    project_id: i32,
+    script_id: i32,
+    track_id: i32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteTrackResponse {
+    track_id: i32,
+    message: &'static str,
+}
+
+async fn post_workbench_delete_track(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<DeleteTrackBody>,
+) -> Result<JsonResponse<DeleteTrackResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 || body.track_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId, scriptId, and trackId must be positive integers".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Verify ownership and clear track_id from storyboards
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET track_id = NULL, updated_at = NOW()
+        FROM app_script, app_project
+        WHERE app_storyboard.script_id = app_script.id
+          AND app_script.project_id = app_project.id
+          AND app_project.owner_user_id = $1
+          AND app_project.legacy_id = $2
+          AND app_script.legacy_id = $3
+          AND app_storyboard.track_id = $4
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .bind(body.track_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(JsonResponse(DeleteTrackResponse {
+        track_id: body.track_id,
+        message: "Track deleted (storyboards unassigned from track)",
+    }))
+}
+
+// =============================================================================
+// Delete Video (Wave E)
+// =============================================================================
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DeleteVideoBody {
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteVideoResponse {
+    storyboard_id: i32,
+    message: &'static str,
+}
+
+async fn post_workbench_delete_video(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<DeleteVideoBody>,
+) -> Result<JsonResponse<DeleteVideoResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 || body.storyboard_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId, scriptId, and storyboardId must be positive integers".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Clear video file_path from storyboard
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET file_path = NULL, state = NULL, updated_at = NOW()
+        FROM app_script, app_project
+        WHERE app_storyboard.script_id = app_script.id
+          AND app_script.project_id = app_project.id
+          AND app_project.owner_user_id = $1
+          AND app_project.legacy_id = $2
+          AND app_script.legacy_id = $3
+          AND app_storyboard.legacy_id = $4
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .bind(body.storyboard_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(JsonResponse(DeleteVideoResponse {
+        storyboard_id: body.storyboard_id,
+        message: "Video deleted from storyboard",
+    }))
+}
+
+// =============================================================================
+// Select Video (Wave E)
+// =============================================================================
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct SelectVideoBody {
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+    video_url: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SelectVideoResponse {
+    storyboard_id: i32,
+    video_url: String,
+    message: &'static str,
+}
+
+async fn post_workbench_select_video(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<SelectVideoBody>,
+) -> Result<JsonResponse<SelectVideoResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 || body.script_id <= 0 || body.storyboard_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId, scriptId, and storyboardId must be positive integers".into(),
+        ));
+    }
+    if body.video_url.trim().is_empty() {
+        return Err(ApiError::BadRequest("videoUrl must not be empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    // Update storyboard with selected video
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET file_path = $5, state = '已完成', updated_at = NOW()
+        FROM app_script, app_project
+        WHERE app_storyboard.script_id = app_script.id
+          AND app_script.project_id = app_project.id
+          AND app_project.owner_user_id = $1
+          AND app_project.legacy_id = $2
+          AND app_script.legacy_id = $3
+          AND app_storyboard.legacy_id = $4
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .bind(body.storyboard_id)
+    .bind(body.video_url.trim())
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(JsonResponse(SelectVideoResponse {
+        storyboard_id: body.storyboard_id,
+        video_url: body.video_url.trim().to_string(),
+        message: "Video selected for storyboard",
+    }))
+}
+
 const LEGACY_JSON_STUB_PATHS: &[&str] = &[
     "/api/v1/production/assets/batch-generate-assets-image",
     "/api/v1/production/assets/delete-assets-derivative",
@@ -739,12 +950,9 @@ const LEGACY_JSON_STUB_PATHS: &[&str] = &[
     "/api/v1/production/storyboard/preview-image",
     "/api/v1/production/storyboard/remove-frame",
     "/api/v1/production/storyboard/update-url",
-    "/api/v1/production/workbench/delete-track",
-    "/api/v1/production/workbench/delete-video",
     "/api/v1/production/workbench/generate-video-prompt",
     "/api/v1/production/workbench/get-generate-data",
     "/api/v1/production/workbench/get-video-model-detail",
-    "/api/v1/production/workbench/select-video",
 ];
 
 pub fn router() -> Router<AppState> {
@@ -778,6 +986,18 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/production/workbench/add-track",
             post(post_workbench_add_track),
+        )
+        .route(
+            "/api/v1/production/workbench/delete-track",
+            post(post_workbench_delete_track),
+        )
+        .route(
+            "/api/v1/production/workbench/delete-video",
+            post(post_workbench_delete_video),
+        )
+        .route(
+            "/api/v1/production/workbench/select-video",
+            post(post_workbench_select_video),
         );
     for path in LEGACY_JSON_STUB_PATHS {
         r = r.route(path, post(post_production_legacy_json_stub));
