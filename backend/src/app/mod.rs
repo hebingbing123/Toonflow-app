@@ -6877,4 +6877,137 @@ mod pg_contract_tests {
             .execute(&pool)
             .await;
     }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
+    async fn scripts_crud_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        // Create project
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "created={created}");
+        let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        // Create script
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{project_id}/scripts"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"name":"test_script","content":"script content"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, script) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "script={script}");
+        let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+        assert_eq!(script["name"].as_str(), Some("test_script"));
+
+        // Get script
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, got) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "get script={got}");
+        assert_eq!(got["legacy_id"].as_i64(), Some(i64::from(script_id)));
+
+        // Update script
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::PATCH)
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"name":"updated_script"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, updated) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "update script={updated}");
+        assert_eq!(updated["name"].as_str(), Some("updated_script"));
+
+        // Delete script
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let status = res.status();
+        assert_eq!(status, StatusCode::NO_CONTENT, "delete script");
+
+        // Verify deletion
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::NOT_FOUND, "script should be deleted");
+
+        // Cleanup
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+            .bind(project_id)
+            .execute(&pool)
+            .await;
+    }
 }
