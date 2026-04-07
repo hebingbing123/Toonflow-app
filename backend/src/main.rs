@@ -45,6 +45,7 @@ mod storyboards;
 mod tasks_legacy;
 mod usage;
 mod vendor_credential;
+mod video_providers;
 mod visual_manual;
 
 use std::net::SocketAddr;

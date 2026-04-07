@@ -20,6 +20,54 @@
           "type": "image"
         }
       ]
+    },
+    {
+      "id": 2,
+      "name": "Runway",
+      "models": [
+        {
+          "name": "Gen-2",
+          "model_name": "gen-2",
+          "type": "video"
+        },
+        {
+          "name": "Gen-3 Alpha",
+          "model_name": "gen-3-alpha",
+          "type": "video"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Pika",
+      "models": [
+        {
+          "name": "Pika 1.5",
+          "model_name": "pika-1.5",
+          "type": "video"
+        },
+        {
+          "name": "Pika 2.0",
+          "model_name": "pika-2.0",
+          "type": "video"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Kling",
+      "models": [
+        {
+          "name": "Kling v1",
+          "model_name": "kling-v1",
+          "type": "video"
+        },
+        {
+          "name": "Kling v1.5",
+          "model_name": "kling-v1.5",
+          "type": "video"
+        }
+      ]
     }
   ]
 }
