@@ -73,7 +73,7 @@ struct JobStatusSummaryRow {
 
 /// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker fails until pipeline exists.
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
-/// Single prompt polish (legacy **`POST …/assets-generate/polish-prompt`**); worker fails until LLM/pipeline exists.
+/// Single prompt polish (legacy **`POST …/assets-generate/polish-prompt`**); worker calls chat completion when **`LlmConfig`** is set, else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
 /// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker fails until pipeline exists.
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";

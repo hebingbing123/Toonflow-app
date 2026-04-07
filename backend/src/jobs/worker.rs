@@ -9,6 +9,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::harness::observe;
+use crate::llm::chat_completion_assistant_text;
 use crate::state::AppState;
 use crate::usage;
 
@@ -68,7 +69,7 @@ async fn process_one_job(
     let owner = row.owner_user_id;
     let id = row.id;
 
-    let outcome = execute_kind(pool, id, &row).await;
+    let outcome = execute_kind(state, pool, id, &row).await;
 
     match outcome {
         Ok(result) => {
@@ -156,6 +157,7 @@ async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>
 }
 
 async fn execute_kind(
+    state: &AppState,
     pool: &PgPool,
     id: Uuid,
     row: &JobRow,
@@ -180,9 +182,7 @@ async fn execute_kind(
         k if k == JOB_KIND_ASSET_GENERATE_IMAGE => Err(JobRunError::Failed(
             "asset image generation pipeline is not implemented yet".into(),
         )),
-        k if k == JOB_KIND_ASSET_POLISH_PROMPT => Err(JobRunError::Failed(
-            "asset prompt polish pipeline is not implemented yet".into(),
-        )),
+        k if k == JOB_KIND_ASSET_POLISH_PROMPT => run_asset_polish_prompt(state, row).await,
         k if k == JOB_KIND_ASSET_GENERATE_BATCH => Err(JobRunError::Failed(
             "batch asset image generation pipeline is not implemented yet".into(),
         )),
@@ -196,4 +196,70 @@ async fn execute_kind(
             "unsupported job kind for worker: {other}"
         ))),
     }
+}
+
+/// Cap polished text stored on the job row (aligned with HTTP **`prompt`** max on enqueue).
+const MAX_POLISHED_PROMPT_CHARS: usize = 48_000;
+
+async fn run_asset_polish_prompt(
+    state: &AppState,
+    row: &JobRow,
+) -> Result<serde_json::Value, JobRunError> {
+    let Some(ref cfg) = state.llm else {
+        return Err(JobRunError::Failed(
+            "LLM not configured (set OPENAI_API_KEY or LLM_API_KEY)".into(),
+        ));
+    };
+
+    let p = &row.payload;
+    let project_legacy_id = p
+        .get("project_legacy_id")
+        .and_then(|x| x.as_i64())
+        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+    let asset_legacy_id = p
+        .get("asset_legacy_id")
+        .and_then(|x| x.as_i64())
+        .ok_or_else(|| JobRunError::Failed("payload missing asset_legacy_id".into()))?;
+    let asset_type = p
+        .get("asset_type")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing asset_type".into()))?;
+    let name = p
+        .get("name")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing name".into()))?;
+    let describe = p
+        .get("describe")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing describe".into()))?;
+
+    tracing::info!(
+        job_id = %row.id,
+        kind = %row.kind,
+        "asset polish-prompt: calling LLM"
+    );
+
+    let user_msg = format!(
+        "Polish the following asset description into a single concise image-generation prompt (keep the user's language).\n\nType: {asset_type}\nName: {name}\nDescription:\n{describe}\n\nReply with only the polished prompt text, no quotes or preamble."
+    );
+
+    let messages = vec![
+        json!({"role": "system", "content": "You help users refine prompts for creative asset generation."}),
+        json!({"role": "user", "content": user_msg}),
+    ];
+
+    let mut text = chat_completion_assistant_text(cfg, &state.http_client, messages)
+        .await
+        .map_err(JobRunError::Failed)?;
+
+    if text.len() > MAX_POLISHED_PROMPT_CHARS {
+        text.truncate(MAX_POLISHED_PROMPT_CHARS);
+    }
+
+    Ok(json!({
+        "source": "assets-generate.polish-prompt",
+        "project_legacy_id": project_legacy_id,
+        "asset_legacy_id": asset_legacy_id,
+        "polished_prompt": text,
+    }))
 }

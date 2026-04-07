@@ -895,7 +895,9 @@ Future<int> postAssetsGenerateGenerateV1(
 }
 
 /// `POST /api/v1/assets-generate/polish-prompt` — OpenAPI `postAssetsGeneratePolishPromptV1`.
-/// **200** = **`queued`** **`JobRow`**; **404**/**429**/**503** as for **`generate`**.
+/// **200** = **`queued`** **`JobRow`** (**`asset.polish.prompt`**); worker **`succeeded`** with
+/// **`result.polished_prompt`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set on the server.
+/// **404**/**429**/**503** as for **`generate`**.
 Future<int> postAssetsGeneratePolishPromptV1(
   String accessToken, {
   required int assetsId,

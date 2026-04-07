@@ -1,5 +1,6 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
-//! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**); workers fail fast until pipelines exist.
+//! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
+//! **`asset.polish.prompt`** is completed by the worker via **`chat_completion_assistant_text`** when LLM env is set; other kinds remain stub **`failed`** until image/batch pipelines exist.
 
 use axum::{
     extract::{Json, State},
