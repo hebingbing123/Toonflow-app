@@ -36,7 +36,7 @@ info:
 
     **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of legacy **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
     **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); worker fails until a live probe is implemented.
-    **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** accept the same *top-level* shapes as legacy **`addVendor`** / **`updateVendor`** / **`deleteVendor`** / **`enableVendor`** / **`updateCode`** / **`getCodeByLink`**, then **501** (no **`o_vendorConfig`** table, no TS/vm2, no server-side URL fetch).
+    **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** now persist non-sensitive vendor metadata into **`app_user_profile.vendor_config`**. The Rust API stores **`tsCode`** / **`code_link`** references only; it does **not** execute TS, evaluate vm2, or fetch remote code server-side.
 
     **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS exposes **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** with body **`{}`** only, then **501** **`not_implemented`** — no bulk wipe endpoint (use Supabase / ops).
 
@@ -837,10 +837,10 @@ paths:
   /api/v1/settings/vendors/add:
     post:
       tags: [settings]
-      summary: Add vendor from TS provider script (not persisted)
+      summary: Add custom vendor metadata
       operationId: postSettingsVendorsAddV1
       description: |
-        Bearer JWT. Validates **`tsCode`** (legacy **`addVendor`**), then **501** **`not_implemented`**.
+        Bearer JWT. Validates non-empty **`tsCode`** (legacy **`addVendor`**), creates a **`custom-*`** vendor entry inside **`app_user_profile.vendor_config`**, and stores the source text as metadata only. The Rust API does **not** execute the TS provider script.
       security:
         - bearerAuth: []
       requestBody:
@@ -850,6 +850,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorAddBody"
       responses:
+        "200":
+          description: Vendor metadata stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorMutationResponse"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -862,14 +868,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -878,10 +878,10 @@ paths:
   /api/v1/settings/vendors/update:
     post:
       tags: [settings]
-      summary: Update vendor inputs/models (not persisted)
+      summary: Update vendor metadata
       operationId: postSettingsVendorsUpdateV1
       description: |
-        Bearer JWT. Validates **`id`** (non-empty), **`inputValues`**, **`inputs`**, **`models`**, then **501** **`not_implemented`**.
+        Bearer JWT. Validates non-empty **`id`**, then upserts display name, selected model IDs, and non-sensitive **`settings`** into **`app_user_profile.vendor_config`**. Keys that look like secrets are ignored; credentials must use the dedicated **`/credential`** endpoints.
       security:
         - bearerAuth: []
       requestBody:
@@ -891,6 +891,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorUpdateBody"
       responses:
+        "200":
+          description: Vendor metadata saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorUpdateResponse"
         "400":
           description: Empty **`id`** or bad JSON
           content:
@@ -903,14 +909,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -919,10 +919,10 @@ paths:
   /api/v1/settings/vendors/delete:
     post:
       tags: [settings]
-      summary: Delete vendor (not persisted)
+      summary: Delete vendor metadata
       operationId: postSettingsVendorsDeleteV1
       description: |
-        Bearer JWT. Validates **`id`**, then **501** **`not_implemented`**.
+        Bearer JWT. Deletes the requested vendor from **`app_user_profile.vendor_config`** and also removes any stored credential metadata for the same **`vendor_id`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -932,6 +932,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorIdBody"
       responses:
+        "200":
+          description: Vendor deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorMutationResponse"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -944,14 +950,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
+        "404":
+          description: Vendor id not found for this user
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -960,10 +966,10 @@ paths:
   /api/v1/settings/vendors/enable:
     post:
       tags: [settings]
-      summary: Enable/disable vendor (not persisted)
+      summary: Enable or disable vendor
       operationId: postSettingsVendorsEnableV1
       description: |
-        Bearer JWT. Validates **`id`** and **`enable`** (legacy number), then **501** **`not_implemented`**.
+        Bearer JWT. Validates non-empty **`id`** and legacy numeric **`enable`** (**0** / non-zero), then stores the enabled state in **`app_user_profile.vendor_config`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -973,6 +979,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorEnableBody"
       responses:
+        "200":
+          description: Enable state saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorEnableResponse"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -985,14 +997,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -1001,10 +1007,10 @@ paths:
   /api/v1/settings/vendors/update-code:
     post:
       tags: [settings]
-      summary: Replace vendor TS provider script (not persisted)
+      summary: Replace stored vendor TS source metadata
       operationId: postSettingsVendorsUpdateCodeV1
       description: |
-        Bearer JWT. Validates **`id`** and **`tsCode`**, then **501** **`not_implemented`**.
+        Bearer JWT. Validates non-empty **`id`** and **`tsCode`**, then stores the updated source text under the vendor's non-sensitive settings metadata. The Rust API still does **not** execute the code.
       security:
         - bearerAuth: []
       requestBody:
@@ -1014,6 +1020,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorUpdateCodeBody"
       responses:
+        "200":
+          description: Vendor code metadata saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorMutationResponse"
         "400":
           description: Unknown JSON fields or invalid body
           content:
@@ -1026,14 +1038,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -1042,10 +1048,10 @@ paths:
   /api/v1/settings/vendors/code-from-link:
     post:
       tags: [settings]
-      summary: Fetch provider script text from URL (not implemented)
+      summary: Store external provider-code link metadata
       operationId: postSettingsVendorsCodeFromLinkV1
       description: |
-        Bearer JWT. Validates non-empty **`link`**, then **501** **`not_implemented`** (no outbound **`fetch`** from the Rust API).
+        Bearer JWT. Validates a non-empty **`http(s)`** **`link`**, stores it as metadata under a new **`linked-*`** vendor entry, and returns the generated vendor id. The Rust API does **not** fetch the remote file.
       security:
         - bearerAuth: []
       requestBody:
@@ -1055,6 +1061,12 @@ paths:
             schema:
               $ref: "#/components/schemas/VendorCodeFromLinkBody"
       responses:
+        "200":
+          description: Link metadata stored under a generated vendor id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorLinkResponse"
         "400":
           description: Empty **`link`** or bad JSON
           content:
@@ -1067,14 +1079,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not implemented
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -8430,6 +8436,37 @@ components:
         message:
           type: string
           description: Confirmation message
+
+    VendorMutationResponse:
+      type: object
+      required: [vendorId, message]
+      properties:
+        vendorId:
+          type: string
+          description: Vendor ID that was created, updated, or deleted
+        message:
+          type: string
+          description: Confirmation message
+
+    VendorEnableResponse:
+      allOf:
+        - $ref: "#/components/schemas/VendorMutationResponse"
+        - type: object
+          required: [enabled]
+          properties:
+            enabled:
+              type: boolean
+              description: Persisted enabled state
+
+    VendorLinkResponse:
+      allOf:
+        - $ref: "#/components/schemas/VendorMutationResponse"
+        - type: object
+          required: [link]
+          properties:
+            link:
+              type: string
+              description: Stored external code link
 
     VendorIdBody:
       type: object

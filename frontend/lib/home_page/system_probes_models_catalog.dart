@@ -23,6 +23,17 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         }
       }
 
+      Future<({int status, VendorMutationResponseV1? body})> vendorMutationProbe(
+        Future<VendorMutationResponseV1> Function() run,
+      ) async {
+        try {
+          final body = await run();
+          return (status: 200, body: body);
+        } on RustApiException catch (e) {
+          return (status: e.statusCode ?? -1, body: null);
+        }
+      }
+
       final list = await fetchModelsCatalog(token, typeFilter: 'all');
       final vs = await fetchVendorsSummaryV1(token);
       final ad = await postAgentDeployListV1(token);
@@ -67,16 +78,19 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         });
         return;
       }
-      final vadd = await postSettingsVendorsAddV1(token, tsCode: 'export {}');
+      final vendorAdd = await vendorMutationProbe(
+        () => postSettingsVendorsAddV1(token, tsCode: 'export {}'),
+      );
       final danger = await postSettingsDangerDeleteAllDataV1(token);
       final prod = await postProductionGetProductionDataV1(
         token,
         storyboardIds: const [1],
       );
       if (!mounted) return;
-      if (vadd != 501) {
+      if (!(vendorAdd.status == 200 || vendorAdd.status == 503)) {
         setState(() {
-          _error = 'POST settings/vendors/add expected 501, got $vadd';
+          _error =
+              'POST settings/vendors/add expected 200/503, got ${vendorAdd.status}';
           _loadingModelsCatalog = false;
         });
         return;
@@ -135,64 +149,78 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         });
         return;
       }
-      final vUp = await postSettingsVendorsUpdateV1(
-        token,
-        id: 'openai',
-        inputs: const [],
-        models: const [],
+      final vendorId = vendorAdd.body?.vendorId ?? 'probe-vendor';
+      final vendorUpdate = await vendorMutationProbe(
+        () => postSettingsVendorsUpdateV1(
+          token,
+          id: vendorId,
+          displayName: 'Probe Vendor',
+          selectedModels: const ['gpt-4o-mini'],
+          settings: const {'timeout': '30'},
+        ),
       );
       if (!mounted) return;
-      if (vUp != 501) {
-        setState(() {
-          _error = 'POST settings/vendors/update expected 501, got $vUp';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final vDel = await postSettingsVendorsDeleteV1(token, id: 'openai');
-      if (!mounted) return;
-      if (vDel != 501) {
-        setState(() {
-          _error = 'POST settings/vendors/delete expected 501, got $vDel';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final vEn = await postSettingsVendorsEnableV1(
-        token,
-        id: 'openai',
-        enable: 1,
-      );
-      if (!mounted) return;
-      if (vEn != 501) {
-        setState(() {
-          _error = 'POST settings/vendors/enable expected 501, got $vEn';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final vCode = await postSettingsVendorsUpdateCodeV1(
-        token,
-        id: 'openai',
-        tsCode: '//',
-      );
-      if (!mounted) return;
-      if (vCode != 501) {
-        setState(() {
-          _error = 'POST settings/vendors/update-code expected 501, got $vCode';
-          _loadingModelsCatalog = false;
-        });
-        return;
-      }
-      final vLink = await postSettingsVendorsCodeFromLinkV1(
-        token,
-        link: 'https://example.com/a.ts',
-      );
-      if (!mounted) return;
-      if (vLink != 501) {
+      if (!(vendorUpdate.status == 200 || vendorUpdate.status == 503)) {
         setState(() {
           _error =
-              'POST settings/vendors/code-from-link expected 501, got $vLink';
+              'POST settings/vendors/update expected 200/503, got ${vendorUpdate.status}';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vendorEnable = await vendorMutationProbe(
+        () => postSettingsVendorsEnableV1(token, id: vendorId, enable: 1),
+      );
+      if (!mounted) return;
+      if (!(vendorEnable.status == 200 || vendorEnable.status == 503)) {
+        setState(() {
+          _error =
+              'POST settings/vendors/enable expected 200/503, got ${vendorEnable.status}';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vendorUpdateCode = await vendorMutationProbe(
+        () => postSettingsVendorsUpdateCodeV1(
+          token,
+          id: vendorId,
+          tsCode: '// probe',
+        ),
+      );
+      if (!mounted) return;
+      if (!(vendorUpdateCode.status == 200 || vendorUpdateCode.status == 503)) {
+        setState(() {
+          _error =
+              'POST settings/vendors/update-code expected 200/503, got ${vendorUpdateCode.status}';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vendorFromLink = await vendorMutationProbe(
+        () => postSettingsVendorsCodeFromLinkV1(
+          token,
+          link: 'https://example.com/a.ts',
+        ),
+      );
+      if (!mounted) return;
+      if (!(vendorFromLink.status == 200 || vendorFromLink.status == 503)) {
+        setState(() {
+          _error =
+              'POST settings/vendors/code-from-link expected 200/503, got ${vendorFromLink.status}';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final vendorDelete = await vendorMutationProbe(
+        () => postSettingsVendorsDeleteV1(token, id: vendorId),
+      );
+      if (!mounted) return;
+      if (!(vendorDelete.status == 200 ||
+          vendorDelete.status == 404 ||
+          vendorDelete.status == 503)) {
+        setState(() {
+          _error =
+              'POST settings/vendors/delete expected 200/404/503, got ${vendorDelete.status}';
           _loadingModelsCatalog = false;
         });
         return;
@@ -657,7 +685,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors/add -> $vadd · vend stubs -> $vUp/$vDel/$vEn/$vCode/$vLink · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/storyboard typed -> $prStoryboardData/$prStoryboardAdd/$prStoryboardBatchAdd/$prStoryboardBatchGenerate/$prStoryboardDownPreview/$prStoryboardEdit/$prStoryboardGet/$prStoryboardPreview/$prStoryboardRemove/$prStoryboardUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors real -> add:${vendorAdd.status}/upd:${vendorUpdate.status}/en:${vendorEnable.status}/code:${vendorUpdateCode.status}/link:${vendorFromLink.status}/del:${vendorDelete.status} · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/storyboard typed -> $prStoryboardData/$prStoryboardAdd/$prStoryboardBatchAdd/$prStoryboardBatchGenerate/$prStoryboardDownPreview/$prStoryboardEdit/$prStoryboardGet/$prStoryboardPreview/$prStoryboardRemove/$prStoryboardUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });

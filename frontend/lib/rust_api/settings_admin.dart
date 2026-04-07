@@ -134,18 +134,58 @@ Future<int> postSettingsVendorModelTestV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/settings/vendors/update` — OpenAPI `postSettingsVendorsUpdateV1` (typically **501**).
-Future<int> postSettingsVendorsUpdateV1(
+/// OpenAPI vendor mutation response shared by add/update/delete/update-code flows.
+class VendorMutationResponseV1 {
+  const VendorMutationResponseV1({
+    required this.vendorId,
+    required this.message,
+    this.enabled,
+    this.link,
+  });
+
+  final String vendorId;
+  final String message;
+  final bool? enabled;
+  final String? link;
+
+  factory VendorMutationResponseV1.fromJson(Map<String, dynamic> json) {
+    return VendorMutationResponseV1(
+      vendorId: json['vendorId'] as String,
+      message: json['message'] as String? ?? '',
+      enabled: json['enabled'] as bool?,
+      link: json['link'] as String?,
+    );
+  }
+}
+
+Future<VendorMutationResponseV1> _decodeVendorMutationResponse(
+  http.Response res,
+) async {
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VendorMutationResponseV1.fromJson(map);
+}
+
+/// `POST /api/v1/settings/vendors/update` — OpenAPI `postSettingsVendorsUpdateV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsUpdateV1(
   String accessToken, {
   required String id,
-  Map<String, String>? inputValues,
-  List<dynamic> inputs = const [],
-  List<dynamic> models = const [],
+  String? displayName,
+  List<String> selectedModels = const [],
+  Map<String, String> settings = const {},
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/update');
-  final body = <String, dynamic>{'id': id, 'inputs': inputs, 'models': models};
-  if (inputValues != null) {
-    body['inputValues'] = inputValues;
+  final body = <String, dynamic>{'id': id};
+  if (displayName != null) {
+    body['displayName'] = displayName;
+  }
+  if (selectedModels.isNotEmpty) {
+    body['selectedModels'] = selectedModels;
+  }
+  if (settings.isNotEmpty) {
+    body['settings'] = settings;
   }
   final res = await http
       .post(
@@ -157,11 +197,11 @@ Future<int> postSettingsVendorsUpdateV1(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
-/// `POST /api/v1/settings/vendors/delete` — OpenAPI `postSettingsVendorsDeleteV1` (typically **501**).
-Future<int> postSettingsVendorsDeleteV1(
+/// `POST /api/v1/settings/vendors/delete` — OpenAPI `postSettingsVendorsDeleteV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsDeleteV1(
   String accessToken, {
   required String id,
 }) async {
@@ -176,11 +216,11 @@ Future<int> postSettingsVendorsDeleteV1(
         body: jsonEncode({'id': id}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
-/// `POST /api/v1/settings/vendors/enable` — OpenAPI `postSettingsVendorsEnableV1` (typically **501**).
-Future<int> postSettingsVendorsEnableV1(
+/// `POST /api/v1/settings/vendors/enable` — OpenAPI `postSettingsVendorsEnableV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsEnableV1(
   String accessToken, {
   required String id,
   required num enable,
@@ -196,11 +236,11 @@ Future<int> postSettingsVendorsEnableV1(
         body: jsonEncode({'id': id, 'enable': enable}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
-/// `POST /api/v1/settings/vendors/update-code` — OpenAPI `postSettingsVendorsUpdateCodeV1` (typically **501**).
-Future<int> postSettingsVendorsUpdateCodeV1(
+/// `POST /api/v1/settings/vendors/update-code` — OpenAPI `postSettingsVendorsUpdateCodeV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsUpdateCodeV1(
   String accessToken, {
   required String id,
   required String tsCode,
@@ -216,11 +256,11 @@ Future<int> postSettingsVendorsUpdateCodeV1(
         body: jsonEncode({'id': id, 'tsCode': tsCode}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
-/// `POST /api/v1/settings/vendors/code-from-link` — OpenAPI `postSettingsVendorsCodeFromLinkV1` (typically **501**).
-Future<int> postSettingsVendorsCodeFromLinkV1(
+/// `POST /api/v1/settings/vendors/code-from-link` — OpenAPI `postSettingsVendorsCodeFromLinkV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsCodeFromLinkV1(
   String accessToken, {
   required String link,
 }) async {
@@ -235,11 +275,11 @@ Future<int> postSettingsVendorsCodeFromLinkV1(
         body: jsonEncode({'link': link}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
-/// `POST /api/v1/settings/vendors/add` — OpenAPI `postSettingsVendorsAddV1` (typically **501**).
-Future<int> postSettingsVendorsAddV1(
+/// `POST /api/v1/settings/vendors/add` — OpenAPI `postSettingsVendorsAddV1`.
+Future<VendorMutationResponseV1> postSettingsVendorsAddV1(
   String accessToken, {
   required String tsCode,
 }) async {
@@ -254,7 +294,7 @@ Future<int> postSettingsVendorsAddV1(
         body: jsonEncode({'tsCode': tsCode}),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  return _decodeVendorMutationResponse(res);
 }
 
 /// `POST /api/v1/settings/danger/delete-all-data` — OpenAPI `postSettingsDangerDeleteAllDataV1` (typically **501**).

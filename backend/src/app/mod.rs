@@ -826,6 +826,19 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_vendors_add_rejects_empty_ts_code_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/add",
+            &token,
+            r#"{"tsCode":"   "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn settings_vendors_update_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -852,6 +865,15 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_vendors_delete_rejects_empty_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/settings/vendors/delete", &token, r#"{"id":"   "}"#).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn settings_vendors_delete_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -865,6 +887,19 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn settings_vendors_enable_rejects_empty_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/enable",
+            &token,
+            r#"{"id":"   ","enable":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn settings_vendors_enable_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -875,6 +910,19 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
         assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_update_code_rejects_empty_ts_code_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/update-code",
+            &token,
+            r#"{"id":"custom-123","tsCode":"   "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
     }
 
     #[tokio::test]
@@ -910,6 +958,19 @@ mod contract_smoke_tests {
             "/api/v1/settings/vendors/code-from-link",
             &token,
             r#"{"link":"  "}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_code_from_link_rejects_non_http_link_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/code-from-link",
+            &token,
+            r#"{"link":"ftp://example.com/code.ts"}"#,
         )
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -6302,6 +6363,138 @@ mod pg_contract_tests {
         assert_eq!(
             v0_3["userConfig"]["settings"]["timeout"].as_str(),
             Some("30")
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/settings/vendors/add")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"tsCode":"export default { id: 'probe' }"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, added) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "added={added}");
+        let custom_vendor_id = added["vendorId"]
+            .as_str()
+            .expect("custom vendor id")
+            .to_string();
+        assert!(custom_vendor_id.starts_with("custom-"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/settings/vendors/update-code")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"id":"{custom_vendor_id}","tsCode":"export default {{ updated: true }}"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, updated_code) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "updated_code={updated_code}");
+        assert_eq!(
+            updated_code["vendorId"].as_str(),
+            Some(custom_vendor_id.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/settings/vendors/summary")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, summary4) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "summary4={summary4}");
+        let vendors4 = summary4["vendors"].as_array().expect("vendors array");
+        assert!(vendors4
+            .iter()
+            .any(|v| v["userConfig"]["vendorId"].as_str() == Some(custom_vendor_id.as_str())));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/settings/vendors/code-from-link")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"link":"https://example.com/vendor.ts"}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, linked) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "linked={linked}");
+        let linked_vendor_id = linked["vendorId"]
+            .as_str()
+            .expect("linked vendor id")
+            .to_string();
+        assert!(linked_vendor_id.starts_with("linked-"));
+        assert_eq!(
+            linked["link"].as_str(),
+            Some("https://example.com/vendor.ts")
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/settings/vendors/delete")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":"{custom_vendor_id}"}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, deleted) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "deleted={deleted}");
+        assert_eq!(
+            deleted["vendorId"].as_str(),
+            Some(custom_vendor_id.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/settings/vendors/delete")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":"{linked_vendor_id}"}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, deleted_linked) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "deleted_linked={deleted_linked}");
+        assert_eq!(
+            deleted_linked["vendorId"].as_str(),
+            Some(linked_vendor_id.as_str())
         );
 
         // Disable vendor
