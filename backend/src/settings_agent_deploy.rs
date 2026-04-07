@@ -152,3 +152,120 @@ pub fn router() -> Router<AppState> {
             post(post_agent_set_key),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn agent_deploy_list_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<AgentDeployListBody>(r#"{"extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn agent_deploy_list_body_accepts_empty() {
+        let b: AgentDeployListBody = serde_json::from_str(r#"{}"#).unwrap();
+        let _ = b;
+    }
+
+    #[test]
+    fn deploy_agent_model_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<DeployAgentModelBody>(
+            r#"{"id":1,"name":"Test","model":"m","modelName":"mn","desc":"d","extra":1}"#,
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn deploy_agent_model_body_accepts_valid() {
+        let b: DeployAgentModelBody = serde_json::from_str(
+            r#"{"id":1,"name":"Script Agent","model":"gpt-4","modelName":"GPT-4","desc":"Test desc"}"#,
+        )
+        .unwrap();
+        assert_eq!(b.id, 1);
+        assert_eq!(b.name, "Script Agent");
+        assert_eq!(b.model, "gpt-4");
+        assert_eq!(b.vendor_id, None);
+    }
+
+    #[test]
+    fn deploy_agent_model_body_accepts_with_vendor() {
+        let b: DeployAgentModelBody = serde_json::from_str(
+            r#"{"id":2,"name":"Prod Agent","model":"gpt-4","modelName":"GPT-4","vendorId":"openai","desc":"Production"}"#,
+        )
+        .unwrap();
+        assert_eq!(b.id, 2);
+        assert_eq!(b.vendor_id, Some("openai".to_string()));
+    }
+
+    #[test]
+    fn agent_set_key_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<AgentSetKeyBody>(r#"{"key":"secret","extra":1}"#);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn agent_set_key_body_accepts_key() {
+        let b: AgentSetKeyBody =
+            serde_json::from_str(r#"{"key":"my-api-key"}"#).unwrap();
+        assert_eq!(b.key, Some("my-api-key".to_string()));
+    }
+
+    #[test]
+    fn agent_set_key_body_accepts_null_key() {
+        let b: AgentSetKeyBody = serde_json::from_str(r#"{"key":null}"#).unwrap();
+        assert_eq!(b.key, None);
+    }
+
+    #[test]
+    fn agent_set_key_body_accepts_empty() {
+        let b: AgentSetKeyBody = serde_json::from_str(r#"{}"#).unwrap();
+        assert_eq!(b.key, None);
+    }
+
+    #[test]
+    fn static_agent_deploy_list_has_4_items() {
+        let list = static_agent_deploy_list();
+        assert_eq!(list.len(), 4);
+    }
+
+    #[test]
+    fn static_agent_deploy_list_has_expected_keys() {
+        let list = static_agent_deploy_list();
+        let keys: Vec<&str> = list.iter().map(|i| i.key.as_str()).collect();
+        assert!(keys.contains(&"scriptAgent"));
+        assert!(keys.contains(&"productionAgent"));
+        assert!(keys.contains(&"universalAi"));
+        assert!(keys.contains(&"ttsDubbing"));
+    }
+
+    #[test]
+    fn static_agent_deploy_list_tts_is_disabled() {
+        let list = static_agent_deploy_list();
+        let tts = list.iter().find(|i| i.key == "ttsDubbing").unwrap();
+        assert!(tts.disabled);
+    }
+
+    #[test]
+    fn agent_deploy_list_item_serialize() {
+        let item = AgentDeployListItem {
+            id: 1,
+            model: "gpt-4".to_string(),
+            key: "scriptAgent".to_string(),
+            model_name: "GPT-4".to_string(),
+            vendor_id: Some("openai".to_string()),
+            desc: "Test".to_string(),
+            name: "Script Agent".to_string(),
+            disabled: false,
+            icon: "icon.png".to_string(),
+        };
+        let json = serde_json::to_string(&item).unwrap();
+        assert!(json.contains("\"id\":1"));
+        assert!(json.contains("\"key\":\"scriptAgent\""));
+        assert!(json.contains("\"name\":\"Script Agent\""));
+        assert!(json.contains("\"disabled\":false"));
+    }
+}
