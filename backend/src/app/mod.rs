@@ -2408,6 +2408,61 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn novel_events_get_events_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/novels/events/get-events",
+            r#"{"projectId":1,"page":1,"limit":20}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn novel_events_get_events_validates_payload_before_database() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/novels/events/get-events",
+            &token,
+            r#"{"projectId":0,"page":1,"limit":20}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+
+        let (status, v) = post_json_bearer(
+            "/api/v1/novels/events/get-events",
+            &token,
+            r#"{"projectId":1,"page":0,"limit":20}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+
+        let (status, v) = post_json_bearer(
+            "/api/v1/novels/events/get-events",
+            &token,
+            r#"{"projectId":1,"page":1,"limit":0}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn novel_events_get_events_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/novels/events/get-events",
+            &token,
+            r#"{"projectId":1,"page":1,"limit":20,"search":"事件"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn novels_get_novel_unauthorized_without_bearer() {
         let (status, v) = post_json(
             "/api/v1/novels/get-novel",
