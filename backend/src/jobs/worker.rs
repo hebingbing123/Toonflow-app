@@ -12,7 +12,11 @@ use crate::harness::observe;
 use crate::state::AppState;
 use crate::usage;
 
-use super::{envelope_generation_job_updated, JobRow};
+use super::{
+    envelope_generation_job_updated, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
+    JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
+    JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+};
 
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")
@@ -157,7 +161,7 @@ async fn execute_kind(
     row: &JobRow,
 ) -> Result<serde_json::Value, JobRunError> {
     match row.kind.as_str() {
-        "flutter.probe" => {
+        k if k == JOB_KIND_FLUTTER_PROBE => {
             // ~1s total; poll so running cancel can land cooperatively.
             for _ in 0..20 {
                 tokio::time::sleep(Duration::from_millis(50)).await;
@@ -173,19 +177,19 @@ async fn execute_kind(
             }
             Ok(json!({ "ok": true, "probe": true }))
         }
-        "asset.generate.image" => Err(JobRunError::Failed(
+        k if k == JOB_KIND_ASSET_GENERATE_IMAGE => Err(JobRunError::Failed(
             "asset image generation pipeline is not implemented yet".into(),
         )),
-        "asset.polish.prompt" => Err(JobRunError::Failed(
+        k if k == JOB_KIND_ASSET_POLISH_PROMPT => Err(JobRunError::Failed(
             "asset prompt polish pipeline is not implemented yet".into(),
         )),
-        "asset.generate.batch" => Err(JobRunError::Failed(
+        k if k == JOB_KIND_ASSET_GENERATE_BATCH => Err(JobRunError::Failed(
             "batch asset image generation pipeline is not implemented yet".into(),
         )),
-        "asset.polish.batch" => Err(JobRunError::Failed(
+        k if k == JOB_KIND_ASSET_POLISH_BATCH => Err(JobRunError::Failed(
             "batch asset prompt polish pipeline is not implemented yet".into(),
         )),
-        "settings.vendor.model_test" => Err(JobRunError::Failed(
+        k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => Err(JobRunError::Failed(
             "vendor modelTest live probe is not implemented yet".into(),
         )),
         other => Err(JobRunError::Failed(format!(

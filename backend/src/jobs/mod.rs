@@ -81,6 +81,8 @@ pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 /// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker fails until live LLM/OSS probe exists.
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
+/// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
+pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.
 pub async fn enqueue_generation_job(
@@ -538,7 +540,7 @@ mod tests {
         JobRow {
             id: Uuid::nil(),
             owner_user_id: Uuid::nil(),
-            kind: "flutter.probe".into(),
+            kind: JOB_KIND_FLUTTER_PROBE.into(),
             status: "queued".into(),
             payload: json!({ "n": 1 }),
             result: None,
@@ -590,7 +592,7 @@ mod tests {
         let payload = v.get("payload").unwrap();
         assert_eq!(
             payload.get("kind").and_then(|x| x.as_str()),
-            Some("flutter.probe")
+            Some(JOB_KIND_FLUTTER_PROBE)
         );
         assert_eq!(
             payload.get("idempotency_key").and_then(|x| x.as_str()),
@@ -617,8 +619,8 @@ mod tests {
         assert_eq!(super::trim_query_opt(Some(String::new())), None);
         assert_eq!(super::trim_query_opt(Some("   \t  ".into())), None);
         assert_eq!(
-            super::trim_query_opt(Some("  flutter.probe  ".into())),
-            Some("flutter.probe".into())
+            super::trim_query_opt(Some(format!("  {}  ", JOB_KIND_FLUTTER_PROBE))),
+            Some(JOB_KIND_FLUTTER_PROBE.into())
         );
     }
 
