@@ -6785,4 +6785,96 @@ mod pg_contract_tests {
             local_asset_image_dir: None,
         }
     }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
+    async fn storyboards_crud_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        // Create project
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "created={created}");
+        let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        // Create script
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/legacy/{project_id}/scripts"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, script) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "script={script}");
+        let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+
+        // Get storyboards (empty)
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{project_id}/scripts/{script_id}/storyboards"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, list) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "list storyboards={list}");
+        assert_eq!(list["items"].as_array().map(|a| a.len()), Some(0));
+
+        // Cleanup
+        let _ = sqlx::query(
+            "DELETE FROM public.app_storyboard WHERE script_id IN (SELECT id FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1))"
+        )
+        .bind(project_id)
+        .execute(&pool)
+        .await;
+        let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+            .bind(project_id)
+            .execute(&pool)
+            .await;
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+            .bind(project_id)
+            .execute(&pool)
+            .await;
+    }
 }
