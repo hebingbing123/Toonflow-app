@@ -26,6 +26,7 @@ part 'home_page/project_editor_assets.dart';
 part 'home_page/project_editor_scripts_probe.dart';
 part 'home_page/project_editor_scripts.dart';
 part 'home_page/projects_controller.dart';
+part 'home_page/jobs_controller_list.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/task_center_controller.dart';
 part 'home_page/skills_harness_controller.dart';
