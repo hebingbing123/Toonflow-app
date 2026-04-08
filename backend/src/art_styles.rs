@@ -1,14 +1,20 @@
 //! User-scoped **`app_art_style`** REST (legacy **`o_artStyle`** list/get/create/update/delete subset).
 
+use std::path::{Path as FsPath, PathBuf};
+
 use axum::{
+    body::Body,
     extract::{Path, State},
-    http::{HeaderMap, StatusCode},
+    http::{header, HeaderMap, StatusCode},
+    response::{IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
+use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlx::FromRow;
+use tokio::fs;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -22,6 +28,8 @@ const MAX_ART_STYLE_LIST: i64 = 500;
 const MAX_EXTRACT_IMAGES: usize = 16;
 /// Per-image cap for **`data:`** / URL strings (legacy **`extractStylePrompt`** had no limit).
 const MAX_IMAGE_ENTRY_BYTES: usize = 20 * 1024 * 1024;
+const MAX_ART_STYLE_COVER_INPUT_CHARS: usize = 20 * 1024 * 1024;
+const MAX_ART_STYLE_COVER_BYTES: usize = 15 * 1024 * 1024;
 
 /// System prompt aligned with legacy **`src/routes/artStyle/extractStylePrompt.ts`**.
 const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提取出图片的画风提示词，用于生成图片时指定风格，要求简洁且具有艺术性,只需要画风提示词，不需要其他内容："比如：`(画风：2D动漫风格,2d animation style)`,`(画风：照片级真人超写实,photorealistic, lifelike, ultra detailed)`，`(画风：3D国创,Chinese 3D animation style)`等,如果图片风格无法描述，可以返回`无法描述`,多张图片时，只输出一个综合的画风提示词，要求包含所有图片的共同风格特征，输出格式必须严格按照示例中的格式，必须包含`画风`二字，且必须使用括号括起来，括号内必须包含中文和英文的画风描述，并用逗号分隔，英文部分需要翻译成地道的英文提示词"#;
@@ -94,10 +102,131 @@ pub fn router() -> Router<AppState> {
                 .patch(patch_art_style_by_legacy)
                 .delete(delete_art_style_by_legacy),
         )
+        .route(
+            "/api/v1/art-styles/legacy/{legacy_id}/cover",
+            get(get_art_style_cover_by_legacy),
+        )
 }
 
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.map(|v| v.trim().to_owned()).filter(|s| !s.is_empty())
+}
+
+#[derive(Debug, Clone)]
+struct LocalArtStyleCover {
+    bytes: Vec<u8>,
+    ext: &'static str,
+}
+
+#[derive(Debug, FromRow)]
+struct ArtStyleFileUrlRow {
+    file_url: Option<String>,
+}
+
+fn is_http_url(s: &str) -> bool {
+    s.starts_with("http://") || s.starts_with("https://")
+}
+
+fn art_style_cover_api_path(legacy_id: i32) -> String {
+    format!("/api/v1/art-styles/legacy/{legacy_id}/cover")
+}
+
+fn parse_uploaded_cover(raw: &str) -> Result<Option<LocalArtStyleCover>, ApiError> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty() || is_http_url(trimmed) || trimmed.starts_with('/') {
+        return Ok(None);
+    }
+    if trimmed.len() > MAX_ART_STYLE_COVER_INPUT_CHARS {
+        return Err(ApiError::BadRequest(format!(
+            "art style file_url exceeds max length ({MAX_ART_STYLE_COVER_INPUT_CHARS} chars)"
+        )));
+    }
+
+    let (mime, b64) = match trimmed.strip_prefix("data:") {
+        Some(rest) => {
+            let (meta, b64) = rest.split_once(";base64,").ok_or_else(|| {
+                ApiError::BadRequest("art style file_url data URI must be base64".into())
+            })?;
+            let mime = match meta.trim().to_ascii_lowercase().as_str() {
+                "image/png" => "image/png",
+                "image/jpeg" | "image/jpg" => "image/jpeg",
+                "image/webp" => "image/webp",
+                _ => return Err(ApiError::BadRequest(
+                    "art style file_url must be png/jpeg/webp data URI, http(s) URL, or API path"
+                        .into(),
+                )),
+            };
+            (mime, b64.trim())
+        }
+        None => ("image/jpeg", trimmed),
+    };
+
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(b64.as_bytes())
+        .map_err(|_| ApiError::BadRequest("art style file_url is not valid base64".into()))?;
+    if bytes.is_empty() {
+        return Err(ApiError::BadRequest(
+            "art style file_url decoded to empty image".into(),
+        ));
+    }
+    if bytes.len() > MAX_ART_STYLE_COVER_BYTES {
+        return Err(ApiError::BadRequest(format!(
+            "art style cover exceeds max decoded size ({MAX_ART_STYLE_COVER_BYTES} bytes)"
+        )));
+    }
+
+    let ext = match mime {
+        "image/png" => "png",
+        "image/webp" => "webp",
+        _ => "jpg",
+    };
+    Ok(Some(LocalArtStyleCover { bytes, ext }))
+}
+
+fn art_style_cover_file_path(
+    root: &FsPath,
+    owner_user_id: Uuid,
+    legacy_id: i32,
+    ext: &str,
+) -> PathBuf {
+    root.join(owner_user_id.to_string())
+        .join(format!("{legacy_id}.{ext}"))
+}
+
+fn existing_art_style_cover_paths(
+    root: &FsPath,
+    owner_user_id: Uuid,
+    legacy_id: i32,
+) -> [PathBuf; 3] {
+    [
+        art_style_cover_file_path(root, owner_user_id, legacy_id, "png"),
+        art_style_cover_file_path(root, owner_user_id, legacy_id, "jpg"),
+        art_style_cover_file_path(root, owner_user_id, legacy_id, "webp"),
+    ]
+}
+
+async fn delete_local_art_style_cover_files(root: &FsPath, owner_user_id: Uuid, legacy_id: i32) {
+    for path in existing_art_style_cover_paths(root, owner_user_id, legacy_id) {
+        let _ = fs::remove_file(path).await;
+    }
+}
+
+async fn persist_local_art_style_cover(
+    root: &FsPath,
+    owner_user_id: Uuid,
+    legacy_id: i32,
+    cover: &LocalArtStyleCover,
+) -> Result<(), ApiError> {
+    let dir = root.join(owner_user_id.to_string());
+    fs::create_dir_all(&dir)
+        .await
+        .map_err(|e| ApiError::BadRequest(format!("art style cover mkdir failed: {e}")))?;
+    delete_local_art_style_cover_files(root, owner_user_id, legacy_id).await;
+    let path = art_style_cover_file_path(root, owner_user_id, legacy_id, cover.ext);
+    fs::write(&path, &cover.bytes)
+        .await
+        .map_err(|e| ApiError::BadRequest(format!("art style cover write failed: {e}")))?;
+    Ok(())
 }
 
 async fn extract_style_prompt(
@@ -205,6 +334,16 @@ async fn create_art_style(
     let file_url = trim_opt(body.file_url);
     let label = trim_opt(body.label);
     let prompt = trim_opt(body.prompt);
+    let uploaded_cover = match file_url.as_deref() {
+        Some(file_url) => parse_uploaded_cover(file_url)?,
+        None => None,
+    };
+    if uploaded_cover.is_some() && state.local_art_style_cover_dir.is_none() {
+        return Err(ApiError::NotImplemented(
+            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot persist art style base64 covers"
+                .into(),
+        ));
+    }
 
     let mut tx = pool
         .begin()
@@ -235,7 +374,11 @@ async fn create_art_style(
     .bind(uid)
     .bind(next_legacy)
     .bind(&name)
-    .bind(&file_url)
+    .bind(if uploaded_cover.is_some() {
+        Some(art_style_cover_api_path(next_legacy))
+    } else {
+        file_url.clone()
+    })
     .bind(&label)
     .bind(&prompt)
     .fetch_one(&mut *tx)
@@ -245,6 +388,13 @@ async fn create_art_style(
     tx.commit()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if let (Some(root), Some(cover)) = (
+        state.local_art_style_cover_dir.as_deref(),
+        uploaded_cover.as_ref(),
+    ) {
+        persist_local_art_style_cover(root, uid, next_legacy, cover).await?;
+    }
 
     Ok((StatusCode::CREATED, Json(row)))
 }
@@ -346,6 +496,21 @@ async fn patch_art_style_by_legacy(
         FieldPatch::Absent => current.prompt.clone(),
         FieldPatch::Set(v) => v.clone(),
     };
+    let uploaded_cover = match &new_file_url {
+        Some(file_url) => parse_uploaded_cover(file_url)?,
+        None => None,
+    };
+    if uploaded_cover.is_some() && state.local_art_style_cover_dir.is_none() {
+        return Err(ApiError::NotImplemented(
+            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot persist art style base64 covers"
+                .into(),
+        ));
+    }
+    let stored_file_url = if uploaded_cover.is_some() {
+        Some(art_style_cover_api_path(legacy_id))
+    } else {
+        new_file_url.clone()
+    };
 
     let row = sqlx::query_as::<_, ArtStyleRow>(
         r#"
@@ -360,7 +525,7 @@ async fn patch_art_style_by_legacy(
         "#,
     )
     .bind(&new_name)
-    .bind(&new_file_url)
+    .bind(&stored_file_url)
     .bind(&new_label)
     .bind(&new_prompt)
     .bind(uid)
@@ -368,6 +533,17 @@ async fn patch_art_style_by_legacy(
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if let Some(root) = state.local_art_style_cover_dir.as_deref() {
+        if let Some(cover) = uploaded_cover.as_ref() {
+            persist_local_art_style_cover(root, uid, legacy_id, cover).await?;
+        } else if matches!(file_url_patch, FieldPatch::Set(_))
+            && current.file_url.as_deref() == Some(art_style_cover_api_path(legacy_id).as_str())
+            && stored_file_url.as_deref() != Some(art_style_cover_api_path(legacy_id).as_str())
+        {
+            delete_local_art_style_cover_files(root, uid, legacy_id).await;
+        }
+    }
 
     Ok(Json(row))
 }
@@ -399,7 +575,81 @@ async fn delete_art_style_by_legacy(
         return Err(ApiError::NotFound);
     }
 
+    if let Some(root) = state.local_art_style_cover_dir.as_deref() {
+        delete_local_art_style_cover_files(root, uid, legacy_id).await;
+    }
+
     Ok(StatusCode::NO_CONTENT)
+}
+
+async fn get_art_style_cover_by_legacy(
+    State(state): State<AppState>,
+    Path(legacy_id): Path<i32>,
+    headers: HeaderMap,
+) -> Result<Response, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy_id must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let row = sqlx::query_as::<_, ArtStyleFileUrlRow>(
+        r#"
+        SELECT file_url
+        FROM app_art_style
+        WHERE owner_user_id = $1 AND legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    if row.file_url.as_deref() != Some(art_style_cover_api_path(legacy_id).as_str()) {
+        return Err(ApiError::NotFound);
+    }
+
+    let Some(root) = state.local_art_style_cover_dir.as_deref() else {
+        return Err(ApiError::DatabaseError(
+            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot serve local art style covers"
+                .into(),
+        ));
+    };
+
+    for (ext, mime) in [
+        ("png", "image/png"),
+        ("jpg", "image/jpeg"),
+        ("webp", "image/webp"),
+    ] {
+        let path = art_style_cover_file_path(root, uid, legacy_id, ext);
+        match fs::read(&path).await {
+            Ok(bytes) => {
+                return Ok((
+                    StatusCode::OK,
+                    [
+                        (header::CONTENT_TYPE, mime),
+                        (header::CACHE_CONTROL, "private, max-age=300"),
+                    ],
+                    Body::from(bytes),
+                )
+                    .into_response())
+            }
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(err) => {
+                return Err(ApiError::DatabaseError(format!(
+                    "art style cover read failed: {err}"
+                )))
+            }
+        }
+    }
+
+    Err(ApiError::NotFound)
 }
 
 #[cfg(test)]
@@ -430,5 +680,27 @@ mod tests {
     fn extract_art_style_prompt_body_rejects_unknown_fields() {
         let j = serde_json::json!({ "images": [], "extra": 1 });
         assert!(serde_json::from_value::<ExtractArtStylePromptBody>(j).is_err());
+    }
+
+    #[test]
+    fn parse_uploaded_cover_accepts_png_data_uri() {
+        let parsed = parse_uploaded_cover("data:image/png;base64,AA==")
+            .expect("parse")
+            .expect("cover");
+        assert_eq!(parsed.ext, "png");
+        assert_eq!(parsed.bytes, vec![0]);
+    }
+
+    #[test]
+    fn parse_uploaded_cover_treats_http_url_as_passthrough() {
+        assert!(parse_uploaded_cover("https://example.com/cover.png")
+            .expect("parse")
+            .is_none());
+    }
+
+    #[test]
+    fn parse_uploaded_cover_rejects_non_image_data_uri() {
+        let err = parse_uploaded_cover("data:text/plain;base64,AA==").expect_err("bad mime");
+        assert!(matches!(err, ApiError::BadRequest(_)));
     }
 }

@@ -58,6 +58,10 @@ class ExtractArtStylePromptResponse {
   }
 }
 
+/// Builds `GET /api/v1/art-styles/legacy/{legacy_id}/cover`.
+Uri artStyleCoverV1Uri(int legacyId) =>
+    Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId/cover');
+
 /// `GET /api/v1/art-styles` — see `listArtStylesV1`.
 Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles');
@@ -121,6 +125,26 @@ Future<ArtStyleRow> fetchArtStyleByLegacyId(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return ArtStyleRow.fromJson(map);
+}
+
+/// `GET /api/v1/art-styles/legacy/{legacy_id}/cover` — JWT-protected local cover bytes.
+Future<Uint8List> fetchArtStyleCoverByLegacyId(
+  String accessToken, {
+  required int legacyId,
+}) async {
+  final res = await http
+      .get(
+        artStyleCoverV1Uri(legacyId),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return res.bodyBytes;
 }
 
 /// `PATCH /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `patchArtStyleByLegacyIdV1`.

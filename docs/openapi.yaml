@@ -82,7 +82,7 @@ tags:
   - name: novels
     description: Novel source chapters per project (`app_novel`; Postgres + RLS)
   - name: art_styles
-    description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset without OSS image upload
+    description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset with local base64 cover persistence instead of OSS upload
   - name: skills
     description: Markdown skills under `backend/data/skills` (read; PUT overwrite; POST create; DELETE remove one file); visual manual (`GET`/`POST /api/v1/visual-manual`) from bundled `art_skills`
   - name: harness
@@ -3649,7 +3649,15 @@ paths:
       summary: Create an art style preset
       operationId: createArtStyleV1
       description: |
-        Allocates a new global **`legacy_id`** (advisory lock **`884_422_008`** + **`MAX(legacy_id)+1`**). Does not accept base64 image upload; store a path or URL in **`file_url`** if needed.
+        Allocates a new global **`legacy_id`** (advisory lock **`884_422_008`** + **`MAX(legacy_id)+1`**).
+        **`file_url`** accepts one of:
+        - public **`http(s)`** URL
+        - existing API path (for already-persisted cover)
+        - **`data:image/png|jpeg|webp;base64,...`**
+        - raw base64 image string (legacy fallback; stored as **jpeg** bytes)
+        When **`file_url`** is base64-like, the server requires **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`** and persists
+        the decoded bytes under **`{dir}/{user_id}/{legacy_id}.{ext}`**, then stores **`/api/v1/art-styles/legacy/{legacy_id}/cover`**
+        in the row.
       security:
         - bearerAuth: []
       requestBody:
@@ -3777,6 +3785,9 @@ paths:
       tags: [art_styles]
       summary: Patch art style fields
       operationId: patchArtStyleByLegacyIdV1
+      description: |
+        Same **`file_url`** rules as create. Setting **`file_url`** to **`null`** clears the cover reference and deletes any
+        locally persisted cover file when it belonged to this API path.
       security:
         - bearerAuth: []
       parameters:
@@ -3819,6 +3830,58 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /api/v1/art-styles/legacy/{legacy_id}/cover:
+    get:
+      tags: [art_styles]
+      summary: Fetch one locally persisted art-style cover
+      operationId: getArtStyleCoverByLegacyIdV1
+      description: |
+        Bearer JWT. Reads the caller-owned **`app_art_style`** row and streams the locally persisted cover image when
+        **`file_url`** equals **`/api/v1/art-styles/legacy/{legacy_id}/cover`**. Requires
+        **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`**; otherwise returns **503**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Cover not found for this art style
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `TOONFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
           content:
             application/json:
               schema:
@@ -10616,6 +10679,7 @@ components:
         file_url:
           type: string
           nullable: true
+          description: Public URL, caller-managed path, or this API's local cover path **`/api/v1/art-styles/legacy/{legacy_id}/cover`**
         label:
           type: string
           nullable: true
@@ -10644,6 +10708,7 @@ components:
           type: string
         file_url:
           type: string
+          description: Public URL, API path, **`data:image/png|jpeg|webp;base64,...`**, or raw base64 image string
         label:
           type: string
         prompt:
@@ -10682,6 +10747,7 @@ components:
         file_url:
           type: string
           nullable: true
+          description: Same as create; use **null** to clear the stored cover reference
         label:
           type: string
           nullable: true

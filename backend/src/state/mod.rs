@@ -30,6 +30,9 @@ pub struct AppState {
     /// When set, **`asset.generate.*`** workers persist PNGs under **`{dir}/{user_id}/{image_row_id}.png`**
     /// and set **`app_asset_image.file_path`** to this API’s **`…/images/{id}/file`** path.
     pub local_asset_image_dir: Option<PathBuf>,
+    /// When set, art-style create/patch may persist uploaded base64 covers under
+    /// **`{dir}/{user_id}/{legacy_id}.{ext}`** and serve them via **`GET …/art-styles/legacy/{id}/cover`**.
+    pub local_art_style_cover_dir: Option<PathBuf>,
 }
 
 impl AppState {

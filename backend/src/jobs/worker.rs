@@ -1233,6 +1233,7 @@ mod tests {
             memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
             switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
+            local_art_style_cover_dir: None,
         }
     }
 

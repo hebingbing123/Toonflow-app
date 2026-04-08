@@ -75,6 +75,16 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
             "TOONFLOW_LOCAL_ASSET_IMAGE_DIR set; asset.generate workers will persist PNGs locally"
         );
     }
+    let local_art_style_cover_dir = std::env::var("TOONFLOW_LOCAL_ART_STYLE_COVER_DIR")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .map(std::path::PathBuf::from);
+    if local_art_style_cover_dir.is_some() {
+        tracing::info!(
+            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR set; art-style base64 covers will persist locally"
+        );
+    }
 
     Ok(AppState {
         pool,
@@ -85,5 +95,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
         switch_ai_dev_tool: Arc::new(RwLock::new(switch_ai_dev_tool_from_env())),
         local_asset_image_dir,
+        local_art_style_cover_dir,
     })
 }
