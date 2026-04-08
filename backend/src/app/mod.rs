@@ -9650,6 +9650,29 @@ mod pg_contract_tests {
             Some(8),
             "add-track should allocate next track id"
         );
+        let persisted_track_count: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM app_video_track vt
+            INNER JOIN app_project p ON p.id = vt.project_id
+            INNER JOIN app_script s ON s.id = vt.script_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+              AND s.legacy_id = $3
+              AND vt.legacy_id = $4
+            "#,
+        )
+        .bind(sub)
+        .bind(project_id)
+        .bind(script_id)
+        .bind(8_i32)
+        .fetch_one(&pool)
+        .await
+        .expect("query persisted video track");
+        assert_eq!(
+            persisted_track_count, 1,
+            "add-track should persist app_video_track row"
+        );
 
         let selected_video_url = "https://cdn.example.com/pg-contract-video.mp4";
         let res = app
@@ -9719,6 +9742,29 @@ mod pg_contract_tests {
         let (status, deleted_track) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "deleted_track={deleted_track}");
         assert_eq!(deleted_track["track_id"].as_i64(), Some(7));
+        let deleted_track_count: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM app_video_track vt
+            INNER JOIN app_project p ON p.id = vt.project_id
+            INNER JOIN app_script s ON s.id = vt.script_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+              AND s.legacy_id = $3
+              AND vt.legacy_id = $4
+            "#,
+        )
+        .bind(sub)
+        .bind(project_id)
+        .bind(script_id)
+        .bind(7_i32)
+        .fetch_one(&pool)
+        .await
+        .expect("query deleted video track");
+        assert_eq!(
+            deleted_track_count, 0,
+            "delete-track should remove persisted app_video_track row"
+        );
 
         let res = app
             .clone()

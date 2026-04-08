@@ -5347,11 +5347,12 @@ paths:
   /api/v1/production/workbench/add-track:
     post:
       tags: [production]
-      summary: Add a virtual video track (legacy `addTrack`)
+      summary: Add a persisted video track (legacy `addTrack`)
       operationId: postProductionWorkbenchAddTrackV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`trackName`**,
-        checks that the script belongs to the caller, then returns the next virtual **`trackId`**.
+        checks that the script belongs to the caller, allocates the next **`trackId`** across
+        storyboard assignments and **`app_video_track`**, then persists a track row in Postgres.
       security:
         - bearerAuth: []
       requestBody:
@@ -5395,11 +5396,12 @@ paths:
   /api/v1/production/workbench/delete-track:
     post:
       tags: [production]
-      summary: Delete a virtual video track (legacy `deleteTrack`)
+      summary: Delete a persisted video track (legacy `deleteTrack`)
       operationId: postProductionWorkbenchDeleteTrackV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`trackId`**, then clears that
-        track assignment from owned storyboards in the script.
+        track assignment from owned storyboards in the script and deletes the matching
+        **`app_video_track`** row when present.
       security:
         - bearerAuth: []
       requestBody:

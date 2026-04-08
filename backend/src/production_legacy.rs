@@ -649,10 +649,14 @@ async fn post_workbench_add_track(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    // Verify ownership
-    let owned_count = sqlx::query_scalar::<_, i64>(
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let (project_uuid, script_uuid): (uuid::Uuid, uuid::Uuid) = sqlx::query_as(
         r#"
-        SELECT COUNT(*)
+        SELECT p.id, s.id
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
@@ -663,37 +667,59 @@ async fn post_workbench_add_track(
     .bind(uid)
     .bind(body.project_id)
     .bind(body.script_id)
-    .fetch_one(pool)
+    .fetch_optional(&mut *tx)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
 
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    // Get next track_id (simplified - in production would use a tracks table)
+    // Allocate the next legacy track id across both persisted tracks and existing storyboard assignments.
     let next_track_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(track_id), 0) + 1
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND sc.legacy_id = $3
+        SELECT GREATEST(
+          COALESCE((
+            SELECT MAX(sb.track_id)
+            FROM app_storyboard sb
+            WHERE sb.script_id = $1
+          ), 0),
+          COALESCE((
+            SELECT MAX(vt.legacy_id)
+            FROM app_video_track vt
+            WHERE vt.project_id = $2
+              AND (vt.script_id = $1 OR vt.script_id IS NULL)
+          ), 0)
+        ) + 1
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_one(pool)
+    .bind(script_uuid)
+    .bind(project_uuid)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_video_track (
+          project_id, script_id, legacy_id, state, prompt, metadata
+        )
+        VALUES ($1, $2, $3, 'draft', $4, jsonb_build_object('track_name', $4))
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(script_uuid)
+    .bind(next_track_id)
+    .bind(body.track_name.trim())
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(JsonResponse(AddTrackResponse {
         track_id: next_track_id,
         track_name: body.track_name.trim().to_string(),
-        message: "Track added (virtual track, assign storyboards to this track_id)",
+        message: "Track added",
     }))
 }
 
@@ -733,7 +759,36 @@ async fn post_workbench_delete_track(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    // Verify ownership and clear track_id from storyboards
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let deleted_track = sqlx::query(
+        r#"
+        DELETE FROM app_video_track vt
+        USING app_project p
+        WHERE vt.project_id = p.id
+          AND p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND (vt.script_id IS NULL OR EXISTS (
+            SELECT 1
+            FROM app_script s
+            WHERE s.id = vt.script_id
+              AND s.legacy_id = $3
+          ))
+          AND vt.legacy_id = $4
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.script_id)
+    .bind(body.track_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    // Clear track assignment from storyboards that referenced the deleted track.
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
@@ -751,17 +806,21 @@ async fn post_workbench_delete_track(
     .bind(body.project_id)
     .bind(body.script_id)
     .bind(body.track_id)
-    .execute(pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    if updated.rows_affected() == 0 {
+    if deleted_track.rows_affected() == 0 && updated.rows_affected() == 0 {
         return Err(ApiError::NotFound);
     }
 
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     Ok(JsonResponse(DeleteTrackResponse {
         track_id: body.track_id,
-        message: "Track deleted (storyboards unassigned from track)",
+        message: "Track deleted",
     }))
 }
 
