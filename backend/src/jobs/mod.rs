@@ -72,11 +72,17 @@ struct JobStatusSummaryRow {
     job_count: i64,
 }
 
-/// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker calls **`images/generations`** when LLM key is set, inserts **`app_asset_image`** (**`file_path`** = provider URL or **`…/images/{id}/file`** when **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** is set).
+/// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker uses
+/// **`images/edits`** when payload has `image_base64`, otherwise **`images/generations`**,
+/// then inserts **`app_asset_image`** (**`file_path`** = provider URL or **`…/images/{id}/file`**
+/// when **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** is set).
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 /// Single prompt polish (legacy **`POST …/assets-generate/polish-prompt`**); worker calls chat completion when **`LlmConfig`** is set, else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
-/// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker runs one **`images/generations`** + **`app_asset_image`** insert per item when LLM key is set (same **`file_path`** rules as single-image).
+/// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker runs one image call
+/// (prefer **`images/edits`** when `image_base64` exists, fallback **`images/generations`**) plus
+/// one **`app_asset_image`** insert per item when LLM key is set (same **`file_path`** rules as
+/// single-image).
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
 /// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker runs **`chat_completion_assistant_text`** per item when **`LlmConfig`** is set (cooperative cancel between items), else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";

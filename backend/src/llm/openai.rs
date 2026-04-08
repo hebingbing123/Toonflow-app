@@ -1,4 +1,6 @@
+use base64::Engine;
 use futures_util::StreamExt;
+use reqwest::multipart::{Form, Part};
 use serde_json::{json, Value};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
@@ -109,6 +111,7 @@ pub async fn chat_completion_assistant_text(
 
 /// DALL-E 3 **`prompt`** cap (characters).
 const DALLE3_MAX_PROMPT_CHARS: usize = 4_000;
+const MAX_REFERENCE_IMAGE_BYTES: usize = 15 * 1024 * 1024;
 
 fn clip_prompt_chars(s: &str, max_chars: usize) -> String {
     let n = s.chars().count();
@@ -191,6 +194,10 @@ pub async fn images_generation_url(
         .json()
         .await
         .map_err(|e| format!("images json: {e}"))?;
+    parse_images_response(&v)
+}
+
+fn parse_images_response(v: &Value) -> Result<(String, Option<String>), String> {
     let data0 = v
         .get("data")
         .and_then(|d| d.as_array())
@@ -205,6 +212,117 @@ pub async fn images_generation_url(
         .and_then(|x| x.as_str())
         .map(str::to_string);
     Ok((url_str.to_string(), revised))
+}
+
+#[derive(Debug)]
+struct ReferenceImageUpload {
+    bytes: Vec<u8>,
+    mime: &'static str,
+    file_name: &'static str,
+}
+
+fn parse_reference_image_upload(image_base64: &str) -> Result<ReferenceImageUpload, String> {
+    let trimmed = image_base64.trim();
+    if trimmed.is_empty() {
+        return Err("reference image base64 is empty".into());
+    }
+
+    let (mime, file_name, b64) = match trimmed.strip_prefix("data:") {
+        Some(rest) => {
+            let (meta, b64) = rest
+                .split_once(";base64,")
+                .ok_or_else(|| "reference image data URI must be base64".to_string())?;
+            let (mime, file_name) = match meta.trim().to_ascii_lowercase().as_str() {
+                "image/png" => ("image/png", "reference.png"),
+                "image/jpeg" | "image/jpg" => ("image/jpeg", "reference.jpg"),
+                "image/webp" => ("image/webp", "reference.webp"),
+                other => return Err(format!("unsupported reference image mime: {other}")),
+            };
+            (mime, file_name, b64.trim())
+        }
+        None => ("image/jpeg", "reference.jpg", trimmed),
+    };
+
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(b64.as_bytes())
+        .map_err(|_| "reference image is not valid base64".to_string())?;
+    if bytes.is_empty() {
+        return Err("reference image decodes to empty bytes".into());
+    }
+    if bytes.len() > MAX_REFERENCE_IMAGE_BYTES {
+        return Err(format!(
+            "reference image exceeds max decoded size ({MAX_REFERENCE_IMAGE_BYTES} bytes)"
+        ));
+    }
+
+    Ok(ReferenceImageUpload {
+        bytes,
+        mime,
+        file_name,
+    })
+}
+
+/// OpenAI-compatible **`POST /v1/images/edits`** with one reference image.
+/// Returns **(image_url, revised_prompt)**.
+pub async fn images_edit_url(
+    cfg: &LlmConfig,
+    client: &reqwest::Client,
+    model: &str,
+    prompt: &str,
+    size: &str,
+    image_base64: &str,
+) -> Result<(String, Option<String>), String> {
+    let prompt = clip_prompt_chars(prompt, DALLE3_MAX_PROMPT_CHARS);
+    let upload = parse_reference_image_upload(image_base64)?;
+
+    let image_part = Part::bytes(upload.bytes)
+        .mime_str(upload.mime)
+        .map_err(|e| format!("invalid image mime: {e}"))?
+        .file_name(upload.file_name.to_string());
+    let form = Form::new()
+        .text("model", model.to_string())
+        .text("prompt", prompt)
+        .text("n", "1".to_string())
+        .text("size", size.to_string())
+        .text("response_format", "url".to_string())
+        .part("image", image_part);
+
+    let url = format!("{}/images/edits", cfg.base_url);
+    let response = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", cfg.api_key))
+        .multipart(form)
+        .send()
+        .await
+        .map_err(|e| format!("images edit request: {e}"))?;
+    if !response.status().is_success() {
+        let status = response.status();
+        let text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "(empty body)".into());
+        return Err(format!("images edits HTTP {status}: {text}"));
+    }
+    let v: Value = response
+        .json()
+        .await
+        .map_err(|e| format!("images edits json: {e}"))?;
+    parse_images_response(&v)
+}
+
+/// Uses **`images/edits`** when a reference image is provided; otherwise **`images/generations`**.
+pub async fn images_generation_or_edit_url(
+    cfg: &LlmConfig,
+    client: &reqwest::Client,
+    model: &str,
+    prompt: &str,
+    size: &str,
+    image_base64: Option<&str>,
+) -> Result<(String, Option<String>), String> {
+    let Some(reference) = image_base64.map(str::trim).filter(|s| !s.is_empty()) else {
+        return images_generation_url(cfg, client, model, prompt, size).await;
+    };
+    images_edit_url(cfg, client, model, prompt, size, reference).await
 }
 
 /// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
@@ -408,5 +526,28 @@ mod tests {
             resolve_openai_image_model("unknown-catalog-id").as_str(),
             "dall-e-3"
         );
+    }
+
+    #[test]
+    fn parse_reference_image_upload_accepts_raw_base64() {
+        let parsed = parse_reference_image_upload("AA==").expect("parse raw");
+        assert_eq!(parsed.mime, "image/jpeg");
+        assert_eq!(parsed.file_name, "reference.jpg");
+        assert_eq!(parsed.bytes, vec![0u8]);
+    }
+
+    #[test]
+    fn parse_reference_image_upload_accepts_data_uri_png() {
+        let parsed = parse_reference_image_upload("data:image/png;base64,AA==").expect("png uri");
+        assert_eq!(parsed.mime, "image/png");
+        assert_eq!(parsed.file_name, "reference.png");
+        assert_eq!(parsed.bytes, vec![0u8]);
+    }
+
+    #[test]
+    fn parse_reference_image_upload_rejects_non_image_mime() {
+        let err =
+            parse_reference_image_upload("data:text/plain;base64,AA==").expect_err("bad mime");
+        assert!(err.contains("unsupported reference image mime"));
     }
 }

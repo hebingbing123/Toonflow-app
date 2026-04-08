@@ -13,8 +13,8 @@ use uuid::Uuid;
 use crate::assets::{next_asset_image_sort_index, resolve_asset_id_for_job};
 use crate::harness::observe;
 use crate::llm::{
-    chat_completion_assistant_text, images_generation_url, resolve_openai_image_model,
-    resolve_openai_image_size, LlmConfig,
+    chat_completion_assistant_text, images_generation_or_edit_url, images_generation_url,
+    resolve_openai_image_model, resolve_openai_image_size, LlmConfig,
 };
 use crate::models_catalog::lookup_vendor_catalog;
 use crate::state::AppState;
@@ -714,12 +714,13 @@ async fn generate_and_store_asset_image(
                 JobRunError::Failed("asset not found for project or not owned".into())
             })?;
 
-    let (url, revised) = images_generation_url(
+    let (url, revised) = images_generation_or_edit_url(
         ctx.cfg,
         ctx.http_client,
         ctx.image_model,
         &full_prompt,
         ctx.size,
+        image_base64,
     )
     .await
     .map_err(JobRunError::Failed)?;

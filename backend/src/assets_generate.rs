@@ -1,6 +1,6 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
 //! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
-//! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible **`images/generations`** (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**), then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) for compatibility, but is not yet applied to the provider call.
+//! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible image generation (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**) then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) and used as the reference image for provider **`images/edits`** (fallback to **`images/generations`** when absent).
 
 use axum::{
     extract::{Json, State},
