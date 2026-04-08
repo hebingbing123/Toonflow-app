@@ -9,7 +9,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::{PgPool, Postgres, QueryBuilder};
+use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -36,6 +36,27 @@ struct LegacyNovelDataResponse {
 #[derive(Debug, Serialize)]
 struct LegacyNovelIndexResponse {
     data: Vec<NovelItem>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct GetNovelEventStateBody {
+    ids: Vec<i32>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct LegacyNovelEventStateItem {
+    /// **`app_novel.legacy_id`**.
+    id: i32,
+    event: Option<String>,
+    event_state: i32,
+    error_reason: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct LegacyNovelEventStateResponse {
+    data: Vec<LegacyNovelEventStateItem>,
 }
 
 #[derive(Debug, Serialize)]
@@ -225,6 +246,43 @@ async fn post_get_novel_index(
         .collect();
 
     Ok(JsonResponse(LegacyNovelIndexResponse { data }))
+}
+
+async fn post_get_novel_event_state(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<GetNovelEventStateBody>,
+) -> Result<JsonResponse<LegacyNovelEventStateResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    if body.ids.is_empty() {
+        return Ok(JsonResponse(LegacyNovelEventStateResponse {
+            data: Vec::new(),
+        }));
+    }
+
+    let data = sqlx::query_as::<_, LegacyNovelEventStateItem>(
+        r#"
+        SELECT n.legacy_id AS id, n.event, n.event_state, n.error_reason
+        FROM app_novel n
+        INNER JOIN app_project p ON p.id = n.project_id
+        WHERE p.owner_user_id = $1
+          AND n.legacy_id = ANY($2)
+          AND n.event_state <> 0
+        ORDER BY n.legacy_id ASC
+        "#,
+    )
+    .bind(uid)
+    .bind(&body.ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(JsonResponse(LegacyNovelEventStateResponse { data }))
 }
 
 async fn post_batch_delete_novels(
@@ -566,6 +624,10 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/novels/get-novel-data", post(post_get_novel_data))
         .route("/api/v1/novels/get-novel-index", post(post_get_novel_index))
+        .route(
+            "/api/v1/novels/get-novel-event-state",
+            post(post_get_novel_event_state),
+        )
         .route("/api/v1/novels/get-novel", post(post_get_novel))
         .route("/api/v1/novels/add-novel", post(post_add_novel))
         .route("/api/v1/novels/delete-novel", post(post_delete_novel))

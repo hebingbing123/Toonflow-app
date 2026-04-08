@@ -82,6 +82,30 @@ class LegacyNovelIndexItem {
   }
 }
 
+/// Row from **`POST /api/v1/novels/get-novel-event-state`**.
+class LegacyNovelEventStateItem {
+  const LegacyNovelEventStateItem({
+    required this.legacyId,
+    this.event,
+    required this.eventState,
+    this.errorReason,
+  });
+
+  final int legacyId;
+  final String? event;
+  final int eventState;
+  final String? errorReason;
+
+  factory LegacyNovelEventStateItem.fromJson(Map<String, dynamic> json) {
+    return LegacyNovelEventStateItem(
+      legacyId: (json['id'] as num).toInt(),
+      event: json['event'] as String?,
+      eventState: (json['eventState'] as num).toInt(),
+      errorReason: json['errorReason'] as String?,
+    );
+  }
+}
+
 /// Row from **`POST /api/v1/novels/get-novel`** — response uses **camelCase** (**`chapterData`**, …).
 class LegacyNovelPageRow {
   const LegacyNovelPageRow({

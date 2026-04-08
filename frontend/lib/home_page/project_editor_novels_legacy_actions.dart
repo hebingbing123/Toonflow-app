@@ -136,6 +136,42 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 novelsLoading[0] ||
                 assetsBusy[0] ||
                 assetsLoading[0] ||
+                assetsScriptFilterLoading[0] ||
+                novelsRef[0] == null
+            ? null
+            : () async {
+                setDialogState(() => novelsBusy[0] = true);
+                try {
+                  final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
+                  final rows = await postLegacyNovelsGetNovelEventState(token, ids);
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'POST …/novels/get-novel-event-state：${rows.length} 条非 0 状态',
+                      ),
+                    ),
+                  );
+                } on RustApiException catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => novelsBusy[0] = false);
+                  }
+                }
+              },
+        child: const Text('POST get-novel-event-state'),
+      ),
+      TextButton(
+        onPressed:
+            novelsBusy[0] ||
+                novelsLoading[0] ||
+                assetsBusy[0] ||
+                assetsLoading[0] ||
                 assetsScriptFilterLoading[0]
             ? null
             : () async {

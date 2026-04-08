@@ -2807,6 +2807,26 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn novels_get_novel_event_state_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/novels/get-novel-event-state", r#"{"ids":[1]}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn novels_get_novel_event_state_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/novels/get-novel-event-state",
+            &token,
+            r#"{"ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn novels_batch_delete_empty_ids_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -5256,6 +5276,34 @@ mod pg_contract_tests {
                 .iter()
                 .any(|r| r["id"].as_i64() == Some(i64::from(novel_leg))),
             "expected novel_leg in get-novel-index: {legacy_idx}"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/novels/get-novel-event-state")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"ids":[{novel_leg}]}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, legacy_event_state) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "legacy_event_state={legacy_event_state}"
+        );
+        let event_rows = legacy_event_state["data"]
+            .as_array()
+            .expect("legacy event state array");
+        assert!(
+            event_rows.is_empty(),
+            "freshly created novels should not expose non-zero event_state rows: {legacy_event_state}"
         );
 
         let res = app

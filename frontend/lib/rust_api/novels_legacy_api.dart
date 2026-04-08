@@ -56,6 +56,32 @@ Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
       .toList();
 }
 
+/// `POST /api/v1/novels/get-novel-event-state` — rows where legacy **`eventState != 0`**.
+Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
+  String accessToken,
+  List<int> legacyIds,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/get-novel-event-state');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ids': legacyIds}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  final raw = map['data'] as List<dynamic>;
+  return raw
+      .map((e) => LegacyNovelEventStateItem.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
 /// `POST /api/v1/novels/get-novel` — paginated list + **`total`** (**`getNovel`**).
 Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   String accessToken,
