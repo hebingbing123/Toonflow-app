@@ -31,6 +31,7 @@ part 'prompts_api.dart';
 part 'projects_legacy.dart';
 part 'projects_legacy_compat.dart';
 part 'quality_reviews.dart';
+part 'quality_reviews_api.dart';
 part 'quality_reviews_stats.dart';
 part 'scripts_api.dart';
 part 'scripts_storyboards_models.dart';
