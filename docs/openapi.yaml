@@ -207,9 +207,10 @@ paths:
         Default mapping is `CNY -> alipay`, `USD -> stripe`, and can be overridden by
         env `BILLING_CURRENCY_PROVIDER_MAP` (format `CNY=alipay,USD=stripe`).
         For Stripe payloads, server also supports provider mapping from event envelope/object:
-        `type` (or fallback `event_type`), `created`, `data.object.status`, `data.object.current_period_end`.
-        For audit metadata extraction, `event_type` and `event_created_at` are accepted as generic
-        fallback fields when provider-native keys are absent.
+        `type` (or fallback `event_type` / `event` / `name`), `created`, `data.object.status`, `data.object.current_period_end`.
+        For audit metadata extraction, event type supports fallback keys
+        `event_type` / `event` / `name`, and event time supports fallback keys
+        `event_created_at` / `event_created` / `created` / `occurred_at` / `notify_time` / `gmt_payment` / `gmt_create` / `gmt_close` / `timestamp`.
         Current Stripe event fallback coverage includes common subscription/invoice events such as:
         `customer.subscription.created|updated|paused|resumed|unpaused|deleted`,
         `invoice.payment_succeeded|paid|payment_failed|payment_reversal|overdue|payment_action_required|marked_uncollectible|voided`.
@@ -225,11 +226,12 @@ paths:
         `charge.dispute.updated`, `charge.dispute.closed`)
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
-        `trade_status` / `type` / `notify_time`.
+        `trade_status` / (`type` or fallback `event_type` / `event` / `name`) / `notify_time`.
+        Alipay time values accept RFC3339, unix timestamp, and legacy datetime format `YYYY-MM-DD HH:MM:SS`.
         Non-state Alipay events in the informational whitelist (currently `trade.finished`)
         are treated as informational only.
         For Paddle payloads, server supports baseline mapping from:
-        `type` (or fallback `event_type`) / `occurred_at` / `data.status` / `data.next_billed_at`.
+        `type` (or fallback `event_type` / `event` / `name`) / `occurred_at` / `data.status` / `data.next_billed_at`.
         Current Paddle event fallback coverage includes common subscription/transaction events such as:
         `subscription.created|activated|updated|paused|resumed|past_due|canceled|expired`,
         `transaction.completed|payment_failed|canceled`.
@@ -275,6 +277,21 @@ paths:
                 notify_id:
                   type: string
                   description: Compatibility dedupe id fallback (legacy provider naming).
+                event_type:
+                  type: string
+                  description: Optional event type fallback key (same role as `type`).
+                event:
+                  type: string
+                  description: Optional event type fallback key (provider-compatible alias).
+                name:
+                  type: string
+                  description: Optional event type fallback key (provider-compatible alias).
+                event_created_at:
+                  description: Optional canonical event timestamp fallback (Unix seconds, RFC3339, or `YYYY-MM-DD HH:MM:SS`).
+                  oneOf:
+                    - type: integer
+                      format: int64
+                    - type: string
                 user_id:
                   type: string
                   format: uuid

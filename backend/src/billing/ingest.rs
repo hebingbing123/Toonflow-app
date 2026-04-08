@@ -1,6 +1,6 @@
 //! Idempotent webhook row insert + optional `app_user_profile` upsert.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -108,45 +108,58 @@ fn parse_raw_event_id(v: &Value) -> Option<String> {
 }
 
 fn parse_event_type(v: &Value) -> Option<String> {
-    v.get("type")
+    for key in ["type", "event_type", "event", "name"] {
+        if let Some(event_type) = v
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            return Some(event_type.chars().take(128).collect());
+        }
+    }
+    None
+}
+
+fn parse_timestamp_string(raw: &str) -> Option<DateTime<Utc>> {
+    let raw = raw.trim();
+    if raw.is_empty() {
+        return None;
+    }
+    if let Ok(dt) = DateTime::parse_from_rfc3339(raw) {
+        return Some(dt.with_timezone(&Utc));
+    }
+    if let Ok(ts) = raw.parse::<i64>() {
+        return DateTime::<Utc>::from_timestamp(ts, 0);
+    }
+    NaiveDateTime::parse_from_str(raw, "%Y-%m-%d %H:%M:%S")
+        .ok()
+        .map(|ndt| ndt.and_utc())
+}
+
+fn parse_event_datetime(v: &Value, key: &str) -> Option<DateTime<Utc>> {
+    if let Some(ts) = v.get(key).and_then(Value::as_i64) {
+        return DateTime::<Utc>::from_timestamp(ts, 0);
+    }
+    v.get(key)
         .and_then(Value::as_str)
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .or_else(|| {
-            v.get("event_type")
-                .and_then(Value::as_str)
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-        })
-        .map(|s| s.chars().take(128).collect())
+        .and_then(parse_timestamp_string)
 }
 
 fn parse_event_created_at(v: &Value) -> Option<DateTime<Utc>> {
-    if let Some(ts) = v.get("event_created_at").and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
-    }
-    if let Some(s) = v.get("event_created_at").and_then(Value::as_str) {
-        if let Ok(dt) = DateTime::parse_from_rfc3339(s.trim()) {
-            return Some(dt.with_timezone(&Utc));
-        }
-    }
-    if let Some(ts) = v.get("created").and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
-    }
-    if let Some(ts) = v.get("occurred_at").and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
-    }
-    if let Some(s) = v.get("occurred_at").and_then(Value::as_str) {
-        if let Ok(dt) = DateTime::parse_from_rfc3339(s.trim()) {
-            return Some(dt.with_timezone(&Utc));
-        }
-    }
-    if let Some(ts) = v.get("notify_time").and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
-    }
-    if let Some(s) = v.get("notify_time").and_then(Value::as_str) {
-        if let Ok(dt) = DateTime::parse_from_rfc3339(s.trim()) {
-            return Some(dt.with_timezone(&Utc));
+    for key in [
+        "event_created_at",
+        "event_created",
+        "created",
+        "occurred_at",
+        "notify_time",
+        "gmt_payment",
+        "gmt_create",
+        "gmt_close",
+        "timestamp",
+    ] {
+        if let Some(dt) = parse_event_datetime(v, key) {
+            return Some(dt);
         }
     }
     None
@@ -475,6 +488,15 @@ mod tests {
     }
 
     #[test]
+    fn parse_event_type_uses_event_fallback_when_type_missing() {
+        let v = json!({ "event": "invoice.payment_failed" });
+        assert_eq!(
+            parse_event_type(&v).as_deref(),
+            Some("invoice.payment_failed")
+        );
+    }
+
+    #[test]
     fn parse_raw_event_id_prefers_id_key() {
         let v = json!({
             "id": "evt_primary",
@@ -522,6 +544,20 @@ mod tests {
         let v = json!({ "event_created_at": 1_800_000_001_i64 });
         let got = parse_event_created_at(&v).expect("event_created_at unix should parse");
         assert_eq!(got.timestamp(), 1_800_000_001_i64);
+    }
+
+    #[test]
+    fn parse_event_created_at_accepts_alipay_datetime_format() {
+        let v = json!({ "notify_time": "2026-04-08 08:09:10" });
+        let got = parse_event_created_at(&v).expect("notify_time should parse");
+        assert_eq!(got.to_rfc3339(), "2026-04-08T08:09:10+00:00");
+    }
+
+    #[test]
+    fn parse_event_created_at_accepts_timestamp_string() {
+        let v = json!({ "timestamp": "1800000002" });
+        let got = parse_event_created_at(&v).expect("timestamp string should parse");
+        assert_eq!(got.timestamp(), 1_800_000_002_i64);
     }
 
     #[test]

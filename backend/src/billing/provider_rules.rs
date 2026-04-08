@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde_json::Value;
 
 use super::provider_adapter::select_billing_adapter;
@@ -239,16 +239,42 @@ fn status_from_event_mappings(
 }
 
 fn event_type_from_payload(v: &Value) -> Option<&str> {
-    v.get("type")
+    for key in ["type", "event_type", "event", "name"] {
+        if let Some(event_type) = v
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            return Some(event_type);
+        }
+    }
+    None
+}
+
+fn parse_timestamp_string(raw: &str) -> Option<DateTime<Utc>> {
+    let raw = raw.trim();
+    if raw.is_empty() {
+        return None;
+    }
+    if let Ok(dt) = DateTime::parse_from_rfc3339(raw) {
+        return Some(dt.with_timezone(&Utc));
+    }
+    if let Ok(ts) = raw.parse::<i64>() {
+        return DateTime::<Utc>::from_timestamp(ts, 0);
+    }
+    NaiveDateTime::parse_from_str(raw, "%Y-%m-%d %H:%M:%S")
+        .ok()
+        .map(|ndt| ndt.and_utc())
+}
+
+fn parse_event_datetime(v: &Value, key: &str) -> Option<DateTime<Utc>> {
+    if let Some(ts) = v.get(key).and_then(Value::as_i64) {
+        return DateTime::<Utc>::from_timestamp(ts, 0);
+    }
+    v.get(key)
         .and_then(Value::as_str)
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .or_else(|| {
-            v.get("event_type")
-                .and_then(Value::as_str)
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-        })
+        .and_then(parse_timestamp_string)
 }
 
 fn is_stripe_informational_event(event_type: Option<&str>) -> bool {
@@ -336,14 +362,12 @@ fn derive_from_alipay(v: &Value) -> ProviderDerivedFields {
 
     let subscription_status_updated_at = v
         .get("notify_time")
-        .and_then(Value::as_str)
-        .and_then(|s| DateTime::parse_from_rfc3339(s.trim()).ok())
-        .map(|dt| dt.with_timezone(&Utc))
-        .or_else(|| {
-            v.get("notify_time")
-                .and_then(Value::as_i64)
-                .and_then(|ts| DateTime::<Utc>::from_timestamp(ts, 0))
-        });
+        .and_then(Value::as_i64)
+        .and_then(|ts| DateTime::<Utc>::from_timestamp(ts, 0))
+        .or_else(|| parse_event_datetime(v, "notify_time"))
+        .or_else(|| parse_event_datetime(v, "gmt_payment"))
+        .or_else(|| parse_event_datetime(v, "gmt_create"))
+        .or_else(|| parse_event_datetime(v, "gmt_close"));
 
     ProviderDerivedFields {
         subscription_status,
@@ -1006,5 +1030,31 @@ mod tests {
             d.status_confidence,
             Some(ProviderStatusConfidence::EventFallback)
         );
+    }
+
+    #[test]
+    fn derive_uses_event_field_when_type_missing() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "event": "invoice.payment_failed"
+        });
+        let d = derive_from_provider(&v);
+        assert_eq!(d.subscription_status.as_deref(), Some("past_due"));
+        assert_eq!(
+            d.status_confidence,
+            Some(ProviderStatusConfidence::EventFallback)
+        );
+    }
+
+    #[test]
+    fn derive_alipay_notify_time_accepts_legacy_datetime_format() {
+        let v = json!({
+            "billing_provider": "alipay",
+            "notify_time": "2026-04-08 12:13:14"
+        });
+        let got = derive_from_provider(&v)
+            .subscription_status_updated_at
+            .expect("notify_time should parse");
+        assert_eq!(got.to_rfc3339(), "2026-04-08T12:13:14+00:00");
     }
 }
