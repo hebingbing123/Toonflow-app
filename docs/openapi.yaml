@@ -54,7 +54,7 @@ info:
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
-    **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/legacy/{id}/novel-events*`** and legacy **`POST …/novels/events/{get-events,batch-delete}`** cover **`o_event`** / **`o_eventChapter`** parity. Legacy **`cleanNovel`** still has no SaaS equivalent.
+    **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/legacy/{id}/novel-events*`** and legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** cover **`o_event`** / **`o_eventChapter`** parity, including async event generation trigger.
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -8312,6 +8312,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/novels/events/generate-events:
+    post:
+      tags: [novel-events]
+      summary: Legacy — trigger async novel event generation
+      operationId: postNovelEventsGenerateEventsV1
+      description: |
+        Parity with **`POST /api/novel/event/generateEvents`**.
+        Resets selected novels to **`eventState = 0`** and starts async event extraction.
+        Returns immediately with **`message: 生成事件成功`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyGenerateNovelEventsBody"
+      responses:
+        "200":
+          description: Trigger accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
+        "400":
+          description: Invalid projectId, empty novelIds, invalid concurrentCount, or no matching chapters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/quality/reviews:
     get:
       tags: [quality]
@@ -12485,6 +12528,26 @@ components:
         message:
           type: string
           description: e.g. 新增原文成功, 删除原文成功, 更新原文成功
+
+    LegacyGenerateNovelEventsBody:
+      type: object
+      required: [projectId, novelIds]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        novelIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        concurrentCount:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 5
+          description: Max effective value is 20
 
     LegacyNovelGetNovelBody:
       type: object

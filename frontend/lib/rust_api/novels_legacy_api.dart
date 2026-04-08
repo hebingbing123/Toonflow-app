@@ -82,6 +82,38 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
       .toList();
 }
 
+/// `POST /api/v1/novels/events/generate-events` — legacy event generation trigger (async).
+Future<String> postLegacyNovelEventsGenerateEvents(
+  String accessToken, {
+  required int projectId,
+  required List<int> novelIds,
+  int concurrentCount = 5,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/generate-events');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'novelIds': novelIds,
+          'concurrentCount': concurrentCount,
+        }),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['message'] as String? ?? '';
+}
+
 /// `POST /api/v1/novels/get-novel` — paginated list + **`total`** (**`getNovel`**).
 Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   String accessToken,

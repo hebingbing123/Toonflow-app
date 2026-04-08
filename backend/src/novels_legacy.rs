@@ -1,5 +1,5 @@
 //! Legacy **`/api/novel/*`** read/delete and paginated CRUD-shaped **`POST`** routes under **`/api/v1/novels/*`**.
-//! **`id`** / **`projectId`** refer to **`app_novel.legacy_id`** / **`app_project.legacy_id`**. SQLite **`o_event*`** cascades and **`cleanNovel`** are **not** replicated.
+//! **`id`** / **`projectId`** refer to **`app_novel.legacy_id`** / **`app_project.legacy_id`**.
 
 use axum::{
     extract::{Json, State},
@@ -7,6 +7,7 @@ use axum::{
     routing::post,
     Json as JsonResponse, Router,
 };
+use futures_util::stream::{self, StreamExt};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
@@ -14,6 +15,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::llm::{chat_completion_assistant_text, LlmConfig};
 use crate::novels::NovelRow;
 use crate::state::AppState;
 
@@ -21,6 +23,12 @@ const MAX_BATCH_DELETE_NOVELS: usize = 500;
 const MAX_ADD_NOVEL_BATCH: usize = 200;
 const MAX_GET_NOVEL_LIMIT: i64 = 200;
 const ADV_LOCK_NOVEL_LEGACY: i64 = 884_422_006;
+const DEFAULT_GENERATE_EVENTS_CONCURRENCY: usize = 5;
+const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
+const DEFAULT_EVENT_EXTRACTION_PROMPT: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/data/prompt_defaults/eventExtraction.txt"
+));
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -148,6 +156,24 @@ struct UpdateNovelBody {
     event: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct GenerateNovelEventsBody {
+    project_id: i32,
+    novel_ids: Vec<i32>,
+    #[serde(default = "default_generate_events_concurrency")]
+    concurrent_count: usize,
+}
+
+#[derive(Debug, Clone, FromRow)]
+struct NovelEventExtractionRow {
+    id: Uuid,
+    chapter_index: i32,
+    reel: Option<String>,
+    chapter: String,
+    chapter_data: String,
+}
+
 fn search_ilike(raw: Option<String>) -> Option<String> {
     raw.and_then(|s| {
         let t = s.trim();
@@ -157,6 +183,10 @@ fn search_ilike(raw: Option<String>) -> Option<String> {
             Some(format!("%{t}%"))
         }
     })
+}
+
+fn default_generate_events_concurrency() -> usize {
+    DEFAULT_GENERATE_EVENTS_CONCURRENCY
 }
 
 fn trim_reel(s: &str) -> Option<String> {
@@ -620,6 +650,182 @@ async fn post_update_novel(
     }))
 }
 
+async fn resolve_event_extraction_prompt(pool: &PgPool, uid: Uuid) -> Result<String, ApiError> {
+    let row: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT body
+        FROM app_user_prompt
+        WHERE owner_user_id = $1 AND legacy_id = 1
+        "#,
+    )
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(row
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| DEFAULT_EVENT_EXTRACTION_PROMPT.to_string()))
+}
+
+async fn mark_novel_event_extraction_result(
+    pool: &PgPool,
+    novel_id: Uuid,
+    event: Option<&str>,
+    event_state: i32,
+    error_reason: Option<&str>,
+) {
+    let _ = sqlx::query(
+        r#"
+        UPDATE app_novel
+        SET event = $1, event_state = $2, error_reason = $3, updated_at = NOW()
+        WHERE id = $4
+        "#,
+    )
+    .bind(event)
+    .bind(event_state)
+    .bind(error_reason)
+    .bind(novel_id)
+    .execute(pool)
+    .await;
+}
+
+async fn run_novel_event_extraction_task(
+    pool: PgPool,
+    llm: Option<LlmConfig>,
+    http_client: reqwest::Client,
+    prompt: String,
+    novels: Vec<NovelEventExtractionRow>,
+    concurrency: usize,
+) {
+    let Some(cfg) = llm else {
+        for novel in novels {
+            mark_novel_event_extraction_result(
+                &pool,
+                novel.id,
+                None,
+                -1,
+                Some("llm_not_configured"),
+            )
+            .await;
+        }
+        return;
+    };
+
+    let concurrency = concurrency.clamp(1, MAX_GENERATE_EVENTS_CONCURRENCY);
+
+    stream::iter(novels)
+        .for_each_concurrent(concurrency, |novel| {
+            let pool = pool.clone();
+            let http_client = http_client.clone();
+            let cfg = cfg.clone();
+            let prompt = prompt.clone();
+            async move {
+                let user_content = format!(
+                    "请根据以下小说章节数：{}小说章节券：{}小说章节名称：{}、小说章节内容生成事件摘要：\n{}",
+                    novel.chapter_index,
+                    novel.reel.as_deref().unwrap_or_default(),
+                    novel.chapter,
+                    novel.chapter_data
+                );
+                let messages = vec![
+                    serde_json::json!({"role":"system","content": prompt}),
+                    serde_json::json!({"role":"user","content": user_content}),
+                ];
+                match chat_completion_assistant_text(&cfg, &http_client, messages).await {
+                    Ok(text) => {
+                        mark_novel_event_extraction_result(&pool, novel.id, Some(&text), 1, None)
+                            .await;
+                    }
+                    Err(err) => {
+                        mark_novel_event_extraction_result(
+                            &pool,
+                            novel.id,
+                            None,
+                            -1,
+                            Some(&err),
+                        )
+                        .await;
+                    }
+                }
+            }
+        })
+        .await;
+}
+
+async fn post_generate_novel_events(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<GenerateNovelEventsBody>,
+) -> Result<JsonResponse<NovelOkMessageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    if body.novel_ids.is_empty() {
+        return Err(ApiError::BadRequest("novelIds must not be empty".into()));
+    }
+    if body.concurrent_count == 0 {
+        return Err(ApiError::BadRequest("concurrentCount must be >= 1".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let novels: Vec<NovelEventExtractionRow> = sqlx::query_as(
+        r#"
+        SELECT n.id, n.chapter_index, n.reel, n.chapter, n.chapter_data
+        FROM app_novel n
+        INNER JOIN app_project p ON p.id = n.project_id
+        WHERE p.legacy_id = $1
+          AND p.owner_user_id = $2
+          AND n.legacy_id = ANY($3)
+        ORDER BY n.chapter_index ASC, n.legacy_id ASC
+        "#,
+    )
+    .bind(body.project_id)
+    .bind(uid)
+    .bind(&body.novel_ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if novels.is_empty() {
+        return Err(ApiError::BadRequest("没有对应章节".into()));
+    }
+
+    let ids: Vec<Uuid> = novels.iter().map(|n| n.id).collect();
+    sqlx::query(
+        r#"
+        UPDATE app_novel
+        SET event = NULL, event_state = 0, error_reason = NULL, updated_at = NOW()
+        WHERE id = ANY($1)
+        "#,
+    )
+    .bind(&ids)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let prompt = resolve_event_extraction_prompt(pool, uid).await?;
+    let pool_clone = pool.clone();
+    let llm = state.llm.clone();
+    let http_client = state.http_client.clone();
+    let concurrency = body.concurrent_count;
+
+    tokio::spawn(async move {
+        run_novel_event_extraction_task(pool_clone, llm, http_client, prompt, novels, concurrency)
+            .await;
+    });
+
+    Ok(JsonResponse(NovelOkMessageResponse {
+        message: "生成事件成功",
+    }))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/novels/get-novel-data", post(post_get_novel_data))
@@ -635,5 +841,9 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/novels/batch-delete",
             post(post_batch_delete_novels),
+        )
+        .route(
+            "/api/v1/novels/events/generate-events",
+            post(post_generate_novel_events),
         )
 }

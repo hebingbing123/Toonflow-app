@@ -172,6 +172,47 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 novelsLoading[0] ||
                 assetsBusy[0] ||
                 assetsLoading[0] ||
+                assetsScriptFilterLoading[0] ||
+                novelsRef[0] == null ||
+                novelsRef[0]!.items.isEmpty
+            ? null
+            : () async {
+                setDialogState(() => novelsBusy[0] = true);
+                try {
+                  final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
+                  final msg = await postLegacyNovelEventsGenerateEvents(
+                    token,
+                    projectId: p.legacyId,
+                    novelIds: ids.take(3).toList(),
+                  );
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'POST …/novels/events/generate-events：$msg',
+                      ),
+                    ),
+                  );
+                } on RustApiException catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => novelsBusy[0] = false);
+                  }
+                }
+              },
+        child: const Text('POST events/generate-events'),
+      ),
+      TextButton(
+        onPressed:
+            novelsBusy[0] ||
+                novelsLoading[0] ||
+                assetsBusy[0] ||
+                assetsLoading[0] ||
                 assetsScriptFilterLoading[0]
             ? null
             : () async {
