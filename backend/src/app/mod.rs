@@ -6403,7 +6403,7 @@ mod pg_contract_tests {
         let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
 
         let gen_body = format!(
-            r#"{{"projectId":{legacy_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe"}}"#
+            r#"{{"projectId":{legacy_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
         );
         let res = app
             .clone()
@@ -6423,6 +6423,11 @@ mod pg_contract_tests {
         assert_eq!(status, StatusCode::OK, "generate body={job}");
         assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_IMAGE));
         assert_eq!(job["status"].as_str(), Some("queued"));
+        assert_eq!(job["payload"]["has_base64"].as_bool(), Some(true));
+        assert_eq!(
+            job["payload"]["image_base64"].as_str(),
+            Some("data:image/jpeg;base64,QUJDRA==")
+        );
 
         let pol_body = format!(
             r#"{{"assetsId":1,"projectId":{legacy_id},"type":"role","name":"n","describe":"d"}}"#
@@ -6447,7 +6452,7 @@ mod pg_contract_tests {
         assert_eq!(job["status"].as_str(), Some("queued"));
 
         let bat_gen = format!(
-            r#"{{"projectId":{legacy_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p"}}]}}"#
+            r#"{{"projectId":{legacy_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
         );
         let res = app
             .clone()
@@ -6467,6 +6472,14 @@ mod pg_contract_tests {
         assert_eq!(status, StatusCode::OK, "batch-generate body={job}");
         assert_eq!(job["kind"].as_str(), Some(JOB_KIND_ASSET_GENERATE_BATCH));
         assert_eq!(job["status"].as_str(), Some("queued"));
+        assert_eq!(
+            job["payload"]["items"][0]["has_base64"].as_bool(),
+            Some(true)
+        );
+        assert_eq!(
+            job["payload"]["items"][0]["image_base64"].as_str(),
+            Some("data:image/png;base64,AA==")
+        );
 
         let bat_pol = format!(
             r#"{{"projectId":{legacy_id},"items":[{{"assetsId":1,"type":"role","name":"n","describe":"d"}}]}}"#

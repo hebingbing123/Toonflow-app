@@ -1,6 +1,6 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
 //! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
-//! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible **`images/generations`** (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**), then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). **`base64`** is not applied to the model call yet.
+//! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible **`images/generations`** (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**), then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) for compatibility, but is not yet applied to the provider call.
 
 use axum::{
     extract::{Json, State},
@@ -122,6 +122,28 @@ fn trim_non_empty(s: String, field: &'static str) -> Result<String, ApiError> {
     trim_non_empty_str(&s, field)
 }
 
+fn normalize_optional_base64(
+    input: Option<&str>,
+    field: &'static str,
+) -> Result<Option<String>, ApiError> {
+    let Some(raw) = input else {
+        return Ok(None);
+    };
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    if trimmed.len() > MAX_BASE64_HINT_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "{field} must be at most {MAX_BASE64_HINT_LEN} chars"
+        )));
+    }
+    if trimmed.starts_with("data:") {
+        return Ok(Some(trimmed.to_owned()));
+    }
+    Ok(Some(format!("data:image/jpeg;base64,{trimmed}")))
+}
+
 const MAX_MODEL_LEN: usize = 512;
 const MAX_RESOLUTION_LEN: usize = 128;
 const MAX_NAME_LEN: usize = 512;
@@ -192,13 +214,7 @@ async fn post_generate_assets(
             "prompt must be at most {MAX_PROMPT_LEN} chars"
         )));
     }
-    if let Some(ref b64) = body.base64 {
-        if b64.len() > MAX_BASE64_HINT_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "base64 must be at most {MAX_BASE64_HINT_LEN} chars"
-            )));
-        }
-    }
+    let image_base64 = normalize_optional_base64(body.base64.as_deref(), "base64")?;
 
     let pool = state
         .pool
@@ -217,7 +233,8 @@ async fn post_generate_assets(
         "asset_type": asset_type,
         "name": name,
         "prompt": prompt,
-        "has_base64": body.base64.is_some(),
+        "has_base64": image_base64.is_some(),
+        "image_base64": image_base64,
     });
 
     let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_IMAGE, payload).await?;
@@ -332,20 +349,15 @@ async fn post_batch_generate_image_assets(
                 "items[].prompt must be at most {MAX_PROMPT_LEN} chars"
             )));
         }
-        if let Some(ref b64) = it.base64 {
-            if b64.len() > MAX_BASE64_HINT_LEN {
-                return Err(ApiError::BadRequest(format!(
-                    "items[].base64 must be at most {MAX_BASE64_HINT_LEN} chars"
-                )));
-            }
-        }
+        let image_base64 = normalize_optional_base64(it.base64.as_deref(), "items[].base64")?;
         let asset_type = asset_type_str(&it.asset_type);
         items_json.push(json!({
             "asset_legacy_id": it.id,
             "asset_type": asset_type,
             "name": name,
             "prompt": prompt,
-            "has_base64": it.base64.is_some(),
+            "has_base64": image_base64.is_some(),
+            "image_base64": image_base64,
         }));
     }
 
@@ -463,4 +475,34 @@ pub fn router() -> Router<AppState> {
             "/api/v1/assets-generate/batch-polish",
             post(post_batch_polish_assets_prompt),
         )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_optional_base64;
+
+    #[test]
+    fn normalize_base64_none_or_blank_to_none() {
+        assert_eq!(
+            normalize_optional_base64(None, "base64").expect("none"),
+            None
+        );
+        assert_eq!(
+            normalize_optional_base64(Some("  "), "base64").expect("blank"),
+            None
+        );
+    }
+
+    #[test]
+    fn normalize_base64_raw_to_data_uri() {
+        let got = normalize_optional_base64(Some("  QUJDRA== "), "base64").expect("raw");
+        assert_eq!(got.as_deref(), Some("data:image/jpeg;base64,QUJDRA=="));
+    }
+
+    #[test]
+    fn normalize_base64_keeps_data_uri() {
+        let src = "data:image/png;base64,AA==";
+        let got = normalize_optional_base64(Some(src), "base64").expect("uri");
+        assert_eq!(got.as_deref(), Some(src));
+    }
 }

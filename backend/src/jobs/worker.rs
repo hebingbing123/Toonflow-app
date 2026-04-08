@@ -699,6 +699,7 @@ async fn generate_and_store_asset_image(
     asset_legacy_id: i32,
     name: &str,
     prompt: &str,
+    image_base64: Option<&str>,
 ) -> Result<serde_json::Value, JobRunError> {
     let full_prompt = combine_image_prompt(name, prompt);
     if full_prompt.is_empty() {
@@ -749,6 +750,7 @@ async fn generate_and_store_asset_image(
             "image_model": ctx.image_model,
             "size": ctx.size,
             "revised_prompt": revised,
+            "has_reference_image": image_base64.is_some(),
             "storage": "local",
             "provider_url": url,
         });
@@ -761,6 +763,7 @@ async fn generate_and_store_asset_image(
             "image_model": ctx.image_model,
             "size": ctx.size,
             "revised_prompt": revised,
+            "has_reference_image": image_base64.is_some(),
         });
         (url.clone(), metadata, url)
     };
@@ -787,6 +790,7 @@ async fn generate_and_store_asset_image(
         "asset_image_id": image_row_id,
         "image_url": image_url,
         "revised_prompt": revised,
+        "has_reference_image": image_base64.is_some(),
     }))
 }
 
@@ -830,6 +834,7 @@ async fn run_asset_generate_image(
         .get("prompt")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing prompt".into()))?;
+    let image_base64 = p.get("image_base64").and_then(|x| x.as_str());
 
     let image_model = resolve_openai_image_model(model_in);
     let size = resolve_openai_image_size(&image_model, resolution);
@@ -854,9 +859,15 @@ async fn run_asset_generate_image(
         local_asset_image_dir: state.local_asset_image_dir.as_deref(),
     };
 
-    let body =
-        generate_and_store_asset_image(&ctx, project_legacy_id, asset_legacy_id, name, prompt)
-            .await?;
+    let body = generate_and_store_asset_image(
+        &ctx,
+        project_legacy_id,
+        asset_legacy_id,
+        name,
+        prompt,
+        image_base64,
+    )
+    .await?;
 
     Ok(json!({
         "source": "assets-generate.generate",
@@ -867,6 +878,7 @@ async fn run_asset_generate_image(
         "asset_image_id": body["asset_image_id"],
         "image_url": body["image_url"],
         "revised_prompt": body["revised_prompt"],
+        "has_reference_image": body["has_reference_image"],
     }))
 }
 
@@ -946,10 +958,17 @@ async fn run_asset_generate_batch(
             .get("prompt")
             .and_then(|x| x.as_str())
             .ok_or_else(|| JobRunError::Failed("item missing prompt".into()))?;
+        let image_base64 = item.get("image_base64").and_then(|x| x.as_str());
 
-        let one =
-            generate_and_store_asset_image(&ctx, project_legacy_id, asset_legacy_id, name, prompt)
-                .await?;
+        let one = generate_and_store_asset_image(
+            &ctx,
+            project_legacy_id,
+            asset_legacy_id,
+            name,
+            prompt,
+            image_base64,
+        )
+        .await?;
         out.push(one);
     }
 
