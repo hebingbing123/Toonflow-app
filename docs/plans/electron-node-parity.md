@@ -26,9 +26,9 @@
 
 | 符号 | 行数 | 含义 |
 |------|------|------|
-| ✅ | **8** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`getVersion`**、**`production`**、**`scriptAgent`**、**`test`**、**`setting/dev`**） |
+| ✅ | **10** | 能力已对齐或明确替代（agents 记忆行、**`generalStatistics`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`getVersion`**、**`deleteAllData`**、**`clearData`**、**`production`**、**`scriptAgent`**、**`test`**、**`setting/dev`**） |
 | 🔀 | **4** | 换设计、不逐路径复刻（**`login`**、**`migrate`**、**`openFolder`**、**`loginConfig`**） |
-| 🟡 | **18** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、OSS、事件管线等）待产品里程碑 |
+| 🟡 | **16** | 仍标「部分覆盖」：契约/竖切已有，备注里常见 **501**、**⏳**（出图、OSS、事件管线等）待产品里程碑 |
 | §3.1 Socket | **2** 行（均为 🔀） | 旧 **Socket.IO** 由 **`/api/v1/ws` + Harness** 承接，非 REST 一对一 |
 
 **计数说明**：**一行**对应 **旧 `src/router.ts` 上一类前缀**（§3 左列），**不是**「二十一个独立产品模块」。**🟡** 表示该前缀下仍有 **501**、**⏳** 等待里程碑；合并同源前缀（如 **`/api/setting/getTextModel`** 并入 **`modelSelect`**）会减少 🟡 行数。
