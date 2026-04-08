@@ -23,6 +23,7 @@ const VALID_BAD_CASE_CATEGORIES: &[&str] = &[
     "pacing_issue",
     "other",
 ];
+const SCORE_FIELD_RANGE: std::ops::RangeInclusive<i16> = 1..=10;
 
 // ============================================================================
 // 数据模型
@@ -146,6 +147,26 @@ fn validate_create_review_body(body: &CreateQualityReviewBody) -> Result<(), Api
                 "Invalid bad_case_category: {}, must be one of {:?}",
                 cat, VALID_BAD_CASE_CATEGORIES
             )));
+        }
+    }
+
+    for (field, score) in [
+        ("plot_coherence", body.plot_coherence),
+        ("character_consistency", body.character_consistency),
+        ("dialogue_naturalness", body.dialogue_naturalness),
+        ("pacing", body.pacing),
+        ("faithfulness", body.faithfulness),
+        ("visual_quality", body.visual_quality),
+        ("overall_score", body.overall_score),
+    ] {
+        if let Some(score) = score {
+            if !SCORE_FIELD_RANGE.contains(&score) {
+                return Err(ApiError::BadRequest(format!(
+                    "Invalid {field}: {score}, must be between {} and {}",
+                    SCORE_FIELD_RANGE.start(),
+                    SCORE_FIELD_RANGE.end()
+                )));
+            }
         }
     }
 
@@ -485,6 +506,17 @@ mod tests {
             ..Default::default()
         };
         let err = validate_create_review_body(&body).expect_err("invalid target_type");
+        assert!(matches!(err, ApiError::BadRequest(_)));
+    }
+
+    #[test]
+    fn validate_create_review_body_rejects_out_of_range_scores() {
+        let body = CreateQualityReviewBody {
+            target_type: "script".to_string(),
+            overall_score: Some(11),
+            ..Default::default()
+        };
+        let err = validate_create_review_body(&body).expect_err("out of range score");
         assert!(matches!(err, ApiError::BadRequest(_)));
     }
 }

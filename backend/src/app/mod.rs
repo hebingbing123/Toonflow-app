@@ -8904,6 +8904,15 @@ mod pg_contract_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
         assert_eq!(body["code"], "bad_request");
+
+        let (status, body) = post_json_bearer(
+            "/api/v1/quality/reviews",
+            &token,
+            r#"{"targetType":"script","overallScore":11}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
+        assert_eq!(body["code"], "bad_request");
     }
 
     #[tokio::test]
