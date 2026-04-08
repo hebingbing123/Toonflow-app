@@ -8987,6 +8987,221 @@ mod pg_contract_tests {
     }
 
     #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn novel_events_generate_events_async_fallback_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "created={created}");
+        let project_legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+
+        let add_novel_body = format!(
+            r#"{{"projectId":{},"data":[{{"index":1,"reel":"卷一","chapter":"第一章","chapterData":"第一章内容"}},{{"index":2,"reel":"卷一","chapter":"第二章","chapterData":"第二章内容"}}]}}"#,
+            project_legacy_id
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/novels/add-novel")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(add_novel_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, add_msg) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "add_msg={add_msg}");
+
+        let novel_rows: Vec<(i32,)> = sqlx::query_as(
+            r#"
+            SELECT n.legacy_id
+            FROM public.app_novel n
+            INNER JOIN public.app_project p ON p.id = n.project_id
+            WHERE p.legacy_id = $1
+              AND p.owner_user_id = $2
+            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(sub)
+        .fetch_all(&pool)
+        .await
+        .expect("list novel legacy ids");
+        let novel_legacy_ids: Vec<i32> = novel_rows.into_iter().map(|(id,)| id).collect();
+        assert_eq!(novel_legacy_ids.len(), 2, "expected two novels");
+
+        sqlx::query(
+            r#"
+            UPDATE public.app_novel n
+            SET event = '历史事件', event_state = 1, error_reason = NULL
+            FROM public.app_project p
+            WHERE n.project_id = p.id
+              AND p.legacy_id = $1
+              AND p.owner_user_id = $2
+              AND n.legacy_id = ANY($3)
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(sub)
+        .bind(&novel_legacy_ids)
+        .execute(&pool)
+        .await
+        .expect("seed existing events");
+
+        let payload = serde_json::json!({
+            "projectId": project_legacy_id,
+            "novelIds": novel_legacy_ids,
+            "concurrentCount": 2
+        });
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/novels/events/generate-events")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(payload.to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, body) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "generate-events body={body}");
+        assert_eq!(body["message"].as_str(), Some("生成事件成功"));
+
+        let reset_rows: Vec<(Option<String>, i32, Option<String>)> = sqlx::query_as(
+            r#"
+            SELECT n.event, n.event_state, n.error_reason
+            FROM public.app_novel n
+            INNER JOIN public.app_project p ON p.id = n.project_id
+            WHERE p.legacy_id = $1
+              AND p.owner_user_id = $2
+              AND n.legacy_id = ANY($3)
+            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+            "#,
+        )
+        .bind(project_legacy_id)
+        .bind(sub)
+        .bind(&novel_legacy_ids)
+        .fetch_all(&pool)
+        .await
+        .expect("rows immediately after enqueue");
+        assert!(
+            reset_rows
+                .iter()
+                .all(|(event, state, reason)| event.is_none() && *state == 0 && reason.is_none()),
+            "expected reset to pending before async extraction: {reset_rows:?}"
+        );
+
+        let mut final_rows: Vec<(i32, Option<String>, i32, Option<String>)> = Vec::new();
+        for _ in 0..40 {
+            final_rows = sqlx::query_as(
+                r#"
+                SELECT n.legacy_id, n.event, n.event_state, n.error_reason
+                FROM public.app_novel n
+                INNER JOIN public.app_project p ON p.id = n.project_id
+                WHERE p.legacy_id = $1
+                  AND p.owner_user_id = $2
+                  AND n.legacy_id = ANY($3)
+                ORDER BY n.chapter_index ASC, n.legacy_id ASC
+                "#,
+            )
+            .bind(project_legacy_id)
+            .bind(sub)
+            .bind(&novel_legacy_ids)
+            .fetch_all(&pool)
+            .await
+            .expect("poll extraction rows");
+            if final_rows
+                .iter()
+                .all(|(_, _, state, _)| *state == -1 || *state == 1)
+            {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        }
+
+        assert!(
+            final_rows.iter().all(|(_, event, state, reason)| {
+                event.is_none() && *state == -1 && reason.as_deref() == Some("llm_not_configured")
+            }),
+            "expected llm_not_configured fallback rows: {final_rows:?}"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/novels/get-novel-event-state")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        serde_json::json!({ "ids": novel_legacy_ids }).to_string(),
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, state_rows) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "state_rows={state_rows}");
+        let data = state_rows["data"].as_array().expect("state data array");
+        assert_eq!(
+            data.len(),
+            2,
+            "both novels should be visible in non-zero legacy event state list: {state_rows}"
+        );
+        assert!(
+            data.iter()
+                .all(|row| row["event_state"].as_i64() == Some(-1)),
+            "legacy event_state should expose fallback failures: {state_rows}"
+        );
+
+        let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+            .bind(project_legacy_id)
+            .execute(&pool)
+            .await;
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+            .bind(project_legacy_id)
+            .execute(&pool)
+            .await;
+    }
+
+    #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
     async fn script_agent_plan_roundtrip() {
         let _ = dotenvy::dotenv();
