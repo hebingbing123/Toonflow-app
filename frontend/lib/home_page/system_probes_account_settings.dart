@@ -144,9 +144,9 @@ extension _HomePageSystemProbesAccountSettings on _HomePageState {
         reinstall: true,
       );
       if (!mounted) return;
-      if (dl != 501) {
+      if (dl != 200) {
         setState(() {
-          _error = 'POST download-app expected 501, got $dl';
+          _error = 'POST download-app expected 200, got $dl';
           _loadingAboutProbe = false;
         });
         return;

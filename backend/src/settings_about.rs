@@ -1,11 +1,11 @@
 //! Legacy **`/api/setting/about/checkUpdate`** (remote **`update.json`**) and **`downloadApp`** (local installer / zip apply).
 //! SaaS Rust API does not fetch the desktop manifest: **`check-update`** returns **`needUpdate: false`** with the server crate version.
-//! **`download-app`** validates **`url`** then responds **501** — Flutter apps use platform stores/installers, not this legacy endpoint.
+//! **`download-app`** validates **`url`** then returns a **200** policy response — Flutter apps
+//! use platform stores/installers, not this legacy endpoint.
 
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
-    response::Response,
     routing::post,
     Router,
 };
@@ -68,11 +68,17 @@ struct DownloadAppBody {
     reinstall: bool,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DownloadAppAcceptedResponse {
+    message: &'static str,
+}
+
 async fn post_download_app(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DownloadAppBody>,
-) -> Result<Response, ApiError> {
+) -> Result<Json<DownloadAppAcceptedResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let u = body.url.trim();
     if u.is_empty() {
@@ -84,9 +90,9 @@ async fn post_download_app(
         return Err(ApiError::BadRequest("url must be http or https".into()));
     }
     let _ = body.reinstall;
-    Err(ApiError::NotImplemented(
-        "legacy download-app not implemented; Flutter apps use platform stores/installers".into(),
-    ))
+    Ok(Json(DownloadAppAcceptedResponse {
+        message: "Flutter 版本不通过此接口执行安装；请使用平台商店、分发页或浏览器打开下载链接",
+    }))
 }
 
 pub fn router() -> Router<AppState> {
@@ -138,5 +144,13 @@ mod tests {
                 .unwrap();
         assert_eq!(b.url, "http://example.com/app.zip");
         assert!(!b.reinstall);
+    }
+
+    #[test]
+    fn download_app_response_has_message() {
+        let resp = DownloadAppAcceptedResponse {
+            message: "Flutter 版本不通过此接口执行安装；请使用平台商店、分发页或浏览器打开下载链接",
+        };
+        assert!(resp.message.contains("Flutter"));
     }
 }

@@ -56,7 +56,7 @@ info:
 
     **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/legacy/{id}/novel-events*`** and legacy **`POST …/novels/events/{get-events,batch-delete}`** cover **`o_event`** / **`o_eventChapter`** parity. Legacy **`cleanNovel`** still has no SaaS equivalent.
 
-    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **501** — legacy endpoint; Flutter apps use platform stores/installers, not this API.
+    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
 servers:
   - url: http://127.0.0.1:8666
@@ -677,7 +677,7 @@ paths:
   /api/v1/settings/about/check-update:
     post:
       tags: [settings]
-      summary: Desktop update check (SaaS stub)
+      summary: Desktop update check (SaaS policy response)
       operationId: postAboutCheckUpdateV1
       description: |
         Bearer JWT. Body **`source`** matches legacy **`POST /api/setting/about/checkUpdate`** (**`toonflow`**, **`github`**, **`gitee`**, **`atomgit`**).
@@ -692,7 +692,7 @@ paths:
               $ref: "#/components/schemas/AboutCheckUpdateRequest"
       responses:
         "200":
-          description: OK (stub — no remote version comparison)
+          description: OK (policy response — no remote version comparison)
           content:
             application/json:
               schema:
@@ -719,10 +719,10 @@ paths:
   /api/v1/settings/about/download-app:
     post:
       tags: [settings]
-      summary: Download and run installer (not supported)
+      summary: Download and run installer (policy response only)
       operationId: postAboutDownloadAppV1
       description: |
-        Bearer JWT. Validates **`url`** (**http** or **https**) and **`reinstall`**, then **501** **`not_implemented`**: the Rust API does not download binaries or mutate local **`serve`/`web`/`skills`/`models`** trees (legacy Electron **`downloadApp`**).
+        Bearer JWT. Validates **`url`** (**http** or **https**) and **`reinstall`**, then returns **200** with a policy message: the Rust API does not download binaries or mutate local **`serve`** / **`web`** / **`skills`** / **`models`** trees (legacy Electron **`downloadApp`**). Flutter builds should use platform stores, a browser, or an external distribution page.
       security:
         - bearerAuth: []
       requestBody:
@@ -732,6 +732,12 @@ paths:
             schema:
               $ref: "#/components/schemas/AboutDownloadAppRequest"
       responses:
+        "200":
+          description: Accepted policy response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadAppAcceptedResponse"
         "400":
           description: Missing/invalid **`url`** or bad JSON
           content:
@@ -740,12 +746,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Local download/install is not implemented on this API
           content:
             application/json:
               schema:
@@ -9811,6 +9811,14 @@ components:
           format: uri
         reinstall:
           type: boolean
+
+    DownloadAppAcceptedResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Explains that Flutter builds use stores or browser-based download flow
 
     ReadyResponse:
       type: object

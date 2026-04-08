@@ -3378,7 +3378,7 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn settings_about_download_app_not_implemented_with_jwt() {
+    async fn settings_about_download_app_noop_ok_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
             "/api/v1/settings/about/download-app",
@@ -3386,8 +3386,8 @@ mod contract_smoke_tests {
             r#"{"url":"https://example.com/app.dmg","reinstall":true}"#,
         )
         .await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::OK);
+        assert!(v["message"].as_str().is_some_and(|s| s.contains("Flutter")));
     }
 
     #[tokio::test]

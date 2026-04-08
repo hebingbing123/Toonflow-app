@@ -82,7 +82,7 @@ Future<AboutCheckUpdateResponseV1> postAboutCheckUpdateV1(
   return AboutCheckUpdateResponseV1.fromJson(map);
 }
 
-/// `POST /api/v1/settings/about/download-app` — OpenAPI `postAboutDownloadAppV1` (typically **501**).
+/// `POST /api/v1/settings/about/download-app` — OpenAPI `postAboutDownloadAppV1` (always **200** after URL validation).
 Future<int> postAboutDownloadAppV1(
   String accessToken, {
   required String url,
