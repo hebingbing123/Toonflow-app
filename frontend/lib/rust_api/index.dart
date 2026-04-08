@@ -11,6 +11,7 @@ export 'production.dart';
 
 part 'catalog_memory.dart';
 part 'art_styles.dart';
+part 'agent_memory_api.dart';
 part 'assets_api.dart';
 part 'assets_crud.dart';
 part 'assets_images.dart';
