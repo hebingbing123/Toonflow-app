@@ -4268,8 +4268,8 @@ paths:
       summary: Load production agent flow data (legacy `getFlowData`)
       operationId: postProductionGetFlowDataV1
       description: |
-        Bearer JWT. Validates **`projectId`** + **`episodesId`**, then returns:
-        - **200** when user owns the project (has at least one storyboard)
+        Bearer JWT. Validates **`projectId`** + **`episodesId`**, then returns the production-agent flow JSON:
+        - **200** with persisted flow data merged with live **script/assets/storyboard** snapshots for the owned project+script
         - **404** when no owned project/storyboard is found
         - **503** when auth/DB is not configured
       security:
@@ -4282,7 +4282,11 @@ paths:
               $ref: "#/components/schemas/ProductionGetFlowDataBody"
       responses:
         "200":
-          description: OK (empty body)
+          description: Production flow JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionFlowDataResponse"
         "400":
           description: Invalid body
           content:
@@ -4314,8 +4318,8 @@ paths:
       summary: Save production flow JSON (legacy `saveFlowData`)
       operationId: postProductionSaveFlowDataV1
       description: |
-        Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`** (must be JSON object), then returns:
-        - **200** when user owns the project (has at least one storyboard)
+        Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`** (must be JSON object), upserts **`app_production_flow`** for the owned project+script, and if **`data.storyboard`** is a full ordered list of numeric ids it also rewrites **`app_storyboard.sb_index`** to match the saved order. Returns:
+        - **200** when user owns the project+script
         - **404** when no owned project/storyboard is found
         - **503** when auth/DB is not configured
       security:
@@ -8925,6 +8929,99 @@ components:
           type: object
           description: Legacy flow JSON (structure defined in TS **`flowDataSchema`**)
           additionalProperties: true
+
+    ProductionFlowAssetDerivativeItem:
+      type: object
+      required: [id, assetsId, name, type, prompt, desc]
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+          format: int32
+        assetsId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        type:
+          type: string
+        prompt:
+          type: string
+        desc:
+          type: string
+        src:
+          type: string
+          nullable: true
+
+    ProductionFlowAssetItem:
+      type: object
+      required: [id, name, type, prompt, desc, derive]
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        type:
+          type: string
+        prompt:
+          type: string
+        desc:
+          type: string
+        src:
+          type: string
+          nullable: true
+        derive:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionFlowAssetDerivativeItem"
+
+    ProductionFlowStoryboardItem:
+      type: object
+      required: [id, duration, prompt, associateAssetsIds]
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+          format: int32
+        duration:
+          type: integer
+          format: int32
+        prompt:
+          type: string
+        associateAssetsIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        src:
+          type: string
+          nullable: true
+        index:
+          type: integer
+          format: int32
+          nullable: true
+
+    ProductionFlowDataResponse:
+      type: object
+      required: [script, scriptPlan, assets, storyboardTable, storyboard]
+      additionalProperties: true
+      properties:
+        script:
+          type: string
+        scriptPlan:
+          type: string
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionFlowAssetItem"
+        storyboardTable:
+          type: string
+        storyboard:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionFlowStoryboardItem"
 
     ProductionWorkbenchGenerateVideoUploadItem:
       type: object

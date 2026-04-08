@@ -9515,6 +9515,32 @@ mod pg_contract_tests {
             .oneshot(
                 Request::builder()
                     .method(Method::POST)
+                    .uri(format!("/api/v1/scripts/legacy/{script_id}/storyboards"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"prompt":"pg_video_storyboard_two","duration":"6","track_id":9,"flow_id":22,"sb_index":2}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, storyboard_two) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::CREATED,
+            "storyboard_two={storyboard_two}"
+        );
+        let storyboard_two_id = storyboard_two["legacy_id"]
+            .as_i64()
+            .expect("storyboard_two legacy_id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
                     .uri("/api/v1/production/get-production-data")
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
@@ -9551,16 +9577,34 @@ mod pg_contract_tests {
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::from(format!(
-                        r#"{{"projectId":{project_id},"episodesId":1}}"#
+                        r#"{{"projectId":{project_id},"episodesId":{script_id}}}"#
                     )))
                     .unwrap(),
             )
             .await
             .unwrap();
+        let (status, initial_flow_data) = read_json_response(res).await;
         assert_eq!(
-            res.status(),
+            status,
             StatusCode::OK,
-            "get-flow-data should see storyboard-backed project"
+            "initial_flow_data={initial_flow_data}"
+        );
+        assert_eq!(
+            initial_flow_data["script"].as_str(),
+            Some(""),
+            "default flow should expose script content"
+        );
+        assert_eq!(
+            initial_flow_data["storyboard"].as_array().map(Vec::len),
+            Some(2)
+        );
+        assert_eq!(
+            initial_flow_data["storyboard"][0]["id"].as_i64(),
+            Some(i64::from(storyboard_id))
+        );
+        assert_eq!(
+            initial_flow_data["storyboard"][1]["id"].as_i64(),
+            Some(i64::from(storyboard_two_id))
         );
 
         let res = app
@@ -9572,9 +9616,22 @@ mod pg_contract_tests {
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
-                    .body(Body::from(format!(
-                        r#"{{"projectId":{project_id},"episodesId":1,"data":{{"nodes":[{{"id":"n1"}}]}}}}"#
-                    )))
+                    .body(Body::from(
+                        serde_json::json!({
+                            "projectId": project_id,
+                            "episodesId": script_id,
+                            "data": {
+                                "scriptPlan": "plan-v1",
+                                "storyboardTable": "table-v1",
+                                "storyboard": [
+                                    {"id": storyboard_two_id, "associateAssetsIds": [11, 12]},
+                                    {"id": storyboard_id, "associateAssetsIds": [21]},
+                                ],
+                                "extraPanel": {"zoom": 125},
+                            }
+                        })
+                        .to_string(),
+                    ))
                     .unwrap(),
             )
             .await
@@ -9583,6 +9640,60 @@ mod pg_contract_tests {
             res.status(),
             StatusCode::OK,
             "save-flow-data should accept owned project"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/production/get-flow-data")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"projectId":{project_id},"episodesId":{script_id}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, saved_flow_data) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "saved_flow_data={saved_flow_data}");
+        assert_eq!(saved_flow_data["scriptPlan"].as_str(), Some("plan-v1"));
+        assert_eq!(
+            saved_flow_data["storyboardTable"].as_str(),
+            Some("table-v1")
+        );
+        assert_eq!(saved_flow_data["extraPanel"]["zoom"].as_i64(), Some(125));
+        assert_eq!(
+            saved_flow_data["storyboard"][0]["id"].as_i64(),
+            Some(i64::from(storyboard_two_id)),
+            "saved storyboard order should drive later get-flow-data ordering"
+        );
+        assert_eq!(
+            saved_flow_data["storyboard"][0]["associateAssetsIds"][0].as_i64(),
+            Some(11)
+        );
+        assert_eq!(
+            saved_flow_data["storyboard"][1]["id"].as_i64(),
+            Some(i64::from(storyboard_id))
+        );
+        let reordered_indexes: Vec<(i32, Option<i32>)> = sqlx::query_as(
+            r#"
+            SELECT legacy_id, sb_index
+            FROM app_storyboard
+            WHERE legacy_id = ANY($1::int4[])
+            ORDER BY legacy_id ASC
+            "#,
+        )
+        .bind(vec![storyboard_id, storyboard_two_id])
+        .fetch_all(&pool)
+        .await
+        .expect("query reordered storyboard indexes");
+        assert_eq!(
+            reordered_indexes,
+            vec![(storyboard_id, Some(1)), (storyboard_two_id, Some(0))]
         );
 
         let res = app

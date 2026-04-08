@@ -11,6 +11,7 @@ use axum::{
     Json as JsonResponse, Router,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Map, Value};
 use sqlx::FromRow;
 
 use crate::auth::require_user_uuid;
@@ -66,7 +67,313 @@ struct GetFlowDataBody {
 struct SaveFlowDataBody {
     project_id: i32,
     episodes_id: i32,
-    data: serde_json::Value,
+    data: Value,
+}
+
+#[derive(Debug, FromRow)]
+struct OwnedProductionScope {
+    project_id: uuid::Uuid,
+    script_id: uuid::Uuid,
+    script_content: Option<String>,
+}
+
+#[derive(Debug, FromRow)]
+struct ProductionAssetFlowRow {
+    legacy_id: i32,
+    name: String,
+    asset_type: String,
+    description: Option<String>,
+    metadata: Value,
+    history_images: Value,
+}
+
+#[derive(Debug, FromRow)]
+struct ProductionStoryboardFlowRow {
+    legacy_id: i32,
+    prompt: Option<String>,
+    file_path: Option<String>,
+    duration: Option<String>,
+    state: Option<String>,
+    reason: Option<String>,
+    video_desc: Option<String>,
+    should_generate_image: Option<i32>,
+    flow_id: Option<i32>,
+    sb_index: Option<i32>,
+}
+
+async fn resolve_owned_production_scope(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+    script_legacy_id: i32,
+) -> Result<OwnedProductionScope, ApiError> {
+    sqlx::query_as::<_, OwnedProductionScope>(
+        r#"
+        SELECT
+          p.id AS project_id,
+          s.id AS script_id,
+          s.content AS script_content
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND s.legacy_id = $3
+        "#,
+    )
+    .bind(uid)
+    .bind(project_legacy_id)
+    .bind(script_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
+
+fn json_string(obj: &Map<String, Value>, key: &str) -> Option<String> {
+    obj.get(key).and_then(Value::as_str).map(str::to_string)
+}
+
+fn json_i32(obj: &Map<String, Value>, key: &str) -> Option<i32> {
+    obj.get(key)
+        .and_then(Value::as_i64)
+        .and_then(|v| i32::try_from(v).ok())
+}
+
+fn history_image_src(metadata: &Value, history_images: &[Value]) -> Option<String> {
+    let selected_legacy_image_id = metadata
+        .get("imageId")
+        .and_then(Value::as_i64)
+        .and_then(|v| i32::try_from(v).ok());
+    if let Some(selected_id) = selected_legacy_image_id {
+        if let Some(src) = history_images.iter().find_map(|img| {
+            let img_obj = img.as_object()?;
+            if json_i32(img_obj, "legacy_image_id") == Some(selected_id) {
+                return json_string(img_obj, "file_path");
+            }
+            None
+        }) {
+            return Some(src);
+        }
+    }
+    history_images.iter().find_map(|img| {
+        img.as_object()
+            .and_then(|obj| json_string(obj, "file_path"))
+    })
+}
+
+fn build_production_asset_item(
+    row: &ProductionAssetFlowRow,
+    child_rows: &[&ProductionAssetFlowRow],
+) -> Value {
+    let history_images = row.history_images.as_array().cloned().unwrap_or_default();
+    let src = history_image_src(&row.metadata, &history_images);
+    let prompt = row
+        .metadata
+        .get("prompt")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    let flow_id = row
+        .metadata
+        .get("flowId")
+        .and_then(Value::as_i64)
+        .and_then(|v| i32::try_from(v).ok());
+
+    let derive = child_rows
+        .iter()
+        .map(|child| {
+            let child_history = child
+                .history_images
+                .as_array()
+                .cloned()
+                .unwrap_or_default();
+            let child_obj = json!({
+              "id": child.legacy_id,
+              "assetsId": row.legacy_id,
+              "name": child.name,
+              "type": child.asset_type,
+              "prompt": child.metadata.get("prompt").and_then(Value::as_str).unwrap_or_default(),
+              "desc": child.description.clone().unwrap_or_default(),
+              "src": history_image_src(&child.metadata, &child_history),
+              "state": child.metadata.get("state").and_then(Value::as_str).unwrap_or("未生成"),
+              "flowId": child.metadata.get("flowId").and_then(Value::as_i64).and_then(|v| i32::try_from(v).ok()),
+              "errorReason": child.metadata.get("errorReason").and_then(Value::as_str).unwrap_or_default(),
+            });
+            child_obj
+        })
+        .collect::<Vec<_>>();
+
+    json!({
+      "id": row.legacy_id,
+      "name": row.name,
+      "type": row.asset_type,
+      "prompt": prompt,
+      "desc": row.description.clone().unwrap_or_default(),
+      "src": src,
+      "flowId": flow_id,
+      "derive": derive,
+    })
+}
+
+async fn load_production_flow_json(
+    pool: &sqlx::PgPool,
+    scope: &OwnedProductionScope,
+) -> Result<Value, ApiError> {
+    let saved = sqlx::query_scalar::<_, Value>(
+        r#"
+        SELECT flow_data
+        FROM app_production_flow
+        WHERE project_id = $1
+          AND script_id = $2
+        "#,
+    )
+    .bind(scope.project_id)
+    .bind(scope.script_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .unwrap_or_else(|| json!({}));
+
+    let rows = sqlx::query_as::<_, ProductionAssetFlowRow>(
+        r#"
+        SELECT
+          a.legacy_id,
+          a.name,
+          a.asset_type,
+          a.description,
+          a.metadata,
+          COALESCE(
+            (
+              SELECT jsonb_agg(
+                jsonb_build_object(
+                  'file_path', i.file_path,
+                  'legacy_image_id', i.legacy_image_id,
+                  'sort_index', i.sort_index
+                )
+                ORDER BY i.sort_index ASC, i.created_at ASC
+              )
+              FROM app_asset_image i
+              WHERE i.asset_id = a.id
+                AND i.state = '已完成'
+            ),
+            '[]'::jsonb
+          ) AS history_images
+        FROM app_asset a
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id
+        WHERE a.project_id = $1
+          AND sa.script_id = $2
+        ORDER BY a.legacy_id ASC
+        "#,
+    )
+    .bind(scope.project_id)
+    .bind(scope.script_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let root_assets = rows
+        .iter()
+        .filter(|row| match row.metadata.get("assetsId") {
+            None => true,
+            Some(v) => v.is_null(),
+        })
+        .map(|row| {
+            let child_rows = rows
+                .iter()
+                .filter(|child| {
+                    child
+                        .metadata
+                        .get("assetsId")
+                        .and_then(Value::as_i64)
+                        .and_then(|v| i32::try_from(v).ok())
+                        == Some(row.legacy_id)
+                })
+                .collect::<Vec<_>>();
+            build_production_asset_item(row, &child_rows)
+        })
+        .collect::<Vec<_>>();
+
+    let storyboards = sqlx::query_as::<_, ProductionStoryboardFlowRow>(
+        r#"
+        SELECT
+          legacy_id,
+          prompt,
+          file_path,
+          duration,
+          state,
+          reason,
+          video_desc,
+          should_generate_image,
+          flow_id,
+          sb_index
+        FROM app_storyboard
+        WHERE script_id = $1
+        ORDER BY COALESCE(sb_index, 2147483647), legacy_id
+        "#,
+    )
+    .bind(scope.script_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let saved_obj = saved.as_object().cloned().unwrap_or_default();
+    let saved_storyboard_by_id = saved_obj
+        .get("storyboard")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|item| {
+            let obj = item.as_object()?.clone();
+            Some((json_i32(&obj, "id")?, obj))
+        })
+        .collect::<std::collections::HashMap<_, _>>();
+
+    let storyboard_items = storyboards
+        .into_iter()
+        .map(|row| {
+            let saved_storyboard = saved_storyboard_by_id.get(&row.legacy_id);
+            json!({
+              "id": row.legacy_id,
+              "index": row.sb_index,
+              "duration": row.duration.as_deref().and_then(|v| v.parse::<i32>().ok()).unwrap_or(0),
+              "prompt": row.prompt.clone().unwrap_or_default(),
+              "associateAssetsIds": saved_storyboard
+                .and_then(|obj| obj.get("associateAssetsIds"))
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default(),
+              "src": row.file_path,
+              "state": row.state,
+              "videoDesc": row.video_desc,
+              "shouldGenerateImage": row.should_generate_image,
+              "reason": row.reason.unwrap_or_default(),
+              "flowId": row.flow_id,
+            })
+        })
+        .collect::<Vec<_>>();
+
+    let mut merged = saved_obj;
+    merged.insert(
+        "script".into(),
+        Value::String(scope.script_content.clone().unwrap_or_default()),
+    );
+    merged.insert(
+        "scriptPlan".into(),
+        merged
+            .get("scriptPlan")
+            .cloned()
+            .unwrap_or_else(|| Value::String(String::new())),
+    );
+    merged.insert("assets".into(), Value::Array(root_assets));
+    merged.insert(
+        "storyboardTable".into(),
+        merged
+            .get("storyboardTable")
+            .cloned()
+            .unwrap_or_else(|| Value::String(String::new())),
+    );
+    merged.insert("storyboard".into(), Value::Array(storyboard_items));
+    Ok(Value::Object(merged))
 }
 
 #[allow(dead_code)]
@@ -159,7 +466,7 @@ async fn post_get_flow_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
-) -> Result<Response, ApiError> {
+) -> Result<JsonResponse<Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.project_id <= 0 || body.episodes_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -171,30 +478,10 @@ async fn post_get_flow_data(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    // Minimal "flow" poll: verify the project exists and user owns at least one storyboard.
-    // (Real episode/flow JSON pipeline will be added later.)
-    let owned_count = sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT COUNT(*)
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(StatusCode::OK.into_response())
+    let scope =
+        resolve_owned_production_scope(pool, uid, body.project_id, body.episodes_id).await?;
+    let flow = load_production_flow_json(pool, &scope).await?;
+    Ok(JsonResponse(flow))
 }
 
 async fn post_save_flow_data(
@@ -216,27 +503,54 @@ async fn post_save_flow_data(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let scope =
+        resolve_owned_production_scope(pool, uid, body.project_id, body.episodes_id).await?;
 
-    // Minimal save: verify user owns the project (has at least one storyboard).
-    let owned_count = sqlx::query_scalar::<_, i64>(
+    if let Some(storyboards) = body.data.get("storyboard").and_then(Value::as_array) {
+        let ordered_ids = storyboards
+            .iter()
+            .map(|item| {
+                item.as_object()
+                    .and_then(|obj| json_i32(obj, "id"))
+                    .filter(|id| *id > 0)
+            })
+            .collect::<Option<Vec<_>>>();
+
+        if let Some(ordered_ids) = ordered_ids {
+            for (index, storyboard_legacy_id) in ordered_ids.iter().enumerate() {
+                sqlx::query(
+                    r#"
+                    UPDATE app_storyboard
+                    SET sb_index = $3, updated_at = NOW()
+                    WHERE script_id = $1
+                      AND legacy_id = $2
+                    "#,
+                )
+                .bind(scope.script_id)
+                .bind(storyboard_legacy_id)
+                .bind(index as i32)
+                .execute(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+            }
+        }
+    }
+
+    sqlx::query(
         r#"
-        SELECT COUNT(*)
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+        INSERT INTO app_production_flow (project_id, script_id, flow_data)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (project_id, script_id) DO UPDATE
+        SET flow_data = EXCLUDED.flow_data,
+            updated_at = NOW()
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .fetch_one(pool)
+    .bind(scope.project_id)
+    .bind(scope.script_id)
+    .bind(&body.data)
+    .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
 
     Ok(StatusCode::OK.into_response())
 }
