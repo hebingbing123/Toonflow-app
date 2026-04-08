@@ -7015,7 +7015,7 @@ paths:
       summary: Legacy task center — task details (UUID or numeric legacy task id)
       operationId: postTasksTaskDetailsV1
       description: |
-        **`taskId`** as **UUID string**: load **`app_generation_job.id`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer**: load **`app_generation_job.legacy_task_id`** for the caller.
+        **`taskId`** as **UUID string**: load **`app_generation_job.id`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer** or a digit-only string like **`"42"`**: load **`app_generation_job.legacy_task_id`** for the caller.
       security:
         - bearerAuth: []
       requestBody:
@@ -11302,10 +11302,12 @@ components:
       additionalProperties: false
       properties:
         taskId:
-          description: UUID string (**`app_generation_job.id`**) or positive integer (**`app_generation_job.legacy_task_id`**)
+          description: UUID string (**`app_generation_job.id`**) or positive integer / numeric string (**`app_generation_job.legacy_task_id`**)
           oneOf:
             - type: string
               format: uuid
+            - type: string
+              pattern: '^[1-9][0-9]*$'
             - type: integer
               format: int32
               minimum: 1

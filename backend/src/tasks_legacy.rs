@@ -79,6 +79,26 @@ fn trim_opt(s: Option<String>) -> Option<String> {
     })
 }
 
+async fn fetch_task_detail_row_by_legacy_task_id(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    legacy_task_id: i64,
+) -> Result<JobRow, ApiError> {
+    sqlx::query_as::<_, JobRow>(
+        r#"
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        FROM app_generation_job
+        WHERE owner_user_id = $1 AND legacy_task_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(legacy_task_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
+
 async fn post_get_project(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -245,26 +265,25 @@ async fn post_task_details(
                 .pool
                 .as_ref()
                 .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-            let row = sqlx::query_as::<_, JobRow>(
-                r#"
-                SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
-                FROM app_generation_job
-                WHERE owner_user_id = $1 AND legacy_task_id = $2
-                "#,
-            )
-            .bind(uid)
-            .bind(legacy)
-            .fetch_optional(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-            .ok_or(ApiError::NotFound)?;
+            let row = fetch_task_detail_row_by_legacy_task_id(pool, uid, legacy).await?;
             Ok(JsonResponse(row))
         }
         Value::String(s) => {
-            let id = Uuid::parse_str(s.trim()).map_err(|_| {
-                ApiError::BadRequest(
-                    "taskId string must be a valid UUID (app_generation_job.id)".into(),
-                )
+            let task_id = s.trim();
+            if let Ok(legacy_task_id) = task_id.parse::<i64>() {
+                if legacy_task_id <= 0 {
+                    return Err(ApiError::BadRequest("taskId must be positive".into()));
+                }
+                let pool = state
+                    .pool
+                    .as_ref()
+                    .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+                let row =
+                    fetch_task_detail_row_by_legacy_task_id(pool, uid, legacy_task_id).await?;
+                return Ok(JsonResponse(row));
+            }
+            let id = Uuid::parse_str(task_id).map_err(|_| {
+                ApiError::BadRequest("taskId string must be a UUID or a positive integer".into())
             })?;
             let pool = state
                 .pool
@@ -286,7 +305,7 @@ async fn post_task_details(
             Ok(JsonResponse(row))
         }
         _ => Err(ApiError::BadRequest(
-            "taskId must be a UUID string or a positive integer".into(),
+            "taskId must be a UUID string, a numeric string, or a positive integer".into(),
         )),
     }
 }
@@ -371,6 +390,15 @@ mod tests {
         match b.task_id {
             Value::Number(n) => assert_eq!(n.as_i64(), Some(123)),
             _ => panic!("Expected number"),
+        }
+    }
+
+    #[test]
+    fn task_details_body_accepts_numeric_string() {
+        let b: TaskDetailsBody = serde_json::from_str(r#"{"taskId":"123"}"#).unwrap();
+        match b.task_id {
+            Value::String(s) => assert_eq!(s, "123"),
+            _ => panic!("Expected string"),
         }
     }
 

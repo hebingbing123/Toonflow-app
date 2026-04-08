@@ -2467,6 +2467,15 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn tasks_task_details_requires_database_for_numeric_string_task_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/tasks/task-details", &token, r#"{"taskId":"1"}"#).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn tasks_task_details_requires_database_for_uuid_task_id_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -6361,6 +6370,33 @@ mod pg_contract_tests {
             task_detail_by_int["legacy_task_id"],
             created_job["legacy_task_id"]
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/task-details")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"taskId":"{}"}}"#,
+                        created_job["legacy_task_id"]
+                            .as_i64()
+                            .expect("legacy task id")
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, task_detail_by_numeric_string) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "task_detail_by_numeric_string={task_detail_by_numeric_string}"
+        );
+        assert_eq!(task_detail_by_numeric_string["id"], created_job["id"]);
 
         cleanup_jobs(&pool, &created_job_ids).await;
         let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
