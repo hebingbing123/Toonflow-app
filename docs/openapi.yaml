@@ -44,7 +44,7 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**), insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**), but provider-side img2img is still not implemented. **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **28 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
@@ -4354,7 +4354,7 @@ paths:
       summary: Generate one asset image (legacy `generateAssets` parity)
       operationId: postAssetsGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), resolves **`projectId`** to the caller's **`app_project`**, checks daily job quota, inserts **`app_generation_job`** with kind **`asset.generate.image`** (**`queued`**). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker calls **`images/generations`**, inserts **`app_asset_image`** (**`state`** **`已完成`**, **`file_path`** = provider URL), and **`succeeded`** with **`result`** including **`asset_image_id`** / **`image_url`** / optional **`revised_prompt`**. Legacy **`base64`** is normalized and stored in **`payload.image_base64`**, but provider-side img2img is not implemented yet.
+        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), resolves **`projectId`** to the caller's **`app_project`**, checks daily job quota, inserts **`app_generation_job`** with kind **`asset.generate.image`** (**`queued`**). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker calls **`images/edits`** if normalized **`payload.image_base64`** exists (multipart reference image), otherwise **`images/generations`**, inserts **`app_asset_image`** (**`state`** **`已完成`**, **`file_path`** = provider URL), and **`succeeded`** with **`result`** including **`asset_image_id`** / **`image_url`** / optional **`revised_prompt`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -4460,7 +4460,7 @@ paths:
       summary: Batch-generate asset images (legacy `batchGenerateImageAssets` parity)
       operationId: postAssetsBatchGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (including normalized optional **`image_base64`** per row). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is set, the worker processes **`items`** sequentially ( **`concurrentCount`** is informational only), one **`images/generations`** + **`app_asset_image`** per row, and **`succeeded`** with **`result.items`** mirroring single-generate outcomes.
+        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (including normalized optional **`image_base64`** per row). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is set, the worker processes **`items`** sequentially ( **`concurrentCount`** is informational only), one image call (**`images/edits`** with reference image, else **`images/generations`**) + **`app_asset_image`** per row, and **`succeeded`** with **`result.items`** mirroring single-generate outcomes.
       security:
         - bearerAuth: []
       requestBody:
@@ -9169,7 +9169,7 @@ components:
         base64:
           type: string
           nullable: true
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload).
+          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image).
 
     PolishAssetsPromptBody:
       type: object
@@ -9207,7 +9207,7 @@ components:
         base64:
           type: string
           nullable: true
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload).
+          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image).
 
     BatchGenerateImageAssetsBody:
       type: object
