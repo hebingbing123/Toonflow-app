@@ -313,10 +313,12 @@ async fn list_reviews(
         }
     } else if let Some(job_id) = query.job_id {
         sqlx::query_as::<_, QualityReview>(
-            "SELECT * FROM app_quality_review WHERE user_id = $1 AND job_id = $2 ORDER BY created_at DESC"
+            "SELECT * FROM app_quality_review WHERE user_id = $1 AND job_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
         )
         .bind(user_id)
         .bind(job_id)
+        .bind(limit)
+        .bind(offset)
         .fetch_all(pool)
         .await
     } else if let Some(is_bad_case) = query.is_bad_case {
