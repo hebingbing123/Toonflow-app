@@ -5440,6 +5440,264 @@ mod pg_contract_tests {
 
     #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn legacy_project_crud_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let unique_suffix = Uuid::new_v4().simple().to_string();
+        let initial_name = format!("pg_legacy_project_{unique_suffix}");
+        let updated_name = format!("{initial_name}_updated");
+
+        let add_body = format!(
+            r#"{{
+                "projectType":" short-drama ",
+                "name":"  {initial_name}  ",
+                "intro":"  legacy intro  ",
+                "type":" novel ",
+                "artStyle":"  ink  ",
+                "directorManual":"  story-manual  ",
+                "videoRatio":" 9:16 ",
+                "imageModel":" dalle-3 ",
+                "videoModel":" runway ",
+                "imageQuality":" hd ",
+                "mode":"   "
+            }}"#
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/add-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(add_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, added) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "added={added}");
+        assert_eq!(added["message"].as_str(), Some("新增项目成功"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/get-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, listed) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "listed={listed}");
+        let created_row = listed["data"]
+            .as_array()
+            .and_then(|rows| {
+                rows.iter()
+                    .find(|row| row["name"].as_str() == Some(initial_name.as_str()))
+            })
+            .cloned()
+            .expect("created project row");
+        let legacy_id = created_row["legacy_id"].as_i64().expect("legacy_id") as i32;
+        assert_eq!(created_row["intro"].as_str(), Some("legacy intro"));
+        assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
+        assert_eq!(created_row["mode"].as_str(), Some("novel"));
+        assert_eq!(created_row["art_style"].as_str(), Some("ink"));
+        assert_eq!(
+            created_row["director_manual"].as_str(),
+            Some("story-manual")
+        );
+        assert_eq!(created_row["video_ratio"].as_str(), Some("9:16"));
+        assert_eq!(created_row["image_model"].as_str(), Some("dalle-3"));
+        assert_eq!(created_row["video_model"].as_str(), Some("runway"));
+        assert_eq!(created_row["image_quality"].as_str(), Some("hd"));
+
+        let stored_mode: Option<String> = sqlx::query_scalar(
+            "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
+        )
+        .bind(sub)
+        .bind(legacy_id)
+        .fetch_optional(&pool)
+        .await
+        .expect("select initial mode");
+        assert_eq!(stored_mode.as_deref(), Some("novel"));
+
+        let edit_body = format!(
+            r#"{{
+                "id":{legacy_id},
+                "name":"  {updated_name}  ",
+                "intro":"   ",
+                "type":"  fallback-mode  ",
+                "artStyle":"   ",
+                "directorManual":"  revised-manual  ",
+                "videoRatio":" 16:9 ",
+                "imageModel":" flux ",
+                "videoModel":" kling ",
+                "imageQuality":" standard ",
+                "projectType":" feature ",
+                "mode":" professional "
+            }}"#
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/edit-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(edit_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, edited) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "edited={edited}");
+        assert_eq!(edited["message"].as_str(), Some("编辑项目成功"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/get-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, relisted) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "relisted={relisted}");
+        let edited_row = relisted["data"]
+            .as_array()
+            .and_then(|rows| {
+                rows.iter()
+                    .find(|row| row["legacy_id"].as_i64() == Some(i64::from(legacy_id)))
+            })
+            .cloned()
+            .expect("edited project row");
+        assert_eq!(edited_row["name"].as_str(), Some(updated_name.as_str()));
+        assert!(edited_row["intro"].is_null());
+        assert_eq!(edited_row["project_type"].as_str(), Some("feature"));
+        assert_eq!(edited_row["mode"].as_str(), Some("professional"));
+        assert!(edited_row["art_style"].is_null());
+        assert_eq!(
+            edited_row["director_manual"].as_str(),
+            Some("revised-manual")
+        );
+        assert_eq!(edited_row["video_ratio"].as_str(), Some("16:9"));
+        assert_eq!(edited_row["image_model"].as_str(), Some("flux"));
+        assert_eq!(edited_row["video_model"].as_str(), Some("kling"));
+        assert_eq!(edited_row["image_quality"].as_str(), Some("standard"));
+
+        let stored_mode: Option<String> = sqlx::query_scalar(
+            "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
+        )
+        .bind(sub)
+        .bind(legacy_id)
+        .fetch_optional(&pool)
+        .await
+        .expect("select edited mode");
+        assert_eq!(stored_mode.as_deref(), Some("professional"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/delete-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, deleted) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "deleted={deleted}");
+        assert_eq!(deleted["message"].as_str(), Some("删除项目成功"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/get-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, after_delete) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "after_delete={after_delete}");
+        let still_present = after_delete["data"].as_array().is_some_and(|rows| {
+            rows.iter()
+                .any(|row| row["legacy_id"].as_i64() == Some(i64::from(legacy_id)))
+        });
+        assert!(
+            !still_present,
+            "deleted row should be absent: {after_delete}"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/project/delete-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, missing_delete) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::NOT_FOUND,
+            "missing_delete={missing_delete}"
+        );
+
+        let _ = sqlx::query(
+            "DELETE FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
+        )
+        .bind(sub)
+        .bind(legacy_id)
+        .execute(&pool)
+        .await;
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
     async fn asset_image_file_local_storage_roundtrip() {
         use base64::Engine;
         use serde_json::json;
