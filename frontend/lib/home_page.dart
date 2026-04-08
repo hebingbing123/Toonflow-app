@@ -32,9 +32,12 @@ part 'home_page/jobs_controller.dart';
 part 'home_page/task_center_controller.dart';
 part 'home_page/skills_harness_controller.dart';
 part 'home_page/script_editor_storyboards.dart';
+part 'home_page/quality_reviews_controller_summary.dart';
 part 'home_page/quality_reviews_controller.dart';
 part 'home_page/system_probes_controller.dart';
 part 'home_page/system_probes_models_catalog.dart';
+part 'home_page/system_probes_models_catalog_settings_probe.dart';
+part 'home_page/system_probes_models_catalog_production_probe.dart';
 part 'home_page/system_probes_account.dart';
 part 'home_page/system_probes_content.dart';
 part 'home_page/skills_harness_websocket.dart';
@@ -45,22 +48,6 @@ part 'home_page/build_sections.dart';
 part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
-
-/// Script-agent REST hits Postgres; catalog probe allows 200 OK, 404 missing project, or 503 without pool.
-bool _scriptAgentCatalogProbeOk(int status) =>
-    status == 200 || status == 404 || status == 503;
-
-/// **`assets-generate`** single + batch routes: **200** queued job, **404** project, **429** quota, **503** no DB.
-bool _assetsGenerateSingleJobProbeOk(int status) =>
-    status == 200 || status == 404 || status == 429 || status == 503;
-
-/// **`settings/vendors/model-test`**: **200** queued job, **429** quota, **503** no DB.
-bool _vendorModelTestProbeOk(int status) =>
-    status == 200 || status == 429 || status == 503;
-
-/// Production probes: allow implemented **200**, missing owned data **404**, or **503** when DB-gated routes run without pool.
-bool _productionProbeOk(int status) =>
-    status == 200 || status == 404 || status == 503;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
