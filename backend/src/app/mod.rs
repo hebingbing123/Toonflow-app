@@ -4141,6 +4141,21 @@ mod pg_contract_tests {
             .await;
     }
 
+    async fn cleanup_jobs(pool: &PgPool, job_ids: &[Uuid]) {
+        if job_ids.is_empty() {
+            return;
+        }
+
+        let _ = sqlx::query("DELETE FROM public.app_usage_event WHERE source_job_id = ANY($1)")
+            .bind(job_ids)
+            .execute(pool)
+            .await;
+        let _ = sqlx::query("DELETE FROM public.app_generation_job WHERE id = ANY($1)")
+            .bind(job_ids)
+            .execute(pool)
+            .await;
+    }
+
     fn test_addr() -> SocketAddr {
         SocketAddr::from(([127, 0, 0, 1], 42_043))
     }
@@ -5927,6 +5942,264 @@ mod pg_contract_tests {
         );
 
         cleanup_quality_reviews(&pool, &created_review_ids).await;
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn tasks_legacy_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let project_name = format!("pg_task_center_{}", Uuid::new_v4());
+        let idem_key = format!("pg-task-idem-{}", Uuid::new_v4());
+        let mut created_job_ids = Vec::new();
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"name":"{project_name}"}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created_project) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "project={created_project}");
+        let legacy_project_id = created_project["legacy_id"]
+            .as_i64()
+            .expect("legacy project id") as i32;
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/jobs")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .header("Idempotency-Key", idem_key.as_str())
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"kind":"flutter.probe","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"idem"}}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created_job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "created_job={created_job}");
+        let created_job_id =
+            Uuid::parse_str(created_job["id"].as_str().expect("created job id")).unwrap();
+        created_job_ids.push(created_job_id);
+        assert_eq!(
+            created_job["idempotency_key"].as_str(),
+            Some(idem_key.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/jobs")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .header("Idempotency-Key", idem_key.as_str())
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"kind":"flutter.probe","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"idem-retry"}}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, idem_retry) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "idem_retry={idem_retry}");
+        assert_eq!(idem_retry["id"], created_job["id"]);
+        assert_eq!(idem_retry["payload"]["marker"], "idem");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/jobs")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"kind":"{JOB_KIND_ASSET_GENERATE_IMAGE}","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"failed"}}}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, failed_seed_job) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "failed_seed_job={failed_seed_job}");
+        let failed_seed_job_id =
+            Uuid::parse_str(failed_seed_job["id"].as_str().expect("failed seed job id")).unwrap();
+        created_job_ids.push(failed_seed_job_id);
+
+        sqlx::query(
+            "UPDATE public.app_generation_job SET status = 'failed', error_message = 'pg task center failure' WHERE id = $1",
+        )
+        .bind(failed_seed_job_id)
+        .execute(&pool)
+        .await
+        .expect("mark failed seed job");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/get-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, task_projects) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "task_projects={task_projects}");
+        let task_projects = task_projects["data"].as_array().expect("task project rows");
+        assert!(
+            task_projects.iter().any(|row| {
+                row["id"].as_i64() == Some(i64::from(legacy_project_id))
+                    && row["name"].as_str() == Some(project_name.as_str())
+            }),
+            "task center project list should include created project: {task_projects:?}"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/get-task-categories")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, task_categories) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "task_categories={task_categories}");
+        let task_categories = task_categories["data"]
+            .as_array()
+            .expect("task category rows");
+        assert!(
+            task_categories
+                .iter()
+                .any(|row| row["taskClass"].as_str() == Some("flutter.probe")),
+            "task categories should include flutter.probe: {task_categories:?}"
+        );
+        assert!(
+            task_categories
+                .iter()
+                .any(|row| row["taskClass"].as_str() == Some(JOB_KIND_ASSET_GENERATE_IMAGE)),
+            "task categories should include asset generate: {task_categories:?}"
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/get-task-api")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"page":1,"limit":10,"projectId":{legacy_project_id},"taskClass":"flutter.probe","state":"queued"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, filtered_jobs) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "filtered_jobs={filtered_jobs}");
+        assert_eq!(filtered_jobs["total"].as_i64(), Some(1));
+        let filtered_jobs = filtered_jobs["data"]
+            .as_array()
+            .expect("filtered task rows");
+        assert_eq!(filtered_jobs.len(), 1);
+        assert_eq!(filtered_jobs[0]["id"], created_job["id"]);
+        assert_eq!(filtered_jobs[0]["status"], "queued");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/get-task-api")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"page":1,"limit":10,"projectId":{legacy_project_id},"state":"failed"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, failed_jobs) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "failed_jobs={failed_jobs}");
+        assert_eq!(failed_jobs["total"].as_i64(), Some(1));
+        let failed_jobs = failed_jobs["data"].as_array().expect("failed task rows");
+        assert_eq!(failed_jobs.len(), 1);
+        assert_eq!(failed_jobs[0]["id"], failed_seed_job["id"]);
+        assert_eq!(failed_jobs[0]["status"], "failed");
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/task-details")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"taskId":"{created_job_id}"}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, task_detail) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "task_detail={task_detail}");
+        assert_eq!(task_detail["id"], created_job["id"]);
+        let legacy_project_id_text = legacy_project_id.to_string();
+        assert_eq!(
+            task_detail["payload"]["project_legacy_id"].as_str(),
+            Some(legacy_project_id_text.as_str())
+        );
+
+        cleanup_jobs(&pool, &created_job_ids).await;
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+            .bind(legacy_project_id)
+            .execute(&pool)
+            .await;
     }
 
     #[tokio::test]
