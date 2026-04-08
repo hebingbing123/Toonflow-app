@@ -40,6 +40,7 @@ part 'settings_vendors_mutations.dart';
 part 'status_and_auth.dart';
 part 'storyboards_api.dart';
 part 'tasks_legacy.dart';
+part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 
