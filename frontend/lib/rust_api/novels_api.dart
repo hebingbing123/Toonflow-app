@@ -136,6 +136,110 @@ class LegacyNovelPagedResponse {
   }
 }
 
+/// One **`app_novel_event`** row with associated chapter indexes.
+class NovelEventRow {
+  const NovelEventRow({
+    required this.id,
+    required this.projectId,
+    required this.legacyId,
+    required this.name,
+    required this.detail,
+    this.createTimeMs,
+    required this.chapterIndexes,
+  });
+
+  final String id;
+  final String projectId;
+  final int legacyId;
+  final String name;
+  final String detail;
+  final int? createTimeMs;
+  final List<int> chapterIndexes;
+
+  factory NovelEventRow.fromJson(Map<String, dynamic> json) {
+    final rawChapterIndexes =
+        json['chapter_indexes'] as List<dynamic>? ?? const [];
+    return NovelEventRow(
+      id: json['id'] as String,
+      projectId: json['project_id'] as String,
+      legacyId: (json['legacy_id'] as num).toInt(),
+      name: json['name'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      createTimeMs: json['create_time_ms'] == null
+          ? null
+          : (json['create_time_ms'] as num).toInt(),
+      chapterIndexes: rawChapterIndexes.map((e) => (e as num).toInt()).toList(),
+    );
+  }
+}
+
+/// Body of **`GET …/novel-events`**.
+class ListNovelEventsResponse {
+  const ListNovelEventsResponse({required this.items, required this.total});
+
+  final List<NovelEventRow> items;
+  final int total;
+
+  factory ListNovelEventsResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>;
+    return ListNovelEventsResponse(
+      items: raw
+          .map((e) => NovelEventRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toInt(),
+    );
+  }
+}
+
+/// Row from **`POST /api/v1/novels/events/get-events`**.
+class LegacyNovelEventRow {
+  const LegacyNovelEventRow({
+    required this.legacyId,
+    required this.eventName,
+    this.detail,
+    required this.createTime,
+    required this.chapters,
+  });
+
+  final int legacyId;
+  final String eventName;
+  final String? detail;
+  final int createTime;
+  final List<int> chapters;
+
+  factory LegacyNovelEventRow.fromJson(Map<String, dynamic> json) {
+    final rawChapters = json['chapters'] as List<dynamic>? ?? const [];
+    return LegacyNovelEventRow(
+      legacyId: (json['id'] as num).toInt(),
+      eventName: json['eventName'] as String? ?? '',
+      detail: json['detail'] as String?,
+      createTime: (json['createTime'] as num?)?.toInt() ?? 0,
+      chapters: rawChapters.map((e) => (e as num).toInt()).toList(),
+    );
+  }
+}
+
+/// **`POST /api/v1/novels/events/get-events`** — legacy paginated list.
+class LegacyNovelEventsPagedResponse {
+  const LegacyNovelEventsPagedResponse({
+    required this.list,
+    required this.total,
+  });
+
+  final List<LegacyNovelEventRow> list;
+  final int total;
+
+  factory LegacyNovelEventsPagedResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['list'] as List<dynamic>;
+    return LegacyNovelEventsPagedResponse(
+      list: raw
+          .map((e) => LegacyNovelEventRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toInt(),
+    );
+  }
+}
+
 /// One entry for **`POST /api/v1/novels/add-novel`** **`data`** (camelCase **`chapterData`**).
 class LegacyNovelAddItem {
   const LegacyNovelAddItem({
@@ -520,6 +624,210 @@ Future<String> postLegacyNovelsBatchDelete(
   List<int> legacyIds,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/batch-delete');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ids': legacyIds}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['message'] as String? ?? '';
+}
+
+/// `GET /api/v1/projects/legacy/{project_legacy_id}/novel-events` — paginated events list with chapter associations.
+Future<ListNovelEventsResponse> fetchProjectNovelEventsByLegacyId(
+  String accessToken,
+  int projectLegacyId, {
+  String? search,
+  int? page,
+  int? limit,
+}) async {
+  final qp = <String, String>{};
+  if (search != null && search.isNotEmpty) {
+    qp['search'] = search;
+  }
+  if (page != null) {
+    qp['page'] = '$page';
+  }
+  if (limit != null) {
+    qp['limit'] = '$limit';
+  }
+  var uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novel-events',
+  );
+  if (qp.isNotEmpty) {
+    uri = uri.replace(queryParameters: qp);
+  }
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ListNovelEventsResponse.fromJson(map);
+}
+
+/// `POST /api/v1/projects/legacy/{project_legacy_id}/novel-events` — create a novel event.
+Future<Map<String, dynamic>> createProjectNovelEventUnderLegacy(
+  String accessToken,
+  int projectLegacyId, {
+  required String name,
+  String? detail,
+  List<int>? chapterIds,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novel-events',
+  );
+  final body = <String, dynamic>{'name': name};
+  if (detail != null) {
+    body['detail'] = detail;
+  }
+  if (chapterIds != null) {
+    body['chapterIds'] = chapterIds;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
+/// `PATCH /api/v1/projects/legacy/{project_legacy_id}/novel-events/{event_legacy_id}` — update a novel event.
+Future<String> patchProjectNovelEventByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int eventLegacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novel-events/$eventLegacyId',
+  );
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['message'] as String? ?? '';
+}
+
+/// `DELETE /api/v1/projects/legacy/{project_legacy_id}/novel-events/{event_legacy_id}` — delete a novel event.
+Future<String> deleteProjectNovelEventByLegacyIds(
+  String accessToken,
+  int projectLegacyId,
+  int eventLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/novel-events/$eventLegacyId',
+  );
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return map['message'] as String? ?? '';
+}
+
+/// `POST /api/v1/novels/events/get-events` — legacy event list shape.
+Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
+  String accessToken,
+  int projectId, {
+  required int page,
+  required int limit,
+  String? search,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/get-events');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'page': page,
+    'limit': limit,
+  };
+  if (search != null && search.isNotEmpty) {
+    body['search'] = search;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return LegacyNovelEventsPagedResponse.fromJson(map);
+}
+
+/// `POST /api/v1/novels/events/batch-delete` — legacy batch delete by event legacy ids.
+Future<String> postLegacyNovelEventsBatchDelete(
+  String accessToken,
+  List<int> legacyIds,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/batch-delete');
   final res = await http
       .post(
         uri,

@@ -34,6 +34,7 @@ extension _HomePageProjectEditor on _HomePageState {
       final statsRef = <ProjectStats?>[statsSnap];
       final assetsRef = <ListAssetsResponse?>[assetsSnap];
       final novelsRef = <ListNovelsResponse?>[novelsSnap];
+      final novelEventsRef = <ListNovelEventsResponse?>[null];
       final assetsForScriptRef = <ListAssetsResponse?>[null];
       final assetsFilterScriptLegacyId = <int?>[null];
       final assetsLoading = <bool>[false];
@@ -41,6 +42,7 @@ extension _HomePageProjectEditor on _HomePageState {
       final assetsBusy = <bool>[false];
       final novelsLoading = <bool>[false];
       final novelsBusy = <bool>[false];
+      final novelEventsLoading = <bool>[false];
       final scriptProbeBusy = <bool>[false];
       final generalLegacyBusy = <bool>[false];
       final tasksLegacyBusy = <bool>[false];
@@ -85,6 +87,14 @@ extension _HomePageProjectEditor on _HomePageState {
                   );
                 } catch (_) {
                   novelsRef[0] = null;
+                }
+                try {
+                  novelEventsRef[0] = await fetchProjectNovelEventsByLegacyId(
+                    token,
+                    p.legacyId,
+                  );
+                } catch (_) {
+                  novelEventsRef[0] = null;
                 }
                 if (ctx.mounted) {
                   setDialogState(() {});
@@ -148,8 +158,10 @@ extension _HomePageProjectEditor on _HomePageState {
                         token: token,
                         p: p,
                         novelsRef: novelsRef,
+                        novelEventsRef: novelEventsRef,
                         novelsLoading: novelsLoading,
                         novelsBusy: novelsBusy,
+                        novelEventsLoading: novelEventsLoading,
                         assetsBusy: assetsBusy,
                         assetsLoading: assetsLoading,
                         assetsScriptFilterLoading: assetsScriptFilterLoading,
