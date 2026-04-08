@@ -1,5 +1,7 @@
 //! Novel events (legacy **`o_event`** / **`o_eventChapter`**): CRUD and chapter associations.
 
+mod query;
+
 use axum::{
     extract::{Json, Path, Query, State},
     http::HeaderMap,
@@ -8,26 +10,15 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::{FromRow, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
+use query::{count_novel_events, list_event_rows, list_legacy_event_rows, search_ilike};
 
 const MAX_EVENT_BATCH_DELETE: usize = 500;
 const MAX_EVENT_LIST_LIMIT: i64 = 200;
-
-#[derive(Debug, FromRow)]
-struct EventQueryRow {
-    id: Uuid,
-    project_id: Uuid,
-    legacy_id: i32,
-    name: String,
-    detail: String,
-    create_time_ms: Option<i64>,
-    chapter_indexes: Vec<i32>,
-}
 
 #[derive(Debug, Serialize)]
 pub struct EventWithChapters {
@@ -40,8 +31,8 @@ pub struct EventWithChapters {
     pub chapter_indexes: Vec<i32>,
 }
 
-impl From<EventQueryRow> for EventWithChapters {
-    fn from(row: EventQueryRow) -> Self {
+impl From<query::EventQueryRow> for EventWithChapters {
+    fn from(row: query::EventQueryRow) -> Self {
         Self {
             id: row.id,
             project_id: row.project_id,
@@ -118,17 +109,6 @@ pub struct BatchDeleteEventsResponse {
     pub message: &'static str,
 }
 
-fn search_ilike(raw: Option<String>) -> Option<String> {
-    raw.and_then(|s| {
-        let t = s.trim();
-        if t.is_empty() {
-            None
-        } else {
-            Some(format!("%{t}%"))
-        }
-    })
-}
-
 async fn list_novel_events(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -159,73 +139,13 @@ async fn list_novel_events(
     let off = i64::from(page.saturating_sub(1)) * lim;
     let search_pat = search_ilike(query.search);
     let search_ref = search_pat.as_deref();
-
-    // Count total (distinct events matching search)
-    let total = {
-        let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
-            "SELECT COUNT(DISTINCT e.id)::BIGINT
-             FROM app_novel_event e
-             INNER JOIN app_project p ON p.id = e.project_id
-             WHERE p.legacy_id = ",
-        );
-        qb.push_bind(project_legacy_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
-        if let Some(pat) = search_ref {
-            qb.push(" AND e.name ILIKE ");
-            qb.push_bind(pat);
-        }
-        qb.build_query_scalar::<i64>()
-            .fetch_one(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    };
-
-    // Fetch events with aggregated chapter indexes
-    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
-        r#"
-        SELECT 
-            e.id as "id!",
-            e.project_id as "project_id!",
-            e.legacy_id as "legacy_id!",
-            e.name as "name!",
-            e.detail as "detail!",
-            e.create_time_ms,
-            COALESCE(
-                ARRAY_AGG(n.chapter_index ORDER BY n.chapter_index) 
-                FILTER (WHERE n.chapter_index IS NOT NULL),
-                ARRAY[]::INTEGER[]
-            ) as "chapter_indexes!: Vec<i32>"
-        FROM app_novel_event e
-        INNER JOIN app_project p ON p.id = e.project_id
-        LEFT JOIN app_novel_event_chapter ec ON ec.event_id = e.id
-        LEFT JOIN app_novel n ON n.id = ec.novel_id
-        WHERE p.legacy_id = "#,
-    );
-    qb.push_bind(project_legacy_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
-    if let Some(pat) = search_ref {
-        qb.push(" AND e.name ILIKE ");
-        qb.push_bind(pat);
-    }
-    qb.push(
-        " GROUP BY e.id, e.project_id, e.legacy_id, e.name, e.detail, e.create_time_ms
-          ORDER BY e.create_time_ms DESC NULLS LAST, e.legacy_id DESC
-          LIMIT ",
-    );
-    qb.push_bind(lim);
-    qb.push(" OFFSET ");
-    qb.push_bind(off);
-
-    let rows: Vec<EventWithChapters> = qb
-        .build_query_as::<EventQueryRow>()
-        .fetch_all(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-        .into_iter()
-        .map(EventWithChapters::from)
-        .collect();
+    let total = count_novel_events(pool, project_legacy_id, uid, search_ref).await?;
+    let rows: Vec<EventWithChapters> =
+        list_event_rows(pool, project_legacy_id, uid, lim, off, search_ref)
+            .await?
+            .into_iter()
+            .map(EventWithChapters::from)
+            .collect();
 
     Ok(JsonResponse(ListNovelEventsResponse { items: rows, total }))
 }
@@ -599,79 +519,8 @@ async fn post_get_events(
     let off = i64::from(body.page.saturating_sub(1)) * lim;
     let search_pat = search_ilike(body.search);
     let search_ref = search_pat.as_deref();
-
-    // Count
-    let total = {
-        let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
-            "SELECT COUNT(DISTINCT e.id)::BIGINT
-             FROM app_novel_event e
-             INNER JOIN app_project p ON p.id = e.project_id
-             WHERE p.legacy_id = ",
-        );
-        qb.push_bind(body.project_id);
-        qb.push(" AND p.owner_user_id = ");
-        qb.push_bind(uid);
-        if let Some(pat) = search_ref {
-            qb.push(" AND e.name ILIKE ");
-            qb.push_bind(pat);
-        }
-        qb.build_query_scalar::<i64>()
-            .fetch_one(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    };
-
-    // List with chapters
-    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
-        r#"
-        SELECT 
-            e.legacy_id as "id!",
-            e.name as "event_name!",
-            e.detail,
-            e.create_time_ms as "create_time!",
-            COALESCE(
-                ARRAY_AGG(n.chapter_index ORDER BY n.chapter_index) 
-                FILTER (WHERE n.chapter_index IS NOT NULL),
-                ARRAY[]::INTEGER[]
-            ) as "chapters!: Vec<i32>"
-        FROM app_novel_event e
-        INNER JOIN app_project p ON p.id = e.project_id
-        LEFT JOIN app_novel_event_chapter ec ON ec.event_id = e.id
-        LEFT JOIN app_novel n ON n.id = ec.novel_id
-        WHERE p.legacy_id = "#,
-    );
-    qb.push_bind(body.project_id);
-    qb.push(" AND p.owner_user_id = ");
-    qb.push_bind(uid);
-    if let Some(pat) = search_ref {
-        qb.push(" AND e.name ILIKE ");
-        qb.push_bind(pat);
-    }
-    qb.push(
-        " GROUP BY e.id, e.legacy_id, e.name, e.detail, e.create_time_ms
-          ORDER BY e.create_time_ms DESC NULLS LAST, e.legacy_id DESC
-          LIMIT ",
-    );
-    qb.push_bind(lim);
-    qb.push(" OFFSET ");
-    qb.push_bind(off);
-
-    #[derive(Debug, FromRow, Serialize)]
-    struct LegacyEventRow {
-        id: i32,
-        #[serde(rename = "eventName")]
-        event_name: String,
-        detail: Option<String>,
-        #[serde(rename = "createTime")]
-        create_time: i64,
-        chapters: Vec<i32>,
-    }
-
-    let rows: Vec<LegacyEventRow> = qb
-        .build_query_as::<LegacyEventRow>()
-        .fetch_all(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let total = count_novel_events(pool, body.project_id, uid, search_ref).await?;
+    let rows = list_legacy_event_rows(pool, body.project_id, uid, lim, off, search_ref).await?;
 
     Ok(JsonResponse(serde_json::json!({
         "list": rows,
@@ -871,7 +720,7 @@ mod tests {
 
     #[test]
     fn event_query_row_into_event_with_chapters() {
-        let row = EventQueryRow {
+        let row = query::EventQueryRow {
             id: Uuid::new_v4(),
             project_id: Uuid::new_v4(),
             legacy_id: 1,
