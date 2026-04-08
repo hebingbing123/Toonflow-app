@@ -479,7 +479,8 @@ pub fn router() -> Router<AppState> {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_optional_base64;
+    use super::{normalize_optional_base64, MAX_BASE64_HINT_LEN};
+    use crate::error::ApiError;
 
     #[test]
     fn normalize_base64_none_or_blank_to_none() {
@@ -504,5 +505,26 @@ mod tests {
         let src = "data:image/png;base64,AA==";
         let got = normalize_optional_base64(Some(src), "base64").expect("uri");
         assert_eq!(got.as_deref(), Some(src));
+    }
+
+    #[test]
+    fn normalize_base64_rejects_over_limit() {
+        let oversized = "A".repeat(MAX_BASE64_HINT_LEN + 1);
+        let err = normalize_optional_base64(Some(&oversized), "base64").expect_err("oversized");
+        match err {
+            ApiError::BadRequest(msg) => assert!(
+                msg.contains(&format!("at most {MAX_BASE64_HINT_LEN} chars")),
+                "msg={msg}"
+            ),
+            other => panic!("expected bad_request, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn normalize_base64_accepts_exact_limit() {
+        let exact = "A".repeat(MAX_BASE64_HINT_LEN);
+        let got = normalize_optional_base64(Some(&exact), "base64").expect("exact");
+        let expected = format!("data:image/jpeg;base64,{exact}");
+        assert_eq!(got.as_deref(), Some(expected.as_str()));
     }
 }
