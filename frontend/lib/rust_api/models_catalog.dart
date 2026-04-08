@@ -1,0 +1,90 @@
+part of 'index.dart';
+
+/// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.
+Future<List<ModelListEntry>> fetchModelsCatalog(
+  String accessToken, {
+  String typeFilter = 'all',
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/models',
+  ).replace(queryParameters: {'type': typeFilter});
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final list = jsonDecode(res.body) as List<dynamic>;
+  return list
+      .map((e) => ModelListEntry.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
+/// `GET /api/v1/settings/vendors/summary` — OpenAPI `getSettingsVendorsSummaryV1`.
+Future<VendorsSummaryResponseV1> fetchVendorsSummaryV1(
+  String accessToken,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/vendors/summary');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VendorsSummaryResponseV1.fromJson(map);
+}
+
+/// `GET /api/v1/models/detail?model_id=…` — Bearer; see `modelDetailV1`.
+Future<ModelDetailResponse> fetchModelDetail(
+  String accessToken, {
+  required String modelId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/models/detail',
+  ).replace(queryParameters: {'model_id': modelId});
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ModelDetailResponse.fromJson(map);
+}
+
+/// `GET /api/v1/models/text-default` — OpenAPI `getTextModelDefaultV1`.
+Future<TextModelDefaultV1> fetchTextModelDefaultV1(String accessToken) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models/text-default');
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return TextModelDefaultV1.fromJson(map);
+}
+
+/// `PATCH /api/v1/models/text-default` — set per-user text model preference; pass `null` to reset.
+Future<TextModelDefaultV1> patchTextModelDefaultV1(
+  String accessToken, {
+  String? modelId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models/text-default');
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{'model_id': modelId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return TextModelDefaultV1.fromJson(map);
+}
