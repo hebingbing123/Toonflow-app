@@ -16,6 +16,7 @@ part 'assets_crud.dart';
 part 'assets_images.dart';
 part 'assets_models.dart';
 part 'assets_generate.dart';
+part 'catalog_memory_models.dart';
 part 'harness_api.dart';
 part 'jobs_api.dart';
 part 'novels_models.dart';
