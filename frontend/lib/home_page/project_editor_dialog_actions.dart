@@ -6,17 +6,17 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
     required StateSetter setDialogState,
     required String token,
     required ProjectRow p,
-    required List<bool> saving,
+    required _ProjectEditorDialogState dialogState,
     required TextEditingController nameCtrl,
     required TextEditingController introCtrl,
   }) {
     return [
       TextButton(
-        onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
+        onPressed: dialogState.saving[0] ? null : () => Navigator.of(ctx).pop(),
         child: const Text('Close'),
       ),
       TextButton(
-        onPressed: saving[0]
+        onPressed: dialogState.saving[0]
             ? null
             : () async {
                 final ok = await showDialog<bool>(
@@ -39,7 +39,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   ),
                 );
                 if (ok != true || !ctx.mounted) return;
-                setDialogState(() => saving[0] = true);
+                setDialogState(() => dialogState.saving[0] = true);
                 try {
                   await deleteProjectByLegacyId(token, p.legacyId);
                   if (!ctx.mounted) return;
@@ -47,19 +47,19 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   if (!mounted) return;
                   await _loadProjects();
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('项目已删除')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('项目已删除')));
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
-                    setDialogState(() => saving[0] = false);
+                    setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
                 } catch (e) {
                   if (ctx.mounted) {
-                    setDialogState(() => saving[0] = false);
+                    setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -69,10 +69,10 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
         child: const Text('DELETE'),
       ),
       FilledButton(
-        onPressed: saving[0]
+        onPressed: dialogState.saving[0]
             ? null
             : () async {
-                setDialogState(() => saving[0] = true);
+                setDialogState(() => dialogState.saving[0] = true);
                 try {
                   await updateProjectByLegacyId(token, p.legacyId, {
                     'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
@@ -84,21 +84,21 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   await _loadProjects();
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
-                    setDialogState(() => saving[0] = false);
+                    setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
                 } catch (e) {
                   if (ctx.mounted) {
-                    setDialogState(() => saving[0] = false);
+                    setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
                 }
               },
-        child: Text(saving[0] ? '保存中…' : 'PATCH 保存'),
+        child: Text(dialogState.saving[0] ? '保存中…' : 'PATCH 保存'),
       ),
     ];
   }

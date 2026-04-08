@@ -7,27 +7,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     required String token,
     required ProjectRow p,
     required ProjectDetail detail,
+    required _ProjectEditorDialogState dialogState,
     required TextEditingController nameCtrl,
     required TextEditingController introCtrl,
     required List<ScriptBrief> scriptList,
-    required List<ProjectStats?> statsRef,
-    required List<ListAssetsResponse?> assetsRef,
-    required List<ListNovelsResponse?> novelsRef,
-    required List<ListNovelEventsResponse?> novelEventsRef,
-    required List<ListAssetsResponse?> assetsForScriptRef,
-    required List<int?> assetsFilterScriptLegacyId,
-    required List<bool> assetsLoading,
-    required List<bool> assetsScriptFilterLoading,
-    required List<bool> assetsBusy,
-    required List<bool> novelsLoading,
-    required List<bool> novelsBusy,
-    required List<bool> novelEventsLoading,
-    required List<bool> scriptProbeBusy,
-    required List<bool> saving,
-    required List<bool> generalLegacyBusy,
-    required List<bool> tasksLegacyBusy,
-    required List<bool> projectLegacyBusy,
-    required Future<void> Function() reloadAssetsAndStats,
   }) {
     return SingleChildScrollView(
       child: Column(
@@ -56,24 +39,22 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             p: p,
             detail: detail,
             introCtrl: introCtrl,
-            generalLegacyBusy: generalLegacyBusy,
-            tasksLegacyBusy: tasksLegacyBusy,
-            projectLegacyBusy: projectLegacyBusy,
+            generalLegacyBusy: dialogState.generalLegacyBusy,
+            tasksLegacyBusy: dialogState.tasksLegacyBusy,
+            projectLegacyBusy: dialogState.projectLegacyBusy,
           ),
           const SizedBox(height: 12),
-          if (statsRef[0] != null)
+          if (dialogState.statsRef[0] != null)
             Text(
-              'GET …/stats：剧本 ${statsRef[0]!.scriptCount} · 分镜 '
-              '${statsRef[0]!.storyboardCount} · 小说 ${statsRef[0]!.novelCount} · 角色/视频 '
-              '${statsRef[0]!.roleCount}/${statsRef[0]!.videoCount}（视频占位）',
+              'GET …/stats：剧本 ${dialogState.statsRef[0]!.scriptCount} · 分镜 '
+              '${dialogState.statsRef[0]!.storyboardCount} · 小说 ${dialogState.statsRef[0]!.novelCount} · 角色/视频 '
+              '${dialogState.statsRef[0]!.roleCount}/${dialogState.statsRef[0]!.videoCount}（视频占位）',
               style: Theme.of(ctx).textTheme.bodySmall,
             )
           else
             Text(
               'GET …/stats 未加载',
-              style: Theme.of(
-                ctx,
-              ).textTheme.bodySmall?.copyWith(
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                 color: Theme.of(ctx).colorScheme.outline,
               ),
             ),
@@ -83,15 +64,16 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             setDialogState: setDialogState,
             token: token,
             p: p,
-            novelsRef: novelsRef,
-            novelEventsRef: novelEventsRef,
-            novelsLoading: novelsLoading,
-            novelsBusy: novelsBusy,
-            novelEventsLoading: novelEventsLoading,
-            assetsBusy: assetsBusy,
-            assetsLoading: assetsLoading,
-            assetsScriptFilterLoading: assetsScriptFilterLoading,
-            reloadAssetsAndStats: reloadAssetsAndStats,
+            novelsRef: dialogState.novelsRef,
+            novelEventsRef: dialogState.novelEventsRef,
+            novelsLoading: dialogState.novelsLoading,
+            novelsBusy: dialogState.novelsBusy,
+            novelEventsLoading: dialogState.novelEventsLoading,
+            assetsBusy: dialogState.assetsBusy,
+            assetsLoading: dialogState.assetsLoading,
+            assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
+            reloadAssetsAndStats: () =>
+                dialogState.reloadAssetsAndStats(token, p.legacyId),
           ),
           const SizedBox(height: 12),
           _buildProjectAssetsProbeSection(
@@ -100,13 +82,14 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             token: token,
             p: p,
             scriptList: scriptList,
-            assetsRef: assetsRef,
-            assetsForScriptRef: assetsForScriptRef,
-            assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
-            assetsLoading: assetsLoading,
-            assetsScriptFilterLoading: assetsScriptFilterLoading,
-            assetsBusy: assetsBusy,
-            reloadAssetsAndStats: reloadAssetsAndStats,
+            assetsRef: dialogState.assetsRef,
+            assetsForScriptRef: dialogState.assetsForScriptRef,
+            assetsFilterScriptLegacyId: dialogState.assetsFilterScriptLegacyId,
+            assetsLoading: dialogState.assetsLoading,
+            assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
+            assetsBusy: dialogState.assetsBusy,
+            reloadAssetsAndStats: () =>
+                dialogState.reloadAssetsAndStats(token, p.legacyId),
           ),
           const SizedBox(height: 12),
           _buildProjectScriptsSection(
@@ -114,10 +97,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             setDialogState: setDialogState,
             token: token,
             p: p,
-            saving: saving,
-            scriptProbeBusy: scriptProbeBusy,
+            saving: dialogState.saving,
+            scriptProbeBusy: dialogState.scriptProbeBusy,
             scriptList: scriptList,
-            statsRef: statsRef,
+            statsRef: dialogState.statsRef,
           ),
         ],
       ),
