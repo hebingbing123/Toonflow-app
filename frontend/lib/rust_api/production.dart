@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import 'core.dart';
-part 'production_assets.dart';
+part 'production_assets_api.dart';
+part 'production_assets_models.dart';
 part 'production_edit_image.dart';
 part 'production_legacy_routes.dart';
 part 'production_storyboard_batch.dart';
