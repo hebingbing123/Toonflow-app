@@ -15,6 +15,7 @@ part 'assets_api.dart';
 part 'assets_generate.dart';
 part 'harness_api.dart';
 part 'jobs_api.dart';
+part 'novels_models.dart';
 part 'novels_api.dart';
 part 'project_overview.dart';
 part 'projects_legacy.dart';
