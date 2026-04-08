@@ -196,101 +196,15 @@ extension _HomePageProjectEditor on _HomePageState {
                     ],
                   ),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
-                    child: const Text('Close'),
-                  ),
-                  TextButton(
-                    onPressed: saving[0]
-                        ? null
-                        : () async {
-                            final ok = await showDialog<bool>(
-                              context: ctx,
-                              builder: (c) => AlertDialog(
-                                title: const Text('删除项目？'),
-                                content: Text(
-                                  '将删除 legacy #${p.legacyId} 及关联剧本/分镜（数据库级联），且清除该项目的 agent 记忆。',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(c).pop(false),
-                                    child: const Text('取消'),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () => Navigator.of(c).pop(true),
-                                    child: const Text('删除'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (ok != true || !ctx.mounted) return;
-                            setDialogState(() => saving[0] = true);
-                            try {
-                              await deleteProjectByLegacyId(token, p.legacyId);
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).pop();
-                              if (!mounted) return;
-                              await _loadProjects();
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('项目已删除')),
-                              );
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            } catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                          },
-                    child: const Text('DELETE'),
-                  ),
-                  FilledButton(
-                    onPressed: saving[0]
-                        ? null
-                        : () async {
-                            setDialogState(() => saving[0] = true);
-                            try {
-                              await updateProjectByLegacyId(token, p.legacyId, {
-                                'name': nameCtrl.text.isEmpty
-                                    ? null
-                                    : nameCtrl.text,
-                                'intro': introCtrl.text.isEmpty
-                                    ? null
-                                    : introCtrl.text,
-                              });
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).pop();
-                              if (!mounted) return;
-                              await _loadProjects();
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            } catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                          },
-                    child: Text(saving[0] ? '保存中…' : 'PATCH 保存'),
-                  ),
-                ],
+                actions: _buildProjectEditorDialogActions(
+                  ctx: ctx,
+                  setDialogState: setDialogState,
+                  token: token,
+                  p: p,
+                  saving: saving,
+                  nameCtrl: nameCtrl,
+                  introCtrl: introCtrl,
+                ),
               );
             },
           );
