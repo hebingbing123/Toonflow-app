@@ -7069,6 +7069,71 @@ mod pg_contract_tests {
         .await
         .expect("insert app_asset_image");
 
+        let single_job_id = Uuid::new_v4();
+        sqlx::query(
+            r#"
+            INSERT INTO public.app_generation_job (id, owner_user_id, kind, status, payload)
+            VALUES ($1, $2, 'asset.generate.image', 'queued', $3::jsonb)
+            "#,
+        )
+        .bind(single_job_id)
+        .bind(sub)
+        .bind(
+            serde_json::json!({
+                "source": "pg_contract.assets_generate.cancel.single",
+                "project_legacy_id": legacy_id,
+                "asset_legacy_id": asset_legacy_id
+            })
+            .to_string(),
+        )
+        .execute(&pool)
+        .await
+        .expect("insert linked single job");
+
+        let batch_job_id = Uuid::new_v4();
+        sqlx::query(
+            r#"
+            INSERT INTO public.app_generation_job (id, owner_user_id, kind, status, payload)
+            VALUES ($1, $2, 'asset.generate.batch', 'running', $3::jsonb)
+            "#,
+        )
+        .bind(batch_job_id)
+        .bind(sub)
+        .bind(
+            serde_json::json!({
+                "source": "pg_contract.assets_generate.cancel.batch",
+                "project_legacy_id": legacy_id,
+                "items": [
+                    { "asset_legacy_id": asset_legacy_id, "name": "probe", "prompt": "probe" }
+                ]
+            })
+            .to_string(),
+        )
+        .execute(&pool)
+        .await
+        .expect("insert linked batch job");
+
+        let unrelated_job_id = Uuid::new_v4();
+        sqlx::query(
+            r#"
+            INSERT INTO public.app_generation_job (id, owner_user_id, kind, status, payload)
+            VALUES ($1, $2, 'asset.generate.image', 'queued', $3::jsonb)
+            "#,
+        )
+        .bind(unrelated_job_id)
+        .bind(sub)
+        .bind(
+            serde_json::json!({
+                "source": "pg_contract.assets_generate.cancel.unrelated",
+                "project_legacy_id": legacy_id,
+                "asset_legacy_id": asset_legacy_id + 999
+            })
+            .to_string(),
+        )
+        .execute(&pool)
+        .await
+        .expect("insert unrelated job");
+
         let res = app
             .clone()
             .oneshot(
@@ -7100,6 +7165,49 @@ mod pg_contract_tests {
             metadata["cancel_source"].as_str(),
             Some("legacy.assets-generate.cancel-generate")
         );
+
+        let single_after: Option<(String, Option<serde_json::Value>)> = sqlx::query_as(
+            r#"SELECT status::text, result FROM public.app_generation_job WHERE id = $1"#,
+        )
+        .bind(single_job_id)
+        .fetch_optional(&pool)
+        .await
+        .expect("read linked single job");
+        let (single_status, single_result) = single_after.expect("linked single job exists");
+        assert_eq!(single_status, "cancelled");
+        assert_eq!(
+            single_result
+                .as_ref()
+                .and_then(|v| v.get("cancel_source"))
+                .and_then(serde_json::Value::as_str),
+            Some("legacy.assets-generate.cancel-generate")
+        );
+
+        let batch_after: Option<(String, Option<serde_json::Value>)> = sqlx::query_as(
+            r#"SELECT status::text, result FROM public.app_generation_job WHERE id = $1"#,
+        )
+        .bind(batch_job_id)
+        .fetch_optional(&pool)
+        .await
+        .expect("read linked batch job");
+        let (batch_status, batch_result) = batch_after.expect("linked batch job exists");
+        assert_eq!(batch_status, "cancelled");
+        assert_eq!(
+            batch_result
+                .as_ref()
+                .and_then(|v| v.get("cancel_legacy_image_id"))
+                .and_then(serde_json::Value::as_i64),
+            Some(i64::from(legacy_image_id))
+        );
+
+        let unrelated_after: Option<String> = sqlx::query_scalar(
+            r#"SELECT status::text FROM public.app_generation_job WHERE id = $1"#,
+        )
+        .bind(unrelated_job_id)
+        .fetch_optional(&pool)
+        .await
+        .expect("read unrelated job");
+        assert_eq!(unrelated_after.as_deref(), Some("queued"));
 
         let res = app
             .oneshot(

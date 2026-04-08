@@ -1,6 +1,7 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
 //! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
-//! **`POST …/cancel-generate`** marks one legacy image row as cancelled (**`state = 生成失败`**) for caller-owned assets.
+//! **`POST …/cancel-generate`** marks one legacy image row as cancelled (**`state = 生成失败`**) for caller-owned assets
+//! and cancels matching queued/running **`asset.generate.*`** / **`asset.polish.*`** jobs for the same asset.
 //! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible image generation (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**) then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) and used as the reference image for provider **`images/edits`** (fallback to **`images/generations`** when absent).
 
 use axum::{
@@ -497,6 +498,64 @@ async fn post_cancel_generate(
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let cancelled_jobs = sqlx::query_as::<_, JobRow>(
+        r#"
+        WITH target_assets AS (
+            SELECT a.legacy_id
+            FROM app_asset_image ai
+            INNER JOIN app_asset a ON a.id = ai.asset_id
+            INNER JOIN app_project p ON p.id = a.project_id
+            WHERE p.owner_user_id = $1
+              AND ai.legacy_image_id = $2
+        ),
+        cancelled AS (
+            UPDATE app_generation_job j
+            SET status = 'cancelled',
+                result = COALESCE(j.result, '{}'::jsonb)
+                  || jsonb_build_object(
+                    'cancelled', true,
+                    'cancel_source', 'legacy.assets-generate.cancel-generate',
+                    'cancel_legacy_image_id', $2
+                  ),
+                updated_at = NOW()
+            WHERE j.owner_user_id = $1
+              AND j.status IN ('queued', 'running')
+              AND j.kind IN ($3, $4, $5, $6)
+              AND EXISTS (
+                SELECT 1
+                FROM target_assets t
+                WHERE (
+                  (j.payload ? 'asset_legacy_id')
+                  AND (j.payload->>'asset_legacy_id') ~ '^[0-9]+$'
+                  AND (j.payload->>'asset_legacy_id')::int = t.legacy_id
+                ) OR EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements(COALESCE(j.payload->'items', '[]'::jsonb)) it
+                  WHERE (it ? 'asset_legacy_id')
+                    AND (it->>'asset_legacy_id') ~ '^[0-9]+$'
+                    AND (it->>'asset_legacy_id')::int = t.legacy_id
+                )
+              )
+            RETURNING j.legacy_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
+        )
+        SELECT * FROM cancelled
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .bind(JOB_KIND_ASSET_GENERATE_IMAGE)
+    .bind(JOB_KIND_ASSET_POLISH_PROMPT)
+    .bind(JOB_KIND_ASSET_GENERATE_BATCH)
+    .bind(JOB_KIND_ASSET_POLISH_BATCH)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    for row in cancelled_jobs {
+        let text = crate::jobs::envelope_generation_job_updated(&row);
+        state.notify.broadcast_to_user(uid, text).await;
+    }
 
     Ok(JsonResponse(json!({ "message": "取消成功" })))
 }
