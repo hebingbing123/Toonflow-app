@@ -26,6 +26,7 @@ part 'novels_crud.dart';
 part 'novels_events.dart';
 part 'project_overview.dart';
 part 'project_manuals.dart';
+part 'prompts_api.dart';
 part 'projects_legacy.dart';
 part 'projects_legacy_compat.dart';
 part 'quality_reviews.dart';
