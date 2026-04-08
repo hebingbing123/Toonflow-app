@@ -5,7 +5,7 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{FromRow, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -277,71 +277,34 @@ async fn list_reviews(
     let limit = query.limit.unwrap_or(100).clamp(1, 500);
     let offset = query.offset.unwrap_or(0).max(0);
 
-    let reviews = if let Some(target_type) = &query.target_type {
-        if let Some(target_id) = &query.target_id {
-            sqlx::query_as::<_, QualityReview>(
-                "SELECT * FROM app_quality_review WHERE user_id = $1 AND target_type = $2 AND target_id = $3 ORDER BY created_at DESC LIMIT $4 OFFSET $5"
-            )
-            .bind(user_id)
-            .bind(target_type)
-            .bind(target_id)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(pool)
-            .await
-        } else if let Some(is_bad_case) = query.is_bad_case {
-            sqlx::query_as::<_, QualityReview>(
-                "SELECT * FROM app_quality_review WHERE user_id = $1 AND target_type = $2 AND is_bad_case = $3 ORDER BY created_at DESC LIMIT $4 OFFSET $5"
-            )
-            .bind(user_id)
-            .bind(target_type)
-            .bind(is_bad_case)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(pool)
-            .await
-        } else {
-            sqlx::query_as::<_, QualityReview>(
-                "SELECT * FROM app_quality_review WHERE user_id = $1 AND target_type = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-            )
-            .bind(user_id)
-            .bind(target_type)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(pool)
-            .await
-        }
-    } else if let Some(job_id) = query.job_id {
-        sqlx::query_as::<_, QualityReview>(
-            "SELECT * FROM app_quality_review WHERE user_id = $1 AND job_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-        )
-        .bind(user_id)
-        .bind(job_id)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
-    } else if let Some(is_bad_case) = query.is_bad_case {
-        sqlx::query_as::<_, QualityReview>(
-            "SELECT * FROM app_quality_review WHERE user_id = $1 AND is_bad_case = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-        )
-        .bind(user_id)
-        .bind(is_bad_case)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
-    } else {
-        sqlx::query_as::<_, QualityReview>(
-            "SELECT * FROM app_quality_review WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-        )
-        .bind(user_id)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
+    let mut qb = QueryBuilder::<Postgres>::new("SELECT * FROM app_quality_review WHERE user_id = ");
+    qb.push_bind(user_id);
+    if let Some(target_type) = &query.target_type {
+        qb.push(" AND target_type = ");
+        qb.push_bind(target_type);
     }
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if let Some(target_id) = &query.target_id {
+        qb.push(" AND target_id = ");
+        qb.push_bind(target_id);
+    }
+    if let Some(job_id) = query.job_id {
+        qb.push(" AND job_id = ");
+        qb.push_bind(job_id);
+    }
+    if let Some(is_bad_case) = query.is_bad_case {
+        qb.push(" AND is_bad_case = ");
+        qb.push_bind(is_bad_case);
+    }
+    qb.push(" ORDER BY created_at DESC LIMIT ");
+    qb.push_bind(limit);
+    qb.push(" OFFSET ");
+    qb.push_bind(offset);
+
+    let reviews = qb
+        .build_query_as::<QualityReview>()
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(reviews))
 }

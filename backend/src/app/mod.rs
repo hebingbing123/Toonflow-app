@@ -5940,6 +5940,56 @@ mod pg_contract_tests {
             .clone()
             .oneshot(
                 Request::builder()
+                    .uri(format!(
+                        "/api/v1/quality/reviews?jobId={quality_job_id}&targetType=asset&isBadCase=true"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, combined_filters) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "combined_filters={combined_filters}"
+        );
+        let combined_filters = combined_filters.as_array().expect("combined filter rows");
+        assert_eq!(combined_filters.len(), 1);
+        assert_eq!(
+            combined_filters[0]["id"].as_str(),
+            Some(asset_review_id_text.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!(
+                        "/api/v1/quality/reviews?targetId={script_target_id}&limit=1&offset=0"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, target_id_only) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "target_id_only={target_id_only}");
+        let target_id_only = target_id_only.as_array().expect("target id only rows");
+        assert_eq!(target_id_only.len(), 1);
+        assert_eq!(
+            target_id_only[0]["id"].as_str(),
+            Some(script_review_id_text.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
                     .uri(format!("/api/v1/quality/reviews/{script_review_id}"))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .extension(ConnectInfo(test_addr()))
