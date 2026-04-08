@@ -190,7 +190,7 @@ struct LegacyGetImageBody {
 struct LegacyUploadClipBody {
     project_id: i32,
     base64_data: String,
-    #[serde(default)]
+    #[serde(default, alias = "type")]
     asset_type: Option<String>,
     name: String,
 }
@@ -2333,5 +2333,15 @@ mod tests {
             ApiError::BadRequest(msg) => assert!(msg.contains("valid base64")),
             other => panic!("unexpected error: {other:?}"),
         }
+    }
+
+    #[test]
+    fn upload_clip_body_accepts_legacy_type_key() {
+        let body: LegacyUploadClipBody = serde_json::from_str(
+            r#"{"projectId":1,"base64Data":"AA==","type":"clip","name":"demo"}"#,
+        )
+        .unwrap();
+        assert_eq!(body.project_id, 1);
+        assert_eq!(body.asset_type.as_deref(), Some("clip"));
     }
 }

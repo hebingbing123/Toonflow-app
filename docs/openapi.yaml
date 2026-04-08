@@ -11096,10 +11096,12 @@ components:
           description: Raw base64 or data URI with **`;base64`** payload.
         type:
           type: string
+          enum: [clip]
           default: clip
           description: Only **`clip`** is accepted in current Rust parity implementation.
         name:
           type: string
+          minLength: 1
 
     LegacyAssetsUploadClipResponse:
       type: object
