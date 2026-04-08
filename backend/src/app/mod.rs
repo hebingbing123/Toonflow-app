@@ -2565,6 +2565,30 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn billing_webhook_events_rejects_event_created_from_after_to() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer(
+            "/api/v1/webhooks/billing/events?event_created_from=2026-04-30T23:59:59Z&event_created_to=2026-04-01T00:00:00Z",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn billing_webhook_events_rejects_created_from_after_to() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = get_json_bearer(
+            "/api/v1/webhooks/billing/events?created_from=2026-04-30T23:59:59Z&created_to=2026-04-01T00:00:00Z",
+            &token,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn billing_webhook_events_rejects_id_min_greater_than_id_max() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =

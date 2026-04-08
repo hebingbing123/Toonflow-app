@@ -139,6 +139,22 @@ fn parse_sort(raw: Option<&str>) -> Result<&'static str, ApiError> {
     }
 }
 
+fn validate_time_range(
+    from: Option<DateTime<Utc>>,
+    to: Option<DateTime<Utc>>,
+    from_field: &str,
+    to_field: &str,
+) -> Result<(), ApiError> {
+    if let (Some(from), Some(to)) = (from, to) {
+        if from > to {
+            return Err(ApiError::BadRequest(format!(
+                "{from_field} must be less than or equal to {to_field}"
+            )));
+        }
+    }
+    Ok(())
+}
+
 async fn list_billing_webhook_events(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -195,6 +211,13 @@ async fn list_billing_webhook_events(
         .as_deref()
         .map(|s| parse_query_ts(s, "created_to"))
         .transpose()?;
+    validate_time_range(
+        event_created_from,
+        event_created_to,
+        "event_created_from",
+        "event_created_to",
+    )?;
+    validate_time_range(created_from, created_to, "created_from", "created_to")?;
     let id_min = q.id_min;
     let id_max = q.id_max;
     if let (Some(min), Some(max)) = (id_min, id_max) {
