@@ -12,6 +12,7 @@ import 'rust_api.dart';
 
 part 'home_page/project_editor.dart';
 part 'home_page/project_editor_legacy_probes.dart';
+part 'home_page/project_editor_assets_images_probe.dart';
 part 'home_page/project_editor_novels_rest_probe.dart';
 part 'home_page/project_editor_novels_legacy_probe.dart';
 part 'home_page/project_editor_novel_events_probe.dart';
