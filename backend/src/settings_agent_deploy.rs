@@ -1,14 +1,18 @@
 //! Legacy **`/api/setting/agentDeploy/*`**: SQLite **`o_agentDeploy`** + vendor join; local key writes.
-//! SaaS: **POST …/list** returns the same **default rows** as **`initDB`** (no DB); **deploy-model** / **set-key** respond **501** (no persistence / no API keys over HTTP).
+//! SaaS keeps the four static rows from **`initDB`**, but persists per-user model selection in
+//! **`app_user_profile.agent_deploy_config`**. Keys still do not travel over HTTP; **`set-key`**
+//! is an explicit no-op success so clients can stop treating it as a broken endpoint.
 
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
-    response::Response,
     routing::post,
     Router,
 };
 use serde::{Deserialize, Serialize};
+use sqlx::types::Json as SqlxJson;
+use std::collections::HashMap;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -31,6 +35,35 @@ struct AgentDeployListItem {
     disabled: bool,
     /// Legacy join **`o_vendorConfig.icon`**; stub empty.
     icon: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct AgentDeployConfigItem {
+    model: String,
+    model_name: String,
+    #[serde(default)]
+    vendor_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct AgentDeployConfig {
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    rows: HashMap<String, AgentDeployConfigItem>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AgentDeploySavedResponse {
+    key: String,
+    message: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AgentDeployKeyIgnoredResponse {
+    message: &'static str,
 }
 
 fn static_agent_deploy_list() -> Vec<AgentDeployListItem> {
@@ -82,16 +115,70 @@ fn static_agent_deploy_list() -> Vec<AgentDeployListItem> {
     ]
 }
 
+fn static_agent_deploy_item_by_id(id: i32) -> Option<AgentDeployListItem> {
+    static_agent_deploy_list()
+        .into_iter()
+        .find(|item| item.id == id)
+}
+
+async fn load_agent_deploy_config(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+) -> Result<AgentDeployConfig, ApiError> {
+    let row: Option<SqlxJson<AgentDeployConfig>> = sqlx::query_scalar(
+        r#"
+        SELECT agent_deploy_config FROM app_user_profile WHERE user_id = $1
+        "#,
+    )
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(row.map(|j| j.0).unwrap_or_default())
+}
+
+async fn save_agent_deploy_config(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    cfg: &AgentDeployConfig,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        INSERT INTO app_user_profile (user_id, agent_deploy_config, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (user_id) DO UPDATE
+        SET agent_deploy_config = EXCLUDED.agent_deploy_config,
+            updated_at = NOW()
+        "#,
+    )
+    .bind(uid)
+    .bind(SqlxJson(cfg))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 async fn post_agent_deploy_list(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(_body): Json<AgentDeployListBody>,
 ) -> Result<Json<Vec<AgentDeployListItem>>, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    Ok(Json(static_agent_deploy_list()))
+    let uid = require_user_uuid(&state, &headers)?;
+    let mut rows = static_agent_deploy_list();
+    if let Some(pool) = state.pool.as_ref() {
+        let cfg = load_agent_deploy_config(pool, uid).await?;
+        for row in &mut rows {
+            if let Some(saved) = cfg.rows.get(&row.key) {
+                row.model = saved.model.clone();
+                row.model_name = saved.model_name.clone();
+                row.vendor_id = saved.vendor_id.clone();
+            }
+        }
+    }
+    Ok(Json(rows))
 }
 
-#[allow(dead_code)] // Deserialize-only until agent deploy persistence exists.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct DeployAgentModelBody {
@@ -108,12 +195,38 @@ async fn post_deploy_agent_model(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeployAgentModelBody>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    let _ = body;
-    Err(ApiError::NotImplemented(
-        "persisting agent deploy rows is not implemented; use server LLM env and Harness".into(),
-    ))
+) -> Result<Json<AgentDeploySavedResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let item = static_agent_deploy_item_by_id(body.id).ok_or_else(|| {
+        ApiError::BadRequest(format!(
+            "agent deploy row {} is not a built-in option",
+            body.id
+        ))
+    })?;
+    if body.name.trim().is_empty() || body.desc.trim().is_empty() {
+        return Err(ApiError::BadRequest(
+            "name and desc must be non-empty".into(),
+        ));
+    }
+
+    let mut cfg = load_agent_deploy_config(pool, uid).await?;
+    cfg.rows.insert(
+        item.key.clone(),
+        AgentDeployConfigItem {
+            model: body.model,
+            model_name: body.model_name,
+            vendor_id: body.vendor_id,
+        },
+    );
+    save_agent_deploy_config(pool, uid, &cfg).await?;
+    Ok(Json(AgentDeploySavedResponse {
+        key: item.key,
+        message: "保存成功",
+    }))
 }
 
 #[allow(dead_code)] // Deserialize-only; keys are not accepted over HTTP.
@@ -128,13 +241,12 @@ async fn post_agent_set_key(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AgentSetKeyBody>,
-) -> Result<Response, ApiError> {
+) -> Result<Json<AgentDeployKeyIgnoredResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let _ = body;
-    Err(ApiError::NotImplemented(
-        "setting vendor API keys over HTTP is not supported; configure OPENAI_API_KEY / LLM keys on the server"
-            .into(),
-    ))
+    Ok(Json(AgentDeployKeyIgnoredResponse {
+        message: "未通过 HTTP 保存密钥；请在服务端环境变量或密钥管理中配置",
+    }))
 }
 
 pub fn router() -> Router<AppState> {
@@ -247,6 +359,12 @@ mod tests {
     }
 
     #[test]
+    fn static_agent_deploy_item_by_id_matches_key() {
+        let item = static_agent_deploy_item_by_id(1).expect("row 1");
+        assert_eq!(item.key, "scriptAgent");
+    }
+
+    #[test]
     fn agent_deploy_list_item_serialize() {
         let item = AgentDeployListItem {
             id: 1,
@@ -264,5 +382,21 @@ mod tests {
         assert!(json.contains("\"key\":\"scriptAgent\""));
         assert!(json.contains("\"name\":\"Script Agent\""));
         assert!(json.contains("\"disabled\":false"));
+    }
+
+    #[test]
+    fn agent_deploy_config_roundtrip_serialize() {
+        let mut cfg = AgentDeployConfig::default();
+        cfg.rows.insert(
+            "scriptAgent".into(),
+            AgentDeployConfigItem {
+                model: "gpt-4.1".into(),
+                model_name: "GPT-4.1".into(),
+                vendor_id: Some("openai".into()),
+            },
+        );
+        let v = serde_json::to_value(&cfg).unwrap();
+        assert_eq!(v["rows"]["scriptAgent"]["model"], "gpt-4.1");
+        assert_eq!(v["rows"]["scriptAgent"]["vendorId"], "openai");
     }
 }

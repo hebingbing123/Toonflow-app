@@ -63,7 +63,7 @@ Future<List<AgentDeployListItemV1>> postAgentDeployListV1(
       .toList();
 }
 
-/// `POST /api/v1/settings/agent-deploy/deploy-model` — OpenAPI `postSettingsAgentDeployModelV1` (typically **501**).
+/// `POST /api/v1/settings/agent-deploy/deploy-model` — OpenAPI `postSettingsAgentDeployModelV1` (**200** with DB, **503** without DB).
 Future<int> postSettingsAgentDeployModelV1(
   String accessToken, {
   required int id,
@@ -96,7 +96,7 @@ Future<int> postSettingsAgentDeployModelV1(
   return res.statusCode;
 }
 
-/// `POST /api/v1/settings/agent-deploy/set-key` — OpenAPI `postSettingsAgentDeploySetKeyV1` (typically **501**).
+/// `POST /api/v1/settings/agent-deploy/set-key` — OpenAPI `postSettingsAgentDeploySetKeyV1` (always **200** no-op).
 Future<int> postSettingsAgentDeploySetKeyV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/settings/agent-deploy/set-key');
   final res = await http

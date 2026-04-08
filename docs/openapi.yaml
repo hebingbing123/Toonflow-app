@@ -40,7 +40,7 @@ info:
 
     **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS exposes **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** with body **`{}`** only, then **501** **`not_implemented`** — no bulk wipe endpoint (use Supabase / ops).
 
-    **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`** (static, no Postgres). **`POST …/deploy-model`** and **`POST …/set-key`** validate bodies then **501** (no per-user deploy table / no API keys over HTTP).
+    **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`**, overlaid with per-user model selection from **`app_user_profile.agent_deploy_config`** when Postgres is configured. **`POST …/deploy-model`** persists model / vendor choice for one of the four rows. **`POST …/set-key`** is a safe **200** no-op: keys are still server-side only.
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
@@ -1171,10 +1171,10 @@ paths:
   /api/v1/settings/agent-deploy/list:
     post:
       tags: [settings]
-      summary: List default agent deploy rows (static)
+      summary: List agent deploy rows with user overlay
       operationId: postSettingsAgentDeployListV1
       description: |
-        Bearer JWT. Body must be **`{}`** (no extra keys). Returns the four **`initDB`** **`o_agentDeploy`** defaults (**`scriptAgent`**, **`productionAgent`**, **`universalAi`**, **`ttsDubbing`**) with empty **`model`/`modelName`**, **`icon`** always **`""`** (no SQLite join).
+        Bearer JWT. Body must be **`{}`** (no extra keys). Returns the four **`initDB`** **`o_agentDeploy`** rows (**`scriptAgent`**, **`productionAgent`**, **`universalAi`**, **`ttsDubbing`**) with **`icon`** always **`""`** (no SQLite join). When Postgres is configured, **`model`**, **`modelName`**, and **`vendorId`** are overlaid from **`app_user_profile.agent_deploy_config`** for the current user.
       security:
         - bearerAuth: []
       requestBody:
@@ -1214,10 +1214,10 @@ paths:
   /api/v1/settings/agent-deploy/deploy-model:
     post:
       tags: [settings]
-      summary: Update agent deploy row (not persisted)
+      summary: Update agent deploy row
       operationId: postSettingsAgentDeployModelV1
       description: |
-        Bearer JWT. Validates legacy **`deployAgentModel`** body, then **501** **`not_implemented`**.
+        Bearer JWT. Validates legacy **`deployAgentModel`** body, maps **`id`** to one of the four built-in agent rows, and persists **`model`** / **`modelName`** / **`vendorId`** into **`app_user_profile.agent_deploy_config`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -1227,26 +1227,26 @@ paths:
             schema:
               $ref: "#/components/schemas/DeployAgentModelBody"
       responses:
-        "400":
-          description: Bad JSON or unknown fields
+        "200":
+          description: Saved
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorBody"
+                $ref: "#/components/schemas/AgentDeploySavedResponse"
         "401":
           description: Missing or invalid Bearer token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Not persisted on this API
+        "400":
+          description: Bad JSON, unknown fields, or unknown built-in agent deploy row id
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
-          description: Auth not configured
+          description: Auth not configured or database unset
           content:
             application/json:
               schema:
@@ -1255,10 +1255,10 @@ paths:
   /api/v1/settings/agent-deploy/set-key:
     post:
       tags: [settings]
-      summary: Set vendor API key (not supported)
+      summary: Ignore vendor API key body and confirm server-side policy
       operationId: postSettingsAgentDeploySetKeyV1
       description: |
-        Bearer JWT. Optional **`key`** in body (legacy **`agentSetKey`**). Always **501** **`not_implemented`**: API keys are not accepted over HTTP.
+        Bearer JWT. Optional **`key`** in body (legacy **`agentSetKey`**). Always **200** with a message explaining that API keys are not accepted over HTTP and must stay in server-side env or secret management.
       security:
         - bearerAuth: []
       requestBody:
@@ -1268,6 +1268,12 @@ paths:
             schema:
               $ref: "#/components/schemas/AgentSetKeyBody"
       responses:
+        "200":
+          description: Accepted but ignored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDeployKeyIgnoredResponse"
         "400":
           description: Unknown fields in body
           content:
@@ -1276,12 +1282,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Keys must be configured server-side
           content:
             application/json:
               schema:
@@ -8595,7 +8595,26 @@ components:
       properties:
         key:
           type: string
-          description: Optional legacy field; never persisted on this API
+          description: Optional legacy field; accepted for compatibility but ignored
+
+    AgentDeploySavedResponse:
+      type: object
+      required: [key, message]
+      properties:
+        key:
+          type: string
+          description: Built-in agent key that was updated
+        message:
+          type: string
+          description: Confirmation message
+
+    AgentDeployKeyIgnoredResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Explains that keys must remain server-side
 
     ScriptAgentTypeV1:
       type: string

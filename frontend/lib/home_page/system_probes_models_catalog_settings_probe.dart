@@ -85,7 +85,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
     _expectProbeStatus(
       label: 'POST settings/agent-deploy/deploy-model',
       status: deployModel,
-      accepted: const [501],
+      accepted: const [200, 503],
     );
     statuses['deploy-model'] = deployModel;
 
@@ -93,7 +93,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
     _expectProbeStatus(
       label: 'POST settings/agent-deploy/set-key',
       status: setKey,
-      accepted: const [501],
+      accepted: const [200],
     );
     statuses['set-key'] = setKey;
 
