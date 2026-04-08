@@ -26,6 +26,7 @@ part 'home_page/project_editor_novel_events_actions.dart';
 part 'home_page/project_editor_novel_events_probe.dart';
 part 'home_page/project_editor_novels.dart';
 part 'home_page/project_editor_assets.dart';
+part 'home_page/project_editor_dialog_basics.dart';
 part 'home_page/project_editor_dialog_state.dart';
 part 'home_page/project_editor_dialog_actions.dart';
 part 'home_page/project_editor_dialog_content.dart';
