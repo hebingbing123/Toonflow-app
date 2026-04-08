@@ -1,5 +1,34 @@
 part of 'index.dart';
 
+/// `POST /api/v1/assets/get-image` — legacy asset image bundle by **`assetsId`**.
+Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
+  String accessToken,
+  int assetLegacyId,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/get-image');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'assetsId': assetLegacyId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return LegacyAssetGetImageResponse.fromJson(map);
+}
+
 /// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `listProjectAssetImagesByLegacyIdsV1`.
 Future<ListAssetImagesResponse> fetchProjectAssetImagesByLegacyIds(
   String accessToken,

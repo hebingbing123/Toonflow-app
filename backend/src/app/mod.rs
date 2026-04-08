@@ -1725,6 +1725,31 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_get_image_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/assets/get-image", r#"{"assetsId":1}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn assets_get_image_rejects_non_positive_assets_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/assets/get-image", &token, r#"{"assetsId":0}"#).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_get_image_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            post_json_bearer("/api/v1/assets/get-image", &token, r#"{"assetsId":1}"#).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_assets_list_pagination_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -4655,6 +4680,38 @@ mod pg_contract_tests {
             lim[0]["legacy_image_id"].is_null(),
             "API-created image has no legacy_image_id"
         );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/assets/get-image")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"assetsId":{asset_leg}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, legacy_get_image) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "legacy_get_image={legacy_get_image}"
+        );
+        assert_eq!(legacy_get_image["id"].as_i64(), Some(i64::from(asset_leg)));
+        assert!(legacy_get_image["imageId"].is_null());
+        let legacy_temp = legacy_get_image["tempAssets"]
+            .as_array()
+            .expect("legacy get-image tempAssets");
+        assert_eq!(legacy_temp.len(), 1);
+        assert_eq!(
+            legacy_temp[0]["assetsId"].as_i64(),
+            Some(i64::from(asset_leg))
+        );
+        assert_eq!(legacy_temp[0]["selected"], false);
 
         let res = app
             .clone()

@@ -176,8 +176,44 @@ struct AssetImageFileSource {
     metadata: SqlxJson<Value>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyGetImageBody {
+    assets_id: i32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyGetImageTempAssetItem {
+    id: Option<i32>,
+    image_uuid: Uuid,
+    file_path: String,
+    assets_id: i32,
+    #[serde(rename = "type")]
+    asset_type: String,
+    state: Option<String>,
+    selected: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyGetImageResponse {
+    id: i32,
+    image_id: Option<i32>,
+    temp_assets: Vec<LegacyGetImageTempAssetItem>,
+}
+
+#[derive(Debug, FromRow)]
+struct LegacyGetImageAssetRow {
+    id: Uuid,
+    legacy_id: i32,
+    asset_type: String,
+    metadata: SqlxJson<Value>,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/assets/get-image", post(post_legacy_get_image))
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets",
             get(list_project_assets).post(create_project_asset),
@@ -210,6 +246,74 @@ pub fn router() -> Router<AppState> {
             "/api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
             put(link_script_to_asset).delete(unlink_script_from_asset),
         )
+}
+
+async fn post_legacy_get_image(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyGetImageBody>,
+) -> Result<Json<LegacyGetImageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.assets_id <= 0 {
+        return Err(ApiError::BadRequest("assetsId must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let asset = sqlx::query_as::<_, LegacyGetImageAssetRow>(
+        r#"
+        SELECT a.id, a.legacy_id, a.asset_type, a.metadata
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.owner_user_id = $1
+          AND a.legacy_id = $2
+        ORDER BY a.created_at DESC
+        LIMIT 1
+        "#,
+    )
+    .bind(uid)
+    .bind(body.assets_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let image_id = metadata_cover_legacy_image_id(&asset.metadata.0);
+
+    let rows: Vec<AssetImageRow> = sqlx::query_as(
+        r#"
+        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        FROM app_asset_image
+        WHERE asset_id = $1
+        ORDER BY sort_index ASC, created_at ASC, id ASC
+        "#,
+    )
+    .bind(asset.id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let temp_assets = rows
+        .into_iter()
+        .map(|row| LegacyGetImageTempAssetItem {
+            id: row.legacy_image_id,
+            image_uuid: row.id,
+            file_path: row.file_path.unwrap_or_default(),
+            assets_id: asset.legacy_id,
+            asset_type: asset.asset_type.clone(),
+            state: row.state,
+            selected: image_id.is_some_and(|x| row.legacy_image_id == Some(x)),
+        })
+        .collect();
+
+    Ok(Json(LegacyGetImageResponse {
+        id: asset.legacy_id,
+        image_id,
+        temp_assets,
+    }))
 }
 
 /// Resolves **`app_script.id`** and **`app_asset.id`** when both belong to the same owned project.

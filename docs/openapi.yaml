@@ -2464,6 +2464,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/assets/get-image:
+    post:
+      tags: [assets]
+      summary: Legacy — load one asset image bundle by legacy asset id
+      operationId: postAssetsGetImageV1
+      description: |
+        Parity with old **`POST /api/assets/getImage`**.
+        Body **`assetsId`** is **`app_asset.legacy_id`** (must belong to current user). Response returns:
+        - **`id`**: same legacy asset id
+        - **`imageId`**: **`app_asset.metadata.imageId`** when set
+        - **`tempAssets`**: image history rows from **`app_asset_image`** with legacy selection flag.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyAssetsGetImageBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyAssetsGetImageResponse"
+        "400":
+          description: Invalid assetsId
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Asset legacy id not found for caller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/assets:
     post:
       tags: [assets]
@@ -10606,6 +10657,60 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AssetImageListItem"
+
+    LegacyAssetsGetImageBody:
+      type: object
+      additionalProperties: false
+      required: [assetsId]
+      properties:
+        assetsId:
+          type: integer
+          format: int32
+
+    LegacyAssetsGetImageTempAsset:
+      type: object
+      required: [imageUuid, filePath, assetsId, type, selected]
+      properties:
+        id:
+          type: integer
+          format: int32
+          nullable: true
+          description: app_asset_image.legacy_image_id (null for API-created rows without legacy id)
+        imageUuid:
+          type: string
+          format: uuid
+        filePath:
+          type: string
+          description: Stored app_asset_image.file_path; may be URL, API path, or empty string.
+        assetsId:
+          type: integer
+          format: int32
+        type:
+          type: string
+          enum: [role, tool, scene]
+        state:
+          type: string
+          nullable: true
+        selected:
+          type: boolean
+
+    LegacyAssetsGetImageResponse:
+      type: object
+      required: [id, tempAssets]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_asset.legacy_id
+        imageId:
+          type: integer
+          format: int32
+          nullable: true
+          description: app_asset.metadata.imageId
+        tempAssets:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyAssetsGetImageTempAsset"
 
     AssetImageListItem:
       allOf:

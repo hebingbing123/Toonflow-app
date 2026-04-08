@@ -171,6 +171,67 @@ class ListAssetImagesResponse {
   }
 }
 
+/// One item in legacy **`POST /api/v1/assets/get-image`** response **`tempAssets`**.
+class LegacyAssetGetImageTempAsset {
+  const LegacyAssetGetImageTempAsset({
+    this.legacyImageId,
+    required this.imageUuid,
+    required this.filePath,
+    required this.assetsId,
+    required this.assetType,
+    this.state,
+    required this.selected,
+  });
+
+  final int? legacyImageId;
+  final String imageUuid;
+  final String filePath;
+  final int assetsId;
+  final String assetType;
+  final String? state;
+  final bool selected;
+
+  factory LegacyAssetGetImageTempAsset.fromJson(Map<String, dynamic> json) {
+    return LegacyAssetGetImageTempAsset(
+      legacyImageId: (json['id'] as num?)?.toInt(),
+      imageUuid: json['imageUuid'] as String? ?? '',
+      filePath: json['filePath'] as String? ?? '',
+      assetsId: (json['assetsId'] as num).toInt(),
+      assetType: json['type'] as String? ?? '',
+      state: json['state'] as String?,
+      selected: json['selected'] as bool? ?? false,
+    );
+  }
+}
+
+/// Body of legacy **`POST /api/v1/assets/get-image`**.
+class LegacyAssetGetImageResponse {
+  const LegacyAssetGetImageResponse({
+    required this.id,
+    this.imageId,
+    required this.tempAssets,
+  });
+
+  final int id;
+  final int? imageId;
+  final List<LegacyAssetGetImageTempAsset> tempAssets;
+
+  factory LegacyAssetGetImageResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['tempAssets'] as List<dynamic>? ?? const [];
+    return LegacyAssetGetImageResponse(
+      id: (json['id'] as num).toInt(),
+      imageId: (json['imageId'] as num?)?.toInt(),
+      tempAssets: raw
+          .map(
+            (e) => LegacyAssetGetImageTempAsset.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
 /// OpenAPI **`CornerScapeResponse`**.
 class CornerScapeResponse {
   const CornerScapeResponse({required this.items});
