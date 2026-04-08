@@ -133,16 +133,25 @@ fn parse_timestamp_string(raw: &str) -> Option<DateTime<Utc>> {
         return Some(dt.with_timezone(&Utc));
     }
     if let Ok(ts) = raw.parse::<i64>() {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
+        return unix_timestamp_to_utc(ts);
     }
     NaiveDateTime::parse_from_str(raw, "%Y-%m-%d %H:%M:%S")
         .ok()
         .map(|ndt| ndt.and_utc())
 }
 
+fn unix_timestamp_to_utc(ts: i64) -> Option<DateTime<Utc>> {
+    // Accept both seconds and milliseconds (common in webhook payloads).
+    if ts.abs() >= 1_000_000_000_000 {
+        DateTime::<Utc>::from_timestamp_millis(ts)
+    } else {
+        DateTime::<Utc>::from_timestamp(ts, 0)
+    }
+}
+
 fn parse_event_datetime(v: &Value, key: &str) -> Option<DateTime<Utc>> {
     if let Some(ts) = v.get(key).and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
+        return unix_timestamp_to_utc(ts);
     }
     v.get(key)
         .and_then(Value::as_str)
@@ -579,6 +588,13 @@ mod tests {
         let v = json!({ "timestamp": "1800000002" });
         let got = parse_event_created_at(&v).expect("timestamp string should parse");
         assert_eq!(got.timestamp(), 1_800_000_002_i64);
+    }
+
+    #[test]
+    fn parse_event_created_at_accepts_millis_timestamp() {
+        let v = json!({ "event_created_at": 1_800_000_003_456_i64 });
+        let got = parse_event_created_at(&v).expect("event_created_at millis should parse");
+        assert_eq!(got.timestamp_millis(), 1_800_000_003_456_i64);
     }
 
     #[test]

@@ -261,16 +261,25 @@ fn parse_timestamp_string(raw: &str) -> Option<DateTime<Utc>> {
         return Some(dt.with_timezone(&Utc));
     }
     if let Ok(ts) = raw.parse::<i64>() {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
+        return unix_timestamp_to_utc(ts);
     }
     NaiveDateTime::parse_from_str(raw, "%Y-%m-%d %H:%M:%S")
         .ok()
         .map(|ndt| ndt.and_utc())
 }
 
+fn unix_timestamp_to_utc(ts: i64) -> Option<DateTime<Utc>> {
+    // Accept both seconds and milliseconds (common in webhook payloads).
+    if ts.abs() >= 1_000_000_000_000 {
+        DateTime::<Utc>::from_timestamp_millis(ts)
+    } else {
+        DateTime::<Utc>::from_timestamp(ts, 0)
+    }
+}
+
 fn parse_event_datetime(v: &Value, key: &str) -> Option<DateTime<Utc>> {
     if let Some(ts) = v.get(key).and_then(Value::as_i64) {
-        return DateTime::<Utc>::from_timestamp(ts, 0);
+        return unix_timestamp_to_utc(ts);
     }
     v.get(key)
         .and_then(Value::as_str)
@@ -360,11 +369,7 @@ fn derive_from_alipay(v: &Value) -> ProviderDerivedFields {
         .map(ToOwned::to_owned)
         .or_else(|| fallback_status.map(ToOwned::to_owned));
 
-    let subscription_status_updated_at = v
-        .get("notify_time")
-        .and_then(Value::as_i64)
-        .and_then(|ts| DateTime::<Utc>::from_timestamp(ts, 0))
-        .or_else(|| parse_event_datetime(v, "notify_time"))
+    let subscription_status_updated_at = parse_event_datetime(v, "notify_time")
         .or_else(|| parse_event_datetime(v, "gmt_payment"))
         .or_else(|| parse_event_datetime(v, "gmt_create"))
         .or_else(|| parse_event_datetime(v, "gmt_close"));
@@ -1070,5 +1075,17 @@ mod tests {
             d.status_confidence,
             Some(ProviderStatusConfidence::EventFallback)
         );
+    }
+
+    #[test]
+    fn derive_alipay_notify_time_accepts_millis_timestamp() {
+        let v = json!({
+            "billing_provider": "alipay",
+            "notify_time": 1_800_000_000_123_i64
+        });
+        let got = derive_from_provider(&v)
+            .subscription_status_updated_at
+            .expect("notify_time millis should parse");
+        assert_eq!(got.timestamp_millis(), 1_800_000_000_123_i64);
     }
 }

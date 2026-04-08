@@ -228,7 +228,7 @@ paths:
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
         `trade_status` / (`type` or fallback `event_type` / `event` / `name` / `notify_type`) / `notify_time`.
-        Alipay time values accept RFC3339, unix timestamp, and legacy datetime format `YYYY-MM-DD HH:MM:SS`.
+        Alipay time values accept RFC3339, unix timestamp (seconds or milliseconds), and legacy datetime format `YYYY-MM-DD HH:MM:SS`.
         Non-state Alipay events in the informational whitelist (currently `trade.finished`)
         are treated as informational only.
         For Paddle payloads, server supports baseline mapping from:
@@ -297,7 +297,7 @@ paths:
                   type: string
                   description: Optional event type fallback key (legacy provider naming).
                 event_created_at:
-                  description: Optional canonical event timestamp fallback (Unix seconds, RFC3339, or `YYYY-MM-DD HH:MM:SS`).
+                  description: Optional canonical event timestamp fallback (Unix seconds/milliseconds, RFC3339, or `YYYY-MM-DD HH:MM:SS`).
                   oneOf:
                     - type: integer
                       format: int64
@@ -319,13 +319,13 @@ paths:
                   type: string
                   description: Optional normalized subscription state (`free|trialing|active|past_due|unpaid|canceled|incomplete|incomplete_expired`).
                 subscription_current_period_end:
-                  description: Optional subscription period end timestamp (Unix seconds or RFC3339 string).
+                  description: Optional subscription period end timestamp (Unix seconds/milliseconds or RFC3339 string).
                   oneOf:
                     - type: integer
                       format: int64
                     - type: string
                 subscription_status_updated_at:
-                  description: Optional provider event timestamp used for out-of-order protection (Unix seconds or RFC3339 string).
+                  description: Optional provider event timestamp used for out-of-order protection (Unix seconds/milliseconds or RFC3339 string).
                   oneOf:
                     - type: integer
                       format: int64
