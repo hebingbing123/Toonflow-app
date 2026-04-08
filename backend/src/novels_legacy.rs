@@ -1,13 +1,14 @@
 //! Legacy **`/api/novel/*`** read/delete and paginated CRUD-shaped **`POST`** routes under **`/api/v1/novels/*`**.
 //! **`id`** / **`projectId`** refer to **`app_novel.legacy_id`** / **`app_project.legacy_id`**.
 
+mod extraction;
+
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
     routing::post,
     Json as JsonResponse, Router,
 };
-use futures_util::stream::{self, StreamExt};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder};
@@ -15,20 +16,15 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::llm::{chat_completion_assistant_text, LlmConfig};
 use crate::novels::NovelRow;
 use crate::state::AppState;
+use extraction::{resolve_event_extraction_prompt, run_novel_event_extraction_task};
 
 const MAX_BATCH_DELETE_NOVELS: usize = 500;
 const MAX_ADD_NOVEL_BATCH: usize = 200;
 const MAX_GET_NOVEL_LIMIT: i64 = 200;
 const ADV_LOCK_NOVEL_LEGACY: i64 = 884_422_006;
 const DEFAULT_GENERATE_EVENTS_CONCURRENCY: usize = 5;
-const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
-const DEFAULT_EVENT_EXTRACTION_PROMPT: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/data/prompt_defaults/eventExtraction.txt"
-));
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -166,12 +162,12 @@ struct GenerateNovelEventsBody {
 }
 
 #[derive(Debug, Clone, FromRow)]
-struct NovelEventExtractionRow {
-    id: Uuid,
-    chapter_index: i32,
-    reel: Option<String>,
-    chapter: String,
-    chapter_data: String,
+pub(super) struct NovelEventExtractionRow {
+    pub(super) id: Uuid,
+    pub(super) chapter_index: i32,
+    pub(super) reel: Option<String>,
+    pub(super) chapter: String,
+    pub(super) chapter_data: String,
 }
 
 fn search_ilike(raw: Option<String>) -> Option<String> {
@@ -648,110 +644,6 @@ async fn post_update_novel(
     Ok(JsonResponse(NovelOkMessageResponse {
         message: "更新原文成功",
     }))
-}
-
-async fn resolve_event_extraction_prompt(pool: &PgPool, uid: Uuid) -> Result<String, ApiError> {
-    let row: Option<String> = sqlx::query_scalar(
-        r#"
-        SELECT body
-        FROM app_user_prompt
-        WHERE owner_user_id = $1 AND legacy_id = 1
-        "#,
-    )
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(row
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| DEFAULT_EVENT_EXTRACTION_PROMPT.to_string()))
-}
-
-async fn mark_novel_event_extraction_result(
-    pool: &PgPool,
-    novel_id: Uuid,
-    event: Option<&str>,
-    event_state: i32,
-    error_reason: Option<&str>,
-) {
-    let _ = sqlx::query(
-        r#"
-        UPDATE app_novel
-        SET event = $1, event_state = $2, error_reason = $3, updated_at = NOW()
-        WHERE id = $4
-        "#,
-    )
-    .bind(event)
-    .bind(event_state)
-    .bind(error_reason)
-    .bind(novel_id)
-    .execute(pool)
-    .await;
-}
-
-async fn run_novel_event_extraction_task(
-    pool: PgPool,
-    llm: Option<LlmConfig>,
-    http_client: reqwest::Client,
-    prompt: String,
-    novels: Vec<NovelEventExtractionRow>,
-    concurrency: usize,
-) {
-    let Some(cfg) = llm else {
-        for novel in novels {
-            mark_novel_event_extraction_result(
-                &pool,
-                novel.id,
-                None,
-                -1,
-                Some("llm_not_configured"),
-            )
-            .await;
-        }
-        return;
-    };
-
-    let concurrency = concurrency.clamp(1, MAX_GENERATE_EVENTS_CONCURRENCY);
-
-    stream::iter(novels)
-        .for_each_concurrent(concurrency, |novel| {
-            let pool = pool.clone();
-            let http_client = http_client.clone();
-            let cfg = cfg.clone();
-            let prompt = prompt.clone();
-            async move {
-                let user_content = format!(
-                    "请根据以下小说章节数：{}小说章节券：{}小说章节名称：{}、小说章节内容生成事件摘要：\n{}",
-                    novel.chapter_index,
-                    novel.reel.as_deref().unwrap_or_default(),
-                    novel.chapter,
-                    novel.chapter_data
-                );
-                let messages = vec![
-                    serde_json::json!({"role":"system","content": prompt}),
-                    serde_json::json!({"role":"user","content": user_content}),
-                ];
-                match chat_completion_assistant_text(&cfg, &http_client, messages).await {
-                    Ok(text) => {
-                        mark_novel_event_extraction_result(&pool, novel.id, Some(&text), 1, None)
-                            .await;
-                    }
-                    Err(err) => {
-                        mark_novel_event_extraction_result(
-                            &pool,
-                            novel.id,
-                            None,
-                            -1,
-                            Some(&err),
-                        )
-                        .await;
-                    }
-                }
-            }
-        })
-        .await;
 }
 
 async fn post_generate_novel_events(
