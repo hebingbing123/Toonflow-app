@@ -9,7 +9,6 @@ import 'core.dart';
 export 'core.dart';
 export 'production.dart';
 
-part 'catalog_memory.dart';
 part 'art_styles.dart';
 part 'agent_memory_api.dart';
 part 'assets_api.dart';
@@ -33,6 +32,7 @@ part 'quality_reviews.dart';
 part 'scripts_api.dart';
 part 'scripts_storyboards_models.dart';
 part 'script_agent.dart';
+part 'skills_binary_api.dart';
 part 'skills_api.dart';
 part 'settings_about_danger.dart';
 part 'settings_agent_deploy.dart';
@@ -40,6 +40,7 @@ part 'settings_vendors_mutations.dart';
 part 'status_and_auth.dart';
 part 'storyboards_api.dart';
 part 'tasks_legacy.dart';
+part 'usage_api.dart';
 part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
