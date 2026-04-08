@@ -94,21 +94,24 @@ fn build_provider_event_id(provider: Option<&str>, raw_id: &str) -> String {
 }
 
 fn parse_raw_event_id(v: &Value) -> Option<String> {
-    for key in ["id", "event_id", "eventId", "notify_id"] {
-        let id = v
+    for key in ["id", "event_id", "eventId", "notify_id", "notifyId"] {
+        if let Some(id) = v
             .get(key)
             .and_then(Value::as_str)
             .map(str::trim)
-            .filter(|s| !s.is_empty());
-        if let Some(id) = id {
+            .filter(|s| !s.is_empty())
+        {
             return Some(id.chars().take(256).collect());
+        }
+        if let Some(id) = v.get(key).and_then(Value::as_i64) {
+            return Some(id.to_string().chars().take(256).collect());
         }
     }
     None
 }
 
 fn parse_event_type(v: &Value) -> Option<String> {
-    for key in ["type", "event_type", "event", "name"] {
+    for key in ["type", "event_type", "event", "name", "notify_type"] {
         if let Some(event_type) = v
             .get(key)
             .and_then(Value::as_str)
@@ -374,7 +377,7 @@ pub(crate) async fn ingest_webhook(
 ) -> Result<(bool, Option<i64>, bool, String, bool), ApiError> {
     let raw_event_id = parse_raw_event_id(v).ok_or_else(|| {
         ApiError::BadRequest(
-            "JSON body must include a non-empty string id (or event_id/eventId/notify_id) for deduplication"
+            "JSON body must include a non-empty id (or event_id/eventId/notify_id/notifyId) for deduplication"
                 .into(),
         )
     })?;
@@ -497,6 +500,12 @@ mod tests {
     }
 
     #[test]
+    fn parse_event_type_uses_notify_type_fallback_when_type_missing() {
+        let v = json!({ "notify_type": "trade.success" });
+        assert_eq!(parse_event_type(&v).as_deref(), Some("trade.success"));
+    }
+
+    #[test]
     fn parse_raw_event_id_prefers_id_key() {
         let v = json!({
             "id": "evt_primary",
@@ -521,6 +530,18 @@ mod tests {
     fn parse_raw_event_id_supports_notify_id_fallback() {
         let v = json!({ "notify_id": "evt_notify" });
         assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_notify"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_supports_notify_id_camel_case_fallback() {
+        let v = json!({ "notifyId": "evt_notify_camel" });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_notify_camel"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_accepts_numeric_id_fallback() {
+        let v = json!({ "event_id": 123456_i64 });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("123456"));
     }
 
     #[test]

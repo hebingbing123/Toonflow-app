@@ -196,7 +196,8 @@ paths:
         When both are present, `Stripe-Signature` takes precedence.
         Persists to `app_billing_webhook_event` when event id is new; replays return `duplicate: true` (HTTP 200).
         Deduplication key is **`<billing_provider>:<event_id>`** when `billing_provider` is present (lowercased), otherwise raw event id as-is.
-        Event id fields accepted in order: `id` (recommended), `event_id`, `eventId`, `notify_id`.
+        Event id fields accepted in order: `id` (recommended), `event_id`, `eventId`, `notify_id`, `notifyId`.
+        Event id values may be string or integer (integers are normalized to string before dedupe).
         Server also stores best-effort metadata for audit:
         `provider`, `raw_event_id`, `event_type`, `event_created_at`, `is_informational_event`.
         On **first** receipt only, if **`user_id`** (UUID string) and **`plan_tier`** (non-empty string) are present, upserts **`app_user_profile`**.
@@ -207,7 +208,7 @@ paths:
         Default mapping is `CNY -> alipay`, `USD -> stripe`, and can be overridden by
         env `BILLING_CURRENCY_PROVIDER_MAP` (format `CNY=alipay,USD=stripe`).
         For Stripe payloads, server also supports provider mapping from event envelope/object:
-        `type` (or fallback `event_type` / `event` / `name`), `created`, `data.object.status`, `data.object.current_period_end`.
+        `type` (or fallback `event_type` / `event` / `name` / `notify_type`), `created`, `data.object.status`, `data.object.current_period_end`.
         For audit metadata extraction, event type supports fallback keys
         `event_type` / `event` / `name`, and event time supports fallback keys
         `event_created_at` / `event_created` / `created` / `occurred_at` / `notify_time` / `gmt_payment` / `gmt_create` / `gmt_close` / `timestamp`.
@@ -226,12 +227,12 @@ paths:
         `charge.dispute.updated`, `charge.dispute.closed`)
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
-        `trade_status` / (`type` or fallback `event_type` / `event` / `name`) / `notify_time`.
+        `trade_status` / (`type` or fallback `event_type` / `event` / `name` / `notify_type`) / `notify_time`.
         Alipay time values accept RFC3339, unix timestamp, and legacy datetime format `YYYY-MM-DD HH:MM:SS`.
         Non-state Alipay events in the informational whitelist (currently `trade.finished`)
         are treated as informational only.
         For Paddle payloads, server supports baseline mapping from:
-        `type` (or fallback `event_type` / `event` / `name`) / `occurred_at` / `data.status` / `data.next_billed_at`.
+        `type` (or fallback `event_type` / `event` / `name` / `notify_type`) / `occurred_at` / `data.status` / `data.next_billed_at`.
         Current Paddle event fallback coverage includes common subscription/transaction events such as:
         `subscription.created|activated|updated|paused|resumed|past_due|canceled|expired`,
         `transaction.completed|payment_failed|canceled`.
@@ -277,6 +278,12 @@ paths:
                 notify_id:
                   type: string
                   description: Compatibility dedupe id fallback (legacy provider naming).
+                notifyId:
+                  oneOf:
+                    - type: string
+                    - type: integer
+                      format: int64
+                  description: Compatibility dedupe id fallback (camelCase legacy provider naming).
                 event_type:
                   type: string
                   description: Optional event type fallback key (same role as `type`).
@@ -286,6 +293,9 @@ paths:
                 name:
                   type: string
                   description: Optional event type fallback key (provider-compatible alias).
+                notify_type:
+                  type: string
+                  description: Optional event type fallback key (legacy provider naming).
                 event_created_at:
                   description: Optional canonical event timestamp fallback (Unix seconds, RFC3339, or `YYYY-MM-DD HH:MM:SS`).
                   oneOf:

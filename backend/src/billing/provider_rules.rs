@@ -239,7 +239,7 @@ fn status_from_event_mappings(
 }
 
 fn event_type_from_payload(v: &Value) -> Option<&str> {
-    for key in ["type", "event_type", "event", "name"] {
+    for key in ["type", "event_type", "event", "name", "notify_type"] {
         if let Some(event_type) = v
             .get(key)
             .and_then(Value::as_str)
@@ -1056,5 +1056,19 @@ mod tests {
             .subscription_status_updated_at
             .expect("notify_time should parse");
         assert_eq!(got.to_rfc3339(), "2026-04-08T12:13:14+00:00");
+    }
+
+    #[test]
+    fn derive_uses_notify_type_field_when_type_missing() {
+        let v = json!({
+            "billing_provider": "alipay",
+            "notify_type": "trade.closed"
+        });
+        let d = derive_from_provider(&v);
+        assert_eq!(d.subscription_status.as_deref(), Some("canceled"));
+        assert_eq!(
+            d.status_confidence,
+            Some(ProviderStatusConfidence::EventFallback)
+        );
     }
 }
