@@ -38,6 +38,7 @@ part 'home_page/system_probes_controller.dart';
 part 'home_page/system_probes_models_catalog.dart';
 part 'home_page/system_probes_models_catalog_settings_probe.dart';
 part 'home_page/system_probes_models_catalog_production_probe.dart';
+part 'home_page/system_probes_account_settings.dart';
 part 'home_page/system_probes_account.dart';
 part 'home_page/system_probes_content.dart';
 part 'home_page/skills_harness_websocket.dart';
