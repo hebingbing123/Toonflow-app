@@ -10,6 +10,7 @@ part 'production_legacy_routes.dart';
 part 'production_storyboard_batch.dart';
 part 'production_storyboard_data.dart';
 part 'production_storyboard_preview.dart';
+part 'production_workbench_tracks.dart';
 part 'production_workbench.dart';
 
 // =============================================================================
