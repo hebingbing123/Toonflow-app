@@ -245,6 +245,43 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
               : () async {
                   setDialogState(() => assetsBusy[0] = true);
                   try {
+                    final ts = DateTime.now().millisecondsSinceEpoch;
+                    final r = await postLegacyAssetsUploadClip(
+                      token,
+                      projectLegacyId: p.legacyId,
+                      base64Data: 'data:image/png;base64,AA==',
+                      name: 'probe clip $ts',
+                    );
+                    if (!ctx.mounted) return;
+                    await reloadAssetsAndStats();
+                    if (!ctx.mounted) return;
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'POST …/assets/upload-clip：${r.message}',
+                        ),
+                      ),
+                    );
+                  } on RustApiException catch (e) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(
+                        ctx,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  } finally {
+                    if (ctx.mounted) {
+                      setDialogState(() => assetsBusy[0] = false);
+                    }
+                  }
+                },
+          child: const Text('POST upload-clip'),
+        ),
+        TextButton(
+          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+              ? null
+              : () async {
+                  setDialogState(() => assetsBusy[0] = true);
+                  try {
                     final r = await postLegacyAssetsGetMaterialData(
                       token,
                       p.legacyId,

@@ -232,6 +232,19 @@ class LegacyAssetGetImageResponse {
   }
 }
 
+/// Body of legacy **`POST /api/v1/assets/upload-clip`**.
+class LegacyAssetUploadClipResponse {
+  const LegacyAssetUploadClipResponse({required this.message});
+
+  final String message;
+
+  factory LegacyAssetUploadClipResponse.fromJson(Map<String, dynamic> json) {
+    return LegacyAssetUploadClipResponse(
+      message: json['message'] as String? ?? '',
+    );
+  }
+}
+
 /// One row in legacy **`POST /api/v1/assets/get-material-data`** response **`data`**.
 class LegacyAssetMaterialDataItem {
   const LegacyAssetMaterialDataItem({

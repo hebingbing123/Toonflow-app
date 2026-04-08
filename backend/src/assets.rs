@@ -8,6 +8,7 @@ use axum::{
     routing::{get, post, put},
     Json, Router,
 };
+use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, FromRow, PgPool, Postgres, QueryBuilder};
@@ -19,7 +20,9 @@ use crate::json_patch::{parse_optional_i32_field, parse_optional_text_field, Fie
 use crate::state::AppState;
 
 const ADV_LOCK_ASSET_LEGACY: i64 = 884_422_004;
+const ADV_LOCK_ASSET_IMAGE_LEGACY: i64 = 884_422_005;
 const MAX_ASSET_LIST_LIMIT: i64 = 200;
+const MAX_UPLOAD_CLIP_BASE64_LEN: usize = 24_000_000;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct AssetRow {
@@ -183,6 +186,21 @@ struct LegacyGetImageBody {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyUploadClipBody {
+    project_id: i32,
+    base64_data: String,
+    #[serde(default)]
+    asset_type: Option<String>,
+    name: String,
+}
+
+#[derive(Debug, Serialize)]
+struct LegacyUploadClipResponse {
+    message: String,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct LegacyPollingImageAssetsBody {
     ids: Vec<i32>,
@@ -305,6 +323,7 @@ struct LegacyGetImageAssetRow {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/assets/get-image", post(post_legacy_get_image))
+        .route("/api/v1/assets/upload-clip", post(post_legacy_upload_clip))
         .route(
             "/api/v1/assets/get-material-data",
             post(post_legacy_get_material_data),
@@ -420,6 +439,169 @@ async fn post_legacy_get_image(
         id: asset.legacy_id,
         image_id,
         temp_assets,
+    }))
+}
+
+fn normalize_upload_clip_data_uri(raw: &str) -> Result<String, ApiError> {
+    let input = raw.trim();
+    if input.is_empty() {
+        return Err(ApiError::BadRequest("base64Data must not be empty".into()));
+    }
+
+    let (prefix, payload) = if let Some(rest) = input.strip_prefix("data:") {
+        let comma_idx = rest
+            .find(',')
+            .ok_or_else(|| ApiError::BadRequest("base64Data must be a valid data URI".into()))?;
+        let data_uri_prefix = &input[..(5 + comma_idx)];
+        if !data_uri_prefix.to_ascii_lowercase().contains(";base64") {
+            return Err(ApiError::BadRequest(
+                "base64Data data URI must include ;base64".into(),
+            ));
+        }
+        (Some(data_uri_prefix), &rest[(comma_idx + 1)..])
+    } else {
+        (None, input)
+    };
+
+    if payload.is_empty() {
+        return Err(ApiError::BadRequest(
+            "base64Data payload must not be empty".into(),
+        ));
+    }
+    if payload.len() > MAX_UPLOAD_CLIP_BASE64_LEN {
+        return Err(ApiError::BadRequest(format!(
+            "base64Data exceeds max length {}",
+            MAX_UPLOAD_CLIP_BASE64_LEN
+        )));
+    }
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(payload)
+        .map_err(|_| ApiError::BadRequest("base64Data must be valid base64".into()))?;
+    if decoded.is_empty() {
+        return Err(ApiError::BadRequest(
+            "base64Data payload must not be empty".into(),
+        ));
+    }
+
+    Ok(match prefix {
+        Some(prefix) => format!("{prefix},{payload}"),
+        None => format!("data:application/octet-stream;base64,{payload}"),
+    })
+}
+
+async fn post_legacy_upload_clip(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyUploadClipBody>,
+) -> Result<Json<LegacyUploadClipResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    let name = body.name.trim();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("name must not be empty".into()));
+    }
+
+    let asset_type = body
+        .asset_type
+        .as_deref()
+        .unwrap_or("clip")
+        .trim()
+        .to_lowercase();
+    if asset_type != "clip" {
+        return Err(ApiError::BadRequest("type must be clip".into()));
+    }
+
+    let file_path = normalize_upload_clip_data_uri(&body.base64_data)?;
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_uuid: Uuid = sqlx::query_scalar(
+        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+    )
+    .bind(body.project_id)
+    .bind(uid)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_ASSET_LEGACY)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_ASSET_IMAGE_LEGACY)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_asset_legacy: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_image_legacy: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_image_id), 0) + 1 FROM app_asset_image"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+    let asset_id: Uuid = sqlx::query_scalar(
+        r#"
+        INSERT INTO app_asset (
+          project_id, legacy_id, name, asset_type, create_time_ms, metadata
+        )
+        VALUES (
+          $1, $2, $3, 'clip', $4, jsonb_build_object('imageId', $5::integer)
+        )
+        RETURNING id
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(next_asset_legacy)
+    .bind(name)
+    .bind(now_ms)
+    .bind(next_image_legacy)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_asset_image (
+          asset_id, sort_index, file_path, state, legacy_image_id
+        )
+        VALUES ($1, 0, $2, '已完成', $3)
+        "#,
+    )
+    .bind(asset_id)
+    .bind(file_path)
+    .bind(next_image_legacy)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyUploadClipResponse {
+        message: "上传成功".into(),
     }))
 }
 
@@ -2121,5 +2303,35 @@ mod tests {
                 || err.to_string().contains("unknown variant"),
             "{err}"
         );
+    }
+
+    #[test]
+    fn upload_clip_base64_normalize_accepts_raw_payload() {
+        let normalized = normalize_upload_clip_data_uri("AA==").unwrap();
+        assert_eq!(normalized, "data:application/octet-stream;base64,AA==");
+    }
+
+    #[test]
+    fn upload_clip_base64_normalize_accepts_data_uri_payload() {
+        let normalized = normalize_upload_clip_data_uri("data:image/png;base64,AA==").unwrap();
+        assert_eq!(normalized, "data:image/png;base64,AA==");
+    }
+
+    #[test]
+    fn upload_clip_base64_normalize_rejects_non_base64_data_uri() {
+        let err = normalize_upload_clip_data_uri("data:image/png,AA==").unwrap_err();
+        match err {
+            ApiError::BadRequest(msg) => assert!(msg.contains(";base64")),
+            other => panic!("unexpected error: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn upload_clip_base64_normalize_rejects_invalid_payload() {
+        let err = normalize_upload_clip_data_uri("data:image/png;base64,not-base64").unwrap_err();
+        match err {
+            ApiError::BadRequest(msg) => assert!(msg.contains("valid base64")),
+            other => panic!("unexpected error: {other:?}"),
+        }
     }
 }

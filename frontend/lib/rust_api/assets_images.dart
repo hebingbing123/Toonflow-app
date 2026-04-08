@@ -29,6 +29,43 @@ Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
   return LegacyAssetGetImageResponse.fromJson(map);
 }
 
+/// `POST /api/v1/assets/upload-clip` — legacy upload clip asset by **`projectId/base64Data/name`**.
+Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
+  String accessToken, {
+  required int projectLegacyId,
+  required String base64Data,
+  required String name,
+  String assetType = 'clip',
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/upload-clip');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectLegacyId,
+          'base64Data': base64Data,
+          'type': assetType,
+          'name': name,
+        }),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return LegacyAssetUploadClipResponse.fromJson(map);
+}
+
 /// `POST /api/v1/assets/get-material-data` — legacy clip-assets and generated videos by **`projectId`**.
 Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
   String accessToken,
