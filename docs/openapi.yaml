@@ -56,7 +56,7 @@ info:
 
     **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/legacy/{id}/novel-events*`** and legacy **`POST …/novels/events/{get-events,batch-delete}`** cover **`o_event`** / **`o_eventChapter`** parity. Legacy **`cleanNovel`** still has no SaaS equivalent.
 
-    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS; it returns **`needUpdate: false`** and **`latestVersion`** set to the server crate version (SaaS deploys are not Electron auto-update). **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
+    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
 servers:
   - url: http://127.0.0.1:8666
@@ -681,7 +681,10 @@ paths:
       operationId: postAboutCheckUpdateV1
       description: |
         Bearer JWT. Body **`source`** matches legacy **`POST /api/setting/about/checkUpdate`** (**`toonflow`**, **`github`**, **`gitee`**, **`atomgit`**).
-        Does not call the legacy OSS manifest: responds **`needUpdate: false`**, **`latestVersion`** = server **`CARGO_PKG_VERSION`**, **`reinstall: false`**, **`time`** = current UTC RFC3339, no **`url`**.
+        Does not call the legacy OSS manifest. Instead it compares the server **`CARGO_PKG_VERSION`** with an optional env-driven release manifest:
+        **`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, and
+        **`TOONFLOW_UPDATE_TOONFLOW_URL`** / **`TOONFLOW_UPDATE_GITHUB_URL`** / **`TOONFLOW_UPDATE_GITEE_URL`** / **`TOONFLOW_UPDATE_ATOMGIT_URL`**.
+        When the manifest is unset or invalid it safely falls back to **`needUpdate: false`**, **`reinstall: false`**, current version, and no **`url`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -692,7 +695,7 @@ paths:
               $ref: "#/components/schemas/AboutCheckUpdateRequest"
       responses:
         "200":
-          description: OK (policy response — no remote version comparison)
+          description: OK (policy response with optional env-driven version comparison)
           content:
             application/json:
               schema:
