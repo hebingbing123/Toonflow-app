@@ -38,20 +38,8 @@ static VENDOR_CREDENTIAL_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>>
     std::sync::OnceLock::new();
 
 #[cfg(test)]
-static SETTINGS_ABOUT_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>> =
-    std::sync::OnceLock::new();
-
-#[cfg(test)]
 async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
     VENDOR_CREDENTIAL_TEST_MUTEX
-        .get_or_init(|| tokio::sync::Mutex::new(()))
-        .lock()
-        .await
-}
-
-#[cfg(test)]
-async fn settings_about_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
-    SETTINGS_ABOUT_TEST_MUTEX
         .get_or_init(|| tokio::sync::Mutex::new(()))
         .lock()
         .await
@@ -74,9 +62,9 @@ mod contract_smoke_tests {
 
     use super::build_router;
     use super::jwt_fixture;
-    use super::settings_about_test_lock;
     use super::vendor_credential_test_lock;
     use crate::notify_hub::WsNotifyHub;
+    use crate::settings_about::settings_about_env_test_lock;
     use crate::state::{AppState, MemoryConfig};
     use axum::http::HeaderValue;
     use hmac::{Hmac, Mac};
@@ -3454,7 +3442,7 @@ mod contract_smoke_tests {
 
     #[tokio::test]
     async fn settings_about_check_update_stub_ok_with_jwt() {
-        let _guard = settings_about_test_lock().await;
+        let _guard = settings_about_env_test_lock().await;
         std::env::remove_var("TOONFLOW_UPDATE_LATEST_VERSION");
         std::env::remove_var("TOONFLOW_UPDATE_TIME");
         std::env::remove_var("TOONFLOW_UPDATE_TOONFLOW_URL");
@@ -3478,7 +3466,7 @@ mod contract_smoke_tests {
 
     #[tokio::test]
     async fn settings_about_check_update_uses_env_manifest_with_jwt() {
-        let _guard = settings_about_test_lock().await;
+        let _guard = settings_about_env_test_lock().await;
         std::env::set_var("TOONFLOW_UPDATE_LATEST_VERSION", "0.1.1");
         std::env::set_var("TOONFLOW_UPDATE_TIME", "2026-04-08T08:30:00Z");
         std::env::set_var(
@@ -3496,7 +3484,14 @@ mod contract_smoke_tests {
         assert_eq!(v["needUpdate"], true);
         assert_eq!(v["reinstall"], false);
         assert_eq!(v["latestVersion"], "0.1.1");
-        assert_eq!(v["time"], "2026-04-08T08:30:00Z");
+        let parsed_time = chrono::DateTime::parse_from_rfc3339(
+            v["time"].as_str().expect("time should be string"),
+        )
+        .expect("time should be rfc3339");
+        assert_eq!(
+            parsed_time.to_utc().to_rfc3339(),
+            "2026-04-08T08:30:00+00:00"
+        );
         assert_eq!(v["url"], "https://example.com/toonflow-0.1.1.zip");
         std::env::remove_var("TOONFLOW_UPDATE_LATEST_VERSION");
         std::env::remove_var("TOONFLOW_UPDATE_TIME");

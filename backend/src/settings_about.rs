@@ -104,6 +104,20 @@ fn configured_update_url(source: CheckUpdateSource) -> Option<String> {
     }
 }
 
+fn resolved_update_time(now: chrono::DateTime<Utc>) -> String {
+    let raw = std::env::var(ENV_UPDATE_TIME).ok();
+    let Some(raw) = raw else {
+        return now.to_rfc3339();
+    };
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return now.to_rfc3339();
+    }
+    chrono::DateTime::parse_from_rfc3339(trimmed)
+        .map(|dt| dt.with_timezone(&Utc).to_rfc3339())
+        .unwrap_or_else(|_| now.to_rfc3339())
+}
+
 fn resolve_check_update_response(
     source: CheckUpdateSource,
     now: chrono::DateTime<Utc>,
@@ -113,11 +127,7 @@ fn resolve_check_update_response(
         .map(|v| v.trim().to_string())
         .filter(|v| !v.is_empty())
         .unwrap_or_else(|| PKG_VERSION.to_string());
-    let time = std::env::var(ENV_UPDATE_TIME)
-        .ok()
-        .map(|v| v.trim().to_string())
-        .filter(|v| !v.is_empty())
-        .unwrap_or_else(|| now.to_rfc3339());
+    let time = resolved_update_time(now);
 
     let Some(current) = ReleaseVersion::parse(PKG_VERSION) else {
         return CheckUpdateResponse {
@@ -212,13 +222,25 @@ pub fn router() -> Router<AppState> {
 }
 
 #[cfg(test)]
+static SETTINGS_ABOUT_ENV_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>> =
+    std::sync::OnceLock::new();
+
+#[cfg(test)]
+pub(crate) async fn settings_about_env_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+    SETTINGS_ABOUT_ENV_TEST_MUTEX
+        .get_or_init(|| tokio::sync::Mutex::new(()))
+        .lock()
+        .await
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Mutex, OnceLock};
 
-    fn env_lock() -> std::sync::MutexGuard<'static, ()> {
-        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-        LOCK.get_or_init(|| Mutex::new(())).lock().unwrap()
+    fn env_lock() -> tokio::sync::MutexGuard<'static, ()> {
+        SETTINGS_ABOUT_ENV_TEST_MUTEX
+            .get_or_init(|| tokio::sync::Mutex::new(()))
+            .blocking_lock()
     }
 
     fn clear_update_env() {
@@ -307,7 +329,8 @@ mod tests {
         let resp = resolve_check_update_response(CheckUpdateSource::Github, Utc::now());
         assert!(resp.need_update);
         assert!(!resp.reinstall);
-        assert_eq!(resp.time, "2026-04-08T08:30:00Z");
+        let parsed = chrono::DateTime::parse_from_rfc3339(&resp.time).expect("valid rfc3339");
+        assert_eq!(parsed.to_utc().to_rfc3339(), "2026-04-08T08:30:00+00:00");
         assert_eq!(
             resp.url.as_deref(),
             Some("https://example.com/toonflow.zip")
@@ -339,6 +362,17 @@ mod tests {
         let resp = resolve_check_update_response(CheckUpdateSource::Atomgit, Utc::now());
         assert!(!resp.need_update);
         assert_eq!(resp.latest_version, PKG_VERSION);
+        clear_update_env();
+    }
+
+    #[test]
+    fn check_update_response_ignores_invalid_time() {
+        let _guard = env_lock();
+        clear_update_env();
+        std::env::set_var(ENV_UPDATE_TIME, "invalid-time");
+        let now = Utc::now();
+        let resp = resolve_check_update_response(CheckUpdateSource::Toonflow, now);
+        assert_eq!(resp.time, now.to_rfc3339());
         clear_update_env();
     }
 }
