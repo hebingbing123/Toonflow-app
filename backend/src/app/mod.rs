@@ -5367,6 +5367,65 @@ mod pg_contract_tests {
             i64::from(scene_leg)
         );
 
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"types":["scene"," SCENE ","scene",""]}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_scene_dedup) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "corner_scene_dedup={corner_scene_dedup}"
+        );
+        let csd = corner_scene_dedup["items"]
+            .as_array()
+            .expect("corner scene dedup filter");
+        assert_eq!(csd.len(), 1);
+        assert_eq!(
+            csd[0]["legacy_id"].as_i64().expect("leg"),
+            i64::from(scene_leg)
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!(
+                        "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    ))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(r#"{"types":[" ","\n\t",""]}"#))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, corner_blank_types) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "corner_blank_types={corner_blank_types}"
+        );
+        assert_eq!(
+            corner_blank_types["items"].as_array().map(|a| a.len()),
+            Some(2),
+            "blank-only types should behave like no filter"
+        );
+
         let n = sqlx::query(
             r#"
             UPDATE app_asset a
