@@ -22,6 +22,7 @@ part 'jobs_api.dart';
 part 'models_catalog.dart';
 part 'novels_models.dart';
 part 'novels_crud.dart';
+part 'novels_legacy_api.dart';
 part 'novels_events.dart';
 part 'project_overview.dart';
 part 'project_manuals.dart';
