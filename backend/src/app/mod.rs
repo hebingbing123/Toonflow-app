@@ -1750,6 +1750,39 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_polling_image_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/assets/polling-image-assets", r#"{"ids":[1]}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn assets_polling_image_assets_rejects_non_positive_ids_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets/polling-image-assets",
+            &token,
+            r#"{"ids":[0]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_polling_image_assets_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets/polling-image-assets",
+            &token,
+            r#"{"ids":[1]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn project_assets_list_pagination_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =

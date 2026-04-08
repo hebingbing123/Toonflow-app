@@ -182,6 +182,20 @@ struct LegacyGetImageBody {
     assets_id: i32,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyPollingImageAssetsBody {
+    ids: Vec<i32>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct LegacyPollingImageAssetsItem {
+    id: i32,
+    state: Option<String>,
+    file_path: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct LegacyGetImageTempAssetItem {
@@ -214,6 +228,10 @@ struct LegacyGetImageAssetRow {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/assets/get-image", post(post_legacy_get_image))
+        .route(
+            "/api/v1/assets/polling-image-assets",
+            post(post_legacy_polling_image_assets),
+        )
         .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets",
             get(list_project_assets).post(create_project_asset),
@@ -314,6 +332,61 @@ async fn post_legacy_get_image(
         image_id,
         temp_assets,
     }))
+}
+
+async fn post_legacy_polling_image_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyPollingImageAssetsBody>,
+) -> Result<Json<Vec<LegacyPollingImageAssetsItem>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.ids.is_empty() {
+        return Ok(Json(Vec::new()));
+    }
+    if body.ids.len() > 200 {
+        return Err(ApiError::BadRequest(
+            "ids must have at most 200 rows".into(),
+        ));
+    }
+    if body.ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest("each ids[] must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let rows: Vec<LegacyPollingImageAssetsItem> = sqlx::query_as(
+        r#"
+        SELECT
+          a.legacy_id AS id,
+          ai.state AS state,
+          ai.file_path AS file_path
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_asset_image ai
+          ON ai.asset_id = a.id
+         AND ai.legacy_image_id = (
+           CASE
+             WHEN jsonb_typeof(a.metadata->'imageId') = 'number'
+               THEN (a.metadata->>'imageId')::integer
+             ELSE NULL
+           END
+         )
+        WHERE p.owner_user_id = $1
+          AND a.legacy_id = ANY($2)
+          AND ai.state <> '生成中'
+        ORDER BY a.legacy_id ASC
+        "#,
+    )
+    .bind(uid)
+    .bind(&body.ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(rows))
 }
 
 /// Resolves **`app_script.id`** and **`app_asset.id`** when both belong to the same owned project.

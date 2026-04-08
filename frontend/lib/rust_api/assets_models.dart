@@ -232,6 +232,27 @@ class LegacyAssetGetImageResponse {
   }
 }
 
+/// One row in legacy **`POST /api/v1/assets/polling-image-assets`** response.
+class LegacyAssetPollingImageAssetsItem {
+  const LegacyAssetPollingImageAssetsItem({
+    required this.id,
+    this.state,
+    this.filePath,
+  });
+
+  final int id;
+  final String? state;
+  final String? filePath;
+
+  factory LegacyAssetPollingImageAssetsItem.fromJson(Map<String, dynamic> json) {
+    return LegacyAssetPollingImageAssetsItem(
+      id: (json['id'] as num).toInt(),
+      state: json['state'] as String?,
+      filePath: json['filePath'] as String?,
+    );
+  }
+}
+
 /// OpenAPI **`CornerScapeResponse`**.
 class CornerScapeResponse {
   const CornerScapeResponse({required this.items});
