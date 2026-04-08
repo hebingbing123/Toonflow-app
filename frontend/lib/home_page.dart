@@ -22,6 +22,7 @@ part 'home_page/project_editor_novels_rest_actions.dart';
 part 'home_page/project_editor_novels_rest_probe.dart';
 part 'home_page/project_editor_novels_legacy_actions.dart';
 part 'home_page/project_editor_novels_legacy_probe.dart';
+part 'home_page/project_editor_novel_events_actions.dart';
 part 'home_page/project_editor_novel_events_probe.dart';
 part 'home_page/project_editor_novels.dart';
 part 'home_page/project_editor_assets.dart';
