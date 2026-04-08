@@ -202,6 +202,70 @@ struct LegacyUploadClipResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyAddAssetsBody {
+    name: String,
+    describe: String,
+    #[serde(rename = "type")]
+    asset_type: String,
+    project_id: i32,
+    #[serde(default)]
+    remark: Option<String>,
+    #[serde(default)]
+    prompt: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyUpdateAssetsBody {
+    id: i32,
+    name: String,
+    describe: String,
+    #[serde(default)]
+    remark: Option<String>,
+    #[serde(default)]
+    prompt: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacySaveAssetsBody {
+    id: i32,
+    project_id: i32,
+    #[serde(default)]
+    base64: Option<String>,
+    #[serde(rename = "type")]
+    asset_type: String,
+    #[serde(default)]
+    prompt: Option<String>,
+    #[serde(default)]
+    image_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyDeleteAssetsBody {
+    id: i32,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyBatchDeleteAssetsBody {
+    id: Vec<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyDelImageBody {
+    id: i32,
+}
+
+#[derive(Debug, Serialize)]
+struct LegacyAssetMutationResponse {
+    message: &'static str,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct LegacyPollingImageAssetsBody {
     ids: Vec<i32>,
@@ -390,6 +454,15 @@ struct LegacyGetAssetsApiDbRow {
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/assets/add-assets", post(post_legacy_add_assets))
+        .route("/api/v1/assets/save-assets", post(post_legacy_save_assets))
+        .route("/api/v1/assets/update-assets", post(post_legacy_update_assets))
+        .route("/api/v1/assets/del-assets", post(post_legacy_del_assets))
+        .route(
+            "/api/v1/assets/batch-delete",
+            post(post_legacy_batch_delete_assets),
+        )
+        .route("/api/v1/assets/del-image", post(post_legacy_del_image))
         .route("/api/v1/assets/get-assets-api", post(post_legacy_get_assets_api))
         .route("/api/v1/assets/get-image", post(post_legacy_get_image))
         .route("/api/v1/assets/upload-clip", post(post_legacy_upload_clip))
@@ -441,6 +514,505 @@ pub fn router() -> Router<AppState> {
             "/api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
             put(link_script_to_asset).delete(unlink_script_from_asset),
         )
+}
+
+fn normalize_optional_legacy_text(raw: Option<String>) -> Option<String> {
+    raw.map(|s| s.trim().to_string()).filter(|s| !s.is_empty())
+}
+
+fn merge_legacy_asset_metadata(
+    mut metadata: Value,
+    prompt_patch: Option<Option<String>>,
+    remark_patch: Option<Option<String>>,
+    image_id_patch: Option<Option<i32>>,
+) -> Value {
+    if !metadata.is_object() {
+        metadata = Value::Object(Default::default());
+    }
+    let Some(obj) = metadata.as_object_mut() else {
+        return metadata;
+    };
+
+    if let Some(next_prompt) = prompt_patch {
+        match next_prompt {
+            Some(v) => {
+                obj.insert("prompt".into(), Value::String(v));
+            }
+            None => {
+                obj.remove("prompt");
+            }
+        }
+    }
+
+    if let Some(next_remark) = remark_patch {
+        match next_remark {
+            Some(v) => {
+                obj.insert("remark".into(), Value::String(v));
+            }
+            None => {
+                obj.remove("remark");
+            }
+        }
+    }
+
+    if let Some(next_image_id) = image_id_patch {
+        match next_image_id {
+            Some(v) => {
+                obj.insert("imageId".into(), Value::from(v));
+            }
+            None => {
+                obj.remove("imageId");
+            }
+        }
+    }
+
+    metadata
+}
+
+async fn post_legacy_add_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyAddAssetsBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    let name = body.name.trim();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("name must not be empty".into()));
+    }
+    let describe = body.describe.trim();
+    if describe.is_empty() {
+        return Err(ApiError::BadRequest("describe must not be empty".into()));
+    }
+    let asset_type = body.asset_type.trim().to_lowercase();
+    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
+        return Err(ApiError::BadRequest(
+            "type must be role, scene, or tool".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let project_uuid: Uuid = sqlx::query_scalar(
+        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+    )
+    .bind(body.project_id)
+    .bind(uid)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_ASSET_LEGACY)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let next_legacy: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+    let metadata = merge_legacy_asset_metadata(
+        Value::Object(Default::default()),
+        Some(normalize_optional_legacy_text(body.prompt)),
+        Some(normalize_optional_legacy_text(body.remark)),
+        None,
+    );
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_asset (
+          project_id, legacy_id, name, asset_type, description, create_time_ms, metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(next_legacy)
+    .bind(name)
+    .bind(asset_type)
+    .bind(describe)
+    .bind(now_ms)
+    .bind(SqlxJson(metadata))
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "新增资产成功",
+    }))
+}
+
+#[derive(Debug, FromRow)]
+struct LegacyOwnedAssetMetaRow {
+    id: Uuid,
+    metadata: SqlxJson<Value>,
+    project_legacy_id: i32,
+}
+
+async fn resolve_owned_asset_metadata(
+    pool: &PgPool,
+    uid: Uuid,
+    asset_legacy_id: i32,
+) -> Result<LegacyOwnedAssetMetaRow, ApiError> {
+    let row: Option<LegacyOwnedAssetMetaRow> = sqlx::query_as(
+        r#"
+        SELECT a.id, a.metadata, p.legacy_id AS project_legacy_id
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.owner_user_id = $1
+          AND a.legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    row.ok_or(ApiError::NotFound)
+}
+
+async fn post_legacy_update_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyUpdateAssetsBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest("id must be positive".into()));
+    }
+    let name = body.name.trim();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("name must not be empty".into()));
+    }
+    let describe = body.describe.trim();
+    if describe.is_empty() {
+        return Err(ApiError::BadRequest("describe must not be empty".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let current = resolve_owned_asset_metadata(pool, uid, body.id).await?;
+    let metadata = merge_legacy_asset_metadata(
+        current.metadata.0,
+        Some(normalize_optional_legacy_text(body.prompt)),
+        Some(normalize_optional_legacy_text(body.remark)),
+        None,
+    );
+
+    sqlx::query(
+        r#"
+        UPDATE app_asset a
+        SET name = $1,
+            description = $2,
+            metadata = $3,
+            updated_at = NOW()
+        FROM app_project p
+        WHERE a.project_id = p.id
+          AND p.owner_user_id = $4
+          AND a.legacy_id = $5
+        "#,
+    )
+    .bind(name)
+    .bind(describe)
+    .bind(SqlxJson(metadata))
+    .bind(uid)
+    .bind(body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "更新资产成功",
+    }))
+}
+
+async fn post_legacy_save_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacySaveAssetsBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest("id must be positive".into()));
+    }
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    let asset_type = body.asset_type.trim().to_lowercase();
+    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
+        return Err(ApiError::BadRequest(
+            "type must be role, scene, or tool".into(),
+        ));
+    }
+    if body.image_id.is_some_and(|id| id <= 0) {
+        return Err(ApiError::BadRequest(
+            "imageId must be positive when set".into(),
+        ));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let current: LegacyOwnedAssetMetaRow = sqlx::query_as(
+        r#"
+        SELECT a.id, a.metadata, p.legacy_id AS project_legacy_id
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.owner_user_id = $1
+          AND a.legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+    if current.project_legacy_id != body.project_id {
+        tx.rollback().await.ok();
+        return Err(ApiError::NotFound);
+    }
+
+    let mut image_patch = body.image_id;
+    if let Some(raw_base64) = body
+        .base64
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+    {
+        let file_path = normalize_upload_clip_data_uri(raw_base64)?;
+        sqlx::query("SELECT pg_advisory_xact_lock($1)")
+            .bind(ADV_LOCK_ASSET_IMAGE_LEGACY)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        let next_image_legacy: i32 = sqlx::query_scalar(
+            r#"SELECT COALESCE(MAX(legacy_image_id), 0) + 1 FROM app_asset_image"#,
+        )
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        let next_sort: i32 = sqlx::query_scalar(
+            r#"
+            SELECT COALESCE(MAX(sort_index), -1) + 1
+            FROM app_asset_image
+            WHERE asset_id = $1
+            "#,
+        )
+        .bind(current.id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        sqlx::query(
+            r#"
+            INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, legacy_image_id)
+            VALUES ($1, $2, $3, '已完成', $4)
+            "#,
+        )
+        .bind(current.id)
+        .bind(next_sort)
+        .bind(file_path)
+        .bind(next_image_legacy)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        image_patch = Some(next_image_legacy);
+    }
+
+    let metadata = merge_legacy_asset_metadata(
+        current.metadata.0,
+        Some(normalize_optional_legacy_text(body.prompt)),
+        None,
+        Some(image_patch),
+    );
+
+    sqlx::query(
+        r#"
+        UPDATE app_asset a
+        SET metadata = $1,
+            updated_at = NOW()
+        FROM app_project p
+        WHERE a.project_id = p.id
+          AND p.owner_user_id = $2
+          AND p.legacy_id = $3
+          AND a.legacy_id = $4
+        "#,
+    )
+    .bind(SqlxJson(metadata))
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(body.id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "保存资产图片成功",
+    }))
+}
+
+async fn post_legacy_del_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyDeleteAssetsBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest("id must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_asset a
+        USING app_project p
+        WHERE a.project_id = p.id
+          AND p.owner_user_id = $1
+          AND a.legacy_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "删除资产成功",
+    }))
+}
+
+async fn post_legacy_batch_delete_assets(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyBatchDeleteAssetsBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id.is_empty() {
+        return Err(ApiError::BadRequest("id must not be empty".into()));
+    }
+    if body.id.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest("id entries must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_asset a
+        USING app_project p
+        WHERE a.project_id = p.id
+          AND p.owner_user_id = $1
+          AND a.legacy_id = ANY($2)
+        "#,
+    )
+    .bind(uid)
+    .bind(&body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "删除资产成功",
+    }))
+}
+
+async fn post_legacy_del_image(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyDelImageBody>,
+) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest("id must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    sqlx::query(
+        r#"
+        UPDATE app_asset a
+        SET metadata = a.metadata - 'imageId',
+            updated_at = NOW()
+        FROM app_project p
+        WHERE a.project_id = p.id
+          AND p.owner_user_id = $1
+          AND COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
+          AND (a.metadata->>'imageId')::integer = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_asset_image ai
+        USING app_asset a, app_project p
+        WHERE ai.asset_id = a.id
+          AND a.project_id = p.id
+          AND p.owner_user_id = $1
+          AND ai.legacy_image_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyAssetMutationResponse {
+        message: "资产图片删除成功",
+    }))
 }
 
 async fn post_legacy_get_assets_api(
@@ -2662,6 +3234,33 @@ mod tests {
                 || err.to_string().contains("unknown variant"),
             "{err}"
         );
+    }
+
+    #[test]
+    fn legacy_add_assets_body_accepts_minimal() {
+        let body: LegacyAddAssetsBody = serde_json::from_str(
+            r#"{"name":"Hero","describe":"Main role","type":"role","projectId":1}"#,
+        )
+        .unwrap();
+        assert_eq!(body.name, "Hero");
+        assert_eq!(body.project_id, 1);
+        assert_eq!(body.asset_type, "role");
+    }
+
+    #[test]
+    fn legacy_save_assets_body_accepts_image_id_without_base64() {
+        let body: LegacySaveAssetsBody =
+            serde_json::from_str(r#"{"id":1,"projectId":2,"type":"role","imageId":3}"#).unwrap();
+        assert_eq!(body.id, 1);
+        assert_eq!(body.project_id, 2);
+        assert_eq!(body.image_id, Some(3));
+    }
+
+    #[test]
+    fn legacy_batch_delete_assets_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<LegacyBatchDeleteAssetsBody>(r#"{"id":[1],"extra":1}"#)
+            .unwrap_err();
+        assert!(err.to_string().contains("unknown field"), "{err}");
     }
 
     #[test]
