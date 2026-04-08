@@ -2560,55 +2560,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/upload-clip:
-    post:
-      tags: [assets]
-      summary: Legacy — upload one clip asset from base64 payload
-      operationId: postAssetsUploadClipV1
-      description: |
-        Parity with old **`POST /api/assets/uploadClip`**.
-        Body contains **`projectId`**, **`name`**, and **`base64Data`** (raw base64 or data URI).
-        The Rust implementation currently accepts **`type=clip`** only (default **`clip`** when omitted).
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyAssetsUploadClipBody"
-      responses:
-        "200":
-          description: Uploaded
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyAssetsUploadClipResponse"
-        "400":
-          description: Invalid projectId, name, type, or base64Data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project legacy id not found for caller
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
   /api/v1/assets/get-material-data:
     post:
       tags: [assets]
@@ -11056,7 +11007,7 @@ components:
           format: int32
         type:
           type: string
-          enum: [role, tool, scene]
+          enum: [role, tool, scene, clip]
         state:
           type: string
           nullable: true
@@ -11080,35 +11031,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LegacyAssetsGetImageTempAsset"
-
-    LegacyAssetsUploadClipBody:
-      type: object
-      additionalProperties: false
-      required: [projectId, base64Data, name]
-      properties:
-        projectId:
-          type: integer
-          format: int32
-          minimum: 1
-        base64Data:
-          type: string
-          maxLength: 24000000
-          description: Raw base64 or data URI with **`;base64`** payload.
-        type:
-          type: string
-          enum: [clip]
-          default: clip
-          description: Only **`clip`** is accepted in current Rust parity implementation.
-        name:
-          type: string
-          minLength: 1
-
-    LegacyAssetsUploadClipResponse:
-      type: object
-      required: [message]
-      properties:
-        message:
-          type: string
 
     LegacyAssetsGetMaterialDataBody:
       type: object
@@ -11136,7 +11058,8 @@ components:
             `data:application/octet-stream;base64,...` before persistence.
         type:
           type: string
-          nullable: true
+          enum: [clip]
+          default: clip
           description: Optional legacy field; only `clip` is accepted when provided.
         name:
           type: string
