@@ -1777,6 +1777,43 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_get_assets_api_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/assets/get-assets-api",
+            r#"{"projectId":1,"type":"role"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
+    async fn assets_get_assets_api_rejects_non_positive_project_id_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets/get-assets-api",
+            &token,
+            r#"{"projectId":0,"type":"role"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_get_assets_api_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets/get-assets-api",
+            &token,
+            r#"{"projectId":1,"type":"role","page":1,"limit":10}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn assets_get_image_unauthorized_without_bearer() {
         let (status, v) = post_json("/api/v1/assets/get-image", r#"{"assetsId":1}"#).await;
         assert_eq!(status, StatusCode::UNAUTHORIZED);
