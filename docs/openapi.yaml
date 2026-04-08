@@ -2517,6 +2517,92 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/assets/get-material-data:
+    post:
+      tags: [assets]
+      summary: Legacy — get clip assets and generated videos by project id
+      operationId: postAssetsGetMaterialDataV1
+      description: |
+        Parity with old **`POST /api/assets/getMaterialData`**.
+        Returns:
+        - **`data`**: project **`clip`** assets with best-effort selected cover **`filePath`**
+        - **`video`**: generated videos for the project (completed states only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyAssetsGetMaterialDataBody"
+      responses:
+        "200":
+          description: Legacy material data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyAssetsGetMaterialDataResponse"
+        "400":
+          description: Invalid projectId
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/assets/batch-generation-data:
+    post:
+      tags: [assets]
+      summary: Legacy — paged asset listing for batch generation picker
+      operationId: postAssetsBatchGenerationDataV1
+      description: |
+        Parity with old **`POST /api/assets/batchGenerationData`**.
+        Filters assets by **`projectId`**, **`type`**, and optional name fuzzy match; returns paged rows with total.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyAssetsBatchGenerationDataBody"
+      responses:
+        "200":
+          description: Legacy paged rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyAssetsBatchGenerationDataResponse"
+        "400":
+          description: Invalid body fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/assets/polling-image-assets:
     post:
       tags: [assets]
@@ -10805,6 +10891,115 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LegacyAssetsGetImageTempAsset"
+
+    LegacyAssetsGetMaterialDataBody:
+      type: object
+      additionalProperties: false
+      required: [projectId]
+      properties:
+        projectId:
+          type: integer
+          format: int32
+
+    LegacyAssetsGetMaterialDataItem:
+      type: object
+      required: [id, name, filePath, type]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_asset.legacy_id (0 for built-in ending clip row)
+        name:
+          type: string
+        filePath:
+          type: string
+          description: Selected clip image file path (or empty string).
+        type:
+          type: string
+          description: Legacy asset type, usually clip.
+
+    LegacyAssetsGetMaterialDataVideoItem:
+      type: object
+      required: [id, filePath]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_video.legacy_id
+        filePath:
+          type: string
+        videoTrackId:
+          type: integer
+          format: int32
+          nullable: true
+
+    LegacyAssetsGetMaterialDataResponse:
+      type: object
+      required: [data, video]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyAssetsGetMaterialDataItem"
+        video:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyAssetsGetMaterialDataVideoItem"
+
+    LegacyAssetsBatchGenerationDataBody:
+      type: object
+      additionalProperties: false
+      required: [projectId, type, page, limit]
+      properties:
+        projectId:
+          type: integer
+          format: int32
+        type:
+          type: string
+        name:
+          type: string
+          nullable: true
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 200
+
+    LegacyAssetsBatchGenerationDataItem:
+      type: object
+      required: [id, name, type]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_asset.legacy_id
+        name:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+          nullable: true
+        createTimeMs:
+          type: integer
+          format: int64
+          nullable: true
+
+    LegacyAssetsBatchGenerationDataResponse:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LegacyAssetsBatchGenerationDataItem"
+        total:
+          type: integer
+          format: int64
 
     LegacyAssetsPollingImageAssetsBody:
       type: object

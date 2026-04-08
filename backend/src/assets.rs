@@ -202,6 +202,67 @@ struct LegacyPollingPromptAssetsBody {
     ids: Vec<i32>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyGetMaterialDataBody {
+    project_id: i32,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct LegacyMaterialAssetItem {
+    id: i32,
+    name: String,
+    file_path: String,
+    #[serde(rename = "type")]
+    asset_type: String,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct LegacyMaterialVideoItem {
+    id: i32,
+    file_path: String,
+    video_track_id: Option<i32>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyGetMaterialDataResponse {
+    data: Vec<LegacyMaterialAssetItem>,
+    video: Vec<LegacyMaterialVideoItem>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyBatchGenerationDataBody {
+    project_id: i32,
+    #[serde(rename = "type")]
+    asset_type: String,
+    #[serde(default)]
+    name: Option<String>,
+    page: i32,
+    limit: i32,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+struct LegacyBatchGenerationAssetItem {
+    id: i32,
+    name: String,
+    #[serde(rename = "type")]
+    asset_type: String,
+    description: Option<String>,
+    create_time_ms: Option<i64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyBatchGenerationDataResponse {
+    data: Vec<LegacyBatchGenerationAssetItem>,
+    total: i64,
+}
+
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 struct LegacyPollingPromptAssetsItem {
@@ -244,6 +305,14 @@ struct LegacyGetImageAssetRow {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/assets/get-image", post(post_legacy_get_image))
+        .route(
+            "/api/v1/assets/get-material-data",
+            post(post_legacy_get_material_data),
+        )
+        .route(
+            "/api/v1/assets/batch-generation-data",
+            post(post_legacy_batch_generation_data),
+        )
         .route(
             "/api/v1/assets/polling-image-assets",
             post(post_legacy_polling_image_assets),
@@ -352,6 +421,179 @@ async fn post_legacy_get_image(
         image_id,
         temp_assets,
     }))
+}
+
+async fn post_legacy_get_material_data(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyGetMaterialDataBody>,
+) -> Result<Json<LegacyGetMaterialDataResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut data: Vec<LegacyMaterialAssetItem> = sqlx::query_as(
+        r#"
+        SELECT
+          a.legacy_id AS id,
+          a.name AS name,
+          COALESCE(sel.file_path, '') AS file_path,
+          a.asset_type AS asset_type
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        LEFT JOIN LATERAL (
+          SELECT ai.file_path
+          FROM app_asset_image ai
+          WHERE ai.asset_id = a.id
+          ORDER BY
+            CASE
+              WHEN ai.legacy_image_id = (
+                CASE
+                  WHEN jsonb_typeof(a.metadata->'imageId') = 'number'
+                    THEN (a.metadata->>'imageId')::integer
+                  ELSE NULL
+                END
+              ) THEN 0
+              ELSE 1
+            END,
+            ai.sort_index ASC,
+            ai.created_at ASC,
+            ai.id ASC
+          LIMIT 1
+        ) sel ON TRUE
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND a.asset_type = 'clip'
+        ORDER BY a.create_time_ms DESC NULLS LAST, a.legacy_id DESC
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    data.push(LegacyMaterialAssetItem {
+        id: 0,
+        name: "Toonflow片尾".into(),
+        file_path: String::new(),
+        asset_type: "clip".into(),
+    });
+
+    let video: Vec<LegacyMaterialVideoItem> = sqlx::query_as(
+        r#"
+        SELECT
+          v.legacy_id AS id,
+          COALESCE(v.file_path, '') AS file_path,
+          (
+            SELECT vt.legacy_id
+            FROM app_video_track vt
+            WHERE vt.project_id = v.project_id
+              AND (vt.select_video_id = v.legacy_id OR vt.video_id = v.id)
+            ORDER BY vt.updated_at DESC, vt.created_at DESC, vt.id DESC
+            LIMIT 1
+          ) AS video_track_id
+        FROM app_video v
+        INNER JOIN app_project p ON p.id = v.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
+        ORDER BY v.legacy_id DESC
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyGetMaterialDataResponse { data, video }))
+}
+
+async fn post_legacy_batch_generation_data(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyBatchGenerationDataBody>,
+) -> Result<Json<LegacyBatchGenerationDataResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    }
+    let asset_type = body.asset_type.trim().to_lowercase();
+    if asset_type.is_empty() {
+        return Err(ApiError::BadRequest("type must be non-empty".into()));
+    }
+    if body.page < 1 {
+        return Err(ApiError::BadRequest("page must be >= 1".into()));
+    }
+    if body.limit < 1 || body.limit > MAX_ASSET_LIST_LIMIT as i32 {
+        return Err(ApiError::BadRequest(format!(
+            "limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"
+        )));
+    }
+    let name = normalize_name_ilike(body.name);
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let total: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND a.asset_type = $3
+          AND ($4::text IS NULL OR a.name ILIKE $4)
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(&asset_type)
+    .bind(name.as_deref())
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let offset = (body.page - 1) as i64 * body.limit as i64;
+    let data: Vec<LegacyBatchGenerationAssetItem> = sqlx::query_as(
+        r#"
+        SELECT
+          a.legacy_id AS id,
+          a.name AS name,
+          a.asset_type AS asset_type,
+          a.description AS description,
+          a.create_time_ms AS create_time_ms
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.owner_user_id = $1
+          AND p.legacy_id = $2
+          AND a.asset_type = $3
+          AND ($4::text IS NULL OR a.name ILIKE $4)
+        ORDER BY a.create_time_ms DESC NULLS LAST, a.legacy_id DESC
+        OFFSET $5
+        LIMIT $6
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(asset_type)
+    .bind(name.as_deref())
+    .bind(offset)
+    .bind(body.limit as i64)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(LegacyBatchGenerationDataResponse { data, total }))
 }
 
 async fn post_legacy_polling_image_assets(
