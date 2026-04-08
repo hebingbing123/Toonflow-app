@@ -2286,7 +2286,7 @@ async fn post_workbench_get_generate_data(
     // Get active video generation jobs (simplified - get recent jobs)
     let generating_jobs = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, payload, status, result, created_at, updated_at
+        SELECT 0 AS legacy_task_id, id, owner_user_id, kind, status, payload, result, NULL AS error_message, NULL AS idempotency_key, NULL AS claimed_by, created_at, updated_at
         FROM app_job
         WHERE owner_user_id = $1
           AND kind = $2

@@ -90,7 +90,7 @@ async fn process_one_job(
                 UPDATE app_generation_job
                 SET status = 'succeeded', result = $1, error_message = NULL, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(result)
@@ -124,7 +124,7 @@ async fn process_one_job(
                 UPDATE app_generation_job
                 SET status = 'failed', error_message = $1, updated_at = NOW()
                 WHERE id = $2 AND status = 'running'
-                RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 "#,
             )
             .bind(msg)
@@ -158,7 +158,7 @@ async fn claim_next_job(pool: &PgPool, worker_id: &str) -> Result<Option<JobRow>
         SET status = 'running', claimed_by = $1, updated_at = NOW()
         FROM cte
         WHERE j.id = cte.id
-        RETURNING j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
+        RETURNING j.legacy_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
         "#,
     )
     .bind(worker_id)

@@ -122,11 +122,17 @@ extension _HomePageTaskCenterController on _HomePageState {
       _taskDetailLegacyLine = null;
     });
     try {
-      await postTasksTaskDetails(token, 1);
+      final jobs = _taskApiJobs ?? (await postTasksGetTaskApi(token, page: 1, limit: 10)).data;
+      final target = jobs.isEmpty ? null : jobs.first;
+      if (target == null) {
+        throw StateError('no task rows available yet; run get-task-api first');
+      }
+      final row = await postTasksTaskDetails(token, target.legacyTaskId);
       if (!mounted) return;
       setState(() {
+        _taskApiJobs = jobs;
         _taskDetailLegacyLine =
-            'taskId=1 -> 501 not implemented (expected legacy integer stub)';
+            'taskId=${row.legacyTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
         _loadingTaskDetailsLegacy = false;
       });
     } on RustApiException catch (e) {

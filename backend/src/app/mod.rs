@@ -2445,12 +2445,12 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
-    async fn tasks_task_details_not_implemented_with_jwt() {
+    async fn tasks_task_details_requires_database_for_int_task_id_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
             post_json_bearer("/api/v1/tasks/task-details", &token, r#"{"taskId":1}"#).await;
-        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
-        assert_eq!(v["code"], "not_implemented");
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
@@ -6324,10 +6324,42 @@ mod pg_contract_tests {
         let (status, task_detail) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "task_detail={task_detail}");
         assert_eq!(task_detail["id"], created_job["id"]);
+        assert_eq!(task_detail["legacy_task_id"], created_job["legacy_task_id"]);
         let legacy_project_id_text = legacy_project_id.to_string();
         assert_eq!(
             task_detail["payload"]["project_legacy_id"].as_str(),
             Some(legacy_project_id_text.as_str())
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/task-details")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"taskId":{}}}"#,
+                        created_job["legacy_task_id"]
+                            .as_i64()
+                            .expect("legacy task id")
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, task_detail_by_int) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "task_detail_by_int={task_detail_by_int}"
+        );
+        assert_eq!(task_detail_by_int["id"], created_job["id"]);
+        assert_eq!(
+            task_detail_by_int["legacy_task_id"],
+            created_job["legacy_task_id"]
         );
 
         cleanup_jobs(&pool, &created_job_ids).await;

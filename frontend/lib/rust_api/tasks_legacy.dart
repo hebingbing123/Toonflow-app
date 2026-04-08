@@ -124,10 +124,10 @@ Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
   return LegacyTasksGetTaskApiResult.fromJson(map);
 }
 
-/// `POST /api/v1/tasks/task-details` with numeric [taskId] — completes without error when the server
-/// returns **501** (legacy SQLite `o_tasks.id` does not map to job UUIDs). For a job UUID, call
-/// [fetchJob] or POST the same path with `{"taskId":"<uuid>"}` and expect **200**/404/503.
-Future<void> postTasksTaskDetails(String accessToken, int taskId) async {
+/// `POST /api/v1/tasks/task-details` with numeric [taskId] — resolves the same job row using
+/// `app_generation_job.legacy_task_id`. For a UUID, call [fetchJob] or POST the same path with
+/// `{"taskId":"<uuid>"}`.
+Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/task-details');
   final res = await http
       .post(
@@ -139,9 +139,14 @@ Future<void> postTasksTaskDetails(String accessToken, int taskId) async {
         body: jsonEncode({'taskId': taskId}),
       )
       .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 501) {
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return JobRow.fromJson(map);
 }
 
 /// `POST /api/v1/tasks/task-details` with a UUID [taskId] — same job payload as `GET /api/v1/jobs/{id}`.

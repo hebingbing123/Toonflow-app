@@ -48,7 +48,7 @@ info:
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **28 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`**: **`taskId`** as **UUID string** returns the same **`JobRow`** as **`GET /api/v1/jobs/{id}`**; **`taskId`** as **integer** → **501** (legacy SQLite **`o_tasks.id`** has no mapping).
+    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** accepts either **UUID** **`id`** or numeric **`legacy_task_id`** and returns the same **`JobRow`**.
 
     **Legacy project CRUD posts (`/api/project/*`):** **`POST …/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**; **`POST …/delete-project`** / **`add-project`** / **`edit-project`** (PG **`app_project`**). **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
@@ -7012,10 +7012,10 @@ paths:
   /api/v1/tasks/task-details:
     post:
       tags: [tasks]
-      summary: Legacy task center — task details (UUID job row or legacy int stub)
+      summary: Legacy task center — task details (UUID or numeric legacy task id)
       operationId: postTasksTaskDetailsV1
       description: |
-        **`taskId`** as **UUID string**: load **`app_generation_job`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer**: **501** — legacy SQLite **`o_tasks.id`** does not map to UUIDs.
+        **`taskId`** as **UUID string**: load **`app_generation_job.id`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer**: load **`app_generation_job.legacy_task_id`** for the caller.
       security:
         - bearerAuth: []
       requestBody:
@@ -7026,7 +7026,7 @@ paths:
               $ref: "#/components/schemas/LegacyTasksTaskDetailsBody"
       responses:
         "200":
-          description: Job row (**`taskId`** was a UUID)
+          description: Job row (**`taskId`** was a UUID or numeric legacy task id)
           content:
             application/json:
               schema:
@@ -7045,12 +7045,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Unknown job id for this user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "501":
-          description: Numeric legacy **`taskId`** (not mapped)
           content:
             application/json:
               schema:
@@ -11308,7 +11302,7 @@ components:
       additionalProperties: false
       properties:
         taskId:
-          description: UUID string (**`app_generation_job.id`**) or legacy positive integer (**501**)
+          description: UUID string (**`app_generation_job.id`**) or positive integer (**`app_generation_job.legacy_task_id`**)
           oneOf:
             - type: string
               format: uuid
@@ -11879,6 +11873,7 @@ components:
     JobRow:
       type: object
       required:
+        - legacy_task_id
         - id
         - owner_user_id
         - kind
@@ -11887,6 +11882,10 @@ components:
         - created_at
         - updated_at
       properties:
+        legacy_task_id:
+          type: integer
+          format: int64
+          description: Monotonic bigint compatibility id for legacy task-center integer lookups.
         id:
           type: string
           format: uuid

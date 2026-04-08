@@ -1,5 +1,5 @@
 //! Legacy **`/api/task/*`** (Electron task center) as **`POST /api/v1/tasks/*`**.
-//! Maps to **`app_project`** / **`app_generation_job`** where shapes align; **`task-details`** accepts **`taskId`** as a **UUID string** (same row as **`GET /api/v1/jobs/{id}`**) or legacy **integer** (**501** — SQLite **`o_tasks.id`** has no mapping).
+//! Maps to **`app_project`** / **`app_generation_job`** where shapes align; **`task-details`** accepts **`taskId`** as either a **UUID string** (`app_generation_job.id`) or a monotonic **integer** (`app_generation_job.legacy_task_id`) for legacy task-center compatibility.
 
 use axum::{
     extract::{Json, State},
@@ -64,7 +64,7 @@ struct LegacyGetTaskApiResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct TaskDetailsBody {
-    /// **`taskId`**: UUID string → load **`app_generation_job`**; positive integer → **501** (legacy SQLite id).
+    /// **`taskId`**: UUID string → load by **`app_generation_job.id`**; positive integer → load by **`legacy_task_id`**.
     task_id: Value,
 }
 
@@ -77,13 +77,6 @@ fn trim_opt(s: Option<String>) -> Option<String> {
             Some(t.to_owned())
         }
     })
-}
-
-fn task_details_not_implemented() -> ApiError {
-    ApiError::NotImplemented(
-        "legacy numeric taskId does not map to app_generation_job UUID ids; use GET /api/v1/jobs/{id}"
-            .into(),
-    )
 }
 
 async fn post_get_project(
@@ -209,7 +202,7 @@ async fn post_get_task_api(
     let offset = (body.page - 1) * body.limit;
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
           AND ($2::text IS NULL OR kind = $2)
@@ -248,7 +241,24 @@ async fn post_task_details(
             if legacy <= 0 {
                 return Err(ApiError::BadRequest("taskId must be positive".into()));
             }
-            Err(task_details_not_implemented())
+            let pool = state
+                .pool
+                .as_ref()
+                .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+            let row = sqlx::query_as::<_, JobRow>(
+                r#"
+                SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                FROM app_generation_job
+                WHERE owner_user_id = $1 AND legacy_task_id = $2
+                "#,
+            )
+            .bind(uid)
+            .bind(legacy)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+            .ok_or(ApiError::NotFound)?;
+            Ok(JsonResponse(row))
         }
         Value::String(s) => {
             let id = Uuid::parse_str(s.trim()).map_err(|_| {
@@ -262,7 +272,7 @@ async fn post_task_details(
                 .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
             let row = sqlx::query_as::<_, JobRow>(
                 r#"
-                SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
                 WHERE id = $1 AND owner_user_id = $2
                 "#,
@@ -382,12 +392,6 @@ mod tests {
             Some("hello".to_string())
         );
         assert_eq!(trim_opt(Some("test".to_string())), Some("test".to_string()));
-    }
-
-    #[test]
-    fn task_details_not_implemented_returns_error() {
-        let err = task_details_not_implemented();
-        assert!(matches!(err, ApiError::NotImplemented(_)));
     }
 
     #[test]

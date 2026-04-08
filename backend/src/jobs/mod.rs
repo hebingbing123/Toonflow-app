@@ -21,6 +21,7 @@ use crate::state::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct JobRow {
+    pub legacy_task_id: i64,
     pub id: Uuid,
     pub owner_user_id: Uuid,
     pub kind: String,
@@ -100,7 +101,7 @@ pub async fn enqueue_generation_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', NULL)
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(owner_user_id)
@@ -300,7 +301,7 @@ async fn list_jobs(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
           AND ($2::text IS NULL OR kind = $2)
@@ -339,7 +340,7 @@ async fn create_job(
     if let Some(ref key) = idem {
         if let Some(row) = sqlx::query_as::<_, JobRow>(
             r#"
-            SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+            SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
             WHERE owner_user_id = $1 AND idempotency_key = $2
             "#,
@@ -362,7 +363,7 @@ async fn create_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', $4)
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(uid)
@@ -380,7 +381,7 @@ async fn create_job(
             };
             sqlx::query_as::<_, JobRow>(
                 r#"
-                SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
                 WHERE owner_user_id = $1 AND idempotency_key = $2
                 "#,
@@ -422,7 +423,7 @@ async fn get_job(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let row = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -452,7 +453,7 @@ async fn cancel_job(
         UPDATE app_generation_job
         SET status = 'cancelled', updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status IN ('queued', 'running')
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
@@ -501,7 +502,7 @@ async fn retry_job(
         UPDATE app_generation_job
         SET status = 'queued', error_message = NULL, result = NULL, claimed_by = NULL, updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
-        RETURNING id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
@@ -542,6 +543,7 @@ mod tests {
 
     fn sample_job_row() -> JobRow {
         JobRow {
+            legacy_task_id: 1,
             id: Uuid::nil(),
             owner_user_id: Uuid::nil(),
             kind: JOB_KIND_FLUTTER_PROBE.into(),

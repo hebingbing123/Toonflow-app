@@ -123,11 +123,25 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
             : () async {
                 setDialogState(() => tasksLegacyBusy[0] = true);
                 try {
-                  await postTasksTaskDetails(token, 1);
+                  final r = await postTasksGetTaskApi(
+                    token,
+                    page: 1,
+                    limit: 1,
+                    projectId: p.legacyId,
+                  );
+                  if (r.data.isEmpty) {
+                    throw StateError('no task rows for project ${p.legacyId}');
+                  }
+                  final row = await postTasksTaskDetails(
+                    token,
+                    r.data.first.legacyTaskId,
+                  );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('POST …/tasks/task-details：501（预期）'),
+                    SnackBar(
+                      content: Text(
+                        'POST …/tasks/task-details：#${row.legacyTaskId} -> ${row.kind}/${row.status}',
+                      ),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -143,7 +157,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                 }
               },
         child: Text(
-          tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks task-details (501)',
+          tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks task-details (int)',
         ),
       ),
     ];

@@ -86,7 +86,7 @@ class TaskCenterSection extends StatelessWidget {
               child: Text(
                 loadingTaskDetailsLegacy
                     ? '…'
-                    : 'POST …/tasks/task-details (501)',
+                    : 'POST …/tasks/task-details (int)',
               ),
             ),
           ],
@@ -147,7 +147,7 @@ class TaskCenterSection extends StatelessWidget {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text('${job.kind} · ${job.status}'),
-                  subtitle: Text(job.id),
+                  subtitle: Text('#${job.legacyTaskId} · ${job.id}'),
                   onTap: () => onSelectTaskJob(job),
                 ),
               ),
