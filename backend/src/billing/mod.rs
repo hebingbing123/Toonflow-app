@@ -139,6 +139,20 @@ fn parse_sort(raw: Option<&str>) -> Result<&'static str, ApiError> {
     }
 }
 
+fn parse_provider_filter(raw: Option<&str>) -> Result<Option<String>, ApiError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+    let normalized = normalize_provider_name(raw)
+        .ok_or_else(|| ApiError::BadRequest("provider must be non-empty".into()))?;
+    match normalized.as_str() {
+        "stripe" | "alipay" | "paddle" => Ok(Some(normalized)),
+        _ => Err(ApiError::BadRequest(
+            "provider must be one of: stripe, alipay, paddle".into(),
+        )),
+    }
+}
+
 fn validate_time_range(
     from: Option<DateTime<Utc>>,
     to: Option<DateTime<Utc>>,
@@ -165,7 +179,7 @@ async fn list_billing_webhook_events(
 
     let limit = q.limit.unwrap_or(50).clamp(1, 200);
     let offset = q.offset.unwrap_or(0).max(0);
-    let provider = q.provider.as_deref().and_then(normalize_provider_name);
+    let provider = parse_provider_filter(q.provider.as_deref())?;
     let raw_event_id = q
         .raw_event_id
         .as_deref()

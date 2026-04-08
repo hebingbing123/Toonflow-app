@@ -2658,6 +2658,15 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn billing_webhook_events_rejects_unknown_provider() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/webhooks/billing/events?provider=foo", &token).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn billing_webhook_events_rejects_invalid_sort() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
