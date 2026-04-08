@@ -75,6 +75,10 @@ fn normalize_project_filter(project_id: Option<i32>) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
+fn compute_page_offset(page: i32, limit: i32) -> i64 {
+    i64::from(page - 1) * i64::from(limit)
+}
+
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
         let t = v.trim();
@@ -223,7 +227,7 @@ async fn post_get_task_api(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let offset = (body.page - 1) * body.limit;
+    let offset = compute_page_offset(body.page, body.limit);
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
@@ -241,7 +245,7 @@ async fn post_get_task_api(
     .bind(kind.as_deref())
     .bind(status.as_deref())
     .bind(project_key.as_deref())
-    .bind(offset as i64)
+    .bind(offset)
     .bind(body.limit as i64)
     .fetch_all(pool)
     .await
@@ -436,6 +440,13 @@ mod tests {
     #[test]
     fn normalize_project_filter_returns_text_for_positive() {
         assert_eq!(normalize_project_filter(Some(7)), Some("7".to_string()));
+    }
+
+    #[test]
+    fn compute_page_offset_handles_normal_and_large_values() {
+        assert_eq!(compute_page_offset(1, 10), 0);
+        assert_eq!(compute_page_offset(3, 10), 20);
+        assert_eq!(compute_page_offset(i32::MAX, 100), 214748364600);
     }
 
     #[test]
