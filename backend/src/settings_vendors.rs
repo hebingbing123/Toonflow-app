@@ -1,8 +1,12 @@
-//! Legacy **`POST /api/setting/vendorConfig/getVendorList`** returned SQLite **`o_vendorConfig`** rows (including **`inputValues`** secrets).
-//! SaaS: **`GET …/vendors/summary`** merges static catalog with per-user **`vendor_config`** from `app_user_profile`.
-//! **`POST …/vendors/enable`** persists enable/disable state; **`POST …/vendors/update`** persists display name and settings (no API keys).
-//! **`POST …/model-test`** validates the legacy body, enqueues **`settings.vendor.model_test`**; worker fails until a live probe exists.
-//! **`addVendor`** / **`deleteVendor`** / **`updateCode`** / **`getCodeByLink`**: validate then **501** (no custom vendor creation, no TS/vm2 execution, no outbound fetch).
+//! Legacy **`POST /api/setting/vendorConfig/getVendorList`** returned SQLite **`o_vendorConfig`**
+//! rows (including **`inputValues`** secrets).
+//! SaaS: **`GET …/vendors/summary`** merges the static catalog with per-user **`vendor_config`**
+//! from `app_user_profile`.
+//! **`POST …/vendors/{add,update,delete,enable,update-code,code-from-link}`** persists vendor
+//! metadata in Postgres-backed user config, but never executes TS, fetches remote code, or stores
+//! API keys. Custom / linked vendor code is stored as metadata only.
+//! **`POST …/model-test`** validates the legacy body, enqueues **`settings.vendor.model_test`**;
+//! worker execution remains a queued stub until a live probe exists.
 //! API keys (`inputValues`) are intentionally NOT stored; use server env or vault.
 
 use std::collections::HashMap;

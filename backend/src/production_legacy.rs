@@ -1,6 +1,7 @@
-//! Legacy **`/api/production/*`**: SQLite **`o_video`**, **`o_videoConfig`**, **`o_agentWorkData`** (production flow), OSS paths.
-//! SaaS parity now covers the production workbench routes in this module; `LEGACY_JSON_STUB_PATHS`
-//! remains only as an explicit escape hatch if an old POST path ever needs to fall back to **501** again.
+//! Legacy **`/api/production/*`**: SQLite **`o_video`**, **`o_videoConfig`**, **`o_agentWorkData`**
+//! (production flow), OSS paths.
+//! SaaS parity now covers the production workbench routes in this module; no generic **501** JSON
+//! stub fallback remains registered here.
 
 use axum::{
     extract::{Json, State},
@@ -10,7 +11,6 @@ use axum::{
     Json as JsonResponse, Router,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use sqlx::FromRow;
 
 use crate::auth::require_user_uuid;
@@ -19,30 +19,6 @@ use crate::jobs::{
     enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_VIDEO_GENERATE,
 };
 use crate::state::AppState;
-
-fn not_implemented() -> ApiError {
-    ApiError::NotImplemented(
-        "production route is not implemented in Rust yet; align the handler and OpenAPI before exposing this path"
-            .into(),
-    )
-}
-
-fn require_json_object(body: &Value) -> Result<(), ApiError> {
-    if body.as_object().is_none() {
-        return Err(ApiError::BadRequest("body must be a JSON object".into()));
-    }
-    Ok(())
-}
-
-async fn post_production_legacy_json_stub(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<Value>,
-) -> Result<Response, ApiError> {
-    let _ = require_user_uuid(&state, &headers)?;
-    require_json_object(&body)?;
-    Err(not_implemented())
-}
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
@@ -2356,10 +2332,8 @@ async fn post_workbench_get_video_model_detail(
     }))
 }
 
-const LEGACY_JSON_STUB_PATHS: &[&str] = &[];
-
 pub fn router() -> Router<AppState> {
-    let mut r = Router::new()
+    Router::new()
         .route(
             "/api/v1/production/get-production-data",
             post(post_get_production_data),
@@ -2489,11 +2463,7 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/production/workbench/get-video-model-detail",
             post(post_workbench_get_video_model_detail),
-        );
-    for path in LEGACY_JSON_STUB_PATHS {
-        r = r.route(path, post(post_production_legacy_json_stub));
-    }
-    r
+        )
 }
 
 #[cfg(test)]
@@ -2617,29 +2587,9 @@ mod tests {
     }
 
     #[test]
-    fn require_json_object_rejects_non_object() {
-        assert!(require_json_object(&Value::Null).is_err());
-        assert!(require_json_object(&Value::Array(vec![])).is_err());
-        assert!(require_json_object(&Value::String("test".to_string())).is_err());
-        assert!(require_json_object(&Value::Number(42.into())).is_err());
-        assert!(require_json_object(&Value::Bool(true)).is_err());
-    }
-
-    #[test]
-    fn require_json_object_accepts_object() {
-        assert!(require_json_object(&Value::Object(serde_json::Map::new())).is_ok());
-    }
-
-    #[test]
-    fn not_implemented_returns_error() {
-        let err = not_implemented();
-        assert!(matches!(err, ApiError::NotImplemented(_)));
-    }
-
-    #[test]
-    fn legacy_json_stub_paths_is_empty_when_all_implemented() {
-        // When all endpoints are implemented, LEGACY_JSON_STUB_PATHS should be empty
-        assert!(LEGACY_JSON_STUB_PATHS.is_empty());
+    fn router_builds_without_generic_stub_paths() {
+        let app = router();
+        let _ = app;
     }
 
     #[test]
