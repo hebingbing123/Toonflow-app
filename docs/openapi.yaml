@@ -9169,7 +9169,8 @@ components:
         base64:
           type: string
           nullable: true
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image).
+          maxLength: 24000000
+          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
 
     PolishAssetsPromptBody:
       type: object
@@ -9207,7 +9208,8 @@ components:
         base64:
           type: string
           nullable: true
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image).
+          maxLength: 24000000
+          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
 
     BatchGenerateImageAssetsBody:
       type: object
