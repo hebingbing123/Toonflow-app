@@ -409,32 +409,12 @@ async fn run_vendor_model_test(
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing id".into()))?;
 
-    let vendor = lookup_vendor_catalog(raw_vendor_id);
-    let resolved_vendor_id = vendor
-        .as_ref()
-        .map(|v| v.slug.clone())
-        .unwrap_or_else(|| raw_vendor_id.trim().to_ascii_lowercase());
-    let mut vendor_candidates = vec![raw_vendor_id.trim().to_string()];
-    if vendor_candidates.iter().all(|v| v != &resolved_vendor_id) {
-        vendor_candidates.push(resolved_vendor_id.clone());
-    }
-    if let Some(vendor) = vendor.as_ref() {
-        let legacy_id = vendor.legacy_id.to_string();
-        if vendor_candidates.iter().all(|v| v != &legacy_id) {
-            vendor_candidates.push(legacy_id);
-        }
-    }
+    let (vendor, resolved_vendor_id, vendor_candidates) =
+        resolve_vendor_probe_targets(raw_vendor_id);
 
     let stored_secret =
         load_vendor_probe_secret(pool, row.owner_user_id, &vendor_candidates).await?;
-    let credential_source = if stored_secret.is_some() {
-        "stored_vendor_credential"
-    } else {
-        match kind {
-            "video" => "provider_env",
-            _ => "server_llm_env",
-        }
-    };
+    let credential_source = vendor_probe_credential_source(kind, stored_secret.is_some());
 
     match kind {
         "text" => {
@@ -541,6 +521,41 @@ async fn run_vendor_model_test(
         other => Err(JobRunError::Failed(format!(
             "unsupported vendor model test kind: {other}"
         ))),
+    }
+}
+
+fn resolve_vendor_probe_targets(
+    raw_vendor_id: &str,
+) -> (
+    Option<crate::models_catalog::VendorCatalogLookup>,
+    String,
+    Vec<String>,
+) {
+    let vendor = lookup_vendor_catalog(raw_vendor_id);
+    let resolved_vendor_id = vendor
+        .as_ref()
+        .map(|v| v.slug.clone())
+        .unwrap_or_else(|| raw_vendor_id.trim().to_ascii_lowercase());
+    let mut vendor_candidates = vec![raw_vendor_id.trim().to_string()];
+    if vendor_candidates.iter().all(|v| v != &resolved_vendor_id) {
+        vendor_candidates.push(resolved_vendor_id.clone());
+    }
+    if let Some(vendor) = vendor.as_ref() {
+        let legacy_id = vendor.legacy_id.to_string();
+        if vendor_candidates.iter().all(|v| v != &legacy_id) {
+            vendor_candidates.push(legacy_id);
+        }
+    }
+    (vendor, resolved_vendor_id, vendor_candidates)
+}
+
+fn vendor_probe_credential_source(kind: &str, has_stored_secret: bool) -> &'static str {
+    if has_stored_secret {
+        "stored_vendor_credential"
+    } else if kind == "video" {
+        "provider_env"
+    } else {
+        "server_llm_env"
     }
 }
 
@@ -1196,4 +1211,89 @@ async fn run_video_export(
         "format": format,
         "include_audio": include_audio,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use tokio::sync::RwLock;
+
+    use super::*;
+    use crate::notify_hub::WsNotifyHub;
+    use crate::state::MemoryConfig;
+
+    fn test_state_without_llm() -> AppState {
+        AppState {
+            pool: None,
+            jwt_secret: None,
+            llm: None,
+            http_client: reqwest::Client::new(),
+            notify: WsNotifyHub::new(),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
+            local_asset_image_dir: None,
+        }
+    }
+
+    #[test]
+    fn clip_preview_trims_and_ellipsizes() {
+        assert_eq!(clip_preview("  ok  ", 8), "ok");
+        assert_eq!(clip_preview("abcdef", 4), "abcd...");
+    }
+
+    #[test]
+    fn resolve_vendor_probe_targets_expands_catalog_aliases() {
+        let (vendor, resolved_vendor_id, candidates) = resolve_vendor_probe_targets("1");
+        assert!(
+            vendor.is_some(),
+            "legacy id should resolve into vendor catalog"
+        );
+        assert_eq!(resolved_vendor_id, "openai");
+        assert_eq!(candidates, vec!["1", "openai"]);
+    }
+
+    #[test]
+    fn resolve_vendor_probe_targets_normalizes_unknown_vendor_ids() {
+        let (vendor, resolved_vendor_id, candidates) =
+            resolve_vendor_probe_targets("  CUSTOM-ENDPOINT  ");
+        assert!(vendor.is_none());
+        assert_eq!(resolved_vendor_id, "custom-endpoint");
+        assert_eq!(candidates, vec!["CUSTOM-ENDPOINT", "custom-endpoint"]);
+    }
+
+    #[test]
+    fn vendor_probe_credential_source_prefers_stored_credentials() {
+        assert_eq!(
+            vendor_probe_credential_source("text", true),
+            "stored_vendor_credential"
+        );
+        assert_eq!(
+            vendor_probe_credential_source("image", false),
+            "server_llm_env"
+        );
+        assert_eq!(
+            vendor_probe_credential_source("video", false),
+            "provider_env"
+        );
+    }
+
+    #[test]
+    fn vendor_probe_llm_config_without_state_llm_returns_clear_error() {
+        let state = test_state_without_llm();
+        let err = match vendor_probe_llm_config(&state, None, "gpt-4o-mini") {
+            Ok(_) => panic!("text/image probe should require llm config or stored secret"),
+            Err(err) => err,
+        };
+
+        match err {
+            JobRunError::Failed(message) => {
+                assert!(
+                    message.contains("OPENAI_API_KEY") || message.contains("LLM_API_KEY"),
+                    "unexpected message: {message}"
+                );
+            }
+            JobRunError::Cancelled => panic!("unexpected cancellation"),
+        }
+    }
 }

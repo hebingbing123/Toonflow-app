@@ -6,7 +6,9 @@
 //! metadata in Postgres-backed user config, but never executes TS, fetches remote code, or stores
 //! API keys. Custom / linked vendor code is stored as metadata only.
 //! **`POST …/model-test`** validates the legacy body, enqueues **`settings.vendor.model_test`**;
-//! worker execution remains a queued stub until a live probe exists.
+//! the worker then performs a live probe:
+//! text / image prefer stored vendor credentials and fall back to server LLM env,
+//! while video resolves provider-specific minimal generation requests.
 //! API keys (`inputValues`) are intentionally NOT stored; use server env or vault.
 
 use std::collections::HashMap;

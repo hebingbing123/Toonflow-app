@@ -80,7 +80,8 @@ pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
 /// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker runs **`chat_completion_assistant_text`** per item when **`LlmConfig`** is set (cooperative cancel between items), else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
-/// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker fails until live LLM/OSS probe exists.
+/// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker performs a live
+/// text/image/video vendor probe using stored credentials when present, otherwise server env fallbacks.
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
 /// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
 pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
