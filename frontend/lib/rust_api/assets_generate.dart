@@ -3,7 +3,8 @@ part of 'index.dart';
 /// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1`.
 /// **200** = **`queued`** **`JobRow`** (**`asset.generate.image`**); worker **`succeeded`** inserts
 /// **`app_asset_image`** (temporary provider **`image_url`**) when **`OPENAI_API_KEY`/`LLM_API_KEY`**
-/// is set. **404** unknown project; **429** daily quota; **503** no DB.
+/// is set. Optional **`base64`** accepts data URI or raw base64 reference image. **404** unknown
+/// project; **429** daily quota; **503** no DB.
 Future<int> postAssetsGenerateGenerateV1(
   String accessToken, {
   required int projectId,
@@ -13,8 +14,19 @@ Future<int> postAssetsGenerateGenerateV1(
   required String type,
   required String name,
   required String prompt,
+  String? base64,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/generate');
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'model': model,
+    'resolution': resolution,
+    'id': assetLegacyId,
+    'type': type,
+    'name': name,
+    'prompt': prompt,
+  };
+  if (base64 != null) body['base64'] = base64;
   final res = await http
       .post(
         uri,
@@ -22,15 +34,7 @@ Future<int> postAssetsGenerateGenerateV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'model': model,
-          'resolution': resolution,
-          'id': assetLegacyId,
-          'type': type,
-          'name': name,
-          'prompt': prompt,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
