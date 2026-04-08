@@ -26,6 +26,7 @@ part 'project_manuals.dart';
 part 'projects_legacy.dart';
 part 'projects_legacy_compat.dart';
 part 'quality_reviews.dart';
+part 'scripts_storyboards_models.dart';
 part 'scripts_storyboards.dart';
 part 'script_agent.dart';
 part 'skills_api.dart';
