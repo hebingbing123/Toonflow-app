@@ -124,6 +124,19 @@ pub struct StagePassRateItem {
     pub avg_score: Option<f64>,
 }
 
+fn validate_list_reviews_query(query: &ListQualityReviewsQuery) -> Result<(), ApiError> {
+    if let Some(target_type) = query.target_type.as_deref() {
+        if !VALID_TARGET_TYPES.contains(&target_type) {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid target_type: {}, must be one of {:?}",
+                target_type, VALID_TARGET_TYPES
+            )));
+        }
+    }
+
+    Ok(())
+}
+
 fn validate_create_review_body(body: &CreateQualityReviewBody) -> Result<(), ApiError> {
     if !VALID_TARGET_TYPES.contains(&body.target_type.as_str()) {
         return Err(ApiError::BadRequest(format!(
@@ -255,6 +268,7 @@ async fn list_reviews(
     Query(query): Query<ListQualityReviewsQuery>,
 ) -> Result<Json<Vec<QualityReview>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
+    validate_list_reviews_query(&query)?;
     let pool = state
         .pool
         .as_ref()
@@ -517,6 +531,20 @@ mod tests {
             ..Default::default()
         };
         let err = validate_create_review_body(&body).expect_err("out of range score");
+        assert!(matches!(err, ApiError::BadRequest(_)));
+    }
+
+    #[test]
+    fn validate_list_reviews_query_rejects_invalid_target_type() {
+        let query = ListQualityReviewsQuery {
+            target_type: Some("chapter".to_string()),
+            target_id: None,
+            job_id: None,
+            is_bad_case: None,
+            limit: None,
+            offset: None,
+        };
+        let err = validate_list_reviews_query(&query).expect_err("invalid target type");
         assert!(matches!(err, ApiError::BadRequest(_)));
     }
 }

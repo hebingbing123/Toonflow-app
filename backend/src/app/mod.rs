@@ -8916,6 +8916,16 @@ mod pg_contract_tests {
     }
 
     #[tokio::test]
+    async fn quality_reviews_list_validates_query_before_db_access() {
+        let token = test_jwt(Uuid::new_v4());
+
+        let (status, body) =
+            get_json_bearer("/api/v1/quality/reviews?targetType=chapter", &token).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "body={body}");
+        assert_eq!(body["code"], "bad_request");
+    }
+
+    #[tokio::test]
     async fn quality_endpoints_return_database_error_without_pool() {
         let token = test_jwt(Uuid::new_v4());
         let review_id = Uuid::nil();
