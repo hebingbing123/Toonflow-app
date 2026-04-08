@@ -7515,7 +7515,7 @@ paths:
       description: |
         Store encrypted API key/secret/token for a vendor.
         Requires TOONFLOW_VENDOR_CREDENTIAL_KEY env to be set.
-        Returns key hint for identification (e.g., "...1234").
+        Returns key hint for identification (e.g., "...1234"). Actual secret values never round-trip over HTTP.
       security:
         - bearerAuth: []
       requestBody:
@@ -7591,6 +7591,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
     delete:
       tags: [settings]
       summary: Delete vendor credential
@@ -7623,6 +7629,12 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Credential not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Database not configured
           content:
             application/json:
               schema:

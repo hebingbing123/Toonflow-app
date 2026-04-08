@@ -152,6 +152,55 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
     );
     statuses['vendors.link'] = vendorFromLink.status;
 
+    final credentialVendorId =
+        vendorAdd.body?.vendorId ?? 'probe-vendor-credential';
+    final credentialStore = await _vendorCredentialProbe(
+      () => postSettingsVendorCredentialV1(
+        token,
+        vendorId: credentialVendorId,
+        apiKey: 'sk-probe-1234',
+        apiSecret: 'probe-secret',
+        apiToken: 'probe-token',
+      ),
+    );
+    _expectProbeStatus(
+      label: 'POST settings/vendors/credential',
+      status: credentialStore.status,
+      accepted: const [200, 501, 503],
+    );
+    statuses['vendors.cred.store'] = credentialStore.status;
+
+    final credentialGet = await _vendorCredentialProbe(
+      () => getSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
+    );
+    _expectProbeStatus(
+      label: 'GET settings/vendors/credential/{vendorId}',
+      status: credentialGet.status,
+      accepted: const [200, 404, 503],
+    );
+    statuses['vendors.cred.get'] = credentialGet.status;
+
+    final credentialDelete = await _vendorMutationProbe(
+      () =>
+          deleteSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
+    );
+    _expectProbeStatus(
+      label: 'DELETE settings/vendors/credential/{vendorId}',
+      status: credentialDelete.status,
+      accepted: const [200, 404, 503],
+    );
+    statuses['vendors.cred.del'] = credentialDelete.status;
+
+    final credentialGetAfterDelete = await _vendorCredentialProbe(
+      () => getSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
+    );
+    _expectProbeStatus(
+      label: 'GET settings/vendors/credential/{vendorId} after delete',
+      status: credentialGetAfterDelete.status,
+      accepted: const [404, 503],
+    );
+    statuses['vendors.cred.get404'] = credentialGetAfterDelete.status;
+
     final vendorDelete = await _vendorMutationProbe(
       () => postSettingsVendorsDeleteV1(token, id: vendorId),
     );
@@ -231,6 +280,18 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
 
   Future<({int status, VendorMutationResponseV1? body})> _vendorMutationProbe(
     Future<VendorMutationResponseV1> Function() run,
+  ) async {
+    try {
+      final body = await run();
+      return (status: 200, body: body);
+    } on RustApiException catch (e) {
+      return (status: e.statusCode ?? -1, body: null);
+    }
+  }
+
+  Future<({int status, VendorCredentialResponseV1? body})>
+  _vendorCredentialProbe(
+    Future<VendorCredentialResponseV1> Function() run,
   ) async {
     try {
       final body = await run();

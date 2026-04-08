@@ -34,6 +34,18 @@ mod jwt_fixture {
 }
 
 #[cfg(test)]
+static VENDOR_CREDENTIAL_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>> =
+    std::sync::OnceLock::new();
+
+#[cfg(test)]
+async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+    VENDOR_CREDENTIAL_TEST_MUTEX
+        .get_or_init(|| tokio::sync::Mutex::new(()))
+        .lock()
+        .await
+}
+
+#[cfg(test)]
 mod contract_smoke_tests {
     use std::net::SocketAddr;
     use std::sync::Arc;
@@ -50,6 +62,7 @@ mod contract_smoke_tests {
 
     use super::build_router;
     use super::jwt_fixture;
+    use super::vendor_credential_test_lock;
     use crate::notify_hub::WsNotifyHub;
     use crate::state::{AppState, MemoryConfig};
     use axum::http::HeaderValue;
@@ -66,7 +79,6 @@ mod contract_smoke_tests {
 
     /// Serialize billing webhook tests that read or write **`BILLING_WEBHOOK_SECRET`** (avoids parallel **`cargo test`** flakes).
     static BILLING_WEBHOOK_TEST_MUTEX: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
-
     async fn billing_webhook_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
         BILLING_WEBHOOK_TEST_MUTEX
             .get_or_init(|| tokio::sync::Mutex::new(()))
@@ -978,6 +990,55 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_credential_requires_encryption_key_with_jwt() {
+        let _guard = vendor_credential_test_lock().await;
+        std::env::remove_var("TOONFLOW_VENDOR_CREDENTIAL_KEY");
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/credential",
+            &token,
+            r#"{"vendorId":"openai","apiKey":"sk-test-1234"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert_eq!(v["code"], "not_implemented");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_credential_requires_database_with_jwt() {
+        let _guard = vendor_credential_test_lock().await;
+        std::env::set_var("TOONFLOW_VENDOR_CREDENTIAL_KEY", "test-credential-key");
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/settings/vendors/credential",
+            &token,
+            r#"{"vendorId":"openai","apiKey":"sk-test-1234"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+        std::env::remove_var("TOONFLOW_VENDOR_CREDENTIAL_KEY");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_get_credential_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            get_json_bearer("/api/v1/settings/vendors/credential/openai", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
+    async fn settings_vendors_delete_credential_requires_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) =
+            delete_json_bearer("/api/v1/settings/vendors/credential/openai", &token).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
@@ -4022,6 +4083,7 @@ mod pg_contract_tests {
 
     use super::build_router;
     use super::jwt_fixture;
+    use super::vendor_credential_test_lock;
     use crate::jobs::{
         JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
         JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
@@ -7558,6 +7620,7 @@ mod pg_contract_tests {
     #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
     async fn vendor_credential_store_get_delete_roundtrip() {
+        let _guard = vendor_credential_test_lock().await;
         let _ = dotenvy::dotenv();
         let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
         let secret = std::env::var("SUPABASE_JWT_SECRET")
@@ -7606,7 +7669,10 @@ mod pg_contract_tests {
         assert_eq!(stored["keyHint"].as_str(), Some("...7890"));
         assert_eq!(stored["hasSecret"].as_bool(), Some(true));
         assert_eq!(stored["hasToken"].as_bool(), Some(true));
-        assert_eq!(stored["message"].as_str(), Some("credential stored"));
+        assert_eq!(
+            stored["message"].as_str(),
+            Some("Credential stored securely")
+        );
 
         // Get credential metadata
         let res = app
@@ -7645,7 +7711,7 @@ mod pg_contract_tests {
         let (status, deleted) = read_json_response(res).await;
         assert_eq!(status, StatusCode::OK, "delete credential={deleted}");
         assert_eq!(deleted["vendorId"].as_str(), Some(vendor_id));
-        assert_eq!(deleted["message"].as_str(), Some("credential deleted"));
+        assert_eq!(deleted["message"].as_str(), Some("Credential deleted"));
 
         // Verify deletion - should get 404
         let res = app

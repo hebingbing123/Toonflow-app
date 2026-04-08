@@ -44,6 +44,7 @@ part 'skills_api.dart';
 part 'settings_about_danger.dart';
 part 'settings_agent_deploy.dart';
 part 'settings_memory_config_api.dart';
+part 'settings_vendor_credentials.dart';
 part 'settings_vendors_mutations.dart';
 part 'status_auth_me.dart';
 part 'storyboards_api.dart';
