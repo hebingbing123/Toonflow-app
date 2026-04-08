@@ -93,6 +93,20 @@ fn build_provider_event_id(provider: Option<&str>, raw_id: &str) -> String {
     }
 }
 
+fn parse_raw_event_id(v: &Value) -> Option<String> {
+    for key in ["id", "event_id", "eventId", "notify_id"] {
+        let id = v
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+        if let Some(id) = id {
+            return Some(id.chars().take(256).collect());
+        }
+    }
+    None
+}
+
 fn parse_event_type(v: &Value) -> Option<String> {
     v.get("type")
         .and_then(Value::as_str)
@@ -345,20 +359,16 @@ pub(crate) async fn ingest_webhook(
     pool: &sqlx::PgPool,
     v: &Value,
 ) -> Result<(bool, Option<i64>, bool, String, bool), ApiError> {
-    let raw_event_id = v
-        .get("id")
-        .and_then(Value::as_str)
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .ok_or_else(|| {
-            ApiError::BadRequest(
-                "JSON body must include a non-empty string id for deduplication".into(),
-            )
-        })?;
+    let raw_event_id = parse_raw_event_id(v).ok_or_else(|| {
+        ApiError::BadRequest(
+            "JSON body must include a non-empty string id (or event_id/eventId/notify_id) for deduplication"
+                .into(),
+        )
+    })?;
 
     let normalized = normalize_webhook(v);
     let provider = normalized.provider.clone();
-    let provider_event_id = build_provider_event_id(provider.as_deref(), raw_event_id);
+    let provider_event_id = build_provider_event_id(provider.as_deref(), &raw_event_id);
     let event_type = parse_event_type(v);
     let event_created_at = parse_event_created_at(v);
     let informational_event = is_informational_event(v);
@@ -387,7 +397,7 @@ pub(crate) async fn ingest_webhook(
     .bind(&provider_event_id)
     .bind(v)
     .bind(provider.as_deref())
-    .bind(raw_event_id)
+    .bind(&raw_event_id)
     .bind(event_type.as_deref())
     .bind(event_created_at)
     .bind(informational_event)
@@ -462,6 +472,39 @@ mod tests {
     fn parse_event_type_uses_event_type_fallback_when_type_missing() {
         let v = json!({ "event_type": "invoice.paid" });
         assert_eq!(parse_event_type(&v).as_deref(), Some("invoice.paid"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_prefers_id_key() {
+        let v = json!({
+            "id": "evt_primary",
+            "event_id": "evt_secondary"
+        });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_primary"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_supports_event_id_fallback() {
+        let v = json!({ "event_id": "evt_fallback" });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_fallback"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_supports_event_id_camel_case_fallback() {
+        let v = json!({ "eventId": "evt_camel" });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_camel"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_supports_notify_id_fallback() {
+        let v = json!({ "notify_id": "evt_notify" });
+        assert_eq!(parse_raw_event_id(&v).as_deref(), Some("evt_notify"));
+    }
+
+    #[test]
+    fn parse_raw_event_id_returns_none_when_all_candidates_missing_or_blank() {
+        let v = json!({ "event_id": "   ", "notify_id": "" });
+        assert!(parse_raw_event_id(&v).is_none());
     }
 
     #[test]

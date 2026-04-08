@@ -194,8 +194,9 @@ paths:
         - **Toonflow native**: `X-Toonflow-Signature: sha256=<hex>` (HMAC-SHA256 of raw body)
         - **Stripe native**: `Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]` (HMAC-SHA256 of `<unix>.<raw_body>`)
         When both are present, `Stripe-Signature` takes precedence.
-        Persists to `app_billing_webhook_event` when `id` is new; replays return `duplicate: true` (HTTP 200).
-        Deduplication key is **`<billing_provider>:<id>`** when `billing_provider` is present (lowercased), otherwise `id` as-is.
+        Persists to `app_billing_webhook_event` when event id is new; replays return `duplicate: true` (HTTP 200).
+        Deduplication key is **`<billing_provider>:<event_id>`** when `billing_provider` is present (lowercased), otherwise raw event id as-is.
+        Event id fields accepted in order: `id` (recommended), `event_id`, `eventId`, `notify_id`.
         Server also stores best-effort metadata for audit:
         `provider`, `raw_event_id`, `event_type`, `event_created_at`, `is_informational_event`.
         On **first** receipt only, if **`user_id`** (UUID string) and **`plan_tier`** (non-empty string) are present, upserts **`app_user_profile`**.
@@ -260,12 +261,20 @@ paths:
           application/json:
             schema:
               type: object
-              required: [id]
               additionalProperties: true
               properties:
                 id:
                   type: string
-                  description: Provider event id. Used in dedupe key (namespaced by `billing_provider` when present).
+                  description: Preferred dedupe id. Used in dedupe key (namespaced by `billing_provider` when present).
+                event_id:
+                  type: string
+                  description: Compatibility dedupe id fallback.
+                eventId:
+                  type: string
+                  description: Compatibility dedupe id fallback (camelCase).
+                notify_id:
+                  type: string
+                  description: Compatibility dedupe id fallback (legacy provider naming).
                 user_id:
                   type: string
                   format: uuid
