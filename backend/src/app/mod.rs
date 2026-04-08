@@ -8132,6 +8132,35 @@ mod pg_contract_tests {
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(
+                        r#"{"page":1,"limit":10,"projectId":0,"taskClass":"flutter.probe","state":"queued"}"#,
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, zero_project_filter_jobs) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::OK,
+            "zero_project_filter_jobs={zero_project_filter_jobs}"
+        );
+        assert_eq!(zero_project_filter_jobs["total"].as_i64(), Some(1));
+        let zero_project_filter_jobs = zero_project_filter_jobs["data"]
+            .as_array()
+            .expect("zero project filter task rows");
+        assert_eq!(zero_project_filter_jobs.len(), 1);
+        assert_eq!(zero_project_filter_jobs[0]["id"], created_job["id"]);
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/tasks/get-task-api")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
                     .body(Body::from(format!(
                         r#"{{"page":1,"limit":10,"projectId":{legacy_project_id},"state":"failed"}}"#
                     )))

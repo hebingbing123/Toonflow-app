@@ -48,7 +48,7 @@ info:
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **28 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` filters rows whose **`payload.project_legacy_id`** string equals the number). **`POST …/task-details`** accepts either **UUID** **`id`** or numeric **`legacy_task_id`** and returns the same **`JobRow`**.
+    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` only filters when **`> 0`**, matching legacy truthy semantics; otherwise ignored). **`POST …/task-details`** accepts either **UUID** **`id`** or numeric **`legacy_task_id`** and returns the same **`JobRow`**.
 
     **Legacy project CRUD posts (`/api/project/*`):** **`POST …/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**; **`POST …/delete-project`** / **`add-project`** / **`edit-project`** (PG **`app_project`**). **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
@@ -7416,7 +7416,7 @@ paths:
       operationId: postTasksGetTaskApiV1
       description: |
         Parity with legacy **`POST /api/task/getTaskApi`**. Filters **`app_generation_job`** by optional **`taskClass`** (kind),
-        **`state`** (status), and optional **`projectId`** (matches **`payload.project_legacy_id`** as a string when set on the job).
+        **`state`** (status), and optional **`projectId`** (only when **`> 0`**, matching legacy truthy behavior; then matches **`payload.project_legacy_id`** as a string).
         **`page`** is 1-based; **`limit`** is 1–100.
       security:
         - bearerAuth: []
@@ -12237,7 +12237,7 @@ components:
           type: integer
           format: int32
           nullable: true
-          description: When set, requires `payload.project_legacy_id` on the job (string match)
+          description: Filters only when `projectId > 0` (legacy truthy semantics); then requires `payload.project_legacy_id` string-equal to the number.
         page:
           type: integer
           format: int32

@@ -68,6 +68,13 @@ struct TaskDetailsBody {
     task_id: Value,
 }
 
+fn normalize_project_filter(project_id: Option<i32>) -> Option<String> {
+    project_id
+        .filter(|id| *id > 0)
+        .map(|id| id.to_string())
+        .filter(|s| !s.is_empty())
+}
+
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
         let t = v.trim();
@@ -196,10 +203,7 @@ async fn post_get_task_api(
 
     let kind = trim_opt(body.task_class);
     let status = trim_opt(body.state);
-    let project_key = body
-        .project_id
-        .map(|n| n.to_string())
-        .filter(|s| !s.is_empty());
+    let project_key = normalize_project_filter(body.project_id);
 
     let total: i64 = sqlx::query_scalar(
         r#"
@@ -420,6 +424,18 @@ mod tests {
             Some("hello".to_string())
         );
         assert_eq!(trim_opt(Some("test".to_string())), Some("test".to_string()));
+    }
+
+    #[test]
+    fn normalize_project_filter_returns_none_for_none_or_non_positive() {
+        assert_eq!(normalize_project_filter(None), None);
+        assert_eq!(normalize_project_filter(Some(0)), None);
+        assert_eq!(normalize_project_filter(Some(-1)), None);
+    }
+
+    #[test]
+    fn normalize_project_filter_returns_text_for_positive() {
+        assert_eq!(normalize_project_filter(Some(7)), Some("7".to_string()));
     }
 
     #[test]
