@@ -108,6 +108,32 @@ pub(crate) struct VendorCatalogSummary {
     pub(crate) model_kinds: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct VendorCatalogLookup {
+    pub(crate) legacy_id: i32,
+    pub(crate) name: String,
+    pub(crate) slug: String,
+}
+
+fn vendor_slug(name: &str) -> String {
+    let mut out = String::with_capacity(name.len());
+    let mut prev_dash = false;
+    for ch in name.chars() {
+        let next = if ch.is_ascii_alphanumeric() {
+            prev_dash = false;
+            ch.to_ascii_lowercase()
+        } else {
+            if prev_dash {
+                continue;
+            }
+            prev_dash = true;
+            '-'
+        };
+        out.push(next);
+    }
+    out.trim_matches('-').to_string()
+}
+
 pub(crate) fn vendor_catalog_summaries() -> Vec<VendorCatalogSummary> {
     let mut out = Vec::with_capacity(CATALOG.vendors.len());
     for v in &CATALOG.vendors {
@@ -122,6 +148,38 @@ pub(crate) fn vendor_catalog_summaries() -> Vec<VendorCatalogSummary> {
         });
     }
     out
+}
+
+pub(crate) fn lookup_vendor_catalog(raw: &str) -> Option<VendorCatalogLookup> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    if let Ok(legacy_id) = trimmed.parse::<i32>() {
+        if let Some(v) = CATALOG.vendors.iter().find(|v| v.id == legacy_id) {
+            return Some(VendorCatalogLookup {
+                legacy_id: v.id,
+                name: v.name.clone(),
+                slug: vendor_slug(&v.name),
+            });
+        }
+    }
+
+    let normalized = vendor_slug(trimmed);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    CATALOG
+        .vendors
+        .iter()
+        .find(|v| vendor_slug(&v.name) == normalized)
+        .map(|v| VendorCatalogLookup {
+            legacy_id: v.id,
+            name: v.name.clone(),
+            slug: vendor_slug(&v.name),
+        })
 }
 
 fn list_filtered(filter: &str) -> Vec<ModelListEntry> {

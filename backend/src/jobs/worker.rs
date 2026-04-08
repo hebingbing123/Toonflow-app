@@ -16,8 +16,10 @@ use crate::llm::{
     chat_completion_assistant_text, images_generation_url, resolve_openai_image_model,
     resolve_openai_image_size, LlmConfig,
 };
+use crate::models_catalog::lookup_vendor_catalog;
 use crate::state::AppState;
 use crate::usage;
+use crate::vendor_credential::decrypt;
 use crate::video_providers::{
     VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
 };
@@ -197,9 +199,9 @@ async fn execute_kind(
             run_asset_generate_batch(state, pool, id, row).await
         }
         k if k == JOB_KIND_ASSET_POLISH_BATCH => run_asset_polish_batch(state, pool, id, row).await,
-        k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => Err(JobRunError::Failed(
-            "vendor modelTest live probe is not implemented yet".into(),
-        )),
+        k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => {
+            run_vendor_model_test(state, pool, row).await
+        }
         k if k == JOB_KIND_VIDEO_GENERATE => run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => run_video_export(state, pool, id, row).await,
         other => Err(JobRunError::Failed(format!(
@@ -210,6 +212,7 @@ async fn execute_kind(
 
 /// Cap polished text stored on the job row (aligned with HTTP **`prompt`** max on enqueue).
 const MAX_POLISHED_PROMPT_CHARS: usize = 48_000;
+const VENDOR_MODEL_TEST_PREVIEW_CHARS: usize = 160;
 
 async fn generation_job_is_cancelled(pool: &PgPool, job_id: Uuid) -> Result<bool, JobRunError> {
     let st: String =
@@ -295,6 +298,250 @@ async fn run_asset_polish_prompt(
         "asset_legacy_id": asset_legacy_id,
         "polished_prompt": text,
     }))
+}
+
+fn clip_preview(text: &str, max_chars: usize) -> String {
+    let trimmed = text.trim();
+    if trimmed.chars().count() <= max_chars {
+        return trimmed.to_string();
+    }
+    let mut clipped = trimmed.chars().take(max_chars).collect::<String>();
+    clipped.push_str("...");
+    clipped
+}
+
+#[derive(sqlx::FromRow)]
+struct VendorCredentialProbeRow {
+    api_key_encrypted: Option<Vec<u8>>,
+    api_secret_encrypted: Option<Vec<u8>>,
+    api_token_encrypted: Option<Vec<u8>>,
+}
+
+async fn load_vendor_probe_secret(
+    pool: &PgPool,
+    owner_user_id: Uuid,
+    candidates: &[String],
+) -> Result<Option<String>, JobRunError> {
+    for vendor_id in candidates {
+        let row = sqlx::query_as::<_, VendorCredentialProbeRow>(
+            r#"
+            SELECT api_key_encrypted, api_secret_encrypted, api_token_encrypted
+            FROM app_vendor_credential
+            WHERE owner_user_id = $1 AND vendor_id = $2
+            "#,
+        )
+        .bind(owner_user_id)
+        .bind(vendor_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+        let Some(row) = row else {
+            continue;
+        };
+
+        for encrypted in [
+            row.api_key_encrypted.as_deref(),
+            row.api_token_encrypted.as_deref(),
+            row.api_secret_encrypted.as_deref(),
+        ]
+        .into_iter()
+        .flatten()
+        {
+            if let Some(value) = decrypt(encrypted) {
+                let trimmed = value.trim();
+                if !trimmed.is_empty() {
+                    return Ok(Some(trimmed.to_string()));
+                }
+            }
+        }
+    }
+
+    Ok(None)
+}
+
+fn vendor_probe_llm_config(
+    state: &AppState,
+    api_key_override: Option<String>,
+    model_name: &str,
+) -> Result<LlmConfig, JobRunError> {
+    if let Some(api_key) = api_key_override {
+        let base_url = std::env::var("OPENAI_BASE_URL")
+            .unwrap_or_else(|_| "https://api.openai.com/v1".to_string())
+            .trim_end_matches('/')
+            .to_string();
+        return Ok(LlmConfig {
+            api_key,
+            base_url,
+            model: model_name.to_string(),
+        });
+    }
+
+    let Some(cfg) = state.llm.as_ref() else {
+        return Err(JobRunError::Failed(
+            "vendor probe requires stored credential or OPENAI_API_KEY / LLM_API_KEY".into(),
+        ));
+    };
+
+    Ok(LlmConfig {
+        api_key: cfg.api_key.clone(),
+        base_url: cfg.base_url.clone(),
+        model: model_name.to_string(),
+    })
+}
+
+async fn run_vendor_model_test(
+    state: &AppState,
+    pool: &PgPool,
+    row: &JobRow,
+) -> Result<serde_json::Value, JobRunError> {
+    let payload = &row.payload;
+    let model_name = payload
+        .get("model_name")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing model_name".into()))?;
+    let kind = payload
+        .get("kind")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing kind".into()))?;
+    let raw_vendor_id = payload
+        .get("id")
+        .and_then(|x| x.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing id".into()))?;
+
+    let vendor = lookup_vendor_catalog(raw_vendor_id);
+    let resolved_vendor_id = vendor
+        .as_ref()
+        .map(|v| v.slug.clone())
+        .unwrap_or_else(|| raw_vendor_id.trim().to_ascii_lowercase());
+    let mut vendor_candidates = vec![raw_vendor_id.trim().to_string()];
+    if vendor_candidates.iter().all(|v| v != &resolved_vendor_id) {
+        vendor_candidates.push(resolved_vendor_id.clone());
+    }
+    if let Some(vendor) = vendor.as_ref() {
+        let legacy_id = vendor.legacy_id.to_string();
+        if vendor_candidates.iter().all(|v| v != &legacy_id) {
+            vendor_candidates.push(legacy_id);
+        }
+    }
+
+    let stored_secret =
+        load_vendor_probe_secret(pool, row.owner_user_id, &vendor_candidates).await?;
+    let credential_source = if stored_secret.is_some() {
+        "stored_vendor_credential"
+    } else {
+        match kind {
+            "video" => "provider_env",
+            _ => "server_llm_env",
+        }
+    };
+
+    match kind {
+        "text" => {
+            let cfg = vendor_probe_llm_config(state, stored_secret, model_name)?;
+            let text = chat_completion_assistant_text(
+                &cfg,
+                &state.http_client,
+                vec![
+                    json!({"role": "system", "content": "Reply with exactly: pong"}),
+                    json!({"role": "user", "content": "ping"}),
+                ],
+            )
+            .await
+            .map_err(JobRunError::Failed)?;
+
+            Ok(json!({
+                "source": "settings.vendors.model-test",
+                "vendor_id": raw_vendor_id,
+                "resolved_vendor_id": resolved_vendor_id,
+                "resolved_vendor_name": vendor.as_ref().map(|v| v.name.clone()),
+                "model_name": model_name,
+                "kind": kind,
+                "probe_status": "ok",
+                "credential_source": credential_source,
+                "response_preview": clip_preview(&text, VENDOR_MODEL_TEST_PREVIEW_CHARS),
+            }))
+        }
+        "image" => {
+            let cfg = vendor_probe_llm_config(state, stored_secret, model_name)?;
+            let resolved_model = resolve_openai_image_model(model_name);
+            let size = resolve_openai_image_size(&resolved_model, "1024x1024");
+            let (image_url, revised_prompt) = images_generation_url(
+                &cfg,
+                &state.http_client,
+                &resolved_model,
+                "Toonflow vendor smoke test image: a simple gray card with the word OK centered.",
+                size,
+            )
+            .await
+            .map_err(JobRunError::Failed)?;
+
+            Ok(json!({
+                "source": "settings.vendors.model-test",
+                "vendor_id": raw_vendor_id,
+                "resolved_vendor_id": resolved_vendor_id,
+                "resolved_vendor_name": vendor.as_ref().map(|v| v.name.clone()),
+                "model_name": resolved_model,
+                "kind": kind,
+                "probe_status": "ok",
+                "credential_source": credential_source,
+                "image_url": image_url,
+                "revised_prompt": revised_prompt,
+            }))
+        }
+        "video" => {
+            let provider = vendor
+                .as_ref()
+                .and_then(|v| VideoProvider::from_str(&v.slug))
+                .or_else(|| VideoProvider::from_str(raw_vendor_id))
+                .ok_or_else(|| {
+                    JobRunError::Failed(format!(
+                        "video vendor '{raw_vendor_id}' is not supported; expected Runway, Pika, or Kling"
+                    ))
+                })?;
+
+            let response = VideoProviderClient::new()
+                .generate_video_with_api_key(
+                    &VideoGenerationRequest {
+                        provider,
+                        model: model_name.to_string(),
+                        prompt: "Toonflow vendor smoke test video: a minimal monochrome title card with the word OK.".to_string(),
+                        negative_prompt: None,
+                        duration: 5,
+                        resolution: "720p".to_string(),
+                        aspect_ratio: "16:9".to_string(),
+                        image_url: None,
+                        seed: None,
+                    },
+                    stored_secret.as_deref(),
+                )
+                .await
+                .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+            Ok(json!({
+                "source": "settings.vendors.model-test",
+                "vendor_id": raw_vendor_id,
+                "resolved_vendor_id": resolved_vendor_id,
+                "resolved_vendor_name": vendor.as_ref().map(|v| v.name.clone()),
+                "model_name": response.model,
+                "kind": kind,
+                "probe_status": match response.status {
+                    VideoGenerationStatus::Failed => "failed",
+                    _ => "queued",
+                },
+                "credential_source": credential_source,
+                "provider": response.provider,
+                "task_id": response.task_id,
+                "status": response.status.as_str(),
+                "preview_url": response.preview_url,
+                "video_url": response.video_url,
+                "error_message": response.error_message,
+            }))
+        }
+        other => Err(JobRunError::Failed(format!(
+            "unsupported vendor model test kind: {other}"
+        ))),
+    }
 }
 
 async fn run_asset_polish_batch(

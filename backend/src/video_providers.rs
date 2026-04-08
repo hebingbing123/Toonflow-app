@@ -44,13 +44,17 @@ impl VideoProvider {
         }
     }
 
+    pub fn api_key_env_var(&self) -> &'static str {
+        match self {
+            Self::Runway => "RUNWAY_API_KEY",
+            Self::Pika => "PIKA_API_KEY",
+            Self::Kling => "KLING_API_KEY",
+        }
+    }
+
     /// Check if API key is configured via environment variable
     pub fn is_configured(&self) -> bool {
-        match self {
-            Self::Runway => std::env::var("RUNWAY_API_KEY").is_ok(),
-            Self::Pika => std::env::var("PIKA_API_KEY").is_ok(),
-            Self::Kling => std::env::var("KLING_API_KEY").is_ok(),
-        }
+        std::env::var(self.api_key_env_var()).is_ok()
     }
 }
 
@@ -216,20 +220,19 @@ impl VideoProviderClient {
         &self,
         req: &VideoGenerationRequest,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        // Check if provider is configured
-        if !req.provider.is_configured() {
-            return Err(anyhow::anyhow!(
-                "{} API key not configured (set {}_API_KEY)",
-                req.provider.name(),
-                req.provider.name().to_uppercase()
-            ));
-        }
+        self.generate_video_with_api_key(req, None).await
+    }
 
-        // Route to provider-specific implementation
+    pub async fn generate_video_with_api_key(
+        &self,
+        req: &VideoGenerationRequest,
+        api_key_override: Option<&str>,
+    ) -> anyhow::Result<VideoGenerationResponse> {
+        let api_key = resolve_provider_api_key(req.provider, api_key_override)?;
         match req.provider {
-            VideoProvider::Runway => self.generate_runway(req).await,
-            VideoProvider::Pika => self.generate_pika(req).await,
-            VideoProvider::Kling => self.generate_kling(req).await,
+            VideoProvider::Runway => self.generate_runway(req, &api_key).await,
+            VideoProvider::Pika => self.generate_pika(req, &api_key).await,
+            VideoProvider::Kling => self.generate_kling(req, &api_key).await,
         }
     }
 
@@ -285,9 +288,8 @@ impl VideoProviderClient {
     async fn generate_runway(
         &self,
         req: &VideoGenerationRequest,
+        api_key: &str,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        let api_key = std::env::var("RUNWAY_API_KEY")?;
-
         // Runway Gen-2 API endpoint
         let url = format!("{}/v1/generation", VideoProvider::Runway.api_base());
 
@@ -402,9 +404,8 @@ impl VideoProviderClient {
     async fn generate_pika(
         &self,
         req: &VideoGenerationRequest,
+        api_key: &str,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        let api_key = std::env::var("PIKA_API_KEY")?;
-
         let url = format!("{}/v1/generations", VideoProvider::Pika.api_base());
 
         let body = json!({
@@ -508,9 +509,8 @@ impl VideoProviderClient {
     async fn generate_kling(
         &self,
         req: &VideoGenerationRequest,
+        api_key: &str,
     ) -> anyhow::Result<VideoGenerationResponse> {
-        let api_key = std::env::var("KLING_API_KEY")?;
-
         let url = format!("{}/v1/videos/generations", VideoProvider::Kling.api_base());
 
         let body = json!({
@@ -615,6 +615,23 @@ impl Default for VideoProviderClient {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn resolve_provider_api_key(
+    provider: VideoProvider,
+    api_key_override: Option<&str>,
+) -> anyhow::Result<String> {
+    if let Some(value) = api_key_override.map(str::trim).filter(|s| !s.is_empty()) {
+        return Ok(value.to_string());
+    }
+
+    std::env::var(provider.api_key_env_var()).map_err(|_| {
+        anyhow::anyhow!(
+            "{} API key not configured (set {})",
+            provider.name(),
+            provider.api_key_env_var()
+        )
+    })
 }
 
 #[cfg(test)]

@@ -790,10 +790,10 @@ paths:
   /api/v1/settings/vendors/model-test:
     post:
       tags: [settings]
-      summary: Live vendor model smoke test (queued job; worker stub)
+      summary: Live vendor model smoke test (queued job)
       operationId: postSettingsVendorModelTestV1
       description: |
-        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), checks daily job quota, inserts **`app_generation_job`** kind **`settings.vendor.model_test`**. Worker marks **`failed`** until the legacy **`modelTest`** LLM/OSS probe is wired.
+        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), checks daily job quota, inserts **`app_generation_job`** kind **`settings.vendor.model_test`**. Worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway** / **Pika** / **Kling** and submits a minimal provider request (fallback provider env vars). Probe outcome is written into **`result`** or **`error_message`**.
       security:
         - bearerAuth: []
       requestBody:
