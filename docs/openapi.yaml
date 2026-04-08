@@ -213,7 +213,9 @@ paths:
         Non-state Stripe events in the informational whitelist (currently
         `customer.subscription.trial_will_end`, `customer.subscription.pending_update_applied`,
         `customer.subscription.pending_update_expired`, `invoice.finalization_failed`, `invoice.upcoming`,
-        `invoice.created`, `invoice.finalized`, `invoice.updated`, `invoice.sent`)
+        `invoice.created`, `invoice.finalized`, `invoice.updated`, `invoice.sent`,
+        `payment_intent.created`, `payment_intent.succeeded`, `payment_intent.payment_failed`,
+        `charge.succeeded`, `charge.updated`, `charge.failed`)
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
         `trade_status` / `type` / `notify_time`.

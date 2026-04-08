@@ -101,6 +101,12 @@ const STRIPE_INFORMATIONAL_EVENTS: &[&str] = &[
     "invoice.finalized",
     "invoice.updated",
     "invoice.sent",
+    "payment_intent.created",
+    "payment_intent.succeeded",
+    "payment_intent.payment_failed",
+    "charge.succeeded",
+    "charge.updated",
+    "charge.failed",
 ];
 
 const ALIPAY_EVENT_STATUS_MAPPINGS: &[EventStatusMapping] = &[
@@ -718,6 +724,34 @@ mod tests {
         let v = json!({
             "billing_provider": "stripe",
             "type": "invoice.sent"
+        });
+        assert!(is_stripe_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
+    fn derive_stripe_payment_intent_succeeded_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "type": "payment_intent.succeeded"
+        });
+        assert!(is_stripe_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
+    fn derive_stripe_charge_failed_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "type": "charge.failed"
         });
         assert!(is_stripe_informational_event(
             v.get("type").and_then(Value::as_str).map(str::trim)
