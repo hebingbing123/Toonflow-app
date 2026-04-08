@@ -128,3 +128,25 @@ Future<int> postAssetsGenerateBatchPolishV1(
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
 }
+
+/// `POST /api/v1/assets-generate/cancel-generate` — OpenAPI
+/// `postAssetsGenerateCancelGenerateV1`.
+/// Legacy-compatible cancel acknowledgement: **200** for accepted cancel (idempotent when
+/// legacy image id is not found), **400** invalid id, **503** no DB.
+Future<int> postAssetsGenerateCancelGenerateV1(
+  String accessToken, {
+  required int legacyImageId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/cancel-generate');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id': legacyImageId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
+}

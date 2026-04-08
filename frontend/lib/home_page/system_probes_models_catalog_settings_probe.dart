@@ -275,6 +275,17 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
     );
     statuses['batch-polish'] = batchPolish;
 
+    final cancelGenerate = await postAssetsGenerateCancelGenerateV1(
+      token,
+      legacyImageId: 1,
+    );
+    _expectProbeStatus(
+      label: 'POST assets-generate/cancel-generate',
+      status: cancelGenerate,
+      accepted: const [200, 503],
+    );
+    statuses['cancel-generate'] = cancelGenerate;
+
     return statuses;
   }
 

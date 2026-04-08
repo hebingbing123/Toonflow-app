@@ -1,5 +1,6 @@
 //! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
 //! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
+//! **`POST …/cancel-generate`** marks one legacy image row as cancelled (**`state = 生成失败`**) for caller-owned assets.
 //! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible image generation (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**) then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) and used as the reference image for provider **`images/edits`** (fallback to **`images/generations`** when absent).
 
 use axum::{
@@ -99,6 +100,12 @@ struct BatchPolishAssetsPromptBody {
     #[serde(default)]
     concurrent_count: Option<i32>,
     items: Vec<BatchPolishItem>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CancelGenerateBody {
+    id: i32,
 }
 
 fn asset_type_str(k: &AssetGenKind) -> &'static str {
@@ -457,6 +464,43 @@ async fn post_batch_polish_assets_prompt(
     Ok(JsonResponse(row))
 }
 
+async fn post_cancel_generate(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<CancelGenerateBody>,
+) -> Result<JsonResponse<serde_json::Value>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.id <= 0 {
+        return Err(ApiError::BadRequest("id must be positive".into()));
+    }
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let _ = sqlx::query(
+        r#"
+        UPDATE app_asset_image ai
+        SET state = '生成失败',
+            metadata = COALESCE(ai.metadata, '{}'::jsonb)
+              || jsonb_build_object('cancelled', true, 'cancel_source', 'legacy.assets-generate.cancel-generate')
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE ai.asset_id = a.id
+          AND p.owner_user_id = $1
+          AND ai.legacy_image_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(body.id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(JsonResponse(json!({ "message": "取消成功" })))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
@@ -474,6 +518,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/assets-generate/batch-polish",
             post(post_batch_polish_assets_prompt),
+        )
+        .route(
+            "/api/v1/assets-generate/cancel-generate",
+            post(post_cancel_generate),
         )
 }
 
