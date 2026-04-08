@@ -1555,6 +1555,19 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_generate_generate_accepts_raw_base64_before_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/generate",
+            &token,
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","id":1,"type":"role","name":"n","prompt":"p","base64":"QUJDRA=="}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
+    }
+
+    #[tokio::test]
     async fn assets_generate_polish_prompt_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -1604,6 +1617,19 @@ mod contract_smoke_tests {
         .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_generate_batch_generate_accepts_data_uri_base64_before_database_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets-generate/batch-generate",
+            &token,
+            r#"{"projectId":1,"model":"1:x","resolution":"1024x1024","items":[{"id":1,"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}]}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(v["code"], "database_error");
     }
 
     #[tokio::test]
