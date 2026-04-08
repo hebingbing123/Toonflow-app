@@ -310,9 +310,9 @@ async fn post_batch_generate_image_assets(
         )));
     }
     if let Some(n) = body.concurrent_count {
-        if n < 0 {
+        if n <= 0 {
             return Err(ApiError::BadRequest(
-                "concurrentCount must be non-negative".into(),
+                "concurrentCount must be at least 1".into(),
             ));
         }
     }
@@ -399,9 +399,9 @@ async fn post_batch_polish_assets_prompt(
         )));
     }
     if let Some(n) = body.concurrent_count {
-        if n < 0 {
+        if n <= 0 {
             return Err(ApiError::BadRequest(
-                "concurrentCount must be non-negative".into(),
+                "concurrentCount must be at least 1".into(),
             ));
         }
     }
