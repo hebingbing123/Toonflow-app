@@ -1838,6 +1838,30 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_add_assets_rejects_invalid_type_with_jwt() {
+        let token = test_jwt(Uuid::nil());
+        let (status, v) = post_json_bearer(
+            "/api/v1/assets/add-assets",
+            &token,
+            r#"{"name":"hero","describe":"d","type":"clip","projectId":1}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_save_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/assets/save-assets",
+            r#"{"id":1,"projectId":1,"type":"role"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn assets_save_assets_rejects_invalid_type_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -1864,6 +1888,17 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_update_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json(
+            "/api/v1/assets/update-assets",
+            r#"{"id":1,"name":"n","describe":"d"}"#,
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn assets_update_assets_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) = post_json_bearer(
@@ -1877,6 +1912,13 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_del_assets_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/assets/del-assets", r#"{"id":1}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn assets_del_assets_requires_database_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
@@ -1886,12 +1928,26 @@ mod contract_smoke_tests {
     }
 
     #[tokio::test]
+    async fn assets_batch_delete_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/assets/batch-delete", r#"{"id":[1]}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
+    }
+
+    #[tokio::test]
     async fn assets_batch_delete_rejects_empty_ids_with_jwt() {
         let token = test_jwt(Uuid::nil());
         let (status, v) =
             post_json_bearer("/api/v1/assets/batch-delete", &token, r#"{"id":[]}"#).await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(v["code"], "bad_request");
+    }
+
+    #[tokio::test]
+    async fn assets_del_image_unauthorized_without_bearer() {
+        let (status, v) = post_json("/api/v1/assets/del-image", r#"{"id":1}"#).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert_eq!(v["code"], "unauthorized");
     }
 
     #[tokio::test]
