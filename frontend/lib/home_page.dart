@@ -13,6 +13,7 @@ import 'rust_api.dart';
 part 'home_page/project_editor.dart';
 part 'home_page/project_editor_legacy_probes.dart';
 part 'home_page/project_editor_legacy_general_probe.dart';
+part 'home_page/project_editor_legacy_project_probe.dart';
 part 'home_page/project_editor_assets_images_probe.dart';
 part 'home_page/project_editor_assets_crud_probe.dart';
 part 'home_page/project_editor_assets_links_probe.dart';
