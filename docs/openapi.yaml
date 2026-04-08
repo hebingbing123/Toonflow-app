@@ -207,6 +207,8 @@ paths:
         env `BILLING_CURRENCY_PROVIDER_MAP` (format `CNY=alipay,USD=stripe`).
         For Stripe payloads, server also supports provider mapping from event envelope/object:
         `type` (or fallback `event_type`), `created`, `data.object.status`, `data.object.current_period_end`.
+        For audit metadata extraction, `event_type` and `event_created_at` are accepted as generic
+        fallback fields when provider-native keys are absent.
         Current Stripe event fallback coverage includes common subscription/invoice events such as:
         `customer.subscription.created|updated|paused|resumed|unpaused|deleted`,
         `invoice.payment_succeeded|paid|payment_failed|payment_reversal|overdue|payment_action_required|marked_uncollectible|voided`.

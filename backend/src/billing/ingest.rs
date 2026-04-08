@@ -98,10 +98,24 @@ fn parse_event_type(v: &Value) -> Option<String> {
         .and_then(Value::as_str)
         .map(str::trim)
         .filter(|s| !s.is_empty())
+        .or_else(|| {
+            v.get("event_type")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+        })
         .map(|s| s.chars().take(128).collect())
 }
 
 fn parse_event_created_at(v: &Value) -> Option<DateTime<Utc>> {
+    if let Some(ts) = v.get("event_created_at").and_then(Value::as_i64) {
+        return DateTime::<Utc>::from_timestamp(ts, 0);
+    }
+    if let Some(s) = v.get("event_created_at").and_then(Value::as_str) {
+        if let Ok(dt) = DateTime::parse_from_rfc3339(s.trim()) {
+            return Some(dt.with_timezone(&Utc));
+        }
+    }
     if let Some(ts) = v.get("created").and_then(Value::as_i64) {
         return DateTime::<Utc>::from_timestamp(ts, 0);
     }
@@ -442,6 +456,29 @@ mod tests {
     #[test]
     fn build_provider_event_id_keeps_raw_when_provider_missing() {
         assert_eq!(build_provider_event_id(None, "evt_1"), "evt_1".to_string());
+    }
+
+    #[test]
+    fn parse_event_type_uses_event_type_fallback_when_type_missing() {
+        let v = json!({ "event_type": "invoice.paid" });
+        assert_eq!(parse_event_type(&v).as_deref(), Some("invoice.paid"));
+    }
+
+    #[test]
+    fn parse_event_created_at_prefers_event_created_at_rfc3339() {
+        let v = json!({
+            "event_created_at": "2026-04-08T10:11:12Z",
+            "created": 1_700_000_000_i64
+        });
+        let got = parse_event_created_at(&v).expect("event_created_at should parse");
+        assert_eq!(got.to_rfc3339(), "2026-04-08T10:11:12+00:00");
+    }
+
+    #[test]
+    fn parse_event_created_at_accepts_event_created_at_unix_timestamp() {
+        let v = json!({ "event_created_at": 1_800_000_001_i64 });
+        let got = parse_event_created_at(&v).expect("event_created_at unix should parse");
+        assert_eq!(got.timestamp(), 1_800_000_001_i64);
     }
 
     #[test]
