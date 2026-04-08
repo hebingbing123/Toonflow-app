@@ -206,28 +206,33 @@ paths:
         Default mapping is `CNY -> alipay`, `USD -> stripe`, and can be overridden by
         env `BILLING_CURRENCY_PROVIDER_MAP` (format `CNY=alipay,USD=stripe`).
         For Stripe payloads, server also supports provider mapping from event envelope/object:
-        `type`, `created`, `data.object.status`, `data.object.current_period_end`.
+        `type` (or fallback `event_type`), `created`, `data.object.status`, `data.object.current_period_end`.
         Current Stripe event fallback coverage includes common subscription/invoice events such as:
         `customer.subscription.created|updated|paused|resumed|unpaused|deleted`,
         `invoice.payment_succeeded|paid|payment_failed|payment_reversal|overdue|payment_action_required|marked_uncollectible|voided`.
         Non-state Stripe events in the informational whitelist (currently
         `customer.subscription.trial_will_end`, `customer.subscription.pending_update_applied`,
-        `customer.subscription.pending_update_expired`, `invoice.finalization_failed`, `invoice.upcoming`,
+        `customer.subscription.pending_update_expired`, `customer.subscription.pending_update_created`,
+        `invoice.finalization_failed`, `invoice.upcoming`,
         `invoice.created`, `invoice.finalized`, `invoice.updated`, `invoice.sent`,
         `payment_intent.created`, `payment_intent.succeeded`, `payment_intent.payment_failed`,
-        `charge.succeeded`, `charge.updated`, `charge.failed`)
+        `payment_intent.canceled`, `payment_intent.processing`, `payment_intent.requires_action`,
+        `charge.succeeded`, `charge.updated`, `charge.failed`, `charge.captured`,
+        `charge.refunded`, `charge.refund.updated`, `charge.dispute.created`,
+        `charge.dispute.updated`, `charge.dispute.closed`)
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
         `trade_status` / `type` / `notify_time`.
         Non-state Alipay events in the informational whitelist (currently `trade.finished`)
         are treated as informational only.
         For Paddle payloads, server supports baseline mapping from:
-        `type` / `occurred_at` / `data.status` / `data.next_billed_at`.
+        `type` (or fallback `event_type`) / `occurred_at` / `data.status` / `data.next_billed_at`.
         Current Paddle event fallback coverage includes common subscription/transaction events such as:
         `subscription.created|activated|updated|paused|resumed|past_due|canceled|expired`,
         `transaction.completed|payment_failed|canceled`.
         Non-state Paddle events in the informational whitelist (currently
-        `subscription.trialing`, `transaction.billed`, `transaction.created`, `transaction.updated`) are treated as informational only.
+        `subscription.trialing`, `transaction.billed`, `transaction.created`, `transaction.updated`,
+        `transaction.paid`, `transaction.ready`) are treated as informational only.
         For subscription fields, incoming updates are guarded by `subscription_status_updated_at` to avoid
         out-of-order webhook events overriding newer state.
         Returns **503** if `BILLING_WEBHOOK_SECRET` is unset or `DATABASE_URL` is not configured.

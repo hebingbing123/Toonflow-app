@@ -95,6 +95,7 @@ const STRIPE_INFORMATIONAL_EVENTS: &[&str] = &[
     "customer.subscription.trial_will_end",
     "customer.subscription.pending_update_applied",
     "customer.subscription.pending_update_expired",
+    "customer.subscription.pending_update_created",
     "invoice.finalization_failed",
     "invoice.upcoming",
     "invoice.created",
@@ -104,9 +105,18 @@ const STRIPE_INFORMATIONAL_EVENTS: &[&str] = &[
     "payment_intent.created",
     "payment_intent.succeeded",
     "payment_intent.payment_failed",
+    "payment_intent.canceled",
+    "payment_intent.processing",
+    "payment_intent.requires_action",
     "charge.succeeded",
     "charge.updated",
     "charge.failed",
+    "charge.captured",
+    "charge.refunded",
+    "charge.refund.updated",
+    "charge.dispute.created",
+    "charge.dispute.updated",
+    "charge.dispute.closed",
 ];
 
 const ALIPAY_EVENT_STATUS_MAPPINGS: &[EventStatusMapping] = &[
@@ -180,6 +190,8 @@ const PADDLE_INFORMATIONAL_EVENTS: &[&str] = &[
     "transaction.billed",
     "transaction.created",
     "transaction.updated",
+    "transaction.paid",
+    "transaction.ready",
 ];
 
 pub(crate) fn normalize_provider_name(raw: &str) -> Option<String> {
@@ -226,6 +238,19 @@ fn status_from_event_mappings(
         .map(|m| m.status)
 }
 
+fn event_type_from_payload(v: &Value) -> Option<&str> {
+    v.get("type")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .or_else(|| {
+            v.get("event_type")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+        })
+}
+
 fn is_stripe_informational_event(event_type: Option<&str>) -> bool {
     let Some(event_type) = event_type else {
         return false;
@@ -248,7 +273,7 @@ fn is_paddle_informational_event(event_type: Option<&str>) -> bool {
 }
 
 fn derive_from_stripe(v: &Value) -> ProviderDerivedFields {
-    let event_type = v.get("type").and_then(Value::as_str).map(str::trim);
+    let event_type = event_type_from_payload(v);
     if is_stripe_informational_event(event_type) {
         return ProviderDerivedFields::default();
     }
@@ -297,7 +322,7 @@ fn alipay_status_from_trade_status(trade_status: &str) -> Option<&'static str> {
 }
 
 fn derive_from_alipay(v: &Value) -> ProviderDerivedFields {
-    let event_type = v.get("type").and_then(Value::as_str).map(str::trim);
+    let event_type = event_type_from_payload(v);
     if is_alipay_informational_event(event_type) {
         return ProviderDerivedFields::default();
     }
@@ -347,7 +372,7 @@ fn paddle_status_from_subscription_status(raw: &str) -> Option<&'static str> {
 }
 
 fn derive_from_paddle(v: &Value) -> ProviderDerivedFields {
-    let event_type = v.get("type").and_then(Value::as_str).map(str::trim);
+    let event_type = event_type_from_payload(v);
     if is_paddle_informational_event(event_type) {
         return ProviderDerivedFields::default();
     }
@@ -407,7 +432,7 @@ fn derive_from_paddle(v: &Value) -> ProviderDerivedFields {
 }
 
 pub(crate) fn is_informational_event(v: &Value) -> bool {
-    let event_type = v.get("type").and_then(Value::as_str).map(str::trim);
+    let event_type = event_type_from_payload(v);
     let selected = select_billing_adapter(v);
     match billing_provider_from_name(selected.mapping_provider.as_deref()) {
         BillingProvider::Stripe => is_stripe_informational_event(event_type),
@@ -650,6 +675,20 @@ mod tests {
     }
 
     #[test]
+    fn derive_stripe_pending_update_created_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "type": "customer.subscription.pending_update_created"
+        });
+        assert!(is_stripe_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
     fn derive_stripe_invoice_finalization_failed_does_not_change_subscription_status() {
         let v = json!({
             "billing_provider": "stripe",
@@ -762,6 +801,34 @@ mod tests {
     }
 
     #[test]
+    fn derive_stripe_payment_intent_requires_action_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "type": "payment_intent.requires_action"
+        });
+        assert!(is_stripe_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
+    fn derive_stripe_charge_dispute_created_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "type": "charge.dispute.created"
+        });
+        assert!(is_stripe_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
     fn derive_paddle_maps_transaction_canceled_to_canceled() {
         let v = json!({
             "billing_provider": "paddle",
@@ -856,6 +923,34 @@ mod tests {
     }
 
     #[test]
+    fn derive_paddle_transaction_ready_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "paddle",
+            "type": "transaction.ready"
+        });
+        assert!(is_paddle_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
+    fn derive_paddle_transaction_paid_does_not_change_subscription_status() {
+        let v = json!({
+            "billing_provider": "paddle",
+            "type": "transaction.paid"
+        });
+        assert!(is_paddle_informational_event(
+            v.get("type").and_then(Value::as_str).map(str::trim)
+        ));
+        let d = derive_from_provider(&v);
+        assert!(d.subscription_status.is_none());
+        assert!(d.status_confidence.is_none());
+    }
+
+    #[test]
     fn derive_from_currency_default_without_provider_uses_alipay_route() {
         let v = json!({
             "billing_currency": "CNY",
@@ -897,5 +992,19 @@ mod tests {
         let n = normalize_webhook(&v);
         assert!(n.provider.is_none());
         assert_eq!(n.derived.subscription_status.as_deref(), Some("active"));
+    }
+
+    #[test]
+    fn derive_uses_event_type_field_when_type_missing() {
+        let v = json!({
+            "billing_provider": "stripe",
+            "event_type": "invoice.paid"
+        });
+        let d = derive_from_provider(&v);
+        assert_eq!(d.subscription_status.as_deref(), Some("active"));
+        assert_eq!(
+            d.status_confidence,
+            Some(ProviderStatusConfidence::EventFallback)
+        );
     }
 }
