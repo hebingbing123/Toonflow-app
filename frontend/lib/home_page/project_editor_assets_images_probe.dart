@@ -240,6 +240,79 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
           child: const Text('POST get-image'),
         ),
         TextButton(
+          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+              ? null
+              : () async {
+                  setDialogState(() => assetsBusy[0] = true);
+                  try {
+                    final r = await postLegacyAssetsGetMaterialData(
+                      token,
+                      p.legacyId,
+                    );
+                    if (!ctx.mounted) return;
+                    final firstClip = r.data.isEmpty ? null : r.data.first;
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'POST …/assets/get-material-data：'
+                          'clips=${r.data.length} videos=${r.video.length}'
+                          '${firstClip == null ? "" : " first=${firstClip.name}"}',
+                        ),
+                      ),
+                    );
+                  } on RustApiException catch (e) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(
+                        ctx,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  } finally {
+                    if (ctx.mounted) {
+                      setDialogState(() => assetsBusy[0] = false);
+                    }
+                  }
+                },
+          child: const Text('POST get-material-data'),
+        ),
+        TextButton(
+          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+              ? null
+              : () async {
+                  setDialogState(() => assetsBusy[0] = true);
+                  try {
+                    final r = await postLegacyAssetsBatchGenerationData(
+                      token,
+                      projectLegacyId: p.legacyId,
+                      assetType: 'role',
+                      page: 1,
+                      limit: 3,
+                    );
+                    if (!ctx.mounted) return;
+                    final first = r.data.isEmpty ? null : r.data.first;
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'POST …/assets/batch-generation-data：'
+                          'rows=${r.data.length}/${r.total}'
+                          '${first == null ? "" : " first=${first.name}(${first.assetType})"}',
+                        ),
+                      ),
+                    );
+                  } on RustApiException catch (e) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(
+                        ctx,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  } finally {
+                    if (ctx.mounted) {
+                      setDialogState(() => assetsBusy[0] = false);
+                    }
+                  }
+                },
+          child: const Text('POST batch-generation-data'),
+        ),
+        TextButton(
           onPressed:
               assetsBusy[0] ||
                   assetsLoading[0] ||
