@@ -17,7 +17,7 @@ part 'harness_api.dart';
 part 'jobs_api.dart';
 part 'novels_models.dart';
 part 'novels_crud.dart';
-part 'novels_api.dart';
+part 'novels_events.dart';
 part 'project_overview.dart';
 part 'projects_legacy.dart';
 part 'quality_reviews.dart';

@@ -604,78 +604,208 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
         });
         return;
       }
-      const productionBodies = <String, Map<String, dynamic>>{
-        '/api/v1/production/edit-image/generate-flow-image': {
-          'flowId': 'img-flow-001',
-          'prompt': 'probe',
-        },
-        '/api/v1/production/edit-image/get-image-default-model': {},
-        '/api/v1/production/edit-image/get-image-flow': {},
-        '/api/v1/production/edit-image/save-image-flow': {
-          'flowId': 'img-flow-001',
-          'steps': [
-            {'stepId': 'upload', 'status': 'pending'},
-          ],
-        },
-        '/api/v1/production/edit-image/update-image-flow': {
-          'flowId': 'img-flow-001',
-          'stepId': 'upload',
-          'updates': {},
-        },
-        '/api/v1/production/workbench/add-track': {
-          'projectId': 1,
-          'scriptId': 1,
-          'trackName': 'probe',
-        },
-        '/api/v1/production/workbench/delete-track': {
-          'projectId': 1,
-          'scriptId': 1,
-          'trackId': 1,
-        },
-        '/api/v1/production/workbench/delete-video': {
-          'projectId': 1,
-          'scriptId': 1,
-          'storyboardId': 1,
-        },
-        '/api/v1/production/workbench/generate-video-prompt': {
-          'projectId': 1,
-          'scriptId': 1,
-        },
-        '/api/v1/production/workbench/get-generate-data': {
-          'projectId': 1,
-          'scriptId': 1,
-        },
-        '/api/v1/production/workbench/get-video-list': {'projectId': 1},
-        '/api/v1/production/workbench/get-video-model-detail': {},
-        '/api/v1/production/workbench/select-video': {
-          'projectId': 1,
-          'scriptId': 1,
-          'storyboardId': 1,
-          'videoUrl': 'https://example.com/probe.mp4',
-        },
-      };
-      const prodPrefix = '/api/v1/production/';
-      for (final entry in productionBodies.entries) {
-        final path = entry.key;
-        final code = await postProductionLegacyJsonStubV1(
+      final prEditDefaultModel = await productionAssetsProbeStatus(
+        () => postProductionEditImageGetImageDefaultModelV1(token),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prEditDefaultModel)) {
+        setState(() {
+          _error =
+              'POST production/edit-image/get-image-default-model expected 200/404/503, got $prEditDefaultModel';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prEditFlow = await productionAssetsProbeStatus(
+        () => postProductionEditImageGetImageFlowV1(token),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prEditFlow)) {
+        setState(() {
+          _error =
+              'POST production/edit-image/get-image-flow expected 200/404/503, got $prEditFlow';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prEditSave = await productionAssetsProbeStatus(
+        () => postProductionEditImageSaveImageFlowV1(
           token,
-          path,
-          body: entry.value,
-        );
-        if (!mounted) return;
-        if (!_productionProbeOk(code)) {
-          final rel = path.startsWith(prodPrefix)
-              ? path.substring(prodPrefix.length)
-              : path;
-          setState(() {
-            _error = 'POST production/$rel expected 200/404/503, got $code';
-            _loadingModelsCatalog = false;
-          });
-          return;
-        }
+          flowId: 'img-flow-001',
+          steps: const [
+            {'stepId': 'upload', 'stepName': 'Upload', 'status': 'pending'},
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prEditSave)) {
+        setState(() {
+          _error =
+              'POST production/edit-image/save-image-flow expected 200/404/503, got $prEditSave';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prEditUpdate = await productionAssetsProbeStatus(
+        () => postProductionEditImageUpdateImageFlowV1(
+          token,
+          flowId: 'img-flow-001',
+          stepId: 'upload',
+          updates: const {'status': 'completed'},
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prEditUpdate)) {
+        setState(() {
+          _error =
+              'POST production/edit-image/update-image-flow expected 200/404/503, got $prEditUpdate';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prEditGenerate = await productionAssetsProbeStatus(
+        () => postProductionEditImageGenerateFlowImageV1(
+          token,
+          flowId: 'img-flow-001',
+          prompt: 'probe',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prEditGenerate)) {
+        setState(() {
+          _error =
+              'POST production/edit-image/generate-flow-image expected 200/404/503, got $prEditGenerate';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchAddTrack = await productionAssetsProbeStatus(
+        () => postWorkbenchAddTrackV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          trackName: 'probe',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchAddTrack)) {
+        setState(() {
+          _error =
+              'POST production/workbench/add-track expected 200/404/503, got $prWorkbenchAddTrack';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchDeleteTrack = await productionAssetsProbeStatus(
+        () => postWorkbenchDeleteTrackV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          trackId: 1,
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchDeleteTrack)) {
+        setState(() {
+          _error =
+              'POST production/workbench/delete-track expected 200/404/503, got $prWorkbenchDeleteTrack';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchDeleteVideo = await productionAssetsProbeStatus(
+        () => postWorkbenchDeleteVideoV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          storyboardId: 1,
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchDeleteVideo)) {
+        setState(() {
+          _error =
+              'POST production/workbench/delete-video expected 200/404/503, got $prWorkbenchDeleteVideo';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchPrompt = await productionAssetsProbeStatus(
+        () => postWorkbenchGenerateVideoPromptV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchPrompt)) {
+        setState(() {
+          _error =
+              'POST production/workbench/generate-video-prompt expected 200/404/503, got $prWorkbenchPrompt';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchGenerateData = await productionAssetsProbeStatus(
+        () => postWorkbenchGetGenerateDataV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchGenerateData)) {
+        setState(() {
+          _error =
+              'POST production/workbench/get-generate-data expected 200/404/503, got $prWorkbenchGenerateData';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchList = await productionAssetsProbeStatus(
+        () => postWorkbenchGetVideoListV1(token, projectId: 1),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchList)) {
+        setState(() {
+          _error =
+              'POST production/workbench/get-video-list expected 200/404/503, got $prWorkbenchList';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchModelDetail = await productionAssetsProbeStatus(
+        () => postWorkbenchGetVideoModelDetailV1(token),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchModelDetail)) {
+        setState(() {
+          _error =
+              'POST production/workbench/get-video-model-detail expected 200/404/503, got $prWorkbenchModelDetail';
+          _loadingModelsCatalog = false;
+        });
+        return;
+      }
+      final prWorkbenchSelect = await productionAssetsProbeStatus(
+        () => postWorkbenchSelectVideoV1(
+          token,
+          projectId: 1,
+          scriptId: 1,
+          storyboardId: 1,
+          videoUrl: 'https://example.com/probe.mp4',
+        ),
+      );
+      if (!mounted) return;
+      if (!_productionProbeOk(prWorkbenchSelect)) {
+        setState(() {
+          _error =
+              'POST production/workbench/select-video expected 200/404/503, got $prWorkbenchSelect';
+          _loadingModelsCatalog = false;
+        });
+        return;
       }
       setState(() {
-        const typedProductionAssetsCount = 15;
+        const typedProductionProbeCount = 28;
         final sample = list.take(4).map((m) => '${m.value}(${m.type})').join(', ');
         final modelsLine = list.isEmpty
             ? '(empty)'
@@ -685,7 +815,7 @@ extension _HomePageSystemProbesModelsCatalog on _HomePageState {
             ? 'vendors: (empty)'
             : 'vendors: ${vs.vendors.length} · ${v0.name} kinds=${v0.modelKinds.join(",")} source=${vs.source}';
         final adBit =
-            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors real -> add:${vendorAdd.status}/upd:${vendorUpdate.status}/en:${vendorEnable.status}/code:${vendorUpdateCode.status}/link:${vendorFromLink.status}/del:${vendorDelete.status} · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/storyboard typed -> $prStoryboardData/$prStoryboardAdd/$prStoryboardBatchAdd/$prStoryboardBatchGenerate/$prStoryboardDownPreview/$prStoryboardEdit/$prStoryboardGet/$prStoryboardPreview/$prStoryboardRemove/$prStoryboardUrl · prod/implemented ${typedProductionAssetsCount + productionBodies.length}x(200/404/503)';
+            'agent-deploy: ${ad.length} rows · deploy-model->$deployM · set-key->$setKey · model-test -> $mt · script-agent/get-plan -> $sap · set-plan->$saSet · update->$saUpd · assets-gen -> $ag / polish->$agPol / batch->$agBat / batch-polish->$agBap · vendors real -> add:${vendorAdd.status}/upd:${vendorUpdate.status}/en:${vendorEnable.status}/code:${vendorUpdateCode.status}/link:${vendorFromLink.status}/del:${vendorDelete.status} · danger/delete-all -> $danger · clear-db -> $clearDb · production/get-data -> $prod · flow/save/workbench/poll/export -> $prFlow/$prSave/$prVid/$prPoll/$prExp · prod/assets typed -> $prAssetsBatch/$prAssetsDelete/$prAssetsData/$prAssetsPoll/$prAssetsUrl · prod/storyboard typed -> $prStoryboardData/$prStoryboardAdd/$prStoryboardBatchAdd/$prStoryboardBatchGenerate/$prStoryboardDownPreview/$prStoryboardEdit/$prStoryboardGet/$prStoryboardPreview/$prStoryboardRemove/$prStoryboardUrl · prod/edit-image typed -> $prEditDefaultModel/$prEditFlow/$prEditSave/$prEditUpdate/$prEditGenerate · prod/workbench typed -> $prWorkbenchAddTrack/$prWorkbenchDeleteTrack/$prWorkbenchDeleteVideo/$prWorkbenchPrompt/$prWorkbenchGenerateData/$prWorkbenchList/$prWorkbenchModelDetail/$prWorkbenchSelect · prod/implemented ${typedProductionProbeCount}x(200/404/503)';
         _modelsCatalogBody = '$modelsLine · $vendorsBit · $adBit';
         _loadingModelsCatalog = false;
       });

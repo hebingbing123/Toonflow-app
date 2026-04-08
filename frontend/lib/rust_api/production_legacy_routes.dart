@@ -149,30 +149,3 @@ Future<int> postProductionExportImageV1(
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
 }
-
-/// `POST /api/v1/production/*` legacy JSON-object stub — **400** if body is not a JSON object; **501** when object (**OpenAPI** `ProductionLegacyJsonStubBody`).
-Future<int> postProductionLegacyJsonStubV1(
-  String accessToken,
-  String path, {
-  Map<String, dynamic> body = const {},
-}) async {
-  if (!path.startsWith('/api/v1/production/')) {
-    throw ArgumentError.value(
-      path,
-      'path',
-      'must start with /api/v1/production/',
-    );
-  }
-  final uri = Uri.parse('$kApiBaseUrl$path');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
-      .timeout(const Duration(seconds: 15));
-  return res.statusCode;
-}
