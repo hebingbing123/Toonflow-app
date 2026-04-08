@@ -1465,6 +1465,12 @@ async fn post_edit_image_generate_flow_image(
     Json(body): Json<GenerateFlowImageBody>,
 ) -> Result<JsonResponse<GenerateFlowImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    if body.flow_id.trim().is_empty() {
+        return Err(ApiError::BadRequest("flowId must not be empty".into()));
+    }
+    if body.prompt.trim().is_empty() {
+        return Err(ApiError::BadRequest("prompt must not be empty".into()));
+    }
 
     let pool = state
         .pool
@@ -1473,8 +1479,8 @@ async fn post_edit_image_generate_flow_image(
 
     let payload = serde_json::json!({
         "source": "production.edit-image.generate-flow",
-        "flow_id": body.flow_id,
-        "prompt": body.prompt,
+        "flow_id": body.flow_id.trim(),
+        "prompt": body.prompt.trim(),
         "model": body.model.unwrap_or_else(|| "dall-e-3".to_string()),
     });
 

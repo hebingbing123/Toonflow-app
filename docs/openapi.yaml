@@ -9494,8 +9494,10 @@ components:
       properties:
         flowId:
           type: string
+          description: Whitespace-only values are rejected (HTTP 400).
         prompt:
           type: string
+          description: Whitespace-only values are rejected (HTTP 400).
         model:
           type: string
           nullable: true
