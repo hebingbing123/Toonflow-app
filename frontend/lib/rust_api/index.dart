@@ -12,6 +12,7 @@ export 'production.dart';
 part 'catalog_memory.dart';
 part 'art_styles.dart';
 part 'assets_api.dart';
+part 'assets_crud.dart';
 part 'assets_images.dart';
 part 'assets_models.dart';
 part 'assets_generate.dart';
