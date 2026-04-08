@@ -148,89 +148,17 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               assetsBusy: assetsBusy,
               reloadAssetsAndStats: reloadAssetsAndStats,
             ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0] ||
-                      scriptList.isEmpty ||
-                      assetsRef[0] == null ||
-                      assetsRef[0]!.items.isEmpty
-                  ? null
-                  : () async {
-                      setDialogState(() => assetsBusy[0] = true);
-                      final sid = scriptList.first.legacyId;
-                      final aid = assetsRef[0]!.items.first.legacyId;
-                      try {
-                        await linkScriptToAssetByLegacyIds(
-                          token,
-                          p.legacyId,
-                          sid,
-                          aid,
-                        );
-                        if (!ctx.mounted) return;
-                        await reloadAssetsAndStats();
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                            SnackBar(
-                              content: Text('已 PUT 关联 script#$sid · asset#$aid'),
-                            ),
-                          );
-                        }
-                      } on RustApiException catch (e) {
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(
-                            ctx,
-                          ).showSnackBar(SnackBar(content: Text(e.toString())));
-                        }
-                      } finally {
-                        if (ctx.mounted) {
-                          setDialogState(() => assetsBusy[0] = false);
-                        }
-                      }
-                    },
-              child: const Text('PUT 关联首剧本·首资产'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0] ||
-                      scriptList.isEmpty ||
-                      assetsRef[0] == null ||
-                      assetsRef[0]!.items.isEmpty
-                  ? null
-                  : () async {
-                      setDialogState(() => assetsBusy[0] = true);
-                      final sid = scriptList.first.legacyId;
-                      final aid = assetsRef[0]!.items.first.legacyId;
-                      try {
-                        await unlinkScriptFromAssetByLegacyIds(
-                          token,
-                          p.legacyId,
-                          sid,
-                          aid,
-                        );
-                        if (!ctx.mounted) return;
-                        await reloadAssetsAndStats();
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                            const SnackBar(content: Text('已 DELETE 剧本–资产关联')),
-                          );
-                        }
-                      } on RustApiException catch (e) {
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(
-                            ctx,
-                          ).showSnackBar(SnackBar(content: Text(e.toString())));
-                        }
-                      } finally {
-                        if (ctx.mounted) {
-                          setDialogState(() => assetsBusy[0] = false);
-                        }
-                      }
-                    },
-              child: const Text('DELETE 取消关联'),
+            ..._buildProjectAssetsLinksProbeActions(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              scriptList: scriptList,
+              assetsRef: assetsRef,
+              assetsLoading: assetsLoading,
+              assetsScriptFilterLoading: assetsScriptFilterLoading,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
             ),
           ],
         ),
