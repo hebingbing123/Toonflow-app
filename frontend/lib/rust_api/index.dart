@@ -32,6 +32,7 @@ part 'script_agent.dart';
 part 'skills_api.dart';
 part 'settings_admin.dart';
 part 'status_and_auth.dart';
+part 'storyboards_api.dart';
 part 'tasks_legacy.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
