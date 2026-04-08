@@ -20,6 +20,7 @@ mod notify_hub;
 mod novel_events;
 mod novels;
 mod novels_legacy;
+mod ops;
 mod production_legacy;
 mod project_legacy;
 mod projects;
@@ -54,15 +55,20 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 
 #[tokio::main]
 async fn main() {
-    if std::env::args()
-        .nth(1)
-        .as_deref()
-        .is_some_and(|s| s == "__harness_isolate_echo__")
-    {
+    let args: Vec<String> = std::env::args().collect();
+    if args.get(1).is_some_and(|s| s == "__harness_isolate_echo__") {
         harness::isolate::stdio_echo_child();
     }
 
     let _ = dotenvy::dotenv();
+
+    if let Some(result) = ops::maybe_run_from_args(args.iter().skip(1).cloned()).await {
+        if let Err(err) = result {
+            eprintln!("{err:#}");
+            std::process::exit(1);
+        }
+        return;
+    }
 
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))

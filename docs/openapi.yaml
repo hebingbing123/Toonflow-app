@@ -38,7 +38,7 @@ info:
     **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); worker fails until a live probe is implemented.
     **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** now persist non-sensitive vendor metadata into **`app_user_profile.vendor_config`**. The Rust API stores **`tsCode`** / **`code_link`** references only; it does **not** execute TS, evaluate vm2, or fetch remote code server-side.
 
-    **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS exposes **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** with body **`{}`** only, then **501** **`not_implemented`** — no bulk wipe endpoint (use Supabase / ops).
+    **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS keeps **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** as **501** **`not_implemented`** placeholders — no bulk wipe endpoint on the hosted API. The supported operational replacement is the guarded CLI: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
 
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`**, overlaid with per-user model selection from **`app_user_profile.agent_deploy_config`** when Postgres is configured. **`POST …/deploy-model`** persists model / vendor choice for one of the four rows. **`POST …/set-key`** is a safe **200** no-op: keys are still server-side only.
 
@@ -1093,6 +1093,7 @@ paths:
       operationId: postSettingsDangerDeleteAllDataV1
       description: |
         Bearer JWT. Body must be **`{}`** (no extra keys). Replaces legacy **`POST /api/other/deleteAllData`** intent; returns **501** **`not_implemented`** — no SQLite **`initDB(..., true)`** equivalent on the hosted API.
+        For operational cleanup use the guarded CLI instead: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -1134,6 +1135,7 @@ paths:
       operationId: postSettingsDangerClearDatabaseV1
       description: |
         Bearer JWT. Body must be **`{}`**. Replaces legacy **`GET /api/setting/dbConfig/clearData`** (verb changed to **POST** for SaaS); returns **501** **`not_implemented`**.
+        For operational cleanup use the guarded CLI instead: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
       security:
         - bearerAuth: []
       requestBody:

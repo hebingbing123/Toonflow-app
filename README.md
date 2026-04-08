@@ -69,6 +69,7 @@
 
 > **重构完成**：旧 Electron + Node 栈已下线（`decommission-electron`）。当前主产品为 `backend/` + `frontend/` 新栈。  
 > **自动化协作**：按 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 连续交付增量即可；Agent 行为约定见 **[`AGENTS.md`](AGENTS.md)**。
+> **危险运维**：HTTP **`/api/v1/settings/danger/*`** 故意保持 **501**；如需按用户清理 SaaS 数据，使用 **`cargo run --bin toonflow-server --manifest-path backend/Cargo.toml -- ops clear-user-data --user-id <uuid> --dry-run`**，确认后再加 **`--execute --confirm clear-user-data:<uuid>`**。
 
 ### CI 与工程规范
 
