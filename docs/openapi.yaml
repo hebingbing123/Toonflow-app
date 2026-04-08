@@ -5111,7 +5111,8 @@ paths:
       summary: Update storyboard prompt/duration (legacy `editStoryboardInfo`)
       operationId: postProductionStoryboardEditInfoV1
       description: |
-        Bearer JWT. Validates **`storyboardId`** and update fields, then updates the owned storyboard.
+        Bearer JWT. Validates **`storyboardId`** and non-empty **`prompt`**, then updates
+        the owned storyboard.
       security:
         - bearerAuth: []
       requestBody:
@@ -9664,6 +9665,7 @@ components:
           format: int32
         prompt:
           type: string
+          description: Whitespace-only values are rejected (HTTP 400).
         duration:
           type: integer
           format: int32

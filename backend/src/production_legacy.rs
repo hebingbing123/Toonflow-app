@@ -1800,6 +1800,9 @@ async fn post_storyboard_edit_info(
             "storyboardId must be a positive integer".into(),
         ));
     }
+    if body.prompt.trim().is_empty() {
+        return Err(ApiError::BadRequest("prompt must not be empty".into()));
+    }
 
     let pool = state
         .pool
