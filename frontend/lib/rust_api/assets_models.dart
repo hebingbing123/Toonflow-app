@@ -50,6 +50,81 @@ class ListAssetsResponse {
   }
 }
 
+/// One row from legacy **`POST /api/v1/assets/get-assets-api`** (including nested children via **`sonAssets`**).
+class LegacyAssetGetAssetsApiItem {
+  const LegacyAssetGetAssetsApiItem({
+    required this.id,
+    required this.projectId,
+    required this.assetType,
+    required this.name,
+    this.assetsId,
+    this.imageId,
+    this.filePath,
+    this.state,
+    this.errorReason,
+    this.src,
+    required this.sonAssets,
+  });
+
+  final int id;
+  final int projectId;
+  final String assetType;
+  final String name;
+  final int? assetsId;
+  final int? imageId;
+  final String? filePath;
+  final String? state;
+  final String? errorReason;
+  final String? src;
+  final List<LegacyAssetGetAssetsApiItem> sonAssets;
+
+  factory LegacyAssetGetAssetsApiItem.fromJson(Map<String, dynamic> json) {
+    final rawChildren = json['sonAssets'] as List<dynamic>? ?? const [];
+    return LegacyAssetGetAssetsApiItem(
+      id: (json['id'] as num).toInt(),
+      projectId: (json['projectId'] as num?)?.toInt() ?? 0,
+      assetType: json['type'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      assetsId: (json['assetsId'] as num?)?.toInt(),
+      imageId: (json['imageId'] as num?)?.toInt(),
+      filePath: json['filePath'] as String?,
+      state: json['state'] as String?,
+      errorReason: json['errorReason'] as String?,
+      src: json['src'] as String?,
+      sonAssets: rawChildren
+          .map(
+            (e) =>
+                LegacyAssetGetAssetsApiItem.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    );
+  }
+}
+
+/// Body from legacy **`POST /api/v1/assets/get-assets-api`**.
+class LegacyAssetGetAssetsApiResponse {
+  const LegacyAssetGetAssetsApiResponse({
+    required this.data,
+    required this.total,
+  });
+
+  final List<LegacyAssetGetAssetsApiItem> data;
+  final int total;
+
+  factory LegacyAssetGetAssetsApiResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['data'] as List<dynamic>? ?? const [];
+    return LegacyAssetGetAssetsApiResponse(
+      data: raw
+          .map(
+            (e) =>
+                LegacyAssetGetAssetsApiItem.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      total: (json['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// One **`app_asset_image`** row in **`POST …/assets/corner-scape`** — OpenAPI **`CornerScapeHistoryImage`**.
 class CornerScapeHistoryImage {
   const CornerScapeHistoryImage({
@@ -306,9 +381,8 @@ class LegacyAssetMaterialDataResponse {
     return LegacyAssetMaterialDataResponse(
       data: rawData
           .map(
-            (e) => LegacyAssetMaterialDataItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
+            (e) =>
+                LegacyAssetMaterialDataItem.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
       video: rawVideo
@@ -390,7 +464,9 @@ class LegacyAssetPollingImageAssetsItem {
   final String? state;
   final String? filePath;
 
-  factory LegacyAssetPollingImageAssetsItem.fromJson(Map<String, dynamic> json) {
+  factory LegacyAssetPollingImageAssetsItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return LegacyAssetPollingImageAssetsItem(
       id: (json['id'] as num).toInt(),
       state: json['state'] as String?,

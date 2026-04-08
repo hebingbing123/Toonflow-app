@@ -28,17 +28,21 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       p.legacyId,
                     );
                     Uint8List? cornerThumb;
-                    if (r.items.isNotEmpty && r.items.first.historyImages.isNotEmpty) {
+                    if (r.items.isNotEmpty &&
+                        r.items.first.historyImages.isNotEmpty) {
                       final a = r.items.first;
-                      cornerThumb = await fetchCornerScapeHistoryImagePreviewBytes(
-                        token,
-                        p.legacyId,
-                        a.legacyId,
-                        a.historyImages.first,
-                      );
+                      cornerThumb =
+                          await fetchCornerScapeHistoryImagePreviewBytes(
+                            token,
+                            p.legacyId,
+                            a.legacyId,
+                            a.historyImages.first,
+                          );
                     }
                     if (!ctx.mounted) return;
-                    final h0 = r.items.isEmpty ? 0 : r.items.first.historyImages.length;
+                    final h0 = r.items.isEmpty
+                        ? 0
+                        : r.items.first.historyImages.length;
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         duration: const Duration(seconds: 6),
@@ -148,9 +152,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       if (!ctx.mounted) return;
                       ScaffoldMessenger.of(ctx).showSnackBar(
                         const SnackBar(
-                          content: Text(
-                            'GET …/images：0 条，可先点「POST 首条资产图片」',
-                          ),
+                          content: Text('GET …/images：0 条，可先点「POST 首条资产图片」'),
                         ),
                       );
                       return;
@@ -240,7 +242,8 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
           child: const Text('POST get-image'),
         ),
         TextButton(
-          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+          onPressed:
+              assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
               ? null
               : () async {
                   setDialogState(() => assetsBusy[0] = true);
@@ -257,9 +260,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                     if (!ctx.mounted) return;
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text(
-                          'POST …/assets/upload-clip：${r.message}',
-                        ),
+                        content: Text('POST …/assets/upload-clip：${r.message}'),
                       ),
                     );
                   } on RustApiException catch (e) {
@@ -277,7 +278,8 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
           child: const Text('POST upload-clip'),
         ),
         TextButton(
-          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+          onPressed:
+              assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
               ? null
               : () async {
                   setDialogState(() => assetsBusy[0] = true);
@@ -312,7 +314,8 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
           child: const Text('POST get-material-data'),
         ),
         TextButton(
-          onPressed: assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+          onPressed:
+              assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
               ? null
               : () async {
                   setDialogState(() => assetsBusy[0] = true);
@@ -348,6 +351,45 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                   }
                 },
           child: const Text('POST batch-generation-data'),
+        ),
+        TextButton(
+          onPressed:
+              assetsBusy[0] || assetsLoading[0] || assetsScriptFilterLoading[0]
+              ? null
+              : () async {
+                  setDialogState(() => assetsBusy[0] = true);
+                  try {
+                    final r = await postLegacyAssetsGetAssetsApi(
+                      token,
+                      projectLegacyId: p.legacyId,
+                      assetType: 'role',
+                      page: 1,
+                      limit: 3,
+                    );
+                    if (!ctx.mounted) return;
+                    final first = r.data.isEmpty ? null : r.data.first;
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'POST …/assets/get-assets-api：'
+                          'parents=${r.data.length}/${r.total}'
+                          '${first == null ? "" : " firstChildren=${first.sonAssets.length}"}',
+                        ),
+                      ),
+                    );
+                  } on RustApiException catch (e) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(
+                        ctx,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  } finally {
+                    if (ctx.mounted) {
+                      setDialogState(() => assetsBusy[0] = false);
+                    }
+                  }
+                },
+          child: const Text('POST get-assets-api'),
         ),
         TextButton(
           onPressed:
@@ -459,10 +501,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       p.legacyId,
                       first.legacyId,
                       row.id,
-                      {
-                        'state': '已完成',
-                        'sort_index': row.sortIndex + 1,
-                      },
+                      {'state': '已完成', 'sort_index': row.sortIndex + 1},
                     );
                     await deleteProjectAssetImageByLegacyIds(
                       token,

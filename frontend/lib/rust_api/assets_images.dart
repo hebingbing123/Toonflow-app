@@ -1,5 +1,44 @@
 part of 'index.dart';
 
+/// `POST /api/v1/assets/get-assets-api` — legacy parent assets with nested `sonAssets` by **`projectId/type/name/page/limit`**.
+Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
+  String accessToken, {
+  required int projectLegacyId,
+  required String assetType,
+  String? name,
+  int page = 1,
+  int limit = 10,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/get-assets-api');
+  final payload = <String, dynamic>{
+    'projectId': projectLegacyId,
+    'type': assetType,
+    'page': page,
+    'limit': limit,
+  };
+  if (name != null && name.trim().isNotEmpty) {
+    payload['name'] = name.trim();
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return LegacyAssetGetAssetsApiResponse.fromJson(map);
+}
+
 /// `POST /api/v1/assets/get-image` — legacy asset image bundle by **`assetsId`**.
 Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
   String accessToken,
@@ -93,7 +132,8 @@ Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
 }
 
 /// `POST /api/v1/assets/batch-generation-data` — legacy paged listing by **`projectId/type/name/page/limit`**.
-Future<LegacyAssetBatchGenerationDataResponse> postLegacyAssetsBatchGenerationData(
+Future<LegacyAssetBatchGenerationDataResponse>
+postLegacyAssetsBatchGenerationData(
   String accessToken, {
   required int projectLegacyId,
   required String assetType,
@@ -132,7 +172,8 @@ Future<LegacyAssetBatchGenerationDataResponse> postLegacyAssetsBatchGenerationDa
 }
 
 /// `POST /api/v1/assets/polling-image-assets` — legacy selected-image polling by **`ids`**.
-Future<List<LegacyAssetPollingImageAssetsItem>> postLegacyAssetsPollingImageAssets(
+Future<List<LegacyAssetPollingImageAssetsItem>>
+postLegacyAssetsPollingImageAssets(
   String accessToken,
   List<int> assetLegacyIds,
 ) async {
@@ -164,7 +205,8 @@ Future<List<LegacyAssetPollingImageAssetsItem>> postLegacyAssetsPollingImageAsse
 }
 
 /// `POST /api/v1/assets/polling-prompt-assets` — legacy prompt polling by **`ids`**.
-Future<List<LegacyAssetPollingPromptAssetsItem>> postLegacyAssetsPollingPromptAssets(
+Future<List<LegacyAssetPollingPromptAssetsItem>>
+postLegacyAssetsPollingPromptAssets(
   String accessToken,
   List<int> assetLegacyIds,
 ) async {
