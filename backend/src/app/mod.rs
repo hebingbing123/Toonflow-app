@@ -5698,6 +5698,155 @@ mod pg_contract_tests {
 
     #[tokio::test]
     #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
+    async fn legacy_general_project_update_roundtrip() {
+        let _ = dotenvy::dotenv();
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
+        let secret = std::env::var("SUPABASE_JWT_SECRET")
+            .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
+
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(&url)
+            .await
+            .expect("connect DATABASE_URL");
+
+        let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+        let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
+        let app = build_router(contract_state(pool.clone(), secret));
+
+        let create_body = format!(
+            r#"{{
+                "name":"pg_general_project_{}",
+                "intro":"before update",
+                "project_type":"movie",
+                "art_style":"orig-style",
+                "mode":"orig-mode",
+                "video_ratio":"9:16"
+            }}"#,
+            Uuid::new_v4().simple()
+        );
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/projects")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(create_body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, created) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "created={created}");
+        let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+        let project_uuid = Uuid::parse_str(created["id"].as_str().expect("project id")).unwrap();
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/general/get-single-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, before_update) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "before_update={before_update}");
+        assert_eq!(
+            before_update["data"][0]["intro"].as_str(),
+            Some("before update")
+        );
+        assert_eq!(before_update["data"][0]["mode"].as_str(), Some("orig-mode"));
+        assert_eq!(
+            before_update["data"][0]["art_style"].as_str(),
+            Some("orig-style")
+        );
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/general/update-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(
+                        r#"{{"id":{legacy_id},"intro":"after update","type":"legacy-mode","artStyle":null,"videoRatio":"1:1","projectType":"series"}}"#
+                    )))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, updated) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "updated={updated}");
+        assert_eq!(updated["message"].as_str(), Some("修改成功"));
+
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/general/get-single-project")
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, after_update) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::OK, "after_update={after_update}");
+        assert_eq!(
+            after_update["data"][0]["name"].as_str(),
+            created["name"].as_str(),
+            "legacy general wrapper must preserve untouched fields"
+        );
+        assert_eq!(
+            after_update["data"][0]["intro"].as_str(),
+            Some("after update")
+        );
+        assert_eq!(
+            after_update["data"][0]["mode"].as_str(),
+            Some("legacy-mode")
+        );
+        assert!(after_update["data"][0]["art_style"].is_null());
+        assert_eq!(after_update["data"][0]["video_ratio"].as_str(), Some("1:1"));
+        assert_eq!(
+            after_update["data"][0]["project_type"].as_str(),
+            Some("series")
+        );
+
+        let stored: (Option<String>, Option<String>, Option<String>, Option<String>) = sqlx::query_as(
+            "SELECT intro, mode, art_style, project_type FROM public.app_project WHERE id = $1 AND owner_user_id = $2",
+        )
+        .bind(project_uuid)
+        .bind(sub)
+        .fetch_one(&pool)
+        .await
+        .expect("select updated project");
+        assert_eq!(stored.0.as_deref(), Some("after update"));
+        assert_eq!(stored.1.as_deref(), Some("legacy-mode"));
+        assert_eq!(stored.2, None);
+        assert_eq!(stored.3.as_deref(), Some("series"));
+
+        let _ = sqlx::query("DELETE FROM public.app_project WHERE id = $1")
+            .bind(project_uuid)
+            .execute(&pool)
+            .await;
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
     async fn asset_image_file_local_storage_roundtrip() {
         use base64::Engine;
         use serde_json::json;
