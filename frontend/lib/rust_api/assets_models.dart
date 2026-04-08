@@ -253,6 +253,32 @@ class LegacyAssetPollingImageAssetsItem {
   }
 }
 
+/// One row in legacy **`POST /api/v1/assets/polling-prompt-assets`** response.
+class LegacyAssetPollingPromptAssetsItem {
+  const LegacyAssetPollingPromptAssetsItem({
+    required this.id,
+    required this.name,
+    required this.assetType,
+    required this.promptState,
+  });
+
+  final int id;
+  final String name;
+  final String assetType;
+  final String promptState;
+
+  factory LegacyAssetPollingPromptAssetsItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return LegacyAssetPollingPromptAssetsItem(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String? ?? '',
+      assetType: json['type'] as String? ?? '',
+      promptState: json['promptState'] as String? ?? '',
+    );
+  }
+}
+
 /// OpenAPI **`CornerScapeResponse`**.
 class CornerScapeResponse {
   const CornerScapeResponse({required this.items});

@@ -2563,6 +2563,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/assets/polling-prompt-assets:
+    post:
+      tags: [assets]
+      summary: Legacy — poll prompt-generate completion by asset ids
+      operationId: postAssetsPollingPromptAssetsV1
+      description: |
+        Parity with old **`POST /api/assets/pollingPromptAssets`**.
+        Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). The server derives each asset's
+        **`promptState`** from latest related polish jobs (`asset.polish.prompt` / `asset.polish.batch`);
+        rows still **`生成中`** are filtered out.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyAssetsPollingPromptAssetsBody"
+      responses:
+        "200":
+          description: Polling rows (legacy shape subset)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LegacyAssetsPollingPromptAssetsItem"
+        "400":
+          description: Unknown JSON fields, non-positive ids, or too many ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/assets:
     post:
       tags: [assets]
@@ -10787,6 +10833,34 @@ components:
           type: string
           nullable: true
           description: Selected app_asset_image.file_path.
+
+    LegacyAssetsPollingPromptAssetsBody:
+      type: object
+      additionalProperties: false
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+    LegacyAssetsPollingPromptAssetsItem:
+      type: object
+      required: [id, name, type, promptState]
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: app_asset.legacy_id
+        name:
+          type: string
+        type:
+          type: string
+          enum: [role, tool, scene]
+        promptState:
+          type: string
+          description: Legacy prompt polling state (filters out 生成中 rows).
 
     AssetImageListItem:
       allOf:

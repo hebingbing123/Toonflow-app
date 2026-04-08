@@ -61,6 +61,38 @@ Future<List<LegacyAssetPollingImageAssetsItem>> postLegacyAssetsPollingImageAsse
       .toList();
 }
 
+/// `POST /api/v1/assets/polling-prompt-assets` — legacy prompt polling by **`ids`**.
+Future<List<LegacyAssetPollingPromptAssetsItem>> postLegacyAssetsPollingPromptAssets(
+  String accessToken,
+  List<int> assetLegacyIds,
+) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/polling-prompt-assets');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ids': assetLegacyIds}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final raw = jsonDecode(res.body) as List<dynamic>;
+  return raw
+      .map(
+        (e) => LegacyAssetPollingPromptAssetsItem.fromJson(
+          e as Map<String, dynamic>,
+        ),
+      )
+      .toList();
+}
+
 /// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `listProjectAssetImagesByLegacyIdsV1`.
 Future<ListAssetImagesResponse> fetchProjectAssetImagesByLegacyIds(
   String accessToken,
