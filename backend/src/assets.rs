@@ -1461,14 +1461,23 @@ fn normalize_corner_types_filter(
     let mut out = Vec::new();
     for s in list {
         let t = s.trim().to_lowercase();
+        if t.is_empty() {
+            continue;
+        }
         if t != "role" && t != "scene" && t != "tool" {
             return Err(ApiError::BadRequest(format!(
                 "types entries must be role, scene, or tool (got {s:?})"
             )));
         }
-        out.push(t);
+        if !out.iter().any(|v| v == &t) {
+            out.push(t);
+        }
     }
-    Ok(Some(out))
+    if out.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(out))
+    }
 }
 
 async fn list_corner_scape_assets(
@@ -2653,5 +2662,35 @@ mod tests {
                 || err.to_string().contains("unknown variant"),
             "{err}"
         );
+    }
+
+    #[test]
+    fn corner_types_filter_normalizes_blanks_and_duplicates() {
+        let out = normalize_corner_types_filter(Some(vec![
+            " role ".into(),
+            "".into(),
+            "ROLE".into(),
+            "scene".into(),
+            "scene".into(),
+            "   ".into(),
+        ]))
+        .unwrap();
+        assert_eq!(out, Some(vec!["role".to_string(), "scene".to_string()]));
+    }
+
+    #[test]
+    fn corner_types_filter_empty_after_trim_is_none() {
+        let out = normalize_corner_types_filter(Some(vec!["".into(), "   ".into(), "\n\t".into()]))
+            .unwrap();
+        assert_eq!(out, None);
+    }
+
+    #[test]
+    fn corner_types_filter_rejects_unknown_value() {
+        let err = normalize_corner_types_filter(Some(vec!["clip".into()])).unwrap_err();
+        match err {
+            ApiError::BadRequest(msg) => assert!(msg.contains("role, scene, or tool")),
+            other => panic!("unexpected error: {other:?}"),
+        }
     }
 }
