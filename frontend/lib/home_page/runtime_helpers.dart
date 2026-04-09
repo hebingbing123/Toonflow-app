@@ -92,6 +92,14 @@ extension _HomePageRuntimeHelpers on _HomePageState {
                 'tool:get_script_content (${content.length} chars)';
           }
         }
+        if (name == 'run_sub_agent_script') {
+          final content = _extractSubAgentResultText(result);
+          if (content != null && content.isNotEmpty) {
+            _workspaceScriptWritebackCandidate = _trimWorkspaceText(content);
+            _workspaceScriptWritebackSource =
+                'tool:run_sub_agent_script (${content.length} chars)';
+          }
+        }
         if (name == 'get_planData') {
           _workspaceScriptPlanWritebackCandidate =
               _extractScriptPlanDataFromToolResult(result);
@@ -134,6 +142,17 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       if (data is Map<String, dynamic>) {
         return result;
       }
+    }
+    return null;
+  }
+
+  String? _extractSubAgentResultText(Object? result) {
+    if (result is! Map<String, dynamic>) {
+      return null;
+    }
+    final text = result['result'];
+    if (text is String) {
+      return text.trim();
     }
     return null;
   }
