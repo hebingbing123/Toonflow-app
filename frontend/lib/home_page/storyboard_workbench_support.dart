@@ -57,3 +57,18 @@ String? resolveStoryboardSourceImageUrl({
   }
   return current;
 }
+
+String? resolveStoryboardGenerationPrompt({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+}) {
+  final scriptPrompt = scriptStoryboard?.prompt?.trim();
+  if (scriptPrompt != null && scriptPrompt.isNotEmpty) {
+    return scriptPrompt;
+  }
+  final productionPrompt = productionStoryboard?.prompt?.trim();
+  if (productionPrompt != null && productionPrompt.isNotEmpty) {
+    return productionPrompt;
+  }
+  return null;
+}

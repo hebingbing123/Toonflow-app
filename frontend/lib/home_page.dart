@@ -65,6 +65,7 @@ part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/script_editor_workbench.dart';
 part 'home_page/storyboard_editor.dart';
+part 'home_page/script_editor_storyboards_workbench.dart';
 part 'home_page/storyboard_editor_workbench.dart';
 
 class HomePage extends StatefulWidget {

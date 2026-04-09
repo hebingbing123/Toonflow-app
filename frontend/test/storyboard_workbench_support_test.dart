@@ -83,4 +83,41 @@ void main() {
       );
     },
   );
+
+  test(
+    'resolveStoryboardGenerationPrompt prefers script prompt then production prompt',
+    () {
+      expect(
+        resolveStoryboardGenerationPrompt(
+          scriptStoryboard: const StoryboardRow(
+            id: '1',
+            legacyId: 11,
+            scriptId: '3',
+            prompt: ' script prompt ',
+          ),
+          productionStoryboard: const ProductionStoryboardItemV1(
+            id: 11,
+            prompt: 'production prompt',
+          ),
+        ),
+        'script prompt',
+      );
+
+      expect(
+        resolveStoryboardGenerationPrompt(
+          scriptStoryboard: const StoryboardRow(
+            id: '1',
+            legacyId: 11,
+            scriptId: '3',
+            prompt: '   ',
+          ),
+          productionStoryboard: const ProductionStoryboardItemV1(
+            id: 11,
+            prompt: ' production prompt ',
+          ),
+        ),
+        'production prompt',
+      );
+    },
+  );
 }

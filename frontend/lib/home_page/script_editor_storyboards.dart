@@ -405,6 +405,20 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                               child: Text(boardsLoading[0] ? '刷新中…' : '刷新列表'),
                             ),
                             TextButton(
+                              onPressed: actionBusy[0] || boardsLoading[0]
+                                  ? null
+                                  : () => _openStoryboardBatchWorkbenchDialog(
+                                      ctx: ctx2,
+                                      token: token,
+                                      projectLegacyId: projectLegacyId,
+                                      scriptLegacyId: scriptLegacyId,
+                                      boardsList: boardsList,
+                                      setBoardsState: setBoardsState,
+                                      actionBusy: actionBusy,
+                                    ),
+                              child: const Text('分镜出图工作台'),
+                            ),
+                            TextButton(
                               onPressed:
                                   actionBusy[0] || productionSummaryLoading[0]
                                   ? null
