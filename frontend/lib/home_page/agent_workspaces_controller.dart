@@ -86,8 +86,6 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         'payload': {'content': prompt, 'max_tool_rounds': 12},
       }),
     );
-
-    if (mounted) setState(() => _loadingScriptWorkspaceRun = false);
   }
 
   Future<void> _runProductionWorkspaceAgent() async {
@@ -128,8 +126,6 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         'payload': {'content': prompt, 'max_tool_rounds': 12},
       }),
     );
-
-    if (mounted) setState(() => _loadingProductionWorkspaceRun = false);
   }
 
   Future<void> _probeProductionDomainTool() async {
@@ -198,8 +194,6 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         'payload': {'name': toolName, 'arguments': args},
       }),
     );
-
-    if (mounted) setState(() => _loadingProductionFlowProbe = false);
   }
 
   Future<void> _probeScriptDomainTool(String toolName, String rawArgs) async {
@@ -244,29 +238,25 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       _error = null;
     });
 
-    try {
-      final channel = await _openHarnessChannel(token);
-      if (channel == null) return;
-      channel.sink.add(
-        jsonEncode({
-          'type': 'agent.script.attach',
-          'schema_version': 1,
-          'payload': {
-            'isolation_key': 'flutter-script-domain-probe',
-            'project_id': projectId,
-          },
-        }),
-      );
-      channel.sink.add(
-        jsonEncode({
-          'type': 'harness.tool.invoke',
-          'schema_version': 1,
-          'payload': {'name': toolName, 'arguments': args},
-        }),
-      );
-    } finally {
-      if (mounted) setState(() => _loadingScriptDomainProbe = false);
-    }
+    final channel = await _openHarnessChannel(token);
+    if (channel == null) return;
+    channel.sink.add(
+      jsonEncode({
+        'type': 'agent.script.attach',
+        'schema_version': 1,
+        'payload': {
+          'isolation_key': 'flutter-script-domain-probe',
+          'project_id': projectId,
+        },
+      }),
+    );
+    channel.sink.add(
+      jsonEncode({
+        'type': 'harness.tool.invoke',
+        'schema_version': 1,
+        'payload': {'name': toolName, 'arguments': args},
+      }),
+    );
   }
 
   Future<void> _runScriptSubAgentTool() async {
@@ -288,36 +278,27 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       _error = null;
     });
 
-    try {
-      final channel = await _openHarnessChannel(token);
-      if (channel == null) return;
-      final arguments = <String, dynamic>{
-        'prompt': prompt,
-        'scriptId': scriptId,
-      }..removeWhere((_, Object? value) => value == null);
-      channel.sink.add(
-        jsonEncode({
-          'type': 'agent.script.attach',
-          'schema_version': 1,
-          'payload': {
-            'isolation_key': 'flutter-script-sub-agent-tool',
-            'project_id': projectId,
-          },
-        }),
-      );
-      channel.sink.add(
-        jsonEncode({
-          'type': 'harness.tool.invoke',
-          'schema_version': 1,
-          'payload': {
-            'name': toolName,
-            'arguments': arguments,
-          },
-        }),
-      );
-    } finally {
-      if (mounted) setState(() => _loadingScriptSubAgentRun = false);
-    }
+    final channel = await _openHarnessChannel(token);
+    if (channel == null) return;
+    final arguments = <String, dynamic>{'prompt': prompt, 'scriptId': scriptId}
+      ..removeWhere((_, Object? value) => value == null);
+    channel.sink.add(
+      jsonEncode({
+        'type': 'agent.script.attach',
+        'schema_version': 1,
+        'payload': {
+          'isolation_key': 'flutter-script-sub-agent-tool',
+          'project_id': projectId,
+        },
+      }),
+    );
+    channel.sink.add(
+      jsonEncode({
+        'type': 'harness.tool.invoke',
+        'schema_version': 1,
+        'payload': {'name': toolName, 'arguments': arguments},
+      }),
+    );
   }
 
   Future<void> _runProductionSubAgentTool() async {
@@ -342,33 +323,29 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       _error = null;
     });
 
-    try {
-      final channel = await _openHarnessChannel(token);
-      if (channel == null) return;
-      channel.sink.add(
-        jsonEncode({
-          'type': 'agent.production.attach',
-          'schema_version': 1,
-          'payload': {
-            'isolation_key': 'flutter-production-sub-agent-tool',
-            'project_id': projectId,
-            'script_id': scriptId,
-          },
-        }),
-      );
-      channel.sink.add(
-        jsonEncode({
-          'type': 'harness.tool.invoke',
-          'schema_version': 1,
-          'payload': {
-            'name': toolName,
-            'arguments': {'prompt': prompt, 'scriptId': scriptId},
-          },
-        }),
-      );
-    } finally {
-      if (mounted) setState(() => _loadingProductionSubAgentRun = false);
-    }
+    final channel = await _openHarnessChannel(token);
+    if (channel == null) return;
+    channel.sink.add(
+      jsonEncode({
+        'type': 'agent.production.attach',
+        'schema_version': 1,
+        'payload': {
+          'isolation_key': 'flutter-production-sub-agent-tool',
+          'project_id': projectId,
+          'script_id': scriptId,
+        },
+      }),
+    );
+    channel.sink.add(
+      jsonEncode({
+        'type': 'harness.tool.invoke',
+        'schema_version': 1,
+        'payload': {
+          'name': toolName,
+          'arguments': {'prompt': prompt, 'scriptId': scriptId},
+        },
+      }),
+    );
   }
 
   Future<void> _writeBackScriptWorkspaceResult() async {

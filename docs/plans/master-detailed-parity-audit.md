@@ -175,11 +175,12 @@
 - 已把 Agent workspace 进一步收口为二级子导航（Script / Production / Activity），并把原超长 `agent_workspaces_section.dart` 拆分为职责化组件文件，减少单文件复杂度并把 WS 执行日志沉淀到独立活动面板，降低“同屏探针堆叠”负担。
 - 已把 Product workspace 一级导航继续拆分为 `Script Workspace`、`Production Workspace`、`Workspace Activity` 三个独立工作区面板：首页保留统一入口，但每个工作区在产品导航中固定单页承载，不再依赖“进入 Agent Workspace 卡片后再二次切页”。
 - 已在 Script/Production 工作区增加 Guided tasks 快捷动作（按步骤触发上下文拉取、子代理执行、结果写回），减少手动切换下拉与拼 JSON 参数，让主流程可以按产品任务序列推进。
+- 已修正 Agent workspace 的 WS 忙闲状态：script/production 运行、领域工具探测、sub-agent 执行现在会持续 busy 到收到完成/失败事件为止，不再在发出消息后立刻解除，避免重复点击造成并发 attach/run 与日志串扰。
+- 项目详情剧本区已提供“批量新增剧本”正式表单，直接调用 `POST /api/v1/scripts/batch-add` 并刷新列表/统计。
+- 项目详情资产区已提供“上传编辑图片”正式表单，直接调用 `POST /api/v1/production/edit-image/upload-image`。
 
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写
 - production agent 页面：flowData、衍生资产、分镜、视频工作台、Agent 对话
-- edit-image 上传流接入正式 UI（项目详情资产区新增“上传编辑图片”表单，选择剧本 + data URI 直传 `POST /api/v1/production/edit-image/upload-image`）
-- 批量新增剧本接入正式 UI（项目详情剧本区新增“批量新增剧本”表单，直接调用 `POST /api/v1/scripts/batch-add` 并刷新列表/统计）
 - 把 `home_page` 下大量 probe 逐步转为回归入口或开发工具，而不是主产品入口
 
 完成标准：

@@ -23,11 +23,20 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
       _wsSub = channel.stream.listen(
         (message) => _appendWsLog(message.toString()),
         onError: (Object e) {
-          if (mounted) setState(() => _error = 'ws: $e');
+          if (mounted) {
+            setState(() {
+              _error = 'ws: $e';
+              _resetWsBusyFlags();
+              _resetWorkspaceWsOperationFlags();
+            });
+          }
         },
         onDone: () {
           if (mounted) {
-            setState(_resetWsBusyFlags);
+            setState(() {
+              _resetWsBusyFlags();
+              _resetWorkspaceWsOperationFlags();
+            });
           }
         },
       );
@@ -70,8 +79,6 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
         'payload': {'content': 'hello from Flutter'},
       }),
     );
-
-    if (mounted) setState(() => _loadingWs = false);
   }
 
   Future<void> _testHarnessToolWebSocket() async {
@@ -101,8 +108,6 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
         },
       }),
     );
-
-    if (mounted) setState(() => _loadingWsHarness = false);
   }
 
   Future<void> _testHarnessIsolatedEchoWebSocket() async {
@@ -132,8 +137,6 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
         },
       }),
     );
-
-    if (mounted) setState(() => _loadingWsIsolatedEcho = false);
   }
 
   Future<void> _testHarnessSkillsReadWebSocket() async {
@@ -162,8 +165,6 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
         },
       }),
     );
-
-    if (mounted) setState(() => _loadingWsSkillsRead = false);
   }
 
   Future<void> _testHarnessWasmProbeWebSocket() async {
@@ -183,14 +184,9 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
       jsonEncode({
         'type': 'harness.tool.invoke',
         'schema_version': 1,
-        'payload': {
-          'name': 'wasm.probe',
-          'arguments': <String, Object?>{},
-        },
+        'payload': {'name': 'wasm.probe', 'arguments': <String, Object?>{}},
       }),
     );
-
-    if (mounted) setState(() => _loadingWsWasmProbe = false);
   }
 
   Future<void> _testHarnessAgentRunWebSocket() async {
@@ -210,10 +206,7 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
       jsonEncode({
         'type': 'agent.script.attach',
         'schema_version': 1,
-        'payload': {
-          'isolation_key': 'flutter-harness-agent',
-          'project_id': 1,
-        },
+        'payload': {'isolation_key': 'flutter-harness-agent', 'project_id': 1},
       }),
     );
     channel.sink.add(
@@ -227,7 +220,5 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
         },
       }),
     );
-
-    if (mounted) setState(() => _loadingWsHarnessAgent = false);
   }
 }

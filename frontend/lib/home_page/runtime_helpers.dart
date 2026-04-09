@@ -17,9 +17,20 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       _loadingProductionWorkspaceRun ||
       _loadingScriptDomainProbe ||
       _loadingProductionFlowProbe ||
+      _loadingScriptSubAgentRun ||
+      _loadingProductionSubAgentRun ||
       _loadingScriptResultWriteback ||
       _loadingScriptPlanResultWriteback ||
       _loadingProductionResultWriteback;
+
+  void _resetWorkspaceWsOperationFlags() {
+    _loadingScriptWorkspaceRun = false;
+    _loadingProductionWorkspaceRun = false;
+    _loadingScriptDomainProbe = false;
+    _loadingProductionFlowProbe = false;
+    _loadingScriptSubAgentRun = false;
+    _loadingProductionSubAgentRun = false;
+  }
 
   void _appendWsLog(String raw) {
     const maxChars = 12000;
@@ -67,6 +78,12 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       return;
     }
 
+    if (type == 'error.occurred') {
+      _resetWsBusyFlags();
+      _resetWorkspaceWsOperationFlags();
+      return;
+    }
+
     if (type == 'chat.content.updated' && payloadMap != null) {
       final append = payloadMap['append'];
       if (append is String && append.isNotEmpty) {
@@ -78,6 +95,14 @@ extension _HomePageRuntimeHelpers on _HomePageState {
     }
 
     if (type == 'harness.tool.result' && payloadMap != null) {
+      _loadingWsHarness = false;
+      _loadingWsIsolatedEcho = false;
+      _loadingWsWasmProbe = false;
+      _loadingWsSkillsRead = false;
+      _loadingScriptDomainProbe = false;
+      _loadingProductionFlowProbe = false;
+      _loadingScriptSubAgentRun = false;
+      _loadingProductionSubAgentRun = false;
       final name = payloadMap['name'];
       final result = payloadMap['result'];
       if (name is String) {
@@ -113,7 +138,21 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       return;
     }
 
+    if (type == 'chat.message.updated' && payloadMap != null) {
+      final status = payloadMap['status'];
+      if (status == 'complete' || status == 'stop' || status == 'error') {
+        _loadingWs = false;
+        _loadingWsHarnessAgent = false;
+        _loadingScriptWorkspaceRun = false;
+        _loadingProductionWorkspaceRun = false;
+      }
+      return;
+    }
+
     if (type == 'harness.agent.cancelled') {
+      _loadingWsHarnessAgent = false;
+      _loadingScriptWorkspaceRun = false;
+      _loadingProductionWorkspaceRun = false;
       _workspaceWritebackLine = '当前运行已取消，可检查日志后决定是否写回。';
     }
   }
