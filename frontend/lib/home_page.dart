@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'home_page/storyboard_workbench_support.dart';
 import 'home_page/sections.dart';
 import 'home_page/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
@@ -59,6 +60,7 @@ part 'home_page/build_sections.dart';
 part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
+part 'home_page/storyboard_editor_workbench.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -472,6 +472,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                             await _openStoryboardEditor(
                                               token,
                                               b.legacyId,
+                                              projectLegacyId: projectLegacyId,
+                                              scriptLegacyId: scriptLegacyId,
                                               onStoryboardTreeMutated: () async {
                                                 await _reloadScriptStoryboards(
                                                   token: token,
