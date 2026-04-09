@@ -13,9 +13,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
     return [
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
             ? null
             : () async {
                 setDialogState(() => tasksLegacyBusy[0] = true);
@@ -44,9 +42,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
             ? null
             : () async {
                 setDialogState(() => tasksLegacyBusy[0] = true);
@@ -73,15 +69,11 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(
-          tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks get-task-categories',
-        ),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks categories'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
             ? null
             : () async {
                 setDialogState(() => tasksLegacyBusy[0] = true);
@@ -112,13 +104,11 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks get-task-api'),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks list'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
             ? null
             : () async {
                 setDialogState(() => tasksLegacyBusy[0] = true);
@@ -156,9 +146,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(
-          tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks task-details (int)',
-        ),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST task-details int'),
       ),
     ];
   }

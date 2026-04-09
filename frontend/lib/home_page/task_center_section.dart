@@ -52,9 +52,13 @@ class TaskCenterSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
+        Text('任务中心', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
         Text(
-          'Task Center (legacy parity)',
-          style: Theme.of(context).textTheme.titleSmall,
+          '查看任务项目、分类和最近任务，并按 legacy id 或 UUID 打开单条详情。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -63,31 +67,21 @@ class TaskCenterSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: loadingTaskProjects ? null : onLoadTaskProjects,
-              child: Text(
-                loadingTaskProjects ? '…' : 'POST …/tasks/get-project',
-              ),
+              child: Text(loadingTaskProjects ? '…' : '加载任务项目'),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskCategories ? null : onLoadTaskCategories,
-              child: Text(
-                loadingTaskCategories
-                    ? '…'
-                    : 'POST …/tasks/get-task-categories',
-              ),
+              child: Text(loadingTaskCategories ? '…' : '加载任务分类'),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskApi ? null : onLoadTaskApi,
-              child: Text(loadingTaskApi ? '…' : 'POST …/tasks/get-task-api'),
+              child: Text(loadingTaskApi ? '…' : '加载任务列表'),
             ),
             FilledButton.tonal(
               onPressed: loadingTaskDetailsLegacy
                   ? null
                   : onProbeTaskDetailLegacy,
-              child: Text(
-                loadingTaskDetailsLegacy
-                    ? '…'
-                    : 'POST …/tasks/task-details (int)',
-              ),
+              child: Text(loadingTaskDetailsLegacy ? '…' : '查看首条任务详情'),
             ),
           ],
         ),
@@ -95,29 +89,27 @@ class TaskCenterSection extends StatelessWidget {
           const SizedBox(height: 8),
           SelectableText(
             taskProjects!.isEmpty
-                ? 'task projects: (empty)'
-                : 'task projects: ${taskProjects!.map((p) => '#${p.id} ${p.name}').join('; ')}',
+                ? '任务项目：空'
+                : '任务项目：${taskProjects!.map((p) => '#${p.id} ${p.name}').join('; ')}',
           ),
         ],
         if (taskCategoriesLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('task categories: $taskCategoriesLine'),
+          SelectableText('任务分类：$taskCategoriesLine'),
         ],
         if (taskApiSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('task api: $taskApiSummaryLine'),
+          SelectableText('任务列表：$taskApiSummaryLine'),
         ],
         if (taskDetailLegacyLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('task-details/int: $taskDetailLegacyLine'),
+          SelectableText('首条任务详情：$taskDetailLegacyLine'),
         ],
         const SizedBox(height: 8),
         TextField(
           controller: taskDetailJobIdController,
           onChanged: onTaskDetailJobIdChanged,
-          decoration: const InputDecoration(
-            labelText: 'Task/job UUID (tap a row below to paste)',
-          ),
+          decoration: const InputDecoration(labelText: '任务 UUID（点下方列表可自动填入）'),
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -126,18 +118,16 @@ class TaskCenterSection extends StatelessWidget {
                   taskDetailJobIdController.text.trim().isEmpty
               ? null
               : onProbeTaskDetailUuid,
-          child: Text(
-            loadingTaskDetailsUuid ? '…' : 'POST …/tasks/task-details (UUID)',
-          ),
+          child: Text(loadingTaskDetailsUuid ? '…' : '按 UUID 查看详情'),
         ),
         if (taskDetailUuidLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('task-details/uuid: $taskDetailUuidLine'),
+          SelectableText('UUID 详情：$taskDetailUuidLine'),
         ],
         if (taskApiJobs != null) ...[
           const SizedBox(height: 8),
           Text(
-            '${taskApiJobs!.length} task row(s)',
+            '${taskApiJobs!.length} 条任务',
             style: Theme.of(context).textTheme.labelLarge,
           ),
           ...taskApiJobs!
