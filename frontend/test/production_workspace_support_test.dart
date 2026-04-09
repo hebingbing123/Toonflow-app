@@ -100,4 +100,44 @@ void main() {
 
     expect(ids, <int>[101, 102, 103]);
   });
+
+  test(
+    'buildProductionActionArgumentSuggestions builds add/delete payloads',
+    () {
+      final result = <String, dynamic>{
+        'data': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 1,
+            'name': '角色A',
+            'derive': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 11},
+              <String, dynamic>{'id': 12},
+            ],
+          },
+        ],
+      };
+
+      final addSuggestions = buildProductionActionArgumentSuggestions(
+        selectedTool: 'add_deriveAsset',
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'assets',
+        result: result,
+      );
+      final deleteSuggestions = buildProductionActionArgumentSuggestions(
+        selectedTool: 'del_deriveAsset',
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'assets',
+        result: result,
+      );
+
+      expect(addSuggestions.first.label, '新增到 #1');
+      expect(addSuggestions.first.payload['assetsId'], 1);
+      expect(addSuggestions.first.payload['name'], '角色A-衍生');
+      expect(deleteSuggestions.first.label, '删除 #11');
+      expect(deleteSuggestions.first.payload, <String, dynamic>{
+        'assetsId': 1,
+        'id': 11,
+      });
+    },
+  );
 }

@@ -295,6 +295,15 @@ class _AgentWorkspaceProductionCardState
     );
   }
 
+  List<ProductionWorkspaceArgumentSuggestion> _buildActionSuggestions() {
+    return buildProductionActionArgumentSuggestions(
+      selectedTool: _selectedProductionTool,
+      toolName: widget.workspaceLastToolName,
+      suggestedFlowKey: _suggestedFlowKeyLine,
+      result: widget.workspaceLastToolResultData,
+    );
+  }
+
   List<int> _buildActionCandidateIds() {
     return extractProductionActionCandidateIds(
       selectedTool: _selectedProductionTool,
@@ -304,42 +313,40 @@ class _AgentWorkspaceProductionCardState
     );
   }
 
-  void _applyActionCandidateIds(List<int> ids, String label) {
-    widget.productionDomainArgsController.text = jsonEncode(<String, dynamic>{
-      'ids': ids,
-    });
-    _setTaskStatus('已填充候选 ID：$label');
+  void _applyActionSuggestion(
+    ProductionWorkspaceArgumentSuggestion suggestion,
+  ) {
+    widget.productionDomainArgsController.text = jsonEncode(suggestion.payload);
+    _setTaskStatus('已填充候选参数：${suggestion.label}');
   }
 
   Widget _buildActionCandidateTemplates(BuildContext context) {
+    final suggestions = _buildActionSuggestions();
+    if (suggestions.isEmpty) return const SizedBox.shrink();
     final ids = _buildActionCandidateIds();
-    if (ids.isEmpty) return const SizedBox.shrink();
-    final selections = <({String label, List<int> ids})>[
-      (label: '填充首项', ids: ids.take(1).toList(growable: false)),
-      if (ids.length > 1)
-        (label: '填充前 3 项', ids: ids.take(3).toList(growable: false)),
-      if (ids.length > 3) (label: '填充全部', ids: ids),
-    ];
+    final hasIdPreview = ids.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('当前 flow 候选 ID', style: Theme.of(context).textTheme.labelMedium),
-        const SizedBox(height: 6),
-        Text(
-          '候选 ${ids.length} 项：${ids.take(8).join(", ")}${ids.length > 8 ? "…" : ""}',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text('当前 flow 候选参数', style: Theme.of(context).textTheme.labelMedium),
+        if (hasIdPreview) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(
+            '候选 ${ids.length} 项：${ids.take(8).join(", ")}${ids.length > 8 ? "…" : ""}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: selections
+          children: suggestions
               .map(
-                (entry) => ActionChip(
-                  label: Text(entry.label),
+                (suggestion) => ActionChip(
+                  label: Text(suggestion.label),
                   onPressed: widget.busy
                       ? null
-                      : () => _applyActionCandidateIds(entry.ids, entry.label),
+                      : () => _applyActionSuggestion(suggestion),
                 ),
               )
               .toList(growable: false),
@@ -762,7 +769,7 @@ class _AgentWorkspaceProductionCardState
                       ],
                     ),
                   ),
-                if (_buildActionCandidateIds().isNotEmpty)
+                if (_buildActionSuggestions().isNotEmpty)
                   SizedBox(
                     width: 360,
                     child: _buildActionCandidateTemplates(context),

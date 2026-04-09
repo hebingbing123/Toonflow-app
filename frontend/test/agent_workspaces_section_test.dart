@@ -1436,7 +1436,7 @@ void main() {
       ),
     );
 
-    expect(find.text('当前 flow 候选 ID'), findsOneWidget);
+    expect(find.text('当前 flow 候选参数'), findsOneWidget);
     expect(find.text('候选 3 项：101, 102, 103'), findsOneWidget);
 
     final fillButton = find.text('填充前 3 项');
@@ -1445,6 +1445,6 @@ void main() {
     await tester.pump();
 
     expect(productionDomainArgsController.text, '{"ids":[101,102,103]}');
-    expect(find.textContaining('已填充候选 ID：填充前 3 项'), findsOneWidget);
+    expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
   });
 }
