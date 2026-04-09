@@ -157,42 +157,43 @@ void main() {
                 projectIdController: projectIdController,
                 scriptIdController: scriptIdController,
                 scriptPromptController: scriptPromptController,
-            scriptDomainArgsController: scriptDomainArgsController,
-            productionPromptController: productionPromptController,
-            flowKeyController: flowKeyController,
-            productionDomainToolController: productionDomainToolController,
-            productionDomainArgsController: productionDomainArgsController,
-            loadingScriptWorkspaceRun: false,
-            loadingProductionWorkspaceRun: false,
-            loadingScriptDomainProbe: false,
-            loadingProductionFlowProbe: false,
-            loadingScriptSubAgentRun: false,
-            loadingProductionSubAgentRun: false,
-            loadingScriptResultWriteback: false,
-            loadingScriptPlanResultWriteback: false,
-            loadingProductionResultWriteback: false,
-            wsLog: const <String>[],
-            workspaceAssistantText: '',
-            workspaceScriptWritebackCandidate: 'candidate',
-            workspaceScriptPlanWritebackCandidate: null,
-            workspaceScriptWritebackSource: null,
-            workspaceLastToolResultLine: 'line',
-            workspaceSuggestedFlowKey: null,
-            workspaceWritebackLine: null,
-            onRunScriptWorkspace: () {},
-            onRunProductionWorkspace: () {},
-            onProbeScriptDomainTool: (String toolName, String rawArgs) {
-              lastProbedTool = toolName;
-              lastProbedArgs = rawArgs;
-            },
-            onProbeProductionDomainTool: () {},
-            scriptSubAgentToolController: scriptSubAgentToolController,
-            productionSubAgentToolController: productionSubAgentToolController,
-            onRunScriptSubAgentTool: () => runSubAgentCalls += 1,
-            onRunProductionSubAgentTool: () {},
-            onWriteBackScriptResult: () => writeBackCalls += 1,
-            onWriteBackScriptPlanResult: () {},
-            onWriteBackProductionFlowResult: () {},
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: 'candidate',
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'line',
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (String toolName, String rawArgs) {
+                  lastProbedTool = toolName;
+                  lastProbedArgs = rawArgs;
+                },
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () => runSubAgentCalls += 1,
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () => writeBackCalls += 1,
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
                 onApplySuggestedFlowKey: () {},
               ),
             ),
@@ -319,10 +320,7 @@ void main() {
     await tester.pump();
 
     expect(probeCalls, 0);
-    expect(
-      find.text('拦截：script tool arguments JSON 解析失败。'),
-      findsOneWidget,
-    );
+    expect(find.text('拦截：script tool arguments JSON 解析失败。'), findsOneWidget);
   });
 
   testWidgets('Script argument templates and probe sync render', (
@@ -429,7 +427,9 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(DropdownButtonFormField<String>, 'get_planData'));
+    await tester.tap(
+      find.widgetWithText(DropdownButtonFormField<String>, 'get_planData'),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('get_script_content').last);
     await tester.pumpAndSettle();
@@ -498,39 +498,41 @@ void main() {
                 projectIdController: projectIdController,
                 scriptIdController: scriptIdController,
                 scriptPromptController: scriptPromptController,
-            scriptDomainArgsController: scriptDomainArgsController,
-            productionPromptController: productionPromptController,
-            flowKeyController: flowKeyController,
-            productionDomainToolController: productionDomainToolController,
-            productionDomainArgsController: productionDomainArgsController,
-            loadingScriptWorkspaceRun: false,
-            loadingProductionWorkspaceRun: false,
-            loadingScriptDomainProbe: false,
-            loadingProductionFlowProbe: false,
-            loadingScriptSubAgentRun: false,
-            loadingProductionSubAgentRun: false,
-            loadingScriptResultWriteback: false,
-            loadingScriptPlanResultWriteback: false,
-            loadingProductionResultWriteback: false,
-            wsLog: const <String>[],
-            workspaceAssistantText: '',
-            workspaceScriptWritebackCandidate: null,
-            workspaceScriptPlanWritebackCandidate: null,
-            workspaceScriptWritebackSource: null,
-            workspaceLastToolResultLine: 'line',
-            workspaceSuggestedFlowKey: null,
-            workspaceWritebackLine: null,
-            onRunScriptWorkspace: () {},
-            onRunProductionWorkspace: () {},
-            onProbeScriptDomainTool: (_, _) {},
-            onProbeProductionDomainTool: () => productionProbeCalls += 1,
-            scriptSubAgentToolController: scriptSubAgentToolController,
-            productionSubAgentToolController: productionSubAgentToolController,
-            onRunScriptSubAgentTool: () {},
-            onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
-            onWriteBackScriptResult: () {},
-            onWriteBackScriptPlanResult: () {},
-            onWriteBackProductionFlowResult: () => productionWriteBackCalls += 1,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'line',
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () => productionProbeCalls += 1,
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () =>
+                    productionWriteBackCalls += 1,
                 onApplySuggestedFlowKey: () {},
               ),
             ),
@@ -550,7 +552,10 @@ void main() {
 
     await tester.tap(find.text('2) 运行资产子代理'));
     await tester.pump();
-    expect(productionSubAgentToolController.text, 'run_sub_agent_derive_assets');
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_derive_assets',
+    );
     expect(productionPromptController.text, isNotEmpty);
     expect(productionSubAgentCalls, 1);
 
@@ -677,7 +682,10 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
     await tester.pumpAndSettle();
 
-    final probeButton = find.widgetWithText(FilledButton, 'Probe production tool');
+    final probeButton = find.widgetWithText(
+      FilledButton,
+      'Probe production tool',
+    );
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();
@@ -896,7 +904,10 @@ void main() {
 
     await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
     await tester.pumpAndSettle();
-    final probeButton = find.widgetWithText(FilledButton, 'Probe production tool');
+    final probeButton = find.widgetWithText(
+      FilledButton,
+      'Probe production tool',
+    );
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();
