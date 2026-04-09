@@ -5,13 +5,22 @@ part of '../home_page.dart';
 extension _HomePageBuildSections on _HomePageState {
   List<Widget> _buildHomePageSections(BuildContext context, Session? session) {
     final signedIn = session != null;
-
-    return [
+    final widgets = <Widget>[
       _buildOverviewSection(),
       _buildAuthSection(session, signedIn),
-      if (signedIn) ..._buildSignedInSections(),
-      ..._buildErrorSection(context),
     ];
+
+    if (signedIn) {
+      widgets.add(_buildWorkspaceModeSection(context));
+      widgets.addAll(
+        _homeSectionMode == _HomeSectionMode.product
+            ? _buildProductSections()
+            : _buildDebugSections(),
+      );
+    }
+
+    widgets.addAll(_buildErrorSection(context));
+    return widgets;
   }
 
   Widget _buildOverviewSection() => OverviewSection(
@@ -79,7 +88,49 @@ extension _HomePageBuildSections on _HomePageState {
     onCallModelDetail: _callModelDetail,
   );
 
-  List<Widget> _buildSignedInSections() => [
+  Widget _buildWorkspaceModeSection(BuildContext context) {
+    final selected = <_HomeSectionMode>{_homeSectionMode};
+    final isProduct = _homeSectionMode == _HomeSectionMode.product;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('Workspace mode', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          SegmentedButton<_HomeSectionMode>(
+            segments: const <ButtonSegment<_HomeSectionMode>>[
+              ButtonSegment<_HomeSectionMode>(
+                value: _HomeSectionMode.product,
+                label: Text('Product workspace'),
+              ),
+              ButtonSegment<_HomeSectionMode>(
+                value: _HomeSectionMode.debug,
+                label: Text('Ops and debug'),
+              ),
+            ],
+            selected: selected,
+            onSelectionChanged: (selection) {
+              final nextMode = selection.firstOrNull;
+              if (nextMode == null || nextMode == _homeSectionMode) {
+                return;
+              }
+              setState(() => _homeSectionMode = nextMode);
+            },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isProduct
+                ? '当前聚焦用户工作流：项目、Agent 工作区、任务与质量。'
+                : '当前聚焦运维探针：Harness 工具目录、WS 探测与系统诊断。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildProductSections() => [
     ProjectsSection(
       loadingProjects: _loadingProjects,
       loadingProjectsSummary: _loadingProjectsSummary,
@@ -210,6 +261,9 @@ extension _HomePageBuildSections on _HomePageState {
       onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
       onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
     ),
+  ];
+
+  List<Widget> _buildDebugSections() => [
     HarnessSection(
       loadingHarnessTools: _loadingHarnessTools,
       loadingSkillsSummary: _loadingSkillsSummary,

@@ -158,6 +158,7 @@
 
 当前进度（本轮）：
 
+- 首页已新增 `Workspace mode` 双模式切换（`Product workspace` / `Ops and debug`），把项目、任务、质量、Agent 工作区归入产品主链路，把 Harness/WS/system probes 收敛到运维调试模式，避免默认信息架构继续以 probe 为中心。
 - 已把 Agent workspace 从单块探针控件升级为任务化双工作区卡片，明确 script / production 两条执行路径，降低对手工拼 WS payload 的依赖。
 - 已补 script 领域工具一键探测入口（`get_planData`、`get_script_content`、`get_novel_text`、`get_novel_events`），可在工作区直接拉取上下文而不必依赖提示词触发。
 - script 领域工具探测已支持 JSON 参数输入（如 `novelId`），并对 `get_script_content` 自动兜底附带当前 `script_id`，减少手工拼 payload 的错误率。
@@ -203,6 +204,6 @@
 
 当前剩余重点项是：
 
-- Flutter 现在仍更像 probe/debug shell 的增强版，还不是旧 Electron 产品工作流的完整替代
+- Flutter 主入口已从“纯探针堆叠”切到“产品/调试分层”，但 script / production 仍缺完整业务 IA 页面（当前仍以 HomePage 工作区卡片承载，尚未形成旧产品级导航与专页编排）
 
 因此，后续收尾应聚焦 **Harness 领域能力 + Flutter 产品工作流** 两条主线。

@@ -66,6 +66,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+enum _HomeSectionMode { product, debug }
+
 class _HomePageState extends State<HomePage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -219,6 +221,7 @@ class _HomePageState extends State<HomePage> {
   String? _skillsAggregateLine;
   String? _skillsListSummary;
   String? _skillMutationLine;
+  _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
 
   @override
   void initState() {
