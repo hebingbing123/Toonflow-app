@@ -22,7 +22,7 @@ extension _HomePageScriptEditor on _HomePageState {
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
               return AlertDialog(
-                title: Text('Script #${script.legacyId}'),
+                title: Text('剧本 #${script.legacyId}'),
                 content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -31,7 +31,7 @@ extension _HomePageScriptEditor on _HomePageState {
                       TextField(
                         controller: nameCtrl,
                         decoration: const InputDecoration(
-                          labelText: 'Name (empty = clear)',
+                          labelText: '名称（留空则清空）',
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -40,7 +40,7 @@ extension _HomePageScriptEditor on _HomePageState {
                         minLines: 4,
                         maxLines: 12,
                         decoration: const InputDecoration(
-                          labelText: 'Content (empty = clear)',
+                          labelText: '内容（留空则清空）',
                           alignLabelWithHint: true,
                         ),
                       ),
@@ -49,7 +49,7 @@ extension _HomePageScriptEditor on _HomePageState {
                         controller: stateCtrl,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          labelText: 'extract_state (empty = clear)',
+                          labelText: '提取状态（留空则清空）',
                         ),
                       ),
                       Align(
@@ -70,7 +70,7 @@ extension _HomePageScriptEditor on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
-                    child: const Text('Close'),
+                    child: const Text('关闭'),
                   ),
                   TextButton(
                     onPressed: saving[0]
@@ -126,7 +126,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                           },
-                    child: const Text('DELETE'),
+                    child: const Text('删除剧本'),
                   ),
                   FilledButton(
                     onPressed: saving[0]
@@ -183,7 +183,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                           },
-                    child: Text(saving[0] ? '保存中…' : 'PATCH 保存'),
+                    child: Text(saving[0] ? '保存中…' : '保存修改'),
                   ),
                 ],
               );

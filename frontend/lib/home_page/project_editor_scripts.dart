@@ -105,9 +105,9 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       } catch (_) {}
       if (!ctx.mounted) return;
       setDialogState(() => saving[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text('已批量创建 ${created.inserted} 条剧本')),
-      );
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(SnackBar(content: Text('已批量创建 ${created.inserted} 条剧本')));
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);
@@ -135,11 +135,21 @@ extension _HomePageProjectEditorScripts on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) {
+    final outline = Theme.of(ctx).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('${scriptList.length} script(s)'),
+        Text(
+          '${scriptList.length} 条剧本',
+          style: Theme.of(ctx).textTheme.labelLarge,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '在项目下管理剧本，并进入剧本详情维护内容与分镜。',
+          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+        ),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 4,
           runSpacing: 0,
@@ -157,15 +167,6 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       statsRef: statsRef,
                     ),
               child: const Text('批量新增剧本'),
-            ),
-            ..._buildProjectScriptsProbeActions(
-              ctx: ctx,
-              setDialogState: setDialogState,
-              token: token,
-              p: p,
-              saving: saving,
-              scriptProbeBusy: scriptProbeBusy,
-              scriptList: scriptList,
             ),
           ],
         ),
@@ -216,8 +217,37 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       }
                     }
                   },
-            child: const Text('POST 空剧本'),
+            child: const Text('新建空剧本'),
           ),
+        ),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          title: const Text('兼容性检查'),
+          subtitle: Text(
+            '保留旧剧本接口与导出/提取回归入口，默认折叠',
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+          ),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 0,
+                children: [
+                  ..._buildProjectScriptsProbeActions(
+                    ctx: ctx,
+                    setDialogState: setDialogState,
+                    token: token,
+                    p: p,
+                    saving: saving,
+                    scriptProbeBusy: scriptProbeBusy,
+                    scriptList: scriptList,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         ...scriptList.map(
