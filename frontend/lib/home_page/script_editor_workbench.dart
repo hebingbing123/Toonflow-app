@@ -6,12 +6,14 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
     required this.projectLegacyId,
     required this.scriptLegacyId,
     required this.onExtractStateSynced,
+    required this.onOpenEditImageWorkbench,
   });
 
   final String token;
   final int projectLegacyId;
   final int scriptLegacyId;
   final void Function(int? extractState) onExtractStateSynced;
+  final Future<void> Function() onOpenEditImageWorkbench;
 
   @override
   State<_ScriptWorkbenchPanel> createState() => _ScriptWorkbenchPanelState();
@@ -200,6 +202,12 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
                     ? null
                     : () => _runAction(_startExtractAssets),
                 child: const Text('提取当前剧本素材'),
+              ),
+              TextButton(
+                onPressed: _runningAction
+                    ? null
+                    : () => widget.onOpenEditImageWorkbench(),
+                child: const Text('编辑图片工作台'),
               ),
             ],
           ),

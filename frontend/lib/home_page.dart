@@ -63,6 +63,7 @@ part 'home_page/overview_controller.dart';
 part 'home_page/build_sections.dart';
 part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
+part 'home_page/script_editor_edit_image_workbench.dart';
 part 'home_page/script_editor_workbench.dart';
 part 'home_page/storyboard_editor.dart';
 part 'home_page/script_editor_storyboards_workbench.dart';

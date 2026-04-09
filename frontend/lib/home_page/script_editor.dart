@@ -38,6 +38,12 @@ extension _HomePageScriptEditor on _HomePageState {
                           onExtractStateSynced: (extractState) {
                             stateCtrl.text = extractState?.toString() ?? '';
                           },
+                          onOpenEditImageWorkbench: () =>
+                              _openScriptEditImageWorkbenchDialog(
+                                token: token,
+                                projectLegacyId: projectLegacyId,
+                                scriptLegacyId: scriptLegacyId,
+                              ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
