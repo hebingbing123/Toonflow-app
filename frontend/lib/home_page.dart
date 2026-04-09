@@ -120,6 +120,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptWorkspaceRun = false;
   bool _loadingProductionWorkspaceRun = false;
   bool _loadingProductionFlowProbe = false;
+  bool _loadingScriptDomainProbe = false;
   bool _loadingScriptSubAgentRun = false;
   bool _loadingProductionSubAgentRun = false;
   bool _loadingScriptResultWriteback = false;

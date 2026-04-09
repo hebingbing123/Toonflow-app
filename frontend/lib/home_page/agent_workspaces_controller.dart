@@ -146,6 +146,57 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (mounted) setState(() => _loadingProductionFlowProbe = false);
   }
 
+  Future<void> _probeScriptDomainTool(String toolName) async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    if (projectId == null || toolName.trim().isEmpty) {
+      setState(() => _error = 'project_id/tool 必须有效');
+      return;
+    }
+    if (toolName == 'get_script_content' && scriptId == null) {
+      setState(() => _error = 'get_script_content 需要有效 script_id');
+      return;
+    }
+
+    final args = <String, dynamic>{};
+    if (toolName == 'get_script_content' && scriptId != null) {
+      args['scriptId'] = scriptId;
+    }
+
+    setState(() {
+      _loadingScriptDomainProbe = true;
+      _wsLog.clear();
+      _resetWorkspaceOutputs();
+      _error = null;
+    });
+
+    try {
+      final channel = await _openHarnessChannel(token);
+      if (channel == null) return;
+      channel.sink.add(
+        jsonEncode({
+          'type': 'agent.script.attach',
+          'schema_version': 1,
+          'payload': {
+            'isolation_key': 'flutter-script-domain-probe',
+            'project_id': projectId,
+          },
+        }),
+      );
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {'name': toolName, 'arguments': args},
+        }),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingScriptDomainProbe = false);
+    }
+  }
+
   Future<void> _runScriptSubAgentTool() async {
     final token = _session?.accessToken;
     if (token == null) return;

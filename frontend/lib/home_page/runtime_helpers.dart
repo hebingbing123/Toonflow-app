@@ -15,6 +15,7 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       _loadingWsSkillsRead ||
       _loadingScriptWorkspaceRun ||
       _loadingProductionWorkspaceRun ||
+      _loadingScriptDomainProbe ||
       _loadingProductionFlowProbe ||
       _loadingScriptResultWriteback ||
       _loadingProductionResultWriteback;

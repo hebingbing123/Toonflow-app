@@ -12,6 +12,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.flowKeyController,
     required this.loadingScriptWorkspaceRun,
     required this.loadingProductionWorkspaceRun,
+    required this.loadingScriptDomainProbe,
     required this.loadingProductionFlowProbe,
     required this.loadingScriptSubAgentRun,
     required this.loadingProductionSubAgentRun,
@@ -25,6 +26,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
     required this.onRunProductionWorkspace,
+    required this.onProbeScriptDomainTool,
     required this.onProbeProductionFlow,
     required this.scriptSubAgentToolController,
     required this.productionSubAgentToolController,
@@ -41,6 +43,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final TextEditingController flowKeyController;
   final bool loadingScriptWorkspaceRun;
   final bool loadingProductionWorkspaceRun;
+  final bool loadingScriptDomainProbe;
   final bool loadingProductionFlowProbe;
   final bool loadingScriptSubAgentRun;
   final bool loadingProductionSubAgentRun;
@@ -54,6 +57,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
   final VoidCallback onRunProductionWorkspace;
+  final ValueChanged<String> onProbeScriptDomainTool;
   final VoidCallback onProbeProductionFlow;
   final TextEditingController scriptSubAgentToolController;
   final TextEditingController productionSubAgentToolController;
@@ -80,6 +84,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     'run_sub_agent_adaptationStrategy',
     'run_sub_agent_script',
     'run_supervision_agent',
+  ];
+
+  static const List<String> _scriptDomainToolPresets = <String>[
+    'get_planData',
+    'get_script_content',
+    'get_novel_text',
+    'get_novel_events',
   ];
 
   static const List<String> _productionSubAgentPresets = <String>[
@@ -116,6 +127,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     ),
   ];
 
+  String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
+
   @override
   void initState() {
     super.initState();
@@ -144,6 +157,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   bool get _busy =>
       widget.loadingScriptWorkspaceRun ||
       widget.loadingProductionWorkspaceRun ||
+      widget.loadingScriptDomainProbe ||
       widget.loadingProductionFlowProbe ||
       widget.loadingScriptSubAgentRun ||
       widget.loadingProductionSubAgentRun ||
@@ -260,6 +274,45 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   onPressed: _busy ? null : widget.onRunScriptWorkspace,
                   child: Text(
                     widget.loadingScriptWorkspaceRun ? '…' : 'Run script',
+                  ),
+                ),
+                SizedBox(
+                  width: 220,
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _resolveDropdownValue(
+                      _selectedScriptDomainTool,
+                      _scriptDomainToolPresets,
+                    ),
+                    items: _scriptDomainToolPresets
+                        .map(
+                          (String tool) => DropdownMenuItem<String>(
+                            value: tool,
+                            child: Text(tool),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: _busy
+                        ? null
+                        : (String? value) {
+                            if (value == null) return;
+                            setState(() => _selectedScriptDomainTool = value);
+                          },
+                    decoration: const InputDecoration(
+                      labelText: 'script domain tool',
+                    ),
+                  ),
+                ),
+                FilledButton.tonal(
+                  onPressed: _busy
+                      ? null
+                      : () =>
+                            widget.onProbeScriptDomainTool(
+                              _selectedScriptDomainTool,
+                            ),
+                  child: Text(
+                    widget.loadingScriptDomainProbe
+                        ? '…'
+                        : 'Probe script data',
                   ),
                 ),
                 SizedBox(
