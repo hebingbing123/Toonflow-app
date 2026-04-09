@@ -159,6 +159,7 @@
 当前进度（本轮）：
 
 - 已把 Agent workspace 从单块探针控件升级为任务化双工作区卡片，明确 script / production 两条执行路径，降低对手工拼 WS payload 的依赖。
+- 已补 script 领域工具一键探测入口（`get_planData`、`get_script_content`、`get_novel_text`、`get_novel_events`），可在工作区直接拉取上下文而不必依赖提示词触发。
 - 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
 - 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
 - 已增加 script 结果回写优先策略：workspace 优先使用 `get_script_content` 工具返回的结构化 `content` 作为写回源，缺省回退到 `chat.content.updated` 聚合文本，并一键调用 `PATCH /api/v1/scripts/legacy/{id}` 写回，降低 Agent 产出到业务数据落库的错写风险与手工搬运成本。
