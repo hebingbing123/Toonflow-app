@@ -82,6 +82,7 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       if (name is String) {
         _workspaceLastToolName = name;
         _workspaceLastToolResultData = result;
+        _workspaceSuggestedFlowKey = _suggestFlowKeyFromToolName(name);
         if (name == 'get_script_content') {
           final content = _extractScriptContentFromToolResult(result);
           if (content != null && content.isNotEmpty) {
@@ -120,6 +121,31 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       }
     }
     return null;
+  }
+
+  String? _suggestFlowKeyFromToolName(String name) {
+    switch (name) {
+      case 'get_flowData':
+        final key = _productionFlowKeyCtrl.text.trim();
+        if (key.isNotEmpty) return key;
+        return 'workspaceResult';
+      case 'add_deriveAsset':
+      case 'del_deriveAsset':
+      case 'generate_deriveAsset':
+      case 'run_sub_agent_derive_assets':
+      case 'run_sub_agent_generate_assets':
+        return 'assets';
+      case 'generate_storyboard':
+      case 'run_sub_agent_storyboard_gen':
+      case 'run_sub_agent_storyboard_panel':
+        return 'storyboard';
+      case 'run_sub_agent_storyboard_table':
+        return 'storyboardTable';
+      case 'run_sub_agent_director_plan':
+        return 'scriptPlan';
+      default:
+        return 'workspaceResult';
+    }
   }
 
   void _setErrorFromException(Object error) {

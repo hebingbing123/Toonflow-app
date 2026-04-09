@@ -26,6 +26,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.workspaceScriptWritebackCandidate,
     required this.workspaceScriptWritebackSource,
     required this.workspaceLastToolResultLine,
+    required this.workspaceSuggestedFlowKey,
     required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
     required this.onRunProductionWorkspace,
@@ -37,6 +38,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onRunProductionSubAgentTool,
     required this.onWriteBackScriptResult,
     required this.onWriteBackProductionFlowResult,
+    required this.onApplySuggestedFlowKey,
   });
 
   final TextEditingController projectIdController;
@@ -60,6 +62,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String? workspaceScriptWritebackCandidate;
   final String? workspaceScriptWritebackSource;
   final String? workspaceLastToolResultLine;
+  final String? workspaceSuggestedFlowKey;
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
   final VoidCallback onRunProductionWorkspace;
@@ -71,6 +74,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final VoidCallback onRunProductionSubAgentTool;
   final VoidCallback onWriteBackScriptResult;
   final VoidCallback onWriteBackProductionFlowResult;
+  final VoidCallback onApplySuggestedFlowKey;
 
   @override
   State<AgentWorkspacesSection> createState() => _AgentWorkspacesSectionState();
@@ -171,7 +175,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.flowKeyController.text = _flowKeyPresets.first;
     }
     if (widget.productionDomainToolController.text.trim().isEmpty) {
-      widget.productionDomainToolController.text = _productionDomainToolPresets.first;
+      widget.productionDomainToolController.text =
+          _productionDomainToolPresets.first;
     }
     if (widget.productionDomainArgsController.text.trim().isEmpty) {
       widget.productionDomainArgsController.text = '{}';
@@ -329,15 +334,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                 FilledButton.tonal(
                   onPressed: _busy
                       ? null
-                      : () =>
-                            widget.onProbeScriptDomainTool(
-                              _selectedScriptDomainTool,
-                              widget.scriptDomainArgsController.text,
-                            ),
+                      : () => widget.onProbeScriptDomainTool(
+                          _selectedScriptDomainTool,
+                          widget.scriptDomainArgsController.text,
+                        ),
                   child: Text(
-                    widget.loadingScriptDomainProbe
-                        ? '…'
-                        : 'Probe script data',
+                    widget.loadingScriptDomainProbe ? '…' : 'Probe script data',
                   ),
                 ),
                 SizedBox(
@@ -493,7 +495,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         : (String? value) {
                             if (value == null) return;
                             setState(
-                              () => widget.productionDomainToolController.text = value,
+                              () => widget.productionDomainToolController.text =
+                                  value,
                             );
                           },
                     decoration: const InputDecoration(
@@ -544,7 +547,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                 FilledButton.tonal(
                   onPressed: _busy ? null : widget.onProbeProductionDomainTool,
                   child: Text(
-                    widget.loadingProductionFlowProbe ? '…' : 'Probe production tool',
+                    widget.loadingProductionFlowProbe
+                        ? '…'
+                        : 'Probe production tool',
                   ),
                 ),
                 SizedBox(
@@ -602,6 +607,29 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
+            if (_suggestedFlowKeyLine != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Suggested writeback key: $_suggestedFlowKeyLine',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    onPressed: _busy ? null : widget.onApplySuggestedFlowKey,
+                    child: const Text('Use key'),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              '核心 key 回写策略：get_flowData 直接写回；资产/分镜变更工具会先刷新对应 flow key 再写回。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
@@ -705,6 +733,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       return 'assistant stream';
     }
     return null;
+  }
+
+  String? get _suggestedFlowKeyLine {
+    final key = widget.workspaceSuggestedFlowKey?.trim();
+    if (key == null || key.isEmpty) return null;
+    return key;
   }
 }
 

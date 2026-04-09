@@ -10,6 +10,13 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     'storyboardTable',
     'storyboard',
   };
+  static const Map<String, String> _toolRefreshableCoreFlowKey =
+      <String, String>{
+        'add_deriveAsset': 'assets',
+        'del_deriveAsset': 'assets',
+        'generate_deriveAsset': 'assets',
+        'generate_storyboard': 'storyboard',
+      };
 
   int? _parsePositiveInt(String raw) {
     final value = int.tryParse(raw.trim());
@@ -22,9 +29,18 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     _workspaceLastToolResultLine = null;
     _workspaceLastToolName = null;
     _workspaceLastToolResultData = null;
+    _workspaceSuggestedFlowKey = null;
     _workspaceScriptWritebackCandidate = null;
     _workspaceScriptWritebackSource = null;
     _workspaceWritebackLine = null;
+  }
+
+  void _applySuggestedProductionFlowKey() {
+    final suggested = _workspaceSuggestedFlowKey?.trim();
+    if (suggested == null || suggested.isEmpty) {
+      return;
+    }
+    setState(() => _productionFlowKeyCtrl.text = suggested);
   }
 
   Future<void> _runScriptWorkspaceAgent() async {
@@ -169,15 +185,12 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       }),
     );
     channel.sink.add(
-        jsonEncode({
-          'type': 'harness.tool.invoke',
-          'schema_version': 1,
-          'payload': {
-            'name': toolName,
-            'arguments': args,
-          },
-        }),
-      );
+      jsonEncode({
+        'type': 'harness.tool.invoke',
+        'schema_version': 1,
+        'payload': {'name': toolName, 'arguments': args},
+      }),
+    );
 
     if (mounted) setState(() => _loadingProductionFlowProbe = false);
   }
@@ -405,10 +418,40 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       return;
     }
 
-    if (toolName != 'get_flowData' && _coreProductionFlowKeys.contains(flowKey)) {
-      setState(
-        () => _error = '非 get_flowData 结果不能覆盖核心 flow key，请改用扩展 key（如 workspaceResult）',
-      );
+    if (toolName == null) {
+      setState(() => _error = '缺少工具来源，无法安全回写');
+      return;
+    }
+
+    Object? payloadForWriteback = result;
+    var writebackSource = toolName;
+    if (toolName != 'get_flowData' &&
+        _coreProductionFlowKeys.contains(flowKey)) {
+      final refreshableKey = _toolRefreshableCoreFlowKey[toolName];
+      if (refreshableKey == flowKey) {
+        try {
+          final latestFlow = await fetchProductionFlowDataV1(
+            token,
+            projectId: projectId,
+            episodesId: scriptId,
+          );
+          payloadForWriteback = latestFlow[flowKey];
+          writebackSource = '$toolName -> refreshed flow[$flowKey]';
+        } catch (error) {
+          _setErrorFromException(error);
+          return;
+        }
+      } else {
+        setState(
+          () => _error =
+              '该工具结果不能直接覆盖核心 flow[$flowKey]，请改用扩展 key（如 workspaceResult）或先 get_flowData',
+        );
+        return;
+      }
+    }
+
+    if (payloadForWriteback == null) {
+      setState(() => _error = '回写数据为空，请先刷新对应 flow key 后重试');
       return;
     }
 
@@ -425,7 +468,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         episodesId: scriptId,
       );
       final merged = Map<String, dynamic>.from(fullFlow);
-      merged[flowKey] = result;
+      merged[flowKey] = payloadForWriteback;
       final status = await postProductionSaveFlowDataV1(
         token,
         projectId: projectId,
@@ -441,7 +484,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       if (!mounted) return;
       setState(() {
         _workspaceWritebackLine =
-            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=${toolName ?? 'unknown'}）。';
+            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$writebackSource）。';
       });
     } catch (error) {
       _setErrorFromException(error);

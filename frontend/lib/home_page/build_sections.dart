@@ -192,6 +192,7 @@ extension _HomePageBuildSections on _HomePageState {
       workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
       workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
       workspaceLastToolResultLine: _workspaceLastToolResultLine,
+      workspaceSuggestedFlowKey: _workspaceSuggestedFlowKey,
       workspaceWritebackLine: _workspaceWritebackLine,
       onRunScriptWorkspace: _runScriptWorkspaceAgent,
       onRunProductionWorkspace: _runProductionWorkspaceAgent,
@@ -203,6 +204,7 @@ extension _HomePageBuildSections on _HomePageState {
       onRunProductionSubAgentTool: _runProductionSubAgentTool,
       onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
       onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
+      onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
     ),
     HarnessSection(
       loadingHarnessTools: _loadingHarnessTools,

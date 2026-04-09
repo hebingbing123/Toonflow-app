@@ -130,6 +130,7 @@ class _HomePageState extends State<HomePage> {
   String? _workspaceLastToolResultLine;
   String? _workspaceLastToolName;
   Object? _workspaceLastToolResultData;
+  String? _workspaceSuggestedFlowKey;
   String? _workspaceScriptWritebackCandidate;
   String? _workspaceScriptWritebackSource;
   String? _workspaceWritebackLine;
