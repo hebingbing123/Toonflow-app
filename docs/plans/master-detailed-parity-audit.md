@@ -45,7 +45,7 @@
 
 ### 2.3 Harness / Socket.IO Agent 的真实遗漏
 
-旧 Socket.IO 已有协议骨架替代，但**域能力没有迁完**。当前 Harness 工具目录只有：
+旧 Socket.IO 已有协议骨架替代，且 script / production 的核心域能力已迁入 Harness；当前剩余缺口集中在前端工作流收口。当前 Harness 工具目录只有：
 
 - `echo`
 - `isolated.echo`
@@ -79,14 +79,14 @@
 - 当前 WS 文档已覆盖 `agent.script.attach`、`agent.production.attach`、`agent.context.update`、`agent.run.cancel`、`harness.agent.run`、`agent.chat.send` 这些协议动作。
 - 当前 script + production 侧核心领域工具与子 Agent 编排工具已经在 Harness 落地，但**协议存在 + 工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖完整前端工作流。
 
-### 2.4 Flutter 侧的真实遗漏
+### 2.4 Flutter 侧的真实遗漏（持续收口中）
 
 当前 Flutter 已接入很多 Rust API，也做了不少 probe，但**整体仍偏向调试壳**，还不能视为旧 Electron 产品 UI 的完整替代。
 
 证据：
 
 - 主入口 [`frontend/lib/home_page.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page.dart) 仍是单页 `HomePage` + 多个 `*_probe.dart` / `system_probes_*` / `skills_harness_*` 组合。
-- 已新增 [`frontend/lib/home_page/agent_workspaces_section.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page/agent_workspaces_section.dart) 与对应 controller，把 script/production attach + `harness.agent.run` + `get_flowData` probe 收口到独立工作区入口，但仍属“最小工作台”而非完整产品 IA。
+- 已新增 [`frontend/lib/home_page/agent_workspaces_section.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page/agent_workspaces_section.dart) 与对应 controller，并在本轮升级为双工作区任务化卡片（script / production 分栏、任务提示词模板、`get_flowData` 快捷键、`run_sub_agent_*` 下拉触发、最近 WS 事件摘要）；但整体仍属“最小工作台”而非完整产品 IA。
 - Agent workspaces 已补 `run_sub_agent_*` / `run_supervision_agent` 的工具直调入口（WS attach + `harness.tool.invoke`），可在 Flutter 侧直接触发 script/production 子 Agent 编排；但仍未形成完整业务信息架构与结果回写 UX。
 - `script-agent` 在 Flutter 侧只有 API probe 与状态码探针，见 [`frontend/lib/rust_api/script_agent.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/rust_api/script_agent.dart) 与 [`frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart)。
 - 目前没有发现与旧 `scriptAgent` / `productionAgent` 对应的完整终端用户聊天工作区、上下文工作区、执行过程 UI。
@@ -156,6 +156,12 @@
 
 目标：把当前 Flutter 从“接口探针台”推进到“用户可用的主界面”。
 
+当前进度（本轮）：
+
+- 已把 Agent workspace 从单块探针控件升级为任务化双工作区卡片，明确 script / production 两条执行路径，降低对手工拼 WS payload 的依赖。
+- 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
+- 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
+
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写
 - production agent 页面：flowData、衍生资产、分镜、视频工作台、Agent 对话
 - edit-image 上传流接入正式 UI
@@ -188,7 +194,6 @@
 
 当前剩余重点项是：
 
-- Harness 还没有承接旧 script/production Agent 的领域工具和子 Agent 编排
-- Flutter 现在更像 probe/debug shell，还不是旧 Electron 产品工作流的完整替代
+- Flutter 现在仍更像 probe/debug shell 的增强版，还不是旧 Electron 产品工作流的完整替代
 
 因此，后续收尾应聚焦 **Harness 领域能力 + Flutter 产品工作流** 两条主线。
