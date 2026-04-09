@@ -60,6 +60,7 @@ part 'home_page/build_sections.dart';
 part 'home_page/runtime_helpers.dart';
 part 'home_page/script_editor.dart';
 part 'home_page/storyboard_editor.dart';
+part 'home_page/storyboard_editor_workbench.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
