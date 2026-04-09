@@ -178,6 +178,7 @@
 - 已修正 Agent workspace 的 WS 忙闲状态：script/production 运行、领域工具探测、sub-agent 执行现在会持续 busy 到收到完成/失败事件为止，不再在发出消息后立刻解除，避免重复点击造成并发 attach/run 与日志串扰。
 - 项目详情剧本区已提供“批量新增剧本”正式表单，直接调用 `POST /api/v1/scripts/batch-add` 并刷新列表/统计。
 - 项目详情资产区已提供“上传编辑图片”正式表单，直接调用 `POST /api/v1/production/edit-image/upload-image`。
+- 剧本编辑器已升级为脚本工作台入口：除基础字段编辑外，现可直接读取 `get-script-api` 当前脚本上下文、查看关联素材摘要、导出当前剧本 ZIP、轮询提取状态并发起当前剧本素材抽取，开始把“脚本导出与抽取流程”从 probe 操作收口到正式产品交互。
 - 剧本分镜编辑器已升级为制作工作台入口：除基础字段编辑外，现可直接读取/保存 storyboard 预览图、清空当前画面、管理 video track、生成默认视频提示词、提交 `workbench/generate-video`、查看当前 storyboard 关联视频候选并一键选中/删除，开始把“分镜与视频流程”从 probe 操作收口到正式产品交互。
 - 分镜工作台相关 UI 已继续拆为独立职责文件，避免 `storyboard_editor.dart` 再次膨胀成超长单文件，后续补产品流程时可以在不压坏主编辑器的前提下继续迭代。
 
@@ -211,6 +212,6 @@
 
 当前剩余重点项是：
 
-- 在已完成 Script/Production/Activity 专页化编排后，继续把业务子流程（例如脚本编辑、资产处理，以及剩余 production 细分流转）从 probe 交互逐步替换为面向终端用户的产品表单与任务流；其中分镜图片/视频工作台已开始正式收口。
+- 在已完成 Script/Production/Activity 专页化编排后，继续把业务子流程（例如资产处理，以及剩余 production 细分流转）从 probe 交互逐步替换为面向终端用户的产品表单与任务流；其中剧本导出/抽取工作台、分镜图片/视频工作台都已开始正式收口。
 
 因此，后续收尾应聚焦 **Harness 领域能力 + Flutter 产品工作流** 两条主线。
