@@ -171,6 +171,7 @@
 - 已扩展 production 工具结果回写面：除 `get_flowData` 外，其他工具结果也可写入自定义扩展 key（如 `workspaceResult`）；同时增加核心 key 保护，阻止非 `get_flowData` 结果覆盖 `assets/script/scriptPlan/storyboardTable/storyboard`。
 - 已增强 production 核心 key 回写闭环：当 `add_deriveAsset`/`del_deriveAsset`/`generate_deriveAsset`/`generate_storyboard` 触发后，若用户选择对应核心 key 回写，workspace 会先刷新最新 flow key 数据再写回，避免把工具执行回执误写成核心 flow 结构；同时新增建议写回 key 提示与一键应用。
 - 已扩展 production 子 Agent 回写闭环：当 `run_sub_agent_derive_assets`/`run_sub_agent_generate_assets`/`run_sub_agent_storyboard_gen`/`run_sub_agent_storyboard_panel`/`run_sub_agent_storyboard_table`/`run_sub_agent_director_plan` 触发后，若写回核心 key，workspace 同样先刷新最新 flow key 再保存，避免把子 Agent 文本结果误写成业务 flow 数据。
+- 已把 production 领域工具结果继续收口为工作区内“上下文快照”：`get_flowData` 返回的 `assets` / `script` / `scriptPlan` / `storyboardTable` / `storyboard` 与子代理文本结果会在同一面板内预览，减少写回前只能盯日志摘要判断数据形态的误操作。
 - 已增强 script 计划数据回写闭环：当 workspace 收到 `get_planData` 工具结果后，可直接一键调用 `POST /api/v1/script-agent/set-plan-data` 写回计划数据（`storySkeleton`/`adaptationStrategy`/`script`），不再仅限于脚本正文写回。
 - 已把 script 领域工具结果继续收口为工作区内“上下文快照”：`get_planData` 的故事骨架 / 改编策略 / script rows，以及 `get_script_content`、`get_novel_text`、`get_novel_events` 的核心内容都会在同一面板内可读预览，减少写回前必须来回查 probe 日志的审阅成本。
 - 已把 Agent workspace 进一步收口为二级子导航（Script / Production / Activity），并把原超长 `agent_workspaces_section.dart` 拆分为职责化组件文件，减少单文件复杂度并把 WS 执行日志沉淀到独立活动面板，降低“同屏探针堆叠”负担。
