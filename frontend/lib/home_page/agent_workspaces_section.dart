@@ -19,6 +19,8 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.loadingProductionResultWriteback,
     required this.wsLog,
     required this.workspaceAssistantText,
+    required this.workspaceScriptWritebackCandidate,
+    required this.workspaceScriptWritebackSource,
     required this.workspaceLastToolResultLine,
     required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
@@ -46,6 +48,8 @@ class AgentWorkspacesSection extends StatefulWidget {
   final bool loadingProductionResultWriteback;
   final List<String> wsLog;
   final String workspaceAssistantText;
+  final String? workspaceScriptWritebackCandidate;
+  final String? workspaceScriptWritebackSource;
   final String? workspaceLastToolResultLine;
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
@@ -294,8 +298,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   ),
                 ),
                 FilledButton(
-                  onPressed:
-                      _busy || widget.workspaceAssistantText.trim().isEmpty
+                  onPressed: _busy || !_canWriteBackScriptResult
                       ? null
                       : widget.onWriteBackScriptResult,
                   child: Text(
@@ -318,6 +321,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   widget.workspaceAssistantText.trim(),
                   maxChars: 720,
                 ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (_scriptWritebackSourceLine != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Writeback source: ${_scriptWritebackSourceLine!}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -553,6 +563,19 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       return value;
     }
     return '${value.substring(0, maxChars)}...';
+  }
+
+  bool get _canWriteBackScriptResult =>
+      widget.workspaceScriptWritebackCandidate?.trim().isNotEmpty == true ||
+      widget.workspaceAssistantText.trim().isNotEmpty;
+
+  String? get _scriptWritebackSourceLine {
+    final source = widget.workspaceScriptWritebackSource?.trim();
+    if (source != null && source.isNotEmpty) return source;
+    if (widget.workspaceAssistantText.trim().isNotEmpty) {
+      return 'assistant stream';
+    }
+    return null;
   }
 }
 

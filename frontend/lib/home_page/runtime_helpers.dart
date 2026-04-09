@@ -59,6 +59,8 @@ extension _HomePageRuntimeHelpers on _HomePageState {
 
     if (type == 'harness.agent.started') {
       _workspaceAssistantText = '';
+      _workspaceScriptWritebackCandidate = null;
+      _workspaceScriptWritebackSource = null;
       _workspaceWritebackLine = null;
       return;
     }
@@ -79,6 +81,14 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       if (name is String) {
         _workspaceLastToolName = name;
         _workspaceLastToolResultData = result;
+        if (name == 'get_script_content') {
+          final content = _extractScriptContentFromToolResult(result);
+          if (content != null && content.isNotEmpty) {
+            _workspaceScriptWritebackCandidate = _trimWorkspaceText(content);
+            _workspaceScriptWritebackSource =
+                'tool:get_script_content (${content.length} chars)';
+          }
+        }
         final encoded = jsonEncode(result);
         final summary = encoded.length > 320
             ? '${encoded.substring(0, 320)}...'
@@ -99,6 +109,16 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       return text;
     }
     return text.substring(text.length - maxChars);
+  }
+
+  String? _extractScriptContentFromToolResult(Object? result) {
+    if (result is Map<String, dynamic>) {
+      final content = result['content'];
+      if (content is String) {
+        return content.trim();
+      }
+    }
+    return null;
   }
 
   void _setErrorFromException(Object error) {

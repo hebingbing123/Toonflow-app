@@ -185,6 +185,8 @@ extension _HomePageBuildSections on _HomePageState {
       loadingProductionResultWriteback: _loadingProductionResultWriteback,
       wsLog: _wsLog,
       workspaceAssistantText: _workspaceAssistantText,
+      workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
+      workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
       workspaceLastToolResultLine: _workspaceLastToolResultLine,
       workspaceWritebackLine: _workspaceWritebackLine,
       onRunScriptWorkspace: _runScriptWorkspaceAgent,

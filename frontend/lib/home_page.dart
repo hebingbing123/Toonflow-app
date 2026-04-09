@@ -129,6 +129,8 @@ class _HomePageState extends State<HomePage> {
   String? _workspaceLastToolResultLine;
   String? _workspaceLastToolName;
   Object? _workspaceLastToolResultData;
+  String? _workspaceScriptWritebackCandidate;
+  String? _workspaceScriptWritebackSource;
   String? _workspaceWritebackLine;
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
   final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');

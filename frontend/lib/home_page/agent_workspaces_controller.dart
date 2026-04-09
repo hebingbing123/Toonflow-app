@@ -14,6 +14,8 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     _workspaceLastToolResultLine = null;
     _workspaceLastToolName = null;
     _workspaceLastToolResultData = null;
+    _workspaceScriptWritebackCandidate = null;
+    _workspaceScriptWritebackSource = null;
     _workspaceWritebackLine = null;
   }
 
@@ -245,7 +247,13 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final content = _workspaceAssistantText.trim();
+    final toolCandidate = _workspaceScriptWritebackCandidate?.trim();
+    final assistantText = _workspaceAssistantText.trim();
+    final useToolCandidate = toolCandidate != null && toolCandidate.isNotEmpty;
+    final content = useToolCandidate ? toolCandidate : assistantText;
+    final source = useToolCandidate
+        ? (_workspaceScriptWritebackSource ?? 'tool:get_script_content')
+        : 'assistant stream';
     if (scriptId == null || content.isEmpty) {
       setState(() => _error = 'script_id 与可回写结果必须有效');
       return;
@@ -267,7 +275,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       setState(() {
         final updatedLen = updated.content?.length ?? 0;
         _workspaceWritebackLine =
-            '写回成功：script ${updated.legacyId} 已更新，content 长度 $updatedLen。';
+            '写回成功：script ${updated.legacyId} 已更新，source=$source，content 长度 $updatedLen。';
       });
     } catch (error) {
       _setErrorFromException(error);
