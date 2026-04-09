@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
 import 'home_page/sections.dart';
+import 'home_page/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
 
 part 'home_page/project_editor.dart';

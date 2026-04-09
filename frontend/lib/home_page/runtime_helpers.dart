@@ -63,6 +63,29 @@ extension _HomePageRuntimeHelpers on _HomePageState {
   }
 
   void _ingestWorkspaceWsEvent(Map<String, dynamic> event) {
+    final resolution = resolveWorkspaceWsEvent(event);
+    if (resolution.clearAllOperations) {
+      _resetWsBusyFlags();
+      _resetWorkspaceWsOperationFlags();
+    } else {
+      if (resolution.clearToolOperations) {
+        _loadingWsHarness = false;
+        _loadingWsIsolatedEcho = false;
+        _loadingWsWasmProbe = false;
+        _loadingWsSkillsRead = false;
+        _loadingScriptDomainProbe = false;
+        _loadingProductionFlowProbe = false;
+        _loadingScriptSubAgentRun = false;
+        _loadingProductionSubAgentRun = false;
+      }
+      if (resolution.clearAgentOperations) {
+        _loadingWs = false;
+        _loadingWsHarnessAgent = false;
+        _loadingScriptWorkspaceRun = false;
+        _loadingProductionWorkspaceRun = false;
+      }
+    }
+
     final type = event['type'];
     if (type is! String || type.isEmpty) {
       return;
@@ -78,12 +101,6 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       return;
     }
 
-    if (type == 'error.occurred') {
-      _resetWsBusyFlags();
-      _resetWorkspaceWsOperationFlags();
-      return;
-    }
-
     if (type == 'chat.content.updated' && payloadMap != null) {
       final append = payloadMap['append'];
       if (append is String && append.isNotEmpty) {
@@ -95,14 +112,6 @@ extension _HomePageRuntimeHelpers on _HomePageState {
     }
 
     if (type == 'harness.tool.result' && payloadMap != null) {
-      _loadingWsHarness = false;
-      _loadingWsIsolatedEcho = false;
-      _loadingWsWasmProbe = false;
-      _loadingWsSkillsRead = false;
-      _loadingScriptDomainProbe = false;
-      _loadingProductionFlowProbe = false;
-      _loadingScriptSubAgentRun = false;
-      _loadingProductionSubAgentRun = false;
       final name = payloadMap['name'];
       final result = payloadMap['result'];
       if (name is String) {
@@ -138,22 +147,9 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       return;
     }
 
-    if (type == 'chat.message.updated' && payloadMap != null) {
-      final status = payloadMap['status'];
-      if (status == 'complete' || status == 'stop' || status == 'error') {
-        _loadingWs = false;
-        _loadingWsHarnessAgent = false;
-        _loadingScriptWorkspaceRun = false;
-        _loadingProductionWorkspaceRun = false;
-      }
-      return;
-    }
-
     if (type == 'harness.agent.cancelled') {
-      _loadingWsHarnessAgent = false;
-      _loadingScriptWorkspaceRun = false;
-      _loadingProductionWorkspaceRun = false;
       _workspaceWritebackLine = '当前运行已取消，可检查日志后决定是否写回。';
+      return;
     }
   }
 
