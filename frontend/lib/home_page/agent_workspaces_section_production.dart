@@ -430,6 +430,22 @@ class _AgentWorkspaceProductionCardState
     _setTaskStatus('已应用任务建议：${recipe.title}');
   }
 
+  void _runWorkspaceRecipeDomainTool(ProductionWorkspaceRecipe recipe) {
+    _applyWorkspaceRecipe(recipe);
+    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) {
+      return;
+    }
+    _probeProductionDomainTool();
+  }
+
+  void _runWorkspaceRecipeSubAgent(ProductionWorkspaceRecipe recipe) {
+    _applyWorkspaceRecipe(recipe);
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
+      return;
+    }
+    _runProductionSubAgentTool();
+  }
+
   Widget _buildWorkspaceDiagnosis(BuildContext context) {
     final recipes = _buildWorkspaceRecipes();
     if (recipes.isEmpty) {
@@ -475,6 +491,20 @@ class _AgentWorkspaceProductionCardState
                             : () => _applyWorkspaceRecipe(recipe),
                         child: const Text('应用建议'),
                       ),
+                      if (recipe.domainTool != null)
+                        FilledButton.tonal(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceRecipeDomainTool(recipe),
+                          child: const Text('读取 flow'),
+                        ),
+                      if (recipe.subAgentTool != null)
+                        FilledButton(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceRecipeSubAgent(recipe),
+                          child: const Text('运行子代理'),
+                        ),
                     ],
                   ),
                 ],

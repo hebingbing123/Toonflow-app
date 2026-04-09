@@ -1016,6 +1016,131 @@ void main() {
     expect(find.text('flow[assets]'), findsOneWidget);
   });
 
+  testWidgets('Production diagnosis card applies and runs suggested actions', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+    var productionProbeCalls = 0;
+    var productionSubAgentCalls = 0;
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: SingleChildScrollView(
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'get_flowData => {"data":[]}',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: <String, dynamic>{
+                  'data': <dynamic>[],
+                },
+                workspaceSuggestedFlowKey: 'assets',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () => productionProbeCalls += 1,
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('下一步建议'), findsOneWidget);
+    expect(find.text('先生成资产计划'), findsOneWidget);
+
+    final recipeCard = find
+        .ancestor(of: find.text('先生成资产计划'), matching: find.byType(Card))
+        .first;
+    final runSubAgentButton = find.descendant(
+      of: recipeCard,
+      matching: find.widgetWithText(FilledButton, '运行子代理'),
+    );
+    await tester.ensureVisible(runSubAgentButton);
+    await tester.tap(runSubAgentButton);
+    await tester.pump();
+
+    expect(productionSubAgentCalls, 1);
+    expect(flowKeyController.text, 'assets');
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_derive_assets',
+    );
+    expect(productionPromptController.text, contains('空白 assets flow'));
+
+    await tester.tap(find.widgetWithText(OutlinedButton, '应用建议').first);
+    await tester.pump();
+    expect(find.textContaining('已应用任务建议：先生成资产计划'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, '使用该 key'));
+    await tester.pump();
+    expect(flowKeyController.text, 'assets');
+    expect(productionProbeCalls, 0);
+  });
+
   testWidgets('Production pane renders tool result text snapshot', (
     WidgetTester tester,
   ) async {
