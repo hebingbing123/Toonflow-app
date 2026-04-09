@@ -108,4 +108,229 @@ void main() {
     expect(find.text('Latest assistant text'), findsOneWidget);
     expect(find.textContaining('latest: harness.tool.result'), findsOneWidget);
   });
+
+  testWidgets('Script guided tasks trigger probe/sub-agent/writeback actions', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    String? lastProbedTool;
+    String? lastProbedArgs;
+    var runSubAgentCalls = 0;
+    var writeBackCalls = 0;
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+            scriptDomainArgsController: scriptDomainArgsController,
+            productionPromptController: productionPromptController,
+            flowKeyController: flowKeyController,
+            productionDomainToolController: productionDomainToolController,
+            productionDomainArgsController: productionDomainArgsController,
+            loadingScriptWorkspaceRun: false,
+            loadingProductionWorkspaceRun: false,
+            loadingScriptDomainProbe: false,
+            loadingProductionFlowProbe: false,
+            loadingScriptSubAgentRun: false,
+            loadingProductionSubAgentRun: false,
+            loadingScriptResultWriteback: false,
+            loadingScriptPlanResultWriteback: false,
+            loadingProductionResultWriteback: false,
+            wsLog: const <String>[],
+            workspaceAssistantText: '',
+            workspaceScriptWritebackCandidate: 'candidate',
+            workspaceScriptPlanWritebackCandidate: null,
+            workspaceScriptWritebackSource: null,
+            workspaceLastToolResultLine: 'line',
+            workspaceSuggestedFlowKey: null,
+            workspaceWritebackLine: null,
+            onRunScriptWorkspace: () {},
+            onRunProductionWorkspace: () {},
+            onProbeScriptDomainTool: (String toolName, String rawArgs) {
+              lastProbedTool = toolName;
+              lastProbedArgs = rawArgs;
+            },
+            onProbeProductionDomainTool: () {},
+            scriptSubAgentToolController: scriptSubAgentToolController,
+            productionSubAgentToolController: productionSubAgentToolController,
+            onRunScriptSubAgentTool: () => runSubAgentCalls += 1,
+            onRunProductionSubAgentTool: () {},
+            onWriteBackScriptResult: () => writeBackCalls += 1,
+            onWriteBackScriptPlanResult: () {},
+            onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('1) 拉取 planData'));
+    await tester.pump();
+    expect(lastProbedTool, 'get_planData');
+
+    await tester.tap(find.text('2) 拉取剧本正文'));
+    await tester.pump();
+    expect(lastProbedTool, 'get_script_content');
+    expect(lastProbedArgs, contains('"scriptId":2'));
+
+    await tester.tap(find.text('3) 生成剧本草稿'));
+    await tester.pump();
+    expect(runSubAgentCalls, 1);
+    expect(scriptSubAgentToolController.text, 'run_sub_agent_script');
+    expect(scriptPromptController.text, isNotEmpty);
+
+    await tester.tap(find.text('4) 写回剧本'));
+    await tester.pump();
+    expect(writeBackCalls, 1);
+  });
+
+  testWidgets('Production guided tasks update flow context and callbacks', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    var productionProbeCalls = 0;
+    var productionSubAgentCalls = 0;
+    var productionWriteBackCalls = 0;
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+            scriptDomainArgsController: scriptDomainArgsController,
+            productionPromptController: productionPromptController,
+            flowKeyController: flowKeyController,
+            productionDomainToolController: productionDomainToolController,
+            productionDomainArgsController: productionDomainArgsController,
+            loadingScriptWorkspaceRun: false,
+            loadingProductionWorkspaceRun: false,
+            loadingScriptDomainProbe: false,
+            loadingProductionFlowProbe: false,
+            loadingScriptSubAgentRun: false,
+            loadingProductionSubAgentRun: false,
+            loadingScriptResultWriteback: false,
+            loadingScriptPlanResultWriteback: false,
+            loadingProductionResultWriteback: false,
+            wsLog: const <String>[],
+            workspaceAssistantText: '',
+            workspaceScriptWritebackCandidate: null,
+            workspaceScriptPlanWritebackCandidate: null,
+            workspaceScriptWritebackSource: null,
+            workspaceLastToolResultLine: 'line',
+            workspaceSuggestedFlowKey: null,
+            workspaceWritebackLine: null,
+            onRunScriptWorkspace: () {},
+            onRunProductionWorkspace: () {},
+            onProbeScriptDomainTool: (_, _) {},
+            onProbeProductionDomainTool: () => productionProbeCalls += 1,
+            scriptSubAgentToolController: scriptSubAgentToolController,
+            productionSubAgentToolController: productionSubAgentToolController,
+            onRunScriptSubAgentTool: () {},
+            onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
+            onWriteBackScriptResult: () {},
+            onWriteBackScriptPlanResult: () {},
+            onWriteBackProductionFlowResult: () => productionWriteBackCalls += 1,
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('1) 拉取资产 flow'));
+    await tester.pump();
+    expect(flowKeyController.text, 'assets');
+    expect(productionDomainToolController.text, 'get_flowData');
+    expect(productionProbeCalls, 1);
+
+    await tester.tap(find.text('2) 运行资产子代理'));
+    await tester.pump();
+    expect(productionSubAgentToolController.text, 'run_sub_agent_derive_assets');
+    expect(productionPromptController.text, isNotEmpty);
+    expect(productionSubAgentCalls, 1);
+
+    await tester.tap(find.text('3) 拉取分镜 flow'));
+    await tester.pump();
+    expect(flowKeyController.text, 'storyboard');
+    expect(productionProbeCalls, 2);
+
+    await tester.tap(find.text('4) 写回 flow'));
+    await tester.pump();
+    expect(productionWriteBackCalls, 1);
+  });
 }
