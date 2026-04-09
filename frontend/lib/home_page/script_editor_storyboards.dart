@@ -1,6 +1,42 @@
 part of '../home_page.dart';
 
 extension _HomePageScriptEditorStoryboards on _HomePageState {
+  Future<void> _reloadProductionStoryboardSummary({
+    required String token,
+    required int projectLegacyId,
+    required int scriptLegacyId,
+    required List<String?> productionSummaryLine,
+    required List<bool> productionSummaryLoading,
+    required StateSetter setBoardsState,
+  }) async {
+    productionSummaryLoading[0] = true;
+    setBoardsState(() {});
+    try {
+      final response = await postProductionGetStoryboardDataV1(
+        token,
+        projectId: projectLegacyId,
+        scriptId: scriptLegacyId,
+      );
+      final preview = response.data
+          .take(4)
+          .map(
+            (item) =>
+                '#${item.id}:${(item.state ?? 'unknown').trim().isEmpty ? 'unknown' : item.state}',
+          )
+          .join(', ');
+      productionSummaryLine[0] = response.data.isEmpty
+          ? '制作视图当前没有分镜数据'
+          : '制作视图 ${response.data.length} 条 · $preview${response.data.length > 4 ? '…' : ''}';
+    } on RustApiException catch (e) {
+      productionSummaryLine[0] = '制作视图读取失败：$e';
+    } catch (e) {
+      productionSummaryLine[0] = '制作视图读取失败：$e';
+    } finally {
+      productionSummaryLoading[0] = false;
+      setBoardsState(() {});
+    }
+  }
+
   Future<List<StoryboardRow>> _reloadScriptStoryboards({
     required String token,
     required int scriptLegacyId,
@@ -292,6 +328,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         builder: (ctx2) {
           final boardsLoading = <bool>[false];
           final actionBusy = <bool>[false];
+          final productionSummaryLoading = <bool>[false];
+          final productionSummaryLine = <String?>[null];
           return StatefulBuilder(
             builder: (ctx2, setBoardsState) {
               final outline = Theme.of(ctx2).colorScheme.outline;
@@ -307,6 +345,13 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                         boardsList.isEmpty
                             ? '当前剧本还没有分镜，可直接新增单条或按每行一个提示词批量导入。'
                             : '按剧本维护分镜顺序、提示词与状态；点击条目可进入单条编辑。',
+                        style: Theme.of(
+                          ctx2,
+                        ).textTheme.bodySmall?.copyWith(color: outline),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        productionSummaryLine[0] ?? '制作视图摘要尚未加载',
                         style: Theme.of(
                           ctx2,
                         ).textTheme.bodySmall?.copyWith(color: outline),
@@ -358,6 +403,26 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       boardsLoading: boardsLoading,
                                     ),
                               child: Text(boardsLoading[0] ? '刷新中…' : '刷新列表'),
+                            ),
+                            TextButton(
+                              onPressed:
+                                  actionBusy[0] || productionSummaryLoading[0]
+                                  ? null
+                                  : () => _reloadProductionStoryboardSummary(
+                                      token: token,
+                                      projectLegacyId: projectLegacyId,
+                                      scriptLegacyId: scriptLegacyId,
+                                      productionSummaryLine:
+                                          productionSummaryLine,
+                                      productionSummaryLoading:
+                                          productionSummaryLoading,
+                                      setBoardsState: setBoardsState,
+                                    ),
+                              child: Text(
+                                productionSummaryLoading[0]
+                                    ? '读取制作视图…'
+                                    : '刷新制作视图',
+                              ),
                             ),
                           ],
                         ),
