@@ -150,6 +150,31 @@ class _AgentWorkspaceProductionCardState
     return true;
   }
 
+  bool _normalizeArgsForProbe() {
+    final tool = widget.productionDomainToolController.text.trim();
+    final raw = widget.productionDomainArgsController.text.trim();
+    if (raw.isEmpty) {
+      widget.productionDomainArgsController.text = '{}';
+    }
+    final decoded = jsonDecode(widget.productionDomainArgsController.text.trim());
+    if (decoded is! Map<String, dynamic>) {
+      _setTaskStatus('拦截：production tool arguments 必须是 JSON object。');
+      return false;
+    }
+    if (tool != 'get_flowData') {
+      return true;
+    }
+    final key = widget.flowKeyController.text.trim();
+    final normalized = Map<String, dynamic>.from(decoded);
+    if (normalized['key'] == key) {
+      return true;
+    }
+    normalized['key'] = key;
+    widget.productionDomainArgsController.text = jsonEncode(normalized);
+    _setTaskStatus('已同步：get_flowData arguments.key -> $key');
+    return true;
+  }
+
   bool _validateSubAgentTool() {
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
       _setTaskStatus('拦截：Run sub-agent 需要选择 production sub-agent tool。');
@@ -166,6 +191,7 @@ class _AgentWorkspaceProductionCardState
 
   void _probeProductionDomainTool() {
     if (!_validateFlowProbe()) return;
+    if (!_normalizeArgsForProbe()) return;
     widget.onProbeProductionDomainTool();
     final tool = widget.productionDomainToolController.text.trim();
     final key = widget.flowKeyController.text.trim();

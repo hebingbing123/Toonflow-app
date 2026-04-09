@@ -569,4 +569,109 @@ void main() {
     expect(find.text('storyboard.count=2'), findsOneWidget);
     expect(find.text('assets.count=3'), findsOneWidget);
   });
+
+  testWidgets('Production probe auto-syncs get_flowData key in arguments', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'storyboard');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(
+      text: '{"key":"assets"}',
+    );
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    var productionProbeCalls = 0;
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: null,
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () => productionProbeCalls += 1,
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.pumpAndSettle();
+    final probeButton = find.widgetWithText(FilledButton, 'Probe production tool');
+    await tester.ensureVisible(probeButton);
+    await tester.tap(probeButton);
+    await tester.pump();
+
+    expect(productionProbeCalls, 1);
+    expect(productionDomainArgsController.text, '{"key":"storyboard"}');
+  });
 }
