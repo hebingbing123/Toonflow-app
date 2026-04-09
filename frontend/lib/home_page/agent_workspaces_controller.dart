@@ -109,15 +109,43 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (mounted) setState(() => _loadingProductionWorkspaceRun = false);
   }
 
-  Future<void> _probeProductionFlowTool() async {
+  Future<void> _probeProductionDomainTool() async {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final key = _productionFlowKeyCtrl.text.trim();
-    if (projectId == null || scriptId == null || key.isEmpty) {
-      setState(() => _error = 'project_id/script_id/key 必须有效');
+    final toolName = _productionDomainToolCtrl.text.trim();
+    if (projectId == null || scriptId == null || toolName.isEmpty) {
+      setState(() => _error = 'project_id/script_id/tool 必须有效');
       return;
+    }
+
+    final argsRaw = _productionDomainArgsCtrl.text.trim();
+    final Map<String, dynamic> args;
+    if (argsRaw.isEmpty) {
+      args = <String, dynamic>{};
+    } else {
+      try {
+        final decoded = jsonDecode(argsRaw);
+        if (decoded is! Map<String, dynamic>) {
+          setState(() => _error = 'production tool arguments 必须是 JSON object');
+          return;
+        }
+        args = decoded;
+      } catch (_) {
+        setState(() => _error = 'production tool arguments JSON 解析失败');
+        return;
+      }
+    }
+
+    if (toolName == 'get_flowData') {
+      final key = _productionFlowKeyCtrl.text.trim();
+      if (key.isEmpty) {
+        setState(() => _error = 'get_flowData 需要有效 key');
+        return;
+      }
+      args.putIfAbsent('key', () => key);
+      args.putIfAbsent('scriptId', () => scriptId);
     }
 
     setState(() {
@@ -141,15 +169,15 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       }),
     );
     channel.sink.add(
-      jsonEncode({
-        'type': 'harness.tool.invoke',
-        'schema_version': 1,
-        'payload': {
-          'name': 'get_flowData',
-          'arguments': {'key': key, 'scriptId': scriptId},
-        },
-      }),
-    );
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': toolName,
+            'arguments': args,
+          },
+        }),
+      );
 
     if (mounted) setState(() => _loadingProductionFlowProbe = false);
   }

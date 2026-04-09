@@ -142,6 +142,8 @@ class _HomePageState extends State<HomePage> {
     text: '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
   );
   final _productionFlowKeyCtrl = TextEditingController(text: 'assets');
+  final _productionDomainToolCtrl = TextEditingController(text: 'get_flowData');
+  final _productionDomainArgsCtrl = TextEditingController(text: '{}');
   final _scriptSubAgentToolCtrl = TextEditingController(
     text: 'run_sub_agent_storySkeleton',
   );
@@ -241,6 +243,8 @@ class _HomePageState extends State<HomePage> {
     _scriptWorkspacePromptCtrl.dispose();
     _productionWorkspacePromptCtrl.dispose();
     _productionFlowKeyCtrl.dispose();
+    _productionDomainToolCtrl.dispose();
+    _productionDomainArgsCtrl.dispose();
     _scriptSubAgentToolCtrl.dispose();
     _productionSubAgentToolCtrl.dispose();
     super.dispose();

@@ -10,6 +10,8 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.scriptPromptController,
     required this.productionPromptController,
     required this.flowKeyController,
+    required this.productionDomainToolController,
+    required this.productionDomainArgsController,
     required this.loadingScriptWorkspaceRun,
     required this.loadingProductionWorkspaceRun,
     required this.loadingScriptDomainProbe,
@@ -27,7 +29,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onRunScriptWorkspace,
     required this.onRunProductionWorkspace,
     required this.onProbeScriptDomainTool,
-    required this.onProbeProductionFlow,
+    required this.onProbeProductionDomainTool,
     required this.scriptSubAgentToolController,
     required this.productionSubAgentToolController,
     required this.onRunScriptSubAgentTool,
@@ -41,6 +43,8 @@ class AgentWorkspacesSection extends StatefulWidget {
   final TextEditingController scriptPromptController;
   final TextEditingController productionPromptController;
   final TextEditingController flowKeyController;
+  final TextEditingController productionDomainToolController;
+  final TextEditingController productionDomainArgsController;
   final bool loadingScriptWorkspaceRun;
   final bool loadingProductionWorkspaceRun;
   final bool loadingScriptDomainProbe;
@@ -58,7 +62,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final VoidCallback onRunScriptWorkspace;
   final VoidCallback onRunProductionWorkspace;
   final ValueChanged<String> onProbeScriptDomainTool;
-  final VoidCallback onProbeProductionFlow;
+  final VoidCallback onProbeProductionDomainTool;
   final TextEditingController scriptSubAgentToolController;
   final TextEditingController productionSubAgentToolController;
   final VoidCallback onRunScriptSubAgentTool;
@@ -101,6 +105,14 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     'run_sub_agent_storyboard_gen',
     'run_sub_agent_storyboard_panel',
     'run_sub_agent_storyboard_table',
+  ];
+
+  static const List<String> _productionDomainToolPresets = <String>[
+    'get_flowData',
+    'add_deriveAsset',
+    'del_deriveAsset',
+    'generate_deriveAsset',
+    'generate_storyboard',
   ];
 
   static const List<_PromptPreset> _scriptPromptPresets = <_PromptPreset>[
@@ -152,6 +164,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     }
     if (widget.flowKeyController.text.trim().isEmpty) {
       widget.flowKeyController.text = _flowKeyPresets.first;
+    }
+    if (widget.productionDomainToolController.text.trim().isEmpty) {
+      widget.productionDomainToolController.text = _productionDomainToolPresets.first;
+    }
+    if (widget.productionDomainArgsController.text.trim().isEmpty) {
+      widget.productionDomainArgsController.text = '{}';
     }
   }
 
@@ -439,6 +457,34 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   ),
                 ),
                 SizedBox(
+                  width: 260,
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _resolveDropdownValue(
+                      widget.productionDomainToolController.text.trim(),
+                      _productionDomainToolPresets,
+                    ),
+                    items: _productionDomainToolPresets
+                        .map(
+                          (String tool) => DropdownMenuItem<String>(
+                            value: tool,
+                            child: Text(tool),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: _busy
+                        ? null
+                        : (String? value) {
+                            if (value == null) return;
+                            setState(
+                              () => widget.productionDomainToolController.text = value,
+                            );
+                          },
+                    decoration: const InputDecoration(
+                      labelText: 'production domain tool',
+                    ),
+                  ),
+                ),
+                SizedBox(
                   width: 220,
                   child: DropdownButtonFormField<String>(
                     initialValue: _resolveDropdownValue(
@@ -462,15 +508,26 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                             );
                           },
                     decoration: const InputDecoration(
-                      labelText: 'get_flowData key',
-                      helperText: '非 get_flowData 结果建议写入 workspaceResult 等扩展 key',
+                      labelText: 'flow key',
+                      helperText: '作为 get_flowData key 和写回 key',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 360,
+                  child: TextField(
+                    controller: widget.productionDomainArgsController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'production tool arguments(JSON)',
+                      helperText: '非 get_flowData 时使用，例如 {"ids":[1,2]}',
                     ),
                   ),
                 ),
                 FilledButton.tonal(
-                  onPressed: _busy ? null : widget.onProbeProductionFlow,
+                  onPressed: _busy ? null : widget.onProbeProductionDomainTool,
                   child: Text(
-                    widget.loadingProductionFlowProbe ? '…' : 'Probe flow data',
+                    widget.loadingProductionFlowProbe ? '…' : 'Probe production tool',
                   ),
                 ),
                 SizedBox(
