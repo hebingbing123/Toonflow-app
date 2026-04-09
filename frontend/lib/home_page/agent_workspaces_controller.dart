@@ -16,6 +16,12 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         'del_deriveAsset': 'assets',
         'generate_deriveAsset': 'assets',
         'generate_storyboard': 'storyboard',
+        'run_sub_agent_derive_assets': 'assets',
+        'run_sub_agent_generate_assets': 'assets',
+        'run_sub_agent_storyboard_gen': 'storyboard',
+        'run_sub_agent_storyboard_panel': 'storyboard',
+        'run_sub_agent_storyboard_table': 'storyboardTable',
+        'run_sub_agent_director_plan': 'scriptPlan',
       };
 
   int? _parsePositiveInt(String raw) {

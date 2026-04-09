@@ -168,6 +168,7 @@
 - 已增加 production 侧 flow 回写：workspace 可基于最新 `get_flowData` 结果，先拉取完整 flow JSON，再按当前 key 合并并调用 `POST /api/v1/production/save-flow-data` 保存，避免只写单 key 时覆盖其他 flow 字段。
 - 已扩展 production 工具结果回写面：除 `get_flowData` 外，其他工具结果也可写入自定义扩展 key（如 `workspaceResult`）；同时增加核心 key 保护，阻止非 `get_flowData` 结果覆盖 `assets/script/scriptPlan/storyboardTable/storyboard`。
 - 已增强 production 核心 key 回写闭环：当 `add_deriveAsset`/`del_deriveAsset`/`generate_deriveAsset`/`generate_storyboard` 触发后，若用户选择对应核心 key 回写，workspace 会先刷新最新 flow key 数据再写回，避免把工具执行回执误写成核心 flow 结构；同时新增建议写回 key 提示与一键应用。
+- 已扩展 production 子 Agent 回写闭环：当 `run_sub_agent_derive_assets`/`run_sub_agent_generate_assets`/`run_sub_agent_storyboard_gen`/`run_sub_agent_storyboard_panel`/`run_sub_agent_storyboard_table`/`run_sub_agent_director_plan` 触发后，若写回核心 key，workspace 同样先刷新最新 flow key 再保存，避免把子 Agent 文本结果误写成业务 flow 数据。
 - 已增强 script 计划数据回写闭环：当 workspace 收到 `get_planData` 工具结果后，可直接一键调用 `POST /api/v1/script-agent/set-plan-data` 写回计划数据（`storySkeleton`/`adaptationStrategy`/`script`），不再仅限于脚本正文写回。
 
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写

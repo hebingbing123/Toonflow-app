@@ -726,7 +726,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             ],
             const SizedBox(height: 8),
             Text(
-              '核心 key 回写策略：get_flowData 直接写回；资产/分镜变更工具会先刷新对应 flow key 再写回。',
+              '核心 key 回写策略：get_flowData 直接写回；资产/分镜/导演计划相关工具会先刷新对应 flow key 再写回。',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
