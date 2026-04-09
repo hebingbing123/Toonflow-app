@@ -56,4 +56,48 @@ void main() {
       expect(recipes.first.flowKey, 'storyboard');
     },
   );
+
+  test('extractProductionActionCandidateIds reads derive asset ids', () {
+    final ids = extractProductionActionCandidateIds(
+      selectedTool: 'generate_deriveAsset',
+      toolName: 'get_flowData',
+      suggestedFlowKey: 'assets',
+      result: <String, dynamic>{
+        'data': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 1,
+            'derive': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 11},
+              <String, dynamic>{'id': 12},
+            ],
+          },
+          <String, dynamic>{
+            'id': 2,
+            'derive': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 21},
+            ],
+          },
+        ],
+      },
+    );
+
+    expect(ids, <int>[11, 12, 21]);
+  });
+
+  test('extractProductionActionCandidateIds reads storyboard ids', () {
+    final ids = extractProductionActionCandidateIds(
+      selectedTool: 'generate_storyboard',
+      toolName: 'get_flowData',
+      suggestedFlowKey: 'storyboard',
+      result: <String, dynamic>{
+        'data': <Map<String, dynamic>>[
+          <String, dynamic>{'id': 101},
+          <String, dynamic>{'id': 102},
+          <String, dynamic>{'id': 103},
+        ],
+      },
+    );
+
+    expect(ids, <int>[101, 102, 103]);
+  });
 }

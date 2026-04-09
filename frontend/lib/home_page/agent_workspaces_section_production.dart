@@ -295,6 +295,59 @@ class _AgentWorkspaceProductionCardState
     );
   }
 
+  List<int> _buildActionCandidateIds() {
+    return extractProductionActionCandidateIds(
+      selectedTool: _selectedProductionTool,
+      toolName: widget.workspaceLastToolName,
+      suggestedFlowKey: _suggestedFlowKeyLine,
+      result: widget.workspaceLastToolResultData,
+    );
+  }
+
+  void _applyActionCandidateIds(List<int> ids, String label) {
+    widget.productionDomainArgsController.text = jsonEncode(<String, dynamic>{
+      'ids': ids,
+    });
+    _setTaskStatus('已填充候选 ID：$label');
+  }
+
+  Widget _buildActionCandidateTemplates(BuildContext context) {
+    final ids = _buildActionCandidateIds();
+    if (ids.isEmpty) return const SizedBox.shrink();
+    final selections = <({String label, List<int> ids})>[
+      (label: '填充首项', ids: ids.take(1).toList(growable: false)),
+      if (ids.length > 1)
+        (label: '填充前 3 项', ids: ids.take(3).toList(growable: false)),
+      if (ids.length > 3) (label: '填充全部', ids: ids),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('当前 flow 候选 ID', style: Theme.of(context).textTheme.labelMedium),
+        const SizedBox(height: 6),
+        Text(
+          '候选 ${ids.length} 项：${ids.take(8).join(", ")}${ids.length > 8 ? "…" : ""}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: selections
+              .map(
+                (entry) => ActionChip(
+                  label: Text(entry.label),
+                  onPressed: widget.busy
+                      ? null
+                      : () => _applyActionCandidateIds(entry.ids, entry.label),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ],
+    );
+  }
+
   List<String> _buildResultSummaryLines() {
     final toolName = widget.workspaceLastToolName?.trim();
     final result = widget.workspaceLastToolResultData;
@@ -708,6 +761,11 @@ class _AgentWorkspaceProductionCardState
                         _buildArgumentTemplates(),
                       ],
                     ),
+                  ),
+                if (_buildActionCandidateIds().isNotEmpty)
+                  SizedBox(
+                    width: 360,
+                    child: _buildActionCandidateTemplates(context),
                   ),
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _probeProductionDomainTool,

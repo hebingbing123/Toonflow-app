@@ -1340,4 +1340,111 @@ void main() {
     expect(productionProbeCalls, 1);
     expect(productionDomainArgsController.text, '{"key":"storyboard"}');
   });
+
+  testWidgets('Production pane fills candidate storyboard ids from flow', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'storyboard');
+    final productionDomainToolController = TextEditingController(
+      text: 'generate_storyboard',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.production,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine:
+                    'get_flowData => {"data":[{"id":101},{"id":102},{"id":103}]}',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': <Map<String, dynamic>>[
+                    <String, dynamic>{'id': 101},
+                    <String, dynamic>{'id': 102},
+                    <String, dynamic>{'id': 103},
+                  ],
+                },
+                workspaceSuggestedFlowKey: 'storyboard',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('当前 flow 候选 ID'), findsOneWidget);
+    expect(find.text('候选 3 项：101, 102, 103'), findsOneWidget);
+
+    final fillButton = find.text('填充前 3 项');
+    await tester.ensureVisible(fillButton);
+    await tester.tap(fillButton);
+    await tester.pump();
+
+    expect(productionDomainArgsController.text, '{"ids":[101,102,103]}');
+    expect(find.textContaining('已填充候选 ID：填充前 3 项'), findsOneWidget);
+  });
 }

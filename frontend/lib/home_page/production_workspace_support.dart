@@ -16,6 +16,76 @@ class ProductionWorkspaceRecipe {
   final String? prompt;
 }
 
+List<int> extractProductionActionCandidateIds({
+  required String? selectedTool,
+  required String? toolName,
+  required String? suggestedFlowKey,
+  required Object? result,
+}) {
+  final normalizedSelectedTool = selectedTool?.trim() ?? '';
+  final normalizedToolName = toolName?.trim() ?? '';
+  final normalizedKey = suggestedFlowKey?.trim() ?? '';
+  if (result is! Map<String, dynamic>) {
+    return const <int>[];
+  }
+
+  Object? data = result['data'];
+  if (normalizedToolName == 'get_flowData') {
+    switch (normalizedSelectedTool) {
+      case 'generate_deriveAsset':
+        if (normalizedKey != 'assets') return const <int>[];
+        return _extractDeriveAssetIds(data);
+      case 'generate_storyboard':
+        if (normalizedKey != 'storyboard') return const <int>[];
+        return _extractEntityIds(data);
+      default:
+        return const <int>[];
+    }
+  }
+
+  if (data is Map<String, dynamic>) {
+    switch (normalizedSelectedTool) {
+      case 'generate_deriveAsset':
+        return _extractDeriveAssetIds(data['assets']);
+      case 'generate_storyboard':
+        return _extractEntityIds(data['storyboard']);
+      default:
+        return const <int>[];
+    }
+  }
+
+  return const <int>[];
+}
+
+List<int> _extractDeriveAssetIds(Object? value) {
+  if (value is! List) return const <int>[];
+  final ids = <int>[];
+  for (final row in value.whereType<Map<String, dynamic>>()) {
+    final derive = row['derive'];
+    if (derive is! List) continue;
+    ids.addAll(_extractEntityIds(derive));
+  }
+  return ids;
+}
+
+List<int> _extractEntityIds(Object? value) {
+  if (value is! List) return const <int>[];
+  final ids = <int>[];
+  for (final row in value.whereType<Map<String, dynamic>>()) {
+    final rawId =
+        row['id'] ??
+        row['legacy_id'] ??
+        row['legacyId'] ??
+        row['storyboardId'] ??
+        row['assetId'] ??
+        row['assetsId'];
+    if (rawId is num) {
+      ids.add(rawId.toInt());
+    }
+  }
+  return ids.toSet().toList(growable: false);
+}
+
 List<String> summarizeProductionResultSnapshot(
   String? toolName,
   Object? result,
