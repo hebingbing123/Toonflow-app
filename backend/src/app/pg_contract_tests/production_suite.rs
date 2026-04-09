@@ -1,4 +1,6 @@
 use super::*;
+use std::io::Cursor;
+use zip::ZipArchive;
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
@@ -590,6 +592,35 @@ async fn production_workbench_video_roundtrip() {
         vec![(storyboard_id, Some(1)), (storyboard_two_id, Some(0))]
     );
 
+    let storyboard_data_uri =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8Z8AAAAASUVORK5CYII=";
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/production/storyboard/update-url")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"storyboardId":{storyboard_id},"imageUrl":"{storyboard_data_uri}"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, updated_storyboard) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "updated_storyboard={updated_storyboard}"
+    );
+    assert_eq!(
+        updated_storyboard["imageUrl"].as_str(),
+        Some(storyboard_data_uri)
+    );
+
     let res = app
         .clone()
         .oneshot(
@@ -626,10 +657,32 @@ async fn production_workbench_video_roundtrip() {
         )
         .await
         .unwrap();
-    assert_eq!(
-        res.status(),
-        StatusCode::OK,
-        "export-image should accept owned storyboard"
+    let content_disposition = res
+        .headers()
+        .get(header::CONTENT_DISPOSITION)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_string);
+    let (status, body, ct) = read_bytes_response(res, 512 * 1024).await;
+    assert_eq!(status, StatusCode::OK, "export-image should return zip");
+    assert_eq!(ct.as_deref(), Some("application/zip"));
+    assert!(
+        content_disposition
+            .as_deref()
+            .unwrap_or_default()
+            .contains("toonflow-storyboards-"),
+        "content-disposition={content_disposition:?}"
+    );
+
+    let cursor = Cursor::new(body);
+    let mut archive = ZipArchive::new(cursor).expect("valid zip");
+    assert_eq!(archive.len(), 1, "one storyboard file expected in zip");
+    let mut exported = archive.by_index(0).expect("zip first file");
+    assert_eq!(exported.name(), format!("storyboard-{storyboard_id}.png"));
+    let mut exported_bytes = Vec::new();
+    std::io::Read::read_to_end(&mut exported, &mut exported_bytes).expect("read zip entry");
+    assert!(
+        !exported_bytes.is_empty(),
+        "zip entry should contain image bytes"
     );
 
     let res = app

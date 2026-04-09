@@ -5208,9 +5208,13 @@ paths:
       summary: ZIP storyboard frames for export (legacy `exportImage`)
       operationId: postProductionExportImageV1
       description: |
-        Bearer JWT. Validates **`shotId`** array, then:
-        - **200** when all referenced storyboard ids are owned by this user
+        Bearer JWT. Validates **`shotId`** array, fetches each storyboard **`file_path`**,
+        and returns a ZIP attachment containing one file per storyboard in request order.
+        Supported sources are **`http(s)`** URLs, base64 **`data:image/...`** URIs, and
+        absolute local file paths.
+        - **200** with **`application/zip`** when all referenced storyboard ids are owned by this user
         - **404** when any id is missing / not owned
+        - **400** when a storyboard has no image yet or its **`file_path`** is not exportable
         - **503** when auth/DB is not configured
       security:
         - bearerAuth: []
@@ -5222,9 +5226,19 @@ paths:
               $ref: "#/components/schemas/ProductionExportImageBody"
       responses:
         "200":
-          description: OK (empty body)
+          description: ZIP attachment
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: Attachment filename for the generated ZIP export
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
         "400":
-          description: Invalid body
+          description: Invalid body or storyboard image source cannot be exported
           content:
             application/json:
               schema:

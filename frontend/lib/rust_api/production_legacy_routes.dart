@@ -158,7 +158,7 @@ Future<int> postProductionStoryboardPollingImageV1(
 }
 
 /// `POST /api/v1/production/export-image` — OpenAPI `postProductionExportImageV1`
-/// (implemented; returns **200** or **404** / **503** when DB-gated).
+/// Returns a ZIP attachment on **200**; this helper currently exposes status-only probing.
 Future<int> postProductionExportImageV1(
   String accessToken, {
   required List<Map<String, dynamic>> shotId,
