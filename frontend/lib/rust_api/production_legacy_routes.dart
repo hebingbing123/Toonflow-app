@@ -1,5 +1,12 @@
 part of 'production.dart';
 
+class ProductionExportZipResponse {
+  final String? filename;
+  final Uint8List bytes;
+
+  const ProductionExportZipResponse({required this.filename, required this.bytes});
+}
+
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
   required List<int> storyboardIds,
@@ -175,4 +182,40 @@ Future<int> postProductionExportImageV1(
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
+}
+
+/// `POST /api/v1/production/export-image` — fetches the ZIP attachment body.
+Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
+  String accessToken, {
+  required List<Map<String, dynamic>> shotId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'shotId': shotId}),
+      )
+      .timeout(const Duration(seconds: 120));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  return ProductionExportZipResponse(
+    filename: _parseAttachmentFilename(res.headers['content-disposition']),
+    bytes: res.bodyBytes,
+  );
+}
+
+String? _parseAttachmentFilename(String? contentDisposition) {
+  if (contentDisposition == null || contentDisposition.isEmpty) {
+    return null;
+  }
+  final match = RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
+  if (match == null) {
+    return null;
+  }
+  return match.group(1);
 }
