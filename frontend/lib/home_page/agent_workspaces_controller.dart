@@ -31,6 +31,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     _workspaceLastToolResultData = null;
     _workspaceSuggestedFlowKey = null;
     _workspaceScriptWritebackCandidate = null;
+    _workspaceScriptPlanWritebackCandidate = null;
     _workspaceScriptWritebackSource = null;
     _workspaceWritebackLine = null;
   }
@@ -398,6 +399,64 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     } finally {
       if (mounted) {
         setState(() => _loadingScriptResultWriteback = false);
+      }
+    }
+  }
+
+  Future<void> _writeBackScriptPlanWorkspaceResult() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final candidate = _workspaceScriptPlanWritebackCandidate;
+    if (projectId == null || candidate == null) {
+      setState(() => _error = 'project_id 与 planData 回写源必须有效');
+      return;
+    }
+
+    final payload = candidate['data'];
+    if (payload is! Map<String, dynamic>) {
+      setState(() => _error = 'planData 结果缺少 data 字段');
+      return;
+    }
+
+    final storySkeleton = (payload['storySkeleton'] as String?)?.trim() ?? '';
+    final adaptationStrategy =
+        (payload['adaptationStrategy'] as String?)?.trim() ?? '';
+    final scriptRaw = payload['script'];
+    final script = scriptRaw is List
+        ? scriptRaw.whereType<Map<String, dynamic>>().toList(growable: false)
+        : const <Map<String, dynamic>>[];
+
+    setState(() {
+      _loadingScriptPlanResultWriteback = true;
+      _workspaceWritebackLine = null;
+      _error = null;
+    });
+
+    try {
+      final status = await postScriptAgentSetPlanDataV1(
+        token,
+        projectId: projectId,
+        storySkeleton: storySkeleton,
+        adaptationStrategy: adaptationStrategy,
+        script: script,
+      );
+      if (status != 200) {
+        throw RustApiException(
+          'set-plan-data failed with status $status',
+          statusCode: status,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _workspaceWritebackLine =
+            '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。';
+      });
+    } catch (error) {
+      _setErrorFromException(error);
+    } finally {
+      if (mounted) {
+        setState(() => _loadingScriptPlanResultWriteback = false);
       }
     }
   }

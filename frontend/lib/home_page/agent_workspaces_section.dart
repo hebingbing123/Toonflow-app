@@ -20,10 +20,12 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.loadingScriptSubAgentRun,
     required this.loadingProductionSubAgentRun,
     required this.loadingScriptResultWriteback,
+    required this.loadingScriptPlanResultWriteback,
     required this.loadingProductionResultWriteback,
     required this.wsLog,
     required this.workspaceAssistantText,
     required this.workspaceScriptWritebackCandidate,
+    required this.workspaceScriptPlanWritebackCandidate,
     required this.workspaceScriptWritebackSource,
     required this.workspaceLastToolResultLine,
     required this.workspaceSuggestedFlowKey,
@@ -37,6 +39,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onRunScriptSubAgentTool,
     required this.onRunProductionSubAgentTool,
     required this.onWriteBackScriptResult,
+    required this.onWriteBackScriptPlanResult,
     required this.onWriteBackProductionFlowResult,
     required this.onApplySuggestedFlowKey,
   });
@@ -56,10 +59,12 @@ class AgentWorkspacesSection extends StatefulWidget {
   final bool loadingScriptSubAgentRun;
   final bool loadingProductionSubAgentRun;
   final bool loadingScriptResultWriteback;
+  final bool loadingScriptPlanResultWriteback;
   final bool loadingProductionResultWriteback;
   final List<String> wsLog;
   final String workspaceAssistantText;
   final String? workspaceScriptWritebackCandidate;
+  final Map<String, dynamic>? workspaceScriptPlanWritebackCandidate;
   final String? workspaceScriptWritebackSource;
   final String? workspaceLastToolResultLine;
   final String? workspaceSuggestedFlowKey;
@@ -73,6 +78,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final VoidCallback onRunScriptSubAgentTool;
   final VoidCallback onRunProductionSubAgentTool;
   final VoidCallback onWriteBackScriptResult;
+  final VoidCallback onWriteBackScriptPlanResult;
   final VoidCallback onWriteBackProductionFlowResult;
   final VoidCallback onApplySuggestedFlowKey;
 
@@ -191,6 +197,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.loadingScriptSubAgentRun ||
       widget.loadingProductionSubAgentRun ||
       widget.loadingScriptResultWriteback ||
+      widget.loadingScriptPlanResultWriteback ||
       widget.loadingProductionResultWriteback;
 
   @override
@@ -398,6 +405,16 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         : 'Write back to script',
                   ),
                 ),
+                FilledButton.tonal(
+                  onPressed: _busy || !_canWriteBackScriptPlanResult
+                      ? null
+                      : widget.onWriteBackScriptPlanResult,
+                  child: Text(
+                    widget.loadingScriptPlanResultWriteback
+                        ? '…'
+                        : 'Write back planData',
+                  ),
+                ),
               ],
             ),
             if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
@@ -419,6 +436,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
               const SizedBox(height: 8),
               Text(
                 'Writeback source: ${_scriptWritebackSourceLine!}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (_scriptPlanWritebackLine != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                _scriptPlanWritebackLine!,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -726,6 +750,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.workspaceScriptWritebackCandidate?.trim().isNotEmpty == true ||
       widget.workspaceAssistantText.trim().isNotEmpty;
 
+  bool get _canWriteBackScriptPlanResult =>
+      widget.workspaceScriptPlanWritebackCandidate != null;
+
   String? get _scriptWritebackSourceLine {
     final source = widget.workspaceScriptWritebackSource?.trim();
     if (source != null && source.isNotEmpty) return source;
@@ -733,6 +760,18 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       return 'assistant stream';
     }
     return null;
+  }
+
+  String? get _scriptPlanWritebackLine {
+    final candidate = widget.workspaceScriptPlanWritebackCandidate;
+    if (candidate == null) return null;
+    final data = candidate['data'];
+    if (data is! Map<String, dynamic>) return null;
+    final scriptRaw = data['script'];
+    final scriptCount = scriptRaw is List
+        ? scriptRaw.whereType<Map<String, dynamic>>().length
+        : 0;
+    return 'PlanData source ready: story/adaptation + script rows=$scriptCount';
   }
 
   String? get _suggestedFlowKeyLine {

@@ -18,6 +18,7 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       _loadingScriptDomainProbe ||
       _loadingProductionFlowProbe ||
       _loadingScriptResultWriteback ||
+      _loadingScriptPlanResultWriteback ||
       _loadingProductionResultWriteback;
 
   void _appendWsLog(String raw) {
@@ -91,6 +92,10 @@ extension _HomePageRuntimeHelpers on _HomePageState {
                 'tool:get_script_content (${content.length} chars)';
           }
         }
+        if (name == 'get_planData') {
+          _workspaceScriptPlanWritebackCandidate =
+              _extractScriptPlanDataFromToolResult(result);
+        }
         final encoded = jsonEncode(result);
         final summary = encoded.length > 320
             ? '${encoded.substring(0, 320)}...'
@@ -118,6 +123,16 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       final content = result['content'];
       if (content is String) {
         return content.trim();
+      }
+    }
+    return null;
+  }
+
+  Map<String, dynamic>? _extractScriptPlanDataFromToolResult(Object? result) {
+    if (result is Map<String, dynamic>) {
+      final data = result['data'];
+      if (data is Map<String, dynamic>) {
+        return result;
       }
     }
     return null;

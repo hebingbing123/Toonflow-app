@@ -124,6 +124,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptSubAgentRun = false;
   bool _loadingProductionSubAgentRun = false;
   bool _loadingScriptResultWriteback = false;
+  bool _loadingScriptPlanResultWriteback = false;
   bool _loadingProductionResultWriteback = false;
   final List<String> _wsLog = [];
   String _workspaceAssistantText = '';
@@ -132,6 +133,7 @@ class _HomePageState extends State<HomePage> {
   Object? _workspaceLastToolResultData;
   String? _workspaceSuggestedFlowKey;
   String? _workspaceScriptWritebackCandidate;
+  Map<String, dynamic>? _workspaceScriptPlanWritebackCandidate;
   String? _workspaceScriptWritebackSource;
   String? _workspaceWritebackLine;
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
