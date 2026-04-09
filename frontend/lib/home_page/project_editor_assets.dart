@@ -998,6 +998,21 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                     ),
               child: const Text('上传编辑图片'),
             ),
+            TextButton(
+              onPressed:
+                  assetsBusy[0] ||
+                      assetsLoading[0] ||
+                      assetsScriptFilterLoading[0]
+                  ? null
+                  : () => _openCornerScapeWorkbenchDialog(
+                      ctx: ctx,
+                      setDialogState: setDialogState,
+                      token: token,
+                      p: p,
+                      assetsBusy: assetsBusy,
+                    ),
+              child: const Text('资产历史图工作台'),
+            ),
           ],
         ),
         const SizedBox(height: 8),
