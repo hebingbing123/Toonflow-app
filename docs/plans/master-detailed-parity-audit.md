@@ -172,7 +172,7 @@
 - 已增强 production 核心 key 回写闭环：当 `add_deriveAsset`/`del_deriveAsset`/`generate_deriveAsset`/`generate_storyboard` 触发后，若用户选择对应核心 key 回写，workspace 会先刷新最新 flow key 数据再写回，避免把工具执行回执误写成核心 flow 结构；同时新增建议写回 key 提示与一键应用。
 - 已扩展 production 子 Agent 回写闭环：当 `run_sub_agent_derive_assets`/`run_sub_agent_generate_assets`/`run_sub_agent_storyboard_gen`/`run_sub_agent_storyboard_panel`/`run_sub_agent_storyboard_table`/`run_sub_agent_director_plan` 触发后，若写回核心 key，workspace 同样先刷新最新 flow key 再保存，避免把子 Agent 文本结果误写成业务 flow 数据。
 - 已把 production 领域工具结果继续收口为工作区内“上下文快照”：`get_flowData` 返回的 `assets` / `script` / `scriptPlan` / `storyboardTable` / `storyboard` 与子代理文本结果会在同一面板内预览，减少写回前只能盯日志摘要判断数据形态的误操作。
-- 已把 production 工作区继续收口为“任务诊断 + 一键建议”形态：当前工具结果会生成 flow 摘要与下一步建议卡，按 `assets` / `scriptPlan` / `storyboardTable` / `storyboard` 的数据状态自动推荐读取 flow、切换子代理与填充提示词，减少仍需人工判断“下一步该跑哪个工具/子代理”的控制台式负担。
+- 已把 production 工作区继续收口为“任务诊断 + 一键建议”形态：当前工具结果会生成 flow 摘要与下一步建议卡，按 `assets` / `scriptPlan` / `storyboardTable` / `storyboard` 的数据状态自动推荐读取 flow、切换子代理与填充提示词，并可直接在建议卡上一键读取 flow 或运行子代理，减少仍需人工判断“下一步该跑哪个工具/子代理”的控制台式负担。
 - 已增强 script 计划数据回写闭环：当 workspace 收到 `get_planData` 工具结果后，可直接一键调用 `POST /api/v1/script-agent/set-plan-data` 写回计划数据（`storySkeleton`/`adaptationStrategy`/`script`），不再仅限于脚本正文写回。
 - 已把 script 领域工具结果继续收口为工作区内“上下文快照”：`get_planData` 的故事骨架 / 改编策略 / script rows，以及 `get_script_content`、`get_novel_text`、`get_novel_events` 的核心内容都会在同一面板内可读预览，减少写回前必须来回查 probe 日志的审阅成本。
 - 已把 Agent workspace 进一步收口为二级子导航（Script / Production / Activity），并把原超长 `agent_workspaces_section.dart` 拆分为职责化组件文件，减少单文件复杂度并把 WS 执行日志沉淀到独立活动面板，降低“同屏探针堆叠”负担。
