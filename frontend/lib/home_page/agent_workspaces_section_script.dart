@@ -93,6 +93,11 @@ class AgentWorkspaceScriptCard extends StatelessWidget {
     return 'PlanData source ready: story/adaptation + script rows=$scriptCount';
   }
 
+  void _applyScriptPromptIfEmpty(String prompt) {
+    if (scriptPromptController.text.trim().isNotEmpty) return;
+    scriptPromptController.text = prompt;
+  }
+
   String _previewText(String value, {required int maxChars}) {
     if (value.length <= maxChars) {
       return value;
@@ -121,6 +126,51 @@ class AgentWorkspaceScriptCard extends StatelessWidget {
     );
   }
 
+  Widget _buildGuidedTasks() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: <Widget>[
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  onScriptDomainToolChanged('get_planData');
+                  onProbeScriptDomainTool();
+                },
+          child: const Text('1) 拉取 planData'),
+        ),
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  onScriptDomainToolChanged('get_script_content');
+                  onProbeScriptDomainTool();
+                },
+          child: const Text('2) 拉取剧本正文'),
+        ),
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  _applyScriptPromptIfEmpty(
+                    '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
+                  );
+                  onScriptSubAgentChanged('run_sub_agent_script');
+                  onRunScriptSubAgentTool();
+                },
+          child: const Text('3) 生成剧本草稿'),
+        ),
+        OutlinedButton(
+          onPressed: busy || !_canWriteBackScriptResult
+              ? null
+              : onWriteBackScriptResult,
+          child: const Text('4) 写回剧本'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -131,6 +181,10 @@ class AgentWorkspaceScriptCard extends StatelessWidget {
           children: <Widget>[
             Text('Script workspace', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
+            Text('Guided tasks', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 6),
+            _buildGuidedTasks(),
+            const SizedBox(height: 10),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
             TextField(

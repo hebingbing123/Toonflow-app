@@ -85,6 +85,58 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
     return key;
   }
 
+  void _applyProductionPromptIfEmpty(String prompt) {
+    if (productionPromptController.text.trim().isNotEmpty) return;
+    productionPromptController.text = prompt;
+  }
+
+  Widget _buildGuidedTasks() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: <Widget>[
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  onFlowKeyChanged('assets');
+                  onProductionDomainToolChanged('get_flowData');
+                  onProbeProductionDomainTool();
+                },
+          child: const Text('1) 拉取资产 flow'),
+        ),
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  _applyProductionPromptIfEmpty(
+                    '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
+                  );
+                  onProductionSubAgentChanged('run_sub_agent_derive_assets');
+                  onRunProductionSubAgentTool();
+                },
+          child: const Text('2) 运行资产子代理'),
+        ),
+        FilledButton.tonal(
+          onPressed: busy
+              ? null
+              : () {
+                  onFlowKeyChanged('storyboard');
+                  onProductionDomainToolChanged('get_flowData');
+                  onProbeProductionDomainTool();
+                },
+          child: const Text('3) 拉取分镜 flow'),
+        ),
+        OutlinedButton(
+          onPressed: busy || workspaceLastToolResultLine == null
+              ? null
+              : onWriteBackProductionFlowResult,
+          child: const Text('4) 写回 flow'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -98,6 +150,10 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
+            Text('Guided tasks', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 6),
+            _buildGuidedTasks(),
+            const SizedBox(height: 10),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
             TextField(
