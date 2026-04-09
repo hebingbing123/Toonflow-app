@@ -179,6 +179,7 @@
 - 项目详情剧本区已提供“批量新增剧本”正式表单，直接调用 `POST /api/v1/scripts/batch-add` 并刷新列表/统计。
 - 项目详情资产区已提供“上传编辑图片”正式表单，直接调用 `POST /api/v1/production/edit-image/upload-image`。
 - 剧本分镜编辑器已升级为制作工作台入口：除基础字段编辑外，现可直接读取/保存 storyboard 预览图、清空当前画面、管理 video track、生成默认视频提示词、提交 `workbench/generate-video`、查看当前 storyboard 关联视频候选并一键选中/删除，开始把“分镜与视频流程”从 probe 操作收口到正式产品交互。
+- 分镜工作台相关 UI 已继续拆为独立职责文件，避免 `storyboard_editor.dart` 再次膨胀成超长单文件，后续补产品流程时可以在不压坏主编辑器的前提下继续迭代。
 
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写
 - production agent 页面：flowData、衍生资产、分镜、视频工作台、Agent 对话
