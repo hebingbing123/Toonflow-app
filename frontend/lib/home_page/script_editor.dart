@@ -4,6 +4,7 @@ extension _HomePageScriptEditor on _HomePageState {
   Future<void> _openScriptEditor(
     String token,
     int scriptLegacyId, {
+    required int projectLegacyId,
     Future<void> Function()? onScriptTreeMutated,
   }) async {
     final nameCtrl = TextEditingController();
@@ -59,6 +60,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               ? null
                               : () => _openScriptStoryboardsDialog(
                                   token: token,
+                                  projectLegacyId: projectLegacyId,
                                   scriptLegacyId: scriptLegacyId,
                                 ),
                           child: const Text('分镜列表…'),

@@ -1,8 +1,286 @@
 part of '../home_page.dart';
 
 extension _HomePageScriptEditorStoryboards on _HomePageState {
+  Future<List<StoryboardRow>> _reloadScriptStoryboards({
+    required String token,
+    required int scriptLegacyId,
+    required List<StoryboardRow> boardsList,
+    required BuildContext ctx,
+    required StateSetter setBoardsState,
+    required List<bool> boardsLoading,
+  }) async {
+    boardsLoading[0] = true;
+    setBoardsState(() {});
+    try {
+      final fresh = await fetchStoryboardsForScript(token, scriptLegacyId);
+      boardsList
+        ..clear()
+        ..addAll(fresh);
+      return fresh;
+    } finally {
+      boardsLoading[0] = false;
+      if (ctx.mounted) {
+        setBoardsState(() {});
+      }
+    }
+  }
+
+  Future<void> _openAddStoryboardDialog({
+    required BuildContext ctx,
+    required StateSetter setBoardsState,
+    required String token,
+    required int projectLegacyId,
+    required int scriptLegacyId,
+    required List<StoryboardRow> boardsList,
+    required List<bool> actionBusy,
+  }) async {
+    final promptCtrl = TextEditingController();
+    final durationCtrl = TextEditingController();
+    try {
+      final confirmed = await showDialog<bool>(
+        context: ctx,
+        builder: (dialogCtx) {
+          return AlertDialog(
+            title: const Text('新增分镜'),
+            content: SizedBox(
+              width: 420,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: promptCtrl,
+                    minLines: 3,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      labelText: '分镜提示词',
+                      helperText: '填写本镜头的画面描述或动作提示。',
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: durationCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '时长（可选）',
+                      helperText: '整数秒；留空表示由后端默认。',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(false),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(true),
+                child: const Text('新增'),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirmed != true || !ctx.mounted) return;
+      final prompt = promptCtrl.text.trim();
+      if (prompt.isEmpty) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('分镜提示词不能为空')));
+        return;
+      }
+      final durationText = durationCtrl.text.trim();
+      final duration = durationText.isEmpty ? null : int.tryParse(durationText);
+      if (durationText.isNotEmpty && duration == null) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('时长必须是整数')));
+        return;
+      }
+
+      actionBusy[0] = true;
+      setBoardsState(() {});
+      try {
+        final added = await postStoryboardAddV1(
+          token,
+          projectId: projectLegacyId,
+          scriptId: scriptLegacyId,
+          prompt: prompt,
+          duration: duration,
+        );
+        if (!ctx.mounted) return;
+        await _reloadScriptStoryboards(
+          token: token,
+          scriptLegacyId: scriptLegacyId,
+          boardsList: boardsList,
+          ctx: ctx,
+          setBoardsState: setBoardsState,
+          boardsLoading: actionBusy,
+        );
+        if (!ctx.mounted) return;
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(SnackBar(content: Text('已新增分镜 #${added.storyboardId}')));
+      } finally {
+        actionBusy[0] = false;
+        if (ctx.mounted) {
+          setBoardsState(() {});
+        }
+      }
+    } on RustApiException catch (e) {
+      if (ctx.mounted) {
+        actionBusy[0] = false;
+        setBoardsState(() {});
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } catch (e) {
+      if (ctx.mounted) {
+        actionBusy[0] = false;
+        setBoardsState(() {});
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      promptCtrl.dispose();
+      durationCtrl.dispose();
+    }
+  }
+
+  Future<void> _openBatchAddStoryboardsDialog({
+    required BuildContext ctx,
+    required StateSetter setBoardsState,
+    required String token,
+    required int projectLegacyId,
+    required int scriptLegacyId,
+    required List<StoryboardRow> boardsList,
+    required List<bool> actionBusy,
+  }) async {
+    final promptsCtrl = TextEditingController();
+    final durationCtrl = TextEditingController();
+    try {
+      final confirmed = await showDialog<bool>(
+        context: ctx,
+        builder: (dialogCtx) {
+          return AlertDialog(
+            title: const Text('批量新增分镜'),
+            content: SizedBox(
+              width: 460,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: promptsCtrl,
+                    minLines: 6,
+                    maxLines: 10,
+                    decoration: const InputDecoration(
+                      labelText: '每行一条分镜提示词',
+                      helperText: '会忽略空行，并按输入顺序批量创建。',
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: durationCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '统一时长（可选）',
+                      helperText: '若填写，会作用于本次全部新增分镜。',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(false),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(true),
+                child: const Text('批量新增'),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirmed != true || !ctx.mounted) return;
+      final prompts = promptsCtrl.text
+          .split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList(growable: false);
+      if (prompts.isEmpty) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('至少填写一条分镜提示词')));
+        return;
+      }
+      final durationText = durationCtrl.text.trim();
+      final duration = durationText.isEmpty ? null : int.tryParse(durationText);
+      if (durationText.isNotEmpty && duration == null) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('统一时长必须是整数')));
+        return;
+      }
+      final payload = prompts
+          .map(
+            (prompt) =>
+                StoryboardBatchAddInfoItem(prompt: prompt, duration: duration),
+          )
+          .toList(growable: false);
+
+      actionBusy[0] = true;
+      setBoardsState(() {});
+      try {
+        final added = await postStoryboardBatchAddInfoV1(
+          token,
+          projectId: projectLegacyId,
+          scriptId: scriptLegacyId,
+          storyboards: payload,
+        );
+        if (!ctx.mounted) return;
+        await _reloadScriptStoryboards(
+          token: token,
+          scriptLegacyId: scriptLegacyId,
+          boardsList: boardsList,
+          ctx: ctx,
+          setBoardsState: setBoardsState,
+          boardsLoading: actionBusy,
+        );
+        if (!ctx.mounted) return;
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(SnackBar(content: Text('已批量新增 ${added.added} 条分镜')));
+      } finally {
+        actionBusy[0] = false;
+        if (ctx.mounted) {
+          setBoardsState(() {});
+        }
+      }
+    } on RustApiException catch (e) {
+      if (ctx.mounted) {
+        actionBusy[0] = false;
+        setBoardsState(() {});
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } catch (e) {
+      if (ctx.mounted) {
+        actionBusy[0] = false;
+        setBoardsState(() {});
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      promptsCtrl.dispose();
+      durationCtrl.dispose();
+    }
+  }
+
   Future<void> _openScriptStoryboardsDialog({
     required String token,
+    required int projectLegacyId,
     required int scriptLegacyId,
   }) async {
     try {
@@ -12,10 +290,11 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       await showDialog<void>(
         context: context,
         builder: (ctx2) {
-          final creatingSb = <bool>[false];
-          final sbProbeBusy = <bool>[false];
+          final boardsLoading = <bool>[false];
+          final actionBusy = <bool>[false];
           return StatefulBuilder(
             builder: (ctx2, setBoardsState) {
+              final outline = Theme.of(ctx2).colorScheme.outline;
               return AlertDialog(
                 title: Text('分镜 (${boardsList.length})'),
                 content: SizedBox(
@@ -24,206 +303,132 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: boardsList.length,
-                        itemBuilder: (_, i) {
-                          final b = boardsList[i];
-                          return ListTile(
-                            title: Text('#${b.legacyId} ${b.state ?? ""}'),
-                            subtitle: Text(
-                              b.prompt ?? '',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            onTap: creatingSb[0]
-                                ? null
-                                : () async {
-                                    await _openStoryboardEditor(
-                                      token,
-                                      b.legacyId,
-                                      onStoryboardTreeMutated: () async {
-                                        final fresh =
-                                            await fetchStoryboardsForScript(
-                                              token,
-                                              scriptLegacyId,
-                                            );
-                                        if (!ctx2.mounted) return;
-                                        boardsList
-                                          ..clear()
-                                          ..addAll(fresh);
-                                        setBoardsState(() {});
-                                      },
-                                    );
-                                  },
-                          );
-                        },
+                      Text(
+                        boardsList.isEmpty
+                            ? '当前剧本还没有分镜，可直接新增单条或按每行一个提示词批量导入。'
+                            : '按剧本维护分镜顺序、提示词与状态；点击条目可进入单条编辑。',
+                        style: Theme.of(
+                          ctx2,
+                        ).textTheme.bodySmall?.copyWith(color: outline),
                       ),
                       const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            TextButton(
-                              onPressed:
-                                  sbProbeBusy[0] ||
-                                      creatingSb[0] ||
-                                      boardsList.isEmpty
+                            FilledButton.tonal(
+                              onPressed: actionBusy[0] || boardsLoading[0]
                                   ? null
-                                  : () async {
-                                      sbProbeBusy[0] = true;
-                                      setBoardsState(() {});
-                                      try {
-                                        final sid = boardsList.first.legacyId;
-                                        final row = await fetchStoryboardByLegacyId(
-                                          token,
-                                          sid,
-                                        );
-                                        if (!ctx2.mounted) return;
-                                        ScaffoldMessenger.of(ctx2).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'GET …/storyboards/legacy/$sid：state=${row.state ?? "(null)"}',
-                                            ),
-                                          ),
-                                        );
-                                      } on RustApiException catch (e) {
-                                        if (ctx2.mounted) {
-                                          ScaffoldMessenger.of(ctx2).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                            ),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (ctx2.mounted) {
-                                          ScaffoldMessenger.of(ctx2).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                            ),
-                                          );
-                                        }
-                                      } finally {
-                                        sbProbeBusy[0] = false;
-                                        if (ctx2.mounted) {
-                                          setBoardsState(() {});
-                                        }
-                                      }
-                                    },
-                              child: Text(
-                                sbProbeBusy[0]
-                                    ? '…'
-                                    : 'GET storyboard/legacy (首条)',
-                              ),
+                                  : () => _openAddStoryboardDialog(
+                                      ctx: ctx2,
+                                      setBoardsState: setBoardsState,
+                                      token: token,
+                                      projectLegacyId: projectLegacyId,
+                                      scriptLegacyId: scriptLegacyId,
+                                      boardsList: boardsList,
+                                      actionBusy: actionBusy,
+                                    ),
+                              child: Text(actionBusy[0] ? '处理中…' : '新增分镜'),
                             ),
                             TextButton(
-                              onPressed:
-                                  sbProbeBusy[0] ||
-                                      creatingSb[0] ||
-                                      boardsList.isEmpty
+                              onPressed: actionBusy[0] || boardsLoading[0]
                                   ? null
-                                  : () async {
-                                      sbProbeBusy[0] = true;
-                                      setBoardsState(() {});
-                                      try {
-                                        final first = boardsList.first;
-                                        final patched =
-                                            await updateStoryboardByLegacyId(
-                                              token,
-                                              first.legacyId,
-                                              <String, dynamic>{
-                                                'state': first.state ?? '',
-                                              },
-                                            );
-                                        if (!ctx2.mounted) return;
-                                        ScaffoldMessenger.of(ctx2).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'PATCH …/storyboards/legacy/${first.legacyId} state noop → ok (legacy #${patched.legacyId})',
-                                            ),
-                                          ),
-                                        );
-                                      } on RustApiException catch (e) {
-                                        if (ctx2.mounted) {
-                                          ScaffoldMessenger.of(ctx2).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                            ),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (ctx2.mounted) {
-                                          ScaffoldMessenger.of(ctx2).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                            ),
-                                          );
-                                        }
-                                      } finally {
-                                        sbProbeBusy[0] = false;
-                                        if (ctx2.mounted) {
-                                          setBoardsState(() {});
-                                        }
-                                      }
-                                    },
-                              child: Text(
-                                sbProbeBusy[0]
-                                    ? '…'
-                                    : 'PATCH storyboard/legacy (state noop)',
-                              ),
+                                  : () => _openBatchAddStoryboardsDialog(
+                                      ctx: ctx2,
+                                      setBoardsState: setBoardsState,
+                                      token: token,
+                                      projectLegacyId: projectLegacyId,
+                                      scriptLegacyId: scriptLegacyId,
+                                      boardsList: boardsList,
+                                      actionBusy: actionBusy,
+                                    ),
+                              child: const Text('批量新增分镜'),
+                            ),
+                            TextButton(
+                              onPressed: actionBusy[0] || boardsLoading[0]
+                                  ? null
+                                  : () => _reloadScriptStoryboards(
+                                      token: token,
+                                      scriptLegacyId: scriptLegacyId,
+                                      boardsList: boardsList,
+                                      ctx: ctx2,
+                                      setBoardsState: setBoardsState,
+                                      boardsLoading: boardsLoading,
+                                    ),
+                              child: Text(boardsLoading[0] ? '刷新中…' : '刷新列表'),
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 320,
+                        child: boardsList.isEmpty
+                            ? Center(
+                                child: Text(
+                                  '暂无分镜',
+                                  style: Theme.of(ctx2).textTheme.bodyMedium
+                                      ?.copyWith(color: outline),
+                                ),
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: boardsList.length,
+                                itemBuilder: (_, i) {
+                                  final b = boardsList[i];
+                                  final parts = <String>[
+                                    '序号 ${b.sbIndex ?? i + 1}',
+                                    if ((b.state ?? '').trim().isNotEmpty)
+                                      '状态 ${b.state}',
+                                    if ((b.duration ?? '').trim().isNotEmpty)
+                                      '时长 ${b.duration}',
+                                  ];
+                                  return ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text('#${b.legacyId}'),
+                                    subtitle: Text(
+                                      [
+                                        if ((b.prompt ?? '').trim().isNotEmpty)
+                                          b.prompt!.trim(),
+                                        if (parts.isNotEmpty) parts.join(' · '),
+                                      ].join('\n'),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    trailing: const Icon(
+                                      Icons.edit_outlined,
+                                      size: 18,
+                                    ),
+                                    onTap: actionBusy[0] || boardsLoading[0]
+                                        ? null
+                                        : () async {
+                                            await _openStoryboardEditor(
+                                              token,
+                                              b.legacyId,
+                                              onStoryboardTreeMutated: () async {
+                                                await _reloadScriptStoryboards(
+                                                  token: token,
+                                                  scriptLegacyId:
+                                                      scriptLegacyId,
+                                                  boardsList: boardsList,
+                                                  ctx: ctx2,
+                                                  setBoardsState:
+                                                      setBoardsState,
+                                                  boardsLoading: boardsLoading,
+                                                );
+                                              },
+                                            );
+                                          },
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),
                 ),
                 actions: [
-                  TextButton(
-                    onPressed: creatingSb[0]
-                        ? null
-                        : () async {
-                            creatingSb[0] = true;
-                            setBoardsState(() {});
-                            try {
-                              final row = await createStoryboardUnderScriptLegacy(
-                                token,
-                                scriptLegacyId,
-                              );
-                              if (ctx2.mounted) {
-                                boardsList.add(row);
-                                ScaffoldMessenger.of(ctx2).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '已创建分镜 legacy #${row.legacyId}',
-                                    ),
-                                  ),
-                                );
-                              }
-                            } on RustApiException catch (e) {
-                              if (ctx2.mounted) {
-                                ScaffoldMessenger.of(ctx2).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            } catch (e) {
-                              if (ctx2.mounted) {
-                                ScaffoldMessenger.of(ctx2).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            } finally {
-                              creatingSb[0] = false;
-                              if (ctx2.mounted) {
-                                setBoardsState(() {});
-                              }
-                            }
-                          },
-                    child: Text(creatingSb[0] ? '创建中…' : 'POST 空分镜'),
-                  ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx2).pop(),
                     child: const Text('Close'),

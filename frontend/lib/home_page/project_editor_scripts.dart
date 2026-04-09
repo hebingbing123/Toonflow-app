@@ -264,6 +264,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                 : () => _openScriptEditor(
                     token,
                     s.legacyId,
+                    projectLegacyId: p.legacyId,
                     onScriptTreeMutated: () async {
                       final d = await fetchProjectByLegacyId(token, p.legacyId);
                       if (!ctx.mounted) return;
