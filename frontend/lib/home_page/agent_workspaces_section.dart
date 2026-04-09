@@ -77,6 +77,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     'scriptPlan',
     'storyboardTable',
     'storyboard',
+    'workspaceResult',
   ];
 
   static const List<String> _scriptSubAgentPresets = <String>[
@@ -462,6 +463,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                           },
                     decoration: const InputDecoration(
                       labelText: 'get_flowData key',
+                      helperText: '非 get_flowData 结果建议写入 workspaceResult 等扩展 key',
                     ),
                   ),
                 ),
@@ -514,7 +516,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   child: Text(
                     widget.loadingProductionResultWriteback
                         ? '…'
-                        : 'Write flow result',
+                        : 'Write tool result',
                   ),
                 ),
               ],

@@ -3,6 +3,14 @@
 part of '../home_page.dart';
 
 extension _HomePageAgentWorkspacesController on _HomePageState {
+  static const Set<String> _coreProductionFlowKeys = <String>{
+    'assets',
+    'script',
+    'scriptPlan',
+    'storyboardTable',
+    'storyboard',
+  };
+
   int? _parsePositiveInt(String raw) {
     final value = int.tryParse(raw.trim());
     if (value == null || value <= 0) return null;
@@ -348,9 +356,15 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (projectId == null ||
         scriptId == null ||
         flowKey.isEmpty ||
-        toolName != 'get_flowData' ||
         result == null) {
-      setState(() => _error = '需先执行 get_flowData 并得到结果后再回写');
+      setState(() => _error = '需先执行工具并拿到结果后再回写');
+      return;
+    }
+
+    if (toolName != 'get_flowData' && _coreProductionFlowKeys.contains(flowKey)) {
+      setState(
+        () => _error = '非 get_flowData 结果不能覆盖核心 flow key，请改用扩展 key（如 workspaceResult）',
+      );
       return;
     }
 
@@ -383,7 +397,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       if (!mounted) return;
       setState(() {
         _workspaceWritebackLine =
-            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId。';
+            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=${toolName ?? 'unknown'}）。';
       });
     } catch (error) {
       _setErrorFromException(error);
