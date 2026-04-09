@@ -12,7 +12,10 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       _loadingWsIsolatedEcho ||
       _loadingWsWasmProbe ||
       _loadingWsHarnessAgent ||
-      _loadingWsSkillsRead;
+      _loadingWsSkillsRead ||
+      _loadingScriptWorkspaceRun ||
+      _loadingProductionWorkspaceRun ||
+      _loadingProductionFlowProbe;
 
   void _appendWsLog(String raw) {
     const maxChars = 12000;

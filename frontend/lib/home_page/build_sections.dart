@@ -170,6 +170,19 @@ extension _HomePageBuildSections on _HomePageState {
       onSelectQualityReview: (review) =>
           setState(() => _qualityReviewIdCtrl.text = review.id),
     ),
+    AgentWorkspacesSection(
+      projectIdController: _agentWorkspaceProjectIdCtrl,
+      scriptIdController: _agentWorkspaceScriptIdCtrl,
+      agentPromptController: _agentWorkspacePromptCtrl,
+      flowKeyController: _productionFlowKeyCtrl,
+      loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
+      loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,
+      loadingProductionFlowProbe: _loadingProductionFlowProbe,
+      wsLog: _wsLog,
+      onRunScriptWorkspace: _runScriptWorkspaceAgent,
+      onRunProductionWorkspace: _runProductionWorkspaceAgent,
+      onProbeProductionFlow: _probeProductionFlowTool,
+    ),
     HarnessSection(
       loadingHarnessTools: _loadingHarnessTools,
       loadingSkillsSummary: _loadingSkillsSummary,

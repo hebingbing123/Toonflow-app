@@ -1,3 +1,4 @@
+export 'agent_workspaces_section.dart';
 export 'auth_section.dart';
 export 'harness_section.dart';
 export 'jobs_section.dart';

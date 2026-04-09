@@ -38,6 +38,7 @@ part 'home_page/jobs_controller_summary.dart';
 part 'home_page/jobs_controller_actions.dart';
 part 'home_page/jobs_controller.dart';
 part 'home_page/task_center_controller.dart';
+part 'home_page/agent_workspaces_controller.dart';
 part 'home_page/skills_harness_controller.dart';
 part 'home_page/script_editor_storyboards.dart';
 part 'home_page/quality_reviews_controller_summary.dart';
@@ -116,7 +117,17 @@ class _HomePageState extends State<HomePage> {
   bool _loadingWsWasmProbe = false;
   bool _loadingWsHarnessAgent = false;
   bool _loadingWsSkillsRead = false;
+  bool _loadingScriptWorkspaceRun = false;
+  bool _loadingProductionWorkspaceRun = false;
+  bool _loadingProductionFlowProbe = false;
   final List<String> _wsLog = [];
+  final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
+  final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
+  final _agentWorkspacePromptCtrl = TextEditingController(
+    text:
+        '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
+  );
+  final _productionFlowKeyCtrl = TextEditingController(text: 'assets');
 
   bool _loadingProjects = false;
   bool _loadingProjectsSummary = false;
@@ -205,6 +216,10 @@ class _HomePageState extends State<HomePage> {
     _qualityReviewIdCtrl.dispose();
     _skillPathCtrl.dispose();
     _skillContentCtrl.dispose();
+    _agentWorkspaceProjectIdCtrl.dispose();
+    _agentWorkspaceScriptIdCtrl.dispose();
+    _agentWorkspacePromptCtrl.dispose();
+    _productionFlowKeyCtrl.dispose();
     super.dispose();
   }
 
