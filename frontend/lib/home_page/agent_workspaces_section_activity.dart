@@ -58,7 +58,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Text('Activity', style: Theme.of(context).textTheme.titleMedium),
+                Text('执行动态', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(width: 8),
                 if (eventType != null)
                   Chip(
@@ -70,7 +70,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
             if (workspaceLastToolResultLine != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Latest tool result: $workspaceLastToolResultLine',
+                '最新工具结果：$workspaceLastToolResultLine',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -83,10 +83,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
             ],
             if (workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
-              Text(
-                'Latest assistant text',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
+              Text('最新助手文本', style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 4),
               SelectableText(
                 _previewText(workspaceAssistantText.trim(), maxChars: 960),

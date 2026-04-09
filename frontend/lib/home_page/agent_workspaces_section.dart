@@ -287,10 +287,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.sectionTitle ?? 'Agent workspaces';
+    final title = widget.sectionTitle ?? 'Agent 工作区';
     final description =
         widget.sectionDescription ??
-        '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独 Activity 面板。';
+        '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独执行动态面板。';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

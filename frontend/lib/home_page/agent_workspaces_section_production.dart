@@ -87,8 +87,9 @@ class _AgentWorkspaceProductionCardState
           .map(
             (AgentWorkspacePromptPreset preset) => ActionChip(
               label: Text(preset.label),
-              onPressed:
-                  widget.busy ? null : () => widget.onSelectPrompt(preset.prompt),
+              onPressed: widget.busy
+                  ? null
+                  : () => widget.onSelectPrompt(preset.prompt),
             ),
           )
           .toList(growable: false),
@@ -102,10 +103,10 @@ class _AgentWorkspaceProductionCardState
   }
 
   String? get _runningTaskLine {
-    if (widget.loadingProductionWorkspaceRun) return '执行中：Run production';
-    if (widget.loadingProductionFlowProbe) return '执行中：Probe production tool';
-    if (widget.loadingProductionSubAgentRun) return '执行中：Run sub-agent';
-    if (widget.loadingProductionResultWriteback) return '执行中：Write tool result';
+    if (widget.loadingProductionWorkspaceRun) return '执行中：运行制作工作流';
+    if (widget.loadingProductionFlowProbe) return '执行中：读取制作工具结果';
+    if (widget.loadingProductionSubAgentRun) return '执行中：运行子代理';
+    if (widget.loadingProductionResultWriteback) return '执行中：写回工具结果';
     return null;
   }
 
@@ -120,30 +121,31 @@ class _AgentWorkspaceProductionCardState
     try {
       final decoded = jsonDecode(normalized);
       if (decoded is Map<String, dynamic>) return true;
-      _setTaskStatus('拦截：production tool arguments 必须是 JSON object。');
+      _setTaskStatus('拦截：制作工具参数必须是 JSON object。');
       return false;
     } catch (_) {
-      _setTaskStatus('拦截：production tool arguments JSON 解析失败。');
+      _setTaskStatus('拦截：制作工具参数 JSON 解析失败。');
       return false;
     }
   }
 
   bool _validatePrompt(String action) {
     if (widget.productionPromptController.text.trim().isNotEmpty) return true;
-    _setTaskStatus('拦截：$action 需要非空 workspace prompt。');
+    _setTaskStatus('拦截：$action 需要非空工作区提示词。');
     return false;
   }
 
   bool _validateFlowProbe() {
     final tool = widget.productionDomainToolController.text.trim();
     if (tool.isEmpty) {
-      _setTaskStatus('拦截：Probe 需要选择 production domain tool。');
+      _setTaskStatus('拦截：读取前需要选择制作域工具。');
       return false;
     }
     if (!_validateJsonArgs(widget.productionDomainArgsController.text)) {
       return false;
     }
-    if (tool == 'get_flowData' && widget.flowKeyController.text.trim().isEmpty) {
+    if (tool == 'get_flowData' &&
+        widget.flowKeyController.text.trim().isEmpty) {
       _setTaskStatus('拦截：get_flowData 需要有效 flow key。');
       return false;
     }
@@ -156,9 +158,11 @@ class _AgentWorkspaceProductionCardState
     if (raw.isEmpty) {
       widget.productionDomainArgsController.text = '{}';
     }
-    final decoded = jsonDecode(widget.productionDomainArgsController.text.trim());
+    final decoded = jsonDecode(
+      widget.productionDomainArgsController.text.trim(),
+    );
     if (decoded is! Map<String, dynamic>) {
-      _setTaskStatus('拦截：production tool arguments 必须是 JSON object。');
+      _setTaskStatus('拦截：制作工具参数必须是 JSON object。');
       return false;
     }
     if (tool != 'get_flowData') {
@@ -177,16 +181,16 @@ class _AgentWorkspaceProductionCardState
 
   bool _validateSubAgentTool() {
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：Run sub-agent 需要选择 production sub-agent tool。');
+      _setTaskStatus('拦截：运行子代理前需要选择制作子代理工具。');
       return false;
     }
-    return _validatePrompt('Run sub-agent');
+    return _validatePrompt('运行子代理');
   }
 
   void _runProductionWorkspace() {
-    if (!_validatePrompt('Run production')) return;
+    if (!_validatePrompt('运行制作工作流')) return;
     widget.onRunProductionWorkspace();
-    _setTaskStatus('已触发：Run production');
+    _setTaskStatus('已触发：运行制作工作流');
   }
 
   void _probeProductionDomainTool() {
@@ -196,14 +200,14 @@ class _AgentWorkspaceProductionCardState
     final tool = widget.productionDomainToolController.text.trim();
     final key = widget.flowKeyController.text.trim();
     final suffix = tool == 'get_flowData' ? ' key=$key' : '';
-    _setTaskStatus('已触发：Probe production tool ($tool$suffix)');
+    _setTaskStatus('已触发：读取制作工具 ($tool$suffix)');
   }
 
   void _runProductionSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunProductionSubAgentTool();
     final tool = widget.productionSubAgentToolController.text.trim();
-    _setTaskStatus('已触发：Run sub-agent ($tool)');
+    _setTaskStatus('已触发：运行子代理 ($tool)');
   }
 
   void _writeBackProductionFlowResult() {
@@ -217,7 +221,7 @@ class _AgentWorkspaceProductionCardState
     }
     widget.onWriteBackProductionFlowResult();
     final key = widget.flowKeyController.text.trim();
-    _setTaskStatus('已触发：Write tool result -> flow[$key]');
+    _setTaskStatus('已触发：写回工具结果 -> flow[$key]');
   }
 
   void _applyProductionPromptIfEmpty(String prompt) {
@@ -230,35 +234,34 @@ class _AgentWorkspaceProductionCardState
 
   Map<String, dynamic> _flowDataArgsTemplate() {
     final flowKey = widget.flowKeyController.text.trim();
-    return <String, dynamic>{
-      'key': flowKey.isEmpty ? 'assets' : flowKey,
-    };
+    return <String, dynamic>{'key': flowKey.isEmpty ? 'assets' : flowKey};
   }
 
   List<({String label, Map<String, dynamic> args})> _argumentTemplates() {
     switch (_selectedProductionTool) {
       case 'get_flowData':
         return <({String label, Map<String, dynamic> args})>[
-          (
-            label: '模板: only key',
-            args: _flowDataArgsTemplate(),
-          ),
-          (label: '模板: default assets', args: <String, dynamic>{'key': 'assets'}),
+          (label: '模板: 仅 key', args: _flowDataArgsTemplate()),
+          (label: '模板: 默认 assets', args: <String, dynamic>{'key': 'assets'}),
         ];
       case 'add_deriveAsset':
       case 'del_deriveAsset':
       case 'generate_deriveAsset':
         return <({String label, Map<String, dynamic> args})>[
           (
-            label: '模板: ids',
-            args: <String, dynamic>{'ids': <int>[1]},
+            label: '模板: ID 列表',
+            args: <String, dynamic>{
+              'ids': <int>[1],
+            },
           ),
         ];
       case 'generate_storyboard':
         return <({String label, Map<String, dynamic> args})>[
           (
-            label: '模板: storyboards',
-            args: <String, dynamic>{'ids': <int>[1]},
+            label: '模板: 分镜 ID',
+            args: <String, dynamic>{
+              'ids': <int>[1],
+            },
           ),
         ];
       default:
@@ -384,7 +387,9 @@ class _AgentWorkspaceProductionCardState
                   _applyProductionPromptIfEmpty(
                     '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
                   );
-                  widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
+                  widget.onProductionSubAgentChanged(
+                    'run_sub_agent_storyboard_gen',
+                  );
                   _runProductionSubAgentTool();
                 },
           child: const Text('5) 运行分镜子代理'),
@@ -397,7 +402,9 @@ class _AgentWorkspaceProductionCardState
                   _applyProductionPromptIfEmpty(
                     '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
                   );
-                  widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
+                  widget.onProductionSubAgentChanged(
+                    'run_sub_agent_director_plan',
+                  );
                   _runProductionSubAgentTool();
                 },
           child: const Text('6) 运行导演计划子代理'),
@@ -414,12 +421,9 @@ class _AgentWorkspaceProductionCardState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              'Production workspace',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('制作工作区', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('Guided tasks', style: Theme.of(context).textTheme.labelLarge),
+            Text('引导任务', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
             const SizedBox(height: 10),
@@ -429,8 +433,8 @@ class _AgentWorkspaceProductionCardState
               controller: widget.productionPromptController,
               maxLines: 4,
               decoration: const InputDecoration(
-                labelText: 'workspace prompt',
-                helperText: '用于 production 通道 harness.agent.run',
+                labelText: '工作区提示词',
+                helperText: '用于制作通道 harness.agent.run',
               ),
             ),
             const SizedBox(height: 8),
@@ -441,7 +445,7 @@ class _AgentWorkspaceProductionCardState
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _runProductionWorkspace,
                   child: Text(
-                    widget.loadingProductionWorkspaceRun ? '…' : 'Run production',
+                    widget.loadingProductionWorkspaceRun ? '…' : '运行制作工作流',
                   ),
                 ),
                 SizedBox(
@@ -466,9 +470,7 @@ class _AgentWorkspaceProductionCardState
                             if (value == null) return;
                             widget.onProductionDomainToolChanged(value);
                           },
-                    decoration: const InputDecoration(
-                      labelText: 'production domain tool',
-                    ),
+                    decoration: const InputDecoration(labelText: '制作域工具'),
                   ),
                 ),
                 SizedBox(
@@ -505,7 +507,7 @@ class _AgentWorkspaceProductionCardState
                     controller: widget.productionDomainArgsController,
                     maxLines: 2,
                     decoration: const InputDecoration(
-                      labelText: 'production tool arguments(JSON)',
+                      labelText: '制作工具参数(JSON)',
                       helperText: '非 get_flowData 时使用，例如 {"ids":[1,2]}',
                     ),
                   ),
@@ -517,7 +519,7 @@ class _AgentWorkspaceProductionCardState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'argument templates',
+                          '参数模板',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 6),
@@ -528,7 +530,7 @@ class _AgentWorkspaceProductionCardState
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _probeProductionDomainTool,
                   child: Text(
-                    widget.loadingProductionFlowProbe ? '…' : 'Probe production tool',
+                    widget.loadingProductionFlowProbe ? '…' : '读取制作工具',
                   ),
                 ),
                 SizedBox(
@@ -553,52 +555,45 @@ class _AgentWorkspaceProductionCardState
                             if (value == null) return;
                             widget.onProductionSubAgentChanged(value);
                           },
-                    decoration: const InputDecoration(
-                      labelText: 'production sub-agent tool',
-                    ),
+                    decoration: const InputDecoration(labelText: '制作子代理工具'),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _runProductionSubAgentTool,
                   child: Text(
-                    widget.loadingProductionSubAgentRun ? '…' : 'Run sub-agent',
+                    widget.loadingProductionSubAgentRun ? '…' : '运行子代理',
                   ),
                 ),
                 FilledButton(
-                  onPressed: widget.busy || widget.workspaceLastToolResultLine == null
+                  onPressed:
+                      widget.busy || widget.workspaceLastToolResultLine == null
                       ? null
                       : _writeBackProductionFlowResult,
                   child: Text(
-                    widget.loadingProductionResultWriteback
-                        ? '…'
-                        : 'Write tool result',
+                    widget.loadingProductionResultWriteback ? '…' : '写回工具结果',
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              _runningTaskLine ??
-                  _taskStatusLine ??
-                  '等待执行：可直接用 Guided tasks 或表单按钮。',
+              _runningTaskLine ?? _taskStatusLine ?? '等待执行：可直接用引导任务或表单按钮。',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             if (widget.workspaceLastToolResultLine != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Latest tool result: ${widget.workspaceLastToolResultLine}',
+                '最新工具结果：${widget.workspaceLastToolResultLine}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
             if (_buildResultSummaryLines().isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
-              Text('Result summary', style: Theme.of(context).textTheme.labelLarge),
+              Text('结果摘要', style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 4),
               ..._buildResultSummaryLines().map(
-                (String line) => Text(
-                  line,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                (String line) =>
+                    Text(line, style: Theme.of(context).textTheme.bodySmall),
               ),
             ],
             if (_suggestedFlowKeyLine != null) ...<Widget>[
@@ -607,14 +602,16 @@ class _AgentWorkspaceProductionCardState
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Suggested writeback key: $_suggestedFlowKeyLine',
+                      '建议写回 key：$_suggestedFlowKeyLine',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton(
-                    onPressed: widget.busy ? null : widget.onApplySuggestedFlowKey,
-                    child: const Text('Use key'),
+                    onPressed: widget.busy
+                        ? null
+                        : widget.onApplySuggestedFlowKey,
+                    child: const Text('使用该 key'),
                   ),
                 ],
               ),

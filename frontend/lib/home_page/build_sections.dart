@@ -247,19 +247,19 @@ extension _HomePageBuildSections on _HomePageState {
     if (_productWorkspacePane == _ProductWorkspacePane.scriptWorkspace)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.script,
-        sectionTitle: 'Script workspace',
+        sectionTitle: '剧本工作区',
         sectionDescription: '专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。',
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.productionWorkspace)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.production,
-        sectionTitle: 'Production workspace',
+        sectionTitle: '制作工作区',
         sectionDescription: '专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。',
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.workspaceActivity)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.activity,
-        sectionTitle: 'Workspace activity',
+        sectionTitle: '执行动态',
         sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.tasks)

@@ -97,15 +97,15 @@ void main() {
       ),
     );
 
-    expect(find.text('Script workspace'), findsNWidgets(2));
+    expect(find.text('剧本工作区'), findsNWidgets(2));
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
-    expect(find.text('Run production'), findsOneWidget);
+    expect(find.text('运行制作工作流'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Activity'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '执行动态'));
     await tester.pumpAndSettle();
-    expect(find.text('Latest assistant text'), findsOneWidget);
+    expect(find.text('最新助手文本'), findsOneWidget);
     expect(find.textContaining('latest: harness.tool.result'), findsOneWidget);
   });
 
@@ -314,13 +314,13 @@ void main() {
       ),
     );
 
-    final probeButton = find.widgetWithText(FilledButton, 'Probe script data');
+    final probeButton = find.widgetWithText(FilledButton, '读取剧本上下文');
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();
 
     expect(probeCalls, 0);
-    expect(find.text('拦截：script tool arguments JSON 解析失败。'), findsOneWidget);
+    expect(find.text('拦截：剧本工具参数 JSON 解析失败。'), findsOneWidget);
   });
 
   testWidgets('Script argument templates and probe sync render', (
@@ -434,15 +434,15 @@ void main() {
     await tester.tap(find.text('get_script_content').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('模板: 当前 script'), findsOneWidget);
+    expect(find.text('模板: 当前剧本'), findsOneWidget);
     expect(find.text('tool=get_script_content'), findsOneWidget);
     expect(find.text('plan.scriptRows=1'), findsOneWidget);
 
-    await tester.tap(find.text('模板: 当前 script'));
+    await tester.tap(find.text('模板: 当前剧本'));
     await tester.pump();
     expect(scriptDomainArgsController.text, '{"scriptId":9}');
 
-    final probeButton = find.widgetWithText(FilledButton, 'Probe script data');
+    final probeButton = find.widgetWithText(FilledButton, '读取剧本上下文');
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();
@@ -541,7 +541,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('1) 拉取资产 flow'));
@@ -679,22 +679,16 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
 
-    final probeButton = find.widgetWithText(
-      FilledButton,
-      'Probe production tool',
-    );
+    final probeButton = find.widgetWithText(FilledButton, '读取制作工具');
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();
 
     expect(productionProbeCalls, 0);
-    expect(
-      find.text('拦截：production tool arguments JSON 解析失败。'),
-      findsOneWidget,
-    );
+    expect(find.text('拦截：制作工具参数 JSON 解析失败。'), findsOneWidget);
   });
 
   testWidgets('Production argument templates and result summary render', (
@@ -795,14 +789,14 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('模板: default assets'));
+    await tester.tap(find.text('模板: 默认 assets'));
     await tester.pump();
     expect(productionDomainArgsController.text, '{"key":"assets"}');
 
-    expect(find.text('Result summary'), findsOneWidget);
+    expect(find.text('结果摘要'), findsOneWidget);
     expect(find.text('tool=get_flowData'), findsOneWidget);
     expect(find.text('storyboard.count=2'), findsOneWidget);
     expect(find.text('assets.count=3'), findsOneWidget);
@@ -902,12 +896,9 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Production workspace'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
-    final probeButton = find.widgetWithText(
-      FilledButton,
-      'Probe production tool',
-    );
+    final probeButton = find.widgetWithText(FilledButton, '读取制作工具');
     await tester.ensureVisible(probeButton);
     await tester.tap(probeButton);
     await tester.pump();

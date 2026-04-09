@@ -106,11 +106,11 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
   }
 
   String? get _runningTaskLine {
-    if (widget.loadingScriptWorkspaceRun) return '执行中：Run script';
-    if (widget.loadingScriptDomainProbe) return '执行中：Probe script data';
-    if (widget.loadingScriptSubAgentRun) return '执行中：Run sub-agent';
-    if (widget.loadingScriptResultWriteback) return '执行中：Write script';
-    if (widget.loadingScriptPlanResultWriteback) return '执行中：Write planData';
+    if (widget.loadingScriptWorkspaceRun) return '执行中：运行剧本工作流';
+    if (widget.loadingScriptDomainProbe) return '执行中：读取剧本上下文';
+    if (widget.loadingScriptSubAgentRun) return '执行中：运行子代理';
+    if (widget.loadingScriptResultWriteback) return '执行中：写回剧本';
+    if (widget.loadingScriptPlanResultWriteback) return '执行中：写回计划数据';
     return null;
   }
 
@@ -149,23 +149,23 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     try {
       final decoded = jsonDecode(normalized);
       if (decoded is Map<String, dynamic>) return true;
-      _setTaskStatus('拦截：script tool arguments 必须是 JSON object。');
+      _setTaskStatus('拦截：剧本工具参数必须是 JSON object。');
       return false;
     } catch (_) {
-      _setTaskStatus('拦截：script tool arguments JSON 解析失败。');
+      _setTaskStatus('拦截：剧本工具参数 JSON 解析失败。');
       return false;
     }
   }
 
   bool _validatePrompt(String action) {
     if (widget.scriptPromptController.text.trim().isNotEmpty) return true;
-    _setTaskStatus('拦截：$action 需要非空 workspace prompt。');
+    _setTaskStatus('拦截：$action 需要非空工作区提示词。');
     return false;
   }
 
   bool _validateScriptProbe() {
     if (widget.selectedScriptDomainTool.trim().isEmpty) {
-      _setTaskStatus('拦截：Probe 需要选择 script domain tool。');
+      _setTaskStatus('拦截：读取前需要选择剧本域工具。');
       return false;
     }
     if (!_validateJsonArgs(widget.scriptDomainArgsController.text)) {
@@ -173,7 +173,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     }
     if (widget.selectedScriptDomainTool == 'get_script_content' &&
         _scopeScriptId == null) {
-      _setTaskStatus('拦截：get_script_content 需要有效 script_id。');
+      _setTaskStatus('拦截：get_script_content 需要有效剧本 ID。');
       return false;
     }
     return true;
@@ -187,7 +187,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     } else {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) {
-        _setTaskStatus('拦截：script tool arguments 必须是 JSON object。');
+        _setTaskStatus('拦截：剧本工具参数必须是 JSON object。');
         return false;
       }
       normalized = Map<String, dynamic>.from(decoded);
@@ -195,7 +195,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     if (widget.selectedScriptDomainTool == 'get_script_content') {
       final scriptId = _scopeScriptId;
       if (scriptId == null) {
-        _setTaskStatus('拦截：get_script_content 需要有效 script_id。');
+        _setTaskStatus('拦截：get_script_content 需要有效剧本 ID。');
         return false;
       }
       if (normalized['scriptId'] != scriptId) {
@@ -213,10 +213,10 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   bool _validateSubAgentTool() {
     if (widget.scriptSubAgentToolController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：Run sub-agent 需要选择 script sub-agent tool。');
+      _setTaskStatus('拦截：运行子代理前需要选择剧本子代理工具。');
       return false;
     }
-    return _validatePrompt('Run sub-agent');
+    return _validatePrompt('运行子代理');
   }
 
   List<({String label, String args})> _argumentTemplates() {
@@ -224,18 +224,16 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       case 'get_script_content':
         final scriptId = _scopeScriptId ?? 1;
         return <({String label, String args})>[
-          (label: '模板: 当前 script', args: '{"scriptId":$scriptId}'),
+          (label: '模板: 当前剧本', args: '{"scriptId":$scriptId}'),
         ];
       case 'get_novel_text':
       case 'get_novel_events':
         return <({String label, String args})>[
-          (label: '模板: novelId', args: '{"novelId":1}'),
+          (label: '模板: 小说 ID', args: '{"novelId":1}'),
         ];
       case 'get_planData':
       default:
-        return <({String label, String args})>[
-          (label: '模板: empty', args: '{}'),
-        ];
+        return <({String label, String args})>[(label: '模板: 空参数', args: '{}')];
     }
   }
 
@@ -275,25 +273,23 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
   }
 
   void _runScriptWorkspace() {
-    if (!_validatePrompt('Run script')) return;
+    if (!_validatePrompt('运行剧本工作流')) return;
     widget.onRunScriptWorkspace();
-    _setTaskStatus('已触发：Run script');
+    _setTaskStatus('已触发：运行剧本工作流');
   }
 
   void _probeScriptDomainTool() {
     if (!_validateScriptProbe()) return;
     if (!_normalizeArgsForProbe()) return;
     widget.onProbeScriptDomainTool();
-    _setTaskStatus(
-      '已触发：Probe script data (${widget.selectedScriptDomainTool})',
-    );
+    _setTaskStatus('已触发：读取剧本上下文 (${widget.selectedScriptDomainTool})');
   }
 
   void _runScriptSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunScriptSubAgentTool();
     final tool = widget.scriptSubAgentToolController.text.trim();
-    _setTaskStatus('已触发：Run sub-agent ($tool)');
+    _setTaskStatus('已触发：运行子代理 ($tool)');
   }
 
   void _writeBackScriptResult() {
@@ -302,7 +298,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       return;
     }
     widget.onWriteBackScriptResult();
-    _setTaskStatus('已触发：Write script');
+    _setTaskStatus('已触发：写回剧本');
   }
 
   void _writeBackScriptPlanResult() {
@@ -311,7 +307,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       return;
     }
     widget.onWriteBackScriptPlanResult();
-    _setTaskStatus('已触发：Write planData');
+    _setTaskStatus('已触发：写回计划数据');
   }
 
   Widget _buildPromptTemplates() {
@@ -403,12 +399,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              'Script workspace',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('剧本工作区', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('Guided tasks', style: Theme.of(context).textTheme.labelLarge),
+            Text('引导任务', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
             const SizedBox(height: 10),
@@ -418,8 +411,8 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
               controller: widget.scriptPromptController,
               maxLines: 4,
               decoration: const InputDecoration(
-                labelText: 'workspace prompt',
-                helperText: '用于 script 通道 harness.agent.run',
+                labelText: '工作区提示词',
+                helperText: '用于剧本通道 harness.agent.run',
               ),
             ),
             const SizedBox(height: 8),
@@ -430,7 +423,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _runScriptWorkspace,
                   child: Text(
-                    widget.loadingScriptWorkspaceRun ? '…' : 'Run script',
+                    widget.loadingScriptWorkspaceRun ? '…' : '运行剧本工作流',
                   ),
                 ),
                 SizedBox(
@@ -455,15 +448,13 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                             if (value == null) return;
                             widget.onScriptDomainToolChanged(value);
                           },
-                    decoration: const InputDecoration(
-                      labelText: 'script domain tool',
-                    ),
+                    decoration: const InputDecoration(labelText: '剧本域工具'),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _probeScriptDomainTool,
                   child: Text(
-                    widget.loadingScriptDomainProbe ? '…' : 'Probe script data',
+                    widget.loadingScriptDomainProbe ? '…' : '读取剧本上下文',
                   ),
                 ),
                 SizedBox(
@@ -472,7 +463,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                     controller: widget.scriptDomainArgsController,
                     maxLines: 2,
                     decoration: const InputDecoration(
-                      labelText: 'script tool arguments(JSON)',
+                      labelText: '剧本工具参数(JSON)',
                       helperText: '可选，例如 {"novelId":1}',
                     ),
                   ),
@@ -499,25 +490,19 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                             if (value == null) return;
                             widget.onScriptSubAgentChanged(value);
                           },
-                    decoration: const InputDecoration(
-                      labelText: 'script sub-agent tool',
-                    ),
+                    decoration: const InputDecoration(labelText: '剧本子代理工具'),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _runScriptSubAgentTool,
-                  child: Text(
-                    widget.loadingScriptSubAgentRun ? '…' : 'Run sub-agent',
-                  ),
+                  child: Text(widget.loadingScriptSubAgentRun ? '…' : '运行子代理'),
                 ),
                 FilledButton(
                   onPressed: widget.busy || !_canWriteBackScriptResult
                       ? null
                       : _writeBackScriptResult,
                   child: Text(
-                    widget.loadingScriptResultWriteback
-                        ? '…'
-                        : 'Write back to script',
+                    widget.loadingScriptResultWriteback ? '…' : '写回剧本',
                   ),
                 ),
                 FilledButton.tonal(
@@ -525,9 +510,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                       ? null
                       : _writeBackScriptPlanResult,
                   child: Text(
-                    widget.loadingScriptPlanResultWriteback
-                        ? '…'
-                        : 'Write back planData',
+                    widget.loadingScriptPlanResultWriteback ? '…' : '写回计划数据',
                   ),
                 ),
               ],
@@ -556,10 +539,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             ],
             if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
-              Text(
-                'Latest assistant result',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
+              Text('最新助手结果', style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 4),
               SelectableText(
                 _previewText(
@@ -572,7 +552,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             if (_scriptWritebackSourceLine != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Writeback source: ${_scriptWritebackSourceLine!}',
+                '写回来源：${_scriptWritebackSourceLine!}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
