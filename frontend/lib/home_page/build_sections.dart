@@ -132,23 +132,20 @@ extension _HomePageBuildSections on _HomePageState {
 
   Widget _buildProductPaneSelector(BuildContext context) {
     final paneEntries = <(_ProductWorkspacePane, String)>[
-      (_ProductWorkspacePane.projects, 'Projects'),
-      (_ProductWorkspacePane.scriptWorkspace, 'Script Workspace'),
-      (_ProductWorkspacePane.productionWorkspace, 'Production Workspace'),
-      (_ProductWorkspacePane.workspaceActivity, 'Workspace Activity'),
-      (_ProductWorkspacePane.tasks, 'Task Center'),
-      (_ProductWorkspacePane.jobs, 'Jobs'),
-      (_ProductWorkspacePane.quality, 'Quality Reviews'),
+      (_ProductWorkspacePane.projects, '项目'),
+      (_ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
+      (_ProductWorkspacePane.productionWorkspace, '制作工作区'),
+      (_ProductWorkspacePane.workspaceActivity, '工作区动态'),
+      (_ProductWorkspacePane.tasks, '任务中心'),
+      (_ProductWorkspacePane.jobs, '任务作业'),
+      (_ProductWorkspacePane.quality, '质量评审'),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            'Product navigation',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text('产品导航', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -204,7 +201,8 @@ extension _HomePageBuildSections on _HomePageState {
       wsLog: _wsLog,
       workspaceAssistantText: _workspaceAssistantText,
       workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
-      workspaceScriptPlanWritebackCandidate: _workspaceScriptPlanWritebackCandidate,
+      workspaceScriptPlanWritebackCandidate:
+          _workspaceScriptPlanWritebackCandidate,
       workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
       workspaceLastToolResultLine: _workspaceLastToolResultLine,
       workspaceLastToolName: _workspaceLastToolName,
