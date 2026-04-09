@@ -133,7 +133,9 @@ extension _HomePageBuildSections on _HomePageState {
   Widget _buildProductPaneSelector(BuildContext context) {
     final paneEntries = <(_ProductWorkspacePane, String)>[
       (_ProductWorkspacePane.projects, 'Projects'),
-      (_ProductWorkspacePane.agents, 'Agent Workspace'),
+      (_ProductWorkspacePane.scriptWorkspace, 'Script Workspace'),
+      (_ProductWorkspacePane.productionWorkspace, 'Production Workspace'),
+      (_ProductWorkspacePane.workspaceActivity, 'Workspace Activity'),
       (_ProductWorkspacePane.tasks, 'Task Center'),
       (_ProductWorkspacePane.jobs, 'Jobs'),
       (_ProductWorkspacePane.quality, 'Quality Reviews'),
@@ -151,19 +153,21 @@ extension _HomePageBuildSections on _HomePageState {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: paneEntries.map((entry) {
-              final pane = entry.$1;
-              return ChoiceChip(
-                label: Text(entry.$2),
-                selected: _productWorkspacePane == pane,
-                onSelected: (selected) {
-                  if (!selected || pane == _productWorkspacePane) {
-                    return;
-                  }
-                  setState(() => _productWorkspacePane = pane);
-                },
-              );
-            }).toList(growable: false),
+            children: paneEntries
+                .map((entry) {
+                  final pane = entry.$1;
+                  return ChoiceChip(
+                    label: Text(entry.$2),
+                    selected: _productWorkspacePane == pane,
+                    onSelected: (selected) {
+                      if (!selected || pane == _productWorkspacePane) {
+                        return;
+                      }
+                      setState(() => _productWorkspacePane = pane);
+                    },
+                  );
+                })
+                .toList(growable: false),
           ),
         ],
       ),
@@ -190,8 +194,102 @@ extension _HomePageBuildSections on _HomePageState {
         onOpenProjectDetail: _openProjectDetail,
         onProbeAgentMemory: _probeAgentMemory,
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.agents)
+    if (_productWorkspacePane == _ProductWorkspacePane.scriptWorkspace)
       AgentWorkspacesSection(
+        initialPane: AgentWorkspacePane.script,
+        showPaneSelector: false,
+        sectionTitle: 'Script workspace',
+        sectionDescription: '专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。',
+        projectIdController: _agentWorkspaceProjectIdCtrl,
+        scriptIdController: _agentWorkspaceScriptIdCtrl,
+        scriptPromptController: _scriptWorkspacePromptCtrl,
+        scriptDomainArgsController: _scriptDomainArgsCtrl,
+        productionPromptController: _productionWorkspacePromptCtrl,
+        flowKeyController: _productionFlowKeyCtrl,
+        productionDomainToolController: _productionDomainToolCtrl,
+        productionDomainArgsController: _productionDomainArgsCtrl,
+        loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
+        loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,
+        loadingScriptDomainProbe: _loadingScriptDomainProbe,
+        loadingProductionFlowProbe: _loadingProductionFlowProbe,
+        loadingScriptSubAgentRun: _loadingScriptSubAgentRun,
+        loadingProductionSubAgentRun: _loadingProductionSubAgentRun,
+        loadingScriptResultWriteback: _loadingScriptResultWriteback,
+        loadingScriptPlanResultWriteback: _loadingScriptPlanResultWriteback,
+        loadingProductionResultWriteback: _loadingProductionResultWriteback,
+        wsLog: _wsLog,
+        workspaceAssistantText: _workspaceAssistantText,
+        workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
+        workspaceScriptPlanWritebackCandidate:
+            _workspaceScriptPlanWritebackCandidate,
+        workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
+        workspaceLastToolResultLine: _workspaceLastToolResultLine,
+        workspaceSuggestedFlowKey: _workspaceSuggestedFlowKey,
+        workspaceWritebackLine: _workspaceWritebackLine,
+        onRunScriptWorkspace: _runScriptWorkspaceAgent,
+        onRunProductionWorkspace: _runProductionWorkspaceAgent,
+        onProbeScriptDomainTool: _probeScriptDomainTool,
+        onProbeProductionDomainTool: _probeProductionDomainTool,
+        scriptSubAgentToolController: _scriptSubAgentToolCtrl,
+        productionSubAgentToolController: _productionSubAgentToolCtrl,
+        onRunScriptSubAgentTool: _runScriptSubAgentTool,
+        onRunProductionSubAgentTool: _runProductionSubAgentTool,
+        onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
+        onWriteBackScriptPlanResult: _writeBackScriptPlanWorkspaceResult,
+        onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
+        onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
+      ),
+    if (_productWorkspacePane == _ProductWorkspacePane.productionWorkspace)
+      AgentWorkspacesSection(
+        initialPane: AgentWorkspacePane.production,
+        showPaneSelector: false,
+        sectionTitle: 'Production workspace',
+        sectionDescription: '专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。',
+        projectIdController: _agentWorkspaceProjectIdCtrl,
+        scriptIdController: _agentWorkspaceScriptIdCtrl,
+        scriptPromptController: _scriptWorkspacePromptCtrl,
+        scriptDomainArgsController: _scriptDomainArgsCtrl,
+        productionPromptController: _productionWorkspacePromptCtrl,
+        flowKeyController: _productionFlowKeyCtrl,
+        productionDomainToolController: _productionDomainToolCtrl,
+        productionDomainArgsController: _productionDomainArgsCtrl,
+        loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
+        loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,
+        loadingScriptDomainProbe: _loadingScriptDomainProbe,
+        loadingProductionFlowProbe: _loadingProductionFlowProbe,
+        loadingScriptSubAgentRun: _loadingScriptSubAgentRun,
+        loadingProductionSubAgentRun: _loadingProductionSubAgentRun,
+        loadingScriptResultWriteback: _loadingScriptResultWriteback,
+        loadingScriptPlanResultWriteback: _loadingScriptPlanResultWriteback,
+        loadingProductionResultWriteback: _loadingProductionResultWriteback,
+        wsLog: _wsLog,
+        workspaceAssistantText: _workspaceAssistantText,
+        workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
+        workspaceScriptPlanWritebackCandidate:
+            _workspaceScriptPlanWritebackCandidate,
+        workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
+        workspaceLastToolResultLine: _workspaceLastToolResultLine,
+        workspaceSuggestedFlowKey: _workspaceSuggestedFlowKey,
+        workspaceWritebackLine: _workspaceWritebackLine,
+        onRunScriptWorkspace: _runScriptWorkspaceAgent,
+        onRunProductionWorkspace: _runProductionWorkspaceAgent,
+        onProbeScriptDomainTool: _probeScriptDomainTool,
+        onProbeProductionDomainTool: _probeProductionDomainTool,
+        scriptSubAgentToolController: _scriptSubAgentToolCtrl,
+        productionSubAgentToolController: _productionSubAgentToolCtrl,
+        onRunScriptSubAgentTool: _runScriptSubAgentTool,
+        onRunProductionSubAgentTool: _runProductionSubAgentTool,
+        onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
+        onWriteBackScriptPlanResult: _writeBackScriptPlanWorkspaceResult,
+        onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
+        onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
+      ),
+    if (_productWorkspacePane == _ProductWorkspacePane.workspaceActivity)
+      AgentWorkspacesSection(
+        initialPane: AgentWorkspacePane.activity,
+        showPaneSelector: false,
+        sectionTitle: 'Workspace activity',
+        sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
         projectIdController: _agentWorkspaceProjectIdCtrl,
         scriptIdController: _agentWorkspaceScriptIdCtrl,
         scriptPromptController: _scriptWorkspacePromptCtrl,

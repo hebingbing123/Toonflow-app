@@ -9,6 +9,10 @@ import 'agent_workspaces_section_script.dart';
 class AgentWorkspacesSection extends StatefulWidget {
   const AgentWorkspacesSection({
     super.key,
+    this.initialPane = AgentWorkspacePane.script,
+    this.showPaneSelector = true,
+    this.sectionTitle,
+    this.sectionDescription,
     required this.projectIdController,
     required this.scriptIdController,
     required this.scriptPromptController,
@@ -48,6 +52,10 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onApplySuggestedFlowKey,
   });
 
+  final AgentWorkspacePane initialPane;
+  final bool showPaneSelector;
+  final String? sectionTitle;
+  final String? sectionDescription;
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
   final TextEditingController scriptPromptController;
@@ -90,7 +98,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   State<AgentWorkspacesSection> createState() => _AgentWorkspacesSectionState();
 }
 
-enum _AgentWorkspacePane { script, production, activity }
+enum AgentWorkspacePane { script, production, activity }
 
 class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   static const List<String> _flowKeyPresets = <String>[
@@ -133,45 +141,49 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     'generate_storyboard',
   ];
 
-  static const List<AgentWorkspacePromptPreset> _scriptPromptPresets =
-      <AgentWorkspacePromptPreset>[
-        AgentWorkspacePromptPreset(
-          label: '剧情骨架',
-          prompt:
-              '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
-        ),
-        AgentWorkspacePromptPreset(
-          label: '章节改编',
-          prompt:
-              '基于 get_novel_text 与 get_script_content，对当前章节做改编策略建议，输出 3 条可执行脚本改写项。',
-        ),
-      ];
+  static const List<AgentWorkspacePromptPreset>
+  _scriptPromptPresets = <AgentWorkspacePromptPreset>[
+    AgentWorkspacePromptPreset(
+      label: '剧情骨架',
+      prompt:
+          '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
+    ),
+    AgentWorkspacePromptPreset(
+      label: '章节改编',
+      prompt:
+          '基于 get_novel_text 与 get_script_content，对当前章节做改编策略建议，输出 3 条可执行脚本改写项。',
+    ),
+  ];
 
-  static const List<AgentWorkspacePromptPreset> _productionPromptPresets =
-      <AgentWorkspacePromptPreset>[
-        AgentWorkspacePromptPreset(
-          label: '资产盘点',
-          prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
-        ),
-        AgentWorkspacePromptPreset(
-          label: '分镜推进',
-          prompt:
-              '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
-        ),
-      ];
+  static const List<AgentWorkspacePromptPreset>
+  _productionPromptPresets = <AgentWorkspacePromptPreset>[
+    AgentWorkspacePromptPreset(
+      label: '资产盘点',
+      prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
+    ),
+    AgentWorkspacePromptPreset(
+      label: '分镜推进',
+      prompt:
+          '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
+    ),
+  ];
 
-  _AgentWorkspacePane _pane = _AgentWorkspacePane.script;
+  late AgentWorkspacePane _pane;
   String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
 
   @override
   void initState() {
     super.initState();
+    _pane = widget.initialPane;
     _ensurePresetDefaults();
   }
 
   @override
   void didUpdateWidget(covariant AgentWorkspacesSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialPane != widget.initialPane) {
+      _pane = widget.initialPane;
+    }
     _ensurePresetDefaults();
   }
 
@@ -247,7 +259,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       case 'del_deriveAsset':
       case 'generate_deriveAsset':
       case 'generate_storyboard':
-        preset = <String, dynamic>{'ids': <int>[1]};
+        preset = <String, dynamic>{
+          'ids': <int>[1],
+        };
         break;
       default:
         preset = <String, dynamic>{};
@@ -269,20 +283,23 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.sectionTitle ?? 'Agent workspaces';
+    final description =
+        widget.sectionDescription ??
+        '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独 Activity 面板。';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 16),
-        Text('Agent workspaces', style: Theme.of(context).textTheme.titleSmall),
+        Text(title, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
-        Text(
-          '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独 Activity 面板。',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(description, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 12),
         _buildScopeInputs(),
-        const SizedBox(height: 12),
-        _buildPaneSelector(),
+        if (widget.showPaneSelector) ...<Widget>[
+          const SizedBox(height: 12),
+          _buildPaneSelector(),
+        ],
         const SizedBox(height: 12),
         _buildPaneBody(context),
       ],
@@ -312,10 +329,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   }
 
   Widget _buildPaneSelector() {
-    final tabs = <(_AgentWorkspacePane, String)>[
-      (_AgentWorkspacePane.script, 'Script workspace'),
-      (_AgentWorkspacePane.production, 'Production workspace'),
-      (_AgentWorkspacePane.activity, 'Activity'),
+    final tabs = <(AgentWorkspacePane, String)>[
+      (AgentWorkspacePane.script, 'Script workspace'),
+      (AgentWorkspacePane.production, 'Production workspace'),
+      (AgentWorkspacePane.activity, 'Activity'),
     ];
     return Wrap(
       spacing: 8,
@@ -339,7 +356,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   Widget _buildPaneBody(BuildContext context) {
     switch (_pane) {
-      case _AgentWorkspacePane.script:
+      case AgentWorkspacePane.script:
         return AgentWorkspaceScriptCard(
           busy: _busy,
           scriptPromptController: widget.scriptPromptController,
@@ -383,7 +400,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           onWriteBackScriptResult: widget.onWriteBackScriptResult,
           onWriteBackScriptPlanResult: widget.onWriteBackScriptPlanResult,
         );
-      case _AgentWorkspacePane.production:
+      case AgentWorkspacePane.production:
         return AgentWorkspaceProductionCard(
           busy: _busy,
           productionPromptController: widget.productionPromptController,
@@ -429,10 +446,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             );
           },
           onRunProductionSubAgentTool: widget.onRunProductionSubAgentTool,
-          onWriteBackProductionFlowResult: widget.onWriteBackProductionFlowResult,
+          onWriteBackProductionFlowResult:
+              widget.onWriteBackProductionFlowResult,
           onApplySuggestedFlowKey: widget.onApplySuggestedFlowKey,
         );
-      case _AgentWorkspacePane.activity:
+      case AgentWorkspacePane.activity:
         return AgentWorkspaceActivityPanel(
           wsLog: widget.wsLog,
           workspaceAssistantText: widget.workspaceAssistantText,

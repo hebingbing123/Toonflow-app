@@ -67,7 +67,16 @@ class HomePage extends StatefulWidget {
 }
 
 enum _HomeSectionMode { product, debug }
-enum _ProductWorkspacePane { projects, agents, tasks, jobs, quality }
+
+enum _ProductWorkspacePane {
+  projects,
+  scriptWorkspace,
+  productionWorkspace,
+  workspaceActivity,
+  tasks,
+  jobs,
+  quality,
+}
 
 class _HomePageState extends State<HomePage> {
   final _email = TextEditingController();
