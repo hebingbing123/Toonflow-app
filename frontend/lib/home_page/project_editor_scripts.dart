@@ -132,6 +132,8 @@ extension _HomePageProjectEditorScripts on _HomePageState {
     required ProjectRow p,
     required List<bool> saving,
     required List<bool> scriptProbeBusy,
+    required List<bool> scriptTaskBusy,
+    required List<String?> scriptTaskLine,
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) {
@@ -168,8 +170,138 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                     ),
               child: const Text('批量新增剧本'),
             ),
+            TextButton(
+              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        scriptTaskBusy[0] = true;
+                        scriptTaskLine[0] = null;
+                      });
+                      try {
+                        final zip = await exportScriptsZip(
+                          token,
+                          scriptList.map((script) => script.legacyId).toList(),
+                        );
+                        if (!ctx.mounted) return;
+                        setDialogState(() {
+                          scriptTaskBusy[0] = false;
+                          scriptTaskLine[0] =
+                              '已导出 ${scriptList.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。';
+                        });
+                      } on RustApiException catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '导出失败：$e';
+                          });
+                        }
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '导出失败：$e';
+                          });
+                        }
+                      }
+                    },
+              child: Text(scriptTaskBusy[0] ? '处理中…' : '导出全部剧本'),
+            ),
+            TextButton(
+              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        scriptTaskBusy[0] = true;
+                        scriptTaskLine[0] = null;
+                      });
+                      try {
+                        final rows = await pollScriptExtractState(
+                          token,
+                          scriptList.map((script) => script.legacyId).toList(),
+                        );
+                        final sample = rows.isEmpty
+                            ? '当前均为 idle 或已完成'
+                            : rows
+                                  .take(3)
+                                  .map(
+                                    (row) =>
+                                        '#${row.legacyId}:${row.extractState ?? 0}',
+                                  )
+                                  .join(' · ');
+                        if (!ctx.mounted) return;
+                        setDialogState(() {
+                          scriptTaskBusy[0] = false;
+                          scriptTaskLine[0] =
+                              '已轮询 ${scriptList.length} 条剧本提取状态：$sample';
+                        });
+                      } on RustApiException catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '轮询提取状态失败：$e';
+                          });
+                        }
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '轮询提取状态失败：$e';
+                          });
+                        }
+                      }
+                    },
+              child: const Text('轮询全部提取状态'),
+            ),
+            TextButton(
+              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        scriptTaskBusy[0] = true;
+                        scriptTaskLine[0] = null;
+                      });
+                      try {
+                        final accepted = await startScriptAssetExtract(
+                          token,
+                          projectLegacyId: p.legacyId,
+                          scriptLegacyIds: scriptList
+                              .map((script) => script.legacyId)
+                              .toList(),
+                        );
+                        if (!ctx.mounted) return;
+                        setDialogState(() {
+                          scriptTaskBusy[0] = false;
+                          scriptTaskLine[0] =
+                              '已提交 ${scriptList.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}';
+                        });
+                      } on RustApiException catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '提交素材抽取失败：$e';
+                          });
+                        }
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          setDialogState(() {
+                            scriptTaskBusy[0] = false;
+                            scriptTaskLine[0] = '提交素材抽取失败：$e';
+                          });
+                        }
+                      }
+                    },
+              child: const Text('提取全部剧本素材'),
+            ),
           ],
         ),
+        if (scriptTaskLine[0] != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            scriptTaskLine[0]!,
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+          ),
+        ],
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(

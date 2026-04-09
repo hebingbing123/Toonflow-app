@@ -25,6 +25,8 @@ class _ProjectEditorDialogState {
   final List<bool> novelsBusy = <bool>[false];
   final List<bool> novelEventsLoading = <bool>[false];
   final List<bool> scriptProbeBusy = <bool>[false];
+  final List<bool> scriptTaskBusy = <bool>[false];
+  final List<String?> scriptTaskLine = <String?>[null];
   final List<bool> saving = <bool>[false];
   final List<bool> generalLegacyBusy = <bool>[false];
   final List<bool> tasksLegacyBusy = <bool>[false];

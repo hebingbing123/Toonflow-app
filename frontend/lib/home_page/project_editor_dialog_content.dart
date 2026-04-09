@@ -68,6 +68,8 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             p: p,
             saving: dialogState.saving,
             scriptProbeBusy: dialogState.scriptProbeBusy,
+            scriptTaskBusy: dialogState.scriptTaskBusy,
+            scriptTaskLine: dialogState.scriptTaskLine,
             scriptList: scriptList,
             statsRef: dialogState.statsRef,
           ),
