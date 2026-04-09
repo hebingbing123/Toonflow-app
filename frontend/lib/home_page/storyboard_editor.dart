@@ -738,50 +738,46 @@ extension _HomePageStoryboardEditor on _HomePageState {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...storyboardVideos
-                            .take(3)
-                            .map(
-                              (video) => ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                title: Text(
-                                  video.videoUrl ?? '视频 URL 缺失',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  [
-                                    if ((video.state ?? '').trim().isNotEmpty)
-                                      '状态 ${video.state}',
-                                    if (video.trackId != null)
-                                      '轨道 ${video.trackId}',
-                                    if ((video.duration ?? '')
-                                        .trim()
-                                        .isNotEmpty)
-                                      '时长 ${video.duration}',
-                                  ].join(' · '),
-                                ),
-                                trailing: TextButton(
-                                  onPressed:
-                                      saving[0] ||
-                                          (video.videoUrl ?? '').trim().isEmpty
-                                      ? null
-                                      : () => runDialogAction(() async {
-                                          await postWorkbenchSelectVideoV1(
-                                            token,
-                                            projectId: projectLegacyId,
-                                            scriptId: scriptLegacyId,
-                                            storyboardId: storyLegacyId,
-                                            videoUrl: video.videoUrl!.trim(),
-                                          );
-                                          await refreshProductionData(
-                                            syncTrackId: true,
-                                          );
-                                        }),
-                                  child: const Text('设为当前视频'),
-                                ),
-                              ),
+                        ...storyboardVideos.take(3).map(
+                          (video) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              video.videoUrl ?? '视频 URL 缺失',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            subtitle: Text(
+                              [
+                                if ((video.state ?? '').trim().isNotEmpty)
+                                  '状态 ${video.state}',
+                                if (video.trackId != null)
+                                  '轨道 ${video.trackId}',
+                                if ((video.duration ?? '').trim().isNotEmpty)
+                                  '时长 ${video.duration}',
+                              ].join(' · '),
+                            ),
+                            trailing: TextButton(
+                              onPressed:
+                                  saving[0] ||
+                                      (video.videoUrl ?? '').trim().isEmpty
+                                  ? null
+                                  : () => runDialogAction(() async {
+                                      await postWorkbenchSelectVideoV1(
+                                        token,
+                                        projectId: projectLegacyId,
+                                        scriptId: scriptLegacyId,
+                                        storyboardId: storyLegacyId,
+                                        videoUrl: video.videoUrl!.trim(),
+                                      );
+                                      await refreshProductionData(
+                                        syncTrackId: true,
+                                      );
+                                    }),
+                              child: const Text('设为当前视频'),
+                            ),
+                          ),
+                        ),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton(
@@ -810,18 +806,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             style: Theme.of(ctx).textTheme.labelLarge,
                           ),
                           const SizedBox(height: 4),
-                          ...generateData!.generatingJobs
-                              .take(3)
-                              .map(
-                                (job) => ListTile(
-                                  dense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(job.kind),
-                                  subtitle: Text(
-                                    '状态 ${job.status} · ${job.updatedAt}',
-                                  ),
-                                ),
-                              ),
+                          ...generateData!.generatingJobs.take(3).map(
+                            (job) => ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(job.kind),
+                              subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -840,9 +832,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               context: ctx,
                               builder: (c) => AlertDialog(
                                 title: const Text('删除分镜？'),
-                                content: Text(
-                                  '将删除 storyboard #${row.legacyId}。',
-                                ),
+                                content: Text('将删除 storyboard #${row.legacyId}。'),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.of(c).pop(false),
