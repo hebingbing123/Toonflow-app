@@ -7,7 +7,8 @@ class AgentWorkspacesSection extends StatefulWidget {
     super.key,
     required this.projectIdController,
     required this.scriptIdController,
-    required this.agentPromptController,
+    required this.scriptPromptController,
+    required this.productionPromptController,
     required this.flowKeyController,
     required this.loadingScriptWorkspaceRun,
     required this.loadingProductionWorkspaceRun,
@@ -26,7 +27,8 @@ class AgentWorkspacesSection extends StatefulWidget {
 
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
-  final TextEditingController agentPromptController;
+  final TextEditingController scriptPromptController;
+  final TextEditingController productionPromptController;
   final TextEditingController flowKeyController;
   final bool loadingScriptWorkspaceRun;
   final bool loadingProductionWorkspaceRun;
@@ -218,12 +220,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             _buildPromptTemplates(
               presets: _scriptPromptPresets,
               onSelected: (String prompt) {
-                setState(() => widget.agentPromptController.text = prompt);
+                setState(() => widget.scriptPromptController.text = prompt);
               },
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: widget.agentPromptController,
+              controller: widget.scriptPromptController,
               maxLines: 4,
               decoration: const InputDecoration(
                 labelText: 'workspace prompt',
@@ -287,12 +289,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             _buildPromptTemplates(
               presets: _productionPromptPresets,
               onSelected: (String prompt) {
-                setState(() => widget.agentPromptController.text = prompt);
+                setState(() => widget.productionPromptController.text = prompt);
               },
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: widget.agentPromptController,
+              controller: widget.productionPromptController,
               maxLines: 4,
               decoration: const InputDecoration(
                 labelText: 'workspace prompt',

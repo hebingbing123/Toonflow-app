@@ -13,7 +13,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final prompt = _scriptWorkspacePromptCtrl.text.trim();
     if (projectId == null || prompt.isEmpty) {
       setState(() => _error = 'project_id 与 prompt 必须有效');
       return;
@@ -53,7 +53,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final prompt = _productionWorkspacePromptCtrl.text.trim();
     if (projectId == null || scriptId == null || prompt.isEmpty) {
       setState(() => _error = 'project_id/script_id/prompt 必须有效');
       return;
@@ -137,7 +137,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final prompt = _scriptWorkspacePromptCtrl.text.trim();
     final toolName = _scriptSubAgentToolCtrl.text.trim();
     if (projectId == null || prompt.isEmpty || toolName.isEmpty) {
       setState(() => _error = 'project_id/prompt/tool 必须有效');
@@ -183,7 +183,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final prompt = _productionWorkspacePromptCtrl.text.trim();
     final toolName = _productionSubAgentToolCtrl.text.trim();
     if (projectId == null ||
         scriptId == null ||

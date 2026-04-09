@@ -173,7 +173,8 @@ extension _HomePageBuildSections on _HomePageState {
     AgentWorkspacesSection(
       projectIdController: _agentWorkspaceProjectIdCtrl,
       scriptIdController: _agentWorkspaceScriptIdCtrl,
-      agentPromptController: _agentWorkspacePromptCtrl,
+      scriptPromptController: _scriptWorkspacePromptCtrl,
+      productionPromptController: _productionWorkspacePromptCtrl,
       flowKeyController: _productionFlowKeyCtrl,
       loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
       loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,

@@ -125,7 +125,10 @@ class _HomePageState extends State<HomePage> {
   final List<String> _wsLog = [];
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
   final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
-  final _agentWorkspacePromptCtrl = TextEditingController(
+  final _scriptWorkspacePromptCtrl = TextEditingController(
+    text: '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
+  );
+  final _productionWorkspacePromptCtrl = TextEditingController(
     text: '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
   );
   final _productionFlowKeyCtrl = TextEditingController(text: 'assets');
@@ -225,7 +228,8 @@ class _HomePageState extends State<HomePage> {
     _skillContentCtrl.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();
     _agentWorkspaceScriptIdCtrl.dispose();
-    _agentWorkspacePromptCtrl.dispose();
+    _scriptWorkspacePromptCtrl.dispose();
+    _productionWorkspacePromptCtrl.dispose();
     _productionFlowKeyCtrl.dispose();
     _scriptSubAgentToolCtrl.dispose();
     _productionSubAgentToolCtrl.dispose();
