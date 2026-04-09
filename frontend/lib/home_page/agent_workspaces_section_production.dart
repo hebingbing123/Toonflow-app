@@ -240,6 +240,32 @@ class _AgentWorkspaceProductionCardState
               : _writeBackProductionFlowResult,
           child: const Text('4) 写回 flow'),
         ),
+        FilledButton.tonal(
+          onPressed: widget.busy
+              ? null
+              : () {
+                  widget.onFlowKeyChanged('storyboard');
+                  _applyProductionPromptIfEmpty(
+                    '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
+                  );
+                  widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
+                  _runProductionSubAgentTool();
+                },
+          child: const Text('5) 运行分镜子代理'),
+        ),
+        FilledButton.tonal(
+          onPressed: widget.busy
+              ? null
+              : () {
+                  widget.onFlowKeyChanged('scriptPlan');
+                  _applyProductionPromptIfEmpty(
+                    '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
+                  );
+                  widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
+                  _runProductionSubAgentTool();
+                },
+          child: const Text('6) 运行导演计划子代理'),
+        ),
       ],
     );
   }

@@ -332,6 +332,24 @@ void main() {
     await tester.tap(find.text('4) 写回 flow'));
     await tester.pump();
     expect(productionWriteBackCalls, 1);
+
+    await tester.tap(find.text('5) 运行分镜子代理'));
+    await tester.pump();
+    expect(flowKeyController.text, 'storyboard');
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_storyboard_gen',
+    );
+    expect(productionSubAgentCalls, 2);
+
+    await tester.tap(find.text('6) 运行导演计划子代理'));
+    await tester.pump();
+    expect(flowKeyController.text, 'scriptPlan');
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_director_plan',
+    );
+    expect(productionSubAgentCalls, 3);
   });
 
   testWidgets('Production form blocks invalid JSON args before probe', (
