@@ -23,6 +23,7 @@ part 'home_page/project_editor_assets_crud_probe.dart';
 part 'home_page/project_editor_assets_links_probe.dart';
 part 'home_page/project_editor_assets_corner_scape_workbench.dart';
 part 'home_page/project_editor_assets_clip_upload_workbench.dart';
+part 'home_page/project_editor_assets_images_workbench.dart';
 part 'home_page/project_editor_novels_rest_actions.dart';
 part 'home_page/project_editor_novels_rest_probe.dart';
 part 'home_page/project_editor_novels_legacy_actions.dart';
