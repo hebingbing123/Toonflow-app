@@ -317,7 +317,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           child: TextField(
             controller: widget.projectIdController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'project_id'),
+            decoration: const InputDecoration(labelText: '项目 ID'),
           ),
         ),
         const SizedBox(width: 8),
@@ -325,7 +325,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           child: TextField(
             controller: widget.scriptIdController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'script_id'),
+            decoration: const InputDecoration(labelText: '剧本 ID'),
           ),
         ),
       ],
@@ -334,9 +334,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   Widget _buildPaneSelector() {
     final tabs = <(AgentWorkspacePane, String)>[
-      (AgentWorkspacePane.script, 'Script workspace'),
-      (AgentWorkspacePane.production, 'Production workspace'),
-      (AgentWorkspacePane.activity, 'Activity'),
+      (AgentWorkspacePane.script, '剧本工作区'),
+      (AgentWorkspacePane.production, '制作工作区'),
+      (AgentWorkspacePane.activity, '执行动态'),
     ];
     return Wrap(
       spacing: 8,
