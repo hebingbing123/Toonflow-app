@@ -31,21 +31,17 @@
 - 旧 `migrate/migrateData` 已由 `toonflow-legacy-import` 与 staging 提升链路替代。
 - 旧 `setting/fileManagement/openFolder` 属于桌面本地能力，不应再按服务端 HTTP 复刻。
 
-### 2.2 后端 HTTP 的真实遗漏
+### 2.2 后端 HTTP 漏项收口（已完成）
 
-以下旧能力当前没有稳定 Rust/OpenAPI/Flutter 对应入口，应视为明确待补项：
+以下两项旧 REST 漏点已在当前分支补齐，并同步到 OpenAPI / smoke / PG contract / Flutter `rust_api`：
 
-1. 旧 `POST /api/production/editImage/uploadImage`
+1. `POST /api/v1/production/edit-image/upload-image`（旧 `POST /api/production/editImage/uploadImage`）
+2. `POST /api/v1/scripts/batch-add`（旧 `POST /api/script/batchAddScript`）
 
-- 旧实现文件：`master:src/routes/production/editImage/uploadImage.ts`
-- 当前状态：`backend/src/production_legacy.rs` 路由集中表中没有对应项，`docs/openapi.yaml` 与 `frontend/lib/rust_api/*` 也没有对应方法。
-- 影响：旧编辑图流程支持将用户上传的图片写入 image flow 工作区；当前 edit-image 流只覆盖读取、保存、更新、生成，不含上传入口。
+收口说明：
 
-2. 旧 `POST /api/script/batchAddScript`
-
-- 旧实现文件：`master:src/routes/script/batchAddScript.ts`
-- 当前状态：Rust 只提供单条创建剧本、legacy 查询、导出、抽取与 `script-agent/set-plan-data` 的近似写入，没有独立 batch create 契约；OpenAPI 与 Flutter 也没有独立入口。
-- 影响：旧端可以一次性插入多条剧本；当前只能单条插入或借助 Agent 计划数据写入，语义不完全等价。
+- `upload-image`：增加 project/script ownership 校验，限制 JPEG/JPG/PNG base64 data URI，返回标准化 `url`。
+- `batch-add`：增加 `projectId + data[{scriptName,scriptData}]` 批量写入契约，事务内顺序分配 `legacy_id`，并返回插入结果。
 
 ### 2.3 Harness / Socket.IO Agent 的真实遗漏
 
@@ -100,14 +96,14 @@
 
 ## 3. 重构补漏计划
 
-### Wave 1: 补齐明确漏掉的 HTTP 契约
+### Wave 1: 补齐明确漏掉的 HTTP 契约（已完成）
 
 目标：先把“确实没实现”的旧 HTTP 能力补齐，避免 parity 表继续失真。
 
-- 增加 `POST /api/v1/production/edit-image/upload-image`
-- 增加对应 OpenAPI、无 DB smoke、PG 回归、Flutter `rust_api`
-- 增加 `POST /api/v1/scripts/batch-add`
-- 明确与旧 `batchAddScript` 的字段映射、响应语义和 project ownership 校验
+- 已增加 `POST /api/v1/production/edit-image/upload-image`
+- 已补齐 OpenAPI、无 DB smoke、PG 回归、Flutter `rust_api`
+- 已增加 `POST /api/v1/scripts/batch-add`
+- 已明确与旧 `batchAddScript` 的字段映射、响应语义和 project ownership 校验
 
 完成标准：
 
@@ -188,10 +184,9 @@
 
 当前重构分支已经完成了**绝大多数旧 REST 能力迁移**，但如果目标是“不能遗漏任何功能点和模块”，那还不能宣布彻底完成。
 
-本次确认的重点剩余项是：
+当前剩余重点项是：
 
-- 后端还漏了两个明确 HTTP 契约：`production/editImage/uploadImage`、`script/batchAddScript`
 - Harness 还没有承接旧 script/production Agent 的领域工具和子 Agent 编排
 - Flutter 现在更像 probe/debug shell，还不是旧 Electron 产品工作流的完整替代
 
-因此，后续收尾不应只继续拆文件，还要按这份计划补齐**契约漏项 + Harness 领域能力 + Flutter 产品工作流**。
+因此，后续收尾应聚焦 **Harness 领域能力 + Flutter 产品工作流** 两条主线。

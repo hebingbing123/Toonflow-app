@@ -226,6 +226,15 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
         prompt: 'probe',
       ),
     );
+    statuses['prod/edit.upload'] = await _runTypedProductionProbe(
+      label: 'POST production/edit-image/upload-image',
+      run: () => postProductionEditImageUploadImageV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        base64Data: 'data:image/png;base64,AA==',
+      ),
+    );
     statuses['prod/workbench.add-track'] = await _runTypedProductionProbe(
       label: 'POST production/workbench/add-track',
       run: () => postWorkbenchAddTrackV1(
@@ -282,7 +291,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       ),
     );
 
-    return (statuses: statuses, implementedCount: 28);
+    return (statuses: statuses, implementedCount: 29);
   }
 
   Future<int> _runTypedProductionProbe({

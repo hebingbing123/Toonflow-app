@@ -877,6 +877,10 @@ pub fn router() -> Router<AppState> {
             post(workbench_edit_image::post_edit_image_generate_flow_image),
         )
         .route(
+            "/api/v1/production/edit-image/upload-image",
+            post(workbench_edit_image::post_edit_image_upload_image),
+        )
+        .route(
             "/api/v1/production/get-storyboard-data",
             post(workbench_storyboard::post_get_storyboard_data),
         )

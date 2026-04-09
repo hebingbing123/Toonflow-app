@@ -17,6 +17,48 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
+                  final stamp = DateTime.now().millisecondsSinceEpoch;
+                  final created = await postScriptsBatchAdd(
+                    token,
+                    projectId: p.legacyId,
+                    data: [
+                      BatchAddScriptItemV1(
+                        scriptName: '[flutter batch probe]$stamp',
+                        scriptData: 'probe',
+                      ),
+                    ],
+                  );
+                  for (final s in created.scripts) {
+                    await deleteScriptByLegacyId(token, s.legacyId);
+                  }
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'POST …/scripts/batch-add：inserted=${created.inserted}',
+                      ),
+                    ),
+                  );
+                } on RustApiException catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => scriptProbeBusy[0] = false);
+                  }
+                }
+              },
+        child: const Text('POST scripts/batch-add'),
+      ),
+      TextButton(
+        onPressed: scriptProbeBusy[0] || saving[0]
+            ? null
+            : () async {
+                setDialogState(() => scriptProbeBusy[0] = true);
+                try {
                   final rows = await postScriptsGetScriptApi(token, p.legacyId);
                   if (!ctx.mounted) return;
                   final sample = rows.isEmpty

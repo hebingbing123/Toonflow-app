@@ -37,6 +37,36 @@ Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApi(
       .toList();
 }
 
+/// `POST /api/v1/scripts/batch-add` — legacy **`batchAddScript`** parity.
+Future<BatchAddScriptResponseV1> postScriptsBatchAdd(
+  String accessToken, {
+  required int projectId,
+  required List<BatchAddScriptItemV1> data,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/batch-add');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'data': data.map((e) => e.toJson()).toList(),
+        }),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return BatchAddScriptResponseV1.fromJson(map);
+}
+
 /// `GET /api/v1/scripts/legacy/{legacy_id}`. See `getScriptByLegacyIdV1`.
 Future<ScriptRow> fetchScriptByLegacyId(
   String accessToken,

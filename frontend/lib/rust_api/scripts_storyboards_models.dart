@@ -139,6 +139,43 @@ class ExtractAssetsAcceptedResponse {
   }
 }
 
+class BatchAddScriptItemV1 {
+  const BatchAddScriptItemV1({
+    required this.scriptName,
+    required this.scriptData,
+  });
+
+  final String scriptName;
+  final String scriptData;
+
+  Map<String, dynamic> toJson() {
+    return {'scriptName': scriptName, 'scriptData': scriptData};
+  }
+}
+
+class BatchAddScriptResponseV1 {
+  const BatchAddScriptResponseV1({
+    required this.message,
+    required this.inserted,
+    required this.scripts,
+  });
+
+  final String message;
+  final int inserted;
+  final List<ScriptRow> scripts;
+
+  factory BatchAddScriptResponseV1.fromJson(Map<String, dynamic> json) {
+    final rows = json['scripts'] as List<dynamic>? ?? const [];
+    return BatchAddScriptResponseV1(
+      message: json['message'] as String,
+      inserted: (json['inserted'] as num).toInt(),
+      scripts: rows
+          .map((e) => ScriptRow.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 class StoryboardRow {
   const StoryboardRow({
     required this.id,

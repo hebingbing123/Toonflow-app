@@ -46,7 +46,7 @@ info:
 
     **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors legacy cancel semantics by marking caller-owned **`app_asset_image`** row (**`legacy_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
 
-    **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **28 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
+    **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
     **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` only filters when **`> 0`**, matching legacy truthy semantics; otherwise ignored). **`POST …/task-details`** accepts either **UUID** **`id`** or numeric **`legacy_task_id`** and returns the same **`JobRow`**.
 
@@ -5512,6 +5512,54 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/production/edit-image/upload-image:
+    post:
+      tags: [production]
+      summary: Upload edit-image source image (legacy `uploadImage`)
+      operationId: postProductionEditImageUploadImageV1
+      description: |
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`base64Data`** (JPEG/JPG/PNG data URI),
+        checks caller ownership of the project/script pair, and returns a normalized image data URI as **`url`**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionEditImageUploadImageBody"
+      responses:
+        "200":
+          description: Upload accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionEditImageUploadImageResponse"
+        "400":
+          description: Invalid request body or unsupported image type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project/script not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/production/edit-image/get-image-default-model:
     post:
       tags: [production]
@@ -7924,6 +7972,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LegacyScriptsGetScriptApiResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project legacy id not found for caller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/scripts/batch-add:
+    post:
+      tags: [scripts]
+      summary: Legacy batch add scripts under project (`batchAddScript`)
+      operationId: postScriptsBatchAddV1
+      description: |
+        Parity with **`POST /api/script/batchAddScript`**. Validates **`projectId`** ownership and inserts all
+        rows in **`data`** with sequential **`legacy_id`** allocation under transaction advisory lock.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchAddScriptBody"
+      responses:
+        "200":
+          description: Insert completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchAddScriptResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
           content:
@@ -10482,6 +10578,31 @@ components:
         status:
           type: string
 
+    ProductionEditImageUploadImageBody:
+      type: object
+      required: [projectId, scriptId, base64Data]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+          minimum: 1
+        scriptId:
+          type: integer
+          format: int32
+          minimum: 1
+        base64Data:
+          type: string
+          description: JPEG/JPG/PNG data URI payload (`data:image/*;base64,...`)
+
+    ProductionEditImageUploadImageResponse:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          description: Normalized image data URI.
+
     ProductionStoryboardListBody:
       type: object
       required: [projectId, scriptId]
@@ -12212,6 +12333,44 @@ components:
         extract_state:
           type: integer
           format: int32
+
+    BatchAddScriptItem:
+      type: object
+      required: [scriptName, scriptData]
+      additionalProperties: false
+      properties:
+        scriptName:
+          type: string
+        scriptData:
+          type: string
+
+    BatchAddScriptBody:
+      type: object
+      required: [projectId, data]
+      additionalProperties: false
+      properties:
+        projectId:
+          type: integer
+          format: int32
+          minimum: 1
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchAddScriptItem"
+
+    BatchAddScriptResponse:
+      type: object
+      required: [message, inserted, scripts]
+      properties:
+        message:
+          type: string
+        inserted:
+          type: integer
+          format: int32
+        scripts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptRow"
 
     PatchScriptBody:
       type: object

@@ -7341,6 +7341,27 @@ async fn production_legacy_endpoints_minimal_roundtrip() {
     assert_eq!(status, StatusCode::OK, "get-video-list should return 200");
     assert_eq!(body["total"].as_i64(), Some(0));
 
+    // Test edit-image/upload-image (legacy parity): validates ownership + returns normalized data URI
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/production/edit-image/upload-image")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"base64Data":"data:image/png;base64,AA=="}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, body) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "upload-image should return 200");
+    assert_eq!(body["url"].as_str(), Some("data:image/png;base64,AA=="));
+
     // Cleanup
     let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
         .bind(project_id)
@@ -8511,6 +8532,32 @@ async fn scripts_crud_roundtrip() {
     assert_eq!(status, StatusCode::CREATED, "script={script}");
     let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
     assert_eq!(script["name"].as_str(), Some("test_script"));
+
+    // Batch add scripts (legacy `batchAddScript` parity)
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/scripts/batch-add")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"data":[{{"scriptName":"batch_1","scriptData":"content_1"}},{{"scriptName":"batch_2","scriptData":"content_2"}}]}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, batch) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "batch add script={batch}");
+    assert_eq!(batch["message"].as_str(), Some("添加剧本成功"));
+    assert_eq!(batch["inserted"].as_i64(), Some(2));
+    let scripts = batch["scripts"].as_array().expect("scripts array");
+    assert_eq!(scripts.len(), 2);
+    assert_eq!(scripts[0]["name"].as_str(), Some("batch_1"));
+    assert_eq!(scripts[1]["name"].as_str(), Some("batch_2"));
 
     // Get script
     let res = app

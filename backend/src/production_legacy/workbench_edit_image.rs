@@ -3,6 +3,7 @@ use axum::{
     http::HeaderMap,
     Json as JsonResponse,
 };
+use base64::Engine;
 use serde::{Deserialize, Serialize};
 
 use crate::auth::require_user_uuid;
@@ -148,6 +149,81 @@ pub(super) async fn post_edit_image_update_image_flow(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct EditImageUploadImageBody {
+    project_id: i32,
+    script_id: i32,
+    base64_data: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct EditImageUploadImageResponse {
+    url: String,
+}
+
+fn normalize_upload_image_data_uri(input: &str) -> Result<String, ApiError> {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return Err(ApiError::BadRequest("base64Data must not be empty".into()));
+    }
+    let (prefix, payload) = trimmed
+        .split_once(',')
+        .ok_or_else(|| ApiError::BadRequest("base64Data must be a valid data URI".into()))?;
+    let lower = prefix.to_ascii_lowercase();
+    if !(lower.starts_with("data:image/jpeg;")
+        || lower.starts_with("data:image/jpg;")
+        || lower.starts_with("data:image/png;"))
+        || !lower.contains(";base64")
+    {
+        return Err(ApiError::BadRequest("不支持的文件类型".into()));
+    }
+
+    let payload = payload.trim();
+    if payload.is_empty() {
+        return Err(ApiError::BadRequest(
+            "base64Data payload must not be empty".into(),
+        ));
+    }
+    base64::engine::general_purpose::STANDARD
+        .decode(payload)
+        .map_err(|_| ApiError::BadRequest("base64Data must be valid base64".into()))?;
+
+    let mime = prefix
+        .trim()
+        .strip_prefix("data:")
+        .and_then(|s| s.split(';').next())
+        .unwrap_or("image/png")
+        .to_ascii_lowercase();
+    Ok(format!("data:{mime};base64,{payload}"))
+}
+
+pub(super) async fn post_edit_image_upload_image(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<EditImageUploadImageBody>,
+) -> Result<JsonResponse<EditImageUploadImageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be > 0".into()));
+    }
+    if body.script_id <= 0 {
+        return Err(ApiError::BadRequest("scriptId must be > 0".into()));
+    }
+    let normalized = normalize_upload_image_data_uri(&body.base64_data)?;
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    super::resolve_owned_production_scope(pool, uid, body.project_id, body.script_id).await?;
+
+    Ok(JsonResponse(EditImageUploadImageResponse {
+        url: normalized,
+    }))
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct GenerateFlowImageBody {
     flow_id: String,
     prompt: String,
@@ -193,4 +269,36 @@ pub(super) async fn post_edit_image_generate_flow_image(
         job_id: row.id.to_string(),
         status: "queued".to_string(),
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_upload_image_data_uri;
+    use crate::error::ApiError;
+
+    #[test]
+    fn upload_image_normalize_accepts_png_data_uri() {
+        let got = normalize_upload_image_data_uri("data:image/png;base64,AA==").expect("png");
+        assert_eq!(got, "data:image/png;base64,AA==");
+    }
+
+    #[test]
+    fn upload_image_normalize_rejects_non_image_mime() {
+        let err = normalize_upload_image_data_uri("data:text/plain;base64,AA==")
+            .expect_err("text mime should fail");
+        match err {
+            ApiError::BadRequest(msg) => assert!(msg.contains("不支持")),
+            other => panic!("unexpected error: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn upload_image_normalize_rejects_invalid_base64() {
+        let err = normalize_upload_image_data_uri("data:image/png;base64,not-base64")
+            .expect_err("invalid base64");
+        match err {
+            ApiError::BadRequest(msg) => assert!(msg.contains("valid base64")),
+            other => panic!("unexpected error: {other:?}"),
+        }
+    }
 }

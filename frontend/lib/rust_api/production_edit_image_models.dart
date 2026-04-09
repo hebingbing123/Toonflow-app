@@ -120,3 +120,14 @@ class GenerateFlowImageResponseV1 {
     );
   }
 }
+
+/// OpenAPI **`ProductionEditImageUploadImageResponse`**.
+class EditImageUploadImageResponseV1 {
+  const EditImageUploadImageResponseV1({required this.url});
+
+  final String url;
+
+  factory EditImageUploadImageResponseV1.fromJson(Map<String, dynamic> json) {
+    return EditImageUploadImageResponseV1(url: json['url'] as String);
+  }
+}

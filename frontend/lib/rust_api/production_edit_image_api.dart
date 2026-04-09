@@ -141,3 +141,37 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return GenerateFlowImageResponseV1.fromJson(map);
 }
+
+/// `POST /api/v1/production/edit-image/upload-image` — OpenAPI `postProductionEditImageUploadImageV1`.
+Future<EditImageUploadImageResponseV1> postProductionEditImageUploadImageV1(
+  String accessToken, {
+  required int projectId,
+  required int scriptId,
+  required String base64Data,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/edit-image/upload-image',
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'base64Data': base64Data,
+        }),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return EditImageUploadImageResponseV1.fromJson(map);
+}
