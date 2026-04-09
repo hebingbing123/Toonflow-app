@@ -45,7 +45,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                 dialogState.reloadAssetsAndStats(token, p.legacyId),
           ),
           const SizedBox(height: 12),
-          _buildProjectAssetsProbeSection(
+          _buildProjectAssetsSection(
             ctx: ctx,
             setDialogState: setDialogState,
             token: token,

@@ -15,7 +15,9 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先创建剧本再上传编辑图片')));
       return;
     }
-    final base64Ctrl = TextEditingController(text: 'data:image/png;base64,AA==');
+    final base64Ctrl = TextEditingController(
+      text: 'data:image/png;base64,AA==',
+    );
     var selectedScriptLegacyId = scriptList.first.legacyId;
     try {
       final confirmed = await showDialog<bool>(
@@ -114,7 +116,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     }
   }
 
-  Widget _buildProjectAssetsProbeSection({
+  Widget _buildProjectAssetsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -135,13 +137,13 @@ extension _HomePageProjectEditorAssets on _HomePageState {
         if (assetsRef[0] != null)
           Text(
             assetsRef[0]!.items.isEmpty
-                ? 'GET …/assets：total=0'
-                : 'GET …/assets：total=${assetsRef[0]!.total} · ${assetsRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsRef[0]!.items.length > 6 ? '…' : ''}',
+                ? '当前没有资产'
+                : '资产 ${assetsRef[0]!.total} 条 · ${assetsRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsRef[0]!.items.length > 6 ? '…' : ''}',
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else
           Text(
-            'GET …/assets 未加载',
+            '资产列表尚未加载',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
@@ -150,7 +152,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
           const SizedBox(height: 6),
           if (assetsScriptFilterLoading[0])
             Text(
-              'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} …',
+              '正在按剧本筛选资产…',
               style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                 color: Theme.of(ctx).colorScheme.outline,
               ),
@@ -158,13 +160,13 @@ extension _HomePageProjectEditorAssets on _HomePageState {
           else if (assetsForScriptRef[0] != null)
             Text(
               assetsForScriptRef[0]!.items.isEmpty
-                  ? 'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]}：total=0'
-                  : 'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]}：total=${assetsForScriptRef[0]!.total} · ${assetsForScriptRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsForScriptRef[0]!.items.length > 6 ? '…' : ''}',
+                  ? '当前剧本下没有关联资产'
+                  : '当前剧本下 ${assetsForScriptRef[0]!.total} 条 · ${assetsForScriptRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsForScriptRef[0]!.items.length > 6 ? '…' : ''}',
               style: Theme.of(ctx).textTheme.bodySmall,
             )
           else
             Text(
-              'GET …/assets?script_legacy_id=${assetsFilterScriptLegacyId[0]} 未加载',
+              '当前剧本资产尚未加载',
               style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                 color: Theme.of(ctx).colorScheme.outline,
               ),
@@ -230,7 +232,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                       }
                     }
                   },
-            child: Text(assetsLoading[0] ? '刷新资产…' : '刷新资产列表'),
+            child: Text(assetsLoading[0] ? '刷新资产…' : '刷新资产'),
           ),
         ),
         const SizedBox(height: 8),
@@ -254,18 +256,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                     ),
               child: const Text('上传编辑图片'),
             ),
-            _buildProjectAssetsImagesProbeSection(
-              ctx: ctx,
-              setDialogState: setDialogState,
-              token: token,
-              p: p,
-              assetsRef: assetsRef,
-              assetsLoading: assetsLoading,
-              assetsScriptFilterLoading: assetsScriptFilterLoading,
-              assetsBusy: assetsBusy,
-              reloadAssetsAndStats: reloadAssetsAndStats,
-            ),
-            ..._buildProjectAssetsCrudProbeActions(
+            ..._buildProjectAssetsPrimaryActions(
               ctx: ctx,
               setDialogState: setDialogState,
               token: token,
@@ -277,7 +268,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               assetsBusy: assetsBusy,
               reloadAssetsAndStats: reloadAssetsAndStats,
             ),
-            ..._buildProjectAssetsLinksProbeActions(
+            ..._buildProjectAssetsRelationActions(
               ctx: ctx,
               setDialogState: setDialogState,
               token: token,
@@ -288,6 +279,50 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               assetsScriptFilterLoading: assetsScriptFilterLoading,
               assetsBusy: assetsBusy,
               reloadAssetsAndStats: reloadAssetsAndStats,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          title: const Text('兼容性检查'),
+          subtitle: Text(
+            '保留旧资产轮询、历史图片和 legacy 形检查入口，默认折叠',
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+              color: Theme.of(ctx).colorScheme.outline,
+            ),
+          ),
+          children: [
+            _buildProjectAssetsImagesCompatibilitySection(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              assetsRef: assetsRef,
+              assetsLoading: assetsLoading,
+              assetsScriptFilterLoading: assetsScriptFilterLoading,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 4,
+              runSpacing: 0,
+              children: [
+                ..._buildProjectAssetsQueryCompatibilityActions(
+                  ctx: ctx,
+                  setDialogState: setDialogState,
+                  token: token,
+                  p: p,
+                  assetsRef: assetsRef,
+                  assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                  assetsLoading: assetsLoading,
+                  assetsScriptFilterLoading: assetsScriptFilterLoading,
+                  assetsBusy: assetsBusy,
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                ),
+              ],
             ),
           ],
         ),

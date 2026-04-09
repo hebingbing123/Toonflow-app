@@ -1,7 +1,7 @@
 part of '../home_page.dart';
 
 extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
-  List<Widget> _buildProjectAssetsLinksProbeActions({
+  List<Widget> _buildProjectAssetsRelationActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -55,7 +55,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('PUT 关联首剧本·首资产'),
+        child: const Text('关联首剧本与首资产'),
       ),
       TextButton(
         onPressed:
@@ -96,7 +96,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('DELETE 取消关联'),
+        child: const Text('取消首条关联'),
       ),
     ];
   }
