@@ -30,6 +30,8 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
     required this.workspaceScriptWritebackSource,
     required this.workspaceScriptWritebackCandidate,
     required this.workspaceScriptPlanWritebackCandidate,
+    this.workspaceLastToolName,
+    this.workspaceLastToolResultData,
     required this.workspaceWritebackLine,
     required this.onSelectPrompt,
     required this.onScriptDomainToolChanged,
@@ -59,6 +61,8 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
   final String? workspaceScriptWritebackSource;
   final String? workspaceScriptWritebackCandidate;
   final Map<String, dynamic>? workspaceScriptPlanWritebackCandidate;
+  final String? workspaceLastToolName;
+  final Object? workspaceLastToolResultData;
   final String? workspaceWritebackLine;
   final ValueChanged<String> onSelectPrompt;
   final ValueChanged<String> onScriptDomainToolChanged;
@@ -103,6 +107,12 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         ? scriptRaw.whereType<Map<String, dynamic>>().length
         : 0;
     return 'PlanData source ready: story/adaptation + script rows=$scriptCount';
+  }
+
+  Map<String, dynamic>? get _lastToolResultMap {
+    final raw = widget.workspaceLastToolResultData;
+    if (raw is Map<String, dynamic>) return raw;
+    return null;
   }
 
   String? get _runningTaskLine {
@@ -270,6 +280,144 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       }
     }
     return lines.take(6).toList(growable: false);
+  }
+
+  List<Widget> _buildContextSnapshot(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final sections = <Widget>[];
+    final planData = widget.workspaceScriptPlanWritebackCandidate;
+    final lastToolName = widget.workspaceLastToolName;
+    final lastToolResult = _lastToolResultMap;
+
+    void addPreviewCard({
+      required String title,
+      required String body,
+      String? subtitle,
+    }) {
+      final normalized = body.trim();
+      if (normalized.isEmpty) return;
+      sections.add(
+        Card(
+          margin: const EdgeInsets.only(top: 8),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(title, style: theme.labelLarge),
+                if (subtitle != null && subtitle.trim().isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(subtitle.trim(), style: theme.bodySmall),
+                ],
+                const SizedBox(height: 6),
+                SelectableText(
+                  _previewText(normalized, maxChars: 1200),
+                  style: theme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (planData != null) {
+      final data = planData['data'];
+      if (data is Map<String, dynamic>) {
+        final storySkeleton = (data['storySkeleton'] as String?)?.trim() ?? '';
+        final adaptationStrategy =
+            (data['adaptationStrategy'] as String?)?.trim() ?? '';
+        final scriptRows = (data['script'] is List)
+            ? (data['script'] as List).whereType<Map<String, dynamic>>().toList(
+                growable: false,
+              )
+            : const <Map<String, dynamic>>[];
+        addPreviewCard(
+          title: '故事骨架',
+          body: storySkeleton,
+          subtitle: '来自 get_planData',
+        );
+        addPreviewCard(
+          title: '改编策略',
+          body: adaptationStrategy,
+          subtitle: '来自 get_planData',
+        );
+        if (scriptRows.isNotEmpty) {
+          final lines = scriptRows
+              .take(4)
+              .map((Map<String, dynamic> row) {
+                final name =
+                    (row['scriptName'] as String?)?.trim().isNotEmpty == true
+                    ? (row['scriptName'] as String).trim()
+                    : '未命名剧本';
+                final content = (row['scriptData'] as String?)?.trim() ?? '';
+                final preview = content.isEmpty
+                    ? '无正文'
+                    : _previewText(content, maxChars: 220);
+                return '$name\n$preview';
+              })
+              .join('\n\n');
+          addPreviewCard(
+            title: '计划内剧本草稿',
+            body: lines,
+            subtitle: '最多展示前 4 条 script rows',
+          );
+        }
+      }
+    }
+
+    if (lastToolName == 'get_script_content' && lastToolResult != null) {
+      addPreviewCard(
+        title: '当前剧本正文',
+        subtitle: '来自 get_script_content',
+        body: (lastToolResult['content'] as String?) ?? '',
+      );
+    }
+
+    if (lastToolName == 'get_novel_text' && lastToolResult != null) {
+      final title = (lastToolResult['title'] as String?)?.trim();
+      addPreviewCard(
+        title: '小说章节正文',
+        subtitle: title == null || title.isEmpty ? '来自 get_novel_text' : title,
+        body: (lastToolResult['content'] as String?) ?? '',
+      );
+    }
+
+    if (lastToolName == 'get_novel_events' && lastToolResult != null) {
+      final rawEvents = lastToolResult['events'];
+      final events = rawEvents is List
+          ? rawEvents.whereType<Map<String, dynamic>>().toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      if (events.isNotEmpty) {
+        final lines = events
+            .take(6)
+            .map((Map<String, dynamic> row) {
+              final title = (row['title'] as String?)?.trim() ?? '未命名事件';
+              final description =
+                  (row['content'] as String?)?.trim() ??
+                  (row['description'] as String?)?.trim() ??
+                  '';
+              if (description.isEmpty) return title;
+              return '$title\n${_previewText(description, maxChars: 180)}';
+            })
+            .join('\n\n');
+        addPreviewCard(
+          title: '小说事件',
+          subtitle: '来自 get_novel_events，最多展示前 6 条',
+          body: lines,
+        );
+      }
+    }
+
+    if (sections.isEmpty) {
+      return const <Widget>[];
+    }
+    return <Widget>[
+      const SizedBox(height: 8),
+      Text('上下文快照', style: theme.labelLarge),
+      ...sections,
+    ];
   }
 
   void _runScriptWorkspace() {
@@ -537,6 +685,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                 ),
               ),
             ],
+            ..._buildContextSnapshot(context),
             if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
               Text('最新助手结果', style: Theme.of(context).textTheme.labelLarge),

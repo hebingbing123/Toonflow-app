@@ -383,6 +383,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
               widget.workspaceScriptWritebackCandidate,
           workspaceScriptPlanWritebackCandidate:
               widget.workspaceScriptPlanWritebackCandidate,
+          workspaceLastToolName: widget.workspaceLastToolName,
+          workspaceLastToolResultData: widget.workspaceLastToolResultData,
           workspaceWritebackLine: widget.workspaceWritebackLine,
           onSelectPrompt: (String prompt) {
             setState(() => widget.scriptPromptController.text = prompt);
