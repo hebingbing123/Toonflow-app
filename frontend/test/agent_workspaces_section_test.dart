@@ -1010,6 +1010,104 @@ void main() {
     expect(find.text('tool=get_flowData'), findsOneWidget);
     expect(find.text('storyboard.count=2'), findsOneWidget);
     expect(find.text('assets.count=3'), findsOneWidget);
+    expect(find.text('上下文快照'), findsOneWidget);
+    expect(find.text('flow[storyboard]'), findsOneWidget);
+    expect(find.text('flow[assets]'), findsOneWidget);
+  });
+
+  testWidgets('Production pane renders tool result text snapshot', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'scriptPlan');
+    final productionDomainToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.production,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine:
+                    'run_sub_agent_director_plan => {"result":"导演计划：先补资产，再细化分镜。"}',
+                workspaceLastToolName: 'run_sub_agent_director_plan',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'result': '导演计划：先补资产，再细化分镜。',
+                },
+                workspaceSuggestedFlowKey: 'scriptPlan',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('工具返回文本'), findsOneWidget);
+    expect(find.textContaining('导演计划：先补资产'), findsWidgets);
   });
 
   testWidgets('Production probe auto-syncs get_flowData key in arguments', (
