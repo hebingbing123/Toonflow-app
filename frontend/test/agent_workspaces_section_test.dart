@@ -221,6 +221,236 @@ void main() {
     expect(writeBackCalls, 1);
   });
 
+  testWidgets('Script form blocks invalid JSON args before probe', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    var probeCalls = 0;
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: null,
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) => probeCalls += 1,
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final probeButton = find.widgetWithText(FilledButton, 'Probe script data');
+    await tester.ensureVisible(probeButton);
+    await tester.tap(probeButton);
+    await tester.pump();
+
+    expect(probeCalls, 0);
+    expect(
+      find.text('拦截：script tool arguments JSON 解析失败。'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Script argument templates and probe sync render', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '9');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    String? lastTool;
+    String? lastArgs;
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: 'assistant text',
+                workspaceScriptWritebackCandidate: 'candidate body',
+                workspaceScriptPlanWritebackCandidate: const <String, dynamic>{
+                  'data': <String, dynamic>{
+                    'storySkeleton': 'ready',
+                    'adaptationStrategy': 'ready',
+                    'script': <Map<String, dynamic>>[
+                      <String, dynamic>{'id': 1},
+                    ],
+                  },
+                },
+                workspaceScriptWritebackSource: 'tool:get_script_content',
+                workspaceLastToolResultLine: null,
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (tool, args) {
+                  lastTool = tool;
+                  lastArgs = args;
+                },
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(DropdownButtonFormField<String>, 'get_planData'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('get_script_content').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('模板: 当前 script'), findsOneWidget);
+    expect(find.text('tool=get_script_content'), findsOneWidget);
+    expect(find.text('plan.scriptRows=1'), findsOneWidget);
+
+    await tester.tap(find.text('模板: 当前 script'));
+    await tester.pump();
+    expect(scriptDomainArgsController.text, '{"scriptId":9}');
+
+    final probeButton = find.widgetWithText(FilledButton, 'Probe script data');
+    await tester.ensureVisible(probeButton);
+    await tester.tap(probeButton);
+    await tester.pump();
+
+    expect(lastTool, 'get_script_content');
+    expect(lastArgs, '{"scriptId":9}');
+  });
+
   testWidgets('Production guided tasks update flow context and callbacks', (
     WidgetTester tester,
   ) async {
