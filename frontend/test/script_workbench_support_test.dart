@@ -47,4 +47,40 @@ void main() {
     expect(formatBinarySize(1536), '1.5 KB');
     expect(formatBinarySize(2 * 1024 * 1024), '2.0 MB');
   });
+
+  test('parseLegacyIdSelection keeps unique positive ids in order', () {
+    expect(parseLegacyIdSelection('9, 2\n0, x, 9, 4'), [9, 2, 4]);
+  });
+
+  test('encodeLegacyIdSelection joins ids for text fields', () {
+    expect(encodeLegacyIdSelection(const [3, 8, 13]), '3,8,13');
+  });
+
+  test('syncScriptExtractStates updates matching scripts only', () {
+    final synced = syncScriptExtractStates(
+      const [
+        ScriptBrief(legacyId: 1, name: 'a', extractState: 0),
+        ScriptBrief(legacyId: 2, name: 'b', extractState: 0),
+      ],
+      const [ScriptExtractStatePollRow(legacyId: 2, extractState: -1)],
+    );
+
+    expect(synced.first.extractState, 0);
+    expect(synced.last.extractState, -1);
+  });
+
+  test('buildBatchAddScriptItems uses prefix and starting index', () {
+    final items = buildBatchAddScriptItems(
+      count: 3,
+      startingIndex: 5,
+      prefix: '批量剧本',
+      scriptData: 'content',
+    );
+
+    expect(items.map((item) => item.toJson()['scriptName']), [
+      '批量剧本 5',
+      '批量剧本 6',
+      '批量剧本 7',
+    ]);
+  });
 }

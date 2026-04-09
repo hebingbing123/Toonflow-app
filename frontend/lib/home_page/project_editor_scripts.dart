@@ -74,14 +74,11 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       final prefix = namePrefixCtrl.text.trim().isEmpty
           ? '新剧本'
           : namePrefixCtrl.text.trim();
-      final scriptData = scriptDataCtrl.text;
-      final base = scriptList.length;
-      final rows = List<BatchAddScriptItemV1>.generate(
-        count,
-        (i) => BatchAddScriptItemV1(
-          scriptName: '$prefix ${base + i + 1}',
-          scriptData: scriptData,
-        ),
+      final rows = buildBatchAddScriptItems(
+        count: count,
+        startingIndex: scriptList.length + 1,
+        prefix: prefix,
+        scriptData: scriptDataCtrl.text,
       );
 
       setDialogState(() => saving[0] = true);
@@ -150,6 +147,48 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         Text(
           '在项目下管理剧本，并进入剧本详情维护内容与分镜。',
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(
+              ctx,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('剧本批量工作台', style: Theme.of(ctx).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              Text(
+                '把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。',
+                style: Theme.of(
+                  ctx,
+                ).textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: saving[0] || scriptTaskBusy[0]
+                    ? null
+                    : () => _openProjectScriptsWorkbenchDialog(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        token: token,
+                        p: p,
+                        saving: saving,
+                        scriptTaskBusy: scriptTaskBusy,
+                        scriptTaskLine: scriptTaskLine,
+                        scriptList: scriptList,
+                        statsRef: statsRef,
+                      ),
+                child: const Text('打开剧本批量工作台'),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
