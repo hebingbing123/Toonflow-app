@@ -48,11 +48,19 @@ class QualityReviewsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('Quality reviews', style: Theme.of(context).textTheme.titleSmall),
+        Text('质量评审', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '查看评审列表、坏例与阶段通过率，并按 ID 打开单条记录。',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: outline),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -60,41 +68,57 @@ class QualityReviewsSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
-              child: Text(
-                loadingQualityReviews ? '…' : 'GET /api/v1/quality/reviews',
-              ),
+              child: Text(loadingQualityReviews ? '…' : '加载评审列表'),
             ),
             FilledButton.tonal(
               onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,
-              child: Text(
-                loadingQualityBadCases
-                    ? '…'
-                    : 'GET …/quality/reviews?isBadCase=true',
-              ),
+              child: Text(loadingQualityBadCases ? '…' : '查看坏例'),
             ),
             FilledButton.tonal(
               onPressed: loadingQualityStats ? null : onLoadQualityStats,
-              child: Text(
-                loadingQualityStats ? '…' : 'GET /api/v1/quality/stats',
-              ),
+              child: Text(loadingQualityStats ? '…' : '查看质量统计'),
             ),
             FilledButton.tonal(
               onPressed: loadingQualityStagePassRate
                   ? null
                   : onLoadQualityStagePassRate,
+              child: Text(loadingQualityStagePassRate ? '…' : '查看阶段通过率'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          title: const Text('兼容性检查'),
+          subtitle: Text(
+            '保留质量评审回归创建入口，默认折叠',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: outline),
+          ),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
               child: Text(
-                loadingQualityStagePassRate
-                    ? '…'
-                    : 'GET …/quality/stage-pass-rate',
+                'Legacy review probe',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: outline),
               ),
             ),
-            FilledButton.tonal(
-              onPressed: creatingQualityReview
-                  ? null
-                  : onCreateQualityReviewProbe,
-              child: Text(
-                creatingQualityReview ? '…' : 'POST quality review probe',
-              ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonal(
+                  onPressed: creatingQualityReview
+                      ? null
+                      : onCreateQualityReviewProbe,
+                  child: Text(creatingQualityReview ? '…' : '创建回归评审'),
+                ),
+              ],
             ),
           ],
         ),
@@ -102,9 +126,7 @@ class QualityReviewsSection extends StatelessWidget {
         TextField(
           controller: qualityReviewIdController,
           onChanged: onQualityReviewIdChanged,
-          decoration: const InputDecoration(
-            labelText: 'Quality review id (tap a row below to paste)',
-          ),
+          decoration: const InputDecoration(labelText: '评审 ID（点下方列表可自动填入）'),
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -113,26 +135,24 @@ class QualityReviewsSection extends StatelessWidget {
                   qualityReviewIdController.text.trim().isEmpty)
               ? null
               : onFetchQualityReviewById,
-          child: Text(
-            loadingQualityReviewById ? '…' : 'GET /api/v1/quality/reviews/{id}',
-          ),
+          child: Text(loadingQualityReviewById ? '…' : '查看评审详情'),
         ),
         if (qualityReviewByIdLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('review by id: $qualityReviewByIdLine'),
+          SelectableText('评审详情：$qualityReviewByIdLine'),
         ],
         if (qualityStatsLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('stats: $qualityStatsLine'),
+          SelectableText('质量统计：$qualityStatsLine'),
         ],
         if (qualityStagePassRateLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('stage-pass-rate: $qualityStagePassRateLine'),
+          SelectableText('阶段通过率：$qualityStagePassRateLine'),
         ],
         if (qualityReviews != null) ...[
           const SizedBox(height: 8),
           Text(
-            '${qualityReviews!.length} review(s)',
+            '${qualityReviews!.length} 条评审',
             style: Theme.of(context).textTheme.labelLarge,
           ),
           ...qualityReviews!

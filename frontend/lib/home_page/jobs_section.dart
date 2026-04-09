@@ -63,11 +63,19 @@ class JobsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text('Generation jobs', style: Theme.of(context).textTheme.titleSmall),
+        Text('任务作业', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Text(
+          '查看作业列表、状态汇总，并按 ID 打开单条执行记录。',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: outline),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -75,41 +83,69 @@ class JobsSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: loadingJobs ? null : onLoadJobs,
-              child: Text(loadingJobs ? '…' : 'GET /api/v1/jobs'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingJobs ? null : onLoadJobsKindFlutterProbe,
-              child: const Text('GET jobs?kind=flutter.probe'),
+              child: Text(loadingJobs ? '…' : '加载作业列表'),
             ),
             FilledButton.tonal(
               onPressed: loadingJobs ? null : onLoadJobsStatusFailed,
-              child: const Text('GET jobs?status=failed'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingJobs ? null : onLoadJobsKindProbeStatusQueued,
-              child: const Text('GET jobs?kind=flutter.probe&status=queued'),
+              child: const Text('查看失败作业'),
             ),
             FilledButton.tonal(
               onPressed: loadingJobKinds ? null : onLoadJobKinds,
-              child: Text(loadingJobKinds ? '…' : 'GET /api/v1/jobs/kinds'),
+              child: Text(loadingJobKinds ? '…' : '加载作业类型'),
             ),
             FilledButton.tonal(
               onPressed: loadingJobKindSummary ? null : onLoadJobKindSummary,
-              child: Text(
-                loadingJobKindSummary ? '…' : 'GET …/jobs/kinds/summary',
-              ),
+              child: Text(loadingJobKindSummary ? '…' : '查看类型汇总'),
             ),
             FilledButton.tonal(
               onPressed: loadingJobStatusSummary
                   ? null
                   : onLoadJobStatusSummary,
+              child: Text(loadingJobStatusSummary ? '…' : '查看状态汇总'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          title: const Text('兼容性检查'),
+          subtitle: Text(
+            '保留 flutter.probe 相关回归入口，默认折叠',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: outline),
+          ),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
               child: Text(
-                loadingJobStatusSummary ? '…' : 'GET …/jobs/status/summary',
+                'Legacy probe filters',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: outline),
               ),
             ),
-            FilledButton.tonal(
-              onPressed: creatingJob ? null : onCreateProbeJob,
-              child: Text(creatingJob ? '…' : 'POST job (flutter.probe)'),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonal(
+                  onPressed: loadingJobs ? null : onLoadJobsKindFlutterProbe,
+                  child: const Text('按 flutter.probe 查看'),
+                ),
+                FilledButton.tonal(
+                  onPressed: loadingJobs
+                      ? null
+                      : onLoadJobsKindProbeStatusQueued,
+                  child: const Text('查看 flutter.probe 排队中'),
+                ),
+                FilledButton.tonal(
+                  onPressed: creatingJob ? null : onCreateProbeJob,
+                  child: Text(creatingJob ? '…' : '创建 probe 作业'),
+                ),
+              ],
             ),
           ],
         ),
@@ -117,40 +153,38 @@ class JobsSection extends StatelessWidget {
         TextField(
           controller: jobIdController,
           onChanged: onJobIdChanged,
-          decoration: const InputDecoration(
-            labelText: 'Job id (tap a row below to paste)',
-          ),
+          decoration: const InputDecoration(labelText: '作业 ID（点下方列表可自动填入）'),
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: (loadingJobById || jobIdController.text.trim().isEmpty)
               ? null
               : onFetchJobById,
-          child: Text(loadingJobById ? '…' : 'GET /api/v1/jobs/{id}'),
+          child: Text(loadingJobById ? '…' : '查看作业详情'),
         ),
         if (jobByIdLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'job by id: $jobByIdLine',
+            '作业详情：$jobByIdLine',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (jobKindsLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('job kinds: $jobKindsLine'),
+          SelectableText('作业类型：$jobKindsLine'),
         ],
         if (jobKindSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('job kinds/summary: $jobKindSummaryLine'),
+          SelectableText('类型汇总：$jobKindSummaryLine'),
         ],
         if (jobStatusSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('job status/summary: $jobStatusSummaryLine'),
+          SelectableText('状态汇总：$jobStatusSummaryLine'),
         ],
         if (jobs != null) ...[
           const SizedBox(height: 8),
           Text(
-            '${jobs!.length} job(s)',
+            '${jobs!.length} 条作业',
             style: Theme.of(context).textTheme.labelLarge,
           ),
           ...jobs!
