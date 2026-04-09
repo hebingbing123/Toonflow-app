@@ -16,6 +16,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.loadingScriptSubAgentRun,
     required this.loadingProductionSubAgentRun,
     required this.loadingScriptResultWriteback,
+    required this.loadingProductionResultWriteback,
     required this.wsLog,
     required this.workspaceAssistantText,
     required this.workspaceLastToolResultLine,
@@ -28,6 +29,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onRunScriptSubAgentTool,
     required this.onRunProductionSubAgentTool,
     required this.onWriteBackScriptResult,
+    required this.onWriteBackProductionFlowResult,
   });
 
   final TextEditingController projectIdController;
@@ -41,6 +43,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final bool loadingScriptSubAgentRun;
   final bool loadingProductionSubAgentRun;
   final bool loadingScriptResultWriteback;
+  final bool loadingProductionResultWriteback;
   final List<String> wsLog;
   final String workspaceAssistantText;
   final String? workspaceLastToolResultLine;
@@ -53,6 +56,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final VoidCallback onRunScriptSubAgentTool;
   final VoidCallback onRunProductionSubAgentTool;
   final VoidCallback onWriteBackScriptResult;
+  final VoidCallback onWriteBackProductionFlowResult;
 
   @override
   State<AgentWorkspacesSection> createState() => _AgentWorkspacesSectionState();
@@ -139,7 +143,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.loadingProductionFlowProbe ||
       widget.loadingScriptSubAgentRun ||
       widget.loadingProductionSubAgentRun ||
-      widget.loadingScriptResultWriteback;
+      widget.loadingScriptResultWriteback ||
+      widget.loadingProductionResultWriteback;
 
   @override
   Widget build(BuildContext context) {
@@ -437,6 +442,16 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                   onPressed: _busy ? null : widget.onRunProductionSubAgentTool,
                   child: Text(
                     widget.loadingProductionSubAgentRun ? '…' : 'Run sub-agent',
+                  ),
+                ),
+                FilledButton(
+                  onPressed: _busy || widget.workspaceLastToolResultLine == null
+                      ? null
+                      : widget.onWriteBackProductionFlowResult,
+                  child: Text(
+                    widget.loadingProductionResultWriteback
+                        ? '…'
+                        : 'Write flow result',
                   ),
                 ),
               ],

@@ -9,6 +9,14 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     return value;
   }
 
+  void _resetWorkspaceOutputs() {
+    _workspaceAssistantText = '';
+    _workspaceLastToolResultLine = null;
+    _workspaceLastToolName = null;
+    _workspaceLastToolResultData = null;
+    _workspaceWritebackLine = null;
+  }
+
   Future<void> _runScriptWorkspaceAgent() async {
     final token = _session?.accessToken;
     if (token == null) return;
@@ -22,9 +30,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingScriptWorkspaceRun = true;
       _wsLog.clear();
-      _workspaceAssistantText = '';
-      _workspaceLastToolResultLine = null;
-      _workspaceWritebackLine = null;
+      _resetWorkspaceOutputs();
       _error = null;
     });
 
@@ -65,9 +71,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionWorkspaceRun = true;
       _wsLog.clear();
-      _workspaceAssistantText = '';
-      _workspaceLastToolResultLine = null;
-      _workspaceWritebackLine = null;
+      _resetWorkspaceOutputs();
       _error = null;
     });
 
@@ -109,9 +113,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionFlowProbe = true;
       _wsLog.clear();
-      _workspaceAssistantText = '';
-      _workspaceLastToolResultLine = null;
-      _workspaceWritebackLine = null;
+      _resetWorkspaceOutputs();
       _error = null;
     });
 
@@ -156,9 +158,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingScriptSubAgentRun = true;
       _wsLog.clear();
-      _workspaceAssistantText = '';
-      _workspaceLastToolResultLine = null;
-      _workspaceWritebackLine = null;
+      _resetWorkspaceOutputs();
       _error = null;
     });
 
@@ -208,9 +208,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionSubAgentRun = true;
       _wsLog.clear();
-      _workspaceAssistantText = '';
-      _workspaceLastToolResultLine = null;
-      _workspaceWritebackLine = null;
+      _resetWorkspaceOutputs();
       _error = null;
     });
 
@@ -276,6 +274,63 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     } finally {
       if (mounted) {
         setState(() => _loadingScriptResultWriteback = false);
+      }
+    }
+  }
+
+  Future<void> _writeBackProductionFlowResult() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    final flowKey = _productionFlowKeyCtrl.text.trim();
+    final toolName = _workspaceLastToolName;
+    final result = _workspaceLastToolResultData;
+    if (projectId == null ||
+        scriptId == null ||
+        flowKey.isEmpty ||
+        toolName != 'get_flowData' ||
+        result == null) {
+      setState(() => _error = '需先执行 get_flowData 并得到结果后再回写');
+      return;
+    }
+
+    setState(() {
+      _loadingProductionResultWriteback = true;
+      _workspaceWritebackLine = null;
+      _error = null;
+    });
+
+    try {
+      final fullFlow = await fetchProductionFlowDataV1(
+        token,
+        projectId: projectId,
+        episodesId: scriptId,
+      );
+      final merged = Map<String, dynamic>.from(fullFlow);
+      merged[flowKey] = result;
+      final status = await postProductionSaveFlowDataV1(
+        token,
+        projectId: projectId,
+        episodesId: scriptId,
+        data: merged,
+      );
+      if (status != 200) {
+        throw RustApiException(
+          'save-flow-data failed with status $status',
+          statusCode: status,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _workspaceWritebackLine =
+            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId。';
+      });
+    } catch (error) {
+      _setErrorFromException(error);
+    } finally {
+      if (mounted) {
+        setState(() => _loadingProductionResultWriteback = false);
       }
     }
   }

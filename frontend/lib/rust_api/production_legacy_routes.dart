@@ -39,6 +39,33 @@ Future<int> postProductionGetFlowDataV1(
   return res.statusCode;
 }
 
+/// `POST /api/v1/production/get-flow-data` — returns flow JSON object on success.
+Future<Map<String, dynamic>> fetchProductionFlowDataV1(
+  String accessToken, {
+  required int projectId,
+  required int episodesId,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-flow-data');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'projectId': projectId, 'episodesId': episodesId}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final decoded = jsonDecode(res.body);
+  if (decoded is! Map<String, dynamic>) {
+    throw RustApiException('invalid flow payload');
+  }
+  return decoded;
+}
+
 /// `POST /api/v1/production/save-flow-data` — OpenAPI `postProductionSaveFlowDataV1`
 /// (implemented in Rust; returns **200/404/503** when DB-gated).
 Future<int> postProductionSaveFlowDataV1(

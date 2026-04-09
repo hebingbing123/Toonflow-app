@@ -16,7 +16,8 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       _loadingScriptWorkspaceRun ||
       _loadingProductionWorkspaceRun ||
       _loadingProductionFlowProbe ||
-      _loadingScriptResultWriteback;
+      _loadingScriptResultWriteback ||
+      _loadingProductionResultWriteback;
 
   void _appendWsLog(String raw) {
     const maxChars = 12000;
@@ -76,6 +77,8 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       final name = payloadMap['name'];
       final result = payloadMap['result'];
       if (name is String) {
+        _workspaceLastToolName = name;
+        _workspaceLastToolResultData = result;
         final encoded = jsonEncode(result);
         final summary = encoded.length > 320
             ? '${encoded.substring(0, 320)}...'
