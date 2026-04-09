@@ -24,49 +24,61 @@ extension _HomePageScriptEditor on _HomePageState {
               final saving = <bool>[false];
               return AlertDialog(
                 title: Text('剧本 #${script.legacyId}'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: '名称（留空则清空）',
+                content: SizedBox(
+                  width: 720,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _ScriptWorkbenchPanel(
+                          token: token,
+                          projectLegacyId: projectLegacyId,
+                          scriptLegacyId: scriptLegacyId,
+                          onExtractStateSynced: (extractState) {
+                            stateCtrl.text = extractState?.toString() ?? '';
+                          },
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: contentCtrl,
-                        minLines: 4,
-                        maxLines: 12,
-                        decoration: const InputDecoration(
-                          labelText: '内容（留空则清空）',
-                          alignLabelWithHint: true,
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: nameCtrl,
+                          decoration: const InputDecoration(
+                            labelText: '名称（留空则清空）',
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: stateCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: '提取状态（留空则清空）',
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: contentCtrl,
+                          minLines: 4,
+                          maxLines: 12,
+                          decoration: const InputDecoration(
+                            labelText: '内容（留空则清空）',
+                            alignLabelWithHint: true,
+                          ),
                         ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: saving[0]
-                              ? null
-                              : () => _openScriptStoryboardsDialog(
-                                  token: token,
-                                  projectLegacyId: projectLegacyId,
-                                  scriptLegacyId: scriptLegacyId,
-                                ),
-                          child: const Text('分镜列表…'),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: stateCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: '提取状态（留空则清空）',
+                          ),
                         ),
-                      ),
-                    ],
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: saving[0]
+                                ? null
+                                : () => _openScriptStoryboardsDialog(
+                                    token: token,
+                                    projectLegacyId: projectLegacyId,
+                                    scriptLegacyId: scriptLegacyId,
+                                  ),
+                            child: const Text('分镜列表…'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 actions: [
