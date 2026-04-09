@@ -170,8 +170,8 @@
 
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写
 - production agent 页面：flowData、衍生资产、分镜、视频工作台、Agent 对话
-- edit-image 上传流接入正式 UI
-- 批量新增剧本接入正式 UI
+- edit-image 上传流接入正式 UI（项目详情资产区新增“上传编辑图片”表单，选择剧本 + data URI 直传 `POST /api/v1/production/edit-image/upload-image`）
+- 批量新增剧本接入正式 UI（项目详情剧本区新增“批量新增剧本”表单，直接调用 `POST /api/v1/scripts/batch-add` 并刷新列表/统计）
 - 把 `home_page` 下大量 probe 逐步转为回归入口或开发工具，而不是主产品入口
 
 完成标准：
