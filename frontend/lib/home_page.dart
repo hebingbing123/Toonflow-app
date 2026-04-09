@@ -67,6 +67,7 @@ class HomePage extends StatefulWidget {
 }
 
 enum _HomeSectionMode { product, debug }
+enum _ProductWorkspacePane { projects, agents, tasks, jobs, quality }
 
 class _HomePageState extends State<HomePage> {
   final _email = TextEditingController();
@@ -222,6 +223,7 @@ class _HomePageState extends State<HomePage> {
   String? _skillsListSummary;
   String? _skillMutationLine;
   _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
+  _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
 
   @override
   void initState() {
