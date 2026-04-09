@@ -41,10 +41,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       jsonEncode({
         'type': 'harness.agent.run',
         'schema_version': 1,
-        'payload': {
-          'content': prompt,
-          'max_tool_rounds': 12,
-        },
+        'payload': {'content': prompt, 'max_tool_rounds': 12},
       }),
     );
 
@@ -85,10 +82,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       jsonEncode({
         'type': 'harness.agent.run',
         'schema_version': 1,
-        'payload': {
-          'content': prompt,
-          'max_tool_rounds': 12,
-        },
+        'payload': {'content': prompt, 'max_tool_rounds': 12},
       }),
     );
 
@@ -131,14 +125,106 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
         'schema_version': 1,
         'payload': {
           'name': 'get_flowData',
-          'arguments': {
-            'key': key,
-            'scriptId': scriptId,
-          },
+          'arguments': {'key': key, 'scriptId': scriptId},
         },
       }),
     );
 
     if (mounted) setState(() => _loadingProductionFlowProbe = false);
+  }
+
+  Future<void> _runScriptSubAgentTool() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final toolName = _scriptSubAgentToolCtrl.text.trim();
+    if (projectId == null || prompt.isEmpty || toolName.isEmpty) {
+      setState(() => _error = 'project_id/prompt/tool 必须有效');
+      return;
+    }
+
+    setState(() {
+      _loadingScriptSubAgentRun = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final channel = await _openHarnessChannel(token);
+      if (channel == null) return;
+      channel.sink.add(
+        jsonEncode({
+          'type': 'agent.script.attach',
+          'schema_version': 1,
+          'payload': {
+            'isolation_key': 'flutter-script-sub-agent-tool',
+            'project_id': projectId,
+          },
+        }),
+      );
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': toolName,
+            'arguments': {'prompt': prompt},
+          },
+        }),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingScriptSubAgentRun = false);
+    }
+  }
+
+  Future<void> _runProductionSubAgentTool() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    final prompt = _agentWorkspacePromptCtrl.text.trim();
+    final toolName = _productionSubAgentToolCtrl.text.trim();
+    if (projectId == null ||
+        scriptId == null ||
+        prompt.isEmpty ||
+        toolName.isEmpty) {
+      setState(() => _error = 'project_id/script_id/prompt/tool 必须有效');
+      return;
+    }
+
+    setState(() {
+      _loadingProductionSubAgentRun = true;
+      _wsLog.clear();
+      _error = null;
+    });
+
+    try {
+      final channel = await _openHarnessChannel(token);
+      if (channel == null) return;
+      channel.sink.add(
+        jsonEncode({
+          'type': 'agent.production.attach',
+          'schema_version': 1,
+          'payload': {
+            'isolation_key': 'flutter-production-sub-agent-tool',
+            'project_id': projectId,
+            'script_id': scriptId,
+          },
+        }),
+      );
+      channel.sink.add(
+        jsonEncode({
+          'type': 'harness.tool.invoke',
+          'schema_version': 1,
+          'payload': {
+            'name': toolName,
+            'arguments': {'prompt': prompt, 'scriptId': scriptId},
+          },
+        }),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingProductionSubAgentRun = false);
+    }
   }
 }

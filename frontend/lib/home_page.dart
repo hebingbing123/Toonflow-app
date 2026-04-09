@@ -120,14 +120,21 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptWorkspaceRun = false;
   bool _loadingProductionWorkspaceRun = false;
   bool _loadingProductionFlowProbe = false;
+  bool _loadingScriptSubAgentRun = false;
+  bool _loadingProductionSubAgentRun = false;
   final List<String> _wsLog = [];
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
   final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
   final _agentWorkspacePromptCtrl = TextEditingController(
-    text:
-        '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
+    text: '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
   );
   final _productionFlowKeyCtrl = TextEditingController(text: 'assets');
+  final _scriptSubAgentToolCtrl = TextEditingController(
+    text: 'run_sub_agent_storySkeleton',
+  );
+  final _productionSubAgentToolCtrl = TextEditingController(
+    text: 'run_sub_agent_director_plan',
+  );
 
   bool _loadingProjects = false;
   bool _loadingProjectsSummary = false;
@@ -220,6 +227,8 @@ class _HomePageState extends State<HomePage> {
     _agentWorkspaceScriptIdCtrl.dispose();
     _agentWorkspacePromptCtrl.dispose();
     _productionFlowKeyCtrl.dispose();
+    _scriptSubAgentToolCtrl.dispose();
+    _productionSubAgentToolCtrl.dispose();
     super.dispose();
   }
 
