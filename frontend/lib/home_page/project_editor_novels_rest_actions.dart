@@ -1,7 +1,7 @@
 part of '../home_page.dart';
 
 extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
-  List<Widget> _buildProjectRestNovelsProbeActions({
+  List<Widget> _buildProjectRestNovelsActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -30,14 +30,14 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   await createProjectNovelUnderLegacy(
                     token,
                     p.legacyId,
-                    chapter: 'novel_probe_$ts',
+                    chapter: '新章节_$ts',
                   );
                   if (!ctx.mounted) return;
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('已 POST 测试章节')),
-                    );
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(const SnackBar(content: Text('已新增小说章节')));
                   }
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -51,7 +51,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST 测试章节'),
+        child: const Text('新增章节'),
       ),
       TextButton(
         onPressed:
@@ -75,9 +75,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        'GET …/novels/${first.legacyId}：${row.chapter}',
-                      ),
+                      content: Text('已读取章节 #${first.legacyId}：${row.chapter}'),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -92,7 +90,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 首条小说'),
+        child: const Text('查看首条章节'),
       ),
       TextButton(
         onPressed:
@@ -108,7 +106,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   final pg = await fetchProjectNovelsByLegacyId(
                     token,
                     p.legacyId,
-                    search: 'novel',
+                    search: '章节',
                     page: 1,
                     limit: 5,
                   );
@@ -116,7 +114,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/novels?search=novel&page=1&limit=5：total=${pg.total}，本页 ${pg.items.length} 条',
+                        '搜索“章节”：共 ${pg.total} 条，本页 ${pg.items.length} 条',
                       ),
                     ),
                   );
@@ -132,7 +130,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 小说 search+分页'),
+        child: const Text('搜索章节'),
       ),
       TextButton(
         onPressed:
@@ -157,9 +155,9 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   if (!ctx.mounted) return;
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('已 PATCH 首条小说 chapter')),
-                    );
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(const SnackBar(content: Text('已更新首条章节标题')));
                   }
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -173,7 +171,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('PATCH 首条小说'),
+        child: const Text('更新首条章节'),
       ),
       TextButton(
         onPressed:
@@ -198,7 +196,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text('已 DELETE 末条小说 #${last.legacyId}')),
+                      SnackBar(content: Text('已删除末条章节 #${last.legacyId}')),
                     );
                   }
                 } on RustApiException catch (e) {
@@ -213,7 +211,7 @@ extension _HomePageProjectEditorNovelsRestActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('DELETE 末条小说'),
+        child: const Text('删除末条章节'),
       ),
     ];
   }

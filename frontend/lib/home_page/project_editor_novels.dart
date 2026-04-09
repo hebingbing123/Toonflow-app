@@ -1,7 +1,7 @@
 part of '../home_page.dart';
 
 extension _HomePageProjectEditorNovels on _HomePageState {
-  Widget _buildProjectNovelProbeSection({
+  Widget _buildProjectNovelsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -20,7 +20,9 @@ extension _HomePageProjectEditorNovels on _HomePageState {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildProjectRestNovelsProbeSection(
+        Text('小说与事件', style: Theme.of(ctx).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        _buildProjectRestNovelsSection(
           ctx: ctx,
           setDialogState: setDialogState,
           token: token,
@@ -34,20 +36,22 @@ extension _HomePageProjectEditorNovels on _HomePageState {
           reloadAssetsAndStats: reloadAssetsAndStats,
         ),
         const SizedBox(height: 8),
-        _buildProjectLegacyNovelsProbeSection(
+        _buildProjectNovelEventsSection(
           ctx: ctx,
           setDialogState: setDialogState,
           token: token,
           p: p,
           novelsRef: novelsRef,
+          novelEventsRef: novelEventsRef,
           novelsLoading: novelsLoading,
           novelsBusy: novelsBusy,
+          novelEventsLoading: novelEventsLoading,
           assetsBusy: assetsBusy,
           assetsLoading: assetsLoading,
           assetsScriptFilterLoading: assetsScriptFilterLoading,
         ),
         const SizedBox(height: 8),
-        _buildProjectNovelEventsProbeSection(
+        _buildProjectNovelsCompatibilitySection(
           ctx: ctx,
           setDialogState: setDialogState,
           token: token,

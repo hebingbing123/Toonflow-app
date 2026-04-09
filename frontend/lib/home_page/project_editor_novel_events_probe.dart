@@ -1,7 +1,7 @@
 part of '../home_page.dart';
 
 extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
-  Widget _buildProjectNovelEventsProbeSection({
+  Widget _buildProjectNovelEventsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -22,13 +22,13 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
         if (novelEventsRef[0] != null)
           Text(
             novelEventsRef[0]!.items.isEmpty
-                ? 'GET …/novel-events：total=0'
-                : 'GET …/novel-events：total=${novelEventsRef[0]!.total} · ${novelEventsRef[0]!.items.take(3).map((e) => '#${e.legacyId}:${e.name}').join(', ')}${novelEventsRef[0]!.items.length > 3 ? '…' : ''}',
+                ? '当前没有小说事件'
+                : '事件 ${novelEventsRef[0]!.total} 条 · ${novelEventsRef[0]!.items.take(3).map((e) => '#${e.legacyId}:${e.name}').join(', ')}${novelEventsRef[0]!.items.length > 3 ? '…' : ''}',
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else
           Text(
-            'GET …/novel-events 未加载',
+            '事件列表尚未加载',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
@@ -64,11 +64,53 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
                       }
                     }
                   },
-            child: Text(novelEventsLoading[0] ? '刷新事件…' : '刷新事件列表'),
+            child: Text(novelEventsLoading[0] ? '刷新事件…' : '刷新事件'),
           ),
         ),
+        Wrap(
+          spacing: 4,
+          runSpacing: 0,
+          children: [
+            ..._buildProjectNovelEventsActions(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              novelsRef: novelsRef,
+              novelEventsRef: novelEventsRef,
+              novelsLoading: novelsLoading,
+              novelsBusy: novelsBusy,
+              novelEventsLoading: novelEventsLoading,
+              assetsBusy: assetsBusy,
+              assetsLoading: assetsLoading,
+              assetsScriptFilterLoading: assetsScriptFilterLoading,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProjectNovelEventsCompatibilitySection({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required String token,
+    required ProjectRow p,
+    required List<ListNovelsResponse?> novelsRef,
+    required List<ListNovelEventsResponse?> novelEventsRef,
+    required List<bool> novelsLoading,
+    required List<bool> novelsBusy,
+    required List<bool> novelEventsLoading,
+    required List<bool> assetsBusy,
+    required List<bool> assetsLoading,
+    required List<bool> assetsScriptFilterLoading,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
         Text(
-          'Novel events / outline（Rust parity）',
+          'Legacy / event regression checks',
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),
@@ -77,7 +119,7 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
           spacing: 4,
           runSpacing: 0,
           children: [
-            ..._buildProjectNovelEventsProbeActions(
+            ..._buildProjectNovelEventsCompatibilityActions(
               ctx: ctx,
               setDialogState: setDialogState,
               token: token,

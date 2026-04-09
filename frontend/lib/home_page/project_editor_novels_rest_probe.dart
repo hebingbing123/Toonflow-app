@@ -1,7 +1,7 @@
 part of '../home_page.dart';
 
 extension _HomePageProjectEditorNovelsRestProbe on _HomePageState {
-  Widget _buildProjectRestNovelsProbeSection({
+  Widget _buildProjectRestNovelsSection({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -21,13 +21,13 @@ extension _HomePageProjectEditorNovelsRestProbe on _HomePageState {
         if (novelsRef[0] != null)
           Text(
             novelsRef[0]!.items.isEmpty
-                ? 'GET …/novels：total=0'
-                : 'GET …/novels：total=${novelsRef[0]!.total} · ${novelsRef[0]!.items.take(4).map((n) => '#${n.legacyId}:${n.chapter}').join(', ')}${novelsRef[0]!.items.length > 4 ? '…' : ''}',
+                ? '当前没有小说章节'
+                : '共 ${novelsRef[0]!.total} 条 · ${novelsRef[0]!.items.take(4).map((n) => '#${n.legacyId}:${n.chapter}').join(', ')}${novelsRef[0]!.items.length > 4 ? '…' : ''}',
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else
           Text(
-            'GET …/novels 未加载',
+            '小说列表尚未加载',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
@@ -51,7 +51,7 @@ extension _HomePageProjectEditorNovelsRestProbe on _HomePageState {
                       }
                     }
                   },
-            child: Text(novelsLoading[0] ? '刷新小说…' : '刷新小说列表'),
+            child: Text(novelsLoading[0] ? '刷新小说…' : '刷新小说'),
           ),
         ),
         const SizedBox(height: 4),
@@ -59,7 +59,7 @@ extension _HomePageProjectEditorNovelsRestProbe on _HomePageState {
           spacing: 4,
           runSpacing: 0,
           children: [
-            ..._buildProjectRestNovelsProbeActions(
+            ..._buildProjectRestNovelsActions(
               ctx: ctx,
               setDialogState: setDialogState,
               token: token,

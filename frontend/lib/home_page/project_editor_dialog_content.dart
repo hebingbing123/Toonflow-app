@@ -28,7 +28,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             dialogState: dialogState,
           ),
           const SizedBox(height: 12),
-          _buildProjectNovelProbeSection(
+          _buildProjectNovelsSection(
             ctx: ctx,
             setDialogState: setDialogState,
             token: token,
