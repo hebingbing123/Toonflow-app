@@ -48,6 +48,31 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Script-agent parity read: returns project novel-event rows (optional arguments.novelId to filter linked events).",
     },
+    HarnessToolInfo {
+        name: "get_flowData",
+        description:
+            "Production-agent parity read: returns one production workbench flow field by arguments.key (script/scriptPlan/assets/storyboardTable/storyboard).",
+    },
+    HarnessToolInfo {
+        name: "add_deriveAsset",
+        description:
+            "Production-agent parity write: add or update a derived asset under arguments.assetsId (with optional arguments.id).",
+    },
+    HarnessToolInfo {
+        name: "del_deriveAsset",
+        description:
+            "Production-agent parity write: delete one derived asset by arguments.id under arguments.assetsId.",
+    },
+    HarnessToolInfo {
+        name: "generate_deriveAsset",
+        description:
+            "Production-agent parity action: enqueue generation jobs for derived asset legacy ids in arguments.ids.",
+    },
+    HarnessToolInfo {
+        name: "generate_storyboard",
+        description:
+            "Production-agent parity action: enqueue storyboard image generation jobs for storyboard legacy ids in arguments.ids.",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).

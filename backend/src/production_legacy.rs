@@ -387,6 +387,17 @@ async fn load_production_flow_json(
     Ok(Value::Object(merged))
 }
 
+pub(crate) async fn load_owned_production_flow_json(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+    script_legacy_id: i32,
+) -> Result<Value, ApiError> {
+    let scope =
+        resolve_owned_production_scope(pool, uid, project_legacy_id, script_legacy_id).await?;
+    load_production_flow_json(pool, &scope).await
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

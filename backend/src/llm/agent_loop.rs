@@ -50,6 +50,76 @@ fn tool_parameters_schema(name: &str) -> Value {
             },
             "additionalProperties": false
         }),
+        "get_flowData" => json!({
+            "type": "object",
+            "required": ["key"],
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "enum": ["script", "scriptPlan", "assets", "storyboardTable", "storyboard", "stoaryTable"],
+                    "description": "Production workbench flow data key (`stoaryTable` is accepted as legacy typo alias)."
+                },
+                "scriptId": {
+                    "type": "integer",
+                    "description": "Optional legacy script id; defaults to attached script context."
+                }
+            },
+            "additionalProperties": false
+        }),
+        "add_deriveAsset" => json!({
+            "type": "object",
+            "required": ["assetsId", "name", "desc"],
+            "properties": {
+                "assetsId": { "type": "integer", "description": "Parent asset legacy id." },
+                "id": { "type": ["integer", "null"], "description": "Derived asset legacy id; null means create new." },
+                "name": { "type": "string" },
+                "desc": { "type": "string" },
+                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+            },
+            "additionalProperties": false
+        }),
+        "del_deriveAsset" => json!({
+            "type": "object",
+            "required": ["assetsId", "id"],
+            "properties": {
+                "assetsId": { "type": "integer", "description": "Parent asset legacy id." },
+                "id": { "type": "integer", "description": "Derived asset legacy id to delete." },
+                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+            },
+            "additionalProperties": false
+        }),
+        "generate_deriveAsset" => json!({
+            "type": "object",
+            "required": ["ids"],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "description": "Derived asset legacy ids."
+                },
+                "model": { "type": "string" },
+                "resolution": { "type": "string" },
+                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+            },
+            "additionalProperties": false
+        }),
+        "generate_storyboard" => json!({
+            "type": "object",
+            "required": ["ids"],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "description": "Storyboard legacy ids."
+                },
+                "model": { "type": "string" },
+                "resolution": { "type": "string" },
+                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+            },
+            "additionalProperties": false
+        }),
         _ => json!({
             "type": "object",
             "description": "JSON arguments for this tool (echo / isolated.echo accept any shape; wasm.probe ignores args)",

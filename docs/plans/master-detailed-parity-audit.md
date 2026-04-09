@@ -61,7 +61,7 @@
 - `get_novel_text`
 - `get_script_content`
 
-2. production agent 旧工具未迁入
+2. production agent 旧工具已迁入（本轮完成）
 
 - `get_flowData`
 - `add_deriveAsset`
@@ -77,7 +77,7 @@
 4. 结论
 
 - 当前 WS 文档已覆盖 `agent.script.attach`、`agent.production.attach`、`agent.context.update`、`agent.run.cancel`、`harness.agent.run`、`agent.chat.send` 这些协议动作。
-- 当前 script 侧核心只读工具已经在 Harness 落地，但**协议存在 + 只读工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖“领域写入 + 子 Agent 分工执行 + 前端工作流”。
+- 当前 script + production 侧核心领域工具已经在 Harness 落地，但**协议存在 + 工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖“子 Agent 分工执行 + 前端工作流”。
 
 ### 2.4 Flutter 侧的真实遗漏
 
@@ -112,7 +112,7 @@
 - Flutter 有调用封装
 - parity 文档可将这两项从“遗漏”改为“已完成”
 
-### Wave 2: 补齐 Harness 的领域工具面
+### Wave 2: 补齐 Harness 的领域工具面（已完成）
 
 目标：让 Harness 真正接住旧 script/production Agent 的业务职责，而不是只停留在通用 probe。
 
