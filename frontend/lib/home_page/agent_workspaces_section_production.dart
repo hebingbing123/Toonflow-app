@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'agent_workspaces_section_script.dart';
+import 'production_workspace_support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
@@ -295,43 +296,13 @@ class _AgentWorkspaceProductionCardState
   }
 
   List<String> _buildResultSummaryLines() {
-    final result = widget.workspaceLastToolResultData;
     final toolName = widget.workspaceLastToolName?.trim();
-    if (result == null) {
-      if (toolName == null || toolName.isEmpty) return const <String>[];
-      return <String>['tool=$toolName', 'result=空'];
-    }
+    final result = widget.workspaceLastToolResultData;
     final lines = <String>[
       if (toolName != null && toolName.isNotEmpty) 'tool=$toolName',
-      'resultType=${result.runtimeType}',
+      if (result != null) 'resultType=${result.runtimeType}',
+      ...summarizeProductionResultSnapshot(toolName, result),
     ];
-    if (result is Map<String, dynamic>) {
-      lines.add('keys=${result.keys.join(',')}');
-      final data = result['data'];
-      if (data is Map<String, dynamic>) {
-        lines.add('dataKeys=${data.keys.join(',')}');
-        final storyboard = data['storyboard'];
-        if (storyboard is List) {
-          lines.add('storyboard.count=${storyboard.length}');
-        }
-        final assets = data['assets'];
-        if (assets is List) {
-          lines.add('assets.count=${assets.length}');
-        }
-      }
-      final items = result['items'];
-      if (items is List) {
-        lines.add('items.count=${items.length}');
-      }
-      final text = result['result'];
-      if (text is String) {
-        lines.add('result.chars=${text.length}');
-      }
-    } else if (result is List) {
-      lines.add('items=${result.length}');
-    } else if (result is String) {
-      lines.add('text.chars=${result.length}');
-    }
     return lines.take(6).toList(growable: false);
   }
 
@@ -431,6 +402,88 @@ class _AgentWorkspaceProductionCardState
       Text('上下文快照', style: theme.labelLarge),
       ...sections,
     ];
+  }
+
+  List<ProductionWorkspaceRecipe> _buildWorkspaceRecipes() {
+    return buildProductionWorkspaceRecipes(
+      toolName: widget.workspaceLastToolName,
+      suggestedFlowKey: _suggestedFlowKeyLine,
+      result: widget.workspaceLastToolResultData,
+    );
+  }
+
+  void _applyWorkspaceRecipe(ProductionWorkspaceRecipe recipe) {
+    widget.onFlowKeyChanged(recipe.flowKey);
+    if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
+      widget.onProductionDomainToolChanged(recipe.domainTool!.trim());
+      widget.productionDomainArgsController.text = jsonEncode(<String, dynamic>{
+        'key': recipe.flowKey,
+      });
+    }
+    if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
+      widget.onProductionSubAgentChanged(recipe.subAgentTool!.trim());
+    }
+    final prompt = recipe.prompt?.trim();
+    if (prompt != null && prompt.isNotEmpty) {
+      widget.productionPromptController.text = prompt;
+    }
+    _setTaskStatus('已应用任务建议：${recipe.title}');
+  }
+
+  Widget _buildWorkspaceDiagnosis(BuildContext context) {
+    final recipes = _buildWorkspaceRecipes();
+    if (recipes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
+        ...recipes.map(
+          (ProductionWorkspaceRecipe recipe) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    recipe.title,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    recipe.detail,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      Chip(label: Text('flow=${recipe.flowKey}')),
+                      if (recipe.domainTool != null)
+                        Chip(label: Text('tool=${recipe.domainTool}')),
+                      if (recipe.subAgentTool != null)
+                        Chip(label: Text('agent=${recipe.subAgentTool}')),
+                      OutlinedButton(
+                        onPressed: widget.busy
+                            ? null
+                            : () => _applyWorkspaceRecipe(recipe),
+                        child: const Text('应用建议'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildGuidedTasks() {
@@ -695,6 +748,7 @@ class _AgentWorkspaceProductionCardState
                     Text(line, style: Theme.of(context).textTheme.bodySmall),
               ),
             ],
+            _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
             if (_suggestedFlowKeyLine != null) ...<Widget>[
               const SizedBox(height: 8),

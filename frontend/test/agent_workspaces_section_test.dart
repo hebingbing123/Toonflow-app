@@ -1008,8 +1008,9 @@ void main() {
 
     expect(find.text('结果摘要'), findsOneWidget);
     expect(find.text('tool=get_flowData'), findsOneWidget);
-    expect(find.text('storyboard.count=2'), findsOneWidget);
-    expect(find.text('assets.count=3'), findsOneWidget);
+    expect(find.text('对象 keys=2 个'), findsOneWidget);
+    expect(find.text('storyboard: 2 项'), findsOneWidget);
+    expect(find.text('assets: 3 项'), findsOneWidget);
     expect(find.text('上下文快照'), findsOneWidget);
     expect(find.text('flow[storyboard]'), findsOneWidget);
     expect(find.text('flow[assets]'), findsOneWidget);
