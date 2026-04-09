@@ -38,6 +38,16 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Script-agent parity read: returns one script row by legacy script id (arguments.scriptId or attached script context).",
     },
+    HarnessToolInfo {
+        name: "get_novel_text",
+        description:
+            "Script-agent parity read: returns project novel text rows (optional arguments.novelId to narrow one chapter).",
+    },
+    HarnessToolInfo {
+        name: "get_novel_events",
+        description:
+            "Script-agent parity read: returns project novel-event rows (optional arguments.novelId to filter linked events).",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).

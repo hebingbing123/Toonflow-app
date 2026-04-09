@@ -54,7 +54,7 @@
 
 对比 `master:src/agents/**/*`，以下旧域工具仍未进入 Harness 正式工具面：
 
-1. script agent 旧工具未迁入
+1. script agent 旧读工具已迁入（本轮完成）
 
 - `get_novel_events`
 - `get_planData`
@@ -69,7 +69,7 @@
 - `generate_deriveAsset`
 - `generate_storyboard`
 
-3. 旧子 Agent 编排未迁入
+3. 旧子 Agent 编排未迁入（script + production）
 
 - script agent：`run_sub_agent_storySkeleton`、`run_sub_agent_adaptationStrategy`、`run_sub_agent_script`、`run_supervision_agent`
 - production agent：`run_sub_agent_derive_assets`、`run_sub_agent_generate_assets`、`run_sub_agent_director_plan`、`run_sub_agent_storyboard_gen`、`run_sub_agent_storyboard_panel`、`run_sub_agent_storyboard_table`
@@ -77,7 +77,7 @@
 4. 结论
 
 - 当前 WS 文档已覆盖 `agent.script.attach`、`agent.production.attach`、`agent.context.update`、`agent.run.cancel`、`harness.agent.run`、`agent.chat.send` 这些协议动作。
-- 但**协议存在 != 产品功能 parity 完成**。旧 Agent 真正依赖的是“领域数据读取 + 领域写入 + 子 Agent 分工执行”，而不是只要 generic chat/tool loop 就算完成。
+- 当前 script 侧核心只读工具已经在 Harness 落地，但**协议存在 + 只读工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖“领域写入 + 子 Agent 分工执行 + 前端工作流”。
 
 ### 2.4 Flutter 侧的真实遗漏
 

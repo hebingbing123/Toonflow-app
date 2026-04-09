@@ -93,6 +93,22 @@ struct HarnessScriptRow {
     extract_state: Option<i32>,
 }
 
+#[derive(sqlx::FromRow, Serialize)]
+struct HarnessNovelRow {
+    legacy_id: i32,
+    chapter_index: i32,
+    chapter: String,
+    chapter_data: String,
+    event_state: i32,
+}
+
+#[derive(sqlx::FromRow, Serialize)]
+struct HarnessNovelEventRow {
+    legacy_id: i32,
+    name: String,
+    detail: String,
+}
+
 fn require_pool(ctx: &HarnessContext) -> Result<&sqlx::PgPool, InvokeError> {
     ctx.pool.as_ref().ok_or(InvokeError::DatabaseUnavailable)
 }
@@ -210,6 +226,120 @@ async fn invoke_get_script_content(
         .map_err(|_| InvokeError::DatabaseError("failed to serialize script".into()))
 }
 
+async fn invoke_get_novel_text(
+    ctx: &HarnessContext,
+    arguments: &Value,
+) -> Result<Value, InvokeError> {
+    let pool = require_pool(ctx)?;
+    let project_legacy_id = project_legacy_from_ctx(ctx)?;
+    let novel_legacy_id = arguments
+        .get("novelId")
+        .and_then(Value::as_i64)
+        .and_then(|v| i32::try_from(v).ok())
+        .filter(|v| *v > 0);
+
+    let rows: Vec<HarnessNovelRow> = if let Some(novel_id) = novel_legacy_id {
+        sqlx::query_as(
+            r#"
+            SELECT n.legacy_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
+            FROM app_novel n
+            INNER JOIN app_project p ON p.id = n.project_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+              AND n.legacy_id = $3
+            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+            "#,
+        )
+        .bind(ctx.user_id)
+        .bind(project_legacy_id)
+        .bind(novel_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
+    } else {
+        sqlx::query_as(
+            r#"
+            SELECT n.legacy_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
+            FROM app_novel n
+            INNER JOIN app_project p ON p.id = n.project_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+            LIMIT 200
+            "#,
+        )
+        .bind(ctx.user_id)
+        .bind(project_legacy_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
+    };
+
+    Ok(serde_json::json!({
+        "projectId": project_legacy_id,
+        "items": rows,
+        "total": rows.len(),
+    }))
+}
+
+async fn invoke_get_novel_events(
+    ctx: &HarnessContext,
+    arguments: &Value,
+) -> Result<Value, InvokeError> {
+    let pool = require_pool(ctx)?;
+    let project_legacy_id = project_legacy_from_ctx(ctx)?;
+    let novel_legacy_id = arguments
+        .get("novelId")
+        .and_then(Value::as_i64)
+        .and_then(|v| i32::try_from(v).ok())
+        .filter(|v| *v > 0);
+
+    let rows: Vec<HarnessNovelEventRow> = if let Some(novel_id) = novel_legacy_id {
+        sqlx::query_as(
+            r#"
+            SELECT e.legacy_id, e.name, e.detail
+            FROM app_novel_event e
+            INNER JOIN app_project p ON p.id = e.project_id
+            INNER JOIN app_novel_event_chapter ec ON ec.event_id = e.id
+            INNER JOIN app_novel n ON n.id = ec.novel_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+              AND n.legacy_id = $3
+            ORDER BY e.legacy_id ASC
+            "#,
+        )
+        .bind(ctx.user_id)
+        .bind(project_legacy_id)
+        .bind(novel_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
+    } else {
+        sqlx::query_as(
+            r#"
+            SELECT e.legacy_id, e.name, e.detail
+            FROM app_novel_event e
+            INNER JOIN app_project p ON p.id = e.project_id
+            WHERE p.owner_user_id = $1
+              AND p.legacy_id = $2
+            ORDER BY e.legacy_id ASC
+            LIMIT 200
+            "#,
+        )
+        .bind(ctx.user_id)
+        .bind(project_legacy_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
+    };
+
+    Ok(serde_json::json!({
+        "projectId": project_legacy_id,
+        "items": rows,
+        "total": rows.len(),
+    }))
+}
+
 fn dispatch_in_process(
     ctx: &HarnessContext,
     name: &str,
@@ -249,6 +379,22 @@ fn dispatch_in_process(
                 )
             })?;
             handle.block_on(invoke_get_script_content(ctx, arguments))
+        }
+        "get_novel_text" => {
+            let handle = tokio::runtime::Handle::try_current().map_err(|_| {
+                InvokeError::DatabaseError(
+                    "get_novel_text requires async runtime (WebSocket invoke path)".into(),
+                )
+            })?;
+            handle.block_on(invoke_get_novel_text(ctx, arguments))
+        }
+        "get_novel_events" => {
+            let handle = tokio::runtime::Handle::try_current().map_err(|_| {
+                InvokeError::DatabaseError(
+                    "get_novel_events requires async runtime (WebSocket invoke path)".into(),
+                )
+            })?;
+            handle.block_on(invoke_get_novel_events(ctx, arguments))
         }
         _ => Err(InvokeError::NotImplemented {
             tool: name.to_string(),
@@ -290,6 +436,8 @@ pub async fn invoke_tool_async(
         "isolated.echo" => super::isolate::isolated_echo(arguments).await,
         "get_planData" => invoke_get_plan_data(ctx).await,
         "get_script_content" => invoke_get_script_content(ctx, arguments).await,
+        "get_novel_text" => invoke_get_novel_text(ctx, arguments).await,
+        "get_novel_events" => invoke_get_novel_events(ctx, arguments).await,
         "wasm.probe" => {
             let r = tokio::task::spawn_blocking(super::wasm_runtime::invoke_probe)
                 .await

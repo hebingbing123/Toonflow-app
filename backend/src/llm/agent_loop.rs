@@ -40,6 +40,16 @@ fn tool_parameters_schema(name: &str) -> Value {
             "description": "No arguments required; reads scriptAgent plan data for the attached project context.",
             "additionalProperties": false
         }),
+        "get_novel_text" | "get_novel_events" => json!({
+            "type": "object",
+            "properties": {
+                "novelId": {
+                    "type": "integer",
+                    "description": "Optional legacy novel id to narrow results within the attached project."
+                }
+            },
+            "additionalProperties": false
+        }),
         _ => json!({
             "type": "object",
             "description": "JSON arguments for this tool (echo / isolated.echo accept any shape; wasm.probe ignores args)",
