@@ -267,6 +267,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
     final prompt = _scriptWorkspacePromptCtrl.text.trim();
     final toolName = _scriptSubAgentToolCtrl.text.trim();
     if (projectId == null || prompt.isEmpty || toolName.isEmpty) {
@@ -284,6 +285,10 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     try {
       final channel = await _openHarnessChannel(token);
       if (channel == null) return;
+      final arguments = <String, dynamic>{
+        'prompt': prompt,
+        'scriptId': scriptId,
+      }..removeWhere((_, Object? value) => value == null);
       channel.sink.add(
         jsonEncode({
           'type': 'agent.script.attach',
@@ -300,7 +305,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
           'schema_version': 1,
           'payload': {
             'name': toolName,
-            'arguments': {'prompt': prompt},
+            'arguments': arguments,
           },
         }),
       );
