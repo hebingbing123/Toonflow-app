@@ -73,6 +73,56 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Production-agent parity action: enqueue storyboard image generation jobs for storyboard legacy ids in arguments.ids.",
     },
+    HarnessToolInfo {
+        name: "run_sub_agent_storySkeleton",
+        description:
+            "Script-agent orchestration parity: run story-skeleton sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_adaptationStrategy",
+        description:
+            "Script-agent orchestration parity: run adaptation-strategy sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_script",
+        description:
+            "Script-agent orchestration parity: run script-writing sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_supervision_agent",
+        description:
+            "Script-agent orchestration parity: run supervision sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_derive_assets",
+        description:
+            "Production-agent orchestration parity: run derive-assets sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_generate_assets",
+        description:
+            "Production-agent orchestration parity: run generate-assets sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_director_plan",
+        description:
+            "Production-agent orchestration parity: run director-plan sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_storyboard_gen",
+        description:
+            "Production-agent orchestration parity: run storyboard-generation sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_storyboard_panel",
+        description:
+            "Production-agent orchestration parity: run storyboard-panel sub-agent with arguments.prompt.",
+    },
+    HarnessToolInfo {
+        name: "run_sub_agent_storyboard_table",
+        description:
+            "Production-agent orchestration parity: run storyboard-table sub-agent with arguments.prompt.",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).

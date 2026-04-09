@@ -34,6 +34,8 @@ pub enum InvokeError {
     /// Domain tools require project/script context and/or arguments.
     MissingContext(String),
     DatabaseError(String),
+    LlmNotConfigured,
+    LlmError(String),
 }
 
 impl From<SkillReadError> for InvokeError {
@@ -65,6 +67,8 @@ impl InvokeError {
             InvokeError::DatabaseUnavailable => "database_error",
             InvokeError::MissingContext(_) => "invalid_state",
             InvokeError::DatabaseError(_) => "database_error",
+            InvokeError::LlmNotConfigured => "llm_not_configured",
+            InvokeError::LlmError(_) => "llm_error",
         }
     }
 
@@ -84,6 +88,8 @@ impl InvokeError {
             InvokeError::DatabaseUnavailable => "DATABASE_URL not configured".into(),
             InvokeError::MissingContext(m) => m.clone(),
             InvokeError::DatabaseError(m) => m.clone(),
+            InvokeError::LlmNotConfigured => "set OPENAI_API_KEY or LLM_API_KEY".into(),
+            InvokeError::LlmError(m) => m.clone(),
         }
     }
 }
@@ -258,6 +264,22 @@ fn parse_ids_required(arguments: &Value, key: &str) -> Result<Vec<i32>, InvokeEr
         uniq.insert(id);
     }
     Ok(uniq.into_iter().collect())
+}
+
+fn is_sub_agent_tool(name: &str) -> bool {
+    matches!(
+        name,
+        "run_sub_agent_storySkeleton"
+            | "run_sub_agent_adaptationStrategy"
+            | "run_sub_agent_script"
+            | "run_supervision_agent"
+            | "run_sub_agent_derive_assets"
+            | "run_sub_agent_generate_assets"
+            | "run_sub_agent_director_plan"
+            | "run_sub_agent_storyboard_gen"
+            | "run_sub_agent_storyboard_panel"
+            | "run_sub_agent_storyboard_table"
+    )
 }
 
 async fn require_owned_script_scope(
@@ -897,6 +919,16 @@ fn dispatch_in_process(
             })?;
             handle.block_on(invoke_generate_storyboard(ctx, arguments))
         }
+        _ if is_sub_agent_tool(name) => {
+            let handle = tokio::runtime::Handle::try_current().map_err(|_| {
+                InvokeError::DatabaseError(
+                    "sub-agent tools require async runtime (WebSocket invoke path)".into(),
+                )
+            })?;
+            handle.block_on(super::sub_agent::invoke_sub_agent_tool(
+                ctx, name, arguments,
+            ))
+        }
         _ => Err(InvokeError::NotImplemented {
             tool: name.to_string(),
             hint: "registered in catalog but execution is not wired yet".to_string(),
@@ -944,6 +976,9 @@ pub async fn invoke_tool_async(
         "del_deriveAsset" => invoke_del_derive_asset(ctx, arguments).await,
         "generate_deriveAsset" => invoke_generate_derive_asset(ctx, arguments).await,
         "generate_storyboard" => invoke_generate_storyboard(ctx, arguments).await,
+        _ if is_sub_agent_tool(name) => {
+            super::sub_agent::invoke_sub_agent_tool(ctx, name, arguments).await
+        }
         "wasm.probe" => {
             let r = tokio::task::spawn_blocking(super::wasm_runtime::invoke_probe)
                 .await
@@ -961,7 +996,7 @@ mod tests {
     use uuid::Uuid;
 
     fn ctx() -> HarnessContext {
-        HarnessContext::with_scope(Uuid::nil(), None, None, None)
+        HarnessContext::with_runtime_scope(Uuid::nil(), None, None, None, None, None)
     }
 
     #[test]

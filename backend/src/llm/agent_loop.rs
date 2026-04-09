@@ -120,6 +120,26 @@ fn tool_parameters_schema(name: &str) -> Value {
             },
             "additionalProperties": false
         }),
+        "run_sub_agent_storySkeleton"
+        | "run_sub_agent_adaptationStrategy"
+        | "run_sub_agent_script"
+        | "run_supervision_agent"
+        | "run_sub_agent_derive_assets"
+        | "run_sub_agent_generate_assets"
+        | "run_sub_agent_director_plan"
+        | "run_sub_agent_storyboard_gen"
+        | "run_sub_agent_storyboard_panel"
+        | "run_sub_agent_storyboard_table" => json!({
+            "type": "object",
+            "required": ["prompt"],
+            "properties": {
+                "prompt": {
+                    "type": "string",
+                    "description": "Sub-agent task prompt (concise instruction, <= 2000 chars)."
+                }
+            },
+            "additionalProperties": false
+        }),
         _ => json!({
             "type": "object",
             "description": "JSON arguments for this tool (echo / isolated.echo accept any shape; wasm.probe ignores args)",

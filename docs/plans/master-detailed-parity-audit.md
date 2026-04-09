@@ -69,7 +69,7 @@
 - `generate_deriveAsset`
 - `generate_storyboard`
 
-3. 旧子 Agent 编排未迁入（script + production）
+3. 旧子 Agent 编排已迁入（后端基线完成）
 
 - script agent：`run_sub_agent_storySkeleton`、`run_sub_agent_adaptationStrategy`、`run_sub_agent_script`、`run_supervision_agent`
 - production agent：`run_sub_agent_derive_assets`、`run_sub_agent_generate_assets`、`run_sub_agent_director_plan`、`run_sub_agent_storyboard_gen`、`run_sub_agent_storyboard_panel`、`run_sub_agent_storyboard_table`
@@ -77,7 +77,7 @@
 4. 结论
 
 - 当前 WS 文档已覆盖 `agent.script.attach`、`agent.production.attach`、`agent.context.update`、`agent.run.cancel`、`harness.agent.run`、`agent.chat.send` 这些协议动作。
-- 当前 script + production 侧核心领域工具已经在 Harness 落地，但**协议存在 + 工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖“子 Agent 分工执行 + 前端工作流”。
+- 当前 script + production 侧核心领域工具与子 Agent 编排工具已经在 Harness 落地，但**协议存在 + 工具存在 != 产品功能 parity 完成**。旧 Agent 仍依赖完整前端工作流。
 
 ### 2.4 Flutter 侧的真实遗漏
 
@@ -136,14 +136,14 @@
 - channel 权限和 project/script ownership 明确
 - 文档与测试能说明旧 Agent 依赖的领域工具已迁入
 
-### Wave 3: 补齐 Agent 编排与多角色执行
+### Wave 3: 补齐 Agent 编排与多角色执行（已完成后端基线）
 
 目标：把旧 Agent 的“分角色执行”语义迁到 Harness，而不是只保留单轮 chat。
 
-- script agent 的 `run_sub_agent_*` 系列迁到 Harness orchestration
-- production agent 的 `run_sub_agent_*` 系列迁到 Harness orchestration
-- 明确 memory namespace、role label、cancel 行为、结果回写规则
-- 决定哪些子 Agent 用工具链实现，哪些保留成提示词编排层
+- script agent 的 `run_sub_agent_*` 系列已迁到 Harness orchestration
+- production agent 的 `run_sub_agent_*` 系列已迁到 Harness orchestration
+- 已明确 role label 与结果回传；memory namespace 与结果回写规则仍在 Flutter 工作流阶段继续收口
+- 当前采用“提示词编排层优先”的最小可运行实现，后续可迭代为更强工具链
 
 完成标准：
 

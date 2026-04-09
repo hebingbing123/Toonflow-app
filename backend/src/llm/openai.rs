@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use super::envelope::envelope;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LlmConfig {
     pub api_key: String,
     pub base_url: String,

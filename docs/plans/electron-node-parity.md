@@ -74,8 +74,8 @@
 
 | 旧模块 | Rust / 说明 |
 |--------|-------------|
-| `src/socket/routes/scriptAgent.ts` | 🟡 已有 **`harness.*` WS**、`agent.script.attach`、`agent.run.cancel`、`agent.context.update` 基础协议替代；script 侧核心只读域工具（`get_novel_events`、`get_planData`、`get_novel_text`、`get_script_content`）已迁入 Harness；**仍缺** `run_sub_agent_*` 等编排能力与写操作域工具。 |
-| `src/socket/routes/productionAgent.ts` | 🟡 已有 `agent.production.attach` / `agent.context.update` / `agent.run.cancel` 协议骨架；production 域工具 `get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard` 已迁入 Harness；**仍缺** 多类 `run_sub_agent_*` 编排能力与完整前端执行流 |
+| `src/socket/routes/scriptAgent.ts` | 🟡 已有 **`harness.*` WS**、`agent.script.attach`、`agent.run.cancel`、`agent.context.update` 基础协议替代；script 侧核心只读域工具（`get_novel_events`、`get_planData`、`get_novel_text`、`get_script_content`）与编排工具（`run_sub_agent_storySkeleton`、`run_sub_agent_adaptationStrategy`、`run_sub_agent_script`、`run_supervision_agent`）已迁入 Harness；**剩余**完整前端工作流收口。 |
+| `src/socket/routes/productionAgent.ts` | 🟡 已有 `agent.production.attach` / `agent.context.update` / `agent.run.cancel` 协议骨架；production 域工具 `get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard` 与编排工具（`run_sub_agent_derive_assets`、`run_sub_agent_generate_assets`、`run_sub_agent_director_plan`、`run_sub_agent_storyboard_gen`、`run_sub_agent_storyboard_panel`、`run_sub_agent_storyboard_table`）已迁入 Harness；**剩余**完整前端执行流。 |
 
 ## 4. Rust 已暴露 HTTP 面（权威列表）
 

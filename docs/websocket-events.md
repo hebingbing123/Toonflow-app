@@ -55,7 +55,7 @@ Emitted when invocation succeeds.
 | Field | Notes |
 |-------|--------|
 | `payload.name` | Tool that ran |
-| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }`; script tools: `get_planData`, `get_script_content`, `get_novel_text`, `get_novel_events`; production tools: `get_flowData`, `add_deriveAsset`, `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`; `wasm.probe`: `{ ok, value }`) |
+| `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }`; script tools: `get_planData`, `get_script_content`, `get_novel_text`, `get_novel_events`, `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent`; production tools: `get_flowData`, `add_deriveAsset`, `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`; `wasm.probe`: `{ ok, value }`) |
 
 ### `harness.agent.run` (client → server)
 
@@ -148,7 +148,7 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
-| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }`; script tools: `get_planData`, `get_script_content`, `get_novel_text`, `get_novel_events`; production tools: `get_flowData` (`arguments.key` + optional `scriptId`), `add_deriveAsset`, `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`; `wasm.probe` runs embedded WASM (wasmi) |
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }`; script tools: `get_planData`, `get_script_content`, `get_novel_text`, `get_novel_events`, `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent`; production tools: `get_flowData` (`arguments.key` + optional `scriptId`), `add_deriveAsset`, `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`; `wasm.probe` runs embedded WASM (wasmi) |
 | (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |

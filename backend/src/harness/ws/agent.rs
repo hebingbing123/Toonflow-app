@@ -28,8 +28,14 @@ pub struct HarnessAgentWsParams {
 pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
     tokio::spawn(async move {
         observe::agent_llm_turn_requested(p.user_id, p.content.len());
-        let ctx =
-            HarnessContext::with_scope(p.user_id, p.pool, p.project_legacy_id, p.script_legacy_id);
+        let ctx = HarnessContext::with_runtime_scope(
+            p.user_id,
+            p.pool,
+            p.project_legacy_id,
+            p.script_legacy_id,
+            Some(p.cfg.clone()),
+            Some(p.client.clone()),
+        );
         if let Err(e) = harness_agent_run(
             &p.cfg,
             &p.client,

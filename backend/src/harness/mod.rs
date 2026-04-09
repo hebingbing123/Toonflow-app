@@ -17,6 +17,7 @@ pub mod invoke;
 pub mod isolate;
 pub mod observe;
 pub mod permissions;
+mod sub_agent;
 pub mod tools;
 pub(crate) mod wasm_runtime;
 pub mod wire;
@@ -30,20 +31,26 @@ pub struct HarnessContext {
     pub pool: Option<sqlx::PgPool>,
     pub project_legacy_id: Option<i32>,
     pub script_legacy_id: Option<i32>,
+    pub llm: Option<crate::llm::LlmConfig>,
+    pub http_client: Option<reqwest::Client>,
 }
 
 impl HarnessContext {
-    pub fn with_scope(
+    pub fn with_runtime_scope(
         user_id: Uuid,
         pool: Option<sqlx::PgPool>,
         project_legacy_id: Option<i32>,
         script_legacy_id: Option<i32>,
+        llm: Option<crate::llm::LlmConfig>,
+        http_client: Option<reqwest::Client>,
     ) -> Self {
         Self {
             user_id,
             pool,
             project_legacy_id,
             script_legacy_id,
+            llm,
+            http_client,
         }
     }
 }
