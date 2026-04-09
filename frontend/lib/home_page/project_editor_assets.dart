@@ -473,6 +473,169 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     }
   }
 
+  Future<void> _openAssetFilterDialog({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required String token,
+    required ProjectRow p,
+    required List<ScriptBrief> scriptList,
+    required List<ListAssetsResponse?> assetsRef,
+    required List<ListAssetsResponse?> assetsForScriptRef,
+    required List<int?> assetsFilterScriptLegacyId,
+    required List<bool> assetsBusy,
+  }) async {
+    final typeCtrl = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final pageCtrl = TextEditingController(text: '1');
+    final limitCtrl = TextEditingController(text: '20');
+    int? selectedScriptLegacyId = assetsFilterScriptLegacyId[0];
+    try {
+      final confirmed = await showDialog<bool>(
+        context: ctx,
+        builder: (dialogCtx) {
+          return StatefulBuilder(
+            builder: (dialogCtx, setState) {
+              return AlertDialog(
+                title: const Text('高级筛选资产'),
+                content: SizedBox(
+                  width: 520,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<int?>(
+                        initialValue: selectedScriptLegacyId,
+                        decoration: const InputDecoration(labelText: '按剧本筛选'),
+                        items: [
+                          const DropdownMenuItem<int?>(
+                            value: null,
+                            child: Text('（全部剧本）'),
+                          ),
+                          ...scriptList.map(
+                            (script) => DropdownMenuItem<int?>(
+                              value: script.legacyId,
+                              child: Text(
+                                '#${script.legacyId} ${script.name ?? ""}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() {
+                          selectedScriptLegacyId = v;
+                        }),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: typeCtrl,
+                        decoration: const InputDecoration(
+                          labelText: '资产类型（可选）',
+                          hintText: 'role / clip / props',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: '资产名称关键字（可选）',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: pageCtrl,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'page',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: limitCtrl,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'limit',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogCtx).pop(false),
+                    child: const Text('取消'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogCtx).pop(true),
+                    child: const Text('应用筛选'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+      if (confirmed != true || !ctx.mounted) return;
+
+      final page = int.tryParse(pageCtrl.text.trim());
+      final limit = int.tryParse(limitCtrl.text.trim());
+      if ((page != null && page <= 0) || (limit != null && limit <= 0)) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('page/limit 必须是正整数')));
+        return;
+      }
+
+      setDialogState(() => assetsBusy[0] = true);
+      final filtered = await fetchProjectAssetsByLegacyId(
+        token,
+        p.legacyId,
+        scriptLegacyId: selectedScriptLegacyId,
+        assetType: typeCtrl.text.trim().isEmpty ? null : typeCtrl.text.trim(),
+        name: nameCtrl.text.trim().isEmpty ? null : nameCtrl.text.trim(),
+        page: page,
+        limit: limit,
+      );
+      if (!ctx.mounted) return;
+      setDialogState(() {
+        assetsRef[0] = filtered;
+        assetsFilterScriptLegacyId[0] = selectedScriptLegacyId;
+        if (selectedScriptLegacyId != null) {
+          assetsForScriptRef[0] = filtered;
+        } else {
+          assetsForScriptRef[0] = null;
+        }
+        assetsBusy[0] = false;
+      });
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text('筛选完成：返回 ${filtered.items.length}/${filtered.total} 条'),
+        ),
+      );
+    } on RustApiException catch (e) {
+      if (ctx.mounted) {
+        setDialogState(() => assetsBusy[0] = false);
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } catch (e) {
+      if (ctx.mounted) {
+        setDialogState(() => assetsBusy[0] = false);
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      typeCtrl.dispose();
+      nameCtrl.dispose();
+      pageCtrl.dispose();
+      limitCtrl.dispose();
+    }
+  }
+
   Future<void> _openEditImageUploadDialog({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -799,6 +962,25 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                       unlink: true,
                     ),
               child: const Text('取消剧本-资产关联'),
+            ),
+            TextButton(
+              onPressed:
+                  assetsBusy[0] ||
+                      assetsLoading[0] ||
+                      assetsScriptFilterLoading[0]
+                  ? null
+                  : () => _openAssetFilterDialog(
+                      ctx: ctx,
+                      setDialogState: setDialogState,
+                      token: token,
+                      p: p,
+                      scriptList: scriptList,
+                      assetsRef: assetsRef,
+                      assetsForScriptRef: assetsForScriptRef,
+                      assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                      assetsBusy: assetsBusy,
+                    ),
+              child: const Text('高级筛选'),
             ),
             TextButton(
               onPressed:
