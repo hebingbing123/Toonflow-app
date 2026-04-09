@@ -189,6 +189,66 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     }
   }
 
+  bool _isDefaultJsonObject(String raw) {
+    final trimmed = raw.trim();
+    return trimmed.isEmpty || trimmed == '{}';
+  }
+
+  void _maybeApplyScriptToolArgsPreset(String toolName) {
+    final current = widget.scriptDomainArgsController.text;
+    if (!_isDefaultJsonObject(current)) {
+      return;
+    }
+    final scriptId = int.tryParse(widget.scriptIdController.text.trim());
+    final Map<String, dynamic> preset;
+    switch (toolName) {
+      case 'get_script_content':
+        preset = scriptId != null && scriptId > 0
+            ? <String, dynamic>{'scriptId': scriptId}
+            : <String, dynamic>{'scriptId': 1};
+        break;
+      case 'get_novel_text':
+      case 'get_novel_events':
+        preset = <String, dynamic>{'novelId': 1};
+        break;
+      case 'get_planData':
+      default:
+        preset = <String, dynamic>{};
+        break;
+    }
+    widget.scriptDomainArgsController.text = jsonEncode(preset);
+  }
+
+  void _maybeApplyProductionToolArgsPreset(String toolName) {
+    final current = widget.productionDomainArgsController.text;
+    if (!_isDefaultJsonObject(current)) {
+      return;
+    }
+    final scriptId = int.tryParse(widget.scriptIdController.text.trim());
+    final flowKey = widget.flowKeyController.text.trim();
+    final Map<String, dynamic> preset;
+    switch (toolName) {
+      case 'get_flowData':
+        preset = <String, dynamic>{
+          'key': flowKey.isEmpty ? 'assets' : flowKey,
+          if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+        };
+        break;
+      case 'add_deriveAsset':
+      case 'del_deriveAsset':
+      case 'generate_deriveAsset':
+        preset = <String, dynamic>{'ids': <int>[1]};
+        break;
+      case 'generate_storyboard':
+        preset = <String, dynamic>{'ids': <int>[1]};
+        break;
+      default:
+        preset = <String, dynamic>{};
+        break;
+    }
+    widget.productionDomainArgsController.text = jsonEncode(preset);
+  }
+
   bool get _busy =>
       widget.loadingScriptWorkspaceRun ||
       widget.loadingProductionWorkspaceRun ||
@@ -331,7 +391,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            setState(() => _selectedScriptDomainTool = value);
+                            setState(() {
+                              _selectedScriptDomainTool = value;
+                              _maybeApplyScriptToolArgsPreset(value);
+                            });
                           },
                     decoration: const InputDecoration(
                       labelText: 'script domain tool',
@@ -519,8 +582,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         : (String? value) {
                             if (value == null) return;
                             setState(
-                              () => widget.productionDomainToolController.text =
-                                  value,
+                              () {
+                                widget.productionDomainToolController.text =
+                                    value;
+                                _maybeApplyProductionToolArgsPreset(value);
+                              },
                             );
                           },
                     decoration: const InputDecoration(
@@ -548,7 +614,16 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         : (String? value) {
                             if (value == null) return;
                             setState(
-                              () => widget.flowKeyController.text = value,
+                              () {
+                                widget.flowKeyController.text = value;
+                                if (widget.productionDomainToolController.text
+                                        .trim() ==
+                                    'get_flowData') {
+                                  _maybeApplyProductionToolArgsPreset(
+                                    'get_flowData',
+                                  );
+                                }
+                              },
                             );
                           },
                     decoration: const InputDecoration(
