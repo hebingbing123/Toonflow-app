@@ -145,6 +145,12 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
     final generateIdsCtrl = TextEditingController(
       text: currentItems.take(3).map((e) => e.legacyId).join(','),
     );
+    final legacyIdsCtrl = TextEditingController(
+      text: currentItems.take(3).map((e) => e.legacyId).join(','),
+    );
+    final batchDeleteIdsCtrl = TextEditingController(
+      text: currentItems.skip(1).take(2).map((e) => e.legacyId).join(','),
+    );
 
     List<NovelRow> previewRows = List<NovelRow>.from(currentItems.take(6));
     String infoLine = currentItems.isEmpty
@@ -494,6 +500,143 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                 }),
                           child: const Text('生成章节事件'),
                         ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Legacy 快照 / 批量动作',
+                          style: Theme.of(dialogCtx).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: legacyIdsCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Legacy 查询章节 IDs',
+                            helperText:
+                                '用于 get-novel-event-state；用逗号分隔，如 1,2,3',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton(
+                              onPressed: localBusy
+                                  ? null
+                                  : () => runAction(() async {
+                                      final rows =
+                                          await postLegacyNovelsGetNovelData(
+                                            token,
+                                            p.legacyId,
+                                          );
+                                      final sample = rows.isEmpty
+                                          ? '空列表'
+                                          : rows
+                                                .take(2)
+                                                .map(
+                                                  (row) =>
+                                                      '#${row.legacyId} ${row.chapter}',
+                                                )
+                                                .join(' · ');
+                                      setLocalState(() {
+                                        infoLine =
+                                            'legacy get-novel-data 返回 ${rows.length} 条：$sample';
+                                      });
+                                    }),
+                              child: const Text('读取 get-novel-data'),
+                            ),
+                            OutlinedButton(
+                              onPressed: localBusy
+                                  ? null
+                                  : () => runAction(() async {
+                                      final rows =
+                                          await postLegacyNovelsGetNovelIndex(
+                                            token,
+                                            p.legacyId,
+                                          );
+                                      final sample = rows.isEmpty
+                                          ? '空列表'
+                                          : rows
+                                                .take(3)
+                                                .map(
+                                                  (row) =>
+                                                      '#${row.legacyId}:${row.chapterIndex}',
+                                                )
+                                                .join(' · ');
+                                      setLocalState(() {
+                                        infoLine =
+                                            'legacy get-novel-index 返回 ${rows.length} 条：$sample';
+                                      });
+                                    }),
+                              child: const Text('读取 get-novel-index'),
+                            ),
+                            OutlinedButton(
+                              onPressed: localBusy
+                                  ? null
+                                  : () => runAction(() async {
+                                      final ids = _parseLegacyIdList(
+                                        legacyIdsCtrl.text,
+                                      );
+                                      if (ids.isEmpty) {
+                                        throw const FormatException(
+                                          '至少提供一个章节 ID',
+                                        );
+                                      }
+                                      final rows =
+                                          await postLegacyNovelsGetNovelEventState(
+                                            token,
+                                            ids,
+                                          );
+                                      final sample = rows.isEmpty
+                                          ? '当前均为 0'
+                                          : rows
+                                                .take(3)
+                                                .map(
+                                                  (row) =>
+                                                      '#${row.legacyId}:${row.eventState}',
+                                                )
+                                                .join(' · ');
+                                      setLocalState(() {
+                                        infoLine =
+                                            'legacy get-novel-event-state 返回 ${rows.length} 条：$sample';
+                                      });
+                                    }),
+                              child: const Text('读取 event-state'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: batchDeleteIdsCtrl,
+                          decoration: const InputDecoration(
+                            labelText: '批量删除章节 IDs',
+                            helperText:
+                                '调用 legacy batch-delete；用逗号分隔，删除后会回刷工作台。',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        FilledButton.tonal(
+                          onPressed: localBusy
+                              ? null
+                              : () => runAction(() async {
+                                  final ids = _parseLegacyIdList(
+                                    batchDeleteIdsCtrl.text,
+                                  );
+                                  if (ids.isEmpty) {
+                                    throw const FormatException('至少提供一个章节 ID');
+                                  }
+                                  final message =
+                                      await postLegacyNovelsBatchDelete(
+                                        token,
+                                        ids,
+                                      );
+                                  await refreshWorkbench(setLocalState);
+                                  setLocalState(() {
+                                    infoLine =
+                                        '已批量删除 ${ids.length} 条章节：$message';
+                                  });
+                                }),
+                          child: const Text('批量删除章节'),
+                        ),
                       ],
                     ),
                   ),
@@ -520,6 +663,8 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
       patchBodyCtrl.dispose();
       deleteNovelIdCtrl.dispose();
       generateIdsCtrl.dispose();
+      legacyIdsCtrl.dispose();
+      batchDeleteIdsCtrl.dispose();
     }
   }
 
