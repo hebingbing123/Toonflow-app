@@ -15,7 +15,11 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.loadingProductionFlowProbe,
     required this.loadingScriptSubAgentRun,
     required this.loadingProductionSubAgentRun,
+    required this.loadingScriptResultWriteback,
     required this.wsLog,
+    required this.workspaceAssistantText,
+    required this.workspaceLastToolResultLine,
+    required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
     required this.onRunProductionWorkspace,
     required this.onProbeProductionFlow,
@@ -23,6 +27,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.productionSubAgentToolController,
     required this.onRunScriptSubAgentTool,
     required this.onRunProductionSubAgentTool,
+    required this.onWriteBackScriptResult,
   });
 
   final TextEditingController projectIdController;
@@ -35,7 +40,11 @@ class AgentWorkspacesSection extends StatefulWidget {
   final bool loadingProductionFlowProbe;
   final bool loadingScriptSubAgentRun;
   final bool loadingProductionSubAgentRun;
+  final bool loadingScriptResultWriteback;
   final List<String> wsLog;
+  final String workspaceAssistantText;
+  final String? workspaceLastToolResultLine;
+  final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
   final VoidCallback onRunProductionWorkspace;
   final VoidCallback onProbeProductionFlow;
@@ -43,6 +52,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final TextEditingController productionSubAgentToolController;
   final VoidCallback onRunScriptSubAgentTool;
   final VoidCallback onRunProductionSubAgentTool;
+  final VoidCallback onWriteBackScriptResult;
 
   @override
   State<AgentWorkspacesSection> createState() => _AgentWorkspacesSectionState();
@@ -89,8 +99,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   static const List<_PromptPreset> _productionPromptPresets = <_PromptPreset>[
     _PromptPreset(
       label: '资产盘点',
-      prompt:
-          '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
+      prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
     ),
     _PromptPreset(
       label: '分镜推进',
@@ -129,7 +138,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.loadingProductionWorkspaceRun ||
       widget.loadingProductionFlowProbe ||
       widget.loadingScriptSubAgentRun ||
-      widget.loadingProductionSubAgentRun;
+      widget.loadingProductionSubAgentRun ||
+      widget.loadingScriptResultWriteback;
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +147,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 16),
-        Text(
-          'Agent workspaces',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text('Agent workspaces', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
         Text(
           '把 script 与 production 通道分开执行，按任务模板快速触发 harness.agent.run 与子 Agent 工具。',
@@ -215,7 +222,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('Script workspace', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Script workspace',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             _buildPromptTemplates(
               presets: _scriptPromptPresets,
@@ -239,7 +249,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
               children: <Widget>[
                 FilledButton.tonal(
                   onPressed: _busy ? null : widget.onRunScriptWorkspace,
-                  child: Text(widget.loadingScriptWorkspaceRun ? '…' : 'Run script'),
+                  child: Text(
+                    widget.loadingScriptWorkspaceRun ? '…' : 'Run script',
+                  ),
                 ),
                 SizedBox(
                   width: 300,
@@ -260,17 +272,57 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            setState(() => widget.scriptSubAgentToolController.text = value);
+                            setState(
+                              () => widget.scriptSubAgentToolController.text =
+                                  value,
+                            );
                           },
-                    decoration: const InputDecoration(labelText: 'script sub-agent tool'),
+                    decoration: const InputDecoration(
+                      labelText: 'script sub-agent tool',
+                    ),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy ? null : widget.onRunScriptSubAgentTool,
-                  child: Text(widget.loadingScriptSubAgentRun ? '…' : 'Run sub-agent'),
+                  child: Text(
+                    widget.loadingScriptSubAgentRun ? '…' : 'Run sub-agent',
+                  ),
+                ),
+                FilledButton(
+                  onPressed:
+                      _busy || widget.workspaceAssistantText.trim().isEmpty
+                      ? null
+                      : widget.onWriteBackScriptResult,
+                  child: Text(
+                    widget.loadingScriptResultWriteback
+                        ? '…'
+                        : 'Write back to script',
+                  ),
                 ),
               ],
             ),
+            if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Latest assistant result',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 4),
+              SelectableText(
+                _previewText(
+                  widget.workspaceAssistantText.trim(),
+                  maxChars: 720,
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (widget.workspaceWritebackLine != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                widget.workspaceWritebackLine!,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
@@ -284,7 +336,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('Production workspace', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Production workspace',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             _buildPromptTemplates(
               presets: _productionPromptPresets,
@@ -308,7 +363,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
               children: <Widget>[
                 FilledButton.tonal(
                   onPressed: _busy ? null : widget.onRunProductionWorkspace,
-                  child: Text(widget.loadingProductionWorkspaceRun ? '…' : 'Run production'),
+                  child: Text(
+                    widget.loadingProductionWorkspaceRun
+                        ? '…'
+                        : 'Run production',
+                  ),
                 ),
                 SizedBox(
                   width: 220,
@@ -329,14 +388,20 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            setState(() => widget.flowKeyController.text = value);
+                            setState(
+                              () => widget.flowKeyController.text = value,
+                            );
                           },
-                    decoration: const InputDecoration(labelText: 'get_flowData key'),
+                    decoration: const InputDecoration(
+                      labelText: 'get_flowData key',
+                    ),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy ? null : widget.onProbeProductionFlow,
-                  child: Text(widget.loadingProductionFlowProbe ? '…' : 'Probe flow data'),
+                  child: Text(
+                    widget.loadingProductionFlowProbe ? '…' : 'Probe flow data',
+                  ),
                 ),
                 SizedBox(
                   width: 300,
@@ -357,7 +422,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            setState(() => widget.productionSubAgentToolController.text = value);
+                            setState(
+                              () =>
+                                  widget.productionSubAgentToolController.text =
+                                      value,
+                            );
                           },
                     decoration: const InputDecoration(
                       labelText: 'production sub-agent tool',
@@ -372,6 +441,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                 ),
               ],
             ),
+            if (widget.workspaceLastToolResultLine != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Latest tool result: ${widget.workspaceLastToolResultLine!}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
@@ -455,6 +531,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     }
 
     return null;
+  }
+
+  String _previewText(String value, {required int maxChars}) {
+    if (value.length <= maxChars) {
+      return value;
+    }
+    return '${value.substring(0, maxChars)}...';
   }
 }
 

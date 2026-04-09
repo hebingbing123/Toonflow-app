@@ -122,7 +122,11 @@ class _HomePageState extends State<HomePage> {
   bool _loadingProductionFlowProbe = false;
   bool _loadingScriptSubAgentRun = false;
   bool _loadingProductionSubAgentRun = false;
+  bool _loadingScriptResultWriteback = false;
   final List<String> _wsLog = [];
+  String _workspaceAssistantText = '';
+  String? _workspaceLastToolResultLine;
+  String? _workspaceWritebackLine;
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
   final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
   final _scriptWorkspacePromptCtrl = TextEditingController(

@@ -161,6 +161,7 @@
 - 已把 Agent workspace 从单块探针控件升级为任务化双工作区卡片，明确 script / production 两条执行路径，降低对手工拼 WS payload 的依赖。
 - 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
 - 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
+- 已增加“最新 Assistant 结果回写 script 内容”最小闭环：workspace 能自动聚合 `chat.content.updated` 流式文本，并一键调用 `PATCH /api/v1/scripts/legacy/{id}` 写回 `content`，降低 Agent 产出到业务数据落库的手工搬运成本。
 
 - script agent 页面：计划数据、章节材料、Agent 对话、执行结果回写
 - production agent 页面：flowData、衍生资产、分镜、视频工作台、Agent 对话

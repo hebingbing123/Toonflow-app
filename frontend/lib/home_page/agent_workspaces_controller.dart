@@ -22,6 +22,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingScriptWorkspaceRun = true;
       _wsLog.clear();
+      _workspaceAssistantText = '';
+      _workspaceLastToolResultLine = null;
+      _workspaceWritebackLine = null;
       _error = null;
     });
 
@@ -62,6 +65,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionWorkspaceRun = true;
       _wsLog.clear();
+      _workspaceAssistantText = '';
+      _workspaceLastToolResultLine = null;
+      _workspaceWritebackLine = null;
       _error = null;
     });
 
@@ -103,6 +109,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionFlowProbe = true;
       _wsLog.clear();
+      _workspaceAssistantText = '';
+      _workspaceLastToolResultLine = null;
+      _workspaceWritebackLine = null;
       _error = null;
     });
 
@@ -147,6 +156,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingScriptSubAgentRun = true;
       _wsLog.clear();
+      _workspaceAssistantText = '';
+      _workspaceLastToolResultLine = null;
+      _workspaceWritebackLine = null;
       _error = null;
     });
 
@@ -196,6 +208,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     setState(() {
       _loadingProductionSubAgentRun = true;
       _wsLog.clear();
+      _workspaceAssistantText = '';
+      _workspaceLastToolResultLine = null;
+      _workspaceWritebackLine = null;
       _error = null;
     });
 
@@ -225,6 +240,43 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       );
     } finally {
       if (mounted) setState(() => _loadingProductionSubAgentRun = false);
+    }
+  }
+
+  Future<void> _writeBackScriptWorkspaceResult() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    final content = _workspaceAssistantText.trim();
+    if (scriptId == null || content.isEmpty) {
+      setState(() => _error = 'script_id 与可回写结果必须有效');
+      return;
+    }
+
+    setState(() {
+      _loadingScriptResultWriteback = true;
+      _workspaceWritebackLine = null;
+      _error = null;
+    });
+
+    try {
+      final updated = await updateScriptByLegacyId(
+        token,
+        scriptId,
+        <String, dynamic>{'content': content},
+      );
+      if (!mounted) return;
+      setState(() {
+        final updatedLen = updated.content?.length ?? 0;
+        _workspaceWritebackLine =
+            '写回成功：script ${updated.legacyId} 已更新，content 长度 $updatedLen。';
+      });
+    } catch (error) {
+      _setErrorFromException(error);
+    } finally {
+      if (mounted) {
+        setState(() => _loadingScriptResultWriteback = false);
+      }
     }
   }
 }
