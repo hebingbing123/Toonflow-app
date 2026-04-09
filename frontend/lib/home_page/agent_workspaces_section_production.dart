@@ -122,6 +122,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                 SizedBox(
                   width: 260,
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _resolveDropdownValue(
                       productionDomainToolController.text.trim(),
                       productionDomainToolPresets,
@@ -148,6 +149,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _resolveDropdownValue(
                       flowKeyController.text.trim(),
                       flowKeyPresets,
@@ -192,6 +194,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                 SizedBox(
                   width: 300,
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _resolveDropdownValue(
                       productionSubAgentToolController.text.trim(),
                       productionSubAgentPresets,

@@ -153,6 +153,7 @@ class AgentWorkspaceScriptCard extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _resolveDropdownValue(
                       selectedScriptDomainTool,
                       scriptDomainToolPresets,
@@ -192,6 +193,7 @@ class AgentWorkspaceScriptCard extends StatelessWidget {
                 SizedBox(
                   width: 300,
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _resolveDropdownValue(
                       scriptSubAgentToolController.text.trim(),
                       scriptSubAgentPresets,
