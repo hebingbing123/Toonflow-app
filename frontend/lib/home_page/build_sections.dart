@@ -207,6 +207,8 @@ extension _HomePageBuildSections on _HomePageState {
       workspaceScriptPlanWritebackCandidate: _workspaceScriptPlanWritebackCandidate,
       workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
       workspaceLastToolResultLine: _workspaceLastToolResultLine,
+      workspaceLastToolName: _workspaceLastToolName,
+      workspaceLastToolResultData: _workspaceLastToolResultData,
       workspaceSuggestedFlowKey: _workspaceSuggestedFlowKey,
       workspaceWritebackLine: _workspaceWritebackLine,
       onRunScriptWorkspace: _runScriptWorkspaceAgent,

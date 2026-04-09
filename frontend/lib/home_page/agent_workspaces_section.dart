@@ -36,6 +36,8 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.workspaceScriptPlanWritebackCandidate,
     required this.workspaceScriptWritebackSource,
     required this.workspaceLastToolResultLine,
+    this.workspaceLastToolName,
+    this.workspaceLastToolResultData,
     required this.workspaceSuggestedFlowKey,
     required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
@@ -79,6 +81,8 @@ class AgentWorkspacesSection extends StatefulWidget {
   final Map<String, dynamic>? workspaceScriptPlanWritebackCandidate;
   final String? workspaceScriptWritebackSource;
   final String? workspaceLastToolResultLine;
+  final String? workspaceLastToolName;
+  final Object? workspaceLastToolResultData;
   final String? workspaceSuggestedFlowKey;
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
@@ -419,6 +423,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           loadingProductionResultWriteback:
               widget.loadingProductionResultWriteback,
           workspaceLastToolResultLine: widget.workspaceLastToolResultLine,
+          workspaceLastToolName: widget.workspaceLastToolName,
+          workspaceLastToolResultData: widget.workspaceLastToolResultData,
           workspaceSuggestedFlowKey: widget.workspaceSuggestedFlowKey,
           onSelectPrompt: (String prompt) {
             setState(() => widget.productionPromptController.text = prompt);

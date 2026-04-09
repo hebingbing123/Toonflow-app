@@ -22,6 +22,8 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
     required this.loadingProductionSubAgentRun,
     required this.loadingProductionResultWriteback,
     required this.workspaceLastToolResultLine,
+    this.workspaceLastToolName,
+    this.workspaceLastToolResultData,
     required this.workspaceSuggestedFlowKey,
     required this.onSelectPrompt,
     required this.onProductionDomainToolChanged,
@@ -49,6 +51,8 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
   final bool loadingProductionSubAgentRun;
   final bool loadingProductionResultWriteback;
   final String? workspaceLastToolResultLine;
+  final String? workspaceLastToolName;
+  final Object? workspaceLastToolResultData;
   final String? workspaceSuggestedFlowKey;
   final ValueChanged<String> onSelectPrompt;
   final ValueChanged<String> onProductionDomainToolChanged;
@@ -193,6 +197,112 @@ class _AgentWorkspaceProductionCardState
   void _applyProductionPromptIfEmpty(String prompt) {
     if (widget.productionPromptController.text.trim().isNotEmpty) return;
     widget.productionPromptController.text = prompt;
+  }
+
+  String get _selectedProductionTool =>
+      widget.productionDomainToolController.text.trim();
+
+  Map<String, dynamic> _flowDataArgsTemplate() {
+    final flowKey = widget.flowKeyController.text.trim();
+    return <String, dynamic>{
+      'key': flowKey.isEmpty ? 'assets' : flowKey,
+    };
+  }
+
+  List<({String label, Map<String, dynamic> args})> _argumentTemplates() {
+    switch (_selectedProductionTool) {
+      case 'get_flowData':
+        return <({String label, Map<String, dynamic> args})>[
+          (
+            label: '模板: only key',
+            args: _flowDataArgsTemplate(),
+          ),
+          (label: '模板: default assets', args: <String, dynamic>{'key': 'assets'}),
+        ];
+      case 'add_deriveAsset':
+      case 'del_deriveAsset':
+      case 'generate_deriveAsset':
+        return <({String label, Map<String, dynamic> args})>[
+          (
+            label: '模板: ids',
+            args: <String, dynamic>{'ids': <int>[1]},
+          ),
+        ];
+      case 'generate_storyboard':
+        return <({String label, Map<String, dynamic> args})>[
+          (
+            label: '模板: storyboards',
+            args: <String, dynamic>{'ids': <int>[1]},
+          ),
+        ];
+      default:
+        return const <({String label, Map<String, dynamic> args})>[];
+    }
+  }
+
+  void _applyToolArgsTemplate(Map<String, dynamic> args, String label) {
+    widget.productionDomainArgsController.text = jsonEncode(args);
+    _setTaskStatus('已填充参数模板：$label');
+  }
+
+  Widget _buildArgumentTemplates() {
+    final templates = _argumentTemplates();
+    if (templates.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: templates
+          .map(
+            (entry) => ActionChip(
+              label: Text(entry.label),
+              onPressed: widget.busy
+                  ? null
+                  : () => _applyToolArgsTemplate(entry.args, entry.label),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  List<String> _buildResultSummaryLines() {
+    final result = widget.workspaceLastToolResultData;
+    final toolName = widget.workspaceLastToolName?.trim();
+    if (result == null) {
+      if (toolName == null || toolName.isEmpty) return const <String>[];
+      return <String>['tool=$toolName', 'result=空'];
+    }
+    final lines = <String>[
+      if (toolName != null && toolName.isNotEmpty) 'tool=$toolName',
+      'resultType=${result.runtimeType}',
+    ];
+    if (result is Map<String, dynamic>) {
+      lines.add('keys=${result.keys.join(',')}');
+      final data = result['data'];
+      if (data is Map<String, dynamic>) {
+        lines.add('dataKeys=${data.keys.join(',')}');
+        final storyboard = data['storyboard'];
+        if (storyboard is List) {
+          lines.add('storyboard.count=${storyboard.length}');
+        }
+        final assets = data['assets'];
+        if (assets is List) {
+          lines.add('assets.count=${assets.length}');
+        }
+      }
+      final items = result['items'];
+      if (items is List) {
+        lines.add('items.count=${items.length}');
+      }
+      final text = result['result'];
+      if (text is String) {
+        lines.add('result.chars=${text.length}');
+      }
+    } else if (result is List) {
+      lines.add('items=${result.length}');
+    } else if (result is String) {
+      lines.add('text.chars=${result.length}');
+    }
+    return lines.take(6).toList(growable: false);
   }
 
   Widget _buildGuidedTasks() {
@@ -374,6 +484,21 @@ class _AgentWorkspaceProductionCardState
                     ),
                   ),
                 ),
+                if (_argumentTemplates().isNotEmpty)
+                  SizedBox(
+                    width: 360,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'argument templates',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 6),
+                        _buildArgumentTemplates(),
+                      ],
+                    ),
+                  ),
                 FilledButton.tonal(
                   onPressed: widget.busy ? null : _probeProductionDomainTool,
                   child: Text(
@@ -437,6 +562,17 @@ class _AgentWorkspaceProductionCardState
               Text(
                 'Latest tool result: ${widget.workspaceLastToolResultLine}',
                 style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (_buildResultSummaryLines().isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Text('Result summary', style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 4),
+              ..._buildResultSummaryLines().map(
+                (String line) => Text(
+                  line,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ],
             if (_suggestedFlowKeyLine != null) ...<Widget>[
