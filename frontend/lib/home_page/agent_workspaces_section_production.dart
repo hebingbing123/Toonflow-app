@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'agent_workspaces_section_script.dart';
 
-class AgentWorkspaceProductionCard extends StatelessWidget {
+class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
     super.key,
     required this.busy,
@@ -58,6 +60,15 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
   final VoidCallback onWriteBackProductionFlowResult;
   final VoidCallback onApplySuggestedFlowKey;
 
+  @override
+  State<AgentWorkspaceProductionCard> createState() =>
+      _AgentWorkspaceProductionCardState();
+}
+
+class _AgentWorkspaceProductionCardState
+    extends State<AgentWorkspaceProductionCard> {
+  String? _taskStatusLine;
+
   String? _resolveDropdownValue(String value, List<String> allowed) {
     if (allowed.contains(value)) return value;
     if (allowed.isEmpty) return null;
@@ -68,11 +79,12 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: productionPromptPresets
+      children: widget.productionPromptPresets
           .map(
             (AgentWorkspacePromptPreset preset) => ActionChip(
               label: Text(preset.label),
-              onPressed: busy ? null : () => onSelectPrompt(preset.prompt),
+              onPressed:
+                  widget.busy ? null : () => widget.onSelectPrompt(preset.prompt),
             ),
           )
           .toList(growable: false),
@@ -80,14 +92,107 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
   }
 
   String? get _suggestedFlowKeyLine {
-    final key = workspaceSuggestedFlowKey?.trim();
+    final key = widget.workspaceSuggestedFlowKey?.trim();
     if (key == null || key.isEmpty) return null;
     return key;
   }
 
+  String? get _runningTaskLine {
+    if (widget.loadingProductionWorkspaceRun) return '执行中：Run production';
+    if (widget.loadingProductionFlowProbe) return '执行中：Probe production tool';
+    if (widget.loadingProductionSubAgentRun) return '执行中：Run sub-agent';
+    if (widget.loadingProductionResultWriteback) return '执行中：Write tool result';
+    return null;
+  }
+
+  void _setTaskStatus(String message) {
+    if (!mounted) return;
+    setState(() => _taskStatusLine = message);
+  }
+
+  bool _validateJsonArgs(String raw) {
+    final normalized = raw.trim();
+    if (normalized.isEmpty) return true;
+    try {
+      final decoded = jsonDecode(normalized);
+      if (decoded is Map<String, dynamic>) return true;
+      _setTaskStatus('拦截：production tool arguments 必须是 JSON object。');
+      return false;
+    } catch (_) {
+      _setTaskStatus('拦截：production tool arguments JSON 解析失败。');
+      return false;
+    }
+  }
+
+  bool _validatePrompt(String action) {
+    if (widget.productionPromptController.text.trim().isNotEmpty) return true;
+    _setTaskStatus('拦截：$action 需要非空 workspace prompt。');
+    return false;
+  }
+
+  bool _validateFlowProbe() {
+    final tool = widget.productionDomainToolController.text.trim();
+    if (tool.isEmpty) {
+      _setTaskStatus('拦截：Probe 需要选择 production domain tool。');
+      return false;
+    }
+    if (!_validateJsonArgs(widget.productionDomainArgsController.text)) {
+      return false;
+    }
+    if (tool == 'get_flowData' && widget.flowKeyController.text.trim().isEmpty) {
+      _setTaskStatus('拦截：get_flowData 需要有效 flow key。');
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateSubAgentTool() {
+    if (widget.productionSubAgentToolController.text.trim().isEmpty) {
+      _setTaskStatus('拦截：Run sub-agent 需要选择 production sub-agent tool。');
+      return false;
+    }
+    return _validatePrompt('Run sub-agent');
+  }
+
+  void _runProductionWorkspace() {
+    if (!_validatePrompt('Run production')) return;
+    widget.onRunProductionWorkspace();
+    _setTaskStatus('已触发：Run production');
+  }
+
+  void _probeProductionDomainTool() {
+    if (!_validateFlowProbe()) return;
+    widget.onProbeProductionDomainTool();
+    final tool = widget.productionDomainToolController.text.trim();
+    final key = widget.flowKeyController.text.trim();
+    final suffix = tool == 'get_flowData' ? ' key=$key' : '';
+    _setTaskStatus('已触发：Probe production tool ($tool$suffix)');
+  }
+
+  void _runProductionSubAgentTool() {
+    if (!_validateSubAgentTool()) return;
+    widget.onRunProductionSubAgentTool();
+    final tool = widget.productionSubAgentToolController.text.trim();
+    _setTaskStatus('已触发：Run sub-agent ($tool)');
+  }
+
+  void _writeBackProductionFlowResult() {
+    if (widget.workspaceLastToolResultLine == null) {
+      _setTaskStatus('拦截：暂无工具结果可写回。');
+      return;
+    }
+    if (widget.flowKeyController.text.trim().isEmpty) {
+      _setTaskStatus('拦截：写回前请提供有效 flow key。');
+      return;
+    }
+    widget.onWriteBackProductionFlowResult();
+    final key = widget.flowKeyController.text.trim();
+    _setTaskStatus('已触发：Write tool result -> flow[$key]');
+  }
+
   void _applyProductionPromptIfEmpty(String prompt) {
-    if (productionPromptController.text.trim().isNotEmpty) return;
-    productionPromptController.text = prompt;
+    if (widget.productionPromptController.text.trim().isNotEmpty) return;
+    widget.productionPromptController.text = prompt;
   }
 
   Widget _buildGuidedTasks() {
@@ -96,41 +201,43 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
       runSpacing: 8,
       children: <Widget>[
         FilledButton.tonal(
-          onPressed: busy
+          onPressed: widget.busy
               ? null
               : () {
-                  onFlowKeyChanged('assets');
-                  onProductionDomainToolChanged('get_flowData');
-                  onProbeProductionDomainTool();
+                  widget.onFlowKeyChanged('assets');
+                  widget.onProductionDomainToolChanged('get_flowData');
+                  _probeProductionDomainTool();
                 },
           child: const Text('1) 拉取资产 flow'),
         ),
         FilledButton.tonal(
-          onPressed: busy
+          onPressed: widget.busy
               ? null
               : () {
                   _applyProductionPromptIfEmpty(
                     '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
                   );
-                  onProductionSubAgentChanged('run_sub_agent_derive_assets');
-                  onRunProductionSubAgentTool();
+                  widget.onProductionSubAgentChanged(
+                    'run_sub_agent_derive_assets',
+                  );
+                  _runProductionSubAgentTool();
                 },
           child: const Text('2) 运行资产子代理'),
         ),
         FilledButton.tonal(
-          onPressed: busy
+          onPressed: widget.busy
               ? null
               : () {
-                  onFlowKeyChanged('storyboard');
-                  onProductionDomainToolChanged('get_flowData');
-                  onProbeProductionDomainTool();
+                  widget.onFlowKeyChanged('storyboard');
+                  widget.onProductionDomainToolChanged('get_flowData');
+                  _probeProductionDomainTool();
                 },
           child: const Text('3) 拉取分镜 flow'),
         ),
         OutlinedButton(
-          onPressed: busy || workspaceLastToolResultLine == null
+          onPressed: widget.busy || widget.workspaceLastToolResultLine == null
               ? null
-              : onWriteBackProductionFlowResult,
+              : _writeBackProductionFlowResult,
           child: const Text('4) 写回 flow'),
         ),
       ],
@@ -157,7 +264,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
             _buildPromptTemplates(),
             const SizedBox(height: 8),
             TextField(
-              controller: productionPromptController,
+              controller: widget.productionPromptController,
               maxLines: 4,
               decoration: const InputDecoration(
                 labelText: 'workspace prompt',
@@ -170,9 +277,9 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 FilledButton.tonal(
-                  onPressed: busy ? null : onRunProductionWorkspace,
+                  onPressed: widget.busy ? null : _runProductionWorkspace,
                   child: Text(
-                    loadingProductionWorkspaceRun ? '…' : 'Run production',
+                    widget.loadingProductionWorkspaceRun ? '…' : 'Run production',
                   ),
                 ),
                 SizedBox(
@@ -180,10 +287,10 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: _resolveDropdownValue(
-                      productionDomainToolController.text.trim(),
-                      productionDomainToolPresets,
+                      widget.productionDomainToolController.text.trim(),
+                      widget.productionDomainToolPresets,
                     ),
-                    items: productionDomainToolPresets
+                    items: widget.productionDomainToolPresets
                         .map(
                           (String tool) => DropdownMenuItem<String>(
                             value: tool,
@@ -191,11 +298,11 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                           ),
                         )
                         .toList(growable: false),
-                    onChanged: busy
+                    onChanged: widget.busy
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            onProductionDomainToolChanged(value);
+                            widget.onProductionDomainToolChanged(value);
                           },
                     decoration: const InputDecoration(
                       labelText: 'production domain tool',
@@ -207,10 +314,10 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: _resolveDropdownValue(
-                      flowKeyController.text.trim(),
-                      flowKeyPresets,
+                      widget.flowKeyController.text.trim(),
+                      widget.flowKeyPresets,
                     ),
-                    items: flowKeyPresets
+                    items: widget.flowKeyPresets
                         .map(
                           (String key) => DropdownMenuItem<String>(
                             value: key,
@@ -218,11 +325,11 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                           ),
                         )
                         .toList(growable: false),
-                    onChanged: busy
+                    onChanged: widget.busy
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            onFlowKeyChanged(value);
+                            widget.onFlowKeyChanged(value);
                           },
                     decoration: const InputDecoration(
                       labelText: 'flow key',
@@ -233,7 +340,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                 SizedBox(
                   width: 360,
                   child: TextField(
-                    controller: productionDomainArgsController,
+                    controller: widget.productionDomainArgsController,
                     maxLines: 2,
                     decoration: const InputDecoration(
                       labelText: 'production tool arguments(JSON)',
@@ -242,9 +349,9 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
-                  onPressed: busy ? null : onProbeProductionDomainTool,
+                  onPressed: widget.busy ? null : _probeProductionDomainTool,
                   child: Text(
-                    loadingProductionFlowProbe ? '…' : 'Probe production tool',
+                    widget.loadingProductionFlowProbe ? '…' : 'Probe production tool',
                   ),
                 ),
                 SizedBox(
@@ -252,10 +359,10 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
                     initialValue: _resolveDropdownValue(
-                      productionSubAgentToolController.text.trim(),
-                      productionSubAgentPresets,
+                      widget.productionSubAgentToolController.text.trim(),
+                      widget.productionSubAgentPresets,
                     ),
-                    items: productionSubAgentPresets
+                    items: widget.productionSubAgentPresets
                         .map(
                           (String tool) => DropdownMenuItem<String>(
                             value: tool,
@@ -263,11 +370,11 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                           ),
                         )
                         .toList(growable: false),
-                    onChanged: busy
+                    onChanged: widget.busy
                         ? null
                         : (String? value) {
                             if (value == null) return;
-                            onProductionSubAgentChanged(value);
+                            widget.onProductionSubAgentChanged(value);
                           },
                     decoration: const InputDecoration(
                       labelText: 'production sub-agent tool',
@@ -275,25 +382,34 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
-                  onPressed: busy ? null : onRunProductionSubAgentTool,
+                  onPressed: widget.busy ? null : _runProductionSubAgentTool,
                   child: Text(
-                    loadingProductionSubAgentRun ? '…' : 'Run sub-agent',
+                    widget.loadingProductionSubAgentRun ? '…' : 'Run sub-agent',
                   ),
                 ),
                 FilledButton(
-                  onPressed: busy || workspaceLastToolResultLine == null
+                  onPressed: widget.busy || widget.workspaceLastToolResultLine == null
                       ? null
-                      : onWriteBackProductionFlowResult,
+                      : _writeBackProductionFlowResult,
                   child: Text(
-                    loadingProductionResultWriteback ? '…' : 'Write tool result',
+                    widget.loadingProductionResultWriteback
+                        ? '…'
+                        : 'Write tool result',
                   ),
                 ),
               ],
             ),
-            if (workspaceLastToolResultLine != null) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              _runningTaskLine ??
+                  _taskStatusLine ??
+                  '等待执行：可直接用 Guided tasks 或表单按钮。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (widget.workspaceLastToolResultLine != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Latest tool result: $workspaceLastToolResultLine',
+                'Latest tool result: ${widget.workspaceLastToolResultLine}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -309,7 +425,7 @@ class AgentWorkspaceProductionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton(
-                    onPressed: busy ? null : onApplySuggestedFlowKey,
+                    onPressed: widget.busy ? null : widget.onApplySuggestedFlowKey,
                     child: const Text('Use key'),
                   ),
                 ],
