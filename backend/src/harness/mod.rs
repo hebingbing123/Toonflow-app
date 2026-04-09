@@ -27,10 +27,23 @@ use uuid::Uuid;
 #[derive(Clone, Debug)]
 pub struct HarnessContext {
     pub user_id: Uuid,
+    pub pool: Option<sqlx::PgPool>,
+    pub project_legacy_id: Option<i32>,
+    pub script_legacy_id: Option<i32>,
 }
 
 impl HarnessContext {
-    pub fn new(user_id: Uuid) -> Self {
-        Self { user_id }
+    pub fn with_scope(
+        user_id: Uuid,
+        pool: Option<sqlx::PgPool>,
+        project_legacy_id: Option<i32>,
+        script_legacy_id: Option<i32>,
+    ) -> Self {
+        Self {
+            user_id,
+            pool,
+            project_legacy_id,
+            script_legacy_id,
+        }
     }
 }

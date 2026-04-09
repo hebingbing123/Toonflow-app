@@ -148,7 +148,7 @@ Legacy Node stack used Socket.IO namespaces:
 
 | Legacy Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
-| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content`; `wasm.probe` runs embedded WASM (wasmi) |
+| (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }` like REST `GET /api/v1/skills/content`; `get_planData` returns script-agent plan data + script list for attached project; `get_script_content` returns one script row by `arguments.scriptId` (or attached `script_id`); `wasm.probe` runs embedded WASM (wasmi) |
 | (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |

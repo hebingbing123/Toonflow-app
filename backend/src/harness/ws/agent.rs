@@ -15,6 +15,9 @@ pub struct HarnessAgentWsParams {
     pub content: String,
     pub assistant_name: &'static str,
     pub user_id: Uuid,
+    pub pool: Option<sqlx::PgPool>,
+    pub project_legacy_id: Option<i32>,
+    pub script_legacy_id: Option<i32>,
     pub max_rounds: usize,
     pub cancel: CancellationToken,
     pub out_tx: UnboundedSender<String>,
@@ -25,7 +28,8 @@ pub struct HarnessAgentWsParams {
 pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
     tokio::spawn(async move {
         observe::agent_llm_turn_requested(p.user_id, p.content.len());
-        let ctx = HarnessContext::new(p.user_id);
+        let ctx =
+            HarnessContext::with_scope(p.user_id, p.pool, p.project_legacy_id, p.script_legacy_id);
         if let Err(e) = harness_agent_run(
             &p.cfg,
             &p.client,

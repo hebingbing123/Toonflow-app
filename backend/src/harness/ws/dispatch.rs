@@ -81,7 +81,14 @@ pub(crate) async fn dispatch_client_text(
         return;
     };
 
-    let ctx = HarnessContext::new(sess.user_id);
+    let project_legacy_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
+    let script_legacy_id = sess.script_id.and_then(|v| i32::try_from(v).ok());
+    let ctx = HarnessContext::with_scope(
+        sess.user_id,
+        state.pool.clone(),
+        project_legacy_id,
+        script_legacy_id,
+    );
     observe::ws_frame(&ctx, &env.msg_type);
 
     match env.msg_type.as_str() {
@@ -203,6 +210,9 @@ pub(crate) async fn dispatch_client_text(
                 content: content.to_string(),
                 assistant_name,
                 user_id: sess.user_id,
+                pool: state.pool.clone(),
+                project_legacy_id,
+                script_legacy_id,
                 max_rounds,
                 cancel,
                 out_tx: out_tx.clone(),

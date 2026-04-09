@@ -28,6 +28,16 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Runs an embedded WebAssembly module via the wasmi interpreter (sandbox MVP); returns JSON like { \"ok\": true, \"value\": 42 }.",
     },
+    HarnessToolInfo {
+        name: "get_planData",
+        description:
+            "Script-agent parity read: returns project-scoped plan data and script list for the attached project context.",
+    },
+    HarnessToolInfo {
+        name: "get_script_content",
+        description:
+            "Script-agent parity read: returns one script row by legacy script id (arguments.scriptId or attached script context).",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).

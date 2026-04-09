@@ -25,6 +25,21 @@ fn tool_parameters_schema(name: &str) -> Value {
             },
             "additionalProperties": false
         }),
+        "get_script_content" => json!({
+            "type": "object",
+            "properties": {
+                "scriptId": {
+                    "type": "integer",
+                    "description": "Legacy script id under the attached project; optional when attached production context already contains script_id."
+                }
+            },
+            "additionalProperties": false
+        }),
+        "get_planData" => json!({
+            "type": "object",
+            "description": "No arguments required; reads scriptAgent plan data for the attached project context.",
+            "additionalProperties": false
+        }),
         _ => json!({
             "type": "object",
             "description": "JSON arguments for this tool (echo / isolated.echo accept any shape; wasm.probe ignores args)",
@@ -153,7 +168,7 @@ pub async fn harness_agent_run(
     let system = format!(
         "You are the Toonflow harness agent ({assistant_name}). \
          Tools match GET /api/v1/harness/tools. \
-         Use tools when asked to read a skill file, test echo / isolated echo, or run the WASM probe. \
+         Use tools when asked to read a skill file, inspect script plan/content, test echo / isolated echo, or run the WASM probe. \
          After tools succeed, answer briefly in natural language."
     );
     let mut messages: Vec<Value> = vec![
