@@ -160,6 +160,7 @@
 
 - 已把 Agent workspace 从单块探针控件升级为任务化双工作区卡片，明确 script / production 两条执行路径，降低对手工拼 WS payload 的依赖。
 - 已补 script 领域工具一键探测入口（`get_planData`、`get_script_content`、`get_novel_text`、`get_novel_events`），可在工作区直接拉取上下文而不必依赖提示词触发。
+- script 领域工具探测已支持 JSON 参数输入（如 `novelId`），并对 `get_script_content` 自动兜底附带当前 `script_id`，减少手工拼 payload 的错误率。
 - 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
 - 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
 - 已增加 production 领域工具直调入口（`get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard`）并支持 JSON 参数探测，减少必须靠提示词间接触发工具的调试成本。

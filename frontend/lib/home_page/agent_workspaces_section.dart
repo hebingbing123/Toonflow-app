@@ -8,6 +8,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.projectIdController,
     required this.scriptIdController,
     required this.scriptPromptController,
+    required this.scriptDomainArgsController,
     required this.productionPromptController,
     required this.flowKeyController,
     required this.productionDomainToolController,
@@ -41,6 +42,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
   final TextEditingController scriptPromptController;
+  final TextEditingController scriptDomainArgsController;
   final TextEditingController productionPromptController;
   final TextEditingController flowKeyController;
   final TextEditingController productionDomainToolController;
@@ -61,7 +63,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;
   final VoidCallback onRunProductionWorkspace;
-  final ValueChanged<String> onProbeScriptDomainTool;
+  final void Function(String toolName, String rawArgs) onProbeScriptDomainTool;
   final VoidCallback onProbeProductionDomainTool;
   final TextEditingController scriptSubAgentToolController;
   final TextEditingController productionSubAgentToolController;
@@ -157,6 +159,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   void _ensurePresetDefaults() {
     if (widget.scriptSubAgentToolController.text.trim().isEmpty) {
       widget.scriptSubAgentToolController.text = _scriptSubAgentPresets.first;
+    }
+    if (widget.scriptDomainArgsController.text.trim().isEmpty) {
+      widget.scriptDomainArgsController.text = '{}';
     }
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
       widget.productionSubAgentToolController.text =
@@ -327,11 +332,23 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
                       : () =>
                             widget.onProbeScriptDomainTool(
                               _selectedScriptDomainTool,
+                              widget.scriptDomainArgsController.text,
                             ),
                   child: Text(
                     widget.loadingScriptDomainProbe
                         ? '…'
                         : 'Probe script data',
+                  ),
+                ),
+                SizedBox(
+                  width: 320,
+                  child: TextField(
+                    controller: widget.scriptDomainArgsController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'script tool arguments(JSON)',
+                      helperText: '可选，例如 {"novelId":1}',
+                    ),
                   ),
                 ),
                 SizedBox(

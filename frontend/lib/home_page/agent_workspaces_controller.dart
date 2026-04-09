@@ -182,7 +182,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     if (mounted) setState(() => _loadingProductionFlowProbe = false);
   }
 
-  Future<void> _probeScriptDomainTool(String toolName) async {
+  Future<void> _probeScriptDomainTool(String toolName, String rawArgs) async {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
@@ -196,9 +196,25 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       return;
     }
 
-    final args = <String, dynamic>{};
+    final Map<String, dynamic> args;
+    final normalizedArgs = rawArgs.trim();
+    if (normalizedArgs.isEmpty) {
+      args = <String, dynamic>{};
+    } else {
+      try {
+        final decoded = jsonDecode(normalizedArgs);
+        if (decoded is! Map<String, dynamic>) {
+          setState(() => _error = 'script tool arguments 必须是 JSON object');
+          return;
+        }
+        args = decoded;
+      } catch (_) {
+        setState(() => _error = 'script tool arguments JSON 解析失败');
+        return;
+      }
+    }
     if (toolName == 'get_script_content' && scriptId != null) {
-      args['scriptId'] = scriptId;
+      args.putIfAbsent('scriptId', () => scriptId);
     }
 
     setState(() {

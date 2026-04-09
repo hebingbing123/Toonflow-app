@@ -174,6 +174,7 @@ extension _HomePageBuildSections on _HomePageState {
       projectIdController: _agentWorkspaceProjectIdCtrl,
       scriptIdController: _agentWorkspaceScriptIdCtrl,
       scriptPromptController: _scriptWorkspacePromptCtrl,
+      scriptDomainArgsController: _scriptDomainArgsCtrl,
       productionPromptController: _productionWorkspacePromptCtrl,
       flowKeyController: _productionFlowKeyCtrl,
       productionDomainToolController: _productionDomainToolCtrl,
