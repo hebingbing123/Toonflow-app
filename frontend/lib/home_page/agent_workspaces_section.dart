@@ -376,6 +376,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           loadingScriptResultWriteback: widget.loadingScriptResultWriteback,
           loadingScriptPlanResultWriteback:
               widget.loadingScriptPlanResultWriteback,
+          scopeScriptIdText: widget.scriptIdController.text,
           workspaceAssistantText: widget.workspaceAssistantText,
           workspaceScriptWritebackSource: widget.workspaceScriptWritebackSource,
           workspaceScriptWritebackCandidate:
