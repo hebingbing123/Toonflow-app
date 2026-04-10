@@ -353,6 +353,29 @@ void main() {
     expect(line, contains('下一步建议：提交视频生成。'));
   });
 
+  test('buildStoryboardWorkbenchFailureNotice normalizes rust api errors', () {
+    final line = buildStoryboardWorkbenchFailureNotice(
+      actionSummary: '刷新当前分镜的视频数据失败。',
+      recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+      error: 'RustApiException(503): database_error',
+      fallbackDetail: '可稍后重试。',
+    );
+
+    expect(line, contains('下一步建议：刷新视频数据。'));
+    expect(line, contains('失败原因：database_error。'));
+  });
+
+  test('buildStoryboardWorkbenchLoadingNotice appends detail text', () {
+    final line = buildStoryboardWorkbenchLoadingNotice(
+      actionSummary: '正在同步当前分镜制作数据。',
+      recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+      detail: '同步完成后会自动回填当前画面。',
+    );
+
+    expect(line, contains('下一步建议：同步当前分镜数据。'));
+    expect(line, contains('同步完成后会自动回填当前画面。'));
+  });
+
   test('collectStoryboardTrackIds merges and sorts known track ids', () {
     final ids = collectStoryboardTrackIds(
       scriptStoryboard: const StoryboardRow(

@@ -67,6 +67,49 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     );
   }
 
+  void _setWorkbenchActionNotice({
+    required String actionSummary,
+    required StoryboardWorkbenchRecommendedAction recommendedAction,
+    required String detail,
+  }) {
+    _workbenchLine = buildStoryboardWorkbenchActionNotice(
+      actionSummary: actionSummary,
+      recommendedAction: recommendedAction,
+      detail: detail,
+    );
+  }
+
+  void _setWorkbenchFailureNotice({
+    required String actionSummary,
+    required StoryboardWorkbenchRecommendedAction recommendedAction,
+    required Object error,
+    required String fallbackDetail,
+  }) {
+    _workbenchLine = buildStoryboardWorkbenchFailureNotice(
+      actionSummary: actionSummary,
+      recommendedAction: recommendedAction,
+      error: error,
+      fallbackDetail: fallbackDetail,
+    );
+  }
+
+  void _showWorkbenchFailureSnackBar({
+    required String actionSummary,
+    required StoryboardWorkbenchRecommendedAction recommendedAction,
+    required Object error,
+    required String fallbackDetail,
+  }) {
+    final notice = buildStoryboardWorkbenchFailureNotice(
+      actionSummary: actionSummary,
+      recommendedAction: recommendedAction,
+      error: error,
+      fallbackDetail: fallbackDetail,
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(notice)));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -111,6 +154,11 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     setState(() {
       _loadingProduction = true;
       _productionError = null;
+      _setWorkbenchActionNotice(
+        actionSummary: '正在同步当前分镜制作数据。',
+        recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+        detail: '同步完成后会自动回填当前画面、轨道和可用视频参数。',
+      );
     });
     try {
       final productionRow = await postStoryboardGetDataV1(
@@ -144,10 +192,30 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _productionError = e.toString());
+      setState(() {
+        _productionError = normalizeStoryboardWorkbenchErrorMessage(
+          e.toString(),
+        );
+        _setWorkbenchFailureNotice(
+          actionSummary: '同步当前分镜制作数据失败。',
+          recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+          error: e,
+          fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
+        );
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _productionError = e.toString());
+      setState(() {
+        _productionError = normalizeStoryboardWorkbenchErrorMessage(
+          e.toString(),
+        );
+        _setWorkbenchFailureNotice(
+          actionSummary: '同步当前分镜制作数据失败。',
+          recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+          error: e,
+          fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
+        );
+      });
     } finally {
       if (mounted) {
         setState(() => _loadingProduction = false);
@@ -158,7 +226,11 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   Future<void> _refreshWorkbenchData() async {
     setState(() {
       _loadingWorkbench = true;
-      _workbenchLine = null;
+      _setWorkbenchActionNotice(
+        actionSummary: '正在刷新当前分镜的视频数据。',
+        recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+        detail: '刷新完成后会同步模型信息、已生成视频和进行中的任务。',
+      );
     });
     try {
       final model = await postWorkbenchGetVideoModelDetailV1(widget.token);
@@ -179,10 +251,24 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _workbenchLine = e.toString());
+      setState(() {
+        _setWorkbenchFailureNotice(
+          actionSummary: '刷新当前分镜的视频数据失败。',
+          recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+          error: e,
+          fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
+        );
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _workbenchLine = e.toString());
+      setState(() {
+        _setWorkbenchFailureNotice(
+          actionSummary: '刷新当前分镜的视频数据失败。',
+          recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+          error: e,
+          fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
+        );
+      });
     } finally {
       if (mounted) {
         setState(() => _loadingWorkbench = false);
@@ -207,9 +293,12 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       await action();
     } on RustApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      _showWorkbenchFailureSnackBar(
+        actionSummary: '当前分镜操作失败。',
+        recommendedAction: _currentDiagnosis().recommendedAction,
+        error: e,
+        fallbackDetail: '建议先完成当前推荐步骤后再重试。',
+      );
     } on FormatException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -217,9 +306,12 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      _showWorkbenchFailureSnackBar(
+        actionSummary: '当前分镜操作失败。',
+        recommendedAction: _currentDiagnosis().recommendedAction,
+        error: e,
+        fallbackDetail: '建议先完成当前推荐步骤后再重试。',
+      );
     } finally {
       if (mounted) {
         setState(() => _saving = false);

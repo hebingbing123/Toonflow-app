@@ -183,6 +183,58 @@ String buildStoryboardWorkbenchFollowUp({
   return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
 }
 
+String buildStoryboardWorkbenchActionNotice({
+  required String actionSummary,
+  required StoryboardWorkbenchRecommendedAction recommendedAction,
+  required String detail,
+}) {
+  final nextAction = describeStoryboardWorkbenchRecommendedAction(
+    recommendedAction,
+  );
+  return '$actionSummary 下一步建议：$nextAction。$detail';
+}
+
+String normalizeStoryboardWorkbenchErrorMessage(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    return '未提供额外错误信息。';
+  }
+  final normalized = trimmed.replaceFirst(
+    RegExp(r'^RustApiException\([^)]*\):\s*'),
+    '',
+  );
+  if (normalized.isEmpty) {
+    return '未提供额外错误信息。';
+  }
+  return normalized;
+}
+
+String buildStoryboardWorkbenchFailureNotice({
+  required String actionSummary,
+  required StoryboardWorkbenchRecommendedAction recommendedAction,
+  required Object error,
+  required String fallbackDetail,
+}) {
+  final reason = normalizeStoryboardWorkbenchErrorMessage(error.toString());
+  return buildStoryboardWorkbenchActionNotice(
+    actionSummary: actionSummary,
+    recommendedAction: recommendedAction,
+    detail: '失败原因：$reason。$fallbackDetail',
+  );
+}
+
+String buildStoryboardWorkbenchLoadingNotice({
+  required String actionSummary,
+  required StoryboardWorkbenchRecommendedAction recommendedAction,
+  required String detail,
+}) {
+  return buildStoryboardWorkbenchActionNotice(
+    actionSummary: actionSummary,
+    recommendedAction: recommendedAction,
+    detail: detail,
+  );
+}
+
 StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
   required Iterable<int> selectedIds,
   required Iterable<StoryboardRow> boards,
