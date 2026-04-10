@@ -135,6 +135,182 @@ extension _HomePageProjectEditorScripts on _HomePageState {
     required List<ProjectStats?> statsRef,
   }) {
     final outline = Theme.of(ctx).colorScheme.outline;
+    final allScriptIds = scriptList
+        .map((script) => script.legacyId)
+        .toList(growable: false);
+    final overviewDiagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: allScriptIds,
+      scripts: scriptList,
+      previewRows: const [],
+    );
+
+    Future<void> runProjectScriptsExportAll() async {
+      setDialogState(() {
+        scriptTaskBusy[0] = true;
+        scriptTaskLine[0] = null;
+      });
+      try {
+        final zip = await exportScriptsZip(token, allScriptIds);
+        if (!ctx.mounted) return;
+        final nextDiagnosis = diagnoseScriptBatchWorkbench(
+          selectedIds: allScriptIds,
+          scripts: scriptList,
+          previewRows: const [],
+        );
+        setDialogState(() {
+          scriptTaskBusy[0] = false;
+          scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+            actionSummary:
+                '已导出 ${scriptList.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。',
+            diagnosis: nextDiagnosis,
+          );
+        });
+      } on RustApiException catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '导出失败：$e';
+          });
+        }
+      } catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '导出失败：$e';
+          });
+        }
+      }
+    }
+
+    Future<void> runProjectScriptsPollAll() async {
+      setDialogState(() {
+        scriptTaskBusy[0] = true;
+        scriptTaskLine[0] = null;
+      });
+      try {
+        final rows = await pollScriptExtractState(token, allScriptIds);
+        final synced = syncScriptExtractStates(scriptList, rows);
+        scriptList
+          ..clear()
+          ..addAll(synced);
+        final sample = rows.isEmpty
+            ? '当前均为 idle 或已完成'
+            : rows
+                  .take(3)
+                  .map((row) => '#${row.legacyId}:${row.extractState ?? 0}')
+                  .join(' · ');
+        if (!ctx.mounted) return;
+        final nextDiagnosis = diagnoseScriptBatchWorkbench(
+          selectedIds: allScriptIds,
+          scripts: scriptList,
+          previewRows: const [],
+        );
+        setDialogState(() {
+          scriptTaskBusy[0] = false;
+          scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+            actionSummary: '已轮询 ${scriptList.length} 条剧本提取状态：$sample',
+            diagnosis: nextDiagnosis,
+          );
+        });
+      } on RustApiException catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '轮询提取状态失败：$e';
+          });
+        }
+      } catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '轮询提取状态失败：$e';
+          });
+        }
+      }
+    }
+
+    Future<void> runProjectScriptsExtractAll() async {
+      setDialogState(() {
+        scriptTaskBusy[0] = true;
+        scriptTaskLine[0] = null;
+      });
+      try {
+        final accepted = await startScriptAssetExtract(
+          token,
+          projectLegacyId: p.legacyId,
+          scriptLegacyIds: allScriptIds,
+        );
+        final rows = await pollScriptExtractState(token, allScriptIds);
+        final synced = syncScriptExtractStates(scriptList, rows);
+        scriptList
+          ..clear()
+          ..addAll(synced);
+        if (!ctx.mounted) return;
+        final nextDiagnosis = diagnoseScriptBatchWorkbench(
+          selectedIds: allScriptIds,
+          scripts: scriptList,
+          previewRows: const [],
+        );
+        setDialogState(() {
+          scriptTaskBusy[0] = false;
+          scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+            actionSummary:
+                '已提交 ${scriptList.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}',
+            diagnosis: nextDiagnosis,
+          );
+        });
+      } on RustApiException catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '提交素材抽取失败：$e';
+          });
+        }
+      } catch (e) {
+        if (ctx.mounted) {
+          setDialogState(() {
+            scriptTaskBusy[0] = false;
+            scriptTaskLine[0] = '提交素材抽取失败：$e';
+          });
+        }
+      }
+    }
+
+    VoidCallback? overviewAction;
+    String overviewActionLabel;
+    switch (overviewDiagnosis.recommendedAction) {
+      case ScriptBatchWorkbenchRecommendedAction.syncContext:
+        overviewAction = saving[0] || scriptTaskBusy[0]
+            ? null
+            : () => _openProjectScriptsWorkbenchDialog(
+                ctx: ctx,
+                setDialogState: setDialogState,
+                token: token,
+                p: p,
+                saving: saving,
+                scriptTaskBusy: scriptTaskBusy,
+                scriptTaskLine: scriptTaskLine,
+                scriptList: scriptList,
+                statsRef: statsRef,
+              );
+        overviewActionLabel = '打开工作台读取上下文';
+      case ScriptBatchWorkbenchRecommendedAction.pollSelected:
+        overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+            ? null
+            : runProjectScriptsPollAll;
+        overviewActionLabel = '轮询全部提取状态';
+      case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
+        overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+            ? null
+            : runProjectScriptsExtractAll;
+        overviewActionLabel = '提取全部剧本素材';
+      case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
+        overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+            ? null
+            : runProjectScriptsExportAll;
+        overviewActionLabel = '导出全部剧本';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -191,6 +367,41 @@ extension _HomePageProjectEditorScripts on _HomePageState {
           ),
         ),
         const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(
+              ctx,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('当前批量建议', style: Theme.of(ctx).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              Text(
+                overviewDiagnosis.summary,
+                style: Theme.of(ctx).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                overviewDiagnosis.detail,
+                style: Theme.of(
+                  ctx,
+                ).textTheme.bodySmall?.copyWith(color: outline),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: overviewAction,
+                child: Text(overviewActionLabel),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 4,
           runSpacing: 0,
@@ -212,124 +423,19 @@ extension _HomePageProjectEditorScripts on _HomePageState {
             TextButton(
               onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
                   ? null
-                  : () async {
-                      setDialogState(() {
-                        scriptTaskBusy[0] = true;
-                        scriptTaskLine[0] = null;
-                      });
-                      try {
-                        final zip = await exportScriptsZip(
-                          token,
-                          scriptList.map((script) => script.legacyId).toList(),
-                        );
-                        if (!ctx.mounted) return;
-                        setDialogState(() {
-                          scriptTaskBusy[0] = false;
-                          scriptTaskLine[0] =
-                              '已导出 ${scriptList.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。';
-                        });
-                      } on RustApiException catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '导出失败：$e';
-                          });
-                        }
-                      } catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '导出失败：$e';
-                          });
-                        }
-                      }
-                    },
+                  : runProjectScriptsExportAll,
               child: Text(scriptTaskBusy[0] ? '处理中…' : '导出全部剧本'),
             ),
             TextButton(
               onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
                   ? null
-                  : () async {
-                      setDialogState(() {
-                        scriptTaskBusy[0] = true;
-                        scriptTaskLine[0] = null;
-                      });
-                      try {
-                        final rows = await pollScriptExtractState(
-                          token,
-                          scriptList.map((script) => script.legacyId).toList(),
-                        );
-                        final sample = rows.isEmpty
-                            ? '当前均为 idle 或已完成'
-                            : rows
-                                  .take(3)
-                                  .map(
-                                    (row) =>
-                                        '#${row.legacyId}:${row.extractState ?? 0}',
-                                  )
-                                  .join(' · ');
-                        if (!ctx.mounted) return;
-                        setDialogState(() {
-                          scriptTaskBusy[0] = false;
-                          scriptTaskLine[0] =
-                              '已轮询 ${scriptList.length} 条剧本提取状态：$sample';
-                        });
-                      } on RustApiException catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '轮询提取状态失败：$e';
-                          });
-                        }
-                      } catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '轮询提取状态失败：$e';
-                          });
-                        }
-                      }
-                    },
+                  : runProjectScriptsPollAll,
               child: const Text('轮询全部提取状态'),
             ),
             TextButton(
               onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
                   ? null
-                  : () async {
-                      setDialogState(() {
-                        scriptTaskBusy[0] = true;
-                        scriptTaskLine[0] = null;
-                      });
-                      try {
-                        final accepted = await startScriptAssetExtract(
-                          token,
-                          projectLegacyId: p.legacyId,
-                          scriptLegacyIds: scriptList
-                              .map((script) => script.legacyId)
-                              .toList(),
-                        );
-                        if (!ctx.mounted) return;
-                        setDialogState(() {
-                          scriptTaskBusy[0] = false;
-                          scriptTaskLine[0] =
-                              '已提交 ${scriptList.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}';
-                        });
-                      } on RustApiException catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '提交素材抽取失败：$e';
-                          });
-                        }
-                      } catch (e) {
-                        if (ctx.mounted) {
-                          setDialogState(() {
-                            scriptTaskBusy[0] = false;
-                            scriptTaskLine[0] = '提交素材抽取失败：$e';
-                          });
-                        }
-                      }
-                    },
+                  : runProjectScriptsExtractAll,
               child: const Text('提取全部剧本素材'),
             ),
           ],

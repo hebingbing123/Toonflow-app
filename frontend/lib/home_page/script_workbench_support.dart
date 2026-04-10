@@ -234,6 +234,15 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
     );
   }
 
+  final previewCoverage = selected.where(previewById.containsKey).length;
+  if (previewCoverage < selected.length) {
+    return ScriptBatchWorkbenchDiagnosis(
+      summary: '所选 ${selected.length} 条剧本还缺少上下文快照。',
+      detail: '建议先读取剧本上下文，确认哪些剧本已有素材，再决定导出 ZIP 还是补做素材抽取。',
+      recommendedAction: ScriptBatchWorkbenchRecommendedAction.syncContext,
+    );
+  }
+
   if (withAssetsCount == selected.length && selected.isNotEmpty) {
     return ScriptBatchWorkbenchDiagnosis(
       summary: '所选 ${selected.length} 条剧本都已有关联素材。',

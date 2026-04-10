@@ -192,6 +192,26 @@ void main() {
     );
   });
 
+  test(
+    'diagnoseScriptBatchWorkbench suggests syncing context before asset-aware actions',
+    () {
+      final diagnosis = diagnoseScriptBatchWorkbench(
+        selectedIds: const [3, 4],
+        scripts: const [
+          ScriptBrief(legacyId: 3, extractState: 0),
+          ScriptBrief(legacyId: 4, extractState: 0),
+        ],
+        previewRows: const [],
+      );
+
+      expect(diagnosis.summary, '所选 2 条剧本还缺少上下文快照。');
+      expect(
+        diagnosis.recommendedAction,
+        ScriptBatchWorkbenchRecommendedAction.syncContext,
+      );
+    },
+  );
+
   test('diagnoseScriptBatchWorkbench suggests retry for failed rows', () {
     final diagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: const [3, 4],
@@ -261,10 +281,10 @@ void main() {
         ],
       );
 
-      expect(diagnosis.summary, '所选 2 条剧本仍有待抽取素材的项。');
+      expect(diagnosis.summary, '所选 2 条剧本还缺少上下文快照。');
       expect(
         diagnosis.recommendedAction,
-        ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+        ScriptBatchWorkbenchRecommendedAction.syncContext,
       );
     },
   );
