@@ -19,8 +19,10 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
     String? statusLine;
     bool loading = false;
     bool busy = false;
+    bool didAutoRefresh = false;
 
     Future<void> refresh(StateSetter setState) async {
+      final previousStepId = stepIdCtrl.text.trim();
       setState(() {
         loading = true;
         statusLine = null;
@@ -39,9 +41,17 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
           if (modelCtrl.text.trim().isEmpty) {
             modelCtrl.text = flow.defaultModel;
           }
-          if (stepIdCtrl.text.trim().isEmpty && flow.steps.isNotEmpty) {
-            stepIdCtrl.text = flow.steps.first.stepId;
-            stepStatusCtrl.text = flow.steps.first.status;
+          ImageFlowStepV1? selectedStep;
+          for (final step in flow.steps) {
+            if (step.stepId == previousStepId) {
+              selectedStep = step;
+              break;
+            }
+          }
+          final focusStep = selectedStep ?? (flow.steps.isEmpty ? null : flow.steps.first);
+          if (focusStep != null) {
+            stepIdCtrl.text = focusStep.stepId;
+            stepStatusCtrl.text = focusStep.status;
           }
           statusLine =
               '已加载 flow ${flow.flowId}，步骤 ${flow.steps.length}，默认模型 ${model.model}';
@@ -77,6 +87,10 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
+              if (!didAutoRefresh) {
+                didAutoRefresh = true;
+                Future<void>.microtask(() => refresh(setState));
+              }
               return AlertDialog(
                 title: const Text('编辑图片工作台'),
                 content: SizedBox(
@@ -102,7 +116,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                               onPressed: loading || busy
                                   ? null
                                   : () => refresh(setState),
-                              child: Text(loading ? '加载中…' : '加载 flow 模板'),
+                              child: Text(loading ? '同步中…' : '重新同步 Flow'),
                             ),
                             if (defaultModel != null)
                               Text(
