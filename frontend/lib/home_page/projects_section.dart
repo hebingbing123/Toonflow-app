@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'projects_creative_manuals_workbench.dart';
 import '../rust_api.dart';
 
 class ProjectsSection extends StatelessWidget {
@@ -62,6 +63,21 @@ class ProjectsSection extends StatelessWidget {
     );
   }
 
+  Future<void> _openCreativeManualsWorkbench(BuildContext context) async {
+    final token = accessToken;
+    if (token == null || token.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取创作手册')));
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (dialogCtx) =>
+          ProjectsCreativeManualsWorkbenchDialog(accessToken: token),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
@@ -72,7 +88,7 @@ class ProjectsSection extends StatelessWidget {
         Text('项目列表', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          '查看项目、摘要与美术风格，并进入项目详情继续编辑。',
+          '查看项目、摘要、美术风格与创作手册，并进入项目详情继续编辑。',
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: outline),
@@ -105,6 +121,12 @@ class ProjectsSection extends StatelessWidget {
                   ? null
                   : () => _openArtStylesWorkbench(context),
               child: const Text('打开画风工作台'),
+            ),
+            FilledButton.tonal(
+              onPressed: creatingProject
+                  ? null
+                  : () => _openCreativeManualsWorkbench(context),
+              child: const Text('打开创作手册工作台'),
             ),
             FilledButton.tonal(
               onPressed: (loadingProjects || creatingProject)
