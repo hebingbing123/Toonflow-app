@@ -49,6 +49,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     int selectedScriptLegacyId =
         assetsFilterScriptLegacyId[0] ?? scriptList.first.legacyId;
     String selectedType = '';
+    bool initialLoadTriggered = false;
     bool loadingSummary = false;
     bool busyMutation = false;
     AssetsDataResponseV1? productionData;
@@ -139,6 +140,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
+              if (!initialLoadTriggered) {
+                initialLoadTriggered = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  if (!dialogCtx.mounted) return;
+                  await refreshProductionSummary(setState);
+                });
+              }
               final visible = visibleAssets();
               final scopedAssets = filteredVisibleAssets();
               final typeSelections = collectAssetIdsByType(visible);
