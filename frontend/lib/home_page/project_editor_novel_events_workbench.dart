@@ -17,6 +17,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
   }) {
     final events = novelEventsRef[0]?.items ?? const <NovelEventRow>[];
     final first = events.isNotEmpty ? events.first : null;
+    final summaryLine = summarizeNovelEventRows(events);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -35,32 +36,69 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
           Text(
             first == null
                 ? '用显式表单管理事件搜索、创建、更新、删除和批量删除，减少对 legacy probe 按钮的依赖。'
-                : '当前已载入 ${events.length} 条事件；首条 #${first.legacyId} ${first.name}。',
+                : '$summaryLine；首条 #${first.legacyId} ${first.name}。',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed:
-                novelsBusy[0] ||
-                    novelsLoading[0] ||
-                    novelEventsLoading[0] ||
-                    assetsBusy[0] ||
-                    assetsLoading[0] ||
-                    assetsScriptFilterLoading[0]
-                ? null
-                : () => _openNovelEventsWorkbenchDialog(
-                    ctx: ctx,
-                    setDialogState: setDialogState,
-                    token: token,
-                    p: p,
-                    novelsRef: novelsRef,
-                    novelEventsRef: novelEventsRef,
-                    novelsBusy: novelsBusy,
-                    novelEventsLoading: novelEventsLoading,
-                  ),
-            child: const Text('打开事件工作台'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.tonal(
+                onPressed:
+                    novelsBusy[0] ||
+                        novelsLoading[0] ||
+                        novelEventsLoading[0] ||
+                        assetsBusy[0] ||
+                        assetsLoading[0] ||
+                        assetsScriptFilterLoading[0]
+                    ? null
+                    : () => _openNovelEventsWorkbenchDialog(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        token: token,
+                        p: p,
+                        novelsRef: novelsRef,
+                        novelEventsRef: novelEventsRef,
+                        novelsBusy: novelsBusy,
+                        novelEventsLoading: novelEventsLoading,
+                      ),
+                child: const Text('打开事件工作台'),
+              ),
+              OutlinedButton(
+                onPressed:
+                    novelsBusy[0] ||
+                        novelsLoading[0] ||
+                        novelEventsLoading[0] ||
+                        assetsBusy[0] ||
+                        assetsLoading[0] ||
+                        assetsScriptFilterLoading[0]
+                    ? null
+                    : () async {
+                        setDialogState(() => novelEventsLoading[0] = true);
+                        try {
+                          novelEventsRef[0] =
+                              await fetchProjectNovelEventsByLegacyId(
+                                token,
+                                p.legacyId,
+                              );
+                        } on RustApiException catch (e) {
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        } finally {
+                          if (ctx.mounted) {
+                            setDialogState(() => novelEventsLoading[0] = false);
+                          }
+                        }
+                      },
+                child: Text(novelEventsLoading[0] ? '刷新事件…' : '刷新事件'),
+              ),
+            ],
           ),
         ],
       ),

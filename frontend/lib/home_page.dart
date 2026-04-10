@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'home_page/novel_workbench_support.dart';
 import 'home_page/script_workbench_support.dart';
 import 'home_page/storyboard_workbench_support.dart';
 import 'home_page/sections.dart';
@@ -24,8 +25,6 @@ part 'home_page/project_editor_assets_links_probe.dart';
 part 'home_page/project_editor_assets_corner_scape_workbench.dart';
 part 'home_page/project_editor_assets_clip_upload_workbench.dart';
 part 'home_page/project_editor_assets_images_workbench.dart';
-part 'home_page/project_editor_novels_rest_actions.dart';
-part 'home_page/project_editor_novels_rest_probe.dart';
 part 'home_page/project_editor_novels_legacy_actions.dart';
 part 'home_page/project_editor_novels_legacy_probe.dart';
 part 'home_page/project_editor_novel_events_actions.dart';

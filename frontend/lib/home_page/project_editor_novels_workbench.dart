@@ -17,6 +17,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
     final novels = novelsRef[0]?.items ?? const <NovelRow>[];
     final first = novels.isNotEmpty ? novels.first : null;
     final last = novels.isNotEmpty ? novels.last : null;
+    final summaryLine = summarizeNovelRows(novels);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -35,7 +36,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
           Text(
             first == null
                 ? '用显式表单完成章节新增、搜索、查看、更新、删除和事件生成，不再依赖首条/末条 probe 按钮。'
-                : '当前已载入 ${novels.length} 条章节；首条 #${first.legacyId} ${first.chapter}，末条 #${last!.legacyId} ${last.chapter}。',
+                : '$summaryLine；首条 #${first.legacyId} ${first.chapter}，末条 #${last!.legacyId} ${last.chapter}。',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
@@ -63,6 +64,26 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         reloadAssetsAndStats: reloadAssetsAndStats,
                       ),
                 child: const Text('打开章节工作台'),
+              ),
+              OutlinedButton(
+                onPressed:
+                    novelsBusy[0] ||
+                        novelsLoading[0] ||
+                        assetsBusy[0] ||
+                        assetsLoading[0] ||
+                        assetsScriptFilterLoading[0]
+                    ? null
+                    : () async {
+                        setDialogState(() => novelsLoading[0] = true);
+                        try {
+                          await reloadAssetsAndStats();
+                        } finally {
+                          if (ctx.mounted) {
+                            setDialogState(() => novelsLoading[0] = false);
+                          }
+                        }
+                      },
+                child: Text(novelsLoading[0] ? '刷新章节…' : '刷新章节'),
               ),
               OutlinedButton(
                 onPressed:
