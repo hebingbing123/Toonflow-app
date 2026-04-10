@@ -319,6 +319,7 @@ extension _HomePageBuildSections on _HomePageState {
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.quality)
       QualityReviewsSection(
+        accessToken: _session?.accessToken,
         loadingQualityReviews: _loadingQualityReviews,
         loadingQualityBadCases: _loadingQualityBadCases,
         loadingQualityStats: _loadingQualityStats,
