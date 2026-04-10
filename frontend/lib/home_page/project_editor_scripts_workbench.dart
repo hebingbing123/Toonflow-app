@@ -84,6 +84,97 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
               final previewOrLocalIds = previewRows.isNotEmpty
                   ? previewRows.map((row) => row.legacyId)
                   : scriptList.map((script) => script.legacyId);
+              final selectedIds = parseLegacyIdSelection(selectedIdsCtrl.text);
+              final diagnosis = diagnoseScriptBatchWorkbench(
+                selectedIds: selectedIds,
+                scripts: scriptList,
+                previewRows: previewRows,
+              );
+              Future<void> Function()? recommendedAction;
+              String recommendedActionLabel;
+              switch (diagnosis.recommendedAction) {
+                case ScriptBatchWorkbenchRecommendedAction.syncContext:
+                  recommendedAction = () async {
+                    final rows = await postScriptsGetScriptApi(
+                      token,
+                      p.legacyId,
+                      name: filterCtrl.text.trim(),
+                    );
+                    setLocalState(() {
+                      previewRows = rows;
+                      infoLine = rows.isEmpty
+                          ? '上下文读取完成，但没有匹配剧本。'
+                          : '已读取 ${rows.length} 条剧本上下文。';
+                      selectedIdsCtrl.text = encodeLegacyIdSelection(
+                        rows.map((row) => row.legacyId),
+                      );
+                    });
+                  };
+                  recommendedActionLabel = '读取剧本上下文';
+                case ScriptBatchWorkbenchRecommendedAction.pollSelected:
+                  recommendedAction = selectedIds.isEmpty
+                      ? null
+                      : () async {
+                          final rows = await pollScriptExtractState(
+                            token,
+                            selectedIds,
+                          );
+                          final synced = syncScriptExtractStates(
+                            scriptList,
+                            rows,
+                          );
+                          scriptList
+                            ..clear()
+                            ..addAll(synced);
+                          final sample = rows.isEmpty
+                              ? '当前均为 idle 或已完成'
+                              : rows
+                                    .take(3)
+                                    .map(
+                                      (row) =>
+                                          '#${row.legacyId}:${row.extractState ?? 0}',
+                                    )
+                                    .join(' · ');
+                          setLocalState(() {
+                            scriptTaskLine[0] =
+                                '已轮询 ${selectedIds.length} 条剧本提取状态：$sample';
+                          });
+                          setDialogState(() {});
+                        };
+                  recommendedActionLabel = '轮询所选状态';
+                case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
+                  recommendedAction = selectedIds.isEmpty
+                      ? null
+                      : () async {
+                          final groupSize = int.tryParse(
+                            groupSizeCtrl.text.trim(),
+                          );
+                          final accepted = await startScriptAssetExtract(
+                            token,
+                            projectLegacyId: p.legacyId,
+                            scriptLegacyIds: selectedIds,
+                            groupSize: groupSize,
+                          );
+                          setLocalState(() {
+                            scriptTaskLine[0] =
+                                '已提交 ${selectedIds.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}';
+                          });
+                          setDialogState(() {});
+                        };
+                  recommendedActionLabel = '提取所选素材';
+                case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
+                  recommendedAction = selectedIds.isEmpty
+                      ? null
+                      : () async {
+                          final zip = await exportScriptsZip(token, selectedIds);
+                          setLocalState(() {
+                            scriptTaskLine[0] =
+                                '已导出 ${selectedIds.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。';
+                          });
+                          setDialogState(() {});
+                        };
+                  recommendedActionLabel = '导出所选剧本';
+              }
 
               return AlertDialog(
                 title: const Text('剧本批量工作台'),
@@ -170,6 +261,44 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                           decoration: const InputDecoration(
                             labelText: '目标剧本 legacy id',
                             helperText: '支持逗号、空格或换行分隔；批量导出、轮询和素材抽取都使用这里的列表。',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(dialogCtx)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                diagnosis.summary,
+                                style: Theme.of(dialogCtx).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                diagnosis.detail,
+                                style: Theme.of(dialogCtx).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        dialogCtx,
+                                      ).colorScheme.outline,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              FilledButton.tonal(
+                                onPressed: localBusy || recommendedAction == null
+                                    ? null
+                                    : () => runAction(recommendedAction!),
+                                child: Text(recommendedActionLabel),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 8),

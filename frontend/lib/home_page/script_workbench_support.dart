@@ -20,6 +20,25 @@ enum ScriptWorkbenchRecommendedAction {
   exportScriptZip,
 }
 
+class ScriptBatchWorkbenchDiagnosis {
+  const ScriptBatchWorkbenchDiagnosis({
+    required this.summary,
+    required this.detail,
+    required this.recommendedAction,
+  });
+
+  final String summary;
+  final String detail;
+  final ScriptBatchWorkbenchRecommendedAction recommendedAction;
+}
+
+enum ScriptBatchWorkbenchRecommendedAction {
+  syncContext,
+  pollSelected,
+  startExtractSelected,
+  exportSelectedZip,
+}
+
 LegacyScriptsGetScriptApiItem? findScriptContextByLegacyId(
   Iterable<LegacyScriptsGetScriptApiItem> rows,
   int legacyId,
@@ -108,6 +127,72 @@ ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
     detail:
         '已同步 ${relatedAssets.length} 条关联素材，可继续进入编辑图片工作台，或先导出 ZIP 做本地审阅。',
     recommendedAction: ScriptWorkbenchRecommendedAction.openEditImageWorkbench,
+  );
+}
+
+ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
+  required Iterable<int> selectedIds,
+  required Iterable<ScriptBrief> scripts,
+  required Iterable<LegacyScriptsGetScriptApiItem> previewRows,
+}) {
+  final selected = selectedIds.toList(growable: false);
+  if (selected.isEmpty) {
+    return const ScriptBatchWorkbenchDiagnosis(
+      summary: '还没有选择要处理的剧本。',
+      detail: '先读取剧本上下文或填写目标剧本 id，再执行批量导出、轮询或素材抽取。',
+      recommendedAction: ScriptBatchWorkbenchRecommendedAction.syncContext,
+    );
+  }
+
+  final previewById = <int, LegacyScriptsGetScriptApiItem>{
+    for (final row in previewRows) row.legacyId: row,
+  };
+  final scriptById = <int, ScriptBrief>{for (final row in scripts) row.legacyId: row};
+
+  var runningCount = 0;
+  var failedCount = 0;
+  var withAssetsCount = 0;
+  for (final id in selected) {
+    final preview = previewById[id];
+    final extractState = preview?.extractState ?? scriptById[id]?.extractState;
+    if (extractState != null && extractState > 0) {
+      runningCount += 1;
+    } else if (extractState != null && extractState < 0) {
+      failedCount += 1;
+    }
+    if ((preview?.relatedAssets.length ?? 0) > 0) {
+      withAssetsCount += 1;
+    }
+  }
+
+  if (runningCount > 0) {
+    return ScriptBatchWorkbenchDiagnosis(
+      summary: '所选剧本里有 $runningCount 条仍在提取中。',
+      detail: '建议先轮询所选状态，确认批量任务是否完成，再决定是否重试抽取。',
+      recommendedAction: ScriptBatchWorkbenchRecommendedAction.pollSelected,
+    );
+  }
+
+  if (failedCount > 0) {
+    return ScriptBatchWorkbenchDiagnosis(
+      summary: '所选剧本里有 $failedCount 条最近提取失败。',
+      detail: '建议重新发起所选剧本素材抽取，优先收敛失败项。',
+      recommendedAction: ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+    );
+  }
+
+  if (withAssetsCount == selected.length && selected.isNotEmpty) {
+    return ScriptBatchWorkbenchDiagnosis(
+      summary: '所选 ${selected.length} 条剧本都已有关联素材。',
+      detail: '可以先导出所选剧本 ZIP 做集中审阅，或转入单剧本工作台继续处理图片流程。',
+      recommendedAction: ScriptBatchWorkbenchRecommendedAction.exportSelectedZip,
+    );
+  }
+
+  return ScriptBatchWorkbenchDiagnosis(
+    summary: '所选 ${selected.length} 条剧本仍有待抽取素材的项。',
+    detail: '建议直接批量发起素材抽取，把当前选择转成后续图片和分镜流程可用的资产。',
+    recommendedAction: ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
   );
 }
 

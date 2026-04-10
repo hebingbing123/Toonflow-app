@@ -134,6 +134,102 @@ void main() {
     );
   });
 
+  test('diagnoseScriptBatchWorkbench suggests sync when selection is empty', () {
+    final diagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: const [],
+      scripts: const [],
+      previewRows: const [],
+    );
+
+    expect(diagnosis.summary, '还没有选择要处理的剧本。');
+    expect(
+      diagnosis.recommendedAction,
+      ScriptBatchWorkbenchRecommendedAction.syncContext,
+    );
+  });
+
+  test('diagnoseScriptBatchWorkbench suggests polling for running rows', () {
+    final diagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: const [3, 4],
+      scripts: const [
+        ScriptBrief(legacyId: 3, extractState: 2),
+        ScriptBrief(legacyId: 4, extractState: 0),
+      ],
+      previewRows: const [],
+    );
+
+    expect(diagnosis.summary, '所选剧本里有 1 条仍在提取中。');
+    expect(
+      diagnosis.recommendedAction,
+      ScriptBatchWorkbenchRecommendedAction.pollSelected,
+    );
+  });
+
+  test('diagnoseScriptBatchWorkbench suggests retry for failed rows', () {
+    final diagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: const [3, 4],
+      scripts: const [
+        ScriptBrief(legacyId: 3, extractState: -1),
+        ScriptBrief(legacyId: 4, extractState: 0),
+      ],
+      previewRows: const [],
+    );
+
+    expect(diagnosis.summary, '所选剧本里有 1 条最近提取失败。');
+    expect(
+      diagnosis.recommendedAction,
+      ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+    );
+  });
+
+  test('diagnoseScriptBatchWorkbench suggests export when all preview rows have assets', () {
+    final diagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: const [7, 8],
+      scripts: const [
+        ScriptBrief(legacyId: 7, extractState: 0),
+        ScriptBrief(legacyId: 8, extractState: 0),
+      ],
+      previewRows: const [
+        LegacyScriptsGetScriptApiItem(
+          legacyId: 7,
+          relatedAssets: [LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A')],
+        ),
+        LegacyScriptsGetScriptApiItem(
+          legacyId: 8,
+          relatedAssets: [LegacyScriptRelatedAssetBrief(legacyId: 2, name: '场景 B')],
+        ),
+      ],
+    );
+
+    expect(diagnosis.summary, '所选 2 条剧本都已有关联素材。');
+    expect(
+      diagnosis.recommendedAction,
+      ScriptBatchWorkbenchRecommendedAction.exportSelectedZip,
+    );
+  });
+
+  test('diagnoseScriptBatchWorkbench suggests extract when assets are still missing', () {
+    final diagnosis = diagnoseScriptBatchWorkbench(
+      selectedIds: const [7, 8],
+      scripts: const [
+        ScriptBrief(legacyId: 7, extractState: 0),
+        ScriptBrief(legacyId: 8, extractState: 0),
+      ],
+      previewRows: const [
+        LegacyScriptsGetScriptApiItem(
+          legacyId: 7,
+          relatedAssets: [LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A')],
+        ),
+      ],
+    );
+
+    expect(diagnosis.summary, '所选 2 条剧本仍有待抽取素材的项。');
+    expect(
+      diagnosis.recommendedAction,
+      ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+    );
+  });
+
   test('formatBinarySize formats bytes into readable units', () {
     expect(formatBinarySize(512), '512 B');
     expect(formatBinarySize(1536), '1.5 KB');
