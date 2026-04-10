@@ -26,6 +26,18 @@ class StoryboardBatchWorkbenchDiagnosis {
   final StoryboardBatchWorkbenchRecommendedAction recommendedAction;
 }
 
+class StoryboardWorkbenchDiagnosis {
+  const StoryboardWorkbenchDiagnosis({
+    required this.summary,
+    required this.detail,
+    required this.recommendedAction,
+  });
+
+  final String summary;
+  final String detail;
+  final StoryboardWorkbenchRecommendedAction recommendedAction;
+}
+
 enum StoryboardListRecommendedAction {
   addStoryboard,
   refreshProductionSummary,
@@ -39,6 +51,15 @@ enum StoryboardBatchWorkbenchRecommendedAction {
   generateSelected,
   previewSelected,
   exportSelected,
+}
+
+enum StoryboardWorkbenchRecommendedAction {
+  syncProductionData,
+  readCurrentPreview,
+  prepareVideoTrack,
+  generateDefaultVideoPrompt,
+  refreshVideoData,
+  submitVideoGeneration,
 }
 
 String describeStoryboardListRecommendedAction(
@@ -70,6 +91,25 @@ String describeStoryboardBatchWorkbenchRecommendedAction(
       return '读取当前预览';
     case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
       return '导出所选 ZIP';
+  }
+}
+
+String describeStoryboardWorkbenchRecommendedAction(
+  StoryboardWorkbenchRecommendedAction action,
+) {
+  switch (action) {
+    case StoryboardWorkbenchRecommendedAction.syncProductionData:
+      return '同步当前分镜数据';
+    case StoryboardWorkbenchRecommendedAction.readCurrentPreview:
+      return '读取当前预览';
+    case StoryboardWorkbenchRecommendedAction.prepareVideoTrack:
+      return '准备视频轨道';
+    case StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt:
+      return '生成默认视频提示词';
+    case StoryboardWorkbenchRecommendedAction.refreshVideoData:
+      return '刷新视频数据';
+    case StoryboardWorkbenchRecommendedAction.submitVideoGeneration:
+      return '提交视频生成';
   }
 }
 
@@ -128,6 +168,16 @@ String buildStoryboardBatchWorkbenchFollowUp({
   required StoryboardBatchWorkbenchDiagnosis diagnosis,
 }) {
   final nextAction = describeStoryboardBatchWorkbenchRecommendedAction(
+    diagnosis.recommendedAction,
+  );
+  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+}
+
+String buildStoryboardWorkbenchFollowUp({
+  required String actionSummary,
+  required StoryboardWorkbenchDiagnosis diagnosis,
+}) {
+  final nextAction = describeStoryboardWorkbenchRecommendedAction(
     diagnosis.recommendedAction,
   );
   return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
@@ -236,6 +286,97 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
     detail: '建议先批量提交出图任务，再回到当前工作台读取预览或下载链接确认结果。',
     recommendedAction:
         StoryboardBatchWorkbenchRecommendedAction.generateSelected,
+  );
+}
+
+StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
+  required StoryboardRow scriptStoryboard,
+  required ProductionStoryboardItemV1? productionStoryboard,
+  required Iterable<ProductionStoryboardItemV1> productionStoryboards,
+  required Iterable<VideoItem> generatedVideos,
+  required Iterable<JobRow> generatingJobs,
+  required String? draftImageUrl,
+  required String trackIdText,
+  required String videoPromptText,
+  required String videoDurationText,
+}) {
+  if (productionStoryboard == null) {
+    return const StoryboardWorkbenchDiagnosis(
+      summary: '当前分镜还没有同步到制作视图。',
+      detail: '建议先同步当前分镜数据，补齐 production 侧的图片、轨道和提示词快照，再继续处理视频流程。',
+      recommendedAction:
+          StoryboardWorkbenchRecommendedAction.syncProductionData,
+    );
+  }
+
+  final sourceImage = resolveStoryboardSourceImageUrl(
+    productionStoryboard: productionStoryboard,
+    draftImageUrl: draftImageUrl,
+  );
+  if (sourceImage == null) {
+    return const StoryboardWorkbenchDiagnosis(
+      summary: '当前分镜还没有可用画面。',
+      detail: '先读取当前预览或手动保存图片 URL，让视频工作台有明确的输入源。',
+      recommendedAction:
+          StoryboardWorkbenchRecommendedAction.readCurrentPreview,
+    );
+  }
+
+  final knownTrackIds = collectStoryboardTrackIds(
+    scriptStoryboard: scriptStoryboard,
+    productionStoryboard: productionStoryboard,
+    productionStoryboards: productionStoryboards,
+    generatedVideos: generatedVideos,
+  );
+  final selectedTrackId = int.tryParse(trackIdText.trim());
+  if (selectedTrackId == null || selectedTrackId <= 0) {
+    return StoryboardWorkbenchDiagnosis(
+      summary: knownTrackIds.isEmpty ? '当前分镜还没有可用视频轨道。' : '当前分镜还没有选定视频轨道。',
+      detail: knownTrackIds.isEmpty
+          ? '建议先准备视频轨道，再提交视频生成任务。'
+          : '已发现轨道 ${knownTrackIds.join(", ")}，建议先回填一个轨道 ID 再继续生成视频。',
+      recommendedAction: StoryboardWorkbenchRecommendedAction.prepareVideoTrack,
+    );
+  }
+
+  final prompt = videoPromptText.trim();
+  final duration = int.tryParse(videoDurationText.trim());
+  if (prompt.isEmpty || duration == null || duration <= 0) {
+    return const StoryboardWorkbenchDiagnosis(
+      summary: '视频参数还没有准备完整。',
+      detail: '建议先生成默认视频提示词并确认时长，再提交视频任务。',
+      recommendedAction:
+          StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt,
+    );
+  }
+
+  final storyboardVideos = storyboardScopedVideos(
+    generatedVideos,
+    scriptStoryboard.legacyId,
+  );
+  if (generatingJobs.isNotEmpty) {
+    return StoryboardWorkbenchDiagnosis(
+      summary: '当前剧本还有 ${generatingJobs.length} 条视频任务在运行。',
+      detail: storyboardVideos.isEmpty
+          ? '建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。'
+          : '建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。',
+      recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+    );
+  }
+
+  if (storyboardVideos.isNotEmpty) {
+    return StoryboardWorkbenchDiagnosis(
+      summary: '当前分镜已有 ${storyboardVideos.length} 条视频候选。',
+      detail: '可以先检查已有视频结果并设为当前视频；若仍不满意，再按当前参数继续提交新任务。',
+      recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+    );
+  }
+
+  return const StoryboardWorkbenchDiagnosis(
+    summary: '图片、轨道和视频参数都已就绪。',
+    detail: '可以直接提交视频生成任务，随后刷新视频数据确认候选结果。',
+    recommendedAction:
+        StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
   );
 }
 

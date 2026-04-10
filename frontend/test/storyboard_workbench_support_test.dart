@@ -150,6 +150,209 @@ void main() {
     },
   );
 
+  test('diagnoseStoryboardWorkbench requests sync before anything else', () {
+    final diagnosis = diagnoseStoryboardWorkbench(
+      scriptStoryboard: const StoryboardRow(
+        id: '1',
+        legacyId: 11,
+        scriptId: '3',
+        prompt: '镜头一',
+      ),
+      productionStoryboard: null,
+      productionStoryboards: const [],
+      generatedVideos: const [],
+      generatingJobs: const [],
+      draftImageUrl: null,
+      trackIdText: '',
+      videoPromptText: '',
+      videoDurationText: '',
+    );
+
+    expect(
+      diagnosis.recommendedAction,
+      StoryboardWorkbenchRecommendedAction.syncProductionData,
+    );
+  });
+
+  test(
+    'diagnoseStoryboardWorkbench requests preview when image is missing',
+    () {
+      final diagnosis = diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          legacyId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(id: 11),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [],
+        generatingJobs: const [],
+        draftImageUrl: '  ',
+        trackIdText: '',
+        videoPromptText: '',
+        videoDurationText: '',
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardWorkbenchRecommendedAction.readCurrentPreview,
+      );
+    },
+  );
+
+  test('diagnoseStoryboardWorkbench requests track preparation first', () {
+    final diagnosis = diagnoseStoryboardWorkbench(
+      scriptStoryboard: const StoryboardRow(
+        id: '1',
+        legacyId: 11,
+        scriptId: '3',
+        prompt: '镜头一',
+        trackId: 4,
+      ),
+      productionStoryboard: const ProductionStoryboardItemV1(
+        id: 11,
+        url: 'https://example.com/frame.png',
+      ),
+      productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+      generatedVideos: const [],
+      generatingJobs: const [],
+      draftImageUrl: null,
+      trackIdText: '',
+      videoPromptText: 'prompt',
+      videoDurationText: '5',
+    );
+
+    expect(
+      diagnosis.recommendedAction,
+      StoryboardWorkbenchRecommendedAction.prepareVideoTrack,
+    );
+  });
+
+  test(
+    'diagnoseStoryboardWorkbench requests default prompt when video params are incomplete',
+    () {
+      final diagnosis = diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          legacyId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          url: 'https://example.com/frame.png',
+        ),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [],
+        generatingJobs: const [],
+        draftImageUrl: null,
+        trackIdText: '7',
+        videoPromptText: ' ',
+        videoDurationText: '0',
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt,
+      );
+    },
+  );
+
+  test(
+    'diagnoseStoryboardWorkbench prefers refreshing when jobs or videos already exist',
+    () {
+      final withJobs = diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          legacyId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          url: 'https://example.com/frame.png',
+        ),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [],
+        generatingJobs: const [
+          JobRow(
+            legacyTaskId: 1,
+            id: 'job-1',
+            ownerUserId: 'u',
+            kind: 'video',
+            status: 'running',
+            payload: {},
+            createdAt: '2026-04-10T10:00:00Z',
+            updatedAt: '2026-04-10T10:01:00Z',
+          ),
+        ],
+        draftImageUrl: null,
+        trackIdText: '7',
+        videoPromptText: 'prompt',
+        videoDurationText: '5',
+      );
+
+      final withVideos = diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          legacyId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          url: 'https://example.com/frame.png',
+        ),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [
+          VideoItem(id: 11, videoUrl: 'https://example.com/video.mp4'),
+        ],
+        generatingJobs: const [],
+        draftImageUrl: null,
+        trackIdText: '7',
+        videoPromptText: 'prompt',
+        videoDurationText: '5',
+      );
+
+      expect(
+        withJobs.recommendedAction,
+        StoryboardWorkbenchRecommendedAction.refreshVideoData,
+      );
+      expect(
+        withVideos.recommendedAction,
+        StoryboardWorkbenchRecommendedAction.refreshVideoData,
+      );
+    },
+  );
+
+  test('buildStoryboardWorkbenchFollowUp appends the recommended action', () {
+    final line = buildStoryboardWorkbenchFollowUp(
+      actionSummary: '已读取当前分镜预览。',
+      diagnosis: diagnoseStoryboardWorkbench(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          legacyId: 11,
+          scriptId: '3',
+          prompt: '镜头一',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          url: 'https://example.com/frame.png',
+        ),
+        productionStoryboards: const [ProductionStoryboardItemV1(id: 11)],
+        generatedVideos: const [],
+        generatingJobs: const [],
+        draftImageUrl: null,
+        trackIdText: '7',
+        videoPromptText: 'prompt',
+        videoDurationText: '5',
+      ),
+    );
+
+    expect(line, contains('下一步建议：提交视频生成。'));
+  });
+
   test('collectStoryboardTrackIds merges and sorts known track ids', () {
     final ids = collectStoryboardTrackIds(
       scriptStoryboard: const StoryboardRow(
