@@ -222,7 +222,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                               ],
                               onChanged: busyMutation
                                   ? null
-                                  : (value) {
+                                  : (value) async {
                                       setState(() {
                                         selectedType = value ?? '';
                                         selectedIds.removeWhere(
@@ -236,7 +236,11 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                             filteredVisibleAssets().first.legacyId,
                                           );
                                         }
+                                        statusLine = selectedType.isEmpty
+                                            ? '正在切换到全部类型并同步 production 摘要…'
+                                            : '正在切换到 $selectedType 并同步 production 摘要…';
                                       });
+                                      await refreshProductionSummary(setState);
                                     },
                             ),
                           ),
