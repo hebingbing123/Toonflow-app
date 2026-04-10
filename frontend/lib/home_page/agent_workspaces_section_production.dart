@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'agent_workspaces_section_script.dart';
+import 'production_workspace_card_panels.dart';
 import 'production_workspace_context_snapshot.dart';
+import 'production_workspace_flow_logic.dart';
 import 'production_workspace_support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
@@ -431,254 +433,86 @@ class _AgentWorkspaceProductionCardState
 
   void _runWorkspaceStageDomainTool(ProductionWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) {
-      return;
-    }
+    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) return;
     _probeProductionDomainTool();
   }
 
   void _runWorkspaceStageSubAgent(ProductionWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
-      return;
-    }
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) return;
     _runProductionSubAgentTool();
-  }
-
-  Widget _buildWorkspaceStagesPanel(BuildContext context) {
-    final stages = _buildWorkspaceStages();
-    if (stages.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 6),
-        ...stages.map(
-          (ProductionWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          stage.title,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                      ),
-                      Chip(label: Text(stage.statusLabel)),
-                    ],
-                  ),
-                  Text(
-                    stage.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      Chip(label: Text('flow=${stage.flowKey}')),
-                      OutlinedButton(
-                        onPressed: widget.busy
-                            ? null
-                            : () => _applyWorkspaceStage(stage),
-                        child: const Text('应用阶段'),
-                      ),
-                      if (stage.domainTool != null)
-                        FilledButton.tonal(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceStageDomainTool(stage),
-                          child: const Text('读取 flow'),
-                        ),
-                      if (stage.subAgentTool != null)
-                        FilledButton(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceStageSubAgent(stage),
-                          child: const Text('推进阶段'),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   void _runWorkspaceRecipeDomainTool(ProductionWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) {
-      return;
-    }
+    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) return;
     _probeProductionDomainTool();
   }
 
   void _runWorkspaceRecipeSubAgent(ProductionWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
-      return;
-    }
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) return;
     _runProductionSubAgentTool();
   }
 
+  Widget _buildWorkspaceStagesPanel(BuildContext context) {
+    return ProductionWorkspaceStagesPanel(
+      stages: _buildWorkspaceStages(),
+      busy: widget.busy,
+      onApplyStage: _applyWorkspaceStage,
+      onRunStageDomainTool: _runWorkspaceStageDomainTool,
+      onRunStageSubAgent: _runWorkspaceStageSubAgent,
+    );
+  }
+
   Widget _buildWorkspaceDiagnosis(BuildContext context) {
-    final recipes = _buildWorkspaceRecipes();
-    if (recipes.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 6),
-        ...recipes.map(
-          (ProductionWorkspaceRecipe recipe) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    recipe.title,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    recipe.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      Chip(label: Text('flow=${recipe.flowKey}')),
-                      if (recipe.domainTool != null)
-                        Chip(label: Text('tool=${recipe.domainTool}')),
-                      if (recipe.subAgentTool != null)
-                        Chip(label: Text('agent=${recipe.subAgentTool}')),
-                      OutlinedButton(
-                        onPressed: widget.busy
-                            ? null
-                            : () => _applyWorkspaceRecipe(recipe),
-                        child: const Text('应用建议'),
-                      ),
-                      if (recipe.domainTool != null)
-                        FilledButton.tonal(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceRecipeDomainTool(recipe),
-                          child: const Text('读取 flow'),
-                        ),
-                      if (recipe.subAgentTool != null)
-                        FilledButton(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceRecipeSubAgent(recipe),
-                          child: const Text('运行子代理'),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return ProductionWorkspaceDiagnosisPanel(
+      recipes: _buildWorkspaceRecipes(),
+      busy: widget.busy,
+      onApplyRecipe: _applyWorkspaceRecipe,
+      onRunRecipeDomainTool: _runWorkspaceRecipeDomainTool,
+      onRunRecipeSubAgent: _runWorkspaceRecipeSubAgent,
     );
   }
 
   Widget _buildGuidedTasks() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: <Widget>[
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onFlowKeyChanged('assets');
-                  widget.onProductionDomainToolChanged('get_flowData');
-                  _probeProductionDomainTool();
-                },
-          child: const Text('1) 拉取资产 flow'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  _applyProductionPromptIfEmpty(
-                    '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
-                  );
-                  widget.onProductionSubAgentChanged(
-                    'run_sub_agent_derive_assets',
-                  );
-                  _runProductionSubAgentTool();
-                },
-          child: const Text('2) 运行资产子代理'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onFlowKeyChanged('storyboard');
-                  widget.onProductionDomainToolChanged('get_flowData');
-                  _probeProductionDomainTool();
-                },
-          child: const Text('3) 拉取分镜 flow'),
-        ),
-        OutlinedButton(
-          onPressed: widget.busy || widget.workspaceLastToolResultLine == null
-              ? null
-              : _writeBackProductionFlowResult,
-          child: const Text('4) 写回 flow'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onFlowKeyChanged('storyboard');
-                  _applyProductionPromptIfEmpty(
-                    '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
-                  );
-                  widget.onProductionSubAgentChanged(
-                    'run_sub_agent_storyboard_gen',
-                  );
-                  _runProductionSubAgentTool();
-                },
-          child: const Text('5) 运行分镜子代理'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onFlowKeyChanged('scriptPlan');
-                  _applyProductionPromptIfEmpty(
-                    '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
-                  );
-                  widget.onProductionSubAgentChanged(
-                    'run_sub_agent_director_plan',
-                  );
-                  _runProductionSubAgentTool();
-                },
-          child: const Text('6) 运行导演计划子代理'),
-        ),
-      ],
+    return ProductionWorkspaceGuidedTasksPanel(
+      busy: widget.busy,
+      hasLastResult: widget.workspaceLastToolResultLine != null,
+      onPullAssetsFlow: () {
+        widget.onFlowKeyChanged('assets');
+        widget.onProductionDomainToolChanged('get_flowData');
+        _probeProductionDomainTool();
+      },
+      onRunAssetsSubAgent: () {
+        _applyProductionPromptIfEmpty(
+          '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
+        );
+        widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
+        _runProductionSubAgentTool();
+      },
+      onPullStoryboardFlow: () {
+        widget.onFlowKeyChanged('storyboard');
+        widget.onProductionDomainToolChanged('get_flowData');
+        _probeProductionDomainTool();
+      },
+      onWriteBackFlow: _writeBackProductionFlowResult,
+      onRunStoryboardSubAgent: () {
+        widget.onFlowKeyChanged('storyboard');
+        _applyProductionPromptIfEmpty(
+          '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
+        );
+        widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
+        _runProductionSubAgentTool();
+      },
+      onRunDirectorPlanSubAgent: () {
+        widget.onFlowKeyChanged('scriptPlan');
+        _applyProductionPromptIfEmpty(
+          '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
+        );
+        widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
+        _runProductionSubAgentTool();
+      },
     );
   }
 

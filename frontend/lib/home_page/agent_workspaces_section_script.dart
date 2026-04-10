@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'script_workspace_card_panels.dart';
 import 'script_workspace_context_snapshot.dart';
 import 'script_workspace_support.dart';
 
@@ -487,17 +488,13 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceRecipeDomainTool(ScriptWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) {
-      return;
-    }
+    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) return;
     _probeScriptDomainTool();
   }
 
   void _runWorkspaceRecipeSubAgent(ScriptWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
-      return;
-    }
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) return;
     _runScriptSubAgentTool();
   }
 
@@ -520,157 +517,33 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceStageDomainTool(ScriptWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) {
-      return;
-    }
+    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) return;
     _probeScriptDomainTool();
   }
 
   void _runWorkspaceStageSubAgent(ScriptWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
-      return;
-    }
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) return;
     _runScriptSubAgentTool();
   }
 
   Widget _buildWorkspaceStagesPanel(BuildContext context) {
-    final stages = _buildWorkspaceStages();
-    if (stages.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 6),
-        ...stages.map(
-          (ScriptWorkspaceStage stage) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          stage.title,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                      ),
-                      Chip(label: Text(stage.statusLabel)),
-                    ],
-                  ),
-                  Text(
-                    stage.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      OutlinedButton(
-                        onPressed: widget.busy
-                            ? null
-                            : () => _applyWorkspaceStage(stage),
-                        child: const Text('应用阶段'),
-                      ),
-                      if (stage.domainTool != null)
-                        FilledButton.tonal(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceStageDomainTool(stage),
-                          child: const Text('读取上下文'),
-                        ),
-                      if (stage.subAgentTool != null)
-                        FilledButton(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceStageSubAgent(stage),
-                          child: const Text('推进阶段'),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return ScriptWorkspaceStagesPanel(
+      stages: _buildWorkspaceStages(),
+      busy: widget.busy,
+      onApplyStage: _applyWorkspaceStage,
+      onRunStageDomainTool: _runWorkspaceStageDomainTool,
+      onRunStageSubAgent: _runWorkspaceStageSubAgent,
     );
   }
 
   Widget _buildWorkspaceDiagnosis(BuildContext context) {
-    final recipes = _buildWorkspaceRecipes();
-    if (recipes.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 6),
-        ...recipes.map(
-          (ScriptWorkspaceRecipe recipe) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    recipe.title,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    recipe.detail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      if (recipe.domainTool != null)
-                        Chip(label: Text('tool=${recipe.domainTool}')),
-                      if (recipe.subAgentTool != null)
-                        Chip(label: Text('agent=${recipe.subAgentTool}')),
-                      OutlinedButton(
-                        onPressed: widget.busy
-                            ? null
-                            : () => _applyWorkspaceRecipe(recipe),
-                        child: const Text('应用建议'),
-                      ),
-                      if (recipe.domainTool != null)
-                        FilledButton.tonal(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceRecipeDomainTool(recipe),
-                          child: const Text('读取上下文'),
-                        ),
-                      if (recipe.subAgentTool != null)
-                        FilledButton(
-                          onPressed: widget.busy
-                              ? null
-                              : () => _runWorkspaceRecipeSubAgent(recipe),
-                          child: const Text('运行子代理'),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+    return ScriptWorkspaceDiagnosisPanel(
+      recipes: _buildWorkspaceRecipes(),
+      busy: widget.busy,
+      onApplyRecipe: _applyWorkspaceRecipe,
+      onRunRecipeDomainTool: _runWorkspaceRecipeDomainTool,
+      onRunRecipeSubAgent: _runWorkspaceRecipeSubAgent,
     );
   }
 
