@@ -47,6 +47,13 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
       downloadUrl = null;
     }
 
+    StoryboardBatchWorkbenchDiagnosis currentDiagnosis() =>
+        diagnoseStoryboardBatchWorkbench(
+          selectedIds: selectedIds,
+          boards: boardsList,
+          productionRows: productionRows,
+        );
+
     Future<void> refreshProduction(StateSetter setState) async {
       final previousSingleSelectedId = sortedSelection().length == 1
           ? sortedSelection().first
@@ -82,9 +89,12 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
           if (previousSingleSelectedId != nextSingleSelectedId) {
             clearSelectionScopedOutputs();
           }
-          statusLine = filtered.isEmpty
-              ? '制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。'
-              : '已同步 ${filtered.length} 条制作分镜';
+          statusLine = buildStoryboardBatchWorkbenchFollowUp(
+            actionSummary: filtered.isEmpty
+                ? '制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。'
+                : '已同步 ${filtered.length} 条制作分镜。',
+            diagnosis: currentDiagnosis(),
+          );
         });
       } on RustApiException catch (e) {
         setState(() => statusLine = '加载制作视图失败：$e');
@@ -144,6 +154,163 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
               final singleSelectedId = selected.length == 1
                   ? selected.first
                   : null;
+              final diagnosis = currentDiagnosis();
+              VoidCallback? recommendedAction;
+              String recommendedActionLabel;
+              switch (diagnosis.recommendedAction) {
+                case StoryboardBatchWorkbenchRecommendedAction
+                    .syncProductionSummary:
+                  recommendedAction = loadingProduction || busyMutation
+                      ? null
+                      : () => refreshProduction(setState);
+                  recommendedActionLabel = loadingProduction
+                      ? '同步中…'
+                      : describeStoryboardBatchWorkbenchRecommendedAction(
+                          diagnosis.recommendedAction,
+                        );
+                case StoryboardBatchWorkbenchRecommendedAction
+                    .selectReadyStoryboards:
+                  recommendedAction = busyMutation
+                      ? null
+                      : () {
+                          setState(() {
+                            selectedIds
+                              ..clear()
+                              ..addAll(
+                                boardsList
+                                    .where(
+                                      (row) =>
+                                          resolveStoryboardGenerationPrompt(
+                                            scriptStoryboard: row,
+                                            productionStoryboard:
+                                                productionMap[row.legacyId],
+                                          ) !=
+                                          null,
+                                    )
+                                    .map((row) => row.legacyId),
+                              );
+                            clearSelectionScopedOutputs();
+                            statusLine = buildStoryboardBatchWorkbenchFollowUp(
+                              actionSummary: '已选择全部可直接出图的分镜。',
+                              diagnosis: currentDiagnosis(),
+                            );
+                          });
+                        };
+                  recommendedActionLabel =
+                      describeStoryboardBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
+                case StoryboardBatchWorkbenchRecommendedAction.generateSelected:
+                  recommendedAction = busyMutation || selectedIds.isEmpty
+                      ? null
+                      : () => runMutation(setState, () async {
+                          final productionMap = productionById();
+                          final suffix = promptSuffixCtrl.text.trim();
+                          final negativePrompt = negativePromptCtrl.text.trim();
+                          final items = <BatchGenerateImageItem>[];
+                          for (final legacyId in selected) {
+                            final scriptRow = findScriptRow(legacyId);
+                            final prompt = resolveStoryboardGenerationPrompt(
+                              scriptStoryboard: scriptRow,
+                              productionStoryboard: productionMap[legacyId],
+                            );
+                            if (prompt == null) {
+                              continue;
+                            }
+                            final combinedPrompt = suffix.isEmpty
+                                ? prompt
+                                : '$prompt\n$suffix';
+                            items.add(
+                              BatchGenerateImageItem(
+                                storyboardId: legacyId,
+                                prompt: combinedPrompt,
+                                negativePrompt: negativePrompt.isEmpty
+                                    ? null
+                                    : negativePrompt,
+                                model: modelCtrl.text.trim().isEmpty
+                                    ? null
+                                    : modelCtrl.text.trim(),
+                                resolution: resolutionCtrl.text.trim().isEmpty
+                                    ? null
+                                    : resolutionCtrl.text.trim(),
+                              ),
+                            );
+                          }
+                          if (items.isEmpty) {
+                            throw const FormatException('所选分镜没有可用提示词，无法发起批量出图');
+                          }
+                          final response =
+                              await postStoryboardBatchGenerateImageV1(
+                                token,
+                                projectId: projectLegacyId,
+                                scriptId: scriptLegacyId,
+                                items: items,
+                                model: modelCtrl.text.trim().isEmpty
+                                    ? null
+                                    : modelCtrl.text.trim(),
+                                resolution: resolutionCtrl.text.trim().isEmpty
+                                    ? null
+                                    : resolutionCtrl.text.trim(),
+                              );
+                          await refreshProduction(setState);
+                          setState(() {
+                            statusLine = buildStoryboardBatchWorkbenchFollowUp(
+                              actionSummary:
+                                  '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
+                              diagnosis: currentDiagnosis(),
+                            );
+                          });
+                        });
+                  recommendedActionLabel =
+                      describeStoryboardBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
+                case StoryboardBatchWorkbenchRecommendedAction.previewSelected:
+                  recommendedAction = busyMutation || singleSelectedId == null
+                      ? null
+                      : () => runMutation(setState, () async {
+                          final preview = await postStoryboardPreviewImageV1(
+                            token,
+                            storyboardId: singleSelectedId,
+                          );
+                          setState(() {
+                            previewUrl = preview.imageUrl;
+                            statusLine = buildStoryboardBatchWorkbenchFollowUp(
+                              actionSummary: preview.imageUrl == null
+                                  ? '当前分镜还没有预览图。'
+                                  : '已读取分镜 #$singleSelectedId 的当前预览。',
+                              diagnosis: currentDiagnosis(),
+                            );
+                          });
+                        });
+                  recommendedActionLabel =
+                      describeStoryboardBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
+                case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
+                  recommendedAction = busyMutation || selectedIds.isEmpty
+                      ? null
+                      : () => runMutation(setState, () async {
+                          final zip = await fetchProductionExportImageZipV1(
+                            token,
+                            shotId: selected
+                                .map((id) => <String, dynamic>{'id': '$id'})
+                                .toList(growable: false),
+                          );
+                          setState(() {
+                            exportLine =
+                                '已导出 ${selected.length} 张分镜图片，文件 ${zip.filename ?? "storyboards.zip"}，大小 ${zip.bytes.length} bytes';
+                            statusLine = buildStoryboardBatchWorkbenchFollowUp(
+                              actionSummary: exportLine!,
+                              diagnosis: currentDiagnosis(),
+                            );
+                          });
+                        });
+                  recommendedActionLabel =
+                      describeStoryboardBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
+              }
               return AlertDialog(
                 title: const Text('分镜出图工作台'),
                 content: SizedBox(
@@ -158,6 +325,37 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                             ?.copyWith(
                               color: Theme.of(dialogCtx).colorScheme.outline,
                             ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(dialogCtx)
+                              .colorScheme
+                              .secondaryContainer
+                              .withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              diagnosis.summary,
+                              style: Theme.of(dialogCtx).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              diagnosis.detail,
+                              style: Theme.of(dialogCtx).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            FilledButton.tonal(
+                              onPressed: recommendedAction,
+                              child: Text(recommendedActionLabel),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -192,7 +390,11 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                               .map((row) => row.legacyId),
                                         );
                                       clearSelectionScopedOutputs();
-                                      statusLine = '已选择全部可直接出图的分镜';
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary: '已选择全部可直接出图的分镜。',
+                                            diagnosis: currentDiagnosis(),
+                                          );
                                     });
                                   },
                             child: const Text('全选可出图分镜'),
@@ -205,7 +407,11 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                       selectedIds.clear();
                                       clearSelectionScopedOutputs();
                                       exportLine = null;
-                                      statusLine = '已清空选择';
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary: '已清空选择。',
+                                            diagnosis: currentDiagnosis(),
+                                          );
                                     });
                                   },
                             child: const Text('清空选择'),
@@ -265,6 +471,8 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                           FilledButton(
                             onPressed: busyMutation || selectedIds.isEmpty
                                 ? null
+                                : recommendedActionLabel == '批量发起出图'
+                                ? recommendedAction
                                 : () => runMutation(setState, () async {
                                     final productionMap = productionById();
                                     final suffix = promptSuffixCtrl.text.trim();
@@ -323,8 +531,14 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                               : resolutionCtrl.text.trim(),
                                         );
                                     await refreshProduction(setState);
-                                    statusLine =
-                                        '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条';
+                                    setState(() {
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary:
+                                                '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
+                                            diagnosis: currentDiagnosis(),
+                                          );
+                                    });
                                   }),
                             child: Text(busyMutation ? '处理中…' : '批量发起出图'),
                           ),
@@ -339,9 +553,14 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                         );
                                     setState(() {
                                       previewUrl = preview.imageUrl;
-                                      statusLine = preview.imageUrl == null
-                                          ? '当前分镜还没有预览图'
-                                          : '已读取分镜 #$singleSelectedId 的当前预览';
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary:
+                                                preview.imageUrl == null
+                                                ? '当前分镜还没有预览图。'
+                                                : '已读取分镜 #$singleSelectedId 的当前预览。',
+                                            diagnosis: currentDiagnosis(),
+                                          );
                                     });
                                   }),
                             child: const Text('读取当前预览'),
@@ -357,9 +576,14 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                         );
                                     setState(() {
                                       downloadUrl = preview.previewUrl;
-                                      statusLine = preview.previewUrl == null
-                                          ? preview.message
-                                          : '已生成分镜 #$singleSelectedId 的下载链接';
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary:
+                                                preview.previewUrl == null
+                                                ? preview.message
+                                                : '已生成分镜 #$singleSelectedId 的下载链接。',
+                                            diagnosis: currentDiagnosis(),
+                                          );
                                     });
                                   }),
                             child: const Text('读取下载链接'),
@@ -382,7 +606,11 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                     setState(() {
                                       exportLine =
                                           '已导出 ${selected.length} 张分镜图片，文件 ${zip.filename ?? "storyboards.zip"}，大小 ${zip.bytes.length} bytes';
-                                      statusLine = exportLine;
+                                      statusLine =
+                                          buildStoryboardBatchWorkbenchFollowUp(
+                                            actionSummary: exportLine!,
+                                            diagnosis: currentDiagnosis(),
+                                          );
                                     });
                                   }),
                             child: const Text('导出所选 ZIP'),

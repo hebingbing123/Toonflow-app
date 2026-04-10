@@ -62,6 +62,94 @@ void main() {
     expect(line, contains('下一步建议：进入分镜出图工作台。'));
   });
 
+  test(
+    'diagnoseStoryboardBatchWorkbench recommends selecting ready boards first',
+    () {
+      final diagnosis = diagnoseStoryboardBatchWorkbench(
+        selectedIds: const <int>[],
+        boards: const [
+          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '  '),
+        ],
+        productionRows: const [],
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards,
+      );
+    },
+  );
+
+  test(
+    'diagnoseStoryboardBatchWorkbench requests production sync when coverage is missing',
+    () {
+      final diagnosis = diagnoseStoryboardBatchWorkbench(
+        selectedIds: const [11, 12],
+        boards: const [
+          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+        ],
+        productionRows: const [
+          ProductionStoryboardItemV1(id: 11, prompt: '镜头一'),
+        ],
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardBatchWorkbenchRecommendedAction.syncProductionSummary,
+      );
+    },
+  );
+
+  test(
+    'diagnoseStoryboardBatchWorkbench prefers preview for single selected board with image',
+    () {
+      final diagnosis = diagnoseStoryboardBatchWorkbench(
+        selectedIds: const [11],
+        boards: const [
+          StoryboardRow(
+            id: '1',
+            legacyId: 11,
+            scriptId: '3',
+            prompt: '镜头一',
+            filePath: 'poster.png',
+          ),
+        ],
+        productionRows: const [
+          ProductionStoryboardItemV1(id: 11, prompt: '镜头一'),
+        ],
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardBatchWorkbenchRecommendedAction.previewSelected,
+      );
+    },
+  );
+
+  test(
+    'buildStoryboardBatchWorkbenchFollowUp appends the recommended action',
+    () {
+      final line = buildStoryboardBatchWorkbenchFollowUp(
+        actionSummary: '已提交 2 条分镜出图任务。',
+        diagnosis: diagnoseStoryboardBatchWorkbench(
+          selectedIds: const [11, 12],
+          boards: const [
+            StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+            StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+          ],
+          productionRows: const [
+            ProductionStoryboardItemV1(id: 11, prompt: '镜头一'),
+            ProductionStoryboardItemV1(id: 12, prompt: '镜头二'),
+          ],
+        ),
+      );
+
+      expect(line, contains('下一步建议：批量发起出图。'));
+    },
+  );
+
   test('collectStoryboardTrackIds merges and sorts known track ids', () {
     final ids = collectStoryboardTrackIds(
       scriptStoryboard: const StoryboardRow(
