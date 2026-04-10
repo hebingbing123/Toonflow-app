@@ -64,45 +64,6 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       });
     }
 
-    Future<void> reloadImages(StateSetter setState) async {
-      setState(() {
-        loadingList = true;
-        statusLine = null;
-      });
-      try {
-        final response = await fetchProjectAssetImagesByLegacyIds(
-          token,
-          p.legacyId,
-          selectedAssetLegacyId,
-        );
-        setState(() {
-          imagesResponse = response;
-          selectedImageId = response.items.isEmpty
-              ? null
-              : response.items.first.id;
-          previewBytes = null;
-          statusLine = '已加载 ${response.items.length} 张图片';
-        });
-        syncPatchFieldsFromSelected(setState);
-      } on RustApiException catch (e) {
-        setState(() {
-          imagesResponse = null;
-          selectedImageId = null;
-          previewBytes = null;
-          statusLine = '加载失败：$e';
-        });
-      } catch (e) {
-        setState(() {
-          imagesResponse = null;
-          selectedImageId = null;
-          previewBytes = null;
-          statusLine = '加载失败：$e';
-        });
-      } finally {
-        setState(() => loadingList = false);
-      }
-    }
-
     Future<void> loadPreview(StateSetter setState) async {
       final image = selectedImage();
       if (image == null) {
@@ -125,6 +86,46 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         setState(() => statusLine = '预览失败：$e');
       } finally {
         setState(() => loadingPreview = false);
+      }
+    }
+
+    Future<void> reloadImages(StateSetter setState) async {
+      setState(() {
+        loadingList = true;
+        statusLine = null;
+      });
+      try {
+        final response = await fetchProjectAssetImagesByLegacyIds(
+          token,
+          p.legacyId,
+          selectedAssetLegacyId,
+        );
+        setState(() {
+          imagesResponse = response;
+          selectedImageId = response.items.isEmpty
+              ? null
+              : response.items.first.id;
+          previewBytes = null;
+          statusLine = '已加载 ${response.items.length} 张图片';
+        });
+        syncPatchFieldsFromSelected(setState);
+        await loadPreview(setState);
+      } on RustApiException catch (e) {
+        setState(() {
+          imagesResponse = null;
+          selectedImageId = null;
+          previewBytes = null;
+          statusLine = '加载失败：$e';
+        });
+      } catch (e) {
+        setState(() {
+          imagesResponse = null;
+          selectedImageId = null;
+          previewBytes = null;
+          statusLine = '加载失败：$e';
+        });
+      } finally {
+        setState(() => loadingList = false);
       }
     }
 
@@ -336,13 +337,15 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                             .toList(),
                         onChanged: imageItems.isEmpty
                             ? null
-                            : (value) {
+                            : (value) async {
                                 if (value == null) return;
                                 setState(() {
                                   selectedImageId = value;
                                   previewBytes = null;
+                                  statusLine = '正在切换图片并刷新预览…';
                                 });
                                 syncPatchFieldsFromSelected(setState);
+                                await loadPreview(setState);
                               },
                       ),
                       const SizedBox(height: 8),
