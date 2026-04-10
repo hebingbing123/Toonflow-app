@@ -9,6 +9,7 @@ class _StoryboardWorkbenchPanel extends StatefulWidget {
     required this.scriptStoryboard,
     required this.readPromptText,
     required this.readVideoDescriptionText,
+    this.onStoryboardMutated,
   });
 
   final String token;
@@ -18,6 +19,7 @@ class _StoryboardWorkbenchPanel extends StatefulWidget {
   final StoryboardRow scriptStoryboard;
   final String Function() readPromptText;
   final String Function() readVideoDescriptionText;
+  final Future<void> Function()? onStoryboardMutated;
 
   @override
   State<_StoryboardWorkbenchPanel> createState() =>
@@ -204,6 +206,14 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     }
   }
 
+  Future<void> _notifyStoryboardMutated() async {
+    final callback = widget.onStoryboardMutated;
+    if (callback == null) {
+      return;
+    }
+    await callback();
+  }
+
   Widget _buildStoryboardPreviewCard() {
     final outline = Theme.of(context).colorScheme.outline;
     final imageUrl = _productionRow?.url?.trim();
@@ -340,6 +350,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                       );
                       _imageUrlCtrl.text = response.imageUrl;
                       await _refreshProductionData();
+                      await _notifyStoryboardMutated();
                     }),
               child: const Text('保存图片 URL'),
             ),
@@ -353,6 +364,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                       );
                       _imageUrlCtrl.clear();
                       await _refreshProductionData();
+                      await _notifyStoryboardMutated();
                     }),
               child: const Text('清空画面'),
             ),
@@ -410,6 +422,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                       _trackIdCtrl.text = response.trackId.toString();
                       _trackNameCtrl.clear();
                       await _refreshAll(syncTrackId: true);
+                      await _notifyStoryboardMutated();
                     }),
               child: const Text('新增轨道'),
             ),
@@ -431,6 +444,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                         _trackIdCtrl.clear();
                       }
                       await _refreshAll(syncTrackId: true);
+                      await _notifyStoryboardMutated();
                     }),
               child: const Text('删除轨道'),
             ),
@@ -598,6 +612,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                     if (!mounted) return;
                     setState(() => _workbenchLine = '视频任务已提交，HTTP $status');
                     await _refreshWorkbenchData();
+                    await _notifyStoryboardMutated();
                   }),
             child: Text(_saving ? '提交中…' : '提交视频生成'),
           ),
@@ -650,6 +665,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                             videoUrl: video.videoUrl!.trim(),
                           );
                           await _refreshProductionData(syncTrackId: true);
+                          await _notifyStoryboardMutated();
                         }),
                   child: const Text('设为当前视频'),
                 ),
@@ -669,6 +685,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                     );
                     await _refreshProductionData(syncTrackId: true);
                     await _refreshWorkbenchData();
+                    await _notifyStoryboardMutated();
                   }),
             child: const Text('删除当前已选视频'),
           ),

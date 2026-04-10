@@ -45,6 +45,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                           scriptStoryboard: row,
                           readPromptText: () => promptCtrl.text,
                           readVideoDescriptionText: () => videoCtrl.text,
+                          onStoryboardMutated: onStoryboardTreeMutated,
                         ),
                         const SizedBox(height: 16),
                         TextField(

@@ -521,6 +521,20 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                                       setBoardsState,
                                                   boardsLoading: boardsLoading,
                                                 );
+                                                if (!ctx2.mounted) return;
+                                                await _reloadProductionStoryboardSummary(
+                                                  token: token,
+                                                  projectLegacyId:
+                                                      projectLegacyId,
+                                                  scriptLegacyId:
+                                                      scriptLegacyId,
+                                                  productionSummaryLine:
+                                                      productionSummaryLine,
+                                                  productionSummaryLoading:
+                                                      productionSummaryLoading,
+                                                  setBoardsState:
+                                                      setBoardsState,
+                                                );
                                               },
                                             );
                                           },
