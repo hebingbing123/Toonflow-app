@@ -215,6 +215,7 @@
 - 项目详情资产区已新增“资产出图工作台”：可在项目资产主视图内按当前可见资产选择目标、同步 `production/assets/get-assets-data` 摘要、读取 legacy `get-material-data` / `batch-generation-data` / `polling-prompt-assets` 上下文、批量触发 `batch-generate-assets-image`、轮询图片状态、清理衍生图并更新单资产封面 URL，把 production + legacy 资产生成链路从 system probe/兼容性按钮收口回正式产品流。
 - Projects 页已新增“画风工作台”：可在同一对话框内刷新画风列表、查看 JWT 保护的本地封面、执行 `GET/POST/PATCH/DELETE …/art-styles*`，并直接调用 `POST /api/v1/art-styles/extract-prompt` 把多图输入转成可保存 prompt，替代首页原先仅有的列表加载与 CRUD 探针摘要。
 - 剧本编辑器已升级为脚本工作台入口：除基础字段编辑外，现可直接读取 `get-script-api` 当前脚本上下文、查看关联素材摘要、导出当前剧本 ZIP、轮询提取状态并发起当前剧本素材抽取，开始把“脚本导出与抽取流程”从 probe 操作收口到正式产品交互。
+- 剧本工作台现已把脚本上下文与提取状态收口为统一“同步工作台”动作：打开时自动同步、发起素材抽取后自动回刷，且从编辑图片子工作台返回后也会立即刷新当前脚本上下文与提取状态，避免脚本编辑器保留过期状态。
 - 剧本工作台已新增“编辑图片工作台”入口：可直接加载 edit-image flow 模板与默认模型、上传源图、保存或更新 flow 步骤状态，并发起 `generate-flow-image`，开始把编辑图片链路从 production probe 收口进脚本主流程。
 - 剧本分镜编辑器已升级为制作工作台入口：除基础字段编辑外，现可直接读取/保存 storyboard 预览图、清空当前画面、管理 video track、生成默认视频提示词、提交 `workbench/generate-video`、查看当前 storyboard 关联视频候选并一键选中/删除，开始把“分镜与视频流程”从 probe 操作收口到正式产品交互。
 - 剧本分镜列表已新增“分镜出图工作台”：可在剧本上下文内批量勾选分镜、沿用现有提示词发起 `batch-generate-image`、读取当前预览图与下载链接，并直接导出所选分镜 ZIP，继续把 production storyboard 图片链路从 probe 收口为正式工作流。

@@ -24,6 +24,19 @@ ScriptExtractStatePollRow? findScriptExtractStateByLegacyId(
   return null;
 }
 
+String describeScriptExtractState({
+  int? extractState,
+  String? errorReason,
+  String emptyLabel = '当前脚本提取状态为空：通常表示 idle 或已完成。',
+}) {
+  if (extractState == null) {
+    return emptyLabel;
+  }
+  final trimmedError = (errorReason ?? '').trim();
+  return '提取状态 $extractState'
+      '${trimmedError.isEmpty ? '' : ' · $trimmedError'}';
+}
+
 String summarizeRelatedScriptAssets(
   Iterable<LegacyScriptRelatedAssetBrief> assets, {
   int maxItems = 4,

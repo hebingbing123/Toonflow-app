@@ -30,6 +30,14 @@ void main() {
     expect(row?.errorReason, 'llm_not_configured');
   });
 
+  test('describeScriptExtractState renders empty and error variants', () {
+    expect(describeScriptExtractState(), '当前脚本提取状态为空：通常表示 idle 或已完成。');
+    expect(
+      describeScriptExtractState(extractState: -1, errorReason: 'llm_not_configured'),
+      '提取状态 -1 · llm_not_configured',
+    );
+  });
+
   test('summarizeRelatedScriptAssets compacts long asset list', () {
     final summary = summarizeRelatedScriptAssets(const [
       LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A'),
