@@ -228,12 +228,14 @@ extension _HomePageBuildSections on _HomePageState {
     _buildProductPaneSelector(context),
     if (_productWorkspacePane == _ProductWorkspacePane.projects)
       ProjectsSection(
+        accessToken: _session?.accessToken,
         loadingProjects: _loadingProjects,
         loadingProjectsSummary: _loadingProjectsSummary,
         loadingArtStyles: _loadingArtStyles,
         creatingProject: _creatingProject,
         loadingAgentMemory: _loadingAgentMemory,
         projects: _projects,
+        artStyles: _artStyles,
         projectsSummaryLine: _projectsSummaryLine,
         artStylesLine: _artStylesLine,
         agentMemoryBody: _agentMemoryBody,

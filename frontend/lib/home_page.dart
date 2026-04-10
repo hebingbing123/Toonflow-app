@@ -185,6 +185,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingArtStyles = false;
   bool _creatingProject = false;
   List<ProjectRow>? _projects;
+  List<ArtStyleRow>? _artStyles;
   String? _projectsSummaryLine;
   String? _artStylesLine;
 

@@ -151,6 +151,7 @@ extension _HomePageProjectsController on _HomePageState {
     setState(() {
       _loadingArtStyles = true;
       _error = null;
+      _artStyles = null;
       _artStylesLine = null;
     });
     try {
@@ -174,6 +175,7 @@ extension _HomePageProjectsController on _HomePageState {
         line += ' · crud -> ${e.statusCode}';
       }
       setState(() {
+        _artStyles = r.items;
         _artStylesLine = line;
         _loadingArtStyles = false;
       });
