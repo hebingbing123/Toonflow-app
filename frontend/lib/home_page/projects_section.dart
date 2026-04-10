@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'projects_agent_memory_workbench.dart';
 import 'projects_creative_manuals_workbench.dart';
 import '../rust_api.dart';
 
@@ -78,6 +79,23 @@ class ProjectsSection extends StatelessWidget {
     );
   }
 
+  Future<void> _openAgentMemoryWorkbench(BuildContext context) async {
+    final token = accessToken;
+    if (token == null || token.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('当前未登录，无法读取 Agent 记忆')));
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => ProjectsAgentMemoryWorkbenchDialog(
+        accessToken: token,
+        initialProjects: projects ?? const <ProjectRow>[],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
@@ -129,6 +147,12 @@ class ProjectsSection extends StatelessWidget {
               child: const Text('打开创作手册工作台'),
             ),
             FilledButton.tonal(
+              onPressed: creatingProject
+                  ? null
+                  : () => _openAgentMemoryWorkbench(context),
+              child: const Text('打开记忆工作台'),
+            ),
+            FilledButton.tonal(
               onPressed: (loadingProjects || creatingProject)
                   ? null
                   : onCreateEmptyProject,
@@ -142,7 +166,7 @@ class ProjectsSection extends StatelessWidget {
           childrenPadding: EdgeInsets.zero,
           title: const Text('兼容性检查'),
           subtitle: Text(
-            '保留 Agent memory 首项目查询回归入口，默认折叠',
+            '保留首项目 Agent memory probe 作为回归入口，默认折叠',
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),

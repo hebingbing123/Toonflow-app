@@ -44,6 +44,7 @@ void main() {
 
     expect(find.text('打开画风工作台'), findsOneWidget);
     expect(find.text('打开创作手册工作台'), findsOneWidget);
+    expect(find.text('打开记忆工作台'), findsOneWidget);
     expect(find.text('1 条画风'), findsOneWidget);
     expect(find.text('水墨古风'), findsOneWidget);
   });
@@ -131,5 +132,52 @@ void main() {
     expect(find.text('创作手册工作台'), findsOneWidget);
     expect(find.text('新建导演手册'), findsOneWidget);
     expect(find.text('刷新全部手册'), findsOneWidget);
+  });
+
+  testWidgets('projects section opens agent memory workbench', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProjectsSection(
+            accessToken: 'token',
+            loadingProjects: false,
+            loadingProjectsSummary: false,
+            loadingArtStyles: false,
+            creatingProject: false,
+            loadingAgentMemory: false,
+            projects: const [
+              ProjectRow(
+                id: 'project-1',
+                legacyId: 11,
+                name: '项目一',
+                createTimeMs: 1,
+              ),
+            ],
+            artStyles: const <ArtStyleRow>[],
+            projectsSummaryLine: null,
+            artStylesLine: null,
+            agentMemoryBody: null,
+            onLoadProjects: () {},
+            onLoadProjectsSummary: () {},
+            onLoadArtStyles: () async {},
+            onCreateEmptyProject: () {},
+            onOpenProjectDetail: (_) {},
+            onProbeAgentMemory: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('打开记忆工作台'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Agent 记忆工作台'), findsOneWidget);
+    expect(find.text('刷新项目列表'), findsOneWidget);
+    expect(find.text('查询记忆'), findsOneWidget);
+    expect(find.text('追加记忆'), findsNWidgets(2));
+    expect(find.text('清理记忆'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'scriptAgent'), findsOneWidget);
   });
 }
