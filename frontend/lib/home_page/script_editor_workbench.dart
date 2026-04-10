@@ -156,6 +156,39 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     final outline = theme.colorScheme.outline;
     final relatedAssets = _scriptContext?.relatedAssets ?? const [];
     final errorReason = (_scriptContext?.errorReason ?? '').trim();
+    final diagnosis = diagnoseScriptWorkbench(
+      scriptContext: _scriptContext,
+      extractStateRow: _extractStateRow,
+    );
+    VoidCallback? recommendedAction;
+    String recommendedActionLabel;
+    switch (diagnosis.recommendedAction) {
+      case ScriptWorkbenchRecommendedAction.syncWorkbench:
+        recommendedAction = _loadingContext || _runningAction
+            ? null
+            : _refreshWorkbench;
+        recommendedActionLabel = _loadingContext ? '同步中…' : '同步工作台';
+      case ScriptWorkbenchRecommendedAction.pollExtractState:
+        recommendedAction = _runningAction
+            ? null
+            : () => _runAction(_pollExtractState);
+        recommendedActionLabel = '轮询提取状态';
+      case ScriptWorkbenchRecommendedAction.startExtractAssets:
+        recommendedAction = _runningAction
+            ? null
+            : () => _runAction(_startExtractAssets);
+        recommendedActionLabel = '提取当前剧本素材';
+      case ScriptWorkbenchRecommendedAction.openEditImageWorkbench:
+        recommendedAction = _runningAction
+            ? null
+            : () => _runAction(_openEditImageWorkbench);
+        recommendedActionLabel = '编辑图片工作台';
+      case ScriptWorkbenchRecommendedAction.exportScriptZip:
+        recommendedAction = _runningAction
+            ? null
+            : () => _runAction(_exportCurrentScript);
+        recommendedActionLabel = '导出当前剧本 ZIP';
+    }
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -179,6 +212,33 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
           Text(
             _contextLine ?? '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。',
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.45,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(diagnosis.summary, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 4),
+                Text(
+                  diagnosis.detail,
+                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                ),
+                const SizedBox(height: 8),
+                FilledButton.tonal(
+                  onPressed: recommendedAction,
+                  child: Text(recommendedActionLabel),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           if (_loadingContext)
