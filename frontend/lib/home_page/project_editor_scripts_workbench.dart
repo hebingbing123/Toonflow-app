@@ -110,7 +110,10 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                       );
                     });
                   };
-                  recommendedActionLabel = '读取剧本上下文';
+                  recommendedActionLabel =
+                      describeScriptBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
                 case ScriptBatchWorkbenchRecommendedAction.pollSelected:
                   recommendedAction = selectedIds.isEmpty
                       ? null
@@ -123,9 +126,12 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                             scriptList,
                             rows,
                           );
+                          final syncedPreviewRows =
+                              syncScriptPreviewExtractStates(previewRows, rows);
                           scriptList
                             ..clear()
                             ..addAll(synced);
+                          previewRows = syncedPreviewRows;
                           final sample = rows.isEmpty
                               ? '当前均为 idle 或已完成'
                               : rows
@@ -135,13 +141,24 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                           '#${row.legacyId}:${row.extractState ?? 0}',
                                     )
                                     .join(' · ');
+                          final nextDiagnosis = diagnoseScriptBatchWorkbench(
+                            selectedIds: selectedIds,
+                            scripts: scriptList,
+                            previewRows: previewRows,
+                          );
                           setLocalState(() {
-                            scriptTaskLine[0] =
-                                '已轮询 ${selectedIds.length} 条剧本提取状态：$sample';
+                            scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+                              actionSummary:
+                                  '已轮询 ${selectedIds.length} 条剧本提取状态：$sample',
+                              diagnosis: nextDiagnosis,
+                            );
                           });
                           setDialogState(() {});
                         };
-                  recommendedActionLabel = '轮询所选状态';
+                  recommendedActionLabel =
+                      describeScriptBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
                 case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
                   recommendedAction = selectedIds.isEmpty
                       ? null
@@ -155,25 +172,64 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                             scriptLegacyIds: selectedIds,
                             groupSize: groupSize,
                           );
+                          final rows = await pollScriptExtractState(
+                            token,
+                            selectedIds,
+                          );
+                          final synced = syncScriptExtractStates(
+                            scriptList,
+                            rows,
+                          );
+                          final syncedPreviewRows =
+                              syncScriptPreviewExtractStates(previewRows, rows);
+                          scriptList
+                            ..clear()
+                            ..addAll(synced);
+                          previewRows = syncedPreviewRows;
+                          final nextDiagnosis = diagnoseScriptBatchWorkbench(
+                            selectedIds: selectedIds,
+                            scripts: scriptList,
+                            previewRows: previewRows,
+                          );
                           setLocalState(() {
-                            scriptTaskLine[0] =
-                                '已提交 ${selectedIds.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}';
+                            scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+                              actionSummary:
+                                  '已提交 ${selectedIds.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}',
+                              diagnosis: nextDiagnosis,
+                            );
                           });
                           setDialogState(() {});
                         };
-                  recommendedActionLabel = '提取所选素材';
+                  recommendedActionLabel =
+                      describeScriptBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
                 case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
                   recommendedAction = selectedIds.isEmpty
                       ? null
                       : () async {
-                          final zip = await exportScriptsZip(token, selectedIds);
+                          final zip = await exportScriptsZip(
+                            token,
+                            selectedIds,
+                          );
+                          final nextDiagnosis = diagnoseScriptBatchWorkbench(
+                            selectedIds: selectedIds,
+                            scripts: scriptList,
+                            previewRows: previewRows,
+                          );
                           setLocalState(() {
-                            scriptTaskLine[0] =
-                                '已导出 ${selectedIds.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。';
+                            scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+                              actionSummary:
+                                  '已导出 ${selectedIds.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。',
+                              diagnosis: nextDiagnosis,
+                            );
                           });
                           setDialogState(() {});
                         };
-                  recommendedActionLabel = '导出所选剧本';
+                  recommendedActionLabel =
+                      describeScriptBatchWorkbenchRecommendedAction(
+                        diagnosis.recommendedAction,
+                      );
               }
 
               return AlertDialog(
@@ -293,7 +349,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                               ),
                               const SizedBox(height: 8),
                               FilledButton.tonal(
-                                onPressed: localBusy || recommendedAction == null
+                                onPressed:
+                                    localBusy || recommendedAction == null
                                     ? null
                                     : () => runAction(recommendedAction!),
                                 child: Text(recommendedActionLabel),
@@ -330,8 +387,18 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                         selected,
                                       );
                                       setLocalState(() {
+                                        final nextDiagnosis =
+                                            diagnoseScriptBatchWorkbench(
+                                              selectedIds: selected,
+                                              scripts: scriptList,
+                                              previewRows: previewRows,
+                                            );
                                         scriptTaskLine[0] =
-                                            '已导出 ${selected.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。';
+                                            buildScriptBatchWorkbenchFollowUp(
+                                              actionSummary:
+                                                  '已导出 ${selected.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。',
+                                              diagnosis: nextDiagnosis,
+                                            );
                                       });
                                       setDialogState(() {});
                                     }),
@@ -355,9 +422,15 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                         scriptList,
                                         rows,
                                       );
+                                      final syncedPreviewRows =
+                                          syncScriptPreviewExtractStates(
+                                            previewRows,
+                                            rows,
+                                          );
                                       scriptList
                                         ..clear()
                                         ..addAll(synced);
+                                      previewRows = syncedPreviewRows;
                                       final sample = rows.isEmpty
                                           ? '当前均为 idle 或已完成'
                                           : rows
@@ -368,8 +441,18 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                                 )
                                                 .join(' · ');
                                       setLocalState(() {
+                                        final nextDiagnosis =
+                                            diagnoseScriptBatchWorkbench(
+                                              selectedIds: selected,
+                                              scripts: scriptList,
+                                              previewRows: previewRows,
+                                            );
                                         scriptTaskLine[0] =
-                                            '已轮询 ${selected.length} 条剧本提取状态：$sample';
+                                            buildScriptBatchWorkbenchFollowUp(
+                                              actionSummary:
+                                                  '已轮询 ${selected.length} 条剧本提取状态：$sample',
+                                              diagnosis: nextDiagnosis,
+                                            );
                                       });
                                       setDialogState(() {});
                                     }),
@@ -395,9 +478,36 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                             scriptLegacyIds: selected,
                                             groupSize: groupSize,
                                           );
+                                      final rows = await pollScriptExtractState(
+                                        token,
+                                        selected,
+                                      );
+                                      final synced = syncScriptExtractStates(
+                                        scriptList,
+                                        rows,
+                                      );
+                                      final syncedPreviewRows =
+                                          syncScriptPreviewExtractStates(
+                                            previewRows,
+                                            rows,
+                                          );
+                                      scriptList
+                                        ..clear()
+                                        ..addAll(synced);
+                                      previewRows = syncedPreviewRows;
                                       setLocalState(() {
+                                        final nextDiagnosis =
+                                            diagnoseScriptBatchWorkbench(
+                                              selectedIds: selected,
+                                              scripts: scriptList,
+                                              previewRows: previewRows,
+                                            );
                                         scriptTaskLine[0] =
-                                            '已提交 ${selected.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}';
+                                            buildScriptBatchWorkbenchFollowUp(
+                                              actionSummary:
+                                                  '已提交 ${selected.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}',
+                                              diagnosis: nextDiagnosis,
+                                            );
                                       });
                                       setDialogState(() {});
                                     }),

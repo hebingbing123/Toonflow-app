@@ -90,9 +90,16 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   Future<void> _exportCurrentScript() async {
     final zip = await exportScriptsZip(widget.token, [widget.scriptLegacyId]);
+    final diagnosis = diagnoseScriptWorkbench(
+      scriptContext: _scriptContext,
+      extractStateRow: _extractStateRow,
+    );
     if (!mounted) return;
     setState(
-      () => _exportLine = '导出完成：1 个剧本，ZIP ${formatBinarySize(zip.length)}。',
+      () => _exportLine = buildScriptWorkbenchFollowUp(
+        actionSummary: '导出完成：1 个剧本，ZIP ${formatBinarySize(zip.length)}。',
+        diagnosis: diagnosis,
+      ),
     );
   }
 
@@ -105,11 +112,16 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       widget.scriptLegacyId,
     );
     if (!mounted) return;
+    final diagnosis = diagnoseScriptWorkbench(
+      scriptContext: _scriptContext,
+      extractStateRow: current,
+    );
     setState(() {
       _extractStateRow = current;
-      _extractStateLine = describeScriptExtractState(
-        extractState: current?.extractState,
-        errorReason: current?.errorReason,
+      _extractStateLine = buildScriptWorkbenchFollowUp(
+        actionSummary:
+            '已轮询当前剧本提取状态：${describeScriptExtractState(extractState: current?.extractState, errorReason: current?.errorReason)}',
+        diagnosis: diagnosis,
       );
     });
     widget.onExtractStateSynced(current?.extractState);
@@ -129,11 +141,20 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     );
     await _refreshWorkbench();
     if (!mounted) return;
+    final diagnosis = diagnoseScriptWorkbench(
+      scriptContext: _scriptContext,
+      extractStateRow: _extractStateRow,
+    );
     setState(() {
-      _extractAssetsLine = '素材抽取已提交：${accepted.status} · ${accepted.message}';
+      _extractAssetsLine = buildScriptWorkbenchFollowUp(
+        actionSummary: '素材抽取已提交：${accepted.status} · ${accepted.message}',
+        diagnosis: diagnosis,
+      );
       _extractStateLine = describeScriptExtractState(
-        extractState: _extractStateRow?.extractState ?? _scriptContext?.extractState,
-        errorReason: _extractStateRow?.errorReason ?? _scriptContext?.errorReason,
+        extractState:
+            _extractStateRow?.extractState ?? _scriptContext?.extractState,
+        errorReason:
+            _extractStateRow?.errorReason ?? _scriptContext?.errorReason,
       );
     });
   }
@@ -143,10 +164,17 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     if (!mounted) return;
     await _refreshWorkbench();
     if (!mounted) return;
+    final diagnosis = diagnoseScriptWorkbench(
+      scriptContext: _scriptContext,
+      extractStateRow: _extractStateRow,
+    );
     setState(() {
       _contextLine = _scriptContext == null
           ? '编辑图片工作台已关闭；当前剧本仍未出现在 get-script-api 结果里。'
-          : '编辑图片工作台已关闭，已同步脚本上下文与提取状态。';
+          : buildScriptWorkbenchFollowUp(
+              actionSummary: '编辑图片工作台已关闭，已同步脚本上下文与提取状态。',
+              diagnosis: diagnosis,
+            );
     });
   }
 
@@ -167,27 +195,39 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
         recommendedAction = _loadingContext || _runningAction
             ? null
             : _refreshWorkbench;
-        recommendedActionLabel = _loadingContext ? '同步中…' : '同步工作台';
+        recommendedActionLabel = _loadingContext
+            ? '同步中…'
+            : describeScriptWorkbenchRecommendedAction(
+                diagnosis.recommendedAction,
+              );
       case ScriptWorkbenchRecommendedAction.pollExtractState:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_pollExtractState);
-        recommendedActionLabel = '轮询提取状态';
+        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+          diagnosis.recommendedAction,
+        );
       case ScriptWorkbenchRecommendedAction.startExtractAssets:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_startExtractAssets);
-        recommendedActionLabel = '提取当前剧本素材';
+        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+          diagnosis.recommendedAction,
+        );
       case ScriptWorkbenchRecommendedAction.openEditImageWorkbench:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_openEditImageWorkbench);
-        recommendedActionLabel = '编辑图片工作台';
+        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+          diagnosis.recommendedAction,
+        );
       case ScriptWorkbenchRecommendedAction.exportScriptZip:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_exportCurrentScript);
-        recommendedActionLabel = '导出当前剧本 ZIP';
+        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+          diagnosis.recommendedAction,
+        );
     }
     return Container(
       padding: const EdgeInsets.all(12),
@@ -210,7 +250,8 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
             ],
           ),
           Text(
-            _contextLine ?? '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。',
+            _contextLine ??
+                '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。',
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 12),

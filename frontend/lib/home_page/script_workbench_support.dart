@@ -39,6 +39,58 @@ enum ScriptBatchWorkbenchRecommendedAction {
   exportSelectedZip,
 }
 
+String describeScriptWorkbenchRecommendedAction(
+  ScriptWorkbenchRecommendedAction action,
+) {
+  switch (action) {
+    case ScriptWorkbenchRecommendedAction.syncWorkbench:
+      return '同步工作台';
+    case ScriptWorkbenchRecommendedAction.pollExtractState:
+      return '轮询提取状态';
+    case ScriptWorkbenchRecommendedAction.startExtractAssets:
+      return '提取当前剧本素材';
+    case ScriptWorkbenchRecommendedAction.openEditImageWorkbench:
+      return '进入编辑图片工作台';
+    case ScriptWorkbenchRecommendedAction.exportScriptZip:
+      return '导出当前剧本 ZIP';
+  }
+}
+
+String describeScriptBatchWorkbenchRecommendedAction(
+  ScriptBatchWorkbenchRecommendedAction action,
+) {
+  switch (action) {
+    case ScriptBatchWorkbenchRecommendedAction.syncContext:
+      return '读取剧本上下文';
+    case ScriptBatchWorkbenchRecommendedAction.pollSelected:
+      return '轮询所选状态';
+    case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
+      return '提取所选素材';
+    case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
+      return '导出所选剧本';
+  }
+}
+
+String buildScriptWorkbenchFollowUp({
+  required String actionSummary,
+  required ScriptWorkbenchDiagnosis diagnosis,
+}) {
+  final nextAction = describeScriptWorkbenchRecommendedAction(
+    diagnosis.recommendedAction,
+  );
+  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+}
+
+String buildScriptBatchWorkbenchFollowUp({
+  required String actionSummary,
+  required ScriptBatchWorkbenchDiagnosis diagnosis,
+}) {
+  final nextAction = describeScriptBatchWorkbenchRecommendedAction(
+    diagnosis.recommendedAction,
+  );
+  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+}
+
 LegacyScriptsGetScriptApiItem? findScriptContextByLegacyId(
   Iterable<LegacyScriptsGetScriptApiItem> rows,
   int legacyId,
@@ -88,13 +140,12 @@ ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
     );
   }
 
-  final extractState = extractStateRow?.extractState ?? scriptContext?.extractState;
-  final trimmedError = (
-    extractStateRow?.errorReason ??
-    scriptContext?.errorReason ??
-    ''
-  ).trim();
-  final relatedAssets = scriptContext?.relatedAssets ?? const <LegacyScriptRelatedAssetBrief>[];
+  final extractState =
+      extractStateRow?.extractState ?? scriptContext?.extractState;
+  final trimmedError =
+      (extractStateRow?.errorReason ?? scriptContext?.errorReason ?? '').trim();
+  final relatedAssets =
+      scriptContext?.relatedAssets ?? const <LegacyScriptRelatedAssetBrief>[];
 
   if (extractState != null && extractState < 0) {
     return ScriptWorkbenchDiagnosis(
@@ -124,8 +175,7 @@ ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
 
   return ScriptWorkbenchDiagnosis(
     summary: '当前剧本已有关联素材。',
-    detail:
-        '已同步 ${relatedAssets.length} 条关联素材，可继续进入编辑图片工作台，或先导出 ZIP 做本地审阅。',
+    detail: '已同步 ${relatedAssets.length} 条关联素材，可继续进入编辑图片工作台，或先导出 ZIP 做本地审阅。',
     recommendedAction: ScriptWorkbenchRecommendedAction.openEditImageWorkbench,
   );
 }
@@ -147,7 +197,9 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
   final previewById = <int, LegacyScriptsGetScriptApiItem>{
     for (final row in previewRows) row.legacyId: row,
   };
-  final scriptById = <int, ScriptBrief>{for (final row in scripts) row.legacyId: row};
+  final scriptById = <int, ScriptBrief>{
+    for (final row in scripts) row.legacyId: row,
+  };
 
   var runningCount = 0;
   var failedCount = 0;
@@ -177,7 +229,8 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
     return ScriptBatchWorkbenchDiagnosis(
       summary: '所选剧本里有 $failedCount 条最近提取失败。',
       detail: '建议重新发起所选剧本素材抽取，优先收敛失败项。',
-      recommendedAction: ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+      recommendedAction:
+          ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
     );
   }
 
@@ -185,14 +238,16 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
     return ScriptBatchWorkbenchDiagnosis(
       summary: '所选 ${selected.length} 条剧本都已有关联素材。',
       detail: '可以先导出所选剧本 ZIP 做集中审阅，或转入单剧本工作台继续处理图片流程。',
-      recommendedAction: ScriptBatchWorkbenchRecommendedAction.exportSelectedZip,
+      recommendedAction:
+          ScriptBatchWorkbenchRecommendedAction.exportSelectedZip,
     );
   }
 
   return ScriptBatchWorkbenchDiagnosis(
     summary: '所选 ${selected.length} 条剧本仍有待抽取素材的项。',
     detail: '建议直接批量发起素材抽取，把当前选择转成后续图片和分镜流程可用的资产。',
-    recommendedAction: ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
+    recommendedAction:
+        ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
   );
 }
 
@@ -264,6 +319,32 @@ List<ScriptBrief> syncScriptExtractStates(
           legacyId: script.legacyId,
           name: script.name,
           extractState: next.extractState,
+        );
+      })
+      .toList(growable: false);
+}
+
+List<LegacyScriptsGetScriptApiItem> syncScriptPreviewExtractStates(
+  Iterable<LegacyScriptsGetScriptApiItem> rows,
+  Iterable<ScriptExtractStatePollRow> updates,
+) {
+  final byLegacyId = <int, ScriptExtractStatePollRow>{
+    for (final row in updates) row.legacyId: row,
+  };
+  return rows
+      .map((row) {
+        final next = byLegacyId[row.legacyId];
+        if (next == null) {
+          return row;
+        }
+        return LegacyScriptsGetScriptApiItem(
+          legacyId: row.legacyId,
+          name: row.name,
+          content: row.content,
+          extractState: next.extractState,
+          errorReason: next.errorReason ?? row.errorReason,
+          createTime: row.createTime,
+          relatedAssets: row.relatedAssets,
         );
       })
       .toList(growable: false);
