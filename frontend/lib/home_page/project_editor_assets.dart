@@ -919,65 +919,6 @@ extension _HomePageProjectEditorAssets on _HomePageState {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 4,
-          runSpacing: 0,
-          children: [
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openAssetImagesWorkbenchDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsRef: assetsRef,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('资产图片工作台'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openAssetGenerationWorkbenchDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      scriptList: scriptList,
-                      assetsRef: assetsRef,
-                      assetsForScriptRef: assetsForScriptRef,
-                      assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('资产出图工作台'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openCornerScapeWorkbenchDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsBusy: assetsBusy,
-                    ),
-              child: const Text('资产历史图工作台'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,

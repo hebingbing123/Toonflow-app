@@ -336,6 +336,66 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '专项工作台',
+                          style: Theme.of(dialogCtx).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '把图片管理、出图链路和历史图查询也统一挂到这里，资产主区只保留一个正式入口。',
+                          style: Theme.of(dialogCtx).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton(
+                              onPressed: localBusy || assetsBusy[0]
+                                  ? null
+                                  : () => _openAssetImagesWorkbenchDialog(
+                                      ctx: dialogCtx,
+                                      setDialogState: setDialogState,
+                                      token: token,
+                                      p: p,
+                                      assetsRef: assetsRef,
+                                      assetsBusy: assetsBusy,
+                                      reloadAssetsAndStats: reloadAssetsAndStats,
+                                    ),
+                              child: const Text('资产图片工作台'),
+                            ),
+                            OutlinedButton(
+                              onPressed: localBusy || assetsBusy[0]
+                                  ? null
+                                  : () => _openAssetGenerationWorkbenchDialog(
+                                      ctx: dialogCtx,
+                                      setDialogState: setDialogState,
+                                      token: token,
+                                      p: p,
+                                      scriptList: scriptList,
+                                      assetsRef: assetsRef,
+                                      assetsForScriptRef: assetsForScriptRef,
+                                      assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                                      assetsBusy: assetsBusy,
+                                      reloadAssetsAndStats: reloadAssetsAndStats,
+                                    ),
+                              child: const Text('资产出图工作台'),
+                            ),
+                            OutlinedButton(
+                              onPressed: localBusy || assetsBusy[0]
+                                  ? null
+                                  : () => _openCornerScapeWorkbenchDialog(
+                                      ctx: dialogCtx,
+                                      setDialogState: setDialogState,
+                                      token: token,
+                                      p: p,
+                                      assetsBusy: assetsBusy,
+                                    ),
+                              child: const Text('资产历史图工作台'),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
