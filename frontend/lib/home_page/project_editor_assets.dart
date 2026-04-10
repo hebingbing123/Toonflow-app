@@ -765,15 +765,14 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (assetsRef[0] != null)
           Text(
-            assetsRef[0]!.items.isEmpty
-                ? '当前没有资产'
-                : '资产 ${assetsRef[0]!.total} 条 · ${assetsRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsRef[0]!.items.length > 6 ? '…' : ''}',
+            summarizeProjectAssetRows(visibleAssets),
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else
@@ -794,9 +793,10 @@ extension _HomePageProjectEditorAssets on _HomePageState {
             )
           else if (assetsForScriptRef[0] != null)
             Text(
-              assetsForScriptRef[0]!.items.isEmpty
-                  ? '当前剧本下没有关联资产'
-                  : '当前剧本下 ${assetsForScriptRef[0]!.total} 条 · ${assetsForScriptRef[0]!.items.take(6).map((a) => '#${a.legacyId}:${a.assetType}').join(', ')}${assetsForScriptRef[0]!.items.length > 6 ? '…' : ''}',
+              summarizeScriptScopedAssets(
+                assetsFilterScriptLegacyId[0],
+                assetsForScriptRef[0]!.items,
+              ),
               style: Theme.of(ctx).textTheme.bodySmall,
             )
           else
@@ -871,149 +871,58 @@ extension _HomePageProjectEditorAssets on _HomePageState {
           ),
         ),
         const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(
+              ctx,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('资产主工作台', style: Theme.of(ctx).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              Text(
+                '把资产 CRUD、剧本关联、筛选与上传动作收口到一个正式入口，主区不再堆叠一排零散按钮。',
+                style: Theme.of(
+                  ctx,
+                ).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed:
+                    assetsBusy[0] ||
+                        assetsLoading[0] ||
+                        assetsScriptFilterLoading[0]
+                    ? null
+                    : () => _openAssetWorkbenchDialog(
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        token: token,
+                        p: p,
+                        scriptList: scriptList,
+                        assetsRef: assetsRef,
+                        assetsForScriptRef: assetsForScriptRef,
+                        assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                        assetsBusy: assetsBusy,
+                        reloadAssetsAndStats: reloadAssetsAndStats,
+                      ),
+                child: const Text('打开资产主工作台'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 4,
           runSpacing: 0,
           children: [
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openCreateAssetDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('新建资产'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openEditAssetDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsRef: assetsRef,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('编辑资产'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openDeleteAssetDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsRef: assetsRef,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('删除资产'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openScriptAssetLinkDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      scriptList: scriptList,
-                      assetsRef: assetsRef,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                      unlink: false,
-                    ),
-              child: const Text('关联剧本与资产'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openScriptAssetLinkDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      scriptList: scriptList,
-                      assetsRef: assetsRef,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                      unlink: true,
-                    ),
-              child: const Text('取消剧本-资产关联'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openAssetFilterDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      scriptList: scriptList,
-                      assetsRef: assetsRef,
-                      assetsForScriptRef: assetsForScriptRef,
-                      assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
-                      assetsBusy: assetsBusy,
-                    ),
-              child: const Text('高级筛选'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openEditImageUploadDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      scriptList: scriptList,
-                      assetsBusy: assetsBusy,
-                    ),
-              child: const Text('上传编辑图片'),
-            ),
-            TextButton(
-              onPressed:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : () => _openClipUploadDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      assetsBusy: assetsBusy,
-                      reloadAssetsAndStats: reloadAssetsAndStats,
-                    ),
-              child: const Text('上传 Clip 资产'),
-            ),
             TextButton(
               onPressed:
                   assetsBusy[0] ||
