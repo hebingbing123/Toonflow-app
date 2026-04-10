@@ -266,6 +266,7 @@ extension _HomePageBuildSections on _HomePageState {
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.tasks)
       TaskCenterSection(
+        accessToken: _session?.accessToken,
         loadingTaskProjects: _loadingTaskProjects,
         loadingTaskCategories: _loadingTaskCategories,
         loadingTaskApi: _loadingTaskApi,
