@@ -19,15 +19,15 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
     bool initialLoadTriggered = false;
     String? summaryLine;
 
-    List<String>? parseTypes() {
-      final raw = typesCtrl.text
-          .split(',')
-          .map((segment) => segment.trim())
-          .where((segment) => segment.isNotEmpty)
-          .toSet()
-          .toList();
-      if (raw.isEmpty) return null;
-      return raw;
+    void syncSummaryLine(StateSetter setState) {
+      setState(() {
+        summaryLine = summarizeCornerScapeSelection(
+          assets,
+          activeTypes: parseCornerScapeTypesInput(typesCtrl.text),
+          selectedAssetLegacyId: selectedAssetLegacyId,
+          selectedHistoryImageId: selectedHistoryImageId,
+        );
+      });
     }
 
     CornerScapeAssetItem? selectedAsset() {
@@ -56,6 +56,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
       final image = selectedHistoryImage();
       if (asset == null || image == null) {
         setState(() => selectedPreviewBytes = null);
+        syncSummaryLine(setState);
         return;
       }
       setState(() {
@@ -72,53 +73,53 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
         loadingPreview = false;
         selectedPreviewBytes = bytes;
       });
+      syncSummaryLine(setState);
     }
 
     Future<void> refreshAssets(StateSetter setState) async {
+      final activeTypes = parseCornerScapeTypesInput(typesCtrl.text);
       setDialogState(() => assetsBusy[0] = true);
       setState(() {
         loading = true;
-        summaryLine = null;
+        summaryLine = activeTypes == null
+            ? '正在加载全部类型的历史图资产…'
+            : '正在加载类型 ${activeTypes.join(", ")} 的历史图资产…';
         selectedPreviewBytes = null;
       });
       try {
         final response = await fetchCornerScapeAssetsByLegacyId(
           token,
           p.legacyId,
-          types: parseTypes(),
+          types: activeTypes,
         );
         selectedAssetLegacyId = response.items.isEmpty
             ? null
-            : (() {
-                if (preferredAssetLegacyId != null) {
-                  for (final item in response.items) {
-                    if (item.legacyId == preferredAssetLegacyId) {
-                      return preferredAssetLegacyId;
-                    }
-                  }
-                }
-                return response.items.first.legacyId;
-              })();
-        selectedHistoryImageId =
-            selectedAssetLegacyId == null
-            ? null
-            : (() {
-                for (final item in response.items) {
-                  if (item.legacyId == selectedAssetLegacyId) {
-                    return item.historyImages.isEmpty
-                        ? null
-                        : item.historyImages.first.id;
-                  }
-                }
-                return null;
-              })();
-        final totalHist = response.items.fold<int>(
-          0,
-          (sum, item) => sum + item.historyImages.length,
+            : chooseInitialAssetLegacyId(
+                response.items
+                    .map(
+                      (item) => AssetRow(
+                        id: item.id,
+                        legacyId: item.legacyId,
+                        name: item.name,
+                        assetType: item.assetType,
+                      ),
+                    )
+                    .toList(growable: false),
+                preferredLegacyId: selectedAssetLegacyId ?? preferredAssetLegacyId,
+              );
+        selectedHistoryImageId = chooseInitialCornerScapeHistoryImageId(
+          response.items,
+          selectedAssetLegacyId: selectedAssetLegacyId,
+          preferredHistoryImageId: selectedHistoryImageId,
         );
         setState(() {
           assets = response.items;
-          summaryLine = '已加载 ${response.items.length} 条资产，历史图 $totalHist 张';
+          summaryLine = summarizeCornerScapeSelection(
+            response.items,
+            activeTypes: activeTypes,
+            selectedAssetLegacyId: selectedAssetLegacyId,
+            selectedHistoryImageId: selectedHistoryImageId,
+          );
         });
         await loadPreview(setState);
       } on RustApiException catch (e) {
@@ -172,6 +173,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                           labelText: '类型过滤（可选）',
                           helperText: '逗号分隔，例如 role,clip,props；留空表示全部',
                         ),
+                        onSubmitted: loading ? null : (_) => refreshAssets(setState),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -187,13 +189,22 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                           TextButton(
                             onPressed: loading
                                 ? null
-                                : () {
+                                : () async {
                                     typesCtrl.clear();
-                                    setState(() {
-                                      summaryLine = '已清空过滤类型，点击“查询历史图资产”重新加载';
-                                    });
+                                    await refreshAssets(setState);
                                   },
                             child: const Text('清空类型过滤'),
+                          ),
+                          ...const ['role', 'clip', 'props', 'scene'].map(
+                            (type) => ActionChip(
+                              label: Text(type),
+                              onPressed: loading
+                                  ? null
+                                  : () async {
+                                      typesCtrl.text = type;
+                                      await refreshAssets(setState);
+                                    },
+                            ),
                           ),
                         ],
                       ),
@@ -237,11 +248,14 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                                   setState(() {
                                     selectedAssetLegacyId = item.legacyId;
                                     selectedHistoryImageId =
-                                        item.historyImages.isEmpty
-                                        ? null
-                                        : item.historyImages.first.id;
+                                        chooseInitialCornerScapeHistoryImageId(
+                                          assets,
+                                          selectedAssetLegacyId: item.legacyId,
+                                          preferredHistoryImageId: selectedHistoryImageId,
+                                        );
                                     selectedPreviewBytes = null;
                                   });
+                                  syncSummaryLine(setState);
                                   await loadPreview(setState);
                                 },
                               );
@@ -273,6 +287,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                                 selectedHistoryImageId = value;
                                 selectedPreviewBytes = null;
                               });
+                              syncSummaryLine(setState);
                               await loadPreview(setState);
                             },
                           )
