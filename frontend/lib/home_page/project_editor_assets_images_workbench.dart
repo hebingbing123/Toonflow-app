@@ -227,6 +227,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           body,
         );
         await reloadImages(setState);
+        await reloadAssetsAndStats();
         setState(() => statusLine = '已更新图片');
       } on RustApiException catch (e) {
         setState(() => statusLine = '更新失败：$e');
@@ -254,6 +255,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           image.id,
         );
         await reloadImages(setState);
+        await reloadAssetsAndStats();
         setState(() => statusLine = '已删除图片');
       } on RustApiException catch (e) {
         setState(() => statusLine = '删除失败：$e');
