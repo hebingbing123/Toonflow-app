@@ -40,12 +40,17 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     final imageUrlCtrl = TextEditingController();
     final batchNameCtrl = TextEditingController();
     final batchLimitCtrl = TextEditingController(text: '10');
+    final initialFocusedAssetLegacyId = chooseInitialAssetLegacyId(
+      seededAssets,
+      preferredLegacyId: preferredAssetLegacyId,
+    );
     final selectedIds = <int>{
-      chooseInitialAssetLegacyId(
+      ...chooseVisibleAssetSelection(
         seededAssets,
-        preferredLegacyId: preferredAssetLegacyId,
-      )!,
+        preferredLegacyId: initialFocusedAssetLegacyId,
+      ),
     };
+    int? focusedAssetLegacyId = initialFocusedAssetLegacyId;
     int selectedScriptLegacyId =
         assetsFilterScriptLegacyId[0] ?? scriptList.first.legacyId;
     String selectedType = '';
@@ -77,7 +82,10 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
         selectedIds
           ..clear()
           ..addAll(next);
-        statusLine = next.isEmpty ? '$label：没有可选资产' : '$label：已选择 ${next.length} 条资产';
+        focusedAssetLegacyId = next.isEmpty ? focusedAssetLegacyId : next.first;
+        statusLine = next.isEmpty
+            ? '$label：没有可选资产'
+            : '$label：已选择 ${next.length} 条资产';
       });
     }
 
@@ -113,22 +121,26 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
             selected,
           );
         }
-        final visibleIds = sortUniqueAssetLegacyIds(
-          visibleAssets().map((asset) => asset.legacyId),
-        ).toSet();
+        final currentVisibleAssets = filteredVisibleAssets();
+        final nextSelection = chooseVisibleAssetSelection(
+          currentVisibleAssets,
+          preferredIds: selectedIds,
+          preferredLegacyId: focusedAssetLegacyId,
+        );
         setState(() {
           if (includeProductionSummary) {
             productionData = nextProductionData;
           }
           pollingData = nextPollingData;
           promptPollingData = nextPromptPollingData;
-          selectedIds.removeWhere((id) => !visibleIds.contains(id));
-          if (selectedIds.isEmpty && visibleAssets().isNotEmpty) {
-            selectedIds.add(visibleAssets().first.legacyId);
-          }
+          selectedIds
+            ..clear()
+            ..addAll(nextSelection);
+          focusedAssetLegacyId = selectedIds.isEmpty ? null : selectedIds.first;
           statusLine = summarizeAssetWorkbenchSnapshot(
             lead: lead,
-            selectedCount: selectedIds.length,
+            visibleAssets: currentVisibleAssets,
+            selectedIds: selectedIds,
             productionData: productionData,
             pollingData: pollingData,
             promptPollingData: promptPollingData,
@@ -257,19 +269,32 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                               onChanged: busyMutation
                                   ? null
                                   : (value) async {
-                                      setState(() {
-                                        selectedType = value ?? '';
-                                        selectedIds.removeWhere(
-                                          (id) => !filteredVisibleAssets()
-                                              .map((asset) => asset.legacyId)
-                                              .contains(id),
-                                        );
-                                        if (selectedIds.isEmpty &&
-                                            filteredVisibleAssets().isNotEmpty) {
-                                          selectedIds.add(
-                                            filteredVisibleAssets().first.legacyId,
+                                      final nextType = value ?? '';
+                                      final nextVisibleAssets = nextType.isEmpty
+                                          ? visible
+                                          : visible
+                                                .where(
+                                                  (asset) =>
+                                                      asset.assetType.trim() ==
+                                                      nextType,
+                                                )
+                                                .toList(growable: false);
+                                      final nextSelection =
+                                          chooseVisibleAssetSelection(
+                                            nextVisibleAssets,
+                                            preferredIds: selectedIds,
+                                            preferredLegacyId:
+                                                focusedAssetLegacyId,
                                           );
-                                        }
+                                      setState(() {
+                                        selectedType = nextType;
+                                        selectedIds
+                                          ..clear()
+                                          ..addAll(nextSelection);
+                                        focusedAssetLegacyId =
+                                            selectedIds.isEmpty
+                                            ? null
+                                            : selectedIds.first;
                                         statusLine = selectedType.isEmpty
                                             ? '正在切换到全部类型并同步工作台摘要…'
                                             : '正在切换到 $selectedType 并同步工作台摘要…';
@@ -350,9 +375,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                     setState,
                                     includeProductionSummary: true,
                                   ),
-                            child: Text(
-                              loadingSummary ? '同步中…' : '同步当前工作台摘要',
-                            ),
+                            child: Text(loadingSummary ? '同步中…' : '同步当前工作台摘要'),
                           ),
                           TextButton(
                             onPressed: busyMutation
@@ -381,7 +404,9 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                         ? visible.first.assetType.trim()
                                         : selectedType;
                                     final limit =
-                                        int.tryParse(batchLimitCtrl.text.trim()) ??
+                                        int.tryParse(
+                                          batchLimitCtrl.text.trim(),
+                                        ) ??
                                         10;
                                     if (effectiveType.isEmpty) {
                                       throw const FormatException(
@@ -467,7 +492,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                               ? null
                                               : modelCtrl.text.trim(),
                                           resolution:
-                                          resolutionCtrl.text.trim().isEmpty
+                                              resolutionCtrl.text.trim().isEmpty
                                               ? null
                                               : resolutionCtrl.text.trim(),
                                         );
@@ -494,10 +519,12 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                       pollingData = response;
                                       statusLine =
                                           summarizeAssetWorkbenchSnapshot(
-                                            selectedCount: selected.length,
+                                            visibleAssets: scopedAssets,
+                                            selectedIds: selectedIds,
                                             productionData: productionData,
                                             pollingData: pollingData,
-                                            promptPollingData: promptPollingData,
+                                            promptPollingData:
+                                                promptPollingData,
                                           );
                                     });
                                   }),
@@ -514,12 +541,15 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                         );
                                     setState(() {
                                       promptPollingData = response;
-                                      statusLine = summarizeAssetWorkbenchSnapshot(
-                                        selectedCount: selected.length,
-                                        productionData: productionData,
-                                        pollingData: pollingData,
-                                        promptPollingData: promptPollingData,
-                                      );
+                                      statusLine =
+                                          summarizeAssetWorkbenchSnapshot(
+                                            visibleAssets: scopedAssets,
+                                            selectedIds: selectedIds,
+                                            productionData: productionData,
+                                            pollingData: pollingData,
+                                            promptPollingData:
+                                                promptPollingData,
+                                          );
                                     });
                                   }),
                             child: const Text('轮询 prompt 状态'),
@@ -575,9 +605,10 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                         assetsFilterScriptLegacyId[0] == null
                             ? '当前按项目全量资产操作；可在主视图先切换“按剧本筛选”再进入工作台。'
                             : '当前主视图已按剧本 #${assetsFilterScriptLegacyId[0]} 过滤资产，工作台默认沿用这批可见资产。',
-                        style: Theme.of(dialogCtx).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(dialogCtx).colorScheme.outline,
-                        ),
+                        style: Theme.of(dialogCtx).textTheme.bodySmall
+                            ?.copyWith(
+                              color: Theme.of(dialogCtx).colorScheme.outline,
+                            ),
                       ),
                       if (statusLine != null) ...[
                         const SizedBox(height: 8),
@@ -652,11 +683,23 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                       setState(() {
                                         if (checked == true) {
                                           selectedIds.add(asset.legacyId);
+                                          focusedAssetLegacyId = asset.legacyId;
                                           if (selectedIds.length == 1) {
                                             imageUrlCtrl.clear();
                                           }
                                         } else {
                                           selectedIds.remove(asset.legacyId);
+                                          if (focusedAssetLegacyId ==
+                                              asset.legacyId) {
+                                            final remaining =
+                                                sortUniqueAssetLegacyIds(
+                                                  selectedIds,
+                                                );
+                                            focusedAssetLegacyId =
+                                                remaining.isEmpty
+                                                ? null
+                                                : remaining.first;
+                                          }
                                         }
                                       });
                                     },

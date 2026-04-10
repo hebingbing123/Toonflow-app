@@ -25,6 +25,30 @@ Map<String, List<int>> collectAssetIdsByType(Iterable<AssetRow> assets) {
   };
 }
 
+List<int> chooseVisibleAssetSelection(
+  Iterable<AssetRow> assets, {
+  Iterable<int>? preferredIds,
+  int? preferredLegacyId,
+}) {
+  final visibleIds = sortUniqueAssetLegacyIds(
+    assets.map((asset) => asset.legacyId),
+  );
+  if (visibleIds.isEmpty) {
+    return const <int>[];
+  }
+  final visibleSet = visibleIds.toSet();
+  final keptIds = sortUniqueAssetLegacyIds(
+    (preferredIds ?? const <int>[]).where(visibleSet.contains),
+  );
+  if (keptIds.isNotEmpty) {
+    return keptIds;
+  }
+  if (preferredLegacyId != null && visibleSet.contains(preferredLegacyId)) {
+    return <int>[preferredLegacyId];
+  }
+  return <int>[visibleIds.first];
+}
+
 String summarizeProductionAssetData(AssetsDataResponseV1 response) {
   if (response.assets.isEmpty) {
     return 'production 资产数据为空';
@@ -101,17 +125,33 @@ String summarizeLegacyPromptPolling(
 }
 
 String summarizeAssetWorkbenchSnapshot({
-  required int selectedCount,
+  required Iterable<AssetRow> visibleAssets,
+  required Iterable<int> selectedIds,
   AssetsDataResponseV1? productionData,
   AssetsPollingImageResponseV1? pollingData,
   Iterable<LegacyAssetPollingPromptAssetsItem>? promptPollingData,
   String? lead,
 }) {
+  final visibleById = <int, AssetRow>{
+    for (final asset in visibleAssets) asset.legacyId: asset,
+  };
+  final scopedSelection = sortUniqueAssetLegacyIds(
+    selectedIds.where(visibleById.containsKey),
+  );
+  final selectionLine = switch (scopedSelection.length) {
+    0 => '当前未选择资产',
+    1 =>
+      '当前选择 #${scopedSelection.first} ${visibleById[scopedSelection.first]?.name ?? ""}'
+          .trim(),
+    _ =>
+      '当前选择 ${scopedSelection.length} 条资产：${scopedSelection.take(3).map((id) => "#$id ${visibleById[id]?.name ?? ""}".trim()).join(", ")}',
+  };
   final parts = <String>[
     if (lead != null && lead.trim().isNotEmpty) lead.trim(),
-    selectedCount <= 0 ? '当前未选择资产' : '当前选择 $selectedCount 条资产',
+    selectionLine,
     if (productionData != null) summarizeProductionAssetData(productionData),
-    if (pollingData != null) summarizeAssetPollingStatuses(pollingData.statuses),
+    if (pollingData != null)
+      summarizeAssetPollingStatuses(pollingData.statuses),
     if (promptPollingData != null)
       summarizeLegacyPromptPolling(promptPollingData),
   ];

@@ -18,6 +18,37 @@ void main() {
     expect(grouped['role'], [5, 7]);
   });
 
+  test('chooseVisibleAssetSelection keeps visible preferred ids', () {
+    final selection = chooseVisibleAssetSelection(
+      const [
+        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+      ],
+      preferredIds: const [99, 5, 7],
+      preferredLegacyId: 3,
+    );
+
+    expect(selection, [5, 7]);
+  });
+
+  test('chooseVisibleAssetSelection falls back to focused or first asset', () {
+    expect(
+      chooseVisibleAssetSelection(const [
+        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+      ], preferredLegacyId: 7),
+      [7],
+    );
+    expect(
+      chooseVisibleAssetSelection(const [
+        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+      ]),
+      [3],
+    );
+  });
+
   test('summarizeProductionAssetData reports counts and sample rows', () {
     final line = summarizeProductionAssetData(
       const AssetsDataResponseV1(
@@ -62,9 +93,7 @@ void main() {
               assetType: 'clip',
             ),
           ],
-          video: [
-            LegacyAssetMaterialVideoItem(id: 2, filePath: 'b.mp4'),
-          ],
+          video: [LegacyAssetMaterialVideoItem(id: 2, filePath: 'b.mp4')],
         ),
       ),
       contains('1 条图片素材 · 1 条视频素材'),
@@ -105,36 +134,47 @@ void main() {
     );
   });
 
-  test('summarizeAssetWorkbenchSnapshot combines selected scope and sync data', () {
-    final line = summarizeAssetWorkbenchSnapshot(
-      lead: '已发起批量出图',
-      selectedCount: 2,
-      productionData: const AssetsDataResponseV1(
-        total: 2,
-        assets: [
-          AssetDataItemV1(id: 11, name: 'Hero', type: 'role'),
-          AssetDataItemV1(id: 12, name: 'Sword', type: 'props'),
+  test(
+    'summarizeAssetWorkbenchSnapshot combines selected scope and sync data',
+    () {
+      final line = summarizeAssetWorkbenchSnapshot(
+        lead: '已发起批量出图',
+        visibleAssets: const [
+          AssetRow(id: '11', legacyId: 11, name: 'Hero', assetType: 'role'),
+          AssetRow(id: '12', legacyId: 12, name: 'Sword', assetType: 'props'),
         ],
-      ),
-      pollingData: const AssetsPollingImageResponseV1(
-        statuses: [
-          AssetImageStatusV1(assetId: 11, imageCount: 1, latestState: 'queued'),
-        ],
-      ),
-      promptPollingData: const [
-        LegacyAssetPollingPromptAssetsItem(
-          id: 11,
-          name: 'Hero',
-          assetType: 'role',
-          promptState: '已完成',
+        selectedIds: const [11, 12],
+        productionData: const AssetsDataResponseV1(
+          total: 2,
+          assets: [
+            AssetDataItemV1(id: 11, name: 'Hero', type: 'role'),
+            AssetDataItemV1(id: 12, name: 'Sword', type: 'props'),
+          ],
         ),
-      ],
-    );
+        pollingData: const AssetsPollingImageResponseV1(
+          statuses: [
+            AssetImageStatusV1(
+              assetId: 11,
+              imageCount: 1,
+              latestState: 'queued',
+            ),
+          ],
+        ),
+        promptPollingData: const [
+          LegacyAssetPollingPromptAssetsItem(
+            id: 11,
+            name: 'Hero',
+            assetType: 'role',
+            promptState: '已完成',
+          ),
+        ],
+      );
 
-    expect(line, contains('已发起批量出图'));
-    expect(line, contains('当前选择 2 条资产'));
-    expect(line, contains('production 资产 2 条'));
-    expect(line, contains('queued 1 条'));
-    expect(line, contains('prompt 轮询 1 条'));
-  });
+      expect(line, contains('已发起批量出图'));
+      expect(line, contains('当前选择 2 条资产：#11 Hero, #12 Sword'));
+      expect(line, contains('production 资产 2 条'));
+      expect(line, contains('queued 1 条'));
+      expect(line, contains('prompt 轮询 1 条'));
+    },
+  );
 }
