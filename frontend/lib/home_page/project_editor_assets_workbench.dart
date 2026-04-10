@@ -15,7 +15,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
   }) async {
     final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
     var selectedAssetLegacyId = chooseInitialAssetLegacyId(visibleAssets);
-    var selectedScriptLegacyId = scriptList.isEmpty ? null : scriptList.first.legacyId;
+    var selectedScriptLegacyId = scriptList.isEmpty
+        ? null
+        : scriptList.first.legacyId;
     String statusLine = visibleAssets.isEmpty
         ? '当前项目还没有资产，可直接在这里创建。'
         : summarizeProjectAssetRows(visibleAssets);
@@ -50,6 +52,18 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
           setLocalState(() => localBusy = false);
         }
       }
+    }
+
+    Future<void> openChildWorkbench(
+      BuildContext dialogCtx,
+      StateSetter setLocalState,
+      Future<void> Function() action,
+    ) async {
+      await action();
+      if (!dialogCtx.mounted || !ctx.mounted) {
+        return;
+      }
+      await refreshWorkbench(setLocalState);
     }
 
     try {
@@ -90,7 +104,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(dialogCtx).colorScheme.outlineVariant,
+                              color: Theme.of(
+                                dialogCtx,
+                              ).colorScheme.outlineVariant,
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -113,7 +129,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                 const SizedBox(height: 6),
                                 Text(
                                   '当前焦点资产：#${selectedAsset.legacyId} ${selectedAsset.name} · ${selectedAsset.assetType}',
-                                  style: Theme.of(dialogCtx).textTheme.bodySmall,
+                                  style: Theme.of(
+                                    dialogCtx,
+                                  ).textTheme.bodySmall,
                                 ),
                               ],
                             ],
@@ -144,7 +162,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                           onChanged: assets.isEmpty
                               ? null
                               : (value) {
-                                  setLocalState(() => selectedAssetLegacyId = value);
+                                  setLocalState(
+                                    () => selectedAssetLegacyId = value,
+                                  );
                                 },
                         ),
                         const SizedBox(height: 8),
@@ -172,7 +192,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                           onChanged: scriptList.isEmpty
                               ? null
                               : (value) {
-                                  setLocalState(() => selectedScriptLegacyId = value);
+                                  setLocalState(
+                                    () => selectedScriptLegacyId = value,
+                                  );
                                 },
                         ),
                         const SizedBox(height: 12),
@@ -191,13 +213,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         token: token,
                                         p: p,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                       ),
                                     ),
                               child: const Text('新建资产'),
                             ),
                             OutlinedButton(
-                              onPressed: localBusy || assetsBusy[0] || assets.isEmpty
+                              onPressed:
+                                  localBusy || assetsBusy[0] || assets.isEmpty
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -208,13 +232,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         p: p,
                                         assetsRef: assetsRef,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                       ),
                                     ),
                               child: const Text('编辑资产'),
                             ),
                             OutlinedButton(
-                              onPressed: localBusy || assetsBusy[0] || assets.isEmpty
+                              onPressed:
+                                  localBusy || assetsBusy[0] || assets.isEmpty
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -225,13 +251,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         p: p,
                                         assetsRef: assetsRef,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                       ),
                                     ),
                               child: const Text('删除资产'),
                             ),
                             OutlinedButton(
-                              onPressed: localBusy || assetsBusy[0] || assets.isEmpty
+                              onPressed:
+                                  localBusy || assetsBusy[0] || assets.isEmpty
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -243,7 +271,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         scriptList: scriptList,
                                         assetsRef: assetsRef,
                                         assetsForScriptRef: assetsForScriptRef,
-                                        assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                                        assetsFilterScriptLegacyId:
+                                            assetsFilterScriptLegacyId,
                                         assetsBusy: assetsBusy,
                                       ),
                                     ),
@@ -257,7 +286,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                           runSpacing: 8,
                           children: [
                             OutlinedButton(
-                              onPressed: localBusy ||
+                              onPressed:
+                                  localBusy ||
                                       assetsBusy[0] ||
                                       assets.isEmpty ||
                                       scriptList.isEmpty ||
@@ -273,14 +303,16 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         scriptList: scriptList,
                                         assetsRef: assetsRef,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                         unlink: false,
                                       ),
                                     ),
                               child: const Text('关联剧本与资产'),
                             ),
                             OutlinedButton(
-                              onPressed: localBusy ||
+                              onPressed:
+                                  localBusy ||
                                       assetsBusy[0] ||
                                       assets.isEmpty ||
                                       scriptList.isEmpty ||
@@ -296,14 +328,18 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         scriptList: scriptList,
                                         assetsRef: assetsRef,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                         unlink: true,
                                       ),
                                     ),
                               child: const Text('取消关联'),
                             ),
                             OutlinedButton(
-                              onPressed: localBusy || assetsBusy[0] || scriptList.isEmpty
+                              onPressed:
+                                  localBusy ||
+                                      assetsBusy[0] ||
+                                      scriptList.isEmpty
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -329,7 +365,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         token: token,
                                         p: p,
                                         assetsBusy: assetsBusy,
-                                        reloadAssetsAndStats: reloadAssetsAndStats,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
                                       ),
                                     ),
                               child: const Text('上传 Clip 资产'),
@@ -354,49 +391,64 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                             OutlinedButton(
                               onPressed: localBusy || assetsBusy[0]
                                   ? null
-                                  : () => _openAssetImagesWorkbenchDialog(
-                                      ctx: dialogCtx,
-                                      setDialogState: setDialogState,
-                                      token: token,
-                                      p: p,
-                                      assetsRef: assetsRef,
-                                      assetsBusy: assetsBusy,
-                                      reloadAssetsAndStats: reloadAssetsAndStats,
-                                      preferredAssetLegacyId:
-                                          selectedAssetLegacyId,
+                                  : () => openChildWorkbench(
+                                      dialogCtx,
+                                      setLocalState,
+                                      () => _openAssetImagesWorkbenchDialog(
+                                        ctx: dialogCtx,
+                                        setDialogState: setDialogState,
+                                        token: token,
+                                        p: p,
+                                        assetsRef: assetsRef,
+                                        assetsBusy: assetsBusy,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
+                                        preferredAssetLegacyId:
+                                            selectedAssetLegacyId,
+                                      ),
                                     ),
                               child: const Text('资产图片工作台'),
                             ),
                             OutlinedButton(
                               onPressed: localBusy || assetsBusy[0]
                                   ? null
-                                  : () => _openAssetGenerationWorkbenchDialog(
-                                      ctx: dialogCtx,
-                                      setDialogState: setDialogState,
-                                      token: token,
-                                      p: p,
-                                      scriptList: scriptList,
-                                      assetsRef: assetsRef,
-                                      assetsForScriptRef: assetsForScriptRef,
-                                      assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
-                                      assetsBusy: assetsBusy,
-                                      reloadAssetsAndStats: reloadAssetsAndStats,
-                                      preferredAssetLegacyId:
-                                          selectedAssetLegacyId,
+                                  : () => openChildWorkbench(
+                                      dialogCtx,
+                                      setLocalState,
+                                      () => _openAssetGenerationWorkbenchDialog(
+                                        ctx: dialogCtx,
+                                        setDialogState: setDialogState,
+                                        token: token,
+                                        p: p,
+                                        scriptList: scriptList,
+                                        assetsRef: assetsRef,
+                                        assetsForScriptRef: assetsForScriptRef,
+                                        assetsFilterScriptLegacyId:
+                                            assetsFilterScriptLegacyId,
+                                        assetsBusy: assetsBusy,
+                                        reloadAssetsAndStats:
+                                            reloadAssetsAndStats,
+                                        preferredAssetLegacyId:
+                                            selectedAssetLegacyId,
+                                      ),
                                     ),
                               child: const Text('资产出图工作台'),
                             ),
                             OutlinedButton(
                               onPressed: localBusy || assetsBusy[0]
                                   ? null
-                                  : () => _openCornerScapeWorkbenchDialog(
-                                      ctx: dialogCtx,
-                                      setDialogState: setDialogState,
-                                      token: token,
-                                      p: p,
-                                      assetsBusy: assetsBusy,
-                                      preferredAssetLegacyId:
-                                          selectedAssetLegacyId,
+                                  : () => openChildWorkbench(
+                                      dialogCtx,
+                                      setLocalState,
+                                      () => _openCornerScapeWorkbenchDialog(
+                                        ctx: dialogCtx,
+                                        setDialogState: setDialogState,
+                                        token: token,
+                                        p: p,
+                                        assetsBusy: assetsBusy,
+                                        preferredAssetLegacyId:
+                                            selectedAssetLegacyId,
+                                      ),
                                     ),
                               child: const Text('资产历史图工作台'),
                             ),
@@ -414,7 +466,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                     child: Text(localBusy ? '处理中…' : '刷新工作台'),
                   ),
                   TextButton(
-                    onPressed: localBusy ? null : () => Navigator.of(dialogCtx).pop(),
+                    onPressed: localBusy
+                        ? null
+                        : () => Navigator.of(dialogCtx).pop(),
                     child: const Text('关闭'),
                   ),
                 ],
