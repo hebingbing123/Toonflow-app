@@ -323,9 +323,9 @@ void main() {
     );
 
     expect(find.text('上下文快照'), findsOneWidget);
-    expect(find.text('故事骨架'), findsOneWidget);
+    expect(find.text('故事骨架'), findsWidgets);
     expect(find.textContaining('主角失去记忆后踏上回乡之路'), findsOneWidget);
-    expect(find.text('改编策略'), findsOneWidget);
+    expect(find.text('改编策略'), findsWidgets);
     expect(find.textContaining('聚焦母女关系'), findsOneWidget);
     expect(find.text('计划内剧本草稿'), findsOneWidget);
     expect(find.textContaining('第一集'), findsOneWidget);
@@ -554,7 +554,7 @@ void main() {
 
     expect(find.text('填充首章'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, '读取上下文').first);
+    await tester.tap(find.widgetWithText(FilledButton, '读取上下文').at(4));
     await tester.pump();
     expect(lastTool, 'get_novel_events');
     expect(lastArgs, '{"novelId":21}');
@@ -567,6 +567,130 @@ void main() {
       'run_sub_agent_adaptationStrategy',
     );
     expect(scriptPromptController.text, isNotEmpty);
+  });
+
+  testWidgets('Script stage board applies and advances stage actions', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '9');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    String? lastTool;
+    String? lastArgs;
+    var scriptSubAgentCalls = 0;
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.script,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: const <String, dynamic>{
+                  'data': <String, dynamic>{
+                    'storySkeleton': '',
+                    'adaptationStrategy': '',
+                  },
+                },
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'get_planData => {...}',
+                workspaceLastToolName: 'get_planData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': <String, dynamic>{
+                    'storySkeleton': '',
+                    'adaptationStrategy': '',
+                  },
+                },
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (tool, args) {
+                  lastTool = tool;
+                  lastArgs = args;
+                },
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () => scriptSubAgentCalls += 1,
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('执行阶段'), findsOneWidget);
+    expect(find.text('待生成'), findsWidgets);
+
+    final advanceStageButton = find.widgetWithText(FilledButton, '推进阶段').first;
+    await tester.ensureVisible(advanceStageButton);
+    await tester.tap(advanceStageButton);
+    await tester.pump();
+    expect(scriptSubAgentCalls, 1);
+    expect(scriptSubAgentToolController.text, 'run_sub_agent_storySkeleton');
+    expect(scriptPromptController.text, isNotEmpty);
+
+    final readContextButton = find.text('读取上下文').first;
+    await tester.ensureVisible(readContextButton);
+    await tester.tap(readContextButton);
+    await tester.pump();
+    expect(lastTool, 'get_novel_text');
+    expect(lastArgs, '{}');
   });
 
   testWidgets('Script form blocks invalid JSON args before probe', (

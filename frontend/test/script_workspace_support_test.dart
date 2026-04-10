@@ -14,40 +14,75 @@ void main() {
     expect(ids, <int>[11, 12, 13]);
   });
 
-  test('buildScriptWorkspaceRecipes suggests next actions for planData gaps', () {
-    final recipes = buildScriptWorkspaceRecipes(
-      toolName: 'get_planData',
-      result: <String, dynamic>{
-        'data': <String, dynamic>{
-          'storySkeleton': '',
-          'adaptationStrategy': '',
-          'script': const <Map<String, dynamic>>[],
+  test(
+    'buildScriptWorkspaceRecipes suggests next actions for planData gaps',
+    () {
+      final recipes = buildScriptWorkspaceRecipes(
+        toolName: 'get_planData',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'storySkeleton': '',
+            'adaptationStrategy': '',
+            'script': const <Map<String, dynamic>>[],
+          },
         },
-      },
-      scopeScriptId: 9,
+        scopeScriptId: 9,
+      );
+
+      expect(recipes.map((recipe) => recipe.title), contains('补故事骨架'));
+      expect(recipes.map((recipe) => recipe.title), contains('补改编策略'));
+      expect(recipes.map((recipe) => recipe.title), contains('读取当前剧本正文'));
+    },
+  );
+
+  test(
+    'buildScriptWorkspaceArgumentSuggestions offers novel id fill chips',
+    () {
+      final suggestions = buildScriptWorkspaceArgumentSuggestions(
+        selectedTool: 'get_novel_events',
+        toolName: 'get_novel_text',
+        result: <String, dynamic>{
+          'items': <Map<String, dynamic>>[
+            <String, dynamic>{'legacy_id': 21},
+            <String, dynamic>{'legacy_id': 22},
+          ],
+        },
+      );
+
+      expect(suggestions.map((item) => item.label), contains('填充首章'));
+      expect(suggestions.first.payload, <String, dynamic>{'novelId': 21});
+    },
+  );
+
+  test(
+    'buildScriptWorkspaceStages marks missing story skeleton as pending',
+    () {
+      final stages = buildScriptWorkspaceStages(
+        toolName: 'get_planData',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'storySkeleton': '',
+            'adaptationStrategy': '聚焦亲情线',
+          },
+        },
+        scopeScriptId: 9,
+      );
+
+      final skeletonStage = stages.firstWhere((stage) => stage.title == '故事骨架');
+      expect(skeletonStage.statusLabel, '待生成');
+      expect(skeletonStage.subAgentTool, 'run_sub_agent_storySkeleton');
+    },
+  );
+
+  test('buildScriptWorkspaceStages marks script content as completed', () {
+    final stages = buildScriptWorkspaceStages(
+      toolName: 'get_script_content',
+      result: <String, dynamic>{'content': '第 1 场，站台重逢。'},
+      scopeScriptId: 8,
     );
 
-    expect(recipes.map((recipe) => recipe.title), contains('补故事骨架'));
-    expect(recipes.map((recipe) => recipe.title), contains('补改编策略'));
-    expect(recipes.map((recipe) => recipe.title), contains('读取当前剧本正文'));
-  });
-
-  test('buildScriptWorkspaceArgumentSuggestions offers novel id fill chips', () {
-    final suggestions = buildScriptWorkspaceArgumentSuggestions(
-      selectedTool: 'get_novel_events',
-      toolName: 'get_novel_text',
-      result: <String, dynamic>{
-        'items': <Map<String, dynamic>>[
-          <String, dynamic>{'legacy_id': 21},
-          <String, dynamic>{'legacy_id': 22},
-        ],
-      },
-    );
-
-    expect(suggestions.map((item) => item.label), contains('填充首章'));
-    expect(
-      suggestions.first.payload,
-      <String, dynamic>{'novelId': 21},
-    );
+    final scriptStage = stages.firstWhere((stage) => stage.title == '剧本正文');
+    expect(scriptStage.statusLabel, '已完成');
+    expect(scriptStage.domainTool, 'get_script_content');
   });
 }

@@ -415,8 +415,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         final title = (lastToolResult['title'] as String?)?.trim();
         addPreviewCard(
           title: '小说章节正文',
-          subtitle:
-              title == null || title.isEmpty ? '来自 get_novel_text' : title,
+          subtitle: title == null || title.isEmpty
+              ? '来自 get_novel_text'
+              : title,
           body: (lastToolResult['content'] as String?) ?? '',
         );
       }
@@ -604,6 +605,14 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     );
   }
 
+  List<ScriptWorkspaceStage> _buildWorkspaceStages() {
+    return buildScriptWorkspaceStages(
+      toolName: widget.workspaceLastToolName,
+      result: widget.workspaceLastToolResultData,
+      scopeScriptId: _scopeScriptId,
+    );
+  }
+
   void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
@@ -635,6 +644,110 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       return;
     }
     _runScriptSubAgentTool();
+  }
+
+  void _applyWorkspaceStage(ScriptWorkspaceStage stage) {
+    if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
+      widget.onScriptDomainToolChanged(stage.domainTool!.trim());
+      widget.scriptDomainArgsController.text = jsonEncode(
+        stage.args ?? <String, dynamic>{},
+      );
+    }
+    if (stage.subAgentTool != null && stage.subAgentTool!.trim().isNotEmpty) {
+      widget.onScriptSubAgentChanged(stage.subAgentTool!.trim());
+    }
+    final prompt = stage.prompt?.trim();
+    if (prompt != null && prompt.isNotEmpty) {
+      widget.scriptPromptController.text = prompt;
+    }
+    _setTaskStatus('已应用阶段动作：${stage.title}');
+  }
+
+  void _runWorkspaceStageDomainTool(ScriptWorkspaceStage stage) {
+    _applyWorkspaceStage(stage);
+    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) {
+      return;
+    }
+    _probeScriptDomainTool();
+  }
+
+  void _runWorkspaceStageSubAgent(ScriptWorkspaceStage stage) {
+    _applyWorkspaceStage(stage);
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
+      return;
+    }
+    _runScriptSubAgentTool();
+  }
+
+  Widget _buildWorkspaceStagesPanel(BuildContext context) {
+    final stages = _buildWorkspaceStages();
+    if (stages.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
+        ...stages.map(
+          (ScriptWorkspaceStage stage) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          stage.title,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      Chip(label: Text(stage.statusLabel)),
+                    ],
+                  ),
+                  Text(
+                    stage.detail,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      OutlinedButton(
+                        onPressed: widget.busy
+                            ? null
+                            : () => _applyWorkspaceStage(stage),
+                        child: const Text('应用阶段'),
+                      ),
+                      if (stage.domainTool != null)
+                        FilledButton.tonal(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceStageDomainTool(stage),
+                          child: const Text('读取上下文'),
+                        ),
+                      if (stage.subAgentTool != null)
+                        FilledButton(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceStageSubAgent(stage),
+                          child: const Text('推进阶段'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildWorkspaceDiagnosis(BuildContext context) {
@@ -853,6 +966,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                 ),
               ),
             ],
+            _buildWorkspaceStagesPanel(context),
             _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
             if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
