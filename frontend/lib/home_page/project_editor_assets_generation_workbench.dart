@@ -89,6 +89,26 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
       });
     }
 
+    void applyScopedSelection(
+      StateSetter setState,
+      Iterable<int> candidateIds,
+      String label,
+    ) {
+      final next = collectScopedAssetLegacyIds(
+        candidateIds,
+        filteredVisibleAssets(),
+      );
+      setState(() {
+        selectedIds
+          ..clear()
+          ..addAll(next);
+        focusedAssetLegacyId = next.isEmpty ? null : next.first;
+        statusLine = next.isEmpty
+            ? '$label：当前可见资产中没有匹配项'
+            : '$label：已选择 ${next.length} 条资产';
+      });
+    }
+
     Future<void> syncWorkbenchSnapshot(
       StateSetter setState, {
       required bool includeProductionSummary,
@@ -196,6 +216,12 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
               final visible = visibleAssets();
               final scopedAssets = filteredVisibleAssets();
               final typeSelections = collectAssetIdsByType(visible);
+              final pollingSelections = pollingData == null
+                  ? const <String, List<int>>{}
+                  : collectAssetIdsByImageState(pollingData!.statuses);
+              final promptSelections = promptPollingData == null
+                  ? const <String, List<int>>{}
+                  : collectAssetIdsByPromptState(promptPollingData!);
               final selected = sortedSelection();
               final selectedSingleAssetId = selected.length == 1
                   ? selected.first
@@ -636,6 +662,27 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                 color: Theme.of(dialogCtx).colorScheme.outline,
                               ),
                         ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: pollingSelections.entries
+                              .map(
+                                (entry) => ActionChip(
+                                  label: Text(
+                                    '${entry.key} ${entry.value.length} 条',
+                                  ),
+                                  onPressed: busyMutation
+                                      ? null
+                                      : () => applyScopedSelection(
+                                          setState,
+                                          entry.value,
+                                          '已按图片状态 ${entry.key} 重建选择',
+                                        ),
+                                ),
+                              )
+                              .toList(growable: false),
+                        ),
                       ],
                       if (materialData != null) ...[
                         const SizedBox(height: 4),
@@ -645,6 +692,25 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                               ?.copyWith(
                                 color: Theme.of(dialogCtx).colorScheme.outline,
                               ),
+                        ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ActionChip(
+                              label: Text(
+                                '使用素材上下文 ${materialData!.data.length} 条',
+                              ),
+                              onPressed: busyMutation
+                                  ? null
+                                  : () => applyScopedSelection(
+                                      setState,
+                                      materialData!.data.map((item) => item.id),
+                                      '已按素材上下文重建选择',
+                                    ),
+                            ),
+                          ],
                         ),
                       ],
                       if (batchData != null) ...[
@@ -656,6 +722,25 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                 color: Theme.of(dialogCtx).colorScheme.outline,
                               ),
                         ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ActionChip(
+                              label: Text(
+                                '使用批量候选 ${batchData!.data.length} 条',
+                              ),
+                              onPressed: busyMutation
+                                  ? null
+                                  : () => applyScopedSelection(
+                                      setState,
+                                      batchData!.data.map((item) => item.id),
+                                      '已按批量候选重建选择',
+                                    ),
+                            ),
+                          ],
+                        ),
                       ],
                       if (promptPollingData != null) ...[
                         const SizedBox(height: 4),
@@ -665,6 +750,27 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                               ?.copyWith(
                                 color: Theme.of(dialogCtx).colorScheme.outline,
                               ),
+                        ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: promptSelections.entries
+                              .map(
+                                (entry) => ActionChip(
+                                  label: Text(
+                                    '${entry.key} ${entry.value.length} 条',
+                                  ),
+                                  onPressed: busyMutation
+                                      ? null
+                                      : () => applyScopedSelection(
+                                          setState,
+                                          entry.value,
+                                          '已按 prompt 状态 ${entry.key} 重建选择',
+                                        ),
+                                ),
+                              )
+                              .toList(growable: false),
                         ),
                       ],
                       const SizedBox(height: 12),

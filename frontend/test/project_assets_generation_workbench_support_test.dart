@@ -18,6 +18,16 @@ void main() {
     expect(grouped['role'], [5, 7]);
   });
 
+  test('collectScopedAssetLegacyIds keeps only currently visible ids', () {
+    final scoped = collectScopedAssetLegacyIds(const [5, 99, 3], const [
+      AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
+      AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+      AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+    ]);
+
+    expect(scoped, [3, 5]);
+  });
+
   test('chooseVisibleAssetSelection keeps visible preferred ids', () {
     final selection = chooseVisibleAssetSelection(
       const [
@@ -79,6 +89,47 @@ void main() {
     expect(line, contains('queued 1 条'));
     expect(line, contains('unknown 1 条'));
     expect(line, contains('#11: 2 张'));
+  });
+
+  test('collect image and prompt state groups for quick selection', () {
+    expect(
+      collectAssetIdsByImageState(const [
+        AssetImageStatusV1(assetId: 12, imageCount: 0, latestState: 'queued'),
+        AssetImageStatusV1(assetId: 11, imageCount: 1, latestState: 'queued'),
+        AssetImageStatusV1(assetId: 13, imageCount: 2),
+      ]),
+      {
+        'queued': [11, 12],
+        'unknown': [13],
+      },
+    );
+
+    expect(
+      collectAssetIdsByPromptState(const [
+        LegacyAssetPollingPromptAssetsItem(
+          id: 7,
+          name: 'Hero',
+          assetType: 'role',
+          promptState: '生成中',
+        ),
+        LegacyAssetPollingPromptAssetsItem(
+          id: 3,
+          name: 'Sword',
+          assetType: 'props',
+          promptState: '生成中',
+        ),
+        LegacyAssetPollingPromptAssetsItem(
+          id: 9,
+          name: 'Mage',
+          assetType: 'role',
+          promptState: '',
+        ),
+      ]),
+      {
+        'unknown': [9],
+        '生成中': [3, 7],
+      },
+    );
   });
 
   test('legacy asset summaries describe material, batch and prompt states', () {

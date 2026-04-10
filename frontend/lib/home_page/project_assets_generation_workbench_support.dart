@@ -25,6 +25,43 @@ Map<String, List<int>> collectAssetIdsByType(Iterable<AssetRow> assets) {
   };
 }
 
+List<int> collectScopedAssetLegacyIds(
+  Iterable<int> candidateIds,
+  Iterable<AssetRow> visibleAssets,
+) {
+  final visibleSet = visibleAssets.map((asset) => asset.legacyId).toSet();
+  return sortUniqueAssetLegacyIds(candidateIds.where(visibleSet.contains));
+}
+
+Map<String, List<int>> collectAssetIdsByImageState(
+  Iterable<AssetImageStatusV1> statuses,
+) {
+  final grouped = SplayTreeMap<String, List<int>>();
+  for (final row in statuses) {
+    final state = row.latestState?.trim();
+    final key = (state == null || state.isEmpty) ? 'unknown' : state;
+    grouped.putIfAbsent(key, () => <int>[]).add(row.assetId);
+  }
+  return <String, List<int>>{
+    for (final entry in grouped.entries)
+      entry.key: sortUniqueAssetLegacyIds(entry.value),
+  };
+}
+
+Map<String, List<int>> collectAssetIdsByPromptState(
+  Iterable<LegacyAssetPollingPromptAssetsItem> rows,
+) {
+  final grouped = SplayTreeMap<String, List<int>>();
+  for (final row in rows) {
+    final key = row.promptState.trim().isEmpty ? 'unknown' : row.promptState;
+    grouped.putIfAbsent(key, () => <int>[]).add(row.id);
+  }
+  return <String, List<int>>{
+    for (final entry in grouped.entries)
+      entry.key: sortUniqueAssetLegacyIds(entry.value),
+  };
+}
+
 List<int> chooseVisibleAssetSelection(
   Iterable<AssetRow> assets, {
   Iterable<int>? preferredIds,
