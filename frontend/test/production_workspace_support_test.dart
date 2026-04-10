@@ -140,4 +140,40 @@ void main() {
       });
     },
   );
+
+  test('buildProductionWorkspaceStages marks assets with missing images', () {
+    final stages = buildProductionWorkspaceStages(
+      toolName: 'get_flowData',
+      suggestedFlowKey: 'assets',
+      result: <String, dynamic>{
+        'data': <Map<String, dynamic>>[
+          <String, dynamic>{'id': 1, 'name': '角色A', 'url': 'https://a.png'},
+          <String, dynamic>{'id': 2, 'name': '角色B'},
+        ],
+      },
+    );
+
+    final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+    expect(assetsStage.statusLabel, '需补图');
+    expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
+    expect(assetsStage.detail, contains('仍有 1 项缺少图像结果'));
+  });
+
+  test(
+    'buildProductionWorkspaceStages marks storyboard as refresh-needed after generation',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'generate_storyboard',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{'ok': true},
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '建议刷新');
+      expect(storyboardStage.domainTool, 'get_flowData');
+      expect(storyboardStage.subAgentTool, isNull);
+    },
+  );
 }

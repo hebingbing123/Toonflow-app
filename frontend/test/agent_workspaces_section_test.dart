@@ -1584,4 +1584,122 @@ void main() {
     expect(productionDomainArgsController.text, '{"ids":[101,102,103]}');
     expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
   });
+
+  testWidgets('Production stage board applies and advances stage actions', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    var productionProbeCalls = 0;
+    var productionSubAgentCalls = 0;
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.production,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'get_flowData => {"data":[]}',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': <Map<String, dynamic>>[],
+                },
+                workspaceSuggestedFlowKey: 'assets',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () => productionProbeCalls += 1,
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('执行阶段'), findsOneWidget);
+    expect(find.text('待规划'), findsOneWidget);
+    expect(find.text('资产准备'), findsOneWidget);
+
+    final advanceStageButton = find.widgetWithText(FilledButton, '推进阶段').first;
+    await tester.ensureVisible(advanceStageButton);
+    await tester.tap(advanceStageButton);
+    await tester.pump();
+    expect(productionSubAgentCalls, 1);
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_derive_assets',
+    );
+    expect(productionPromptController.text, isNotEmpty);
+
+    final readFlowButton = find.text('读取 flow').first;
+    await tester.ensureVisible(readFlowButton);
+    await tester.tap(readFlowButton);
+    await tester.pump();
+    expect(productionProbeCalls, 1);
+    expect(flowKeyController.text, 'scriptPlan');
+    expect(productionDomainToolController.text, 'get_flowData');
+    expect(productionDomainArgsController.text, '{"key":"scriptPlan"}');
+  });
 }

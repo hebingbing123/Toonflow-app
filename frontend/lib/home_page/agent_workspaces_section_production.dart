@@ -472,6 +472,14 @@ class _AgentWorkspaceProductionCardState
     );
   }
 
+  List<ProductionWorkspaceStage> _buildWorkspaceStages() {
+    return buildProductionWorkspaceStages(
+      toolName: widget.workspaceLastToolName,
+      suggestedFlowKey: _suggestedFlowKeyLine,
+      result: widget.workspaceLastToolResultData,
+    );
+  }
+
   void _applyWorkspaceRecipe(ProductionWorkspaceRecipe recipe) {
     widget.onFlowKeyChanged(recipe.flowKey);
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
@@ -488,6 +496,114 @@ class _AgentWorkspaceProductionCardState
       widget.productionPromptController.text = prompt;
     }
     _setTaskStatus('已应用任务建议：${recipe.title}');
+  }
+
+  void _applyWorkspaceStage(ProductionWorkspaceStage stage) {
+    widget.onFlowKeyChanged(stage.flowKey);
+    if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
+      widget.onProductionDomainToolChanged(stage.domainTool!.trim());
+      if (stage.domainTool == 'get_flowData') {
+        widget.productionDomainArgsController.text = jsonEncode(
+          <String, dynamic>{'key': stage.flowKey},
+        );
+      }
+    }
+    if (stage.subAgentTool != null && stage.subAgentTool!.trim().isNotEmpty) {
+      widget.onProductionSubAgentChanged(stage.subAgentTool!.trim());
+    }
+    final prompt = stage.prompt?.trim();
+    if (prompt != null && prompt.isNotEmpty) {
+      widget.productionPromptController.text = prompt;
+    }
+    _setTaskStatus('已应用阶段动作：${stage.title}');
+  }
+
+  void _runWorkspaceStageDomainTool(ProductionWorkspaceStage stage) {
+    _applyWorkspaceStage(stage);
+    if (stage.domainTool == null || stage.domainTool!.trim().isEmpty) {
+      return;
+    }
+    _probeProductionDomainTool();
+  }
+
+  void _runWorkspaceStageSubAgent(ProductionWorkspaceStage stage) {
+    _applyWorkspaceStage(stage);
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
+      return;
+    }
+    _runProductionSubAgentTool();
+  }
+
+  Widget _buildWorkspaceStagesPanel(BuildContext context) {
+    final stages = _buildWorkspaceStages();
+    if (stages.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
+        ...stages.map(
+          (ProductionWorkspaceStage stage) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          stage.title,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      Chip(label: Text(stage.statusLabel)),
+                    ],
+                  ),
+                  Text(
+                    stage.detail,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      Chip(label: Text('flow=${stage.flowKey}')),
+                      OutlinedButton(
+                        onPressed: widget.busy
+                            ? null
+                            : () => _applyWorkspaceStage(stage),
+                        child: const Text('应用阶段'),
+                      ),
+                      if (stage.domainTool != null)
+                        FilledButton.tonal(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceStageDomainTool(stage),
+                          child: const Text('读取 flow'),
+                        ),
+                      if (stage.subAgentTool != null)
+                        FilledButton(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceStageSubAgent(stage),
+                          child: const Text('推进阶段'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   void _runWorkspaceRecipeDomainTool(ProductionWorkspaceRecipe recipe) {
@@ -843,6 +959,7 @@ class _AgentWorkspaceProductionCardState
                     Text(line, style: Theme.of(context).textTheme.bodySmall),
               ),
             ],
+            _buildWorkspaceStagesPanel(context),
             _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
             if (_suggestedFlowKeyLine != null) ...<Widget>[
