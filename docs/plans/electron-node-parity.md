@@ -70,6 +70,10 @@
 | `/api/task/getProject`、`getTaskApi`、`getTaskCategories`、`taskDetails` | 任务中心 | ✅ | **`GET /api/v1/jobs*`**（列表支持 **`limit`/`offset`** 分页，默认 **100**/**0**）+ 聚合 **`kinds`/`status` summary**；**`POST /api/v1/tasks/get-project`**（**`{}`**）→ **`{ data: [{ id, name }] }`**（**`legacy_id`**）；**`POST …/get-task-categories`** → **`{ data: [{ taskClass }] }`**；**`POST …/get-task-api`** 分页 **`app_generation_job`**（**`taskClass`/`state`/`projectId`** 过滤，且 **`projectId`** 仅在 **`>0`** 时生效并对齐 **`payload.project_legacy_id`**，兼容旧栈 truthy 语义）；**JobRow** 现额外返回 **`legacy_task_id`**；**`POST …/task-details`**：**`taskId`** **UUID 字符串** 或 **正整数**（查 **`legacy_task_id`**）→ 同一任务行（**404**/**503** 等）；非法字符串 → **400**；OpenAPI、无 DB 烟雾、PG 回归（project list + categories + filtered task api + UUID/int task-details + idempotent job create，含 **`projectId=0`** 忽略过滤回归）已完成；Flutter **task center** 主区现已升级为“任务工作台”入口，可在同一对话框内完成项目/分类读取、按项目/分类/状态筛选列表，以及按 legacy id 或 UUID 打开详情，旧首条/UUID probe 下沉到兼容性折叠区 |
 | `/api/test/test` | 测试路由 | ✅ | **`GET /api/v1/ping`** — JSON **`{"ok":true}`**（旧栈为纯文本 **`ok`**） |
 
+补充产品化进展：
+
+- Flutter 剧本分镜列表现在会把“新增/批量新增分镜”后的结果写回共享 follow-up 区，并自动补同步一次制作视图摘要；用户创建分镜后可直接看到“刷新制作视图 / 进入分镜出图工作台 / 补充分镜提示词”的下一步建议，不再只停留在一次性 SnackBar。
+
 ### 3.1 Socket.IO（非 REST）
 
 | 旧模块 | Rust / 说明 |

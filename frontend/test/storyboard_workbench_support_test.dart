@@ -3,6 +3,65 @@ import 'package:toonflow_app/home_page/storyboard_workbench_support.dart';
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {
+  test('diagnoseStoryboardList requests creation when there are no boards', () {
+    final diagnosis = diagnoseStoryboardList(
+      boards: const <StoryboardRow>[],
+      productionSummaryLoaded: false,
+    );
+
+    expect(
+      diagnosis.recommendedAction,
+      StoryboardListRecommendedAction.addStoryboard,
+    );
+    expect(diagnosis.summary, '当前剧本还没有分镜。');
+  });
+
+  test(
+    'diagnoseStoryboardList requests production refresh before workbench',
+    () {
+      final diagnosis = diagnoseStoryboardList(
+        boards: const [
+          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+        ],
+        productionSummaryLoaded: false,
+      );
+
+      expect(
+        diagnosis.recommendedAction,
+        StoryboardListRecommendedAction.refreshProductionSummary,
+      );
+    },
+  );
+
+  test('diagnoseStoryboardList routes to editing when prompts are missing', () {
+    final diagnosis = diagnoseStoryboardList(
+      boards: const [
+        StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '  '),
+      ],
+      productionSummaryLoaded: true,
+    );
+
+    expect(
+      diagnosis.recommendedAction,
+      StoryboardListRecommendedAction.editStoryboard,
+    );
+  });
+
+  test('buildStoryboardListFollowUp appends the recommended action', () {
+    final line = buildStoryboardListFollowUp(
+      actionSummary: '已批量新增 2 条分镜。',
+      diagnosis: diagnoseStoryboardList(
+        boards: const [
+          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+        ],
+        productionSummaryLoaded: true,
+      ),
+    );
+
+    expect(line, contains('下一步建议：进入分镜出图工作台。'));
+  });
+
   test('collectStoryboardTrackIds merges and sorts known track ids', () {
     final ids = collectStoryboardTrackIds(
       scriptStoryboard: const StoryboardRow(

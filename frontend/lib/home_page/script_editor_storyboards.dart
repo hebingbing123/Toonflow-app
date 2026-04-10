@@ -6,6 +6,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required int projectLegacyId,
     required int scriptLegacyId,
     required List<String?> productionSummaryLine,
+    required List<bool> productionSummaryLoaded,
     required List<bool> productionSummaryLoading,
     required StateSetter setBoardsState,
   }) async {
@@ -27,9 +28,12 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       productionSummaryLine[0] = response.data.isEmpty
           ? '制作视图当前没有分镜数据'
           : '制作视图 ${response.data.length} 条 · $preview${response.data.length > 4 ? '…' : ''}';
+      productionSummaryLoaded[0] = true;
     } on RustApiException catch (e) {
+      productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = '制作视图读取失败：$e';
     } catch (e) {
+      productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = '制作视图读取失败：$e';
     } finally {
       productionSummaryLoading[0] = false;
@@ -69,6 +73,9 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required int scriptLegacyId,
     required List<StoryboardRow> boardsList,
     required List<bool> actionBusy,
+    required List<String?> storyboardTaskLine,
+    required List<String?> productionSummaryLine,
+    required List<bool> productionSummaryLoaded,
   }) async {
     final promptCtrl = TextEditingController();
     final durationCtrl = TextEditingController();
@@ -156,9 +163,25 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           boardsLoading: actionBusy,
         );
         if (!ctx.mounted) return;
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(SnackBar(content: Text('已新增分镜 #${added.storyboardId}')));
+        await _reloadProductionStoryboardSummary(
+          token: token,
+          projectLegacyId: projectLegacyId,
+          scriptLegacyId: scriptLegacyId,
+          productionSummaryLine: productionSummaryLine,
+          productionSummaryLoaded: productionSummaryLoaded,
+          productionSummaryLoading: actionBusy,
+          setBoardsState: setBoardsState,
+        );
+        if (!ctx.mounted) return;
+        setBoardsState(() {
+          storyboardTaskLine[0] = buildStoryboardListFollowUp(
+            actionSummary: '已新增分镜 #${added.storyboardId}。',
+            diagnosis: diagnoseStoryboardList(
+              boards: boardsList,
+              productionSummaryLoaded: productionSummaryLoaded[0],
+            ),
+          );
+        });
       } finally {
         actionBusy[0] = false;
         if (ctx.mounted) {
@@ -191,6 +214,9 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required int scriptLegacyId,
     required List<StoryboardRow> boardsList,
     required List<bool> actionBusy,
+    required List<String?> storyboardTaskLine,
+    required List<String?> productionSummaryLine,
+    required List<bool> productionSummaryLoaded,
   }) async {
     final promptsCtrl = TextEditingController();
     final durationCtrl = TextEditingController();
@@ -287,9 +313,25 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           boardsLoading: actionBusy,
         );
         if (!ctx.mounted) return;
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(SnackBar(content: Text('已批量新增 ${added.added} 条分镜')));
+        await _reloadProductionStoryboardSummary(
+          token: token,
+          projectLegacyId: projectLegacyId,
+          scriptLegacyId: scriptLegacyId,
+          productionSummaryLine: productionSummaryLine,
+          productionSummaryLoaded: productionSummaryLoaded,
+          productionSummaryLoading: actionBusy,
+          setBoardsState: setBoardsState,
+        );
+        if (!ctx.mounted) return;
+        setBoardsState(() {
+          storyboardTaskLine[0] = buildStoryboardListFollowUp(
+            actionSummary: '已批量新增 ${added.added} 条分镜。',
+            diagnosis: diagnoseStoryboardList(
+              boards: boardsList,
+              productionSummaryLoaded: productionSummaryLoaded[0],
+            ),
+          );
+        });
       } finally {
         actionBusy[0] = false;
         if (ctx.mounted) {
@@ -329,10 +371,16 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           final boardsLoading = <bool>[false];
           final actionBusy = <bool>[false];
           final productionSummaryLoading = <bool>[false];
+          final productionSummaryLoaded = <bool>[false];
           final productionSummaryLine = <String?>[null];
+          final storyboardTaskLine = <String?>[null];
           return StatefulBuilder(
             builder: (ctx2, setBoardsState) {
               final outline = Theme.of(ctx2).colorScheme.outline;
+              final diagnosis = diagnoseStoryboardList(
+                boards: boardsList,
+                productionSummaryLoaded: productionSummaryLoaded[0],
+              );
               return AlertDialog(
                 title: Text('分镜 (${boardsList.length})'),
                 content: SizedBox(
@@ -357,6 +405,45 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                         ).textTheme.bodySmall?.copyWith(color: outline),
                       ),
                       const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: outline.withValues(alpha: 0.4),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              diagnosis.summary,
+                              style: Theme.of(ctx2).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '推荐动作：${describeStoryboardListRecommendedAction(diagnosis.recommendedAction)}',
+                              style: Theme.of(
+                                ctx2,
+                              ).textTheme.bodySmall?.copyWith(color: outline),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              diagnosis.detail,
+                              style: Theme.of(ctx2).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (storyboardTaskLine[0] != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          storyboardTaskLine[0]!,
+                          style: Theme.of(ctx2).textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Wrap(
@@ -374,6 +461,11 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       scriptLegacyId: scriptLegacyId,
                                       boardsList: boardsList,
                                       actionBusy: actionBusy,
+                                      storyboardTaskLine: storyboardTaskLine,
+                                      productionSummaryLine:
+                                          productionSummaryLine,
+                                      productionSummaryLoaded:
+                                          productionSummaryLoaded,
                                     ),
                               child: Text(actionBusy[0] ? '处理中…' : '新增分镜'),
                             ),
@@ -388,6 +480,11 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       scriptLegacyId: scriptLegacyId,
                                       boardsList: boardsList,
                                       actionBusy: actionBusy,
+                                      storyboardTaskLine: storyboardTaskLine,
+                                      productionSummaryLine:
+                                          productionSummaryLine,
+                                      productionSummaryLoaded:
+                                          productionSummaryLoaded,
                                     ),
                               child: const Text('批量新增分镜'),
                             ),
@@ -433,6 +530,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                         scriptLegacyId: scriptLegacyId,
                                         productionSummaryLine:
                                             productionSummaryLine,
+                                        productionSummaryLoaded:
+                                            productionSummaryLoaded,
                                         productionSummaryLoading:
                                             productionSummaryLoading,
                                         setBoardsState: setBoardsState,
@@ -450,6 +549,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       scriptLegacyId: scriptLegacyId,
                                       productionSummaryLine:
                                           productionSummaryLine,
+                                      productionSummaryLoaded:
+                                          productionSummaryLoaded,
                                       productionSummaryLoading:
                                           productionSummaryLoading,
                                       setBoardsState: setBoardsState,
@@ -530,6 +631,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                                       scriptLegacyId,
                                                   productionSummaryLine:
                                                       productionSummaryLine,
+                                                  productionSummaryLoaded:
+                                                      productionSummaryLoaded,
                                                   productionSummaryLoading:
                                                       productionSummaryLoading,
                                                   setBoardsState:

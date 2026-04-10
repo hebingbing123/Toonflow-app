@@ -2,6 +2,90 @@ import 'dart:collection';
 
 import '../rust_api.dart';
 
+class StoryboardListDiagnosis {
+  const StoryboardListDiagnosis({
+    required this.summary,
+    required this.detail,
+    required this.recommendedAction,
+  });
+
+  final String summary;
+  final String detail;
+  final StoryboardListRecommendedAction recommendedAction;
+}
+
+enum StoryboardListRecommendedAction {
+  addStoryboard,
+  refreshProductionSummary,
+  openBatchWorkbench,
+  editStoryboard,
+}
+
+String describeStoryboardListRecommendedAction(
+  StoryboardListRecommendedAction action,
+) {
+  switch (action) {
+    case StoryboardListRecommendedAction.addStoryboard:
+      return '继续新增分镜';
+    case StoryboardListRecommendedAction.refreshProductionSummary:
+      return '刷新制作视图';
+    case StoryboardListRecommendedAction.openBatchWorkbench:
+      return '进入分镜出图工作台';
+    case StoryboardListRecommendedAction.editStoryboard:
+      return '补充分镜提示词';
+  }
+}
+
+StoryboardListDiagnosis diagnoseStoryboardList({
+  required Iterable<StoryboardRow> boards,
+  required bool productionSummaryLoaded,
+}) {
+  final rows = boards.toList(growable: false);
+  if (rows.isEmpty) {
+    return const StoryboardListDiagnosis(
+      summary: '当前剧本还没有分镜。',
+      detail: '先新增单条或批量导入分镜，再继续同步制作视图或发起出图。',
+      recommendedAction: StoryboardListRecommendedAction.addStoryboard,
+    );
+  }
+
+  final readyPromptCount = rows
+      .where((row) => (row.prompt ?? '').trim().isNotEmpty)
+      .length;
+  if (!productionSummaryLoaded) {
+    return StoryboardListDiagnosis(
+      summary: '已维护 ${rows.length} 条分镜，但制作视图还未同步。',
+      detail: '建议先刷新制作视图，确认 production 侧是否已生成对应记录，再决定是否继续批量出图。',
+      recommendedAction:
+          StoryboardListRecommendedAction.refreshProductionSummary,
+    );
+  }
+
+  if (readyPromptCount == 0) {
+    return StoryboardListDiagnosis(
+      summary: '已存在 ${rows.length} 条分镜，但都还缺少可用提示词。',
+      detail: '先打开单条分镜补全提示词，再进入出图工作台会更稳妥。',
+      recommendedAction: StoryboardListRecommendedAction.editStoryboard,
+    );
+  }
+
+  return StoryboardListDiagnosis(
+    summary: '已有 $readyPromptCount/${rows.length} 条分镜可直接进入出图流程。',
+    detail: '可以进入分镜出图工作台批量读取制作视图、生成预览并导出所选图片。',
+    recommendedAction: StoryboardListRecommendedAction.openBatchWorkbench,
+  );
+}
+
+String buildStoryboardListFollowUp({
+  required String actionSummary,
+  required StoryboardListDiagnosis diagnosis,
+}) {
+  final nextAction = describeStoryboardListRecommendedAction(
+    diagnosis.recommendedAction,
+  );
+  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+}
+
 List<int> collectStoryboardTrackIds({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
