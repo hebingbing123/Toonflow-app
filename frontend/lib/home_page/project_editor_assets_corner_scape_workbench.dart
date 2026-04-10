@@ -16,6 +16,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
     Uint8List? selectedPreviewBytes;
     bool loading = false;
     bool loadingPreview = false;
+    bool initialLoadTriggered = false;
     String? summaryLine;
 
     List<String>? parseTypes() {
@@ -148,6 +149,13 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
+              if (!initialLoadTriggered) {
+                initialLoadTriggered = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  if (!dialogCtx.mounted) return;
+                  await refreshAssets(setState);
+                });
+              }
               final selected = selectedAsset();
               final selectedImage = selectedHistoryImage();
               return AlertDialog(
@@ -199,7 +207,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                       const SizedBox(height: 12),
                       if (assets.isEmpty)
                         Text(
-                          '暂无数据，点击“查询历史图资产”开始。',
+                          loading ? '正在加载历史图资产…' : '暂无数据，点击“查询历史图资产”开始。',
                           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                             color: Theme.of(ctx).colorScheme.outline,
                           ),
