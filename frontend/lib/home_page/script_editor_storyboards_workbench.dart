@@ -42,7 +42,15 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
       return null;
     }
 
+    void clearSelectionScopedOutputs() {
+      previewUrl = null;
+      downloadUrl = null;
+    }
+
     Future<void> refreshProduction(StateSetter setState) async {
+      final previousSingleSelectedId = sortedSelection().length == 1
+          ? sortedSelection().first
+          : null;
       setState(() {
         loadingProduction = true;
         statusLine = null;
@@ -57,11 +65,22 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
         final filtered = response.data
             .where((row) => ids.contains(row.id))
             .toList(growable: false);
+        final nextSelectedIds = <int>{
+          ...selectedIds.where((legacyId) => ids.contains(legacyId)),
+        };
+        if (nextSelectedIds.isEmpty && boardsList.isNotEmpty) {
+          nextSelectedIds.add(boardsList.first.legacyId);
+        }
+        final nextSingleSelectedId = nextSelectedIds.length == 1
+            ? nextSelectedIds.first
+            : null;
         setState(() {
           productionRows = filtered;
-          selectedIds.removeWhere((legacyId) => !ids.contains(legacyId));
-          if (selectedIds.isEmpty && boardsList.isNotEmpty) {
-            selectedIds.add(boardsList.first.legacyId);
+          selectedIds
+            ..clear()
+            ..addAll(nextSelectedIds);
+          if (previousSingleSelectedId != nextSingleSelectedId) {
+            clearSelectionScopedOutputs();
           }
           statusLine = filtered.isEmpty
               ? '制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。'
@@ -172,6 +191,7 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                               )
                                               .map((row) => row.legacyId),
                                         );
+                                      clearSelectionScopedOutputs();
                                       statusLine = '已选择全部可直接出图的分镜';
                                     });
                                   },
@@ -183,8 +203,7 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                 : () {
                                     setState(() {
                                       selectedIds.clear();
-                                      previewUrl = null;
-                                      downloadUrl = null;
+                                      clearSelectionScopedOutputs();
                                       exportLine = null;
                                       statusLine = '已清空选择';
                                     });
@@ -415,12 +434,24 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
                                         ? null
                                         : (value) {
                                             setState(() {
+                                              final previousSingleSelectedId =
+                                                  selectedIds.length == 1
+                                                  ? selectedIds.first
+                                                  : null;
                                               if (value == true) {
                                                 selectedIds.add(row.legacyId);
                                               } else {
                                                 selectedIds.remove(
                                                   row.legacyId,
                                                 );
+                                              }
+                                              final nextSingleSelectedId =
+                                                  selectedIds.length == 1
+                                                  ? selectedIds.first
+                                                  : null;
+                                              if (previousSingleSelectedId !=
+                                                  nextSingleSelectedId) {
+                                                clearSelectionScopedOutputs();
                                               }
                                             });
                                           },
