@@ -7,6 +7,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
     required String token,
     required ProjectRow p,
     required List<bool> saving,
+    required List<String?> scriptTaskLine,
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) async {
@@ -101,7 +102,18 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         statsRef[0] = await fetchProjectStatsByLegacyId(token, p.legacyId);
       } catch (_) {}
       if (!ctx.mounted) return;
+      final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        selectedIds: scriptList.map((script) => script.legacyId),
+        scripts: scriptList,
+        previewRows: const [],
+      );
       setDialogState(() => saving[0] = false);
+      setDialogState(() {
+        scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+          actionSummary: '已批量创建 ${created.inserted} 条剧本。',
+          diagnosis: nextDiagnosis,
+        );
+      });
       ScaffoldMessenger.of(
         ctx,
       ).showSnackBar(SnackBar(content: Text('已批量创建 ${created.inserted} 条剧本')));
@@ -415,6 +427,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       token: token,
                       p: p,
                       saving: saving,
+                      scriptTaskLine: scriptTaskLine,
                       scriptList: scriptList,
                       statsRef: statsRef,
                     ),
@@ -473,8 +486,21 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                           p.legacyId,
                         );
                       } catch (_) {}
+                      final nextDiagnosis = diagnoseScriptBatchWorkbench(
+                        selectedIds: scriptList.map(
+                          (script) => script.legacyId,
+                        ),
+                        scripts: scriptList,
+                        previewRows: const [],
+                      );
                       if (!ctx.mounted) return;
-                      setDialogState(() => saving[0] = false);
+                      setDialogState(() {
+                        saving[0] = false;
+                        scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+                          actionSummary: '已创建剧本 legacy #${s.legacyId}。',
+                          diagnosis: nextDiagnosis,
+                        );
+                      });
                       ScaffoldMessenger.of(ctx).showSnackBar(
                         SnackBar(content: Text('已创建剧本 legacy #${s.legacyId}')),
                       );

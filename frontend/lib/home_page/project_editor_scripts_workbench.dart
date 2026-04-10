@@ -593,8 +593,20 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                             (script) => script.legacyId,
                                           ),
                                         );
+                                    final nextDiagnosis =
+                                        diagnoseScriptBatchWorkbench(
+                                          selectedIds: scriptList.map(
+                                            (script) => script.legacyId,
+                                          ),
+                                          scripts: scriptList,
+                                          previewRows: previewRows,
+                                        );
                                     scriptTaskLine[0] =
-                                        '已批量创建 ${created.inserted} 条剧本。';
+                                        buildScriptBatchWorkbenchFollowUp(
+                                          actionSummary:
+                                              '已批量创建 ${created.inserted} 条剧本。',
+                                          diagnosis: nextDiagnosis,
+                                        );
                                   });
                                   setDialogState(() => saving[0] = false);
                                   setDialogState(() {});
