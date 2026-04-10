@@ -372,10 +372,26 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           final actionBusy = <bool>[false];
           final productionSummaryLoading = <bool>[false];
           final productionSummaryLoaded = <bool>[false];
+          final autoRefreshQueued = <bool>[false];
           final productionSummaryLine = <String?>[null];
           final storyboardTaskLine = <String?>[null];
           return StatefulBuilder(
             builder: (ctx2, setBoardsState) {
+              if (!autoRefreshQueued[0]) {
+                autoRefreshQueued[0] = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  if (!ctx2.mounted) return;
+                  await _reloadProductionStoryboardSummary(
+                    token: token,
+                    projectLegacyId: projectLegacyId,
+                    scriptLegacyId: scriptLegacyId,
+                    productionSummaryLine: productionSummaryLine,
+                    productionSummaryLoaded: productionSummaryLoaded,
+                    productionSummaryLoading: productionSummaryLoading,
+                    setBoardsState: setBoardsState,
+                  );
+                });
+              }
               final outline = Theme.of(ctx2).colorScheme.outline;
               final diagnosis = diagnoseStoryboardList(
                 boards: boardsList,
