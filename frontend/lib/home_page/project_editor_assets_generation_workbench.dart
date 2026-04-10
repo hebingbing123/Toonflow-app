@@ -81,32 +81,63 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
       });
     }
 
-    Future<void> refreshProductionSummary(StateSetter setState) async {
+    Future<void> syncWorkbenchSnapshot(
+      StateSetter setState, {
+      required bool includeProductionSummary,
+      String? lead,
+    }) async {
       setState(() {
         loadingSummary = true;
-        statusLine = null;
+        statusLine = lead == null ? null : '$lead，正在同步工作台摘要…';
       });
       try {
-        final response = await postProductionAssetsGetAssetsDataV1(
-          token,
-          projectId: p.legacyId,
-          assetType: selectedType.isEmpty ? null : selectedType,
-        );
+        final selected = sortedSelection();
+        AssetsDataResponseV1? nextProductionData = productionData;
+        if (includeProductionSummary) {
+          nextProductionData = await postProductionAssetsGetAssetsDataV1(
+            token,
+            projectId: p.legacyId,
+            assetType: selectedType.isEmpty ? null : selectedType,
+          );
+        }
+        AssetsPollingImageResponseV1? nextPollingData;
+        List<LegacyAssetPollingPromptAssetsItem>? nextPromptPollingData;
+        if (selected.isNotEmpty) {
+          nextPollingData = await postProductionAssetsPollingImageV1(
+            token,
+            projectId: p.legacyId,
+            assetIds: selected,
+          );
+          nextPromptPollingData = await postLegacyAssetsPollingPromptAssets(
+            token,
+            selected,
+          );
+        }
         final visibleIds = sortUniqueAssetLegacyIds(
           visibleAssets().map((asset) => asset.legacyId),
         ).toSet();
         setState(() {
-          productionData = response;
+          if (includeProductionSummary) {
+            productionData = nextProductionData;
+          }
+          pollingData = nextPollingData;
+          promptPollingData = nextPromptPollingData;
           selectedIds.removeWhere((id) => !visibleIds.contains(id));
           if (selectedIds.isEmpty && visibleAssets().isNotEmpty) {
             selectedIds.add(visibleAssets().first.legacyId);
           }
-          statusLine = summarizeProductionAssetData(response);
+          statusLine = summarizeAssetWorkbenchSnapshot(
+            lead: lead,
+            selectedCount: selectedIds.length,
+            productionData: productionData,
+            pollingData: pollingData,
+            promptPollingData: promptPollingData,
+          );
         });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '读取 production 资产摘要失败：$e');
+        setState(() => statusLine = '同步工作台摘要失败：$e');
       } catch (e) {
-        setState(() => statusLine = '读取 production 资产摘要失败：$e');
+        setState(() => statusLine = '同步工作台摘要失败：$e');
       } finally {
         setState(() => loadingSummary = false);
       }
@@ -144,7 +175,10 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                 initialLoadTriggered = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (!dialogCtx.mounted) return;
-                  await refreshProductionSummary(setState);
+                  await syncWorkbenchSnapshot(
+                    setState,
+                    includeProductionSummary: true,
+                  );
                 });
               }
               final visible = visibleAssets();
@@ -237,10 +271,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                           );
                                         }
                                         statusLine = selectedType.isEmpty
-                                            ? '正在切换到全部类型并同步 production 摘要…'
-                                            : '正在切换到 $selectedType 并同步 production 摘要…';
+                                            ? '正在切换到全部类型并同步工作台摘要…'
+                                            : '正在切换到 $selectedType 并同步工作台摘要…';
                                       });
-                                      await refreshProductionSummary(setState);
+                                      await syncWorkbenchSnapshot(
+                                        setState,
+                                        includeProductionSummary: true,
+                                      );
                                     },
                             ),
                           ),
@@ -309,8 +346,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                           FilledButton.tonal(
                             onPressed: loadingSummary || busyMutation
                                 ? null
-                                : () => refreshProductionSummary(setState),
-                            child: Text(loadingSummary ? '同步中…' : '同步 production 摘要'),
+                                : () => syncWorkbenchSnapshot(
+                                    setState,
+                                    includeProductionSummary: true,
+                                  ),
+                            child: Text(
+                              loadingSummary ? '同步中…' : '同步当前工作台摘要',
+                            ),
                           ),
                           TextButton(
                             onPressed: busyMutation
@@ -425,12 +467,16 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                               ? null
                                               : modelCtrl.text.trim(),
                                           resolution:
-                                              resolutionCtrl.text.trim().isEmpty
+                                          resolutionCtrl.text.trim().isEmpty
                                               ? null
                                               : resolutionCtrl.text.trim(),
                                         );
-                                    statusLine =
-                                        '已为 ${response.total} 条资产创建出图任务，队列 ${response.enqueued.length} 条';
+                                    await syncWorkbenchSnapshot(
+                                      setState,
+                                      includeProductionSummary: true,
+                                      lead:
+                                          '已为 ${response.total} 条资产创建出图任务，队列 ${response.enqueued.length} 条',
+                                    );
                                   }),
                             child: Text(busyMutation ? '处理中…' : '批量发起资产出图'),
                           ),
@@ -446,9 +492,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                         );
                                     setState(() {
                                       pollingData = response;
-                                      statusLine = summarizeAssetPollingStatuses(
-                                        response.statuses,
-                                      );
+                                      statusLine =
+                                          summarizeAssetWorkbenchSnapshot(
+                                            selectedCount: selected.length,
+                                            productionData: productionData,
+                                            pollingData: pollingData,
+                                            promptPollingData: promptPollingData,
+                                          );
                                     });
                                   }),
                             child: const Text('轮询图片状态'),
@@ -464,8 +514,11 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                         );
                                     setState(() {
                                       promptPollingData = response;
-                                      statusLine = summarizeLegacyPromptPolling(
-                                        response,
+                                      statusLine = summarizeAssetWorkbenchSnapshot(
+                                        selectedCount: selected.length,
+                                        productionData: productionData,
+                                        pollingData: pollingData,
+                                        promptPollingData: promptPollingData,
                                       );
                                     });
                                   }),
@@ -482,11 +535,12 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                           assetIds: selected,
                                         );
                                     await reloadAssetsAndStats();
-                                    setState(() {
-                                      pollingData = null;
-                                      statusLine =
-                                          '已删除 ${response.deleted} 个衍生图记录，资产 ${response.assetIds.join(", ")}';
-                                    });
+                                    await syncWorkbenchSnapshot(
+                                      setState,
+                                      includeProductionSummary: true,
+                                      lead:
+                                          '已删除 ${response.deleted} 个衍生图记录，资产 ${response.assetIds.join(", ")}',
+                                    );
                                   }),
                             child: const Text('清理衍生图'),
                           ),
@@ -505,10 +559,12 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                           imageUrl: imageUrlCtrl.text.trim(),
                                         );
                                     await reloadAssetsAndStats();
-                                    setState(() {
-                                      statusLine =
-                                          '已更新资产 #${response.assetId} 封面 URL：${response.message}';
-                                    });
+                                    await syncWorkbenchSnapshot(
+                                      setState,
+                                      includeProductionSummary: true,
+                                      lead:
+                                          '已更新资产 #${response.assetId} 封面 URL：${response.message}',
+                                    );
                                   }),
                             child: const Text('更新封面 URL'),
                           ),

@@ -99,3 +99,21 @@ String summarizeLegacyPromptPolling(
       .join(' · ');
   return 'prompt 轮询 ${items.length} 条 · $stateLine';
 }
+
+String summarizeAssetWorkbenchSnapshot({
+  required int selectedCount,
+  AssetsDataResponseV1? productionData,
+  AssetsPollingImageResponseV1? pollingData,
+  Iterable<LegacyAssetPollingPromptAssetsItem>? promptPollingData,
+  String? lead,
+}) {
+  final parts = <String>[
+    if (lead != null && lead.trim().isNotEmpty) lead.trim(),
+    selectedCount <= 0 ? '当前未选择资产' : '当前选择 $selectedCount 条资产',
+    if (productionData != null) summarizeProductionAssetData(productionData),
+    if (pollingData != null) summarizeAssetPollingStatuses(pollingData.statuses),
+    if (promptPollingData != null)
+      summarizeLegacyPromptPolling(promptPollingData),
+  ];
+  return parts.join('；');
+}

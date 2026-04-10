@@ -104,4 +104,37 @@ void main() {
       contains('生成中 1 条'),
     );
   });
+
+  test('summarizeAssetWorkbenchSnapshot combines selected scope and sync data', () {
+    final line = summarizeAssetWorkbenchSnapshot(
+      lead: '已发起批量出图',
+      selectedCount: 2,
+      productionData: const AssetsDataResponseV1(
+        total: 2,
+        assets: [
+          AssetDataItemV1(id: 11, name: 'Hero', type: 'role'),
+          AssetDataItemV1(id: 12, name: 'Sword', type: 'props'),
+        ],
+      ),
+      pollingData: const AssetsPollingImageResponseV1(
+        statuses: [
+          AssetImageStatusV1(assetId: 11, imageCount: 1, latestState: 'queued'),
+        ],
+      ),
+      promptPollingData: const [
+        LegacyAssetPollingPromptAssetsItem(
+          id: 11,
+          name: 'Hero',
+          assetType: 'role',
+          promptState: '已完成',
+        ),
+      ],
+    );
+
+    expect(line, contains('已发起批量出图'));
+    expect(line, contains('当前选择 2 条资产'));
+    expect(line, contains('production 资产 2 条'));
+    expect(line, contains('queued 1 条'));
+    expect(line, contains('prompt 轮询 1 条'));
+  });
 }
