@@ -28,6 +28,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
     bool loadingList = false;
     bool loadingPreview = false;
     bool busyMutation = false;
+    bool initialLoadTriggered = false;
     String? statusLine;
 
     final createFilePathCtrl = TextEditingController();
@@ -249,6 +250,13 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
+              if (!initialLoadTriggered) {
+                initialLoadTriggered = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  if (!dialogCtx.mounted) return;
+                  await reloadImages(setState);
+                });
+              }
               final imageItems =
                   imagesResponse?.items ?? const <AssetImageRow>[];
               return AlertDialog(
@@ -273,15 +281,16 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                               ),
                             )
                             .toList(),
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           if (value == null) return;
                           setState(() {
                             selectedAssetLegacyId = value;
                             imagesResponse = null;
                             selectedImageId = null;
                             previewBytes = null;
-                            statusLine = null;
+                            statusLine = '正在切换到资产 #$value 并加载图片列表…';
                           });
+                          await reloadImages(setState);
                         },
                       ),
                       const SizedBox(height: 8),
