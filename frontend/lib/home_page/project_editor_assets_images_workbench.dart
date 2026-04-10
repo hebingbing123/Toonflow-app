@@ -38,6 +38,19 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
     final patchStateCtrl = TextEditingController();
     final patchSortCtrl = TextEditingController();
 
+    void syncStatusLine(StateSetter setState) {
+      final response = imagesResponse;
+      if (response == null) {
+        return;
+      }
+      setState(() {
+        statusLine = summarizeAssetImageSelection(
+          response,
+          selectedImageId: selectedImageId,
+        );
+      });
+    }
+
     AssetImageRow? selectedImage() {
       final items = imagesResponse?.items ?? const <AssetImageRow>[];
       if (selectedImageId == null) return null;
@@ -68,6 +81,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       final image = selectedImage();
       if (image == null) {
         setState(() => previewBytes = null);
+        syncStatusLine(setState);
         return;
       }
       setState(() {
@@ -82,6 +96,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           image.id,
         );
         setState(() => previewBytes = bytes);
+        syncStatusLine(setState);
       } on RustApiException catch (e) {
         setState(() => statusLine = '预览失败：$e');
       } finally {
@@ -100,13 +115,18 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           p.legacyId,
           selectedAssetLegacyId,
         );
+        final nextSelectedImageId = chooseInitialAssetImageId(
+          response,
+          preferredImageId: selectedImageId,
+        );
         setState(() {
           imagesResponse = response;
-          selectedImageId = response.items.isEmpty
-              ? null
-              : response.items.first.id;
+          selectedImageId = nextSelectedImageId;
           previewBytes = null;
-          statusLine = '已加载 ${response.items.length} 张图片';
+          statusLine = summarizeAssetImageSelection(
+            response,
+            selectedImageId: nextSelectedImageId,
+          );
         });
         syncPatchFieldsFromSelected(setState);
         await loadPreview(setState);
@@ -344,6 +364,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                                   previewBytes = null;
                                   statusLine = '正在切换图片并刷新预览…';
                                 });
+                                syncStatusLine(setState);
                                 syncPatchFieldsFromSelected(setState);
                                 await loadPreview(setState);
                               },

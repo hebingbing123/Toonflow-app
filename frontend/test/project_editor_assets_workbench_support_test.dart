@@ -145,4 +145,107 @@ void main() {
     expect(line, contains('sort=1'));
     expect(line, contains('done'));
   });
+
+  test('chooseInitialAssetImageId prefers current selection then selected/cover', () {
+    expect(
+      chooseInitialAssetImageId(
+        const ListAssetImagesResponse(
+          coverLegacyImageId: 8,
+          items: [
+            AssetImageRow(
+              id: 'img-1',
+              assetId: 'asset-a',
+              sortIndex: 1,
+              legacyImageId: 7,
+            ),
+            AssetImageRow(
+              id: 'img-2',
+              assetId: 'asset-a',
+              sortIndex: 2,
+              legacyImageId: 8,
+              selected: true,
+            ),
+          ],
+        ),
+        preferredImageId: 'img-1',
+      ),
+      'img-1',
+    );
+
+    expect(
+      chooseInitialAssetImageId(
+        const ListAssetImagesResponse(
+          coverLegacyImageId: 8,
+          items: [
+            AssetImageRow(
+              id: 'img-1',
+              assetId: 'asset-a',
+              sortIndex: 1,
+              legacyImageId: 7,
+            ),
+            AssetImageRow(
+              id: 'img-2',
+              assetId: 'asset-a',
+              sortIndex: 2,
+              legacyImageId: 8,
+              selected: true,
+            ),
+          ],
+        ),
+      ),
+      'img-2',
+    );
+
+    expect(
+      chooseInitialAssetImageId(
+        const ListAssetImagesResponse(
+          coverLegacyImageId: 9,
+          items: [
+            AssetImageRow(
+              id: 'img-1',
+              assetId: 'asset-a',
+              sortIndex: 1,
+              legacyImageId: 7,
+            ),
+            AssetImageRow(
+              id: 'img-2',
+              assetId: 'asset-a',
+              sortIndex: 2,
+              legacyImageId: 9,
+            ),
+          ],
+        ),
+      ),
+      'img-2',
+    );
+  });
+
+  test('summarizeAssetImageSelection reports cover and current image', () {
+    final line = summarizeAssetImageSelection(
+      const ListAssetImagesResponse(
+        coverLegacyImageId: 8,
+        items: [
+          AssetImageRow(
+            id: 'img-1',
+            assetId: 'asset-a',
+            sortIndex: 1,
+            legacyImageId: 7,
+          ),
+          AssetImageRow(
+            id: 'img-2',
+            assetId: 'asset-a',
+            sortIndex: 2,
+            state: 'done',
+            legacyImageId: 8,
+          ),
+        ],
+      ),
+      selectedImageId: 'img-2',
+    );
+
+    expect(line, contains('已加载 2 张图片'));
+    expect(line, contains('封面 legacy image #8'));
+    expect(line, contains('sort=2'));
+    expect(line, contains('done'));
+  });
 }

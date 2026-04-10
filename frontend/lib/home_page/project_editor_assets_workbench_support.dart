@@ -145,3 +145,57 @@ String summarizeCornerScapeSelection(
       : '当前焦点 #${selectedAsset.legacyId} ${selectedAsset.name} · 图 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}';
   return '历史图过滤：$typeLine；已加载 ${rows.length} 条资产、$totalHistories 张历史图；$focusLine。';
 }
+
+String? chooseInitialAssetImageId(
+  ListAssetImagesResponse response, {
+  String? preferredImageId,
+}) {
+  final items = response.items;
+  if (items.isEmpty) {
+    return null;
+  }
+  if (preferredImageId != null) {
+    for (final image in items) {
+      if (image.id == preferredImageId) {
+        return preferredImageId;
+      }
+    }
+  }
+  for (final image in items) {
+    if (image.selected ?? false) {
+      return image.id;
+    }
+  }
+  final coverLegacyImageId = response.coverLegacyImageId;
+  if (coverLegacyImageId != null) {
+    for (final image in items) {
+      if (image.legacyImageId == coverLegacyImageId) {
+        return image.id;
+      }
+    }
+  }
+  return items.first.id;
+}
+
+String summarizeAssetImageSelection(
+  ListAssetImagesResponse response, {
+  String? selectedImageId,
+}) {
+  if (response.items.isEmpty) {
+    return '当前资产暂无图片。';
+  }
+  AssetImageRow? selectedImage;
+  if (selectedImageId != null) {
+    for (final image in response.items) {
+      if (image.id == selectedImageId) {
+        selectedImage = image;
+        break;
+      }
+    }
+  }
+  selectedImage ??= response.items.first;
+  final coverLine = response.coverLegacyImageId == null
+      ? '当前未记录封面 legacy image'
+      : '封面 legacy image #${response.coverLegacyImageId}';
+  return '已加载 ${response.items.length} 张图片；$coverLine；当前图片 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}。';
+}
