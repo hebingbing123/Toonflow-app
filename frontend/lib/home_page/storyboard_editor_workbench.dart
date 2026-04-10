@@ -686,307 +686,106 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           ],
         ),
         const SizedBox(height: 16),
-        Text('视频工作台', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _trackIdCtrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: '轨道 ID',
-            helperText: knownTrackIds.isEmpty
-                ? '当前还没有已知轨道，可先新建。'
-                : '已发现轨道：${knownTrackIds.join(", ")}',
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _trackNameCtrl,
-          decoration: const InputDecoration(
-            labelText: '新轨道名称',
-            helperText: '新增后会自动回填轨道 ID。',
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      final name = _trackNameCtrl.text.trim();
-                      if (name.isEmpty) {
-                        throw const FormatException('轨道名称不能为空');
-                      }
-                      final response = await postWorkbenchAddTrackV1(
-                        widget.token,
-                        projectId: widget.projectLegacyId,
-                        scriptId: widget.scriptLegacyId,
-                        trackName: name,
-                      );
-                      _trackIdCtrl.text = response.trackId.toString();
-                      _trackNameCtrl.clear();
-                      await _refreshAll(syncTrackId: true);
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp('已新增轨道 #${response.trackId}。');
-                      });
-                      await _notifyStoryboardMutated();
-                    }),
-              child: const Text('新增轨道'),
-            ),
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      final trackId = int.tryParse(_trackIdCtrl.text.trim());
-                      if (trackId == null || trackId <= 0) {
-                        throw const FormatException('请填写有效轨道 ID');
-                      }
-                      await postWorkbenchDeleteTrackV1(
-                        widget.token,
-                        projectId: widget.projectLegacyId,
-                        scriptId: widget.scriptLegacyId,
-                        trackId: trackId,
-                      );
-                      if (_productionRow?.trackId == trackId) {
-                        _trackIdCtrl.clear();
-                      }
-                      await _refreshAll(syncTrackId: true);
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp('已删除轨道 #$trackId。');
-                      });
-                      await _notifyStoryboardMutated();
-                    }),
-              child: const Text('删除轨道'),
-            ),
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      final generated =
-                          await postWorkbenchGenerateVideoPromptV1(
-                            widget.token,
-                            projectId: widget.projectLegacyId,
-                            scriptId: widget.scriptLegacyId,
-                            imageUrl: resolveStoryboardSourceImageUrl(
-                              productionStoryboard: _productionRow,
-                              draftImageUrl: _imageUrlCtrl.text,
-                            ),
-                            description:
-                                widget.readVideoDescriptionText().trim().isEmpty
-                                ? widget.readPromptText().trim()
-                                : widget.readVideoDescriptionText().trim(),
-                          );
-                      _videoPromptCtrl.text = generated.prompt;
-                      _videoDurationCtrl.text = generated.duration.toString();
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。');
-                      });
-                    }),
-              child: const Text('生成默认视频提示词'),
-            ),
-            TextButton(
-              onPressed: _saving || _loadingWorkbench
-                  ? null
-                  : _refreshWorkbenchData,
-              child: Text(_loadingWorkbench ? '刷新中…' : '刷新视频数据'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _videoPromptCtrl,
-          minLines: 3,
-          maxLines: 6,
-          decoration: const InputDecoration(
-            labelText: '视频生成提示词',
-            alignLabelWithHint: true,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _videoDurationCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '时长（秒）'),
+        _StoryboardVideoSection(
+          saving: _saving,
+          loadingWorkbench: _loadingWorkbench,
+          trackIdCtrl: _trackIdCtrl,
+          trackNameCtrl: _trackNameCtrl,
+          videoPromptCtrl: _videoPromptCtrl,
+          videoDurationCtrl: _videoDurationCtrl,
+          resolution: _resolution,
+          mode: _mode,
+          audio: _audio,
+          modelDetail: _modelDetail,
+          generateData: _generateData,
+          productionRow: _productionRow,
+          workbenchLine: _workbenchLine,
+          knownTrackIds: knownTrackIds,
+          storyboardVideos: storyboardVideos,
+          onResolutionChanged: (v) => setState(() => _resolution = v),
+          onModeChanged: (v) => setState(() => _mode = v),
+          onAudioChanged: (v) => setState(() => _audio = v),
+          onAddTrack: () => _runDialogAction(() async {
+            final name = _trackNameCtrl.text.trim();
+            if (name.isEmpty) throw const FormatException('轨道名称不能为空');
+            final response = await postWorkbenchAddTrackV1(
+              widget.token,
+              projectId: widget.projectLegacyId,
+              scriptId: widget.scriptLegacyId,
+              trackName: name,
+            );
+            _trackIdCtrl.text = response.trackId.toString();
+            _trackNameCtrl.clear();
+            await _refreshAll(syncTrackId: true);
+            if (!mounted) return;
+            setState(() => _setWorkbenchFollowUp('已新增轨道 #${response.trackId}。'));
+            await _notifyStoryboardMutated();
+          }),
+          onDeleteTrack: () => _runDialogAction(() async {
+            final trackId = int.tryParse(_trackIdCtrl.text.trim());
+            if (trackId == null || trackId <= 0) {
+              throw const FormatException('请填写有效轨道 ID');
+            }
+            await postWorkbenchDeleteTrackV1(
+              widget.token,
+              projectId: widget.projectLegacyId,
+              scriptId: widget.scriptLegacyId,
+              trackId: trackId,
+            );
+            if (_productionRow?.trackId == trackId) _trackIdCtrl.clear();
+            await _refreshAll(syncTrackId: true);
+            if (!mounted) return;
+            setState(() => _setWorkbenchFollowUp('已删除轨道 #$trackId。'));
+            await _notifyStoryboardMutated();
+          }),
+          onGenerateVideoPrompt: () => _runDialogAction(() async {
+            final generated = await postWorkbenchGenerateVideoPromptV1(
+              widget.token,
+              projectId: widget.projectLegacyId,
+              scriptId: widget.scriptLegacyId,
+              imageUrl: resolveStoryboardSourceImageUrl(
+                productionStoryboard: _productionRow,
+                draftImageUrl: _imageUrlCtrl.text,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                initialValue: _resolution,
-                decoration: const InputDecoration(labelText: '分辨率'),
-                items: (_modelDetail?.resolutions.isNotEmpty ?? false)
-                    ? _modelDetail!.resolutions
-                          .map(
-                            (item) => DropdownMenuItem(
-                              value: item,
-                              child: Text(item),
-                            ),
-                          )
-                          .toList(growable: false)
-                    : const [
-                        DropdownMenuItem(value: '1080p', child: Text('1080p')),
-                        DropdownMenuItem(value: '720p', child: Text('720p')),
-                      ],
-                onChanged: _saving
-                    ? null
-                    : (value) {
-                        if (value == null) return;
-                        setState(() => _resolution = value);
-                      },
-              ),
-            ),
-          ],
+              description: widget.readVideoDescriptionText().trim().isEmpty
+                  ? widget.readPromptText().trim()
+                  : widget.readVideoDescriptionText().trim(),
+            );
+            _videoPromptCtrl.text = generated.prompt;
+            _videoDurationCtrl.text = generated.duration.toString();
+            if (!mounted) return;
+            setState(() => _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。'));
+          }),
+          onRefreshVideoData: _refreshWorkbenchData,
+          onSubmitVideoGeneration: () =>
+              _runDialogAction(_submitVideoGeneration),
+          onSelectVideo: (video) => _runDialogAction(() async {
+            await postWorkbenchSelectVideoV1(
+              widget.token,
+              projectId: widget.projectLegacyId,
+              scriptId: widget.scriptLegacyId,
+              storyboardId: widget.storyLegacyId,
+              videoUrl: video.videoUrl!.trim(),
+            );
+            await _refreshProductionData(syncTrackId: true);
+            if (!mounted) return;
+            setState(() => _setWorkbenchFollowUp('已将当前候选视频设为分镜视频。'));
+            await _notifyStoryboardMutated();
+          }),
+          onDeleteCurrentVideo: () => _runDialogAction(() async {
+            await postWorkbenchDeleteVideoV1(
+              widget.token,
+              projectId: widget.projectLegacyId,
+              scriptId: widget.scriptLegacyId,
+              storyboardId: widget.storyLegacyId,
+            );
+            await _refreshProductionData(syncTrackId: true);
+            await _refreshWorkbenchData();
+            if (!mounted) return;
+            setState(() => _setWorkbenchFollowUp('已删除当前分镜已选视频。'));
+            await _notifyStoryboardMutated();
+          }),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                initialValue: _mode,
-                decoration: const InputDecoration(labelText: '生成模式'),
-                items: const [
-                  DropdownMenuItem(value: 'standard', child: Text('standard')),
-                  DropdownMenuItem(value: 'fast', child: Text('fast')),
-                ],
-                onChanged: _saving
-                    ? null
-                    : (value) {
-                        if (value == null) return;
-                        setState(() => _mode = value);
-                      },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: InputDecorator(
-                decoration: const InputDecoration(labelText: '模型'),
-                child: Text(_modelDetail?.modelId ?? '等待加载模型信息'),
-              ),
-            ),
-          ],
-        ),
-        CheckboxListTile(
-          value: _audio,
-          contentPadding: EdgeInsets.zero,
-          title: const Text('生成视频时携带音频'),
-          controlAffinity: ListTileControlAffinity.leading,
-          onChanged: _saving
-              ? null
-              : (value) => setState(() => _audio = value ?? false),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FilledButton(
-            onPressed: _saving
-                ? null
-                : () => _runDialogAction(_submitVideoGeneration),
-            child: Text(_saving ? '提交中…' : '提交视频生成'),
-          ),
-        ),
-        if (_workbenchLine != null) ...[
-          const SizedBox(height: 8),
-          Text(_workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
-        ],
-        const SizedBox(height: 12),
-        Text('当前分镜的视频候选', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 4),
-        Text(
-          storyboardVideos.isEmpty
-              ? '还没有与当前 storyboard 关联的已生成视频。'
-              : '优先展示当前 storyboard 的视频结果，可一键设为当前选中视频。',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.outline,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...storyboardVideos
-            .take(3)
-            .map(
-              (video) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  video.videoUrl ?? '视频 URL 缺失',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  [
-                    if ((video.state ?? '').trim().isNotEmpty)
-                      '状态 ${video.state}',
-                    if (video.trackId != null) '轨道 ${video.trackId}',
-                    if ((video.duration ?? '').trim().isNotEmpty)
-                      '时长 ${video.duration}',
-                  ].join(' · '),
-                ),
-                trailing: TextButton(
-                  onPressed: _saving || (video.videoUrl ?? '').trim().isEmpty
-                      ? null
-                      : () => _runDialogAction(() async {
-                          await postWorkbenchSelectVideoV1(
-                            widget.token,
-                            projectId: widget.projectLegacyId,
-                            scriptId: widget.scriptLegacyId,
-                            storyboardId: widget.storyLegacyId,
-                            videoUrl: video.videoUrl!.trim(),
-                          );
-                          await _refreshProductionData(syncTrackId: true);
-                          if (!mounted) return;
-                          setState(() {
-                            _setWorkbenchFollowUp('已将当前候选视频设为分镜视频。');
-                          });
-                          await _notifyStoryboardMutated();
-                        }),
-                  child: const Text('设为当前视频'),
-                ),
-              ),
-            ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: _saving
-                ? null
-                : () => _runDialogAction(() async {
-                    await postWorkbenchDeleteVideoV1(
-                      widget.token,
-                      projectId: widget.projectLegacyId,
-                      scriptId: widget.scriptLegacyId,
-                      storyboardId: widget.storyLegacyId,
-                    );
-                    await _refreshProductionData(syncTrackId: true);
-                    await _refreshWorkbenchData();
-                    if (!mounted) return;
-                    setState(() {
-                      _setWorkbenchFollowUp('已删除当前分镜已选视频。');
-                    });
-                    await _notifyStoryboardMutated();
-                  }),
-            child: const Text('删除当前已选视频'),
-          ),
-        ),
-        if ((_generateData?.generatingJobs.isNotEmpty ?? false)) ...[
-          const SizedBox(height: 8),
-          Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 4),
-          ..._generateData!.generatingJobs
-              .take(3)
-              .map(
-                (job) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(job.kind),
-                  subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
-                ),
-              ),
-        ],
       ],
     );
   }

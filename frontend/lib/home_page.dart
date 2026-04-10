@@ -75,6 +75,7 @@ part 'home_page/script_editor_workbench.dart';
 part 'home_page/storyboard_editor.dart';
 part 'home_page/script_editor_storyboards_workbench.dart';
 part 'home_page/storyboard_editor_workbench.dart';
+part 'home_page/storyboard_editor_workbench_video.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
