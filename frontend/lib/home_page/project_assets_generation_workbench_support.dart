@@ -64,3 +64,38 @@ String summarizeAssetPollingStatuses(Iterable<AssetImageStatusV1> statuses) {
       .join(', ');
   return '已轮询 ${rows.length} 条资产 · $stateLine · 示例：$sampleLine';
 }
+
+String summarizeLegacyAssetMaterialData(LegacyAssetMaterialDataResponse data) {
+  return '素材上下文 ${data.data.length} 条图片素材 · ${data.video.length} 条视频素材';
+}
+
+String summarizeLegacyBatchGenerationData(
+  LegacyAssetBatchGenerationDataResponse data,
+) {
+  if (data.data.isEmpty) {
+    return '批量候选为空';
+  }
+  final sampleLine = data.data
+      .take(3)
+      .map((row) => '#${row.id} ${row.name}')
+      .join(', ');
+  return '批量候选 ${data.data.length}/${data.total} 条 · 示例：$sampleLine';
+}
+
+String summarizeLegacyPromptPolling(
+  Iterable<LegacyAssetPollingPromptAssetsItem> rows,
+) {
+  final items = rows.toList(growable: false);
+  if (items.isEmpty) {
+    return '未返回 prompt 状态';
+  }
+  final states = SplayTreeMap<String, int>();
+  for (final row in items) {
+    final key = row.promptState.trim().isEmpty ? 'unknown' : row.promptState;
+    states[key] = (states[key] ?? 0) + 1;
+  }
+  final stateLine = states.entries
+      .map((entry) => '${entry.key} ${entry.value} 条')
+      .join(' · ');
+  return 'prompt 轮询 ${items.length} 条 · $stateLine';
+}

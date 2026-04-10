@@ -37,6 +37,8 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     final modelCtrl = TextEditingController();
     final resolutionCtrl = TextEditingController();
     final imageUrlCtrl = TextEditingController();
+    final batchNameCtrl = TextEditingController();
+    final batchLimitCtrl = TextEditingController(text: '10');
     final selectedIds = <int>{seededAssets.first.legacyId};
     int selectedScriptLegacyId =
         assetsFilterScriptLegacyId[0] ?? scriptList.first.legacyId;
@@ -45,6 +47,9 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     bool busyMutation = false;
     AssetsDataResponseV1? productionData;
     AssetsPollingImageResponseV1? pollingData;
+    LegacyAssetMaterialDataResponse? materialData;
+    LegacyAssetBatchGenerationDataResponse? batchData;
+    List<LegacyAssetPollingPromptAssetsItem>? promptPollingData;
     String? statusLine;
 
     List<AssetRow> filteredVisibleAssets() {
@@ -246,6 +251,30 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                         ],
                       ),
                       const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: batchNameCtrl,
+                              decoration: const InputDecoration(
+                                labelText: '批量候选名称过滤（可选）',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          SizedBox(
+                            width: 140,
+                            child: TextField(
+                              controller: batchLimitCtrl,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: '候选 limit',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: imageUrlCtrl,
                         onChanged: (_) => setState(() {}),
@@ -264,6 +293,61 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                 ? null
                                 : () => refreshProductionSummary(setState),
                             child: Text(loadingSummary ? '同步中…' : '同步 production 摘要'),
+                          ),
+                          TextButton(
+                            onPressed: busyMutation
+                                ? null
+                                : () => runMutation(setState, () async {
+                                    final response =
+                                        await postLegacyAssetsGetMaterialData(
+                                          token,
+                                          p.legacyId,
+                                        );
+                                    setState(() {
+                                      materialData = response;
+                                      statusLine =
+                                          summarizeLegacyAssetMaterialData(
+                                            response,
+                                          );
+                                    });
+                                  }),
+                            child: const Text('读取素材上下文'),
+                          ),
+                          TextButton(
+                            onPressed: busyMutation || visible.isEmpty
+                                ? null
+                                : () => runMutation(setState, () async {
+                                    final effectiveType = selectedType.isEmpty
+                                        ? visible.first.assetType.trim()
+                                        : selectedType;
+                                    final limit =
+                                        int.tryParse(batchLimitCtrl.text.trim()) ??
+                                        10;
+                                    if (effectiveType.isEmpty) {
+                                      throw const FormatException(
+                                        '批量候选读取需要有效资产类型',
+                                      );
+                                    }
+                                    if (limit <= 0) {
+                                      throw const FormatException(
+                                        '候选 limit 需要大于 0',
+                                      );
+                                    }
+                                    final response =
+                                        await postLegacyAssetsBatchGenerationData(
+                                          token,
+                                          projectLegacyId: p.legacyId,
+                                          assetType: effectiveType,
+                                          name: batchNameCtrl.text.trim(),
+                                          limit: limit,
+                                        );
+                                    setState(() {
+                                      batchData = response;
+                                      statusLine =
+                                          '${summarizeLegacyBatchGenerationData(response)} · type=$effectiveType';
+                                    });
+                                  }),
+                            child: const Text('读取批量候选'),
                           ),
                           TextButton(
                             onPressed: busyMutation
@@ -356,6 +440,24 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                                 ? null
                                 : () => runMutation(setState, () async {
                                     final response =
+                                        await postLegacyAssetsPollingPromptAssets(
+                                          token,
+                                          selected,
+                                        );
+                                    setState(() {
+                                      promptPollingData = response;
+                                      statusLine = summarizeLegacyPromptPolling(
+                                        response,
+                                      );
+                                    });
+                                  }),
+                            child: const Text('轮询 prompt 状态'),
+                          ),
+                          TextButton(
+                            onPressed: busyMutation || selected.isEmpty
+                                ? null
+                                : () => runMutation(setState, () async {
+                                    final response =
                                         await postProductionAssetsDeleteAssetsDerivativeV1(
                                           token,
                                           projectId: p.legacyId,
@@ -430,6 +532,36 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
                               ),
                         ),
                       ],
+                      if (materialData != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          summarizeLegacyAssetMaterialData(materialData!),
+                          style: Theme.of(dialogCtx).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(dialogCtx).colorScheme.outline,
+                              ),
+                        ),
+                      ],
+                      if (batchData != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          summarizeLegacyBatchGenerationData(batchData!),
+                          style: Theme.of(dialogCtx).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(dialogCtx).colorScheme.outline,
+                              ),
+                        ),
+                      ],
+                      if (promptPollingData != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          summarizeLegacyPromptPolling(promptPollingData!),
+                          style: Theme.of(dialogCtx).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(dialogCtx).colorScheme.outline,
+                              ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 280,
@@ -490,6 +622,8 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
       modelCtrl.dispose();
       resolutionCtrl.dispose();
       imageUrlCtrl.dispose();
+      batchNameCtrl.dispose();
+      batchLimitCtrl.dispose();
     }
   }
 }

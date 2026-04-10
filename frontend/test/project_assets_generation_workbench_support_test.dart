@@ -49,4 +49,59 @@ void main() {
     expect(line, contains('unknown 1 条'));
     expect(line, contains('#11: 2 张'));
   });
+
+  test('legacy asset summaries describe material, batch and prompt states', () {
+    expect(
+      summarizeLegacyAssetMaterialData(
+        const LegacyAssetMaterialDataResponse(
+          data: [
+            LegacyAssetMaterialDataItem(
+              id: 1,
+              name: 'Clip A',
+              filePath: 'a.png',
+              assetType: 'clip',
+            ),
+          ],
+          video: [
+            LegacyAssetMaterialVideoItem(id: 2, filePath: 'b.mp4'),
+          ],
+        ),
+      ),
+      contains('1 条图片素材 · 1 条视频素材'),
+    );
+
+    expect(
+      summarizeLegacyBatchGenerationData(
+        const LegacyAssetBatchGenerationDataResponse(
+          total: 2,
+          data: [
+            LegacyAssetBatchGenerationDataItem(
+              id: 7,
+              name: 'Hero',
+              assetType: 'role',
+            ),
+          ],
+        ),
+      ),
+      contains('批量候选 1/2 条'),
+    );
+
+    expect(
+      summarizeLegacyPromptPolling(const [
+        LegacyAssetPollingPromptAssetsItem(
+          id: 3,
+          name: 'Hero',
+          assetType: 'role',
+          promptState: '生成中',
+        ),
+        LegacyAssetPollingPromptAssetsItem(
+          id: 4,
+          name: 'Sword',
+          assetType: 'props',
+          promptState: '',
+        ),
+      ]),
+      contains('生成中 1 条'),
+    );
+  });
 }
