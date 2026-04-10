@@ -407,15 +407,37 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                             TextButton(
                               onPressed: actionBusy[0] || boardsLoading[0]
                                   ? null
-                                  : () => _openStoryboardBatchWorkbenchDialog(
-                                      ctx: ctx2,
-                                      token: token,
-                                      projectLegacyId: projectLegacyId,
-                                      scriptLegacyId: scriptLegacyId,
-                                      boardsList: boardsList,
-                                      setBoardsState: setBoardsState,
-                                      actionBusy: actionBusy,
-                                    ),
+                                  : () async {
+                                      await _openStoryboardBatchWorkbenchDialog(
+                                        ctx: ctx2,
+                                        token: token,
+                                        projectLegacyId: projectLegacyId,
+                                        scriptLegacyId: scriptLegacyId,
+                                        boardsList: boardsList,
+                                        setBoardsState: setBoardsState,
+                                        actionBusy: actionBusy,
+                                      );
+                                      if (!ctx2.mounted) return;
+                                      await _reloadScriptStoryboards(
+                                        token: token,
+                                        scriptLegacyId: scriptLegacyId,
+                                        boardsList: boardsList,
+                                        ctx: ctx2,
+                                        setBoardsState: setBoardsState,
+                                        boardsLoading: boardsLoading,
+                                      );
+                                      if (!ctx2.mounted) return;
+                                      await _reloadProductionStoryboardSummary(
+                                        token: token,
+                                        projectLegacyId: projectLegacyId,
+                                        scriptLegacyId: scriptLegacyId,
+                                        productionSummaryLine:
+                                            productionSummaryLine,
+                                        productionSummaryLoading:
+                                            productionSummaryLoading,
+                                        setBoardsState: setBoardsState,
+                                      );
+                                    },
                               child: const Text('分镜出图工作台'),
                             ),
                             TextButton(
