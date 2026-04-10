@@ -33,6 +33,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
     required this.workspaceScriptWritebackSource,
     required this.workspaceScriptWritebackCandidate,
     required this.workspaceScriptPlanWritebackCandidate,
+    this.workspaceScriptPlanRowId,
     this.workspaceLastToolName,
     this.workspaceLastToolResultData,
     required this.workspaceWritebackLine,
@@ -44,6 +45,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
     required this.onRunScriptSubAgentTool,
     required this.onWriteBackScriptResult,
     required this.onWriteBackScriptPlanResult,
+    required this.onWriteBackScriptPlanViaUpdateData,
   });
 
   final bool busy;
@@ -64,6 +66,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
   final String? workspaceScriptWritebackSource;
   final String? workspaceScriptWritebackCandidate;
   final Map<String, dynamic>? workspaceScriptPlanWritebackCandidate;
+  final int? workspaceScriptPlanRowId;
   final String? workspaceLastToolName;
   final Object? workspaceLastToolResultData;
   final String? workspaceWritebackLine;
@@ -75,6 +78,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
   final VoidCallback onRunScriptSubAgentTool;
   final VoidCallback onWriteBackScriptResult;
   final VoidCallback onWriteBackScriptPlanResult;
+  final VoidCallback onWriteBackScriptPlanViaUpdateData;
 
   @override
   State<AgentWorkspaceScriptCard> createState() =>
@@ -90,6 +94,10 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   bool get _canWriteBackScriptPlanResult =>
       widget.workspaceScriptPlanWritebackCandidate != null;
+
+  bool get _canWriteBackScriptPlanViaUpdateData =>
+      widget.workspaceScriptPlanWritebackCandidate != null &&
+      widget.workspaceScriptPlanRowId != null;
 
   String? get _scriptWritebackSourceLine {
     final source = widget.workspaceScriptWritebackSource?.trim();
@@ -109,7 +117,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     final scriptCount = scriptRaw is List
         ? scriptRaw.whereType<Map<String, dynamic>>().length
         : 0;
-    return 'PlanData source ready: story/adaptation + script rows=$scriptCount';
+    final pid = widget.workspaceScriptPlanRowId;
+    final planHint = pid != null ? ' plan_row_id=$pid' : '';
+    return 'PlanData source ready:$planHint story/adaptation + script rows=$scriptCount';
   }
 
   String? get _runningTaskLine {
@@ -261,6 +271,10 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     ];
     final planCandidate = widget.workspaceScriptPlanWritebackCandidate;
     if (planCandidate != null) {
+      final pid = widget.workspaceScriptPlanRowId;
+      if (pid != null) {
+        lines.add('planRowId=$pid');
+      }
       final data = planCandidate['data'];
       if (data is Map<String, dynamic>) {
         final scriptRows = data['script'];
@@ -331,6 +345,15 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     }
     widget.onWriteBackScriptPlanResult();
     _setTaskStatus('已触发：写回计划数据');
+  }
+
+  void _writeBackScriptPlanViaUpdateData() {
+    if (!_canWriteBackScriptPlanViaUpdateData) {
+      _setTaskStatus('拦截：需要 planId（拉取 get_planData）与 planData。');
+      return;
+    }
+    widget.onWriteBackScriptPlanViaUpdateData();
+    _setTaskStatus('已触发：update-data 写回计划行');
   }
 
   Widget _buildPromptTemplates() {
@@ -772,6 +795,17 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                       : _writeBackScriptPlanResult,
                   child: Text(
                     widget.loadingScriptPlanResultWriteback ? '…' : '写回计划数据',
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: widget.busy ||
+                          !_canWriteBackScriptPlanViaUpdateData
+                      ? null
+                      : _writeBackScriptPlanViaUpdateData,
+                  child: Text(
+                    widget.loadingScriptPlanResultWriteback
+                        ? '…'
+                        : 'update-data 写回',
                   ),
                 ),
               ],

@@ -406,7 +406,7 @@ async fn novel_events_crud_roundtrip() {
     assert_eq!(status, StatusCode::OK, "add novels");
 
     // Create event
-    let create_body = format!(r#"{{"name":"测试事件","detail":"事件详情","chapterIds":[1,2]}}"#);
+    let create_body = r#"{"name":"测试事件","detail":"事件详情","chapterIds":[1,2]}"#.to_string();
     let res = app
         .clone()
         .oneshot(

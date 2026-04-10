@@ -38,6 +38,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     _workspaceSuggestedFlowKey = null;
     _workspaceScriptWritebackCandidate = null;
     _workspaceScriptPlanWritebackCandidate = null;
+    _workspaceScriptPlanRowId = null;
     _workspaceScriptWritebackSource = null;
     _workspaceWritebackLine = null;
   }
@@ -439,6 +440,80 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       setState(() {
         _workspaceWritebackLine =
             '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。';
+      });
+    } catch (error) {
+      _setErrorFromException(error);
+    } finally {
+      if (mounted) {
+        setState(() => _loadingScriptPlanResultWriteback = false);
+      }
+    }
+  }
+
+  /// 对齐旧 `POST /api/scriptAgent/updateData`：按 `app_script_agent_plan.id` 更新 plan JSON（不经由 project 级 set-plan-data）。
+  Future<void> _writeBackScriptPlanViaUpdateData() async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    final planRowId = _workspaceScriptPlanRowId;
+    final candidate = _workspaceScriptPlanWritebackCandidate;
+    if (planRowId == null || candidate == null) {
+      setState(
+        () => _error = '需要 planId 与 planData：请先拉取 get_planData（含 plan 行 id）',
+      );
+      return;
+    }
+
+    final payload = candidate['data'];
+    if (payload is! Map<String, dynamic>) {
+      setState(() => _error = 'planData 结果缺少 data 字段');
+      return;
+    }
+
+    final storySkeleton = (payload['storySkeleton'] as String?)?.trim() ?? '';
+    final adaptationStrategy =
+        (payload['adaptationStrategy'] as String?)?.trim() ?? '';
+    final scriptRaw = payload['script'];
+    final scriptRows = <Map<String, dynamic>>[];
+    if (scriptRaw is List) {
+      for (final item in scriptRaw.whereType<Map<String, dynamic>>()) {
+        final rawId = item['legacy_id'] ?? item['id'];
+        int? sid;
+        if (rawId is int) {
+          sid = rawId;
+        } else if (rawId is num) {
+          sid = rawId.toInt();
+        }
+        final content = item['content'];
+        if (sid != null && content is String) {
+          scriptRows.add(<String, dynamic>{'id': sid, 'content': content});
+        }
+      }
+    }
+
+    setState(() {
+      _loadingScriptPlanResultWriteback = true;
+      _workspaceWritebackLine = null;
+      _error = null;
+    });
+
+    try {
+      final status = await postScriptAgentUpdateDataV1(
+        token,
+        id: planRowId,
+        storySkeleton: storySkeleton,
+        adaptationStrategy: adaptationStrategy,
+        script: scriptRows,
+      );
+      if (status != 200) {
+        throw RustApiException(
+          'update-data failed with status $status',
+          statusCode: status,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _workspaceWritebackLine =
+            '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=${scriptRows.length}）。';
       });
     } catch (error) {
       _setErrorFromException(error);

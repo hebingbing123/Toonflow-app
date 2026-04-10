@@ -34,6 +34,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.workspaceAssistantText,
     required this.workspaceScriptWritebackCandidate,
     required this.workspaceScriptPlanWritebackCandidate,
+    required this.workspaceScriptPlanRowId,
     required this.workspaceScriptWritebackSource,
     required this.workspaceLastToolResultLine,
     this.workspaceLastToolName,
@@ -50,6 +51,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.onRunProductionSubAgentTool,
     required this.onWriteBackScriptResult,
     required this.onWriteBackScriptPlanResult,
+    required this.onWriteBackScriptPlanViaUpdateData,
     required this.onWriteBackProductionFlowResult,
     required this.onApplySuggestedFlowKey,
   });
@@ -79,6 +81,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String workspaceAssistantText;
   final String? workspaceScriptWritebackCandidate;
   final Map<String, dynamic>? workspaceScriptPlanWritebackCandidate;
+  final int? workspaceScriptPlanRowId;
   final String? workspaceScriptWritebackSource;
   final String? workspaceLastToolResultLine;
   final String? workspaceLastToolName;
@@ -95,6 +98,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final VoidCallback onRunProductionSubAgentTool;
   final VoidCallback onWriteBackScriptResult;
   final VoidCallback onWriteBackScriptPlanResult;
+  final VoidCallback onWriteBackScriptPlanViaUpdateData;
   final VoidCallback onWriteBackProductionFlowResult;
   final VoidCallback onApplySuggestedFlowKey;
 
@@ -383,6 +387,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
               widget.workspaceScriptWritebackCandidate,
           workspaceScriptPlanWritebackCandidate:
               widget.workspaceScriptPlanWritebackCandidate,
+          workspaceScriptPlanRowId: widget.workspaceScriptPlanRowId,
           workspaceLastToolName: widget.workspaceLastToolName,
           workspaceLastToolResultData: widget.workspaceLastToolResultData,
           workspaceWritebackLine: widget.workspaceWritebackLine,
@@ -406,6 +411,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           onRunScriptSubAgentTool: widget.onRunScriptSubAgentTool,
           onWriteBackScriptResult: widget.onWriteBackScriptResult,
           onWriteBackScriptPlanResult: widget.onWriteBackScriptPlanResult,
+          onWriteBackScriptPlanViaUpdateData:
+              widget.onWriteBackScriptPlanViaUpdateData,
         );
       case AgentWorkspacePane.production:
         return AgentWorkspaceProductionCard(

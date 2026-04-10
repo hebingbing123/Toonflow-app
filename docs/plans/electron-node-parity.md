@@ -28,8 +28,8 @@
 |------|------|------|
 | ✅ | **26** | 能力已对齐或明确替代（agents 记忆行、**`artStyle/*`**、**`assets/*`**、**`assetsGenerate/*`**、**`generalStatistics`**、**`general/getSingleProject+updateProject`**、**`project/*`**、**`quality/*`**、**`modelSelect`**（含旧 **`getTextModel`** / **`GET …/models/text-default`**）、**`novel/*`**、**`getVersion`**、**`deleteAllData`**、**`clearData`**、**`scriptAgent`**（REST 面）、**`test`**、**`setting/dev`**、**`setting/about`**、**`setting/agentDeploy`**、**`setting/memoryConfig`**、**`setting/promptManage`**、**`setting/skillManagement`**、**`setting/vendorConfig`**、**`task`**、**`cornerScape`**、**`script/*`**、**`production/**`**） |
 | 🔀 | **4** | 换设计、不逐路径复刻（**`login`**、**`migrate`**、**`openFolder`**、**`loginConfig`**） |
-| 🟡 | **0** | REST 前缀级显式缺口已收口；剩余 Harness/Socket.IO Agent 迁移缺口见 §3.1 |
-| §3.1 Socket | **2** 行（均为 🔀） | 旧 **Socket.IO** 由 **`/api/v1/ws` + Harness** 承接，非 REST 一对一 |
+| 🟡 | **0** | REST 前缀级显式缺口已收口；旧 Socket.IO 域能力已由 **`/api/v1/ws` + Harness** 承接（见 §3.1） |
+| §3.1 Socket | **2** 行（均为 ✅） | 旧 **Socket.IO** 由 **`/api/v1/ws` + Harness** 承接；**不追求**协议字节级复刻，以领域工具 + Flutter 工作区为完成标准 |
 
 **计数说明**：**一行**对应 **旧 `src/router.ts` 上一类前缀**（§3 左列），**不是**「二十一个独立产品模块」。**🟡** 表示该前缀下仍有 **501**、**⏳** 等待里程碑；合并同源前缀（如 **`/api/setting/getTextModel`** 并入 **`modelSelect`**）会减少 🟡 行数。
 
@@ -81,8 +81,8 @@
 
 | 旧模块 | Rust / 说明 |
 |--------|-------------|
-| `src/socket/routes/scriptAgent.ts` | 🟡 已有 **`harness.*` WS**、`agent.script.attach`、`agent.run.cancel`、`agent.context.update` 基础协议替代；script 侧核心只读域工具（`get_novel_events`、`get_planData`、`get_novel_text`、`get_script_content`）与编排工具（`run_sub_agent_storySkeleton`、`run_sub_agent_adaptationStrategy`、`run_sub_agent_script`、`run_supervision_agent`）已迁入 Harness；Flutter script workspace 现已补上下文快照，可直接审阅骨架 / 改编策略 / 剧本正文 / 小说正文与事件摘要，并能基于 `get_planData` / `get_novel_text` / `get_novel_events` / `get_script_content` 自动生成下一步建议卡、复用章节 `novelId` 填参；本轮再补固定的 `storySkeleton → adaptationStrategy → novel context → script content` 阶段看板，可按待生成/待读取/已就绪/已完成状态直接读取上下文或推进下一阶段子代理，进一步收口完整前端工作流。 |
-| `src/socket/routes/productionAgent.ts` | 🟡 已有 `agent.production.attach` / `agent.context.update` / `agent.run.cancel` 协议骨架；production 域工具 `get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard` 与编排工具（`run_sub_agent_derive_assets`、`run_sub_agent_generate_assets`、`run_sub_agent_director_plan`、`run_sub_agent_storyboard_gen`、`run_sub_agent_storyboard_panel`、`run_sub_agent_storyboard_table`）已迁入 Harness；Flutter production workspace 现已补 flow / 子代理结果上下文快照，以及基于 `assets` / `scriptPlan` / `storyboardTable` / `storyboard` 状态的任务诊断与一键建议卡，可直接衔接下一步读取 flow、切换子代理、提示词填充，并可在建议卡上直接执行读取或子代理动作；同时已支持从当前 `assets` / `storyboard` flow 快照提取候选参数，一键填入 `generate_deriveAsset` / `generate_storyboard` 的 `ids`，并为 `add_deriveAsset` / `del_deriveAsset` 生成资产树参数模板；本轮再补固定的 `scriptPlan → assets → storyboardTable → storyboard` 阶段看板，可按空白/待补图/建议刷新/已完成状态直接读取对应 flow 或推进下一阶段子代理，进一步收口完整前端执行流。 |
+| `src/socket/routes/scriptAgent.ts` | ✅ 已有 **`harness.*` WS**、`agent.script.attach`、`agent.run.cancel`、`agent.context.update` 协议替代；script 侧核心只读域工具（`get_novel_events`、`get_planData`（**`planId`** 与 REST `get-plan-data` 对齐，便于衔接 **`update-data`**）、`get_novel_text`、`get_script_content`）与编排工具（`run_sub_agent_storySkeleton`、`run_sub_agent_adaptationStrategy`、`run_sub_agent_script`、`run_supervision_agent`）已迁入 Harness；Flutter script workspace 已补上下文快照、阶段看板、`set-plan-data` 与 **`POST /api/v1/script-agent/update-data`** 双写回路径，主链路不再依赖旧 Socket.IO。 |
+| `src/socket/routes/productionAgent.ts` | ✅ 已有 `agent.production.attach` / `agent.context.update` / `agent.run.cancel`；production 域工具 `get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard` 与编排工具（`run_sub_agent_derive_assets`、`run_sub_agent_generate_assets`、`run_sub_agent_director_plan`、`run_sub_agent_storyboard_gen`、`run_sub_agent_storyboard_panel`、`run_sub_agent_storyboard_table`）已迁入 Harness；Flutter production workspace 已补 flow / 子代理快照、阶段看板与安全回写闭环，主链路不再依赖旧 Socket.IO。 |
 
 ## 4. Rust 已暴露 HTTP 面（权威列表）
 

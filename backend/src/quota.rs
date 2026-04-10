@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn default_is_positive() {
-        assert!(DEFAULT_FREE_DAILY_JOBS > 0);
+        const { assert!(DEFAULT_FREE_DAILY_JOBS > 0) };
     }
 
     #[test]

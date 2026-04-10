@@ -203,6 +203,7 @@ extension _HomePageBuildSections on _HomePageState {
       workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
       workspaceScriptPlanWritebackCandidate:
           _workspaceScriptPlanWritebackCandidate,
+      workspaceScriptPlanRowId: _workspaceScriptPlanRowId,
       workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
       workspaceLastToolResultLine: _workspaceLastToolResultLine,
       workspaceLastToolName: _workspaceLastToolName,
@@ -219,6 +220,7 @@ extension _HomePageBuildSections on _HomePageState {
       onRunProductionSubAgentTool: _runProductionSubAgentTool,
       onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
       onWriteBackScriptPlanResult: _writeBackScriptPlanWorkspaceResult,
+      onWriteBackScriptPlanViaUpdateData: _writeBackScriptPlanViaUpdateData,
       onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
       onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
     );

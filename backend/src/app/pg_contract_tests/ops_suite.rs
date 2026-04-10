@@ -64,8 +64,6 @@ async fn quality_reviews_roundtrip() {
     let asset_target_id = format!("pg_quality_asset_{}", Uuid::new_v4());
     let mut created_review_ids = Vec::new();
     let mut created_job_ids = Vec::new();
-    let script_review_id_text;
-    let asset_review_id_text;
 
     let res = app
         .clone()
@@ -118,7 +116,7 @@ async fn quality_reviews_roundtrip() {
     assert_eq!(created_script["passed"], true);
     let script_review_id =
         Uuid::parse_str(created_script["id"].as_str().expect("script review id")).unwrap();
-    script_review_id_text = script_review_id.to_string();
+    let script_review_id_text = script_review_id.to_string();
     created_review_ids.push(script_review_id);
 
     let res = app
@@ -149,7 +147,7 @@ async fn quality_reviews_roundtrip() {
     assert_eq!(created_asset["badCaseCategory"], "visual_error");
     let asset_review_id =
         Uuid::parse_str(created_asset["id"].as_str().expect("asset review id")).unwrap();
-    asset_review_id_text = asset_review_id.to_string();
+    let asset_review_id_text = asset_review_id.to_string();
     created_review_ids.push(asset_review_id);
 
     let res = app

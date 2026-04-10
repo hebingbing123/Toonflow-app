@@ -19,8 +19,6 @@ async fn jobs_rest_roundtrip() {
     let app = build_router(contract_state(pool.clone(), secret));
 
     let mut created_job_ids = Vec::new();
-    let cancel_job_id_text;
-    let retry_job_id_text;
 
     let res = app
         .clone()
@@ -41,7 +39,7 @@ async fn jobs_rest_roundtrip() {
     let (status, cancel_job) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "cancel_job={cancel_job}");
     let cancel_job_id = Uuid::parse_str(cancel_job["id"].as_str().expect("cancel job id")).unwrap();
-    cancel_job_id_text = cancel_job_id.to_string();
+    let cancel_job_id_text = cancel_job_id.to_string();
     created_job_ids.push(cancel_job_id);
     assert_eq!(cancel_job["kind"], "flutter.probe");
     assert_eq!(cancel_job["status"], "queued");
@@ -66,7 +64,7 @@ async fn jobs_rest_roundtrip() {
     assert_eq!(status, StatusCode::OK, "retry_job_seed={retry_job_seed}");
     let retry_job_id =
         Uuid::parse_str(retry_job_seed["id"].as_str().expect("retry job id")).unwrap();
-    retry_job_id_text = retry_job_id.to_string();
+    let retry_job_id_text = retry_job_id.to_string();
     created_job_ids.push(retry_job_id);
     assert_eq!(retry_job_seed["kind"], JOB_KIND_ASSET_POLISH_PROMPT);
     assert_eq!(retry_job_seed["status"], "queued");

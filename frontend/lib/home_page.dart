@@ -163,6 +163,7 @@ class _HomePageState extends State<HomePage> {
   String? _workspaceSuggestedFlowKey;
   String? _workspaceScriptWritebackCandidate;
   Map<String, dynamic>? _workspaceScriptPlanWritebackCandidate;
+  int? _workspaceScriptPlanRowId;
   String? _workspaceScriptWritebackSource;
   String? _workspaceWritebackLine;
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');

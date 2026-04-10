@@ -89,9 +89,9 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
         InvokeError::MissingContext("attached project is not owned or missing".into())
     })?;
 
-    let plan_data: Option<Json<Value>> = sqlx::query_scalar(
+    let plan_row: Option<(i64, Json<Value>)> = sqlx::query_as(
         r#"
-        SELECT plan_data
+        SELECT id, plan_data
         FROM app_script_agent_plan
         WHERE project_id = $1 AND owner_user_id = $2 AND agent_key = 'scriptAgent'
         "#,
@@ -117,7 +117,10 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
-    let mut data = plan_data.map_or_else(|| Value::Object(Default::default()), |j| j.0);
+    let mut data = plan_row
+        .as_ref()
+        .map(|(_, j)| j.0.clone())
+        .unwrap_or_else(|| Value::Object(Default::default()));
     if let Some(obj) = data.as_object_mut() {
         obj.insert(
             "script".into(),
@@ -126,11 +129,17 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
         );
     }
 
-    Ok(serde_json::json!({
+    let mut body = serde_json::json!({
         "projectId": project_legacy_id,
         "agentType": "scriptAgent",
         "data": data,
-    }))
+    });
+    if let Some((plan_id, _)) = plan_row {
+        body.as_object_mut()
+            .expect("get_planData body must be an object")
+            .insert("planId".to_string(), serde_json::json!(plan_id));
+    }
+    Ok(body)
 }
 
 pub(super) async fn invoke_get_script_content(

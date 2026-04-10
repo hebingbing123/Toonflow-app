@@ -96,6 +96,8 @@ extension _HomePageRuntimeHelpers on _HomePageState {
     if (type == 'harness.agent.started') {
       _workspaceAssistantText = '';
       _workspaceScriptWritebackCandidate = null;
+      _workspaceScriptPlanWritebackCandidate = null;
+      _workspaceScriptPlanRowId = null;
       _workspaceScriptWritebackSource = null;
       _workspaceWritebackLine = null;
       return;
@@ -137,6 +139,7 @@ extension _HomePageRuntimeHelpers on _HomePageState {
         if (name == 'get_planData') {
           _workspaceScriptPlanWritebackCandidate =
               _extractScriptPlanDataFromToolResult(result);
+          _workspaceScriptPlanRowId = _extractScriptPlanRowIdFromToolResult(result);
         }
         final encoded = jsonEncode(result);
         final summary = encoded.length > 320
@@ -177,6 +180,20 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       if (data is Map<String, dynamic>) {
         return result;
       }
+    }
+    return null;
+  }
+
+  int? _extractScriptPlanRowIdFromToolResult(Object? result) {
+    if (result is! Map<String, dynamic>) {
+      return null;
+    }
+    final raw = result['planId'];
+    if (raw is int) {
+      return raw;
+    }
+    if (raw is num) {
+      return raw.toInt();
     }
     return null;
   }
