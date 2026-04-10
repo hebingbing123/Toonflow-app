@@ -6,6 +6,19 @@
 - 仅在高风险操作（如删库、`rm -rf`、改生产密钥）时暂停向人类确认。
 - 默认 **小步多次 commit**，而不是停在「等你回复再继续」。
 
+## 分叉自主决策（不要「请选择」、不要停）
+
+- 出现 **多个方案**（架构选型、技术栈、实现路径、选项 1/2/3 等）时：**在仓库内自行选定其一并立即执行下一步**，**不要**向人类发起「请选择」或等待确认。
+- 选定后 **用一两句话说明**：选了什么、主要理由（可维护性 / 契约一致性 / 与 `docs/plans/harness-rust-flutter.md` 对齐 / 风险等）。
+- **每完成一轮决策点修复**（或 **一个主要变更阶段**）后：`git add` 相关文件并 **`git commit`**，提交说明建议包含：`AI decision: <方案摘要>，因为 <简要原因>。完成 <本阶段做了什么>。`
+- 仍仅在 **高危操作**（删库、`rm -rf`、改生产密钥等）前暂停确认。
+
+## 与 `master` 对照、体量与顺带修复
+
+- 当前分支若 **已删除旧 Node/Electron 代码**，需要对照旧实现时：**以 `master`（或文档/parity 表）为参考**，用 `git show master:<path>` 等查看历史文件；**真源**仍是 [`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) 与仓库内 OpenAPI/WS 文档。
+- **单文件体量**：`backend/`、`frontend/` 中 **避免单文件过长**（建议 **≤800 行**；明显膨胀时 **拆模块/组件**），与路线图「竖切、可维护」一致。
+- 对照 `master` 或 parity 时，若发现 **明确 bug、性能问题、明显不合理设计**，可在 **同一竖切/同一 PR 节奏内** 一并修复（避免无关大重构）。
+
 ## 重构栈门禁（自动跑，别让用户手动点）
 
 凡改动 **`backend/`**、**`frontend/`**、**`docs/openapi.yaml`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
