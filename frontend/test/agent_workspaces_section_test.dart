@@ -432,6 +432,143 @@ void main() {
     expect(find.textContaining('失踪多年的姐姐'), findsOneWidget);
   });
 
+  testWidgets('Script pane renders raw harness novel items and recipe cards', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '9');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'assets');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    String? lastTool;
+    String? lastArgs;
+    var subAgentCalls = 0;
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'get_novel_text => {...}',
+                workspaceLastToolName: 'get_novel_text',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'items': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'legacy_id': 21,
+                      'chapter_index': 1,
+                      'chapter': '雨夜归乡',
+                      'chapter_data': '女主在暴雨中回到旧站台。',
+                    },
+                  ],
+                },
+                workspaceSuggestedFlowKey: null,
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (tool, args) {
+                  lastTool = tool;
+                  lastArgs = args;
+                },
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () => subAgentCalls += 1,
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('小说章节正文'), findsOneWidget);
+    expect(find.textContaining('雨夜归乡'), findsOneWidget);
+    expect(find.text('下一步建议'), findsOneWidget);
+    expect(find.text('读取对应事件'), findsOneWidget);
+
+    await tester.tap(
+      find.widgetWithText(DropdownButtonFormField<String>, 'get_planData'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('get_novel_events').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('填充首章'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, '读取上下文').first);
+    await tester.pump();
+    expect(lastTool, 'get_novel_events');
+    expect(lastArgs, '{"novelId":21}');
+
+    await tester.tap(find.widgetWithText(FilledButton, '运行子代理').last);
+    await tester.pump();
+    expect(subAgentCalls, 1);
+    expect(
+      scriptSubAgentToolController.text,
+      'run_sub_agent_adaptationStrategy',
+    );
+    expect(scriptPromptController.text, isNotEmpty);
+  });
+
   testWidgets('Script form blocks invalid JSON args before probe', (
     WidgetTester tester,
   ) async {

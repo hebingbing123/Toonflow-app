@@ -176,6 +176,7 @@
 - 已把 production 工作区的资产/分镜参数输入再向产品执行面推进：当用户先读取 `assets` / `storyboard` flow 后，工作区会直接从当前快照提取可执行候选，并为 `generate_deriveAsset` / `generate_storyboard` 提供 `ids` 一键填参，同时为 `add_deriveAsset` / `del_deriveAsset` 生成基于当前资产树的新增/删除参数模板，减少继续手写 JSON 的控制台式操作。
 - 已增强 script 计划数据回写闭环：当 workspace 收到 `get_planData` 工具结果后，可直接一键调用 `POST /api/v1/script-agent/set-plan-data` 写回计划数据（`storySkeleton`/`adaptationStrategy`/`script`），不再仅限于脚本正文写回。
 - 已把 script 领域工具结果继续收口为工作区内“上下文快照”：`get_planData` 的故事骨架 / 改编策略 / script rows，以及 `get_script_content`、`get_novel_text`、`get_novel_events` 的核心内容都会在同一面板内可读预览，减少写回前必须来回查 probe 日志的审阅成本。
+- 已把 script 工作区再推进到“任务诊断 + 章节填参”形态：`get_planData`、`get_novel_text`、`get_novel_events`、`get_script_content` 的结果现在会生成下一步建议卡，可一键切换到对应域工具或子代理；同时 `get_novel_text` / `get_novel_events` 返回的原始 `items` 结构已直接渲染为章节/事件快照，并为 `novelId` 参数提供章节复用芯片，减少继续手写 JSON 与猜测下一步动作。
 - 已把 Agent workspace 进一步收口为二级子导航（Script / Production / Activity），并把原超长 `agent_workspaces_section.dart` 拆分为职责化组件文件，减少单文件复杂度并把 WS 执行日志沉淀到独立活动面板，降低“同屏探针堆叠”负担。
 - 已把 Product workspace 一级导航继续拆分为 `Script Workspace`、`Production Workspace`、`Workspace Activity` 三个独立工作区面板：首页保留统一入口，但每个工作区在产品导航中固定单页承载，不再依赖“进入 Agent Workspace 卡片后再二次切页”。
 - 已在 Script/Production 工作区增加 Guided tasks 快捷动作（按步骤触发上下文拉取、子代理执行、结果写回），减少手动切换下拉与拼 JSON 参数，让主流程可以按产品任务序列推进。

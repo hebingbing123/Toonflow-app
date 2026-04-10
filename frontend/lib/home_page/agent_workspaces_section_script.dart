@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'script_workspace_support.dart';
+
 class AgentWorkspacePromptPreset {
   const AgentWorkspacePromptPreset({required this.label, required this.prompt});
 
@@ -279,6 +281,12 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         }
       }
     }
+    lines.addAll(
+      summarizeScriptResultSnapshot(
+        widget.workspaceLastToolName,
+        widget.workspaceLastToolResultData,
+      ),
+    );
     return lines.take(6).toList(growable: false);
   }
 
@@ -376,16 +384,46 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     }
 
     if (lastToolName == 'get_novel_text' && lastToolResult != null) {
-      final title = (lastToolResult['title'] as String?)?.trim();
-      addPreviewCard(
-        title: '小说章节正文',
-        subtitle: title == null || title.isEmpty ? '来自 get_novel_text' : title,
-        body: (lastToolResult['content'] as String?) ?? '',
-      );
+      final items = (lastToolResult['items'] is List)
+          ? (lastToolResult['items'] as List)
+                .whereType<Map<String, dynamic>>()
+                .toList(growable: false)
+          : const <Map<String, dynamic>>[];
+      if (items.isNotEmpty) {
+        final lines = items
+            .take(4)
+            .map((Map<String, dynamic> row) {
+              final chapterIndex = row['chapter_index'] ?? row['chapterIndex'];
+              final chapter = (row['chapter'] as String?)?.trim() ?? '未命名章节';
+              final body =
+                  (row['chapter_data'] as String?)?.trim() ??
+                  (row['content'] as String?)?.trim() ??
+                  '';
+              final prefix = chapterIndex is num
+                  ? '第 ${chapterIndex.toInt()} 章 · $chapter'
+                  : chapter;
+              if (body.isEmpty) return prefix;
+              return '$prefix\n${_previewText(body, maxChars: 220)}';
+            })
+            .join('\n\n');
+        addPreviewCard(
+          title: '小说章节正文',
+          subtitle: '来自 get_novel_text，最多展示前 4 条',
+          body: lines,
+        );
+      } else {
+        final title = (lastToolResult['title'] as String?)?.trim();
+        addPreviewCard(
+          title: '小说章节正文',
+          subtitle:
+              title == null || title.isEmpty ? '来自 get_novel_text' : title,
+          body: (lastToolResult['content'] as String?) ?? '',
+        );
+      }
     }
 
     if (lastToolName == 'get_novel_events' && lastToolResult != null) {
-      final rawEvents = lastToolResult['events'];
+      final rawEvents = lastToolResult['events'] ?? lastToolResult['items'];
       final events = rawEvents is List
           ? rawEvents.whereType<Map<String, dynamic>>().toList(growable: false)
           : const <Map<String, dynamic>>[];
@@ -393,9 +431,13 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         final lines = events
             .take(6)
             .map((Map<String, dynamic> row) {
-              final title = (row['title'] as String?)?.trim() ?? '未命名事件';
+              final title =
+                  (row['title'] as String?)?.trim() ??
+                  (row['name'] as String?)?.trim() ??
+                  '未命名事件';
               final description =
                   (row['content'] as String?)?.trim() ??
+                  (row['detail'] as String?)?.trim() ??
                   (row['description'] as String?)?.trim() ??
                   '';
               if (description.isEmpty) return title;
@@ -522,19 +564,145 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   Widget _buildArgumentTemplates() {
     final templates = _argumentTemplates();
+    final suggestions = buildScriptWorkspaceArgumentSuggestions(
+      selectedTool: widget.selectedScriptDomainTool,
+      toolName: widget.workspaceLastToolName,
+      result: widget.workspaceLastToolResultData,
+    );
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: templates
-          .map(
-            (entry) => ActionChip(
-              label: Text(entry.label),
-              onPressed: widget.busy
-                  ? null
-                  : () => _applyToolArgsTemplate(entry.args, entry.label),
+      children: <Widget>[
+        ...templates.map(
+          (entry) => ActionChip(
+            label: Text(entry.label),
+            onPressed: widget.busy
+                ? null
+                : () => _applyToolArgsTemplate(entry.args, entry.label),
+          ),
+        ),
+        ...suggestions.map(
+          (suggestion) => ActionChip(
+            label: Text(suggestion.label),
+            onPressed: widget.busy
+                ? null
+                : () => _applyToolArgsTemplate(
+                    jsonEncode(suggestion.payload),
+                    suggestion.label,
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<ScriptWorkspaceRecipe> _buildWorkspaceRecipes() {
+    return buildScriptWorkspaceRecipes(
+      toolName: widget.workspaceLastToolName,
+      result: widget.workspaceLastToolResultData,
+      scopeScriptId: _scopeScriptId,
+    );
+  }
+
+  void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
+    if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
+      widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
+      widget.scriptDomainArgsController.text = jsonEncode(
+        recipe.args ?? <String, dynamic>{},
+      );
+    }
+    if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
+      widget.onScriptSubAgentChanged(recipe.subAgentTool!.trim());
+    }
+    final prompt = recipe.prompt?.trim();
+    if (prompt != null && prompt.isNotEmpty) {
+      widget.scriptPromptController.text = prompt;
+    }
+    _setTaskStatus('已应用任务建议：${recipe.title}');
+  }
+
+  void _runWorkspaceRecipeDomainTool(ScriptWorkspaceRecipe recipe) {
+    _applyWorkspaceRecipe(recipe);
+    if (recipe.domainTool == null || recipe.domainTool!.trim().isEmpty) {
+      return;
+    }
+    _probeScriptDomainTool();
+  }
+
+  void _runWorkspaceRecipeSubAgent(ScriptWorkspaceRecipe recipe) {
+    _applyWorkspaceRecipe(recipe);
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
+      return;
+    }
+    _runScriptSubAgentTool();
+  }
+
+  Widget _buildWorkspaceDiagnosis(BuildContext context) {
+    final recipes = _buildWorkspaceRecipes();
+    if (recipes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
+        ...recipes.map(
+          (ScriptWorkspaceRecipe recipe) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    recipe.title,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    recipe.detail,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      if (recipe.domainTool != null)
+                        Chip(label: Text('tool=${recipe.domainTool}')),
+                      if (recipe.subAgentTool != null)
+                        Chip(label: Text('agent=${recipe.subAgentTool}')),
+                      OutlinedButton(
+                        onPressed: widget.busy
+                            ? null
+                            : () => _applyWorkspaceRecipe(recipe),
+                        child: const Text('应用建议'),
+                      ),
+                      if (recipe.domainTool != null)
+                        FilledButton.tonal(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceRecipeDomainTool(recipe),
+                          child: const Text('读取上下文'),
+                        ),
+                      if (recipe.subAgentTool != null)
+                        FilledButton(
+                          onPressed: widget.busy
+                              ? null
+                              : () => _runWorkspaceRecipeSubAgent(recipe),
+                          child: const Text('运行子代理'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          )
-          .toList(growable: false),
+          ),
+        ),
+      ],
     );
   }
 
@@ -685,6 +853,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                 ),
               ),
             ],
+            _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
             if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
