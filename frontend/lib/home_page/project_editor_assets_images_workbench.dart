@@ -9,6 +9,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
     required List<ListAssetsResponse?> assetsRef,
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
+    int? preferredAssetLegacyId,
   }) async {
     final assets = assetsRef[0]?.items ?? const <AssetRow>[];
     if (assets.isEmpty) {
@@ -17,7 +18,10 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先创建资产再管理图片')));
       return;
     }
-    var selectedAssetLegacyId = assets.first.legacyId;
+    var selectedAssetLegacyId = chooseInitialAssetLegacyId(
+      assets,
+      preferredLegacyId: preferredAssetLegacyId,
+    )!;
     String? selectedImageId;
     ListAssetImagesResponse? imagesResponse;
     Uint8List? previewBytes;

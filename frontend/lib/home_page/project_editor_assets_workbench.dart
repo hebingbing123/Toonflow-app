@@ -362,6 +362,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                       assetsRef: assetsRef,
                                       assetsBusy: assetsBusy,
                                       reloadAssetsAndStats: reloadAssetsAndStats,
+                                      preferredAssetLegacyId:
+                                          selectedAssetLegacyId,
                                     ),
                               child: const Text('资产图片工作台'),
                             ),
@@ -379,6 +381,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                       assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
                                       assetsBusy: assetsBusy,
                                       reloadAssetsAndStats: reloadAssetsAndStats,
+                                      preferredAssetLegacyId:
+                                          selectedAssetLegacyId,
                                     ),
                               child: const Text('资产出图工作台'),
                             ),
@@ -391,6 +395,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                       token: token,
                                       p: p,
                                       assetsBusy: assetsBusy,
+                                      preferredAssetLegacyId:
+                                          selectedAssetLegacyId,
                                     ),
                               child: const Text('资产历史图工作台'),
                             ),

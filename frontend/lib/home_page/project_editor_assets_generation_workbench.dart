@@ -12,6 +12,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     required List<int?> assetsFilterScriptLegacyId,
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
+    int? preferredAssetLegacyId,
   }) async {
     List<AssetRow> visibleAssets() {
       final filtered = assetsFilterScriptLegacyId[0] == null
@@ -39,7 +40,12 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     final imageUrlCtrl = TextEditingController();
     final batchNameCtrl = TextEditingController();
     final batchLimitCtrl = TextEditingController(text: '10');
-    final selectedIds = <int>{seededAssets.first.legacyId};
+    final selectedIds = <int>{
+      chooseInitialAssetLegacyId(
+        seededAssets,
+        preferredLegacyId: preferredAssetLegacyId,
+      )!,
+    };
     int selectedScriptLegacyId =
         assetsFilterScriptLegacyId[0] ?? scriptList.first.legacyId;
     String selectedType = '';

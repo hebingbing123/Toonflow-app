@@ -7,6 +7,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
     required String token,
     required ProjectRow p,
     required List<bool> assetsBusy,
+    int? preferredAssetLegacyId,
   }) async {
     final typesCtrl = TextEditingController(text: 'role,clip,props');
     List<CornerScapeAssetItem> assets = const [];
@@ -87,11 +88,29 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
         );
         selectedAssetLegacyId = response.items.isEmpty
             ? null
-            : response.items.first.legacyId;
+            : (() {
+                if (preferredAssetLegacyId != null) {
+                  for (final item in response.items) {
+                    if (item.legacyId == preferredAssetLegacyId) {
+                      return preferredAssetLegacyId;
+                    }
+                  }
+                }
+                return response.items.first.legacyId;
+              })();
         selectedHistoryImageId =
-            response.items.isEmpty || response.items.first.historyImages.isEmpty
+            selectedAssetLegacyId == null
             ? null
-            : response.items.first.historyImages.first.id;
+            : (() {
+                for (final item in response.items) {
+                  if (item.legacyId == selectedAssetLegacyId) {
+                    return item.historyImages.isEmpty
+                        ? null
+                        : item.historyImages.first.id;
+                  }
+                }
+                return null;
+              })();
         final totalHist = response.items.fold<int>(
           0,
           (sum, item) => sum + item.historyImages.length,
