@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'agent_workspaces_section_script.dart';
+import 'production_workspace_context_snapshot.dart';
 import 'production_workspace_support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
@@ -72,7 +73,6 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
 
 class _AgentWorkspaceProductionCardState
     extends State<AgentWorkspaceProductionCard> {
-  static const JsonEncoder _prettyJsonEncoder = JsonEncoder.withIndent('  ');
   String? _taskStatusLine;
 
   String? _resolveDropdownValue(String value, List<String> allowed) {
@@ -366,101 +366,12 @@ class _AgentWorkspaceProductionCardState
     return lines.take(6).toList(growable: false);
   }
 
-  String _previewText(String value, {required int maxChars}) {
-    if (value.length <= maxChars) {
-      return value;
-    }
-    return '${value.substring(0, maxChars)}...';
-  }
-
   List<Widget> _buildContextSnapshot(BuildContext context) {
-    final result = widget.workspaceLastToolResultData;
-    final toolName = widget.workspaceLastToolName?.trim();
-    if (result is! Map<String, dynamic> ||
-        toolName == null ||
-        toolName.isEmpty) {
-      return const <Widget>[];
-    }
-
-    final theme = Theme.of(context).textTheme;
-    final sections = <Widget>[];
-
-    void addPreviewCard({
-      required String title,
-      required Object body,
-      String? subtitle,
-    }) {
-      final normalized = switch (body) {
-        String value => value.trim(),
-        _ => _prettyJsonEncoder.convert(body).trim(),
-      };
-      if (normalized.isEmpty) return;
-      sections.add(
-        Card(
-          margin: const EdgeInsets.only(top: 8),
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(title, style: theme.labelLarge),
-                if (subtitle != null && subtitle.trim().isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 2),
-                  Text(subtitle.trim(), style: theme.bodySmall),
-                ],
-                const SizedBox(height: 6),
-                SelectableText(
-                  _previewText(normalized, maxChars: 1200),
-                  style: theme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final data = result['data'];
-    if (data is Map<String, dynamic>) {
-      for (final key in <String>[
-        'assets',
-        'script',
-        'scriptPlan',
-        'storyboardTable',
-        'storyboard',
-      ]) {
-        final value = data[key];
-        if (value == null) continue;
-        addPreviewCard(
-          title: 'flow[$key]',
-          subtitle: '来自 $toolName',
-          body: value,
-        );
-      }
-    }
-
-    final items = result['items'];
-    if (items is List && items.isNotEmpty) {
-      addPreviewCard(
-        title: '返回列表',
-        subtitle: '来自 $toolName',
-        body: items.take(6).toList(growable: false),
-      );
-    }
-
-    final text = result['result'];
-    if (text is String && text.trim().isNotEmpty) {
-      addPreviewCard(title: '工具返回文本', subtitle: '来自 $toolName', body: text);
-    }
-
-    if (sections.isEmpty) {
-      return const <Widget>[];
-    }
     return <Widget>[
-      const SizedBox(height: 8),
-      Text('上下文快照', style: theme.labelLarge),
-      ...sections,
+      ProductionContextSnapshotView(
+        workspaceLastToolName: widget.workspaceLastToolName,
+        workspaceLastToolResultData: widget.workspaceLastToolResultData,
+      ),
     ];
   }
 
