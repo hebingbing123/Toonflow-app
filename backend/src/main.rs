@@ -1,7 +1,6 @@
 //! Toonflow HTTP API entrypoint.
 //! Default listen port: 8666 (override with `PORT`).
 
-mod agent_memory;
 mod app;
 mod assets;
 mod auth;

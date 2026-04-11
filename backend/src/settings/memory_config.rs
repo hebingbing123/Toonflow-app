@@ -13,10 +13,10 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json as SqlxJson;
 
-use crate::agent_memory::{self, ClearMemoryResponse};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::harness::observe;
+use crate::settings::agent_memory::{self, ClearMemoryResponse};
 use crate::state::{AppState, MemoryConfig};
 
 #[derive(Debug, Serialize)]
