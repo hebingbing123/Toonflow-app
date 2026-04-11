@@ -1,4 +1,4 @@
-//! User-scoped **`app_art_style`** REST (legacy **`o_artStyle`** list/get/create/update/delete subset).
+//! 用户范围的 `app_art_style` REST（遗留 `o_artStyle` 列表/获取/创建/更新/删除子集）。
 
 use std::path::{Path as FsPath, PathBuf};
 
