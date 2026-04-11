@@ -6857,7 +6857,7 @@ paths:
       summary: List storyboards for a script (by project UUID + script legacy id)
       operationId: listStoryboardsByProjectAndScriptLegacyV1
       description: |
-        Same as **`GET /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**, scoped with **`app_project.id`** (UUID).
+        Lists **`app_storyboard`** rows for the script **`script_legacy_id`** under **`project_id`** (**`app_project.id`** UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -6905,7 +6905,7 @@ paths:
       summary: Create storyboard under a script (by project UUID + script legacy id)
       operationId: createStoryboardUnderProjectAndScriptLegacyV1
       description: |
-        Same as **`POST /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**, scoped with **`app_project.id`** (UUID).
+        Inserts **`app_storyboard`** for the script under **`project_id`** (**`app_project.id`** UUID). **`legacy_id`** is allocated with advisory lock **`884_422_003`** + **`MAX(legacy_id)+1`** over **`app_storyboard`**.
       security:
         - bearerAuth: []
       parameters:
@@ -6965,7 +6965,7 @@ paths:
       summary: Storyboard by legacy id (scoped to project UUID)
       operationId: getStoryboardByProjectAndLegacyV1
       description: |
-        Same row as **`GET /api/v1/storyboards/legacy/{legacy_id}`**, requiring the storyboard to belong to **`app_project.id`**.
+        Returns **`app_storyboard`** for **`storyboard_legacy_id`** when that row belongs to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -7011,7 +7011,7 @@ paths:
       summary: Partially update storyboard (scoped to project UUID)
       operationId: patchStoryboardByProjectAndLegacyV1
       description: |
-        Same merge rules as **`PATCH /api/v1/storyboards/legacy/{legacy_id}`**; storyboard must belong to the given project.
+        Merge patch per **`PatchStoryboardBody`**; at least one key required. Storyboard must belong to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -7094,232 +7094,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Not found or not under project
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/scripts/legacy/{script_legacy_id}/storyboards:
-    get:
-      deprecated: true
-      tags: [storyboards]
-      summary: List storyboards for a script (by script legacy id)
-      operationId: listStoryboardsByScriptLegacyIdV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: script_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "200":
-          description: OK (may be empty)
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/StoryboardRow"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    post:
-      deprecated: true
-      tags: [storyboards]
-      summary: Create storyboard under a script (allocates global storyboard legacy_id)
-      operationId: createStoryboardUnderScriptLegacyV1
-      description: |
-        Inserts **`app_storyboard`** for the script identified by **`script_legacy_id`** (must belong to a project owned by the caller).
-        **`legacy_id`** is **`MAX(legacy_id)+1`** over **`app_storyboard`** under advisory lock **`884_422_003`** (distinct from project/script locks).
-        Defaults **`legacy_script_id`** to the path script legacy id and **`legacy_project_id`** to the parent project's legacy id unless overridden in the body.
-        **`create_time_ms`** is server-set. Legacy Node flow created **`o_videoTrack`** first; not replicated in PG MVP.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: script_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateStoryboardBody"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StoryboardRow"
-        "400":
-          description: Unknown JSON properties
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Script not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/storyboards/legacy/{legacy_id}:
-    get:
-      deprecated: true
-      tags: [storyboards]
-      summary: Storyboard by legacy integer id
-      operationId: getStoryboardByLegacyIdV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StoryboardRow"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    patch:
-      deprecated: true
-      tags: [storyboards]
-      summary: Partially update storyboard by legacy id
-      operationId: patchStoryboardByLegacyIdV1
-      description: |
-        Merge patch; omit keys to leave unchanged; `null` or `""` clears text fields; `null` clears integers.
-        At least one key required.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PatchStoryboardBody"
-      responses:
-        "200":
-          description: Updated row
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StoryboardRow"
-        "400":
-          description: Invalid body, no fields to apply, unknown properties (only keys on `PatchStoryboardBody`), or malformed JSON
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    delete:
-      deprecated: true
-      tags: [storyboards]
-      summary: Delete storyboard by legacy id
-      operationId: deleteStoryboardByLegacyIdV1
-      description: |
-        Deletes **`app_storyboard`** when the row belongs to a script under a project owned by the caller.
-        (Legacy SQLite also removed **`o_assets2Storyboard`** links; PG MVP has no equivalent join table yet.)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "204":
-          description: Deleted
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Not found or not owned
           content:
             application/json:
               schema:

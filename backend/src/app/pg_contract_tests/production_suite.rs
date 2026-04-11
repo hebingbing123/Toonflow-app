@@ -391,7 +391,9 @@ async fn production_workbench_video_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/scripts/legacy/{script_id}/storyboards"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}/storyboards"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -413,7 +415,9 @@ async fn production_workbench_video_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/scripts/legacy/{script_id}/storyboards"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}/storyboards"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

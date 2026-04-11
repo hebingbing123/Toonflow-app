@@ -184,87 +184,6 @@ pub(super) async fn create_under_script_for_project(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
-pub(super) async fn create_under_script_legacy(
-    State(state): State<AppState>,
-    Path(script_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CreateStoryboardBody>,
-) -> Result<(StatusCode, Json<StoryboardRow>), ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let (script_uuid, project_legacy_id): (Uuid, i32) = sqlx::query_as(
-        r#"
-        SELECT s.id, p.legacy_id
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.legacy_id = $1 AND p.owner_user_id = $2
-        "#,
-    )
-    .bind(script_legacy_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    let row = create_storyboard_locked(
-        &mut tx,
-        script_uuid,
-        project_legacy_id,
-        script_legacy_id,
-        body,
-    )
-    .await?;
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok((StatusCode::CREATED, Json(row)))
-}
-
-pub(super) async fn list_by_script_legacy(
-    State(state): State<AppState>,
-    Path(script_legacy_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<Json<Vec<StoryboardRow>>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let rows = sqlx::query_as::<_, StoryboardRow>(
-        r#"
-        SELECT
-          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
-          sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sc.legacy_id = $1 AND p.owner_user_id = $2
-        ORDER BY sb.sb_index ASC NULLS LAST, sb.legacy_id ASC
-        "#,
-    )
-    .bind(script_legacy_id)
-    .bind(uid)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(Json(rows))
-}
-
 pub(super) async fn get_by_legacy_for_project(
     State(state): State<AppState>,
     Path((project_id, storyboard_legacy_id)): Path<(Uuid, i32)>,
@@ -301,45 +220,12 @@ pub(super) async fn get_by_legacy_for_project(
     Ok(Json(row))
 }
 
-pub(super) async fn get_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<Json<StoryboardRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let row = sqlx::query_as::<_, StoryboardRow>(
-        r#"
-        SELECT
-          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
-          sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sb.legacy_id = $1 AND p.owner_user_id = $2
-        "#,
-    )
-    .bind(legacy_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    Ok(Json(row))
-}
-
 async fn patch_storyboard_row(
     pool: &PgPool,
     uid: Uuid,
     legacy_id: i32,
     body: PatchStoryboardBody,
-    project_id: Option<Uuid>,
+    project_id: Uuid,
 ) -> Result<Json<StoryboardRow>, ApiError> {
     let p_prompt = parse_optional_text_field(body.prompt, "prompt")?;
     let p_file = parse_optional_text_field(body.file_path, "file_path")?;
@@ -374,44 +260,24 @@ async fn patch_storyboard_row(
         ));
     }
 
-    let current = if let Some(pid) = project_id {
-        sqlx::query_as::<_, StoryboardRow>(
-            r#"
-            SELECT
-              sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
-              sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-              sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-            FROM app_storyboard sb
-            INNER JOIN app_script sc ON sc.id = sb.script_id
-            INNER JOIN app_project p ON p.id = sc.project_id
-            WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
-            "#,
-        )
-        .bind(legacy_id)
-        .bind(pid)
-        .bind(uid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    } else {
-        sqlx::query_as::<_, StoryboardRow>(
-            r#"
-            SELECT
-              sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
-              sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-              sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-            FROM app_storyboard sb
-            INNER JOIN app_script sc ON sc.id = sb.script_id
-            INNER JOIN app_project p ON p.id = sc.project_id
-            WHERE sb.legacy_id = $1 AND p.owner_user_id = $2
-            "#,
-        )
-        .bind(legacy_id)
-        .bind(uid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    }
+    let current = sqlx::query_as::<_, StoryboardRow>(
+        r#"
+        SELECT
+          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
+          sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
+          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(project_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
     let merge_t = |patch: &FieldPatch<String>, cur: &Option<String>| -> Option<String> {
@@ -500,33 +366,17 @@ pub(super) async fn patch_by_legacy_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_storyboard_row(pool, uid, storyboard_legacy_id, body, Some(project_id)).await
-}
-
-pub(super) async fn patch_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<PatchStoryboardBody>,
-) -> Result<Json<StoryboardRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    patch_storyboard_row(pool, uid, legacy_id, body, None).await
+    patch_storyboard_row(pool, uid, storyboard_legacy_id, body, project_id).await
 }
 
 async fn delete_storyboard_row(
     pool: &PgPool,
     uid: Uuid,
     legacy_id: i32,
-    project_id: Option<Uuid>,
+    project_id: Uuid,
 ) -> Result<StatusCode, ApiError> {
-    let res = if let Some(pid) = project_id {
-        sqlx::query(
-            r#"
+    let res = sqlx::query(
+        r#"
             DELETE FROM app_storyboard sb
             USING app_script sc, app_project p
             WHERE sb.script_id = sc.id
@@ -535,30 +385,13 @@ async fn delete_storyboard_row(
               AND p.owner_user_id = $2
               AND p.id = $3
             "#,
-        )
-        .bind(legacy_id)
-        .bind(uid)
-        .bind(pid)
-        .execute(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    } else {
-        sqlx::query(
-            r#"
-            DELETE FROM app_storyboard sb
-            USING app_script sc, app_project p
-            WHERE sb.script_id = sc.id
-              AND sc.project_id = p.id
-              AND sb.legacy_id = $1
-              AND p.owner_user_id = $2
-            "#,
-        )
-        .bind(legacy_id)
-        .bind(uid)
-        .execute(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    };
+    )
+    .bind(legacy_id)
+    .bind(uid)
+    .bind(project_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if res.rows_affected() == 0 {
         return Err(ApiError::NotFound);
@@ -579,19 +412,5 @@ pub(super) async fn delete_by_legacy_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_storyboard_row(pool, uid, storyboard_legacy_id, Some(project_id)).await
-}
-
-pub(super) async fn delete_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    delete_storyboard_row(pool, uid, legacy_id, None).await
+    delete_storyboard_row(pool, uid, storyboard_legacy_id, project_id).await
 }

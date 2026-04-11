@@ -7,7 +7,7 @@
 | 概念 | 含义 | 收敛难度 |
 |------|------|----------|
 | **HTTP 模块名带 `legacy`** | `narrative::legacy`、`production_legacy` 等独立路由树 | 中–高：删路由前须改 Flutter |
-| **URL 中含 `/legacy/{整型 id}`** | 如 `GET /api/v1/scripts/legacy/1/storyboards`（分镜列表等仍常见） | 中：按域竖切为 UUID 项目段或资源 UUID |
+| **URL 中含 `/legacy/{整型 id}`** | 如 `GET /api/v1/art-styles/legacy/1`（画风等资源仍常见） | 中：按域竖切为 UUID 项目段或资源 UUID |
 | **请求体旧形状** | `projectId`、`camelCase` 与旧 Electron 对齐的 POST | 中：需换客户端 body + 后端 handler |
 | **列 `legacy_id`（PG）** | 各 `app_*` 表常见整型外键/排序 | 低–高：属 **Schema**，可与 HTTP 分阶段 |
 | **迁移工具 `legacy_import`** | `backend/src/bin/legacy_import.rs` | 通常 **保留**（与「在线 API 废弃」无关） |
@@ -53,7 +53,7 @@
 |------|------|
 | `backend/src/narrative/novels/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novels`，`GET\|PATCH\|DELETE …/novels/{novel_legacy_id}`（UUID 项目段；**`novel_legacy_id`** 仍为 **`app_novel.legacy_id`**）。**已删除** `…/projects/legacy/{id}/novels*` |
 | `backend/src/narrative/events/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`；**`POST …/novels/events/*`** 旧形仍保留。**已删除** `…/projects/legacy/{id}/novel-events*` |
-| `backend/src/narrative/storyboards/*` | **并行**：`…/projects/{project_id}/scripts/{script_legacy_id}/storyboards`、`…/projects/{project_id}/storyboards/{storyboard_legacy_id}`；仍保留 `…/scripts/legacy/.../storyboards`、`…/storyboards/legacy/{id}` |
+| `backend/src/narrative/storyboards/*` | **主路径**：`…/projects/{project_id}/scripts/{script_legacy_id}/storyboards`、`…/projects/{project_id}/storyboards/{storyboard_legacy_id}`。**已删除** `…/scripts/legacy/.../storyboards` 与 **`…/storyboards/legacy/{id}`** |
 
 ### 4. 其它后端引用（删 `production_legacy` 前需评估）
 
@@ -85,7 +85,7 @@
 | `backend/src/projects/routes.rs` | **主路径**：`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`、`GET …/stats`（UUID）。**已删除** `GET`/`PATCH`/`DELETE …/projects/legacy/{legacy_id}` 与 `GET …/projects/legacy/{legacy_id}/stats`（与竖切 1 对齐） |
 | `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{id}`、`GET …/cover`（封面落盘路径也按 `legacy_id` 命名，见 `AppState` 注释） |
 | `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{legacy_id}`（对齐旧 `o_prompt.id` 1–3） |
-| `backend/src/scripting/scripts.rs` | **主路径**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`。**已删除** `…/projects/legacy/{id}/scripts` 与 **`…/scripts/legacy/{id}`**（剧本本体 `GET`/`PATCH`/`DELETE`）。**仍保留**：`…/scripts/legacy/{id}/storyboards`（列表/创建）；旧 `POST …/scripts/batch-add` 已移除 |
+| `backend/src/scripting/scripts.rs` | **主路径**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`。**已删除** `…/projects/legacy/{id}/scripts` 与 **`…/scripts/legacy/{id}`**（剧本本体 `GET`/`PATCH`/`DELETE`）；分镜列表/创建见 **`narrative/storyboards`** UUID 路径。旧 `POST …/scripts/batch-add` 已移除 |
 | `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_legacy_id`** + **`script_legacy_ids[]`**（无 `/legacy/` 段但语义同旧栈） |
 | `backend/src/assets/generate.rs` | `assets-generate` 各 handler：`project_id`/`project_legacy_id`、`asset_legacy_id`、`legacy_image_id` 入队 payload；`cancel-generate` 按 **`legacy_image_id`** 协同取消 |
 | `backend/src/settings/agent_memory.rs` | `project_id: i32`（**项目 legacy id**）+ `episodes_id` 等驼峰体；与 Harness/工作台「按 legacy 项目」一致 |
@@ -246,8 +246,8 @@
 | **B·竖切 2：项目资产 REST（UUID 项目段）** | 已落地（主路径） | 后端：`/api/v1/projects/{project_id}/assets` 全树（含 corner-scape、图片 CRUD、`scripts/{sid}/assets/{aid}` 关联）。资产仍用 **`asset_legacy_id`** 路径段。Flutter `rust_api` 主路径为 `fetchProjectAssetsByProjectId`、`createProjectAssetUnderProject` 等；项目编辑器资产 UI 已切 UUID。**已删除** HTTP **`…/projects/legacy/.../assets*`** 与 **`…/projects/legacy/.../scripts/.../assets/...` 的 PUT/DELETE**；OpenAPI 与 `pg_contract` 已对齐 |
 | **B·竖切 3：项目小说 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novels`，`GET\|PATCH\|DELETE …/novels/{novel_legacy_id}`。Flutter `novels_rest_api` 与项目编辑器小说列表/工作台已切 UUID。**已删除** `…/projects/legacy/{id}/novels*`。**仍保留**：`/api/v1/novels/*` 旧 POST（Electron 形） |
 | **B·竖切 4：项目小说事件 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。`POST …/novels/events/get-events` / **`batch-delete`** 仍按旧形 body。Flutter `novels_events` 仅 UUID 路径封装。**已删除** `…/projects/legacy/.../novel-events*` |
-| **B·竖切 5：叙事分镜 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST …/projects/{project_id}/scripts/{script_legacy_id}/storyboards`，`GET\|PATCH\|DELETE …/projects/{project_id}/storyboards/{storyboard_legacy_id}`（分镜仍为 **`storyboard_legacy_id`**）。Flutter `storyboards_api` 与剧本编辑器分镜列表/单条编辑主路径已切 UUID；`scripts/legacy/.../storyboards` 与 `storyboards/legacy/{id}` 仍保留并已标 **`deprecated`** |
-| **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与旧路径一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID。**已删除** `POST …/projects/legacy/.../scripts` 与 **`…/scripts/legacy/{id}`** 剧本本体 CRUD；**仍保留**：`…/scripts/legacy/{id}/storyboards` |
+| **B·竖切 5：叙事分镜 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST …/projects/{project_id}/scripts/{script_legacy_id}/storyboards`，`GET\|PATCH\|DELETE …/projects/{project_id}/storyboards/{storyboard_legacy_id}`（分镜仍为 **`storyboard_legacy_id`**）。Flutter `storyboards_api` 与剧本编辑器分镜列表/单条编辑仅 UUID 路径。**已删除** `scripts/legacy/.../storyboards` 与 **`storyboards/legacy/{id}`** |
+| **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与旧路径一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID。**已删除** `POST …/projects/legacy/.../scripts` 与 **`…/scripts/legacy/{id}`** 剧本本体 CRUD（分镜 REST 见 **B·竖切 5**） |
 | **B·竖切 7：`get-script-api`（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/get-script-api`（`ensure_owned_project_pk` + body 可选 `name`）。Flutter `postScriptsGetScriptApiByProjectId`；剧本/项目脚本工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/get-script-api` **已删除** |
 | **B·竖切 8：`batch-add` 剧本（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/batch-add`（body 仅 **`data`**，与 legacy 插入/锁一致）。Flutter `postScriptsBatchAddByProjectId`；项目剧本批量工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/batch-add` **已删除** |
 | **B·其余域** | 部分 | **`POST /api/v1/assets/*`** 等旧形 body、**`production_legacy`**、**`narrative::legacy`**、**`harness`/jobs 整型 payload** 仍待竖切；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 已与当前 **UUID 项目段**主路径对齐（避免仍写已删的 **`…/projects/legacy/...`** 项目删改统计等） |
