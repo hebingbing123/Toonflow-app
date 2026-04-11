@@ -1,4 +1,6 @@
-//! Bearer JWT extraction for REST; WebSocket paths use [`jwt::verify_supabase_user_jwt`] with raw tokens.
+//! 认证模块：REST 的 Bearer JWT 提取。
+//!
+//! WebSocket 路径使用 [`jwt::verify_supabase_user_jwt`] 验证原始令牌。
 
 mod jwt;
 
