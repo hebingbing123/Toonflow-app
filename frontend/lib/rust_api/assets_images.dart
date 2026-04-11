@@ -1,17 +1,18 @@
 part of 'index.dart';
 
-/// `POST /api/v1/assets/get-assets-api` — legacy parent assets with nested `sonAssets` by **`projectId/type/name/page/limit`**.
+/// `POST /api/v1/projects/{project_id}/assets/workbench/nested` — parent assets with nested `sonAssets` by **`type/name/page/limit`** (**`project_id`** = project UUID).
 Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
   String accessToken, {
-  required int projectLegacyId,
+  required String projectId,
   required String assetType,
   String? name,
   int page = 1,
   int limit = 10,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/get-assets-api');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/nested',
+  );
   final payload = <String, dynamic>{
-    'projectId': projectLegacyId,
     'type': assetType,
     'page': page,
     'limit': limit,
@@ -39,12 +40,15 @@ Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
   return LegacyAssetGetAssetsApiResponse.fromJson(map);
 }
 
-/// `POST /api/v1/assets/get-image` — legacy asset image bundle by **`assetsId`**.
+/// `POST …/assets/workbench/image-bundle` — asset image bundle by **`assetsId`** (scoped to **`project_id`** UUID).
 Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
   String accessToken,
+  String projectId,
   int assetLegacyId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/get-image');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/image-bundle',
+  );
   final res = await http
       .post(
         uri,
@@ -68,15 +72,17 @@ Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
   return LegacyAssetGetImageResponse.fromJson(map);
 }
 
-/// `POST /api/v1/assets/upload-clip` — legacy upload clip asset by **`projectId/base64Data/name`**.
+/// `POST …/assets/workbench/upload-clip` — upload clip asset (**`base64Data`**, **`name`**, optional **`type`** = clip).
 Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
   String accessToken, {
-  required int projectLegacyId,
+  required String projectId,
   required String base64Data,
   required String name,
   String assetType = 'clip',
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/upload-clip');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/upload-clip',
+  );
   final res = await http
       .post(
         uri,
@@ -85,7 +91,6 @@ Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'projectId': projectLegacyId,
           'base64Data': base64Data,
           'type': assetType,
           'name': name,
@@ -105,12 +110,14 @@ Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
   return LegacyAssetUploadClipResponse.fromJson(map);
 }
 
-/// `POST /api/v1/assets/get-material-data` — legacy clip-assets and generated videos by **`projectId`**.
+/// `POST …/assets/workbench/material-data` — clip assets and generated videos for the project (**empty `{}`** body).
 Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
   String accessToken,
-  int projectLegacyId,
+  String projectId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/get-material-data');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/material-data',
+  );
   final res = await http
       .post(
         uri,
@@ -118,7 +125,7 @@ Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectLegacyId}),
+        body: jsonEncode({}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
@@ -131,19 +138,20 @@ Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
   return LegacyAssetMaterialDataResponse.fromJson(map);
 }
 
-/// `POST /api/v1/assets/batch-generation-data` — legacy paged listing by **`projectId/type/name/page/limit`**.
+/// `POST …/assets/workbench/batch-generation-data` — paged listing by **`type/name/page/limit`**.
 Future<LegacyAssetBatchGenerationDataResponse>
 postLegacyAssetsBatchGenerationData(
   String accessToken, {
-  required int projectLegacyId,
+  required String projectId,
   required String assetType,
   String? name,
   int page = 1,
   int limit = 10,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/batch-generation-data');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/batch-generation-data',
+  );
   final payload = <String, dynamic>{
-    'projectId': projectLegacyId,
     'type': assetType,
     'page': page,
     'limit': limit,
@@ -171,13 +179,16 @@ postLegacyAssetsBatchGenerationData(
   return LegacyAssetBatchGenerationDataResponse.fromJson(map);
 }
 
-/// `POST /api/v1/assets/polling-image-assets` — legacy selected-image polling by **`ids`**.
+/// `POST …/assets/workbench/polling-image-assets` — selected-image polling by **`ids`**.
 Future<List<LegacyAssetPollingImageAssetsItem>>
 postLegacyAssetsPollingImageAssets(
   String accessToken,
+  String projectId,
   List<int> assetLegacyIds,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/polling-image-assets');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/polling-image-assets',
+  );
   final res = await http
       .post(
         uri,
@@ -204,13 +215,16 @@ postLegacyAssetsPollingImageAssets(
       .toList();
 }
 
-/// `POST /api/v1/assets/polling-prompt-assets` — legacy prompt polling by **`ids`**.
+/// `POST …/assets/workbench/polling-prompt-assets` — prompt polling by **`ids`**.
 Future<List<LegacyAssetPollingPromptAssetsItem>>
 postLegacyAssetsPollingPromptAssets(
   String accessToken,
+  String projectId,
   List<int> assetLegacyIds,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/assets/polling-prompt-assets');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/polling-prompt-assets',
+  );
   final res = await http
       .post(
         uri,

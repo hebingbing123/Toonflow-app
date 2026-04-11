@@ -547,18 +547,18 @@ async fn assets_upload_clip_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let project_legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     let clip_name = format!("pg_clip_{}", Uuid::new_v4());
-    let body = format!(
-        r#"{{"projectId":{project_legacy_id},"name":"{clip_name}","base64Data":"QUJDRA=="}}"#
-    );
+    let body = format!(r#"{{"name":"{clip_name}","base64Data":"QUJDRA=="}}"#);
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/upload-clip")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/upload-clip"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -576,13 +576,13 @@ async fn assets_upload_clip_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-material-data")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/material-data"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{project_legacy_id}}}"#
-                )))
+                .body(Body::from("{}"))
                 .unwrap(),
         )
         .await
@@ -606,7 +606,9 @@ async fn assets_upload_clip_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-image")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/image-bundle"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -665,9 +667,6 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["legacy_id"]
-        .as_i64()
-        .expect("project legacy id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
 
     let base_name = format!("pg_legacy_asset_{}", Uuid::new_v4().simple());
@@ -677,14 +676,16 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let asset_d_name = format!("{base_name}_d");
 
     let create_body = format!(
-        r#"{{"name":"{asset_a_name}","describe":"desc a","type":"role","projectId":{project_legacy_id},"remark":"  r0  ","prompt":"  p0  "}}"#
+        r#"{{"name":"{asset_a_name}","describe":"desc a","type":"role","remark":"  r0  ","prompt":"  p0  "}}"#
     );
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/add-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/add-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -729,14 +730,16 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     );
 
     let save_body = format!(
-        r#"{{"id":{asset_a_legacy_id},"projectId":{project_legacy_id},"type":"role","prompt":"  p1  ","base64":"QUJDRA=="}}"#
+        r#"{{"id":{asset_a_legacy_id},"type":"role","prompt":"  p1  ","base64":"QUJDRA=="}}"#
     );
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/save-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/save-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -754,7 +757,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-image")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/image-bundle"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -783,7 +788,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/update-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/update-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -839,7 +846,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/del-image")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/del-image"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -857,7 +866,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-image")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/image-bundle"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -878,15 +889,15 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .is_some_and(|arr| arr.is_empty()));
 
     for name in [&asset_b_name, &asset_c_name, &asset_d_name] {
-        let create_body = format!(
-            r#"{{"name":"{name}","describe":"desc","type":"role","projectId":{project_legacy_id}}}"#
-        );
+        let create_body = format!(r#"{{"name":"{name}","describe":"desc","type":"role"}}"#);
         let res = app
             .clone()
             .oneshot(
                 Request::builder()
                     .method(Method::POST)
-                    .uri("/api/v1/assets/add-assets")
+                    .uri(format!(
+                        "/api/v1/projects/{project_uuid}/assets/workbench/add-assets"
+                    ))
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
@@ -924,7 +935,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/del-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/del-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -985,7 +998,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/batch-delete")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/batch-delete"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1249,13 +1264,15 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-assets-api")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/nested"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{project_legacy_id},"type":"role","page":1,"limit":1}}"#
-                )))
+                .body(Body::from(
+                    r#"{"type":"role","page":1,"limit":1}"#.to_string(),
+                ))
                 .unwrap(),
         )
         .await
@@ -1301,13 +1318,15 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-assets-api")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/nested"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{project_legacy_id},"type":"role","page":2,"limit":1}}"#
-                )))
+                .body(Body::from(
+                    r#"{"type":"role","page":2,"limit":1}"#.to_string(),
+                ))
                 .unwrap(),
         )
         .await
@@ -1503,7 +1522,9 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/polling-image-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/polling-image-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1585,7 +1606,9 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/polling-prompt-assets")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/polling-prompt-assets"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1647,9 +1670,6 @@ async fn assets_batch_generation_data_filters_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["legacy_id"]
-        .as_i64()
-        .expect("project legacy id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
 
     let make_asset = |name: &str, kind: &str| -> Request<Body> {
@@ -1694,15 +1714,15 @@ async fn assets_batch_generation_data_filters_roundtrip() {
     .await;
     assert_eq!(status, StatusCode::CREATED, "create scene");
 
-    let filter_body = format!(
-        r#"{{"projectId":{project_legacy_id},"type":"role","name":"role_","page":1,"limit":1}}"#
-    );
+    let filter_body = r#"{"type":"role","name":"role_","page":1,"limit":1}"#.to_string();
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/batch-generation-data")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/batch-generation-data"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1722,14 +1742,14 @@ async fn assets_batch_generation_data_filters_roundtrip() {
     assert!(first_name == role_name_a || first_name == role_name_b);
     assert_eq!(page_1["data"][0]["type"].as_str(), Some("role"));
 
-    let filter_body_page_2 = format!(
-        r#"{{"projectId":{project_legacy_id},"type":"role","name":"role_","page":2,"limit":1}}"#
-    );
+    let filter_body_page_2 = r#"{"type":"role","name":"role_","page":2,"limit":1}"#.to_string();
     let res = app
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/batch-generation-data")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/batch-generation-data"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

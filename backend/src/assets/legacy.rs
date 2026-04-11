@@ -1,10 +1,10 @@
-//! 遗留 POST 资产写入操作。
-//!
-//! 处理 add-assets、update-assets、save-assets、del-assets、
-//! batch-delete 和 del-image 等遗留端点。
-//! 读取/查询操作位于 [`legacy_query`]。
+//! 资产变更辅助端点（**`POST …/projects/{project_id}/assets/workbench/*`**）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
 use serde_json::Value;
 use sqlx::types::Json as SqlxJson;
 use uuid::Uuid;
@@ -13,21 +13,20 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::crud::ensure_owned_project_pk;
 use super::models::*;
 use super::{
     merge_legacy_asset_metadata, normalize_upload_clip_data_uri, resolve_owned_asset_metadata,
     ADV_LOCK_ASSET_IMAGE_LEGACY, ADV_LOCK_ASSET_LEGACY,
 };
 
-pub(super) async fn post_legacy_add_assets(
+pub(super) async fn post_project_workbench_add_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyAddAssetsBody>,
+    Json(body): Json<WorkbenchAddAssetsBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
     let name = body.name.trim();
     if name.is_empty() {
         return Err(ApiError::BadRequest("name must not be empty".into()));
@@ -48,20 +47,12 @@ pub(super) async fn post_legacy_add_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     let mut tx = pool
         .begin()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
-    )
-    .bind(body.project_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
         .bind(ADV_LOCK_ASSET_LEGACY)
@@ -91,7 +82,7 @@ pub(super) async fn post_legacy_add_assets(
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         "#,
     )
-    .bind(project_uuid)
+    .bind(project_id)
     .bind(next_legacy)
     .bind(name)
     .bind(asset_type)
@@ -111,8 +102,9 @@ pub(super) async fn post_legacy_add_assets(
     }))
 }
 
-pub(super) async fn post_legacy_update_assets(
+pub(super) async fn post_project_workbench_update_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<LegacyUpdateAssetsBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
@@ -134,6 +126,8 @@ pub(super) async fn post_legacy_update_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     let current = resolve_owned_asset_metadata(pool, uid, body.id).await?;
     let metadata = merge_legacy_asset_metadata(
         current.metadata.0,
@@ -152,13 +146,15 @@ pub(super) async fn post_legacy_update_assets(
         FROM app_project p
         WHERE a.project_id = p.id
           AND p.owner_user_id = $4
-          AND a.legacy_id = $5
+          AND p.id = $5
+          AND a.legacy_id = $6
         "#,
     )
     .bind(name)
     .bind(describe)
     .bind(SqlxJson(metadata))
     .bind(uid)
+    .bind(project_id)
     .bind(body.id)
     .execute(pool)
     .await
@@ -169,17 +165,15 @@ pub(super) async fn post_legacy_update_assets(
     }))
 }
 
-pub(super) async fn post_legacy_save_assets(
+pub(super) async fn post_project_workbench_save_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacySaveAssetsBody>,
+    Json(body): Json<WorkbenchSaveAssetsBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
-    }
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
     }
     let asset_type = body.asset_type.trim().to_lowercase();
     if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
@@ -198,6 +192,8 @@ pub(super) async fn post_legacy_save_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     let mut tx = pool
         .begin()
         .await
@@ -205,23 +201,21 @@ pub(super) async fn post_legacy_save_assets(
 
     let current: LegacyOwnedAssetMetaRow = sqlx::query_as(
         r#"
-        SELECT a.id, a.metadata, p.legacy_id AS project_legacy_id
+        SELECT a.id, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND a.legacy_id = $2
+          AND p.id = $2
+          AND a.legacy_id = $3
         "#,
     )
     .bind(uid)
+    .bind(project_id)
     .bind(body.id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
-    if current.project_legacy_id != body.project_id {
-        tx.rollback().await.ok();
-        return Err(ApiError::NotFound);
-    }
 
     let mut image_patch = body.image_id;
     if let Some(raw_base64) = body
@@ -288,13 +282,13 @@ pub(super) async fn post_legacy_save_assets(
         FROM app_project p
         WHERE a.project_id = p.id
           AND p.owner_user_id = $2
-          AND p.legacy_id = $3
+          AND p.id = $3
           AND a.legacy_id = $4
         "#,
     )
     .bind(SqlxJson(metadata))
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_id)
     .bind(body.id)
     .execute(&mut *tx)
     .await
@@ -309,8 +303,9 @@ pub(super) async fn post_legacy_save_assets(
     }))
 }
 
-pub(super) async fn post_legacy_del_assets(
+pub(super) async fn post_project_workbench_del_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<LegacyDeleteAssetsBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
@@ -324,16 +319,20 @@ pub(super) async fn post_legacy_del_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     sqlx::query(
         r#"
         DELETE FROM app_asset a
         USING app_project p
         WHERE a.project_id = p.id
           AND p.owner_user_id = $1
-          AND a.legacy_id = $2
+          AND p.id = $2
+          AND a.legacy_id = $3
         "#,
     )
     .bind(uid)
+    .bind(project_id)
     .bind(body.id)
     .execute(pool)
     .await
@@ -344,8 +343,9 @@ pub(super) async fn post_legacy_del_assets(
     }))
 }
 
-pub(super) async fn post_legacy_batch_delete_assets(
+pub(super) async fn post_project_workbench_batch_delete_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<LegacyBatchDeleteAssetsBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
@@ -362,16 +362,20 @@ pub(super) async fn post_legacy_batch_delete_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     sqlx::query(
         r#"
         DELETE FROM app_asset a
         USING app_project p
         WHERE a.project_id = p.id
           AND p.owner_user_id = $1
-          AND a.legacy_id = ANY($2)
+          AND p.id = $2
+          AND a.legacy_id = ANY($3)
         "#,
     )
     .bind(uid)
+    .bind(project_id)
     .bind(&body.id)
     .execute(pool)
     .await
@@ -382,8 +386,9 @@ pub(super) async fn post_legacy_batch_delete_assets(
     }))
 }
 
-pub(super) async fn post_legacy_del_image(
+pub(super) async fn post_project_workbench_del_image(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<LegacyDelImageBody>,
 ) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
@@ -397,6 +402,8 @@ pub(super) async fn post_legacy_del_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     sqlx::query(
         r#"
         UPDATE app_asset a
@@ -405,11 +412,13 @@ pub(super) async fn post_legacy_del_image(
         FROM app_project p
         WHERE a.project_id = p.id
           AND p.owner_user_id = $1
+          AND p.id = $2
           AND COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
-          AND (a.metadata->>'imageId')::integer = $2
+          AND (a.metadata->>'imageId')::integer = $3
         "#,
     )
     .bind(uid)
+    .bind(project_id)
     .bind(body.id)
     .execute(pool)
     .await
@@ -422,10 +431,12 @@ pub(super) async fn post_legacy_del_image(
         WHERE ai.asset_id = a.id
           AND a.project_id = p.id
           AND p.owner_user_id = $1
-          AND ai.legacy_image_id = $2
+          AND p.id = $2
+          AND ai.legacy_image_id = $3
         "#,
     )
     .bind(uid)
+    .bind(project_id)
     .bind(body.id)
     .execute(pool)
     .await

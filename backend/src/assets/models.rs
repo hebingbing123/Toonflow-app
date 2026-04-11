@@ -256,51 +256,11 @@ pub(super) struct LegacyGetImageBody {
     pub assets_id: i32,
 }
 
-/// 遗留 upload-clip 端点的请求体。
-///
-/// 接受 base64 编码的图片数据以附加到资产。
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyUploadClipBody {
-    /// 用于限定范围的遗留项目 ID。
-    pub project_id: i32,
-    /// Base64 编码的图片数据（data URI 或原始）。
-    pub base64_data: String,
-    /// 可选的资产类型提示。
-    #[serde(default, alias = "type")]
-    pub asset_type: Option<String>,
-    /// 上传片段的名称。
-    pub name: String,
-}
-
 /// 遗留 upload-clip 端点的响应。
 #[derive(Debug, Serialize)]
 pub(super) struct LegacyUploadClipResponse {
     /// 人类可读的状态消息。
     pub message: String,
-}
-
-/// 遗留 add-assets 端点的请求体。
-///
-/// 创建带有必填名称、描述和类型的新资产。
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyAddAssetsBody {
-    /// 资产的显示名称。
-    pub name: String,
-    /// 描述或提示词文本（遗留字段名 "describe"）。
-    pub describe: String,
-    /// 资产类型：role、tool 或 scene。
-    #[serde(rename = "type")]
-    pub asset_type: String,
-    /// 用于限定资产范围的遗留项目 ID。
-    pub project_id: i32,
-    /// 可选的备注。
-    #[serde(default)]
-    pub remark: Option<String>,
-    /// 可选的生成提示词。
-    #[serde(default)]
-    pub prompt: Option<String>,
 }
 
 /// 遗留 update-assets 端点的请求体。
@@ -321,30 +281,6 @@ pub(super) struct LegacyUpdateAssetsBody {
     /// 可选的提示词更新。
     #[serde(default)]
     pub prompt: Option<String>,
-}
-
-/// 遗留 save-assets 端点的请求体。
-///
-/// 插入或更新资产，可选 base64 图片数据。
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacySaveAssetsBody {
-    /// 遗留资产 ID（新资产为 0）。
-    pub id: i32,
-    /// 用于限定范围的遗留项目 ID。
-    pub project_id: i32,
-    /// 可选的 base64 编码图片数据。
-    #[serde(default)]
-    pub base64: Option<String>,
-    /// 资产类型：role、tool 或 scene。
-    #[serde(rename = "type")]
-    pub asset_type: String,
-    /// 可选的生成提示词。
-    #[serde(default)]
-    pub prompt: Option<String>,
-    /// 可选的选中图片 ID。
-    #[serde(default)]
-    pub image_id: Option<i32>,
 }
 
 /// 遗留 delete-assets 端点的请求体。
@@ -410,14 +346,6 @@ pub(super) struct LegacyPollingPromptAssetsBody {
     pub ids: Vec<i32>,
 }
 
-/// 遗留 get-material-data 端点的请求体。
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyGetMaterialDataBody {
-    /// 用于限定查询范围的遗留项目 ID。
-    pub project_id: i32,
-}
-
 /// 素材数据响应中的资产项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -453,26 +381,6 @@ pub(super) struct LegacyGetMaterialDataResponse {
     pub data: Vec<LegacyMaterialAssetItem>,
     /// 视频素材列表。
     pub video: Vec<LegacyMaterialVideoItem>,
-}
-
-/// 遗留 batch-generation-data 端点的请求体。
-///
-/// 用于批量生成工作流的分页查询资产。
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyBatchGenerationDataBody {
-    /// 遗留项目 ID，用于限定查询范围。
-    pub project_id: i32,
-    /// 资产类型过滤：role、tool 或 scene。
-    #[serde(rename = "type")]
-    pub asset_type: String,
-    /// 可选的名称子串过滤。
-    #[serde(default)]
-    pub name: Option<String>,
-    /// 页码（从 1 开始）。
-    pub page: i32,
-    /// 每页大小。
-    pub limit: i32,
 }
 
 /// batch-generation-data 响应中的资产项。
@@ -563,26 +471,74 @@ pub(super) struct LegacyGetImageAssetRow {
     pub metadata: SqlxJson<Value>,
 }
 
-/// 遗留 get-assets-api 端点的请求体。
-///
-/// 遗留客户端使用的主要资产列表端点。
+/// **`POST …/projects/{project_id}/assets/workbench/nested`** — 同 get-assets-api，项目 UUID 在路径。
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyGetAssetsApiBody {
-    /// 遗留项目 ID，用于限定查询范围。
-    pub project_id: i32,
-    /// 资产类型过滤：role、tool 或 scene。
+pub(super) struct WorkbenchNestedAssetsBody {
     #[serde(rename = "type")]
     pub asset_type: String,
-    /// 可选的名称子串过滤（不区分大小写）。
     #[serde(default)]
     pub name: Option<String>,
-    /// 页码（从 1 开始），默认为 1。
     #[serde(default)]
     pub page: Option<i32>,
-    /// 每页大小，默认为系统限制。
     #[serde(default)]
     pub limit: Option<i32>,
+}
+
+/// **`POST …/projects/{project_id}/assets/workbench/upload-clip`**。
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct WorkbenchUploadClipBody {
+    pub base64_data: String,
+    #[serde(default, alias = "type")]
+    pub asset_type: Option<String>,
+    pub name: String,
+}
+
+/// **`POST …/projects/{project_id}/assets/workbench/material-data`** — 空对象体。
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+pub(super) struct WorkbenchEmptyBody {}
+
+/// **`POST …/projects/{project_id}/assets/workbench/batch-generation-data`**。
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct WorkbenchBatchGenerationDataBody {
+    #[serde(rename = "type")]
+    pub asset_type: String,
+    #[serde(default)]
+    pub name: Option<String>,
+    pub page: i32,
+    pub limit: i32,
+}
+
+/// **`POST …/projects/{project_id}/assets/workbench/add-assets`**。
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct WorkbenchAddAssetsBody {
+    pub name: String,
+    pub describe: String,
+    #[serde(rename = "type")]
+    pub asset_type: String,
+    #[serde(default)]
+    pub remark: Option<String>,
+    #[serde(default)]
+    pub prompt: Option<String>,
+}
+
+/// **`POST …/projects/{project_id}/assets/workbench/save-assets`**。
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct WorkbenchSaveAssetsBody {
+    pub id: i32,
+    #[serde(default)]
+    pub base64: Option<String>,
+    #[serde(rename = "type")]
+    pub asset_type: String,
+    #[serde(default)]
+    pub prompt: Option<String>,
+    #[serde(default)]
+    pub image_id: Option<i32>,
 }
 
 /// get-assets-api 响应中的子/附属资产项。
@@ -691,8 +647,6 @@ pub(crate) struct LegacyOwnedAssetMetaRow {
     pub id: Uuid,
     /// 元数据 JSON。
     pub metadata: SqlxJson<Value>,
-    /// 用于所有权验证的遗留项目 ID。
-    pub project_legacy_id: i32,
 }
 
 /// 应用 PATCH 更新前获取的当前资产状态。

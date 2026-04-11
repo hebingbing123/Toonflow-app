@@ -1,29 +1,30 @@
-//! 遗留 `POST …/upload-clip`。
-//!
-//! 上传片段端点。
+//! Clip 资产上传（**`POST …/assets/workbench/upload-clip`**）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_pk;
 use super::super::models::*;
 use super::super::{
     normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_LEGACY, ADV_LOCK_ASSET_LEGACY,
 };
 
-pub(crate) async fn post_legacy_upload_clip(
+pub(crate) async fn post_project_workbench_upload_clip(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyUploadClipBody>,
+    Json(body): Json<WorkbenchUploadClipBody>,
 ) -> Result<Json<LegacyUploadClipResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
     let name = body.name.trim();
     if name.is_empty() {
         return Err(ApiError::BadRequest("name must not be empty".into()));
@@ -46,20 +47,12 @@ pub(crate) async fn post_legacy_upload_clip(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
     let mut tx = pool
         .begin()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
-    )
-    .bind(body.project_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
         .bind(ADV_LOCK_ASSET_LEGACY)
@@ -97,7 +90,7 @@ pub(crate) async fn post_legacy_upload_clip(
         RETURNING id
         "#,
     )
-    .bind(project_uuid)
+    .bind(project_id)
     .bind(next_asset_legacy)
     .bind(name)
     .bind(now_ms)

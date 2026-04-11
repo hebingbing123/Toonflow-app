@@ -1,42 +1,31 @@
-//! 遗留 `POST …/get-assets-api`。
-//!
-//! 返回父子资产树结构。
+//! 父子资产树查询（项目 UUID 路径：**`POST …/assets/workbench/nested`**）。
 
 use std::collections::HashMap;
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_legacy_id;
 use super::super::models::*;
 use super::super::MAX_ASSET_LIST_LIMIT;
 
-pub(crate) async fn post_legacy_get_assets_api(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<LegacyGetAssetsApiBody>,
-) -> Result<Json<LegacyGetAssetsApiResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
+async fn run_get_assets_api(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+    body: &WorkbenchNestedAssetsBody,
+) -> Result<LegacyGetAssetsApiResponse, ApiError> {
     let asset_type = body.asset_type.trim().to_lowercase();
-    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
-        return Err(ApiError::BadRequest(
-            "type must be role, scene, or tool".into(),
-        ));
-    }
-
     let page = body.page.unwrap_or(1);
     let limit = body.limit.unwrap_or(10);
-    if page <= 0 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
-    }
-    if limit <= 0 {
-        return Err(ApiError::BadRequest("limit must be >= 1".into()));
-    }
     let limit = i64::from(limit).min(MAX_ASSET_LIST_LIMIT);
     let offset = i64::from(page - 1) * limit;
 
@@ -46,11 +35,6 @@ pub(crate) async fn post_legacy_get_assets_api(
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .map(|s| format!("%{s}%"));
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let total: i64 = sqlx::query_scalar(
         r#"
@@ -71,7 +55,7 @@ pub(crate) async fn post_legacy_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .fetch_one(pool)
@@ -127,7 +111,7 @@ pub(crate) async fn post_legacy_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .bind(limit)
@@ -184,7 +168,7 @@ pub(crate) async fn post_legacy_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .fetch_all(pool)
@@ -195,7 +179,7 @@ pub(crate) async fn post_legacy_get_assets_api(
     for row in children {
         let child = LegacyGetAssetsApiChildItem {
             id: row.id,
-            project_id: row.project_id.unwrap_or(body.project_id),
+            project_id: row.project_id.unwrap_or(project_legacy_id),
             asset_type: row.asset_type,
             name: row.name,
             assets_id: row.assets_id,
@@ -214,7 +198,7 @@ pub(crate) async fn post_legacy_get_assets_api(
         .into_iter()
         .map(|row| LegacyGetAssetsApiParentItem {
             id: row.id,
-            project_id: row.project_id.unwrap_or(body.project_id),
+            project_id: row.project_id.unwrap_or(project_legacy_id),
             asset_type: row.asset_type,
             name: row.name,
             assets_id: row.assets_id,
@@ -227,5 +211,35 @@ pub(crate) async fn post_legacy_get_assets_api(
         })
         .collect();
 
-    Ok(Json(LegacyGetAssetsApiResponse { data, total }))
+    Ok(LegacyGetAssetsApiResponse { data, total })
+}
+
+pub(crate) async fn post_project_workbench_nested_assets(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<WorkbenchNestedAssetsBody>,
+) -> Result<Json<LegacyGetAssetsApiResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let asset_type = body.asset_type.trim().to_lowercase();
+    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
+        return Err(ApiError::BadRequest(
+            "type must be role, scene, or tool".into(),
+        ));
+    }
+    let page = body.page.unwrap_or(1);
+    let limit = body.limit.unwrap_or(10);
+    if page <= 0 {
+        return Err(ApiError::BadRequest("page must be >= 1".into()));
+    }
+    if limit <= 0 {
+        return Err(ApiError::BadRequest("limit must be >= 1".into()));
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
+    let out = run_get_assets_api(pool, uid, project_legacy_id, &body).await?;
+    Ok(Json(out))
 }

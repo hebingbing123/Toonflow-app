@@ -1,43 +1,28 @@
-//! 遗留 `POST …/batch-generation-data`。
-//!
-//! 批量生成数据查询端点。
+//! 批量生成候选分页（**`POST …/assets/workbench/batch-generation-data`**）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_legacy_id;
 use super::super::models::*;
 use super::super::{normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
 
-pub(crate) async fn post_legacy_batch_generation_data(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<LegacyBatchGenerationDataBody>,
-) -> Result<Json<LegacyBatchGenerationDataResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
+async fn run_batch_generation_data(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+    body: &WorkbenchBatchGenerationDataBody,
+) -> Result<LegacyBatchGenerationDataResponse, ApiError> {
     let asset_type = body.asset_type.trim().to_lowercase();
-    if asset_type.is_empty() {
-        return Err(ApiError::BadRequest("type must be non-empty".into()));
-    }
-    if body.page < 1 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
-    }
-    if body.limit < 1 || body.limit > MAX_ASSET_LIST_LIMIT as i32 {
-        return Err(ApiError::BadRequest(format!(
-            "limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"
-        )));
-    }
-    let name = normalize_name_ilike(body.name);
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let name = normalize_name_ilike(body.name.clone());
 
     let total: i64 = sqlx::query_scalar(
         r#"
@@ -51,7 +36,7 @@ pub(crate) async fn post_legacy_batch_generation_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .bind(&asset_type)
     .bind(name.as_deref())
     .fetch_one(pool)
@@ -79,7 +64,7 @@ pub(crate) async fn post_legacy_batch_generation_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .bind(asset_type)
     .bind(name.as_deref())
     .bind(offset)
@@ -88,5 +73,33 @@ pub(crate) async fn post_legacy_batch_generation_data(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyBatchGenerationDataResponse { data, total }))
+    Ok(LegacyBatchGenerationDataResponse { data, total })
+}
+
+pub(crate) async fn post_project_workbench_batch_generation_data(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<WorkbenchBatchGenerationDataBody>,
+) -> Result<Json<LegacyBatchGenerationDataResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let asset_type = body.asset_type.trim().to_lowercase();
+    if asset_type.is_empty() {
+        return Err(ApiError::BadRequest("type must be non-empty".into()));
+    }
+    if body.page < 1 {
+        return Err(ApiError::BadRequest("page must be >= 1".into()));
+    }
+    if body.limit < 1 || body.limit > MAX_ASSET_LIST_LIMIT as i32 {
+        return Err(ApiError::BadRequest(format!(
+            "limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"
+        )));
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
+    let out = run_batch_generation_data(pool, uid, project_legacy_id, &body).await?;
+    Ok(Json(out))
 }

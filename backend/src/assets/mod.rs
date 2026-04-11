@@ -2,8 +2,8 @@
 //!
 //! 子模块：
 //! - `models` — 请求/响应类型
-//! - `legacy` — 遗留 POST 写入操作（添加/更新/保存/删除）
-//! - `legacy_query` — 遗留 POST 读取/查询
+//! - `legacy` — **`…/projects/{project_id}/assets/workbench/*`** 写入（添加/更新/保存/删除）
+//! - `legacy_query` — 同上路径前缀下的查询/轮询/上传 clip
 //! - `crud` — REST CRUD 资产操作、角景、脚本-资产关联
 //! - `crud_images` — 资产图片 REST CRUD
 //! - `generate` — 遗留 `/api/assetsGenerate/*` 入队和取消
@@ -223,7 +223,7 @@ pub(super) async fn resolve_owned_asset_metadata(
 ) -> Result<LegacyOwnedAssetMetaRow, ApiError> {
     let row: Option<LegacyOwnedAssetMetaRow> = sqlx::query_as(
         r#"
-        SELECT a.id, a.metadata, p.legacy_id AS project_legacy_id
+        SELECT a.id, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
@@ -247,39 +247,57 @@ pub fn router() -> Router<AppState> {
     use legacy_query::*;
 
     Router::new()
-        .route("/api/v1/assets/add-assets", post(post_legacy_add_assets))
-        .route("/api/v1/assets/save-assets", post(post_legacy_save_assets))
         .route(
-            "/api/v1/assets/update-assets",
-            post(post_legacy_update_assets),
-        )
-        .route("/api/v1/assets/del-assets", post(post_legacy_del_assets))
-        .route(
-            "/api/v1/assets/batch-delete",
-            post(post_legacy_batch_delete_assets),
-        )
-        .route("/api/v1/assets/del-image", post(post_legacy_del_image))
-        .route(
-            "/api/v1/assets/get-assets-api",
-            post(post_legacy_get_assets_api),
-        )
-        .route("/api/v1/assets/get-image", post(post_legacy_get_image))
-        .route("/api/v1/assets/upload-clip", post(post_legacy_upload_clip))
-        .route(
-            "/api/v1/assets/get-material-data",
-            post(post_legacy_get_material_data),
+            "/api/v1/projects/{project_id}/assets/workbench/nested",
+            post(post_project_workbench_nested_assets),
         )
         .route(
-            "/api/v1/assets/batch-generation-data",
-            post(post_legacy_batch_generation_data),
+            "/api/v1/projects/{project_id}/assets/workbench/image-bundle",
+            post(post_project_workbench_image_bundle),
         )
         .route(
-            "/api/v1/assets/polling-image-assets",
-            post(post_legacy_polling_image_assets),
+            "/api/v1/projects/{project_id}/assets/workbench/upload-clip",
+            post(post_project_workbench_upload_clip),
         )
         .route(
-            "/api/v1/assets/polling-prompt-assets",
-            post(post_legacy_polling_prompt_assets),
+            "/api/v1/projects/{project_id}/assets/workbench/material-data",
+            post(post_project_workbench_material_data),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/batch-generation-data",
+            post(post_project_workbench_batch_generation_data),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/polling-image-assets",
+            post(post_project_workbench_polling_image_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/polling-prompt-assets",
+            post(post_project_workbench_polling_prompt_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/add-assets",
+            post(post_project_workbench_add_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/update-assets",
+            post(post_project_workbench_update_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/save-assets",
+            post(post_project_workbench_save_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/del-assets",
+            post(post_project_workbench_del_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/batch-delete",
+            post(post_project_workbench_batch_delete_assets),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/workbench/del-image",
+            post(post_project_workbench_del_image),
         )
         .route(
             "/api/v1/projects/{project_id}/assets",
@@ -413,19 +431,15 @@ mod tests {
 
     #[test]
     fn upload_clip_body_accepts_legacy_type_key() {
-        let body: LegacyUploadClipBody = serde_json::from_str(
-            r#"{"projectId":1,"base64Data":"AA==","type":"clip","name":"demo"}"#,
-        )
-        .unwrap();
-        assert_eq!(body.project_id, 1);
+        let body: WorkbenchUploadClipBody =
+            serde_json::from_str(r#"{"base64Data":"AA==","type":"clip","name":"demo"}"#).unwrap();
         assert_eq!(body.asset_type.as_deref(), Some("clip"));
+        assert_eq!(body.name, "demo");
     }
 
     #[test]
-    fn legacy_get_assets_api_body_accepts_minimal() {
-        let body: LegacyGetAssetsApiBody =
-            serde_json::from_str(r#"{"projectId":1,"type":"role"}"#).unwrap();
-        assert_eq!(body.project_id, 1);
+    fn workbench_nested_assets_body_accepts_minimal() {
+        let body: WorkbenchNestedAssetsBody = serde_json::from_str(r#"{"type":"role"}"#).unwrap();
         assert_eq!(body.asset_type, "role");
         assert!(body.name.is_none());
         assert!(body.page.is_none());
@@ -433,11 +447,9 @@ mod tests {
     }
 
     #[test]
-    fn legacy_get_assets_api_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<LegacyGetAssetsApiBody>(
-            r#"{"projectId":1,"type":"role","x":1}"#,
-        )
-        .unwrap_err();
+    fn workbench_nested_assets_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<WorkbenchNestedAssetsBody>(r#"{"type":"role","x":1}"#)
+            .unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),
@@ -446,22 +458,19 @@ mod tests {
     }
 
     #[test]
-    fn legacy_add_assets_body_accepts_minimal() {
-        let body: LegacyAddAssetsBody = serde_json::from_str(
-            r#"{"name":"Hero","describe":"Main role","type":"role","projectId":1}"#,
-        )
-        .unwrap();
+    fn workbench_add_assets_body_accepts_minimal() {
+        let body: WorkbenchAddAssetsBody =
+            serde_json::from_str(r#"{"name":"Hero","describe":"Main role","type":"role"}"#)
+                .unwrap();
         assert_eq!(body.name, "Hero");
-        assert_eq!(body.project_id, 1);
         assert_eq!(body.asset_type, "role");
     }
 
     #[test]
-    fn legacy_save_assets_body_accepts_image_id_without_base64() {
-        let body: LegacySaveAssetsBody =
-            serde_json::from_str(r#"{"id":1,"projectId":2,"type":"role","imageId":3}"#).unwrap();
+    fn workbench_save_assets_body_accepts_image_id_without_base64() {
+        let body: WorkbenchSaveAssetsBody =
+            serde_json::from_str(r#"{"id":1,"type":"role","imageId":3}"#).unwrap();
         assert_eq!(body.id, 1);
-        assert_eq!(body.project_id, 2);
         assert_eq!(body.image_id, Some(3));
     }
 

@@ -29,6 +29,23 @@ pub(crate) async fn ensure_owned_project_pk(
     }
 }
 
+/// **404** if the project is missing or not owned; returns **`app_project.legacy_id`** for Electron-era payloads.
+pub(crate) async fn ensure_owned_project_legacy_id(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+) -> Result<i32, ApiError> {
+    let v: Option<i32> = sqlx::query_scalar(
+        r#"SELECT p.legacy_id FROM app_project p WHERE p.id = $1 AND p.owner_user_id = $2"#,
+    )
+    .bind(project_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    v.ok_or(ApiError::NotFound)
+}
+
 pub(crate) async fn resolve_owned_asset_id_for_project(
     pool: &PgPool,
     uid: Uuid,

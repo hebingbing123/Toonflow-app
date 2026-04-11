@@ -26,7 +26,7 @@ pub(crate) use links::{link_script_to_asset_for_project, unlink_script_from_asse
 pub(crate) use list::list_project_assets_for_project;
 pub(crate) use patch_delete::{delete_project_asset_for_project, patch_project_asset_for_project};
 pub(crate) use resolve::{
-    ensure_owned_project_pk, resolve_owned_asset_id_and_metadata_for_project,
-    resolve_owned_asset_id_for_project,
+    ensure_owned_project_legacy_id, ensure_owned_project_pk,
+    resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
 };
 pub use resolve::{next_asset_image_sort_index, resolve_asset_id_for_job};

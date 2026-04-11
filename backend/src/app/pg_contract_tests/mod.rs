@@ -500,7 +500,9 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets/get-image")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/assets/workbench/image-bundle"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

@@ -1,30 +1,24 @@
-//! 遗留 `POST …/get-material-data`。
-//!
-//! 获取素材数据端点。
+//! 素材板数据（**`POST …/assets/workbench/material-data`**）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_legacy_id;
 use super::super::models::*;
 
-pub(crate) async fn post_legacy_get_material_data(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<LegacyGetMaterialDataBody>,
-) -> Result<Json<LegacyGetMaterialDataResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
+async fn run_get_material_data(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+) -> Result<LegacyGetMaterialDataResponse, ApiError> {
     let mut data: Vec<LegacyMaterialAssetItem> = sqlx::query_as(
         r#"
         SELECT
@@ -61,7 +55,7 @@ pub(crate) async fn post_legacy_get_material_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -95,10 +89,26 @@ pub(crate) async fn post_legacy_get_material_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_legacy_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyGetMaterialDataResponse { data, video }))
+    Ok(LegacyGetMaterialDataResponse { data, video })
+}
+
+pub(crate) async fn post_project_workbench_material_data(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(_body): Json<WorkbenchEmptyBody>,
+) -> Result<Json<LegacyGetMaterialDataResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
+    let out = run_get_material_data(pool, uid, project_legacy_id).await?;
+    Ok(Json(out))
 }

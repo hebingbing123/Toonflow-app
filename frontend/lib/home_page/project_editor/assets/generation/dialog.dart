@@ -147,6 +147,7 @@ class _AssetGenerationWorkbenchDialogState
         );
         nextPromptPollingData = await postLegacyAssetsPollingPromptAssets(
           widget.token,
+          widget.project.id,
           selected,
         );
       }
@@ -401,7 +402,7 @@ class _AssetGenerationWorkbenchDialogState
               : () => _runMutation(() async {
                   final response = await postLegacyAssetsGetMaterialData(
                     widget.token,
-                    widget.project.legacyId,
+                    widget.project.id,
                   );
                   if (mounted) {
                     setState(() {
@@ -428,7 +429,7 @@ class _AssetGenerationWorkbenchDialogState
                   }
                   final response = await postLegacyAssetsBatchGenerationData(
                     widget.token,
-                    projectLegacyId: widget.project.legacyId,
+                    projectId: widget.project.id,
                     assetType: effectiveType,
                     name: _batchNameCtrl.text.trim(),
                     limit: limit,
@@ -539,6 +540,7 @@ class _AssetGenerationWorkbenchDialogState
               : () => _runMutation(() async {
                   final response = await postLegacyAssetsPollingPromptAssets(
                     widget.token,
+                    widget.project.id,
                     selected,
                   );
                   if (mounted) {

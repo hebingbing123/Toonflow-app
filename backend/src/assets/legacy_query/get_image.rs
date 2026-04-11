@@ -1,44 +1,41 @@
-//! 遗留 `POST …/get-image`。
-//!
-//! 获取资产图片端点。
+//! 资产图片包查询（**`POST …/assets/workbench/image-bundle`**）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_legacy_id;
 use super::super::metadata_cover_legacy_image_id;
 use super::super::models::*;
 
-pub(crate) async fn post_legacy_get_image(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<LegacyGetImageBody>,
-) -> Result<Json<LegacyGetImageResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.assets_id <= 0 {
-        return Err(ApiError::BadRequest("assetsId must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
+async fn run_get_image(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_legacy_id: i32,
+    assets_id: i32,
+) -> Result<LegacyGetImageResponse, ApiError> {
     let asset = sqlx::query_as::<_, LegacyGetImageAssetRow>(
         r#"
         SELECT a.id, a.legacy_id, a.asset_type, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND a.legacy_id = $2
+          AND p.legacy_id = $2
+          AND a.legacy_id = $3
         ORDER BY a.created_at DESC
         LIMIT 1
         "#,
     )
     .bind(uid)
-    .bind(body.assets_id)
+    .bind(project_legacy_id)
+    .bind(assets_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -72,9 +69,28 @@ pub(crate) async fn post_legacy_get_image(
         })
         .collect();
 
-    Ok(Json(LegacyGetImageResponse {
+    Ok(LegacyGetImageResponse {
         id: asset.legacy_id,
         image_id,
         temp_assets,
-    }))
+    })
+}
+
+pub(crate) async fn post_project_workbench_image_bundle(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyGetImageBody>,
+) -> Result<Json<LegacyGetImageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if body.assets_id <= 0 {
+        return Err(ApiError::BadRequest("assetsId must be positive".into()));
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
+    let out = run_get_image(pool, uid, project_legacy_id, body.assets_id).await?;
+    Ok(Json(out))
 }

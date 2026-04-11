@@ -1,37 +1,28 @@
-//! 遗留轮询端点。
-//!
-//! 图片/提示词资产状态的轮询检查端点。
+//! 资产图片 / prompt 轮询（项目 UUID 路径）。
 
-use axum::{extract::State, http::HeaderMap, Json};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+use super::super::crud::ensure_owned_project_pk;
 use super::super::models::*;
 
-pub(crate) async fn post_legacy_polling_image_assets(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<LegacyPollingImageAssetsBody>,
-) -> Result<Json<Vec<LegacyPollingImageAssetsItem>>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.ids.is_empty() {
-        return Ok(Json(Vec::new()));
+async fn run_polling_image_assets(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_id: Uuid,
+    ids: &[i32],
+) -> Result<Vec<LegacyPollingImageAssetsItem>, ApiError> {
+    if ids.is_empty() {
+        return Ok(Vec::new());
     }
-    if body.ids.len() > 200 {
-        return Err(ApiError::BadRequest(
-            "ids must have at most 200 rows".into(),
-        ));
-    }
-    if body.ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest("each ids[] must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let rows: Vec<LegacyPollingImageAssetsItem> = sqlx::query_as(
         r#"
@@ -51,42 +42,57 @@ pub(crate) async fn post_legacy_polling_image_assets(
            END
          )
         WHERE p.owner_user_id = $1
-          AND a.legacy_id = ANY($2)
+          AND p.id = $2
+          AND a.legacy_id = ANY($3)
           AND ai.state <> '生成中'
         ORDER BY a.legacy_id ASC
         "#,
     )
     .bind(uid)
-    .bind(&body.ids)
+    .bind(project_id)
+    .bind(ids)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(rows))
+    Ok(rows)
 }
 
-pub(crate) async fn post_legacy_polling_prompt_assets(
+pub(crate) async fn post_project_workbench_polling_image_assets(
     State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyPollingPromptAssetsBody>,
-) -> Result<Json<Vec<LegacyPollingPromptAssetsItem>>, ApiError> {
+    Json(body): Json<LegacyPollingImageAssetsBody>,
+) -> Result<Json<Vec<LegacyPollingImageAssetsItem>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.ids.is_empty() {
-        return Ok(Json(Vec::new()));
+    if !body.ids.is_empty() {
+        if body.ids.len() > 200 {
+            return Err(ApiError::BadRequest(
+                "ids must have at most 200 rows".into(),
+            ));
+        }
+        if body.ids.iter().any(|id| *id <= 0) {
+            return Err(ApiError::BadRequest("each ids[] must be positive".into()));
+        }
     }
-    if body.ids.len() > 200 {
-        return Err(ApiError::BadRequest(
-            "ids must have at most 200 rows".into(),
-        ));
-    }
-    if body.ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest("each ids[] must be positive".into()));
-    }
-
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let rows = run_polling_image_assets(pool, uid, project_id, &body.ids).await?;
+    Ok(Json(rows))
+}
+
+async fn run_polling_prompt_assets(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_id: Uuid,
+    ids: &[i32],
+) -> Result<Vec<LegacyPollingPromptAssetsItem>, ApiError> {
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
 
     let rows: Vec<LegacyPollingPromptAssetsItem> = sqlx::query_as(
         r#"
@@ -130,7 +136,8 @@ pub(crate) async fn post_legacy_polling_prompt_assets(
           LIMIT 1
         ) pj ON TRUE
         WHERE p.owner_user_id = $1
-          AND a.legacy_id = ANY($2)
+          AND p.id = $2
+          AND a.legacy_id = ANY($3)
           AND COALESCE(
             CASE pj.status
               WHEN 'queued' THEN '生成中'
@@ -146,10 +153,37 @@ pub(crate) async fn post_legacy_polling_prompt_assets(
         "#,
     )
     .bind(uid)
-    .bind(&body.ids)
+    .bind(project_id)
+    .bind(ids)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    Ok(rows)
+}
+
+pub(crate) async fn post_project_workbench_polling_prompt_assets(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<LegacyPollingPromptAssetsBody>,
+) -> Result<Json<Vec<LegacyPollingPromptAssetsItem>>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    if !body.ids.is_empty() {
+        if body.ids.len() > 200 {
+            return Err(ApiError::BadRequest(
+                "ids must have at most 200 rows".into(),
+            ));
+        }
+        if body.ids.iter().any(|id| *id <= 0) {
+            return Err(ApiError::BadRequest("each ids[] must be positive".into()));
+        }
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let rows = run_polling_prompt_assets(pool, uid, project_id, &body.ids).await?;
     Ok(Json(rows))
 }

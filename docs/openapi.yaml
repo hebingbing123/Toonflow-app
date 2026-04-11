@@ -2532,19 +2532,26 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/get-image:
+  /api/v1/projects/{project_id}/assets/workbench/image-bundle:
     post:
       tags: [assets]
-      summary: Legacy — load one asset image bundle by legacy asset id
+      summary: Workbench — load one asset image bundle by legacy asset id (project UUID)
       operationId: postAssetsGetImageV1
       description: |
-        Parity with old **`POST /api/assets/getImage`**.
-        Body **`assetsId`** is **`app_asset.legacy_id`** (must belong to current user). Response returns:
+        Parity with old **`POST /api/assets/getImage`**, scoped to caller-owned **`project_id`** (**`app_project.id`**, UUID).
+        Body **`assetsId`** is **`app_asset.legacy_id`** (must belong to that project). Response returns:
         - **`id`**: same legacy asset id
         - **`imageId`**: **`app_asset.metadata.imageId`** when set
         - **`tempAssets`**: image history rows from **`app_asset_image`** with legacy selection flag.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2571,7 +2578,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Asset legacy id not found for caller
+          description: Project or asset legacy id not found for caller
           content:
             application/json:
               schema:
@@ -2583,16 +2590,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/add-assets:
+  /api/v1/projects/{project_id}/assets/workbench/add-assets:
     post:
       tags: [assets]
-      summary: Legacy — create one project asset
+      summary: Workbench — create one project asset (by project UUID)
       operationId: postAssetsAddAssetsV1
       description: |
-        Parity with old **`POST /api/assets/addAssets`**.
-        Creates one asset under caller-owned **`projectId`**, persists **`name`**, **`describe`**, **`type`**, and writes optional **`remark`**/**`prompt`** into `metadata`.
+        Parity with old **`POST /api/assets/addAssets`**, under path **`project_id`** (**`app_project.id`**, UUID).
+        Creates one asset, persists **`name`**, **`describe`**, **`type`**, and writes optional **`remark`**/**`prompt`** into `metadata`.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2607,7 +2621,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/LegacyAssetsMutationResponse"
         "400":
-          description: Invalid projectId, type, name, or describe
+          description: Invalid type, name, or describe
           content:
             application/json:
               schema:
@@ -2619,7 +2633,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project legacy id not found for caller
+          description: Project UUID not found for caller
           content:
             application/json:
               schema:
@@ -2631,18 +2645,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/save-assets:
+  /api/v1/projects/{project_id}/assets/workbench/save-assets:
     post:
       tags: [assets]
-      summary: Legacy — save selected image and prompt for an asset
+      summary: Workbench — save selected image and prompt for an asset (by project UUID)
       operationId: postAssetsSaveAssetsV1
       description: |
-        Parity with old **`POST /api/assets/saveAssets`**.
+        Parity with old **`POST /api/assets/saveAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         - With **`base64`**, inserts a new `app_asset_image` history row (`state=已完成`) and sets metadata `imageId` to the new `legacy_image_id`.
         - Without **`base64`**, updates metadata `imageId` from **`imageId`**.
         - Optional **`prompt`** updates metadata `prompt` (empty/null clears).
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2657,7 +2678,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/LegacyAssetsMutationResponse"
         "400":
-          description: Invalid id, projectId, type, imageId, or base64
+          description: Invalid id, type, imageId, or base64
           content:
             application/json:
               schema:
@@ -2669,7 +2690,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Asset legacy id or project legacy id not found for caller
+          description: Project UUID or asset legacy id not found for caller
           content:
             application/json:
               schema:
@@ -2681,18 +2702,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/update-assets:
+  /api/v1/projects/{project_id}/assets/workbench/update-assets:
     post:
       tags: [assets]
-      summary: Legacy — update asset name/describe and optional prompt remark
+      summary: Workbench — update asset name/describe and optional prompt remark (by project UUID)
       operationId: postAssetsUpdateAssetsV1
       description: |
-        Parity with old **`POST /api/assets/updateAssets`**.
-        Updates one caller-owned legacy asset by **`id`**, mapping:
+        Parity with old **`POST /api/assets/updateAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Updates one legacy asset by **`id`**, mapping:
         - `describe` -> `description`
         - optional `prompt`/`remark` -> metadata `prompt`/`remark` (empty/null clears).
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2719,7 +2747,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Asset legacy id not found for caller
+          description: Project UUID or asset legacy id not found for caller
           content:
             application/json:
               schema:
@@ -2731,16 +2759,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/del-assets:
+  /api/v1/projects/{project_id}/assets/workbench/del-assets:
     post:
       tags: [assets]
-      summary: Legacy — delete one asset by legacy id
+      summary: Workbench — delete one asset by legacy id (by project UUID)
       operationId: postAssetsDelAssetsV1
       description: |
-        Parity with old **`POST /api/assets/delAssets`**.
-        Deletes one caller-owned asset by **`id`** (legacy id).
+        Parity with old **`POST /api/assets/delAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Deletes one asset by **`id`** (legacy id).
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2773,16 +2808,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/batch-delete:
+  /api/v1/projects/{project_id}/assets/workbench/batch-delete:
     post:
       tags: [assets]
-      summary: Legacy — batch delete assets by legacy ids
+      summary: Workbench — batch delete assets by legacy ids (by project UUID)
       operationId: postAssetsBatchDeleteV1
       description: |
-        Parity with old **`POST /api/assets/batchDelete`**.
-        Deletes caller-owned assets by legacy **`id[]`**.
+        Parity with old **`POST /api/assets/batchDelete`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Deletes assets by legacy **`id[]`**.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2815,16 +2857,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/del-image:
+  /api/v1/projects/{project_id}/assets/workbench/del-image:
     post:
       tags: [assets]
-      summary: Legacy — delete one image by legacy image id
+      summary: Workbench — delete one image by legacy image id (by project UUID)
       operationId: postAssetsDelImageV1
       description: |
-        Parity with old **`POST /api/assets/delImage`**.
+        Parity with old **`POST /api/assets/delImage`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         Clears matching metadata `imageId` from caller-owned assets and deletes matching `app_asset_image` rows by **`legacy_image_id`**.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2857,18 +2906,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/get-assets-api:
+  /api/v1/projects/{project_id}/assets/workbench/nested:
     post:
       tags: [assets]
-      summary: Legacy — paged parent assets with nested children
+      summary: Workbench — paged parent assets with nested children (by project UUID)
       operationId: postAssetsGetAssetsApiV1
       description: |
-        Parity with old **`POST /api/assets/getAssetsApi`**.
-        Returns parent assets (where legacy **`assetsId`** is null) under **`projectId`** and **`type`**,
+        Parity with old **`POST /api/assets/getAssetsApi`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Returns parent assets (where legacy **`assetsId`** is null) for **`type`**,
         with optional **`name`** fuzzy filter and classic **`page`**/**`limit`** pagination.
         Each parent row includes **`sonAssets`** (children whose **`assetsId`** equals the parent legacy id).
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2883,13 +2939,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/LegacyAssetsGetAssetsApiResponse"
         "400":
-          description: Invalid projectId, type, page, or limit
+          description: Invalid type, page, or limit
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project UUID not found for caller
           content:
             application/json:
               schema:
@@ -2901,18 +2963,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/get-material-data:
+  /api/v1/projects/{project_id}/assets/workbench/material-data:
     post:
       tags: [assets]
-      summary: Legacy — get clip assets and generated videos by project id
+      summary: Workbench — get clip assets and generated videos (by project UUID)
       operationId: postAssetsGetMaterialDataV1
       description: |
-        Parity with old **`POST /api/assets/getMaterialData`**.
+        Parity with old **`POST /api/assets/getMaterialData`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         Returns:
         - **`data`**: project **`clip`** assets with best-effort selected cover **`filePath`**
         - **`video`**: generated videos for the project (completed states only)
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2927,13 +2996,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/LegacyAssetsGetMaterialDataResponse"
         "400":
-          description: Invalid projectId
+          description: Malformed body (must be empty JSON object)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project UUID not found for caller
           content:
             application/json:
               schema:
@@ -2945,19 +3020,26 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/upload-clip:
+  /api/v1/projects/{project_id}/assets/workbench/upload-clip:
     post:
       tags: [assets]
-      summary: Legacy — upload one clip asset with inline base64
+      summary: Workbench — upload one clip asset with inline base64 (by project UUID)
       operationId: postAssetsUploadClipV1
       description: |
-        Parity with old **`POST /api/assets/uploadClip`**.
-        Inserts one **`clip`** asset and one selected image row in **`app_asset_image`** for the caller-owned project.
+        Parity with old **`POST /api/assets/uploadClip`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Inserts one **`clip`** asset and one selected image row in **`app_asset_image`**.
         - **`base64Data`** accepts either full data URI (`data:*;base64,...`) or raw base64.
         - Raw base64 is normalized to **`data:application/octet-stream;base64,...`** before persistence.
-        - The created asset metadata stores **`imageId`** so legacy **`/assets/get-image`** selection semantics stay aligned.
+        - The created asset metadata stores **`imageId`** so workbench **`image-bundle`** selection semantics stay aligned.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -2972,7 +3054,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/LegacyAssetsUploadClipResponse"
         "400":
-          description: Invalid projectId, type, name, or base64Data
+          description: Invalid type, name, or base64Data
           content:
             application/json:
               schema:
@@ -2984,7 +3066,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project legacy id not found for caller
+          description: Project UUID not found for caller
           content:
             application/json:
               schema:
@@ -2996,16 +3078,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/batch-generation-data:
+  /api/v1/projects/{project_id}/assets/workbench/batch-generation-data:
     post:
       tags: [assets]
-      summary: Legacy — paged asset listing for batch generation picker
+      summary: Workbench — paged asset listing for batch generation picker (by project UUID)
       operationId: postAssetsBatchGenerationDataV1
       description: |
-        Parity with old **`POST /api/assets/batchGenerationData`**.
-        Filters assets by **`projectId`**, **`type`**, and optional name fuzzy match; returns paged rows with total.
+        Parity with old **`POST /api/assets/batchGenerationData`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
+        Filters assets by **`type`** and optional name fuzzy match; returns paged rows with total.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -3031,6 +3120,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project UUID not found for caller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
@@ -3038,18 +3133,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/polling-image-assets:
+  /api/v1/projects/{project_id}/assets/workbench/polling-image-assets:
     post:
       tags: [assets]
-      summary: Legacy — poll selected image completion by asset ids
+      summary: Workbench — poll selected image completion by asset ids (by project UUID)
       operationId: postAssetsPollingImageAssetsV1
       description: |
-        Parity with old **`POST /api/assets/pollingImageAssets`**.
+        Parity with old **`POST /api/assets/pollingImageAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). For each id, the server reads the selected
         cover image from **`app_asset.metadata.imageId`** and joins to **`app_asset_image.legacy_image_id`**.
         Only rows whose selected image state is **not** **`生成中`** are returned.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -3077,6 +3179,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project UUID not found for caller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
@@ -3084,18 +3192,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/assets/polling-prompt-assets:
+  /api/v1/projects/{project_id}/assets/workbench/polling-prompt-assets:
     post:
       tags: [assets]
-      summary: Legacy — poll prompt-generate completion by asset ids
+      summary: Workbench — poll prompt-generate completion by asset ids (by project UUID)
       operationId: postAssetsPollingPromptAssetsV1
       description: |
-        Parity with old **`POST /api/assets/pollingPromptAssets`**.
+        Parity with old **`POST /api/assets/pollingPromptAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). The server derives each asset's
         **`promptState`** from latest related polish jobs (`asset.polish.prompt` / `asset.polish.batch`);
         rows still **`生成中`** are filtered out.
       security:
         - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -3119,6 +3234,12 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project UUID not found for caller
           content:
             application/json:
               schema:
@@ -10860,11 +10981,8 @@ components:
     LegacyAssetsGetAssetsApiBody:
       type: object
       additionalProperties: false
-      required: [projectId, type]
+      required: [type]
       properties:
-        projectId:
-          type: integer
-          format: int32
         type:
           type: string
           enum: [role, scene, tool]
@@ -11015,7 +11133,7 @@ components:
     LegacyAssetsAddAssetsBody:
       type: object
       additionalProperties: false
-      required: [name, describe, type, projectId]
+      required: [name, describe, type]
       properties:
         name:
           type: string
@@ -11026,10 +11144,6 @@ components:
         type:
           type: string
           enum: [role, scene, tool]
-        projectId:
-          type: integer
-          format: int32
-          minimum: 1
         remark:
           type: string
           nullable: true
@@ -11062,13 +11176,9 @@ components:
     LegacyAssetsSaveAssetsBody:
       type: object
       additionalProperties: false
-      required: [id, projectId, type]
+      required: [id, type]
       properties:
         id:
-          type: integer
-          format: int32
-          minimum: 1
-        projectId:
           type: integer
           format: int32
           minimum: 1
@@ -11115,20 +11225,13 @@ components:
     LegacyAssetsGetMaterialDataBody:
       type: object
       additionalProperties: false
-      required: [projectId]
-      properties:
-        projectId:
-          type: integer
-          format: int32
+      description: Empty JSON object `{}` (project is taken from path).
 
     LegacyAssetsUploadClipBody:
       type: object
       additionalProperties: false
-      required: [projectId, base64Data, name]
+      required: [base64Data, name]
       properties:
-        projectId:
-          type: integer
-          format: int32
         base64Data:
           type: string
           minLength: 1
@@ -11200,11 +11303,8 @@ components:
     LegacyAssetsBatchGenerationDataBody:
       type: object
       additionalProperties: false
-      required: [projectId, type, page, limit]
+      required: [type, page, limit]
       properties:
-        projectId:
-          type: integer
-          format: int32
         type:
           type: string
         name:

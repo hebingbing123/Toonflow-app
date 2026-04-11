@@ -2,6 +2,9 @@ use super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
 
+/// Fixed UUID for smoke routes that require a project path segment (may 404/503 without DB).
+const WB_PROJECT: &str = "00000000-0000-0000-0000-000000000001";
+
 #[tokio::test]
 async fn skill_content_ok_with_jwt_for_known_file() {
     let token = test_jwt(Uuid::nil());
@@ -45,24 +48,17 @@ async fn project_assets_list_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn assets_get_assets_api_unauthorized_without_bearer() {
-    let (status, v) = post_json(
-        "/api/v1/assets/get-assets-api",
-        r#"{"projectId":1,"type":"role"}"#,
-    )
-    .await;
+    let uri = format!("/api/v1/projects/{WB_PROJECT}/assets/workbench/nested");
+    let (status, v) = post_json(&uri, r#"{"type":"role"}"#).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn assets_get_assets_api_rejects_non_positive_project_id_with_jwt() {
+async fn assets_workbench_nested_rejects_invalid_asset_type_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/assets/get-assets-api",
-        &token,
-        r#"{"projectId":0,"type":"role"}"#,
-    )
-    .await;
+    let uri = format!("/api/v1/projects/{WB_PROJECT}/assets/workbench/nested");
+    let (status, v) = post_json_bearer(&uri, &token, r#"{"type":"invalid"}"#).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 }
@@ -70,12 +66,9 @@ async fn assets_get_assets_api_rejects_non_positive_project_id_with_jwt() {
 #[tokio::test]
 async fn assets_get_assets_api_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/assets/get-assets-api",
-        &token,
-        r#"{"projectId":1,"type":"role","page":1,"limit":10}"#,
-    )
-    .await;
+    let uri = format!("/api/v1/projects/{WB_PROJECT}/assets/workbench/nested");
+    let (status, v) =
+        post_json_bearer(&uri, &token, r#"{"type":"role","page":1,"limit":10}"#).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -83,8 +76,8 @@ async fn assets_get_assets_api_requires_database_with_jwt() {
 #[tokio::test]
 async fn assets_add_assets_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/assets/add-assets",
-        r#"{"name":"hero","describe":"d","type":"role","projectId":1}"#,
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/add-assets",
+        r#"{"name":"hero","describe":"d","type":"role"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -95,9 +88,9 @@ async fn assets_add_assets_unauthorized_without_bearer() {
 async fn assets_add_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/add-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/add-assets",
         &token,
-        r#"{"name":"hero","describe":"d","type":"role","projectId":1}"#,
+        r#"{"name":"hero","describe":"d","type":"role"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -108,9 +101,9 @@ async fn assets_add_assets_requires_database_with_jwt() {
 async fn assets_add_assets_rejects_invalid_type_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/add-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/add-assets",
         &token,
-        r#"{"name":"hero","describe":"d","type":"clip","projectId":1}"#,
+        r#"{"name":"hero","describe":"d","type":"clip"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -120,8 +113,8 @@ async fn assets_add_assets_rejects_invalid_type_with_jwt() {
 #[tokio::test]
 async fn assets_save_assets_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/assets/save-assets",
-        r#"{"id":1,"projectId":1,"type":"role"}"#,
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/save-assets",
+        r#"{"id":1,"type":"role"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -132,9 +125,9 @@ async fn assets_save_assets_unauthorized_without_bearer() {
 async fn assets_save_assets_rejects_invalid_type_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/save-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/save-assets",
         &token,
-        r#"{"id":1,"projectId":1,"type":"clip"}"#,
+        r#"{"id":1,"type":"clip"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -145,9 +138,9 @@ async fn assets_save_assets_rejects_invalid_type_with_jwt() {
 async fn assets_save_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/save-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/save-assets",
         &token,
-        r#"{"id":1,"projectId":1,"type":"role","imageId":1}"#,
+        r#"{"id":1,"type":"role","imageId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -157,7 +150,7 @@ async fn assets_save_assets_requires_database_with_jwt() {
 #[tokio::test]
 async fn assets_update_assets_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/assets/update-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/update-assets",
         r#"{"id":1,"name":"n","describe":"d"}"#,
     )
     .await;
@@ -169,7 +162,7 @@ async fn assets_update_assets_unauthorized_without_bearer() {
 async fn assets_update_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/update-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/update-assets",
         &token,
         r#"{"id":1,"name":"n","describe":"d"}"#,
     )
@@ -180,7 +173,11 @@ async fn assets_update_assets_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn assets_del_assets_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/del-assets", r#"{"id":1}"#).await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/del-assets",
+        r#"{"id":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -188,14 +185,23 @@ async fn assets_del_assets_unauthorized_without_bearer() {
 #[tokio::test]
 async fn assets_del_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/assets/del-assets", &token, r#"{"id":1}"#).await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/del-assets",
+        &token,
+        r#"{"id":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
 async fn assets_batch_delete_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/batch-delete", r#"{"id":[1]}"#).await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/batch-delete",
+        r#"{"id":[1]}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -203,14 +209,23 @@ async fn assets_batch_delete_unauthorized_without_bearer() {
 #[tokio::test]
 async fn assets_batch_delete_rejects_empty_ids_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/assets/batch-delete", &token, r#"{"id":[]}"#).await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/batch-delete",
+        &token,
+        r#"{"id":[]}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 }
 
 #[tokio::test]
 async fn assets_del_image_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/del-image", r#"{"id":1}"#).await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/del-image",
+        r#"{"id":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -218,14 +233,23 @@ async fn assets_del_image_unauthorized_without_bearer() {
 #[tokio::test]
 async fn assets_del_image_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/assets/del-image", &token, r#"{"id":1}"#).await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/del-image",
+        &token,
+        r#"{"id":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
 async fn assets_get_image_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/get-image", r#"{"assetsId":1}"#).await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/image-bundle",
+        r#"{"assetsId":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -233,8 +257,12 @@ async fn assets_get_image_unauthorized_without_bearer() {
 #[tokio::test]
 async fn assets_get_image_rejects_non_positive_assets_id_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/assets/get-image", &token, r#"{"assetsId":0}"#).await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/image-bundle",
+        &token,
+        r#"{"assetsId":0}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 }
@@ -242,8 +270,12 @@ async fn assets_get_image_rejects_non_positive_assets_id_with_jwt() {
 #[tokio::test]
 async fn assets_get_image_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/assets/get-image", &token, r#"{"assetsId":1}"#).await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/image-bundle",
+        &token,
+        r#"{"assetsId":1}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -251,8 +283,8 @@ async fn assets_get_image_requires_database_with_jwt() {
 #[tokio::test]
 async fn assets_upload_clip_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/assets/upload-clip",
-        r#"{"projectId":1,"name":"smoke clip","base64Data":"data:image/png;base64,AA=="}"#,
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
+        r#"{"name":"smoke clip","base64Data":"data:image/png;base64,AA=="}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -260,25 +292,12 @@ async fn assets_upload_clip_unauthorized_without_bearer() {
 }
 
 #[tokio::test]
-async fn assets_upload_clip_rejects_non_positive_project_id_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
-        &token,
-        r#"{"projectId":0,"name":"smoke clip","base64Data":"data:image/png;base64,AA=="}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
 async fn assets_upload_clip_rejects_invalid_base64_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
         &token,
-        r#"{"projectId":1,"name":"smoke clip","base64Data":"data:image/png;base64,not-base64"}"#,
+        r#"{"name":"smoke clip","base64Data":"data:image/png;base64,not-base64"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -289,9 +308,9 @@ async fn assets_upload_clip_rejects_invalid_base64_with_jwt() {
 async fn assets_upload_clip_rejects_empty_name_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
         &token,
-        r#"{"projectId":1,"name":" ","base64Data":"data:image/png;base64,AA=="}"#,
+        r#"{"name":" ","base64Data":"data:image/png;base64,AA=="}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -302,9 +321,9 @@ async fn assets_upload_clip_rejects_empty_name_with_jwt() {
 async fn assets_upload_clip_rejects_non_clip_type_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
         &token,
-        r#"{"projectId":1,"name":"smoke clip","type":"role","base64Data":"data:image/png;base64,AA=="}"#,
+        r#"{"name":"smoke clip","type":"role","base64Data":"data:image/png;base64,AA=="}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -315,9 +334,9 @@ async fn assets_upload_clip_rejects_non_clip_type_with_jwt() {
 async fn assets_upload_clip_accepts_raw_base64_before_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
         &token,
-        r#"{"projectId":1,"name":"smoke clip","base64Data":"AA=="}"#,
+        r#"{"name":"smoke clip","base64Data":"AA=="}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -328,9 +347,9 @@ async fn assets_upload_clip_accepts_raw_base64_before_database_with_jwt() {
 async fn assets_upload_clip_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/upload-clip",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/upload-clip",
         &token,
-        r#"{"projectId":1,"name":"smoke clip","base64Data":"data:image/png;base64,AA=="}"#,
+        r#"{"name":"smoke clip","base64Data":"data:image/png;base64,AA=="}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -339,31 +358,22 @@ async fn assets_upload_clip_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn assets_get_material_data_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/get-material-data", r#"{"projectId":1}"#).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn assets_get_material_data_rejects_non_positive_project_id_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/assets/get-material-data",
-        &token,
-        r#"{"projectId":0}"#,
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/material-data",
+        r#"{}"#,
     )
     .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
 async fn assets_get_material_data_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/get-material-data",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/material-data",
         &token,
-        r#"{"projectId":1}"#,
+        r#"{}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -373,8 +383,8 @@ async fn assets_get_material_data_requires_database_with_jwt() {
 #[tokio::test]
 async fn assets_batch_generation_data_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/assets/batch-generation-data",
-        r#"{"projectId":1,"type":"role","page":1,"limit":10}"#,
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/batch-generation-data",
+        r#"{"type":"role","page":1,"limit":10}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -382,12 +392,12 @@ async fn assets_batch_generation_data_unauthorized_without_bearer() {
 }
 
 #[tokio::test]
-async fn assets_batch_generation_data_rejects_non_positive_project_id_with_jwt() {
+async fn assets_batch_generation_data_rejects_invalid_page_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/batch-generation-data",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/batch-generation-data",
         &token,
-        r#"{"projectId":0,"type":"role","page":1,"limit":10}"#,
+        r#"{"type":"role","page":0,"limit":10}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -398,9 +408,9 @@ async fn assets_batch_generation_data_rejects_non_positive_project_id_with_jwt()
 async fn assets_batch_generation_data_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/batch-generation-data",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/batch-generation-data",
         &token,
-        r#"{"projectId":1,"type":"role","page":1,"limit":10}"#,
+        r#"{"type":"role","page":1,"limit":10}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -409,7 +419,7 @@ async fn assets_batch_generation_data_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn assets_polling_image_assets_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/polling-image-assets", r#"{"ids":[1]}"#).await;
+    let (status, v) = post_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-image-assets", r#"{"ids":[1]}"#).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -418,7 +428,7 @@ async fn assets_polling_image_assets_unauthorized_without_bearer() {
 async fn assets_polling_image_assets_rejects_non_positive_ids_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/polling-image-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-image-assets",
         &token,
         r#"{"ids":[0]}"#,
     )
@@ -431,7 +441,7 @@ async fn assets_polling_image_assets_rejects_non_positive_ids_with_jwt() {
 async fn assets_polling_image_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/polling-image-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-image-assets",
         &token,
         r#"{"ids":[1]}"#,
     )
@@ -442,7 +452,7 @@ async fn assets_polling_image_assets_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn assets_polling_prompt_assets_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/assets/polling-prompt-assets", r#"{"ids":[1]}"#).await;
+    let (status, v) = post_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-prompt-assets", r#"{"ids":[1]}"#).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -451,7 +461,7 @@ async fn assets_polling_prompt_assets_unauthorized_without_bearer() {
 async fn assets_polling_prompt_assets_rejects_non_positive_ids_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/polling-prompt-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-prompt-assets",
         &token,
         r#"{"ids":[0]}"#,
     )
@@ -464,7 +474,7 @@ async fn assets_polling_prompt_assets_rejects_non_positive_ids_with_jwt() {
 async fn assets_polling_prompt_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/assets/polling-prompt-assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/workbench/polling-prompt-assets",
         &token,
         r#"{"ids":[1]}"#,
     )

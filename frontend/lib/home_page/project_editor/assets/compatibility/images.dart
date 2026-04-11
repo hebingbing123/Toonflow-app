@@ -231,13 +231,14 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final r = await postLegacyAssetsGetImage(
                           token,
+                          p.id,
                           first.legacyId,
                         );
                         if (!ctx.mounted) return;
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/get-image：tempAssets=${r.tempAssets.length} '
+                              'POST …/workbench/image-bundle：tempAssets=${r.tempAssets.length} '
                               'imageId=${r.imageId ?? "null"}',
                             ),
                           ),
@@ -268,7 +269,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final ts = DateTime.now().millisecondsSinceEpoch;
                         final r = await postLegacyAssetsUploadClip(
                           token,
-                          projectLegacyId: p.legacyId,
+                          projectId: p.id,
                           base64Data: 'data:image/png;base64,AA==',
                           name: 'probe clip $ts',
                         );
@@ -278,7 +279,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/upload-clip：${r.message}',
+                              'POST …/workbench/upload-clip：${r.message}',
                             ),
                           ),
                         );
@@ -307,14 +308,14 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final r = await postLegacyAssetsGetMaterialData(
                           token,
-                          p.legacyId,
+                          p.id,
                         );
                         if (!ctx.mounted) return;
                         final firstClip = r.data.isEmpty ? null : r.data.first;
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/get-material-data：'
+                              'POST …/workbench/material-data：'
                               'clips=${r.data.length} videos=${r.video.length}'
                               '${firstClip == null ? "" : " first=${firstClip.name}"}',
                             ),
@@ -345,7 +346,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final r = await postLegacyAssetsBatchGenerationData(
                           token,
-                          projectLegacyId: p.legacyId,
+                          projectId: p.id,
                           assetType: 'role',
                           page: 1,
                           limit: 3,
@@ -355,7 +356,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/batch-generation-data：'
+                              'POST …/workbench/batch-generation-data：'
                               'rows=${r.data.length}/${r.total}'
                               '${first == null ? "" : " first=${first.name}(${first.assetType})"}',
                             ),
@@ -386,7 +387,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final r = await postLegacyAssetsGetAssetsApi(
                           token,
-                          projectLegacyId: p.legacyId,
+                          projectId: p.id,
                           assetType: 'role',
                           page: 1,
                           limit: 3,
@@ -396,7 +397,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/get-assets-api：'
+                              'POST …/workbench/nested：'
                               'parents=${r.data.length}/${r.total}'
                               '${first == null ? "" : " firstChildren=${first.sonAssets.length}"}',
                             ),
@@ -430,6 +431,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final rows = await postLegacyAssetsPollingImageAssets(
                           token,
+                          p.id,
                           <int>[first.legacyId],
                         );
                         if (!ctx.mounted) return;
@@ -438,8 +440,8 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                           SnackBar(
                             content: Text(
                               one == null
-                                  ? 'POST …/assets/polling-image-assets：0 rows'
-                                  : 'POST …/assets/polling-image-assets：'
+                                  ? 'POST …/workbench/polling-image-assets：0 rows'
+                                  : 'POST …/workbench/polling-image-assets：'
                                         'state=${one.state ?? "-"} '
                                         'filePath=${one.filePath ?? "-"}',
                             ),
@@ -473,6 +475,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       try {
                         final rows = await postLegacyAssetsPollingPromptAssets(
                           token,
+                          p.id,
                           <int>[first.legacyId],
                         );
                         if (!ctx.mounted) return;
@@ -481,8 +484,8 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                           SnackBar(
                             content: Text(
                               one == null
-                                  ? 'POST …/assets/polling-prompt-assets：0 rows'
-                                  : 'POST …/assets/polling-prompt-assets：'
+                                  ? 'POST …/workbench/polling-prompt-assets：0 rows'
+                                  : 'POST …/workbench/polling-prompt-assets：'
                                         'promptState=${one.promptState} '
                                         'type=${one.assetType}',
                             ),
