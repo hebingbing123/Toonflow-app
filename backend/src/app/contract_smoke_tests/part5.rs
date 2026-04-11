@@ -1,6 +1,8 @@
 use super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
+
+#[tokio::test]
 async fn project_query_director_manual_unauthorized_without_bearer() {
     let (status, v) = post_json("/api/v1/project/query-director-manual", "{}").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);

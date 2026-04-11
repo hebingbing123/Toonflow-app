@@ -1,6 +1,8 @@
 use super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
+
+#[tokio::test]
 async fn corner_scape_assets_accepts_blank_types_entries_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(

@@ -219,7 +219,7 @@ pub async fn create_queue(pool: PgPool) -> anyhow::Result<Box<dyn Queue>> {
 }
 
 #[cfg(feature = "redis")]
-async fn create_redis_queue(redis_url: &str, pool: PgPool) -> anyhow::Result<Box<dyn Queue>> {
+async fn create_redis_queue(_redis_url: &str, _pool: PgPool) -> anyhow::Result<Box<dyn Queue>> {
     // Redis implementation would go here when redis feature is enabled
     // For now, return error to trigger fallback
     anyhow::bail!("Redis feature not enabled in this build")

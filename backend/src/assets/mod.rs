@@ -1,12 +1,16 @@
 //! Project-scoped **`app_asset`** HTTP API and **`app_script_asset`** links.
 //!
 //! Submodules:
-//! - [`models`] – request/response types
-//! - [`legacy`] – legacy POST operations (add/update/save/del/get-image/upload-clip/material/polling)
-//! - [`crud`]   – REST CRUD for assets, images, corner-scape, script-asset links
+//! - [`models`]       – request/response types
+//! - [`legacy`]       – legacy POST write operations (add/update/save/del)
+//! - [`legacy_query`] – legacy POST read/query operations (get-image/upload-clip/material/polling)
+//! - [`crud`]         – REST CRUD for assets, corner-scape, script-asset links
+//! - [`crud_images`]  – REST CRUD for asset images
 
 mod crud;
+mod crud_images;
 mod legacy;
+mod legacy_query;
 pub mod models;
 
 pub use crud::{next_asset_image_sort_index, resolve_asset_id_for_job};
@@ -233,7 +237,9 @@ pub(super) async fn resolve_owned_asset_metadata(
 
 pub fn router() -> Router<AppState> {
     use crud::*;
+    use crud_images::*;
     use legacy::*;
+    use legacy_query::*;
 
     Router::new()
         .route("/api/v1/assets/add-assets", post(post_legacy_add_assets))

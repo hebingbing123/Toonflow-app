@@ -1,6 +1,8 @@
 use super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
+
+#[tokio::test]
 async fn storyboard_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = delete_empty_bearer("/api/v1/storyboards/legacy/1", &token).await;

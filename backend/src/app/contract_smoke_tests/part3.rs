@@ -1,6 +1,8 @@
 use super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
+
+#[tokio::test]
 async fn skill_content_ok_with_jwt_for_known_file() {
     let token = test_jwt(Uuid::nil());
     let uri = "/api/v1/skills/content?path=script_execution_script.md";

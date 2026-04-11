@@ -7,6 +7,8 @@ use axum::http::Method;
 use axum::http::Request;
 use axum::http::StatusCode;
 use uuid::Uuid;
+
+#[tokio::test]
 async fn projects_create_unauthorized_without_bearer() {
     let (status, v) = post_json("/api/v1/projects", "{}").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
