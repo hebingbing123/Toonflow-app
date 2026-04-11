@@ -6,12 +6,12 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{VideoItem, WorkbenchGenerateVideoBody};
+use super::super::{VideoItem, WorkbenchGenerateVideoBody};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-pub(super) async fn post_workbench_generate_video(
+pub(in crate::production_legacy) async fn post_workbench_generate_video(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
@@ -54,14 +54,14 @@ pub(super) async fn post_workbench_generate_video(
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct VideoListResponse {
+pub(in crate::production_legacy) struct VideoListResponse {
     videos: Vec<VideoItem>,
     total: i64,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct VideoListBody {
+pub(in crate::production_legacy) struct VideoListBody {
     project_id: i32,
     #[serde(default)]
     track_id: Option<i32>,
@@ -71,7 +71,7 @@ pub(super) struct VideoListBody {
     offset: Option<i64>,
 }
 
-pub(super) async fn post_workbench_get_video_list(
+pub(in crate::production_legacy) async fn post_workbench_get_video_list(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VideoListBody>,

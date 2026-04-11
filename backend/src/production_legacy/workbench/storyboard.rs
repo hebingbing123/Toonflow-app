@@ -5,14 +5,14 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
+use super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct AddStoryboardBody {
+pub(in crate::production_legacy) struct AddStoryboardBody {
     project_id: i32,
     script_id: i32,
     prompt: String,
@@ -22,12 +22,12 @@ pub(super) struct AddStoryboardBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct AddStoryboardResponse {
+pub(in crate::production_legacy) struct AddStoryboardResponse {
     storyboard_id: i32,
     message: &'static str,
 }
 
-pub(super) async fn post_storyboard_add(
+pub(in crate::production_legacy) async fn post_storyboard_add(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddStoryboardBody>,
@@ -117,7 +117,7 @@ pub(super) async fn post_storyboard_add(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct BatchAddInfoBody {
+pub(in crate::production_legacy) struct BatchAddInfoBody {
     project_id: i32,
     script_id: i32,
     storyboards: Vec<StoryboardInfoInput>,
@@ -125,7 +125,7 @@ pub(super) struct BatchAddInfoBody {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct StoryboardInfoInput {
+pub(in crate::production_legacy) struct StoryboardInfoInput {
     prompt: String,
     #[serde(default)]
     duration: Option<i32>,
@@ -133,12 +133,12 @@ pub(super) struct StoryboardInfoInput {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct BatchAddInfoResponse {
+pub(in crate::production_legacy) struct BatchAddInfoResponse {
     added: usize,
     storyboard_ids: Vec<i32>,
 }
 
-pub(super) async fn post_storyboard_batch_add_info(
+pub(in crate::production_legacy) async fn post_storyboard_batch_add_info(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchAddInfoBody>,
@@ -243,11 +243,11 @@ pub(super) async fn post_storyboard_batch_add_info(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct GetStoryboardDataBody {
+pub(in crate::production_legacy) struct GetStoryboardDataBody {
     storyboard_id: i32,
 }
 
-pub(super) async fn post_storyboard_get_data(
+pub(in crate::production_legacy) async fn post_storyboard_get_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GetStoryboardDataBody>,
@@ -295,7 +295,7 @@ pub(super) async fn post_storyboard_get_data(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct EditStoryboardInfoBody {
+pub(in crate::production_legacy) struct EditStoryboardInfoBody {
     storyboard_id: i32,
     prompt: String,
     #[serde(default)]
@@ -304,12 +304,12 @@ pub(super) struct EditStoryboardInfoBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct EditStoryboardInfoResponse {
+pub(in crate::production_legacy) struct EditStoryboardInfoResponse {
     storyboard_id: i32,
     message: &'static str,
 }
 
-pub(super) async fn post_storyboard_edit_info(
+pub(in crate::production_legacy) async fn post_storyboard_edit_info(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EditStoryboardInfoBody>,
@@ -360,18 +360,18 @@ pub(super) async fn post_storyboard_edit_info(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct RemoveFrameBody {
+pub(in crate::production_legacy) struct RemoveFrameBody {
     storyboard_id: i32,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct RemoveFrameResponse {
+pub(in crate::production_legacy) struct RemoveFrameResponse {
     storyboard_id: i32,
     message: &'static str,
 }
 
-pub(super) async fn post_storyboard_remove_frame(
+pub(in crate::production_legacy) async fn post_storyboard_remove_frame(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<RemoveFrameBody>,
@@ -417,20 +417,20 @@ pub(super) async fn post_storyboard_remove_frame(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct UpdateStoryboardUrlBody {
+pub(in crate::production_legacy) struct UpdateStoryboardUrlBody {
     storyboard_id: i32,
     image_url: String,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct UpdateStoryboardUrlResponse {
+pub(in crate::production_legacy) struct UpdateStoryboardUrlResponse {
     storyboard_id: i32,
     image_url: String,
     message: &'static str,
 }
 
-pub(super) async fn post_storyboard_update_url(
+pub(in crate::production_legacy) async fn post_storyboard_update_url(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateStoryboardUrlBody>,
@@ -481,12 +481,12 @@ pub(super) async fn post_storyboard_update_url(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct GetStoryboardDataByProjectBody {
+pub(in crate::production_legacy) struct GetStoryboardDataByProjectBody {
     project_id: i32,
     script_id: i32,
 }
 
-pub(super) async fn post_get_storyboard_data(
+pub(in crate::production_legacy) async fn post_get_storyboard_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GetStoryboardDataByProjectBody>,
@@ -538,19 +538,19 @@ pub(super) async fn post_get_storyboard_data(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct DownPreviewImageBody {
+pub(in crate::production_legacy) struct DownPreviewImageBody {
     storyboard_id: i32,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct DownPreviewImageResponse {
+pub(in crate::production_legacy) struct DownPreviewImageResponse {
     storyboard_id: i32,
     preview_url: Option<String>,
     message: &'static str,
 }
 
-pub(super) async fn post_storyboard_down_preview_image(
+pub(in crate::production_legacy) async fn post_storyboard_down_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DownPreviewImageBody>,
@@ -596,19 +596,19 @@ pub(super) async fn post_storyboard_down_preview_image(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct PreviewImageBody {
+pub(in crate::production_legacy) struct PreviewImageBody {
     storyboard_id: i32,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct PreviewImageResponse {
+pub(in crate::production_legacy) struct PreviewImageResponse {
     storyboard_id: i32,
     image_url: Option<String>,
     prompt: Option<String>,
 }
 
-pub(super) async fn post_storyboard_preview_image(
+pub(in crate::production_legacy) async fn post_storyboard_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<PreviewImageBody>,

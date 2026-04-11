@@ -9,27 +9,9 @@ use sqlx::FromRow;
 
 use crate::state::AppState;
 
-#[path = "production_legacy/workbench_assets.rs"]
-mod workbench_assets;
-#[path = "production_legacy/workbench_edit_image.rs"]
-mod workbench_edit_image;
-#[path = "production_legacy/workbench_flow.rs"]
-mod workbench_flow;
-#[path = "production_legacy/workbench_meta.rs"]
-mod workbench_meta;
-#[path = "production_legacy/workbench_storyboard.rs"]
-mod workbench_storyboard;
-#[path = "production_legacy/workbench_storyboard_ops.rs"]
-mod workbench_storyboard_ops;
-#[path = "production_legacy/workbench_track.rs"]
-mod workbench_track;
-#[path = "production_legacy/workbench_video.rs"]
-mod workbench_video;
+mod workbench;
 
-pub(crate) use workbench_flow::{load_owned_production_flow_json, resolve_owned_production_scope};
-pub(crate) use workbench_storyboard_ops::{
-    ProductionGetProductionDataResponse, ProductionStoryboardItem,
-};
+pub(crate) use workbench::flow::load_owned_production_flow_json;
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
@@ -79,143 +61,143 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route(
             "/api/v1/production/get-production-data",
-            post(workbench_storyboard_ops::post_get_production_data),
+            post(workbench::storyboard_ops::post_get_production_data),
         )
         .route(
             "/api/v1/production/get-flow-data",
-            post(workbench_flow::post_get_flow_data),
+            post(workbench::flow::post_get_flow_data),
         )
         .route(
             "/api/v1/production/save-flow-data",
-            post(workbench_flow::post_save_flow_data),
+            post(workbench::flow::post_save_flow_data),
         )
         .route(
             "/api/v1/production/workbench/generate-video",
-            post(workbench_video::post_workbench_generate_video),
+            post(workbench::video::post_workbench_generate_video),
         )
         .route(
             "/api/v1/production/storyboard/polling-image",
-            post(workbench_storyboard_ops::post_storyboard_polling_image),
+            post(workbench::storyboard_ops::post_storyboard_polling_image),
         )
         .route(
             "/api/v1/production/export-image",
-            post(workbench_storyboard_ops::post_export_image),
+            post(workbench::storyboard_ops::post_export_image),
         )
         .route(
             "/api/v1/production/storyboard/batch-generate-image",
-            post(workbench_storyboard_ops::post_storyboard_batch_generate_image),
+            post(workbench::storyboard_ops::post_storyboard_batch_generate_image),
         )
         .route(
             "/api/v1/production/workbench/get-video-list",
-            post(workbench_video::post_workbench_get_video_list),
+            post(workbench::video::post_workbench_get_video_list),
         )
         .route(
             "/api/v1/production/workbench/add-track",
-            post(workbench_track::post_workbench_add_track),
+            post(workbench::track::post_workbench_add_track),
         )
         .route(
             "/api/v1/production/workbench/delete-track",
-            post(workbench_track::post_workbench_delete_track),
+            post(workbench::track::post_workbench_delete_track),
         )
         .route(
             "/api/v1/production/workbench/delete-video",
-            post(workbench_track::post_workbench_delete_video),
+            post(workbench::track::post_workbench_delete_video),
         )
         .route(
             "/api/v1/production/workbench/select-video",
-            post(workbench_track::post_workbench_select_video),
+            post(workbench::track::post_workbench_select_video),
         )
         .route(
             "/api/v1/production/assets/batch-generate-assets-image",
-            post(workbench_assets::post_assets_batch_generate_image),
+            post(workbench::assets::post_assets_batch_generate_image),
         )
         .route(
             "/api/v1/production/assets/delete-assets-derivative",
-            post(workbench_assets::post_assets_delete_derivative),
+            post(workbench::assets::post_assets_delete_derivative),
         )
         .route(
             "/api/v1/production/assets/get-assets-data",
-            post(workbench_assets::post_assets_get_data),
+            post(workbench::assets::post_assets_get_data),
         )
         .route(
             "/api/v1/production/assets/polling-image",
-            post(workbench_assets::post_assets_polling_image),
+            post(workbench::assets::post_assets_polling_image),
         )
         .route(
             "/api/v1/production/assets/update-assets-url",
-            post(workbench_assets::post_assets_update_url),
+            post(workbench::assets::post_assets_update_url),
         )
         .route(
             "/api/v1/production/edit-image/get-image-flow",
-            post(workbench_edit_image::post_edit_image_get_image_flow),
+            post(workbench::edit_image::post_edit_image_get_image_flow),
         )
         .route(
             "/api/v1/production/edit-image/get-image-default-model",
-            post(workbench_edit_image::post_edit_image_get_image_default_model),
+            post(workbench::edit_image::post_edit_image_get_image_default_model),
         )
         .route(
             "/api/v1/production/edit-image/save-image-flow",
-            post(workbench_edit_image::post_edit_image_save_image_flow),
+            post(workbench::edit_image::post_edit_image_save_image_flow),
         )
         .route(
             "/api/v1/production/edit-image/update-image-flow",
-            post(workbench_edit_image::post_edit_image_update_image_flow),
+            post(workbench::edit_image::post_edit_image_update_image_flow),
         )
         .route(
             "/api/v1/production/edit-image/generate-flow-image",
-            post(workbench_edit_image::post_edit_image_generate_flow_image),
+            post(workbench::edit_image::post_edit_image_generate_flow_image),
         )
         .route(
             "/api/v1/production/edit-image/upload-image",
-            post(workbench_edit_image::post_edit_image_upload_image),
+            post(workbench::edit_image::post_edit_image_upload_image),
         )
         .route(
             "/api/v1/production/get-storyboard-data",
-            post(workbench_storyboard::post_get_storyboard_data),
+            post(workbench::storyboard::post_get_storyboard_data),
         )
         .route(
             "/api/v1/production/storyboard/add",
-            post(workbench_storyboard::post_storyboard_add),
+            post(workbench::storyboard::post_storyboard_add),
         )
         .route(
             "/api/v1/production/storyboard/batch-add-info",
-            post(workbench_storyboard::post_storyboard_batch_add_info),
+            post(workbench::storyboard::post_storyboard_batch_add_info),
         )
         .route(
             "/api/v1/production/storyboard/down-preview-image",
-            post(workbench_storyboard::post_storyboard_down_preview_image),
+            post(workbench::storyboard::post_storyboard_down_preview_image),
         )
         .route(
             "/api/v1/production/storyboard/edit-info",
-            post(workbench_storyboard::post_storyboard_edit_info),
+            post(workbench::storyboard::post_storyboard_edit_info),
         )
         .route(
             "/api/v1/production/storyboard/get-data",
-            post(workbench_storyboard::post_storyboard_get_data),
+            post(workbench::storyboard::post_storyboard_get_data),
         )
         .route(
             "/api/v1/production/storyboard/preview-image",
-            post(workbench_storyboard::post_storyboard_preview_image),
+            post(workbench::storyboard::post_storyboard_preview_image),
         )
         .route(
             "/api/v1/production/storyboard/remove-frame",
-            post(workbench_storyboard::post_storyboard_remove_frame),
+            post(workbench::storyboard::post_storyboard_remove_frame),
         )
         .route(
             "/api/v1/production/storyboard/update-url",
-            post(workbench_storyboard::post_storyboard_update_url),
+            post(workbench::storyboard::post_storyboard_update_url),
         )
         .route(
             "/api/v1/production/workbench/generate-video-prompt",
-            post(workbench_meta::post_workbench_generate_video_prompt),
+            post(workbench::meta::post_workbench_generate_video_prompt),
         )
         .route(
             "/api/v1/production/workbench/get-generate-data",
-            post(workbench_meta::post_workbench_get_generate_data),
+            post(workbench::meta::post_workbench_get_generate_data),
         )
         .route(
             "/api/v1/production/workbench/get-video-model-detail",
-            post(workbench_meta::post_workbench_get_video_model_detail),
+            post(workbench::meta::post_workbench_get_video_model_detail),
         )
 }
 

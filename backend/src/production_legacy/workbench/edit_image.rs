@@ -13,7 +13,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct ImageFlowResponse {
+pub(in crate::production_legacy) struct ImageFlowResponse {
     flow_id: String,
     steps: Vec<ImageFlowStep>,
     default_model: String,
@@ -21,13 +21,13 @@ pub(super) struct ImageFlowResponse {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct ImageFlowStep {
+pub(in crate::production_legacy) struct ImageFlowStep {
     step_id: String,
     step_name: String,
     status: String,
 }
 
-pub(super) async fn post_edit_image_get_image_flow(
+pub(in crate::production_legacy) async fn post_edit_image_get_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<JsonResponse<ImageFlowResponse>, ApiError> {
@@ -59,12 +59,12 @@ pub(super) async fn post_edit_image_get_image_flow(
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct ImageDefaultModelResponse {
+pub(in crate::production_legacy) struct ImageDefaultModelResponse {
     model: String,
     resolution: String,
 }
 
-pub(super) async fn post_edit_image_get_image_default_model(
+pub(in crate::production_legacy) async fn post_edit_image_get_image_default_model(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<JsonResponse<ImageDefaultModelResponse>, ApiError> {
@@ -78,7 +78,7 @@ pub(super) async fn post_edit_image_get_image_default_model(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct SaveImageFlowBody {
+pub(in crate::production_legacy) struct SaveImageFlowBody {
     #[allow(dead_code)]
     flow_id: String,
     #[allow(dead_code)]
@@ -87,7 +87,7 @@ pub(super) struct SaveImageFlowBody {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct ImageFlowStepInput {
+pub(in crate::production_legacy) struct ImageFlowStepInput {
     #[allow(dead_code)]
     step_id: String,
     #[allow(dead_code)]
@@ -96,12 +96,12 @@ pub(super) struct ImageFlowStepInput {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct SaveImageFlowResponse {
+pub(in crate::production_legacy) struct SaveImageFlowResponse {
     flow_id: String,
     saved: bool,
 }
 
-pub(super) async fn post_edit_image_save_image_flow(
+pub(in crate::production_legacy) async fn post_edit_image_save_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<SaveImageFlowBody>,
@@ -116,7 +116,7 @@ pub(super) async fn post_edit_image_save_image_flow(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct UpdateImageFlowBody {
+pub(in crate::production_legacy) struct UpdateImageFlowBody {
     #[allow(dead_code)]
     flow_id: String,
     #[allow(dead_code)]
@@ -127,13 +127,13 @@ pub(super) struct UpdateImageFlowBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct UpdateImageFlowResponse {
+pub(in crate::production_legacy) struct UpdateImageFlowResponse {
     flow_id: String,
     step_id: String,
     updated: bool,
 }
 
-pub(super) async fn post_edit_image_update_image_flow(
+pub(in crate::production_legacy) async fn post_edit_image_update_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateImageFlowBody>,
@@ -149,7 +149,7 @@ pub(super) async fn post_edit_image_update_image_flow(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct EditImageUploadImageBody {
+pub(in crate::production_legacy) struct EditImageUploadImageBody {
     project_id: i32,
     script_id: i32,
     base64_data: String,
@@ -157,7 +157,7 @@ pub(super) struct EditImageUploadImageBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct EditImageUploadImageResponse {
+pub(in crate::production_legacy) struct EditImageUploadImageResponse {
     url: String,
 }
 
@@ -197,7 +197,7 @@ fn normalize_upload_image_data_uri(input: &str) -> Result<String, ApiError> {
     Ok(format!("data:{mime};base64,{payload}"))
 }
 
-pub(super) async fn post_edit_image_upload_image(
+pub(in crate::production_legacy) async fn post_edit_image_upload_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EditImageUploadImageBody>,
@@ -215,7 +215,7 @@ pub(super) async fn post_edit_image_upload_image(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    super::resolve_owned_production_scope(pool, uid, body.project_id, body.script_id).await?;
+    super::flow::resolve_owned_production_scope(pool, uid, body.project_id, body.script_id).await?;
 
     Ok(JsonResponse(EditImageUploadImageResponse {
         url: normalized,
@@ -224,7 +224,7 @@ pub(super) async fn post_edit_image_upload_image(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct GenerateFlowImageBody {
+pub(in crate::production_legacy) struct GenerateFlowImageBody {
     flow_id: String,
     prompt: String,
     #[serde(default)]
@@ -233,12 +233,12 @@ pub(super) struct GenerateFlowImageBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct GenerateFlowImageResponse {
+pub(in crate::production_legacy) struct GenerateFlowImageResponse {
     job_id: String,
     status: String,
 }
 
-pub(super) async fn post_edit_image_generate_flow_image(
+pub(in crate::production_legacy) async fn post_edit_image_generate_flow_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GenerateFlowImageBody>,

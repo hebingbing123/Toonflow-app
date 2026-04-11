@@ -31,8 +31,8 @@ use super::{
     JOB_KIND_VIDEO_GENERATE,
 };
 
-mod worker_vendor;
-mod worker_video;
+mod vendor;
+mod video;
 
 fn worker_id_label() -> String {
     std::env::var("WORKER_ID")
@@ -203,14 +203,10 @@ async fn execute_kind(
         }
         k if k == JOB_KIND_ASSET_POLISH_BATCH => run_asset_polish_batch(state, pool, id, row).await,
         k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => {
-            worker_vendor::run_vendor_model_test(state, pool, row).await
+            vendor::run_vendor_model_test(state, pool, row).await
         }
-        k if k == JOB_KIND_VIDEO_GENERATE => {
-            worker_video::run_video_generate(state, pool, id, row).await
-        }
-        k if k == JOB_KIND_VIDEO_EXPORT => {
-            worker_video::run_video_export(state, pool, id, row).await
-        }
+        k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
+        k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,
         other => Err(JobRunError::Failed(format!(
             "unsupported job kind for worker: {other}"
         ))),
