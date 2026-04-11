@@ -54,7 +54,7 @@ info:
 
     **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`legacy_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
 
-        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_legacy_id}`**（**`novel_legacy_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_legacy_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_legacy_api` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
+        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_legacy_id}`**（**`novel_legacy_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_legacy_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -4445,8 +4445,8 @@ paths:
         - **`data:image/png|jpeg|webp;base64,...`**
         - raw base64 image string (legacy fallback; stored as **jpeg** bytes)
         When **`file_url`** is base64-like, the server requires **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`** and persists
-        the decoded bytes under **`{dir}/{user_id}/{legacy_id}.{ext}`**, then stores **`/api/v1/art-styles/legacy/{legacy_id}/cover`**
-        in the row.
+        the decoded bytes under **`{dir}/{user_id}/{legacy_id}.{ext}`**, then stores **`/api/v1/art-styles/numeric/{numeric_id}/cover`**
+        in the row (where **`numeric_id`** is the row's **`app_art_style.legacy_id`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -4531,15 +4531,15 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/art-styles/legacy/{legacy_id}:
+  /api/v1/art-styles/numeric/{numeric_id}:
     get:
       tags: [art_styles]
-      summary: Get one art style by legacy id
-      operationId: getArtStyleByLegacyIdV1
+      summary: Get one art style by numeric id
+      operationId: getArtStyleByNumericIdV1
       security:
         - bearerAuth: []
       parameters:
-        - name: legacy_id
+        - name: numeric_id
           in: path
           required: true
           schema:
@@ -4573,14 +4573,14 @@ paths:
     patch:
       tags: [art_styles]
       summary: Patch art style fields
-      operationId: patchArtStyleByLegacyIdV1
+      operationId: patchArtStyleByNumericIdV1
       description: |
         Same **`file_url`** rules as create. Setting **`file_url`** to **`null`** clears the cover reference and deletes any
         locally persisted cover file when it belonged to this API path.
       security:
         - bearerAuth: []
       parameters:
-        - name: legacy_id
+        - name: numeric_id
           in: path
           required: true
           schema:
@@ -4623,19 +4623,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
-  /api/v1/art-styles/legacy/{legacy_id}/cover:
+    delete:
+      tags: [art_styles]
+      summary: Delete an art style preset
+      operationId: deleteArtStyleByNumericIdV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: numeric_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /api/v1/art-styles/numeric/{numeric_id}/cover:
     get:
       tags: [art_styles]
       summary: Fetch one locally persisted art-style cover
-      operationId: getArtStyleCoverByLegacyIdV1
+      operationId: getArtStyleCoverByNumericIdV1
       description: |
         Bearer JWT. Reads the caller-owned **`app_art_style`** row and streams the locally persisted cover image when
-        **`file_url`** equals **`/api/v1/art-styles/legacy/{legacy_id}/cover`**. Requires
+        **`file_url`** equals **`/api/v1/art-styles/numeric/{numeric_id}/cover`**. Requires
         **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`**; otherwise returns **503**.
       security:
         - bearerAuth: []
       parameters:
-        - name: legacy_id
+        - name: numeric_id
           in: path
           required: true
           schema:
@@ -4671,40 +4705,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured, database error, or `TOONFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    delete:
-      tags: [art_styles]
-      summary: Delete an art style preset
-      operationId: deleteArtStyleByLegacyIdV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "204":
-          description: Deleted
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:
@@ -11519,7 +11519,7 @@ components:
         file_url:
           type: string
           nullable: true
-          description: Public URL, caller-managed path, or this API's local cover path **`/api/v1/art-styles/legacy/{legacy_id}/cover`**
+          description: Public URL, caller-managed path, or this API's local cover path **`/api/v1/art-styles/numeric/{numeric_id}/cover`**
         label:
           type: string
           nullable: true

@@ -97,14 +97,14 @@ pub fn router() -> Router<AppState> {
             get(list_art_styles).post(create_art_style),
         )
         .route(
-            "/api/v1/art-styles/legacy/{legacy_id}",
-            get(get_art_style_by_legacy)
-                .patch(patch_art_style_by_legacy)
-                .delete(delete_art_style_by_legacy),
+            "/api/v1/art-styles/numeric/{numeric_id}",
+            get(get_art_style_by_numeric_id)
+                .patch(patch_art_style_by_numeric_id)
+                .delete(delete_art_style_by_numeric_id),
         )
         .route(
-            "/api/v1/art-styles/legacy/{legacy_id}/cover",
-            get(get_art_style_cover_by_legacy),
+            "/api/v1/art-styles/numeric/{numeric_id}/cover",
+            get(get_art_style_cover_by_numeric_id),
         )
 }
 
@@ -127,8 +127,8 @@ fn is_http_url(s: &str) -> bool {
     s.starts_with("http://") || s.starts_with("https://")
 }
 
-fn art_style_cover_api_path(legacy_id: i32) -> String {
-    format!("/api/v1/art-styles/legacy/{legacy_id}/cover")
+fn art_style_cover_api_path(numeric_id: i32) -> String {
+    format!("/api/v1/art-styles/numeric/{numeric_id}/cover")
 }
 
 fn parse_uploaded_cover(raw: &str) -> Result<Option<LocalArtStyleCover>, ApiError> {
@@ -399,9 +399,9 @@ async fn create_art_style(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
-async fn get_art_style_by_legacy(
+async fn get_art_style_by_numeric_id(
     State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -410,8 +410,8 @@ async fn get_art_style_by_legacy(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    if legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy_id must be positive".into()));
+    if numeric_id <= 0 {
+        return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
     let row = sqlx::query_as::<_, ArtStyleRow>(
@@ -422,7 +422,7 @@ async fn get_art_style_by_legacy(
         "#,
     )
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -431,9 +431,9 @@ async fn get_art_style_by_legacy(
     Ok(Json(row))
 }
 
-async fn patch_art_style_by_legacy(
+async fn patch_art_style_by_numeric_id(
     State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
     headers: HeaderMap,
     Json(body): Json<PatchArtStyleBody>,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
@@ -443,8 +443,8 @@ async fn patch_art_style_by_legacy(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    if legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy_id must be positive".into()));
+    if numeric_id <= 0 {
+        return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
@@ -470,7 +470,7 @@ async fn patch_art_style_by_legacy(
         "#,
     )
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -507,7 +507,7 @@ async fn patch_art_style_by_legacy(
         ));
     }
     let stored_file_url = if uploaded_cover.is_some() {
-        Some(art_style_cover_api_path(legacy_id))
+        Some(art_style_cover_api_path(numeric_id))
     } else {
         new_file_url.clone()
     };
@@ -529,28 +529,28 @@ async fn patch_art_style_by_legacy(
     .bind(&new_label)
     .bind(&new_prompt)
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if let Some(root) = state.local_art_style_cover_dir.as_deref() {
         if let Some(cover) = uploaded_cover.as_ref() {
-            persist_local_art_style_cover(root, uid, legacy_id, cover).await?;
+            persist_local_art_style_cover(root, uid, numeric_id, cover).await?;
         } else if matches!(file_url_patch, FieldPatch::Set(_))
-            && current.file_url.as_deref() == Some(art_style_cover_api_path(legacy_id).as_str())
-            && stored_file_url.as_deref() != Some(art_style_cover_api_path(legacy_id).as_str())
+            && current.file_url.as_deref() == Some(art_style_cover_api_path(numeric_id).as_str())
+            && stored_file_url.as_deref() != Some(art_style_cover_api_path(numeric_id).as_str())
         {
-            delete_local_art_style_cover_files(root, uid, legacy_id).await;
+            delete_local_art_style_cover_files(root, uid, numeric_id).await;
         }
     }
 
     Ok(Json(row))
 }
 
-async fn delete_art_style_by_legacy(
+async fn delete_art_style_by_numeric_id(
     State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -559,14 +559,14 @@ async fn delete_art_style_by_legacy(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    if legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy_id must be positive".into()));
+    if numeric_id <= 0 {
+        return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
     let res =
         sqlx::query(r#"DELETE FROM app_art_style WHERE owner_user_id = $1 AND legacy_id = $2"#)
             .bind(uid)
-            .bind(legacy_id)
+            .bind(numeric_id)
             .execute(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -576,20 +576,20 @@ async fn delete_art_style_by_legacy(
     }
 
     if let Some(root) = state.local_art_style_cover_dir.as_deref() {
-        delete_local_art_style_cover_files(root, uid, legacy_id).await;
+        delete_local_art_style_cover_files(root, uid, numeric_id).await;
     }
 
     Ok(StatusCode::NO_CONTENT)
 }
 
-async fn get_art_style_cover_by_legacy(
+async fn get_art_style_cover_by_numeric_id(
     State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy_id must be positive".into()));
+    if numeric_id <= 0 {
+        return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
     let pool = state
@@ -605,13 +605,13 @@ async fn get_art_style_cover_by_legacy(
         "#,
     )
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    if row.file_url.as_deref() != Some(art_style_cover_api_path(legacy_id).as_str()) {
+    if row.file_url.as_deref() != Some(art_style_cover_api_path(numeric_id).as_str()) {
         return Err(ApiError::NotFound);
     }
 
@@ -627,7 +627,7 @@ async fn get_art_style_cover_by_legacy(
         ("jpg", "image/jpeg"),
         ("webp", "image/webp"),
     ] {
-        let path = art_style_cover_file_path(root, uid, legacy_id, ext);
+        let path = art_style_cover_file_path(root, uid, numeric_id, ext);
         match fs::read(&path).await {
             Ok(bytes) => {
                 return Ok((

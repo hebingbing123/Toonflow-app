@@ -6,8 +6,8 @@ build = "build.rs"
 description = "Toonflow API (Harness-oriented Rust backend; work in progress)"
 
 [[bin]]
-name = "toonflow-legacy-import"
-path = "src/bin/legacy_import.rs"
+name = "toonflow-sqlite-import"
+path = "src/bin/sqlite_import.rs"
 
 [dependencies]
 anyhow = "1"

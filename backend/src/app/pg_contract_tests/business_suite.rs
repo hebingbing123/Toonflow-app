@@ -1226,7 +1226,7 @@ async fn art_styles_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/art-styles/legacy/{leg}"))
+                .uri(format!("/api/v1/art-styles/numeric/{leg}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1243,7 +1243,7 @@ async fn art_styles_crud_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::PATCH)
-                .uri(format!("/api/v1/art-styles/legacy/{leg}"))
+                .uri(format!("/api/v1/art-styles/numeric/{leg}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1261,7 +1261,7 @@ async fn art_styles_crud_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::DELETE)
-                .uri(format!("/api/v1/art-styles/legacy/{leg}"))
+                .uri(format!("/api/v1/art-styles/numeric/{leg}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1274,7 +1274,7 @@ async fn art_styles_crud_roundtrip() {
     let res = app
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/art-styles/legacy/{leg}"))
+                .uri(format!("/api/v1/art-styles/numeric/{leg}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1337,7 +1337,7 @@ async fn art_styles_base64_cover_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
-    let cover_uri = format!("/api/v1/art-styles/legacy/{legacy_id}/cover");
+    let cover_uri = format!("/api/v1/art-styles/numeric/{legacy_id}/cover");
     assert_eq!(created["file_url"].as_str(), Some(cover_uri.as_str()));
 
     let res = app
@@ -1362,7 +1362,7 @@ async fn art_styles_base64_cover_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::PATCH)
-                .uri(format!("/api/v1/art-styles/legacy/{legacy_id}"))
+                .uri(format!("/api/v1/art-styles/numeric/{legacy_id}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

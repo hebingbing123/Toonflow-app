@@ -2,8 +2,8 @@
 //!
 //! 子模块：
 //! - `models` — 请求/响应类型
-//! - `legacy` — **`…/projects/{project_id}/assets/workbench/*`** 写入（添加/更新/保存/删除）
-//! - `legacy_query` — 同上路径前缀下的查询/轮询/上传 clip
+//! - `workbench_write` — **`…/projects/{project_id}/assets/workbench/*`** 写入（添加/更新/保存/删除）
+//! - `workbench_query` — 同上路径前缀下的查询/轮询/上传 clip
 //! - `crud` — REST CRUD 资产操作、角景、脚本-资产关联
 //! - `crud_images` — 资产图片 REST CRUD
 //! - `generate` — 遗留 `/api/assetsGenerate/*` 入队和取消
@@ -11,9 +11,9 @@
 mod crud;
 mod crud_images;
 mod generate;
-mod legacy;
-mod legacy_query;
 pub mod models;
+mod workbench_query;
+mod workbench_write;
 
 pub use crud::{next_asset_image_sort_index, resolve_asset_id_for_job};
 
@@ -243,8 +243,8 @@ pub(super) async fn resolve_owned_asset_metadata(
 pub fn router() -> Router<AppState> {
     use crud::*;
     use crud_images::*;
-    use legacy::*;
-    use legacy_query::*;
+    use workbench_query::*;
+    use workbench_write::*;
 
     Router::new()
         .route(

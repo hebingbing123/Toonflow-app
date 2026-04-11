@@ -277,9 +277,9 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       _statusLine = '读取封面中…';
     });
     try {
-      final bytes = await fetchArtStyleCoverByLegacyId(
+      final bytes = await fetchArtStyleCoverByNumericId(
         widget.accessToken,
-        legacyId: selected.legacyId,
+        numericId: selected.legacyId,
       );
       if (!mounted) return;
       setState(() {
@@ -365,7 +365,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       _statusLine = '保存画风中…';
     });
     try {
-      final updated = await patchArtStyleByLegacyId(
+      final updated = await patchArtStyleByNumericId(
         widget.accessToken,
         selected.legacyId,
         body,
@@ -399,7 +399,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       _statusLine = '删除画风中…';
     });
     try {
-      await deleteArtStyleByLegacyId(widget.accessToken, selected.legacyId);
+      await deleteArtStyleByNumericId(widget.accessToken, selected.legacyId);
       await _reloadRows();
       if (!mounted) return;
       setState(() => _statusLine = '已删除画风 #${selected.legacyId}。');

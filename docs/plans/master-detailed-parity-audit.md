@@ -28,7 +28,7 @@
 
 - 旧 `login/login` 已由 Supabase Auth 替代。
 - 旧 `setting/loginConfig/*` 已并入 Supabase 账户体系。
-- 旧 `migrate/migrateData` 已由 `toonflow-legacy-import` 与 staging 提升链路替代。
+- 旧 `migrate/migrateData` 已由 `toonflow-sqlite-import` 与 staging 提升链路替代。
 - 旧 `setting/fileManagement/openFolder` 属于桌面本地能力，不应再按服务端 HTTP 复刻。
 
 ### 2.2 后端 HTTP 漏项收口（已完成）

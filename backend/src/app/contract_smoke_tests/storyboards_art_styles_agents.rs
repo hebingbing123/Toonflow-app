@@ -23,14 +23,15 @@ async fn art_styles_create_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn art_style_patch_unauthorized_without_bearer() {
-    let (status, v) = patch_json_no_bearer("/api/v1/art-styles/legacy/1", r#"{"label":"x"}"#).await;
+    let (status, v) =
+        patch_json_no_bearer("/api/v1/art-styles/numeric/1", r#"{"label":"x"}"#).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
 async fn art_style_delete_unauthorized_without_bearer() {
-    let (status, v) = delete_empty_no_bearer("/api/v1/art-styles/legacy/1").await;
+    let (status, v) = delete_empty_no_bearer("/api/v1/art-styles/numeric/1").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -186,7 +187,7 @@ async fn art_style_extract_prompt_unauthorized_without_bearer() {
 #[tokio::test]
 async fn art_style_get_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/art-styles/legacy/1", &token).await;
+    let (status, v) = get_json_bearer("/api/v1/art-styles/numeric/1", &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -194,7 +195,7 @@ async fn art_style_get_requires_database_with_jwt() {
 #[tokio::test]
 async fn art_style_cover_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/art-styles/legacy/1/cover", &token).await;
+    let (status, v) = get_json_bearer("/api/v1/art-styles/numeric/1/cover", &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -203,7 +204,7 @@ async fn art_style_cover_requires_database_with_jwt() {
 async fn art_style_patch_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) =
-        patch_json_bearer("/api/v1/art-styles/legacy/1", &token, r#"{"label":"x"}"#).await;
+        patch_json_bearer("/api/v1/art-styles/numeric/1", &token, r#"{"label":"x"}"#).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -211,7 +212,7 @@ async fn art_style_patch_requires_database_with_jwt() {
 #[tokio::test]
 async fn art_style_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = delete_empty_bearer("/api/v1/art-styles/legacy/1", &token).await;
+    let (status, v) = delete_empty_bearer("/api/v1/art-styles/numeric/1", &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }

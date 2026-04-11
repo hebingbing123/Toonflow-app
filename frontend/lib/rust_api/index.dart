@@ -23,7 +23,7 @@ part 'models_catalog.dart';
 part 'novels_models.dart';
 part 'novels_events_models.dart';
 part 'novels_crud.dart';
-part 'novels_legacy_api.dart';
+part 'novels_workbench_http.dart';
 part 'novels_rest_api.dart';
 part 'novels_events.dart';
 part 'project_overview.dart';
@@ -31,8 +31,8 @@ part 'project_manuals.dart';
 part 'project_manuals_director.dart';
 part 'project_manuals_visual.dart';
 part 'prompts_api.dart';
-part 'projects_legacy.dart';
-part 'projects_legacy_compat.dart';
+part 'projects_rest_extra.dart';
+part 'projects_rest_compat.dart';
 part 'quality_reviews.dart';
 part 'quality_reviews_api.dart';
 part 'quality_reviews_stats.dart';
@@ -49,14 +49,14 @@ part 'settings_vendors_mutations.dart';
 part 'status_auth_me.dart';
 part 'storyboards_api.dart';
 part 'system_status_api.dart';
-part 'tasks_legacy.dart';
+part 'tasks_center_rest.dart';
 part 'usage_api.dart';
 part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 
-// --- Task center compat (`tasks_legacy.dart` → `GET /api/v1/projects`, `GET /api/v1/jobs/*`) ---
+// --- Task center (`tasks_center_rest.dart` → `GET /api/v1/projects`, `GET /api/v1/jobs/*`) ---
 
-// --- Compat names for project list/CRUD (`projects_legacy_compat.dart` → `/api/v1/projects`) ---
+// --- Project list/CRUD compat (`projects_rest_compat.dart` → `/api/v1/projects`) ---
 
 /// One **`app_novel`** row — OpenAPI **`NovelRow`**.

@@ -17,10 +17,10 @@ import 'home_page/shell/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
 
 part 'home_page/project_editor/editor.dart';
-part 'home_page/project_editor/legacy/probes.dart';
-part 'home_page/project_editor/legacy/general_probe.dart';
-part 'home_page/project_editor/legacy/project_probe.dart';
-part 'home_page/project_editor/legacy/tasks_probe.dart';
+part 'home_page/project_editor/http_probes/probes.dart';
+part 'home_page/project_editor/http_probes/general_probe.dart';
+part 'home_page/project_editor/http_probes/project_probe.dart';
+part 'home_page/project_editor/http_probes/tasks_probe.dart';
 part 'home_page/project_editor/assets/compatibility/images.dart';
 part 'home_page/project_editor/assets/compatibility/crud.dart';
 part 'home_page/project_editor/assets/compatibility/relations.dart';

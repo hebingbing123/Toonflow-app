@@ -163,13 +163,13 @@ extension _HomePageProjectsController on _HomePageState {
         final probeName =
             '[flutter probe art-style] ${DateTime.now().toIso8601String()}';
         final created = await createArtStyle(token, name: probeName);
-        await fetchArtStyleByLegacyId(token, legacyId: created.legacyId);
-        await patchArtStyleByLegacyId(
+        await fetchArtStyleByNumericId(token, numericId: created.legacyId);
+        await patchArtStyleByNumericId(
           token,
           created.legacyId,
           <String, dynamic>{'label': 'probe'},
         );
-        await deleteArtStyleByLegacyId(token, created.legacyId);
+        await deleteArtStyleByNumericId(token, created.legacyId);
         line += ' · create→get→patch→del ok (#${created.legacyId})';
       } on RustApiException catch (e) {
         line += ' · crud -> ${e.statusCode}';

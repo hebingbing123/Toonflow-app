@@ -58,9 +58,9 @@ class ExtractArtStylePromptResponse {
   }
 }
 
-/// Builds `GET /api/v1/art-styles/legacy/{legacy_id}/cover`.
-Uri artStyleCoverV1Uri(int legacyId) =>
-    Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId/cover');
+/// Builds `GET /api/v1/art-styles/numeric/{numeric_id}/cover`.
+Uri artStyleCoverV1Uri(int numericId) =>
+    Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId/cover');
 
 /// `GET /api/v1/art-styles` — see `listArtStylesV1`.
 Future<ListArtStylesResponse> fetchArtStyles(String accessToken) async {
@@ -108,12 +108,12 @@ Future<ArtStyleRow> createArtStyle(
   return ArtStyleRow.fromJson(map);
 }
 
-/// `GET /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `getArtStyleByLegacyIdV1`.
-Future<ArtStyleRow> fetchArtStyleByLegacyId(
+/// `GET /api/v1/art-styles/numeric/{numeric_id}` — OpenAPI `getArtStyleByNumericIdV1`.
+Future<ArtStyleRow> fetchArtStyleByNumericId(
   String accessToken, {
-  required int legacyId,
+  required int numericId,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
@@ -127,14 +127,14 @@ Future<ArtStyleRow> fetchArtStyleByLegacyId(
   return ArtStyleRow.fromJson(map);
 }
 
-/// `GET /api/v1/art-styles/legacy/{legacy_id}/cover` — JWT-protected local cover bytes.
-Future<Uint8List> fetchArtStyleCoverByLegacyId(
+/// `GET /api/v1/art-styles/numeric/{numeric_id}/cover` — JWT-protected local cover bytes.
+Future<Uint8List> fetchArtStyleCoverByNumericId(
   String accessToken, {
-  required int legacyId,
+  required int numericId,
 }) async {
   final res = await http
       .get(
-        artStyleCoverV1Uri(legacyId),
+        artStyleCoverV1Uri(numericId),
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 20));
@@ -147,19 +147,19 @@ Future<Uint8List> fetchArtStyleCoverByLegacyId(
   return res.bodyBytes;
 }
 
-/// `PATCH /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `patchArtStyleByLegacyIdV1`.
+/// `PATCH /api/v1/art-styles/numeric/{numeric_id}` — OpenAPI `patchArtStyleByNumericIdV1`.
 ///
 /// [body] uses **snake_case** keys only: **`name`**, **`file_url`**, **`label`**, **`prompt`**.
 /// At least one key is required; use JSON **`null`** or empty string for optional fields to clear them.
-Future<ArtStyleRow> patchArtStyleByLegacyId(
+Future<ArtStyleRow> patchArtStyleByNumericId(
   String accessToken,
-  int legacyId,
+  int numericId,
   Map<String, dynamic> body,
 ) async {
   if (body.isEmpty) {
     throw ArgumentError('patch body must include at least one allowed field');
   }
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
       .patch(
         uri,
@@ -180,9 +180,9 @@ Future<ArtStyleRow> patchArtStyleByLegacyId(
   return ArtStyleRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/art-styles/legacy/{legacy_id}` — OpenAPI `deleteArtStyleByLegacyIdV1` (**204**).
-Future<void> deleteArtStyleByLegacyId(String accessToken, int legacyId) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/legacy/$legacyId');
+/// `DELETE /api/v1/art-styles/numeric/{numeric_id}` — OpenAPI `deleteArtStyleByNumericIdV1` (**204**).
+Future<void> deleteArtStyleByNumericId(String accessToken, int numericId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));

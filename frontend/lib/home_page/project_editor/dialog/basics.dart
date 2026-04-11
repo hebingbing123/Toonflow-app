@@ -26,7 +26,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           decoration: const InputDecoration(labelText: 'Intro (empty = clear)'),
         ),
         const SizedBox(height: 8),
-        _buildProjectLegacyProbeActions(
+        _buildProjectHttpProbeActions(
           ctx: ctx,
           setDialogState: setDialogState,
           token: token,

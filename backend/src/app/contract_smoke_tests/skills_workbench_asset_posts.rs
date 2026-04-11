@@ -700,14 +700,14 @@ async fn art_styles_list_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn art_style_by_legacy_unauthorized_without_bearer() {
-    let (status, v) = get_json("/api/v1/art-styles/legacy/1").await;
+    let (status, v) = get_json("/api/v1/art-styles/numeric/1").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
 async fn art_style_cover_unauthorized_without_bearer() {
-    let (status, v) = get_json("/api/v1/art-styles/legacy/1/cover").await;
+    let (status, v) = get_json("/api/v1/art-styles/numeric/1/cover").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }

@@ -3,7 +3,7 @@
 //! 用法：
 //! ```text
 //! SQLITE_PATH=/path/to/db2.sqlite DATABASE_URL=postgresql://... \
-//!   cargo run --bin toonflow-legacy-import --release
+//!   cargo run --bin toonflow-sqlite-import --release
 //! ```
 //! 可选：`LEGACY_IMPORT_TRUNCATE=1` 首先执行 `TRUNCATE legacy_staging.snapshot`。
 

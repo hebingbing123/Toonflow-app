@@ -1,6 +1,6 @@
 part of '../../../home_page.dart';
 
-extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
+extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
   List<Widget> _buildProjectLegacyTasksProbeActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
