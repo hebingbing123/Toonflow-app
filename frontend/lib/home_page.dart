@@ -28,6 +28,7 @@ part 'home_page/project_editor/assets/corner_scape.dart';
 part 'home_page/project_editor/assets/clip_upload.dart';
 part 'home_page/project_editor/assets/generation/section.dart';
 part 'home_page/project_editor/assets/generation/dialog.dart';
+part 'home_page/project_editor/assets/generation/status.dart';
 part 'home_page/project_editor/assets/images.dart';
 part 'home_page/project_editor/assets/workbench.dart';
 part 'home_page/project_editor/novels/compatibility/actions.dart';

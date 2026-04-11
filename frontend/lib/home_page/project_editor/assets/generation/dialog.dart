@@ -263,126 +263,33 @@ class _AssetGenerationWorkbenchDialogState
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
-              if (_statusLine != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _statusLine!,
-                  style: Theme.of(context).textTheme.bodySmall,
+              _AssetGenerationStatusPanel(
+                busy: _busyMutation,
+                statusLine: _statusLine,
+                productionData: _productionData,
+                pollingData: _pollingData,
+                materialData: _materialData,
+                batchData: _batchData,
+                promptPollingData: _promptPollingData,
+                pollingSelections: pollingSelections,
+                promptSelections: promptSelections,
+                onApplyPollingSelection: (label, ids) => _applyScopedSelection(
+                  ids,
+                  '已按图片状态 $label 重建选择',
                 ),
-              ],
-              if (_productionData != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summarizeProductionAssetData(_productionData!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                onApplyMaterialSelection: () => _applyScopedSelection(
+                  _materialData!.data.map((item) => item.id),
+                  '已按素材上下文重建选择',
                 ),
-              ],
-              if (_pollingData != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summarizeAssetPollingStatuses(_pollingData!.statuses),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                onApplyBatchSelection: () => _applyScopedSelection(
+                  _batchData!.data.map((item) => item.id),
+                  '已按批量候选重建选择',
                 ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: pollingSelections.entries
-                      .map(
-                        (entry) => ActionChip(
-                          label: Text('${entry.key} ${entry.value.length} 条'),
-                          onPressed: _busyMutation
-                              ? null
-                              : () => _applyScopedSelection(
-                                  entry.value,
-                                  '已按图片状态 ${entry.key} 重建选择',
-                                ),
-                        ),
-                      )
-                      .toList(growable: false),
+                onApplyPromptSelection: (label, ids) => _applyScopedSelection(
+                  ids,
+                  '已按 prompt 状态 $label 重建选择',
                 ),
-              ],
-              if (_materialData != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summarizeLegacyAssetMaterialData(_materialData!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      label: Text('使用素材上下文 ${_materialData!.data.length} 条'),
-                      onPressed: _busyMutation
-                          ? null
-                          : () => _applyScopedSelection(
-                              _materialData!.data.map((item) => item.id),
-                              '已按素材上下文重建选择',
-                            ),
-                    ),
-                  ],
-                ),
-              ],
-              if (_batchData != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summarizeLegacyBatchGenerationData(_batchData!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      label: Text('使用批量候选 ${_batchData!.data.length} 条'),
-                      onPressed: _busyMutation
-                          ? null
-                          : () => _applyScopedSelection(
-                              _batchData!.data.map((item) => item.id),
-                              '已按批量候选重建选择',
-                            ),
-                    ),
-                  ],
-                ),
-              ],
-              if (_promptPollingData != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summarizeLegacyPromptPolling(_promptPollingData!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: promptSelections.entries
-                      .map(
-                        (entry) => ActionChip(
-                          label: Text('${entry.key} ${entry.value.length} 条'),
-                          onPressed: _busyMutation
-                              ? null
-                              : () => _applyScopedSelection(
-                                  entry.value,
-                                  '已按 prompt 状态 ${entry.key} 重建选择',
-                                ),
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              ],
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 height: 280,
