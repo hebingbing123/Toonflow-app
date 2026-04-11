@@ -1,4 +1,7 @@
-//! Legacy **`POST …/get-assets-api`** — parent/child asset tree.
+//! 遗留 `POST …/get-assets-api` — 父子资产树查询。
+//!
+//! 返回指定项目和类型下的资产层级结构，
+//! 父资产包含嵌套的子资产（生成的图片）列表。
 
 use std::collections::HashMap;
 

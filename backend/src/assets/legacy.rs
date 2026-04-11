@@ -1,5 +1,8 @@
-//! Legacy POST asset write operations (add/update/save/del/batch-del/del-image).
-//! Read/query operations live in [`legacy_query`].
+//! 遗留 POST 资产写入操作。
+//!
+//! 处理 add-assets、update-assets、save-assets、del-assets、
+//! batch-delete 和 del-image 等遗留端点。
+//! 读取/查询操作位于 [`legacy_query`]。
 
 use axum::{extract::State, http::HeaderMap, Json};
 use serde_json::Value;

@@ -1,4 +1,7 @@
-//! `POST …/assets` — create asset.
+//! `POST …/assets` — 创建资产。
+//!
+//! 处理 POST /api/v1/projects/legacy/{project_legacy_id}/assets 请求，
+//! 验证用户权限并在指定项目中创建新资产。
 
 use axum::{
     extract::{Path, State},

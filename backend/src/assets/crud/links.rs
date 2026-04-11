@@ -1,4 +1,7 @@
-//! Script ↔ asset link handlers.
+//! 脚本 ↔ 资产关联处理器。
+//!
+//! 处理 PUT / DELETE /api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}
+//! 用于建立或解除脚本与资产的关联关系。
 
 use axum::{
     extract::{Path, State},

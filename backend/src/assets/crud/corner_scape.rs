@@ -1,4 +1,6 @@
-//! `POST …/assets/corner-scape` — assets missing `assetsId` in metadata, with history images.
+//! `POST …/assets/corner-scape` — 角景资产查询。
+//!
+//! 返回元数据中缺少 `assetsId` 的顶级资产列表，包含历史图片。
 
 use axum::{
     extract::{Path, State},
