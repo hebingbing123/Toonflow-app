@@ -1,4 +1,8 @@
-//! REST routes under `/api/v1/jobs` and the in-process poller in [`worker`]（`worker/mod.rs` + `worker/*` 子模块）。
+//! 任务模块：`/api/v1/jobs` 下的 REST 路由和进程内轮询器。
+//!
+//! 子模块：
+//! - `worker` — 任务工作器（`worker/mod.rs` + `worker/*` 子模块）
+//! - `queue` — 任务队列抽象
 
 pub mod queue;
 pub mod worker;

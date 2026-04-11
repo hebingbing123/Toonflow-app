@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'previews.dart';
 import 'support.dart';
 import '../../rust_api.dart';
 
@@ -124,40 +125,10 @@ class QualityReviewsSection extends StatelessWidget {
           ).textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          title: const Text('兼容性检查'),
-          subtitle: Text(
-            '保留质量评审回归创建入口，默认折叠',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Legacy review probe',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: outline),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  onPressed: creatingQualityReview
-                      ? null
-                      : onCreateQualityReviewProbe,
-                  child: Text(creatingQualityReview ? '…' : '创建回归评审'),
-                ),
-              ],
-            ),
-          ],
+        QualityReviewsCompatibilityPanel(
+          outlineColor: outline,
+          creatingQualityReview: creatingQualityReview,
+          onCreateQualityReviewProbe: onCreateQualityReviewProbe,
         ),
         const SizedBox(height: 8),
         TextField(
@@ -187,34 +158,10 @@ class QualityReviewsSection extends StatelessWidget {
           SelectableText('阶段通过率：$qualityStagePassRateLine'),
         ],
         if (qualityReviews != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            '${qualityReviews!.length} 条评审',
-            style: Theme.of(context).textTheme.labelLarge,
+          QualityReviewsListPreview(
+            reviews: qualityReviews!,
+            onSelectQualityReview: onSelectQualityReview,
           ),
-          ...qualityReviews!
-              .take(8)
-              .map(
-                (review) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
-                  ),
-                  subtitle: Text(
-                    [
-                      review.id,
-                      if (review.targetId != null &&
-                          review.targetId!.isNotEmpty)
-                        'target=${review.targetId}',
-                      if (review.passed != null) 'passed=${review.passed}',
-                      if (review.isBadCase) 'bad_case',
-                    ].join(' · '),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => onSelectQualityReview(review),
-                ),
-              ),
         ],
       ],
     );
