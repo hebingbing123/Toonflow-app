@@ -1,4 +1,4 @@
-//! Axum **`GET /api/v1/ws`** upgrade handler.
+//! Axum `GET /api/v1/ws` 升级处理器。
 
 use axum::extract::ws::WebSocketUpgrade;
 use axum::extract::{Query, State};
