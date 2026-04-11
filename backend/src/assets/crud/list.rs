@@ -137,7 +137,7 @@ async fn list_project_assets_inner(
     if let Some(sid) = query.script_legacy_id {
         if sid <= 0 {
             return Err(ApiError::BadRequest(
-                "script_legacy_id must be positive when set".into(),
+                "script_numeric_id must be positive when set".into(),
             ));
         }
         let script_ok: bool = sqlx::query_scalar(

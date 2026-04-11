@@ -28,7 +28,7 @@ class NovelRow {
   factory NovelRow.fromJson(Map<String, dynamic> json) {
     return NovelRow(
       id: json['id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       chapterIndex: (json['chapter_index'] as num).toInt(),
       reel: json['reel'] as String?,
       chapter: json['chapter'] as String? ?? '',

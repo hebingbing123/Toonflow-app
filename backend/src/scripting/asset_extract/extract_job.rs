@@ -14,8 +14,8 @@ pub(crate) async fn run_extract_job(
     cfg: LlmConfig,
     client: reqwest::Client,
     uid: Uuid,
-    project_legacy_id: i32,
-    script_legacy_ids: Vec<i32>,
+    project_numeric_id: i32,
+    script_numeric_ids: Vec<i32>,
     group_size: usize,
 ) -> Result<(), String> {
     let system = load_system_prompt();
@@ -23,7 +23,7 @@ pub(crate) async fn run_extract_job(
     let project_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(uid)
     .fetch_optional(&pool)
     .await
@@ -43,7 +43,7 @@ pub(crate) async fn run_extract_job(
     )
     .bind(project_uuid)
     .bind(uid)
-    .bind(&script_legacy_ids)
+    .bind(&script_numeric_ids)
     .execute(&pool)
     .await
     .map_err(|e| e.to_string())?;
@@ -57,7 +57,7 @@ pub(crate) async fn run_extract_job(
         "#,
     )
     .bind(project_uuid)
-    .bind(&script_legacy_ids)
+    .bind(&script_numeric_ids)
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
@@ -68,7 +68,7 @@ pub(crate) async fn run_extract_job(
         map_by_legacy.insert(lid, (name, content));
     }
 
-    for chunk in script_legacy_ids.chunks(group_size) {
+    for chunk in script_numeric_ids.chunks(group_size) {
         process_one_group(
             &pool,
             &cfg,

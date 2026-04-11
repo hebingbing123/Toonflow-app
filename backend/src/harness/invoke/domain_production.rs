@@ -308,7 +308,7 @@ pub(super) async fn invoke_generate_derive_asset(
     for asset_id in valid_ids {
         let payload = json!({
             "source": "production.assets.batch-generate",
-            "project_legacy_id": project_legacy_id,
+            "project_numeric_id": project_legacy_id,
             "script_id": script_legacy_id,
             "asset_id": asset_id,
             "model": model,
@@ -371,9 +371,9 @@ pub(super) async fn invoke_generate_storyboard(
     for row in rows {
         let payload = json!({
             "source": "production.storyboard.batch-generate-image",
-            "project_legacy_id": project_legacy_id,
+            "project_numeric_id": project_legacy_id,
             "script_id": script_legacy_id,
-            "storyboard_id": row.legacy_id,
+            "storyboard_numeric_id": row.legacy_id,
             "prompt": row.prompt.unwrap_or_default(),
             "model": model,
             "resolution": resolution,

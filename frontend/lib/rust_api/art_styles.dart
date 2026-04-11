@@ -21,7 +21,7 @@ class ArtStyleRow {
   factory ArtStyleRow.fromJson(Map<String, dynamic> json) {
     return ArtStyleRow(
       id: json['id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       fileUrl: json['file_url'] as String?,
       label: json['label'] as String?,

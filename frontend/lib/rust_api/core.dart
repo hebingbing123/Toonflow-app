@@ -42,7 +42,7 @@ class JobRow {
 
   factory JobRow.fromJson(Map<String, dynamic> json) {
     return JobRow(
-      legacyTaskId: (json['legacy_task_id'] as num).toInt(),
+      legacyTaskId: (json['numeric_task_id'] as num).toInt(),
       id: json['id'] as String,
       ownerUserId: json['owner_user_id'] as String,
       kind: json['kind'] as String,

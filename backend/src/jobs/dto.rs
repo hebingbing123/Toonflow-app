@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct JobRow {
+    #[serde(rename = "numeric_task_id")]
     pub legacy_task_id: i64,
     pub id: Uuid,
     pub owner_user_id: Uuid,

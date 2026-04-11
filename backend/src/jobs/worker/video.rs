@@ -53,11 +53,11 @@ pub(super) async fn run_video_generate(
     let seed = p.get("seed").and_then(|x| x.as_u64());
 
     let project_legacy_id = p
-        .get("project_legacy_id")
+        .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok());
     let storyboard_id = p
-        .get("storyboard_id")
+        .get("storyboard_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok());
 
@@ -139,8 +139,8 @@ pub(super) async fn run_video_generate(
         "task_id": gen_resp.task_id,
         "video_url": video_url,
         "preview_url": gen_resp.preview_url,
-        "project_legacy_id": project_legacy_id,
-        "storyboard_id": storyboard_id,
+        "project_numeric_id": project_legacy_id,
+        "storyboard_numeric_id": storyboard_id,
     }))
 }
 

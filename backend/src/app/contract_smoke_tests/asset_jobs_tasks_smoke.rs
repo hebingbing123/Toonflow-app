@@ -241,7 +241,7 @@ async fn asset_image_file_get_rejects_malformed_image_id_uuid_with_jwt() {
 #[tokio::test]
 async fn project_assets_list_query_unauthorized_without_bearer() {
     let (status, v) =
-        get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/assets?script_legacy_id=1&page=1&limit=10").await;
+        get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/assets?script_numeric_id=1&page=1&limit=10").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -446,7 +446,7 @@ async fn agents_memory_query_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn scripts_export_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/scripts/export", r#"{"legacy_ids":[1]}"#).await;
+    let (status, v) = post_json("/api/v1/scripts/export", r#"{"numeric_ids":[1]}"#).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }

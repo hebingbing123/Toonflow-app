@@ -188,7 +188,7 @@ Future<Uint8List> exportScriptsZip(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'legacy_ids': legacyIds}),
+        body: jsonEncode({'numeric_ids': legacyIds}),
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode != 200) {
@@ -210,7 +210,7 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'legacy_ids': legacyIds}),
+        body: jsonEncode({'numeric_ids': legacyIds}),
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode != 200) {
@@ -231,8 +231,8 @@ Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
   final body = <String, dynamic>{
-    'project_legacy_id': projectLegacyId,
-    'script_legacy_ids': scriptLegacyIds,
+    'project_numeric_id': projectLegacyId,
+    'script_numeric_ids': scriptLegacyIds,
   };
   if (groupSize != null) {
     body['group_size'] = groupSize;

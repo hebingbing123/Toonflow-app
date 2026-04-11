@@ -23,7 +23,7 @@ class ScriptRow {
     return ScriptRow(
       id: json['id'] as String,
       projectId: json['project_id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       content: json['content'] as String?,
       extractState: json['extract_state'] == null
@@ -112,7 +112,7 @@ class ScriptExtractStatePollRow {
 
   factory ScriptExtractStatePollRow.fromJson(Map<String, dynamic> json) {
     return ScriptExtractStatePollRow(
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       extractState: json['extract_state'] == null
           ? null
           : (json['extract_state'] as num).toInt(),
@@ -220,8 +220,8 @@ class StoryboardRow {
     return StoryboardRow(
       id: json['id'] as String,
       scriptId: json['script_id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
-      legacyScriptId: ni('legacy_script_id'),
+      legacyId: (json['numeric_id'] as num).toInt(),
+      legacyScriptId: ni('numeric_script_id'),
       prompt: json['prompt'] as String?,
       filePath: json['file_path'] as String?,
       duration: json['duration'] as String?,
@@ -231,7 +231,7 @@ class StoryboardRow {
       track: json['track'] as String?,
       videoDesc: json['video_desc'] as String?,
       shouldGenerateImage: ni('should_generate_image'),
-      legacyProjectId: ni('legacy_project_id'),
+      legacyProjectId: ni('numeric_project_id'),
       flowId: ni('flow_id'),
       sbIndex: ni('sb_index'),
       createTimeMs: json['create_time_ms'] == null

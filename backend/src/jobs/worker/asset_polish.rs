@@ -51,13 +51,13 @@ pub(super) async fn run_asset_polish_prompt(
 
     let p = &row.payload;
     let project_legacy_id = p
-        .get("project_legacy_id")
+        .get("project_numeric_id")
         .and_then(|x| x.as_i64())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
     let asset_legacy_id = p
-        .get("asset_legacy_id")
+        .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
-        .ok_or_else(|| JobRunError::Failed("payload missing asset_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing asset_numeric_id".into()))?;
     let asset_type = p
         .get("asset_type")
         .and_then(|x| x.as_str())
@@ -82,8 +82,8 @@ pub(super) async fn run_asset_polish_prompt(
 
     Ok(json!({
         "source": "assets-generate.polish-prompt",
-        "project_legacy_id": project_legacy_id,
-        "asset_legacy_id": asset_legacy_id,
+        "project_numeric_id": project_legacy_id,
+        "asset_numeric_id": asset_legacy_id,
         "polished_prompt": text,
     }))
 }
@@ -102,9 +102,9 @@ pub(super) async fn run_asset_polish_batch(
 
     let p = &row.payload;
     let project_legacy_id = p
-        .get("project_legacy_id")
+        .get("project_numeric_id")
         .and_then(|x| x.as_i64())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
     let items = p
         .get("items")
         .and_then(|x| x.as_array())
@@ -129,9 +129,9 @@ pub(super) async fn run_asset_polish_batch(
         }
 
         let asset_legacy_id = item
-            .get("asset_legacy_id")
+            .get("asset_numeric_id")
             .and_then(|x| x.as_i64())
-            .ok_or_else(|| JobRunError::Failed("item missing asset_legacy_id".into()))?;
+            .ok_or_else(|| JobRunError::Failed("item missing asset_numeric_id".into()))?;
         let asset_type = item
             .get("asset_type")
             .and_then(|x| x.as_str())
@@ -150,14 +150,14 @@ pub(super) async fn run_asset_polish_batch(
                 .await?;
 
         out.push(json!({
-            "asset_legacy_id": asset_legacy_id,
+            "asset_numeric_id": asset_legacy_id,
             "polished_prompt": text,
         }));
     }
 
     Ok(json!({
         "source": "assets-generate.batch-polish",
-        "project_legacy_id": project_legacy_id,
+        "project_numeric_id": project_legacy_id,
         "items": out,
     }))
 }

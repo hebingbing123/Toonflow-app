@@ -26,7 +26,7 @@ class NovelEventRow {
     return NovelEventRow(
       id: json['id'] as String,
       projectId: json['project_id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String? ?? '',
       detail: json['detail'] as String? ?? '',
       createTimeMs: json['create_time_ms'] == null

@@ -21,7 +21,7 @@ class AssetRow {
   factory AssetRow.fromJson(Map<String, dynamic> json) {
     return AssetRow(
       id: json['id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       assetType: json['asset_type'] as String,
       description: json['description'] as String?,
@@ -147,7 +147,7 @@ class CornerScapeHistoryImage {
       sortIndex: (json['sort_index'] as num).toInt(),
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
-      legacyImageId: (json['legacy_image_id'] as num?)?.toInt(),
+      legacyImageId: (json['numeric_image_id'] as num?)?.toInt(),
     );
   }
 }
@@ -182,7 +182,7 @@ class CornerScapeAssetItem {
     final meta = json['metadata'];
     return CornerScapeAssetItem(
       id: json['id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       assetType: json['asset_type'] as String,
       description: json['description'] as String?,
@@ -222,7 +222,7 @@ class AssetImageRow {
       sortIndex: (json['sort_index'] as num).toInt(),
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
-      legacyImageId: (json['legacy_image_id'] as num?)?.toInt(),
+      legacyImageId: (json['numeric_image_id'] as num?)?.toInt(),
       selected: json['selected'] as bool?,
     );
   }
@@ -238,7 +238,7 @@ class ListAssetImagesResponse {
   factory ListAssetImagesResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['items'] as List<dynamic>;
     return ListAssetImagesResponse(
-      coverLegacyImageId: (json['cover_legacy_image_id'] as num?)?.toInt(),
+      coverLegacyImageId: (json['cover_numeric_image_id'] as num?)?.toInt(),
       items: raw
           .map((e) => AssetImageRow.fromJson(e as Map<String, dynamic>))
           .toList(),

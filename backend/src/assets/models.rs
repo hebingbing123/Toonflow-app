@@ -15,7 +15,8 @@ use uuid::Uuid;
 pub struct AssetRow {
     /// 内部 UUID 主键 (`app_asset.id`)。
     pub id: Uuid,
-    /// 向客户端暴露的遗留整数 ID (`app_asset.legacy_id`)。
+    /// 向客户端暴露的稳定整数 ID（`app_asset.legacy_id` 列；JSON 键 **`numeric_id`**）。
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     /// 资产显示名称。
     pub name: String,
@@ -34,7 +35,7 @@ pub struct AssetRow {
 #[derive(Debug, Deserialize)]
 pub struct ListAssetsQuery {
     /// 设置时，仅返回项目中关联到此脚本 (`app_script.legacy_id`) 的资产。
-    #[serde(default)]
+    #[serde(default, rename = "script_numeric_id")]
     pub script_legacy_id: Option<i32>,
     /// role、tool 或 scene（遗留 getAssetsApi 的 type）。
     #[serde(default)]
@@ -68,7 +69,8 @@ pub struct ListAssetsResponse {
 pub struct CornerScapeAssetItem {
     /// 内部 UUID 主键。
     pub id: Uuid,
-    /// 向客户端暴露的遗留整数 ID。
+    /// 向客户端暴露的稳定整数 ID（JSON **`numeric_id`**）。
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     /// 资产显示名称。
     pub name: String,
@@ -156,8 +158,8 @@ pub(super) struct PatchAssetBody {
     /// 新资产类型，`null` 表示清除，或省略。
     #[serde(default)]
     pub asset_type: Option<Value>,
-    /// 封面图片遗留 ID，`null` 表示清除，或省略。
-    #[serde(default)]
+    /// 封面图片稳定整数 ID，`null` 表示清除，或省略（JSON **`cover_numeric_image_id`**）。
+    #[serde(default, rename = "cover_numeric_image_id")]
     pub cover_legacy_image_id: Option<Value>,
 }
 
@@ -176,7 +178,8 @@ pub struct AssetImageRow {
     pub file_path: Option<String>,
     /// 生成状态：如 pending、completed、failed。
     pub state: Option<String>,
-    /// 向后兼容的遗留整数 ID。
+    /// 图片的稳定整数 ID（`legacy_image_id` 列；JSON **`numeric_image_id`**）。
+    #[serde(rename = "numeric_image_id")]
     pub legacy_image_id: Option<i32>,
 }
 
@@ -197,7 +200,8 @@ pub struct AssetImageListItem {
 /// 包含封面图片 ID 和完整图片列表。
 #[derive(Debug, Serialize)]
 pub struct ListAssetImagesResponse {
-    /// 当前选中的封面图片遗留 ID。
+    /// 当前选中的封面图片稳定整数 ID（JSON **`cover_numeric_image_id`**）。
+    #[serde(rename = "cover_numeric_image_id")]
     pub cover_legacy_image_id: Option<i32>,
     /// 带选择标志的图片列表。
     pub items: Vec<AssetImageListItem>,

@@ -121,14 +121,14 @@ async fn run_polling_prompt_assets(
             AND (
               (
                 j.kind = 'asset.polish.prompt'
-                AND NULLIF(j.payload->>'asset_legacy_id', '')::integer = a.legacy_id
+                AND NULLIF(j.payload->>'asset_numeric_id', '')::integer = a.legacy_id
               )
               OR (
                 j.kind = 'asset.polish.batch'
                 AND EXISTS (
                   SELECT 1
                   FROM jsonb_array_elements(COALESCE(j.payload->'items', '[]'::jsonb)) it
-                  WHERE NULLIF(it->>'asset_legacy_id', '')::integer = a.legacy_id
+                  WHERE NULLIF(it->>'asset_numeric_id', '')::integer = a.legacy_id
                 )
               )
             )

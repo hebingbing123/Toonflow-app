@@ -44,17 +44,17 @@ info:
 
     **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors legacy cancel semantics by marking caller-owned **`app_asset_image`** row (**`legacy_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors legacy cancel semantics by marking caller-owned **`app_asset_image`** row (**`numeric_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`legacy_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_legacy_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`legacy_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
+    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`legacy_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
 
     **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
     **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`legacy_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
 
-        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_legacy_id}`**（**`novel_legacy_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_legacy_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
+        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -2399,7 +2399,7 @@ paths:
       operationId: listProjectAssetsByProjectIdV1
       description: |
         Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the project, ordered by **`legacy_id`**.
-        Optional query **`script_legacy_id`** restricts to assets linked via **`app_script_asset`** to that script (must belong to the same project).
+        Optional query **`script_numeric_id`** restricts to assets linked via **`app_script_asset`** to that script (must belong to the same project).
         Optional **`asset_type`** (**`role`** | **`tool`** | **`scene`**) and substring **`name`** (**`ILIKE`**) filter like legacy **`getAssetsApi`**.
         Optional **`limit`** (1–200) with **`page`** (1-based, default 1) paginate; without **`limit`**, all matches are returned and **`total`** equals **`items`** length.
       security:
@@ -2411,7 +2411,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: query
           required: false
           schema:
@@ -2464,7 +2464,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project not owned, or **`script_legacy_id`** not in this project
+          description: Project not owned, or **`script_numeric_id`** not in this project
           content:
             application/json:
               schema:
@@ -2652,7 +2652,7 @@ paths:
       operationId: postAssetsSaveAssetsV1
       description: |
         Parity with old **`POST /api/assets/saveAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        - With **`base64`**, inserts a new `app_asset_image` history row (`state=已完成`) and sets metadata `imageId` to the new `legacy_image_id`.
+        - With **`base64`**, inserts a new `app_asset_image` history row (`state=已完成`) and sets metadata `imageId` to the new `numeric_image_id`.
         - Without **`base64`**, updates metadata `imageId` from **`imageId`**.
         - Optional **`prompt`** updates metadata `prompt` (empty/null clears).
       security:
@@ -2864,7 +2864,7 @@ paths:
       operationId: postAssetsDelImageV1
       description: |
         Parity with old **`POST /api/assets/delImage`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Clears matching metadata `imageId` from caller-owned assets and deletes matching `app_asset_image` rows by **`legacy_image_id`**.
+        Clears matching metadata `imageId` from caller-owned assets and deletes matching `app_asset_image` rows by **`numeric_image_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -3141,7 +3141,7 @@ paths:
       description: |
         Parity with old **`POST /api/assets/pollingImageAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
         Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). For each id, the server reads the selected
-        cover image from **`app_asset.metadata.imageId`** and joins to **`app_asset_image.legacy_image_id`**.
+        cover image from **`app_asset.metadata.imageId`** and joins to **`app_asset_image.numeric_image_id`**.
         Only rows whose selected image state is **not** **`生成中`** are returned.
       security:
         - bearerAuth: []
@@ -3251,13 +3251,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/assets/{asset_legacy_id}:
+  /api/v1/projects/{project_id}/assets/{asset_numeric_id}:
     get:
       tags: [assets]
       summary: Single asset by project UUID and asset legacy id
       operationId: getProjectAssetByProjectIdV1
       description: |
-        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns one **`app_asset`** row when **`asset_legacy_id`** belongs to that project.
+        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns one **`app_asset`** row when **`asset_numeric_id`** belongs to that project.
       security:
         - bearerAuth: []
       parameters:
@@ -3267,7 +3267,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3319,7 +3319,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3383,7 +3383,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3417,14 +3417,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images:
+  /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images:
     get:
       tags: [assets]
       summary: List image history rows (by project UUID)
       operationId: listProjectAssetImagesByProjectIdV1
       description: |
         All **`app_asset_image`** rows for the asset, ordered by **`sort_index`** then **`created_at`** (includes any **`state`**).
-        **`cover_legacy_image_id`** is **`app_asset.metadata.imageId`**; each item includes **`selected`** when **`legacy_image_id`** matches.
+        **`cover_numeric_image_id`** is **`app_asset.metadata.imageId`**; each item includes **`selected`** when **`numeric_image_id`** matches.
       security:
         - bearerAuth: []
       parameters:
@@ -3434,7 +3434,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3476,7 +3476,7 @@ paths:
       summary: Add an image history row (by project UUID)
       operationId: createProjectAssetImageByProjectIdV1
       description: |
-        Inserts **`app_asset_image`** for the asset (**`asset_legacy_id`** in the project keyed by UUID **`project_id`**). Omitted **`state`** defaults to **`已完成`**; send **`state`**: **`""`** to store SQL **`NULL`**. **`sort_index`** defaults to **0**.
+        Inserts **`app_asset_image`** for the asset (**`asset_numeric_id`** in the project keyed by UUID **`project_id`**). Omitted **`state`** defaults to **`已完成`**; send **`state`**: **`""`** to store SQL **`NULL`**. **`sort_index`** defaults to **0**.
       security:
         - bearerAuth: []
       parameters:
@@ -3486,7 +3486,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3530,7 +3530,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}/file:
+  /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file:
     get:
       tags: [assets]
       summary: Download asset image bytes or redirect (by project UUID)
@@ -3548,7 +3548,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3599,7 +3599,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}:
+  /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}:
     get:
       tags: [assets]
       summary: Get one asset image row (by project UUID)
@@ -3613,7 +3613,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3669,7 +3669,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3731,7 +3731,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3771,7 +3771,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}:
+  /api/v1/projects/{project_id}/scripts/{script_numeric_id}/assets/{asset_numeric_id}:
     put:
       tags: [assets]
       summary: Link script to asset (by project UUID)
@@ -3788,13 +3788,13 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
             type: integer
             format: int32
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3840,13 +3840,13 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
             type: integer
             format: int32
-        - name: asset_legacy_id
+        - name: asset_numeric_id
           in: path
           required: true
           schema:
@@ -3991,13 +3991,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/scripts/{script_legacy_id}:
+  /api/v1/projects/{project_id}/scripts/{script_numeric_id}:
     get:
       tags: [scripts]
       summary: Script by project UUID + script legacy id
       operationId: getScriptByProjectAndLegacyV1
       description: |
-        Returns **`app_script`** for **`script_legacy_id`** when that script belongs to **`project_id`** (UUID).
+        Returns **`app_script`** for **`script_numeric_id`** when that script belongs to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -4007,7 +4007,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
@@ -4055,7 +4055,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
@@ -4111,7 +4111,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
@@ -4259,13 +4259,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/novels/{novel_legacy_id}:
+  /api/v1/projects/{project_id}/novels/{novel_numeric_id}:
     get:
       tags: [novels]
       summary: Get one novel chapter (by project UUID + novel legacy id)
       operationId: getProjectNovelByProjectIdV1
       description: |
-        Returns one **`app_novel`** row for the authenticated user, scoped by project UUID (**`app_project.id`**) and **`novel_legacy_id`** (**`app_novel.legacy_id`**).
+        Returns one **`app_novel`** row for the authenticated user, scoped by project UUID (**`app_project.id`**) and **`novel_numeric_id`** (**`app_novel.legacy_id`**).
       security:
         - bearerAuth: []
       parameters:
@@ -4275,7 +4275,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: novel_legacy_id
+        - name: novel_numeric_id
           in: path
           required: true
           schema:
@@ -4319,7 +4319,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: novel_legacy_id
+        - name: novel_numeric_id
           in: path
           required: true
           schema:
@@ -4367,7 +4367,7 @@ paths:
       summary: Delete a novel chapter (by project UUID)
       operationId: deleteProjectNovelByProjectIdV1
       description: |
-        Deletes the novel row for the given project UUID and **`novel_legacy_id`** (**`app_novel.legacy_id`**).
+        Deletes the novel row for the given project UUID and **`novel_numeric_id`** (**`app_novel.legacy_id`**).
       security:
         - bearerAuth: []
       parameters:
@@ -4377,7 +4377,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: novel_legacy_id
+        - name: novel_numeric_id
           in: path
           required: true
           schema:
@@ -5025,7 +5025,7 @@ paths:
       summary: Batch-polish asset prompts (legacy `batchPolishAssetsPrompt` parity)
       operationId: postAssetsBatchPolishV1
       description: |
-        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker runs one chat completion per **`items[]`** and **`succeeded`** with **`result.items`** (**`asset_legacy_id`** + **`polished_prompt`** each); otherwise **`failed`**.
+        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker runs one chat completion per **`items[]`** and **`succeeded`** with **`result.items`** (**`asset_numeric_id`** + **`polished_prompt`** each); otherwise **`failed`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -5079,7 +5079,7 @@ paths:
       operationId: postAssetsGenerateCancelGenerateV1
       description: |
         Bearer JWT. Validates positive **`id`** and marks caller-owned **`app_asset_image`**
-        row (**`legacy_image_id = id`**) to **`state = 生成失败`**. This endpoint intentionally
+        row (**`numeric_image_id = id`**) to **`state = 生成失败`**. This endpoint intentionally
         keeps legacy idempotent behavior: when no row matches, still returns **200** with success message.
       security:
         - bearerAuth: []
@@ -6663,7 +6663,7 @@ paths:
       description: |
         Returns **`application/zip`** with one **`.txt`** per script (**`{legacy_id}_{sanitized_name}.txt`**).
         Only scripts **owned** by the caller (via `app_project.owner_user_id`) are included; unknown legacy ids are **omitted** (legacy SQLite behavior).
-        Request body **`legacy_ids`** must be **non-empty** positive integers, at most **500** per call.
+        Request body **`numeric_ids`** must be **non-empty** positive integers, at most **500** per call.
       security:
         - bearerAuth: []
       requestBody:
@@ -6686,7 +6686,7 @@ paths:
                 type: string
                 example: attachment; filename="scripts.zip"
         "400":
-          description: Empty or too many `legacy_ids`, or unknown JSON fields
+          description: Empty or too many `numeric_ids`, or unknown JSON fields
           content:
             application/json:
               schema:
@@ -6801,13 +6801,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards:
+  /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards:
     get:
       tags: [storyboards]
       summary: List storyboards for a script (by project UUID + script legacy id)
       operationId: listStoryboardsByProjectAndScriptLegacyV1
       description: |
-        Lists **`app_storyboard`** rows for the script **`script_legacy_id`** under **`project_id`** (**`app_project.id`** UUID).
+        Lists **`app_storyboard`** rows for the script **`script_numeric_id`** under **`project_id`** (**`app_project.id`** UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -6817,7 +6817,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
@@ -6865,7 +6865,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: script_legacy_id
+        - name: script_numeric_id
           in: path
           required: true
           schema:
@@ -6909,13 +6909,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}:
+  /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}:
     get:
       tags: [storyboards]
       summary: Storyboard by legacy id (scoped to project UUID)
       operationId: getStoryboardByProjectAndLegacyV1
       description: |
-        Returns **`app_storyboard`** for **`storyboard_legacy_id`** when that row belongs to **`project_id`** (UUID).
+        Returns **`app_storyboard`** for **`storyboard_numeric_id`** when that row belongs to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -6925,7 +6925,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: storyboard_legacy_id
+        - name: storyboard_numeric_id
           in: path
           required: true
           schema:
@@ -6971,7 +6971,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: storyboard_legacy_id
+        - name: storyboard_numeric_id
           in: path
           required: true
           schema:
@@ -7027,7 +7027,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: storyboard_legacy_id
+        - name: storyboard_numeric_id
           in: path
           required: true
           schema:
@@ -7769,7 +7769,7 @@ paths:
       operationId: listJobsPageV1
       description: |
         Same filter semantics as removed **`POST /api/v1/tasks/get-task-api`**: optional **`task_class`** (exact **`kind`**),
-        **`state`** (exact **`status`**), optional **`project_id`** (only when **`> 0`**; matches **`payload.project_legacy_id`** as string).
+        **`state`** (exact **`status`**), optional **`project_id`** (only when **`> 0`**; matches **`payload.project_numeric_id`** as string).
         **`page`** defaults to **1**; **`limit`** defaults to **20**, max **100**. **`page`** must be **>= 1**.
       security:
         - bearerAuth: []
@@ -7839,10 +7839,10 @@ paths:
   /api/v1/jobs/task-detail/{task_id}:
     get:
       tags: [jobs]
-      summary: Job row by UUID or legacy_task_id (path segment)
+      summary: Job row by UUID or numeric_task_id (path segment)
       operationId: getJobTaskDetailCompatV1
       description: |
-        **`task_id`** path segment: **UUID** → **`app_generation_job.id`**; positive integer (or digits-only, e.g. **`42`**) → **`legacy_task_id`**.
+        **`task_id`** path segment: **UUID** → **`app_generation_job.id`**; positive integer (or digits-only, e.g. **`42`**) → **`numeric_task_id`**.
         Other strings → **400**. Same **`JobRow`** as **`GET /api/v1/jobs/{id}`** when **`task_id`** is a UUID.
       security:
         - bearerAuth: []
@@ -8279,13 +8279,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/projects/{project_id}/novel-events/{event_legacy_id}:
+  /api/v1/projects/{project_id}/novel-events/{event_numeric_id}:
     patch:
       tags: [novel-events]
       summary: Update a novel event (by project UUID)
       operationId: updateProjectNovelEventByProjectIdV1
       description: |
-        Updates the event identified by **`event_legacy_id`** (**`app_novel_event.legacy_id`**) under **`app_project.id`** = **`project_id`**.
+        Updates the event identified by **`event_numeric_id`** (**`app_novel_event.legacy_id`**) under **`app_project.id`** = **`project_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -8295,7 +8295,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: event_legacy_id
+        - name: event_numeric_id
           in: path
           required: true
           schema:
@@ -8344,7 +8344,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: event_legacy_id
+        - name: event_numeric_id
           in: path
           required: true
           schema:
@@ -9289,7 +9289,7 @@ components:
           type: integer
           format: int32
           minimum: 1
-          description: Legacy image id (`app_asset_image.legacy_image_id`)
+          description: Legacy image id (`app_asset_image.numeric_image_id`)
 
     ProductionStoryboardIdsBody:
       type: object
@@ -10732,7 +10732,7 @@ components:
         id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -10856,7 +10856,7 @@ components:
     PatchAssetBody:
       type: object
       additionalProperties: false
-      description: "At least one property required; unknown properties rejected (400). cover_legacy_image_id maps to app_asset.metadata.imageId (legacy o_assets.imageId); when a number, must match app_asset_image.legacy_image_id for this asset."
+      description: "At least one property required; unknown properties rejected (400). cover_numeric_image_id maps to app_asset.metadata.imageId (legacy o_assets.imageId); when a number, must match app_asset_image.numeric_image_id for this asset."
       properties:
         name:
           type: string
@@ -10867,7 +10867,7 @@ components:
         asset_type:
           type: string
           enum: [role, tool, scene]
-        cover_legacy_image_id:
+        cover_numeric_image_id:
           type: integer
           format: int32
           nullable: true
@@ -10881,7 +10881,7 @@ components:
         id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -10940,7 +10940,7 @@ components:
         sort_index:
           type: integer
           format: int32
-        legacy_image_id:
+        numeric_image_id:
           type: integer
           format: int32
           nullable: true
@@ -10968,7 +10968,7 @@ components:
       type: object
       required: [items]
       properties:
-        cover_legacy_image_id:
+        cover_numeric_image_id:
           type: integer
           format: int32
           nullable: true
@@ -11086,7 +11086,7 @@ components:
           type: integer
           format: int32
           nullable: true
-          description: app_asset_image.legacy_image_id (null for API-created rows without legacy id)
+          description: app_asset_image.numeric_image_id (null for API-created rows without legacy id)
         imageUuid:
           type: string
           format: uuid
@@ -11416,7 +11416,7 @@ components:
           properties:
             selected:
               type: boolean
-              description: True when legacy_image_id equals cover_legacy_image_id.
+              description: True when numeric_image_id equals cover_numeric_image_id.
 
     AssetImageRow:
       type: object
@@ -11438,7 +11438,7 @@ components:
         state:
           type: string
           nullable: true
-        legacy_image_id:
+        numeric_image_id:
           type: integer
           format: int32
           nullable: true
@@ -11469,7 +11469,7 @@ components:
         id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -11511,7 +11511,7 @@ components:
         id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -11604,7 +11604,7 @@ components:
         id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         chapter_index:
@@ -11691,7 +11691,7 @@ components:
       type: object
       required: [legacy_id]
       properties:
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -11788,7 +11788,7 @@ components:
         project_id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         name:
@@ -11873,9 +11873,9 @@ components:
     ExportScriptsBody:
       type: object
       additionalProperties: false
-      required: [legacy_ids]
+      required: [numeric_ids]
       properties:
-        legacy_ids:
+        numeric_ids:
           type: array
           items:
             type: integer
@@ -11887,9 +11887,9 @@ components:
     ScriptExtractStatePollBody:
       type: object
       additionalProperties: false
-      required: [legacy_ids]
+      required: [numeric_ids]
       properties:
-        legacy_ids:
+        numeric_ids:
           type: array
           items:
             type: integer
@@ -11902,7 +11902,7 @@ components:
       type: object
       required: [legacy_id]
       properties:
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         extract_state:
@@ -11916,13 +11916,13 @@ components:
     ExtractAssetsStartBody:
       type: object
       additionalProperties: false
-      required: [project_legacy_id, script_legacy_ids]
+      required: [project_numeric_id, script_numeric_ids]
       properties:
-        project_legacy_id:
+        project_numeric_id:
           type: integer
           format: int32
           minimum: 1
-        script_legacy_ids:
+        script_numeric_ids:
           type: array
           items:
             type: integer
@@ -11958,7 +11958,7 @@ components:
         script_id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
           format: int32
         legacy_script_id:
@@ -12854,7 +12854,7 @@ components:
     JobRow:
       type: object
       required:
-        - legacy_task_id
+        - numeric_task_id
         - id
         - owner_user_id
         - kind
@@ -12863,7 +12863,7 @@ components:
         - created_at
         - updated_at
       properties:
-        legacy_task_id:
+        numeric_task_id:
           type: integer
           format: int64
           description: Monotonic bigint compatibility id for legacy task-center integer lookups.
@@ -12961,7 +12961,7 @@ components:
         project_id:
           type: string
           format: uuid
-        legacy_id:
+        numeric_id:
           type: integer
         name:
           type: string

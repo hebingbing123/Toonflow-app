@@ -97,7 +97,8 @@ List<int> extractScriptWorkspaceNovelIds(Object? result) {
   final items = _extractResultItems(result);
   final ids = <int>[];
   for (final row in items) {
-    final rawId = row['legacy_id'] ?? row['legacyId'] ?? row['id'];
+    final rawId =
+        row['numeric_id'] ?? row['numericId'] ?? row['legacyId'] ?? row['id'];
     if (rawId is num && rawId > 0) {
       ids.add(rawId.toInt());
     }

@@ -37,6 +37,7 @@ const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提�
 #[derive(Debug, FromRow, Serialize)]
 pub struct ArtStyleRow {
     pub id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     pub name: String,
     pub file_url: Option<String>,

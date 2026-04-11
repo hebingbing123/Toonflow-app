@@ -485,7 +485,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final scriptRows = <Map<String, dynamic>>[];
     if (scriptRaw is List) {
       for (final item in scriptRaw.whereType<Map<String, dynamic>>()) {
-        final rawId = item['legacy_id'] ?? item['id'];
+        final rawId = item['numeric_id'] ?? item['id'];
         int? sid;
         if (rawId is int) {
           sid = rawId;

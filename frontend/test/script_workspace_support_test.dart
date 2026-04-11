@@ -5,7 +5,7 @@ void main() {
   test('extractScriptWorkspaceNovelIds reads legacy ids from items', () {
     final ids = extractScriptWorkspaceNovelIds(<String, dynamic>{
       'items': <Map<String, dynamic>>[
-        <String, dynamic>{'legacy_id': 11},
+        <String, dynamic>{'numeric_id': 11},
         <String, dynamic>{'legacyId': 12},
         <String, dynamic>{'id': 13},
       ],
@@ -43,8 +43,8 @@ void main() {
         toolName: 'get_novel_text',
         result: <String, dynamic>{
           'items': <Map<String, dynamic>>[
-            <String, dynamic>{'legacy_id': 21},
-            <String, dynamic>{'legacy_id': 22},
+            <String, dynamic>{'numeric_id': 21},
+            <String, dynamic>{'numeric_id': 22},
           ],
         },
       );

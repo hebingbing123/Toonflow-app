@@ -8,6 +8,7 @@ use uuid::Uuid;
 #[derive(Debug, FromRow, Serialize)]
 pub struct NovelRow {
     pub id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     pub chapter_index: i32,
     pub reel: Option<String>,

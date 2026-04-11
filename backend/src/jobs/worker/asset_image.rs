@@ -176,7 +176,7 @@ async fn generate_and_store_asset_image(
     .map_err(|e| JobRunError::Failed(e.to_string()))?;
 
     Ok(json!({
-        "asset_legacy_id": asset_legacy_id,
+        "asset_numeric_id": asset_legacy_id,
         "asset_image_id": image_row_id,
         "image_url": image_url,
         "revised_prompt": revised,
@@ -202,15 +202,15 @@ pub(super) async fn run_asset_generate_image(
 
     let p = &row.payload;
     let project_legacy_id = p
-        .get("project_legacy_id")
+        .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
     let asset_legacy_id = p
-        .get("asset_legacy_id")
+        .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
-        .ok_or_else(|| JobRunError::Failed("payload missing asset_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing asset_numeric_id".into()))?;
     let model_in = p
         .get("model")
         .and_then(|x| x.as_str())
@@ -261,10 +261,10 @@ pub(super) async fn run_asset_generate_image(
 
     Ok(json!({
         "source": "assets-generate.generate",
-        "project_legacy_id": project_legacy_id,
+        "project_numeric_id": project_legacy_id,
         "image_model": image_model,
         "size": size,
-        "asset_legacy_id": asset_legacy_id,
+        "asset_numeric_id": asset_legacy_id,
         "asset_image_id": body["asset_image_id"],
         "image_url": body["image_url"],
         "revised_prompt": body["revised_prompt"],
@@ -286,10 +286,10 @@ pub(super) async fn run_asset_generate_batch(
 
     let p = &row.payload;
     let project_legacy_id = p
-        .get("project_legacy_id")
+        .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
-        .ok_or_else(|| JobRunError::Failed("payload missing project_legacy_id".into()))?;
+        .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
     let model_in = p
         .get("model")
         .and_then(|x| x.as_str())
@@ -339,10 +339,10 @@ pub(super) async fn run_asset_generate_batch(
         }
 
         let asset_legacy_id = item
-            .get("asset_legacy_id")
+            .get("asset_numeric_id")
             .and_then(|x| x.as_i64())
             .and_then(|n| i32::try_from(n).ok())
-            .ok_or_else(|| JobRunError::Failed("item missing asset_legacy_id".into()))?;
+            .ok_or_else(|| JobRunError::Failed("item missing asset_numeric_id".into()))?;
         let name = item.get("name").and_then(|x| x.as_str()).unwrap_or("");
         let prompt = item
             .get("prompt")
@@ -364,7 +364,7 @@ pub(super) async fn run_asset_generate_batch(
 
     Ok(json!({
         "source": "assets-generate.batch-generate",
-        "project_legacy_id": project_legacy_id,
+        "project_numeric_id": project_legacy_id,
         "image_model": image_model,
         "size": size,
         "items": out,

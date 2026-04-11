@@ -27,7 +27,7 @@ async fn projects_create_requires_database_with_jwt() {
 async fn scripts_extract_state_poll_unauthorized_without_bearer() {
     let (status, v) = post_json(
         "/api/v1/scripts/extract-state/poll",
-        r#"{"legacy_ids":[1]}"#,
+        r#"{"numeric_ids":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -38,7 +38,7 @@ async fn scripts_extract_state_poll_unauthorized_without_bearer() {
 async fn scripts_extract_assets_unauthorized_without_bearer() {
     let (status, v) = post_json(
         "/api/v1/scripts/extract-assets",
-        r#"{"project_legacy_id":1,"script_legacy_ids":[1]}"#,
+        r#"{"project_numeric_id":1,"script_numeric_ids":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);

@@ -353,8 +353,8 @@ mod tests {
     }
 
     #[test]
-    fn patch_asset_body_accepts_cover_legacy_image_id_only() {
-        let b: PatchAssetBody = serde_json::from_str(r#"{"cover_legacy_image_id":42}"#).unwrap();
+    fn patch_asset_body_accepts_cover_numeric_image_id_only() {
+        let b: PatchAssetBody = serde_json::from_str(r#"{"cover_numeric_image_id":42}"#).unwrap();
         assert!(b.name.is_none());
         assert_eq!(
             crate::http_kit::json_patch::parse_optional_i32_field(b.cover_legacy_image_id, "c")

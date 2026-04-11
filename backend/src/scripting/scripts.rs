@@ -27,6 +27,7 @@ use crate::state::AppState;
 pub struct ScriptRow {
     pub id: Uuid,
     pub project_id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     pub name: Option<String>,
     pub content: Option<String>,
@@ -89,17 +90,18 @@ const MAX_SCRIPT_EXTRACT_POLL: usize = 2_000;
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ExportScriptsBody {
-    legacy_ids: Vec<i32>,
+    numeric_ids: Vec<i32>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ScriptExtractPollBody {
-    legacy_ids: Vec<i32>,
+    numeric_ids: Vec<i32>,
 }
 
 #[derive(Debug, Serialize, FromRow)]
 struct ScriptExtractPollRow {
+    #[serde(rename = "numeric_id")]
     legacy_id: i32,
     extract_state: Option<i32>,
     error_reason: Option<String>,
@@ -355,12 +357,12 @@ fn normalize_legacy_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32
     ids.dedup();
     if ids.is_empty() {
         return Err(ApiError::BadRequest(
-            "legacy_ids must be non-empty (positive integers)".into(),
+            "numeric_ids must be non-empty (positive integers)".into(),
         ));
     }
     if ids.len() > max_len {
         return Err(ApiError::BadRequest(format!(
-            "at most {max_len} legacy_ids per request"
+            "at most {max_len} numeric_ids per request"
         )));
     }
     Ok(ids)
@@ -420,7 +422,7 @@ async fn export_scripts_zip(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXPORT)?;
+    let legacy_ids = normalize_legacy_id_list(body.numeric_ids, MAX_SCRIPT_EXPORT)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -481,7 +483,7 @@ async fn poll_script_extract_state(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_legacy_id_list(body.legacy_ids, MAX_SCRIPT_EXTRACT_POLL)?;
+    let legacy_ids = normalize_legacy_id_list(body.numeric_ids, MAX_SCRIPT_EXTRACT_POLL)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -824,7 +826,7 @@ mod tests {
     #[test]
     fn export_scripts_body_rejects_unknown_fields() {
         let err =
-            serde_json::from_str::<ExportScriptsBody>(r#"{"legacy_ids":[1],"x":1}"#).unwrap_err();
+            serde_json::from_str::<ExportScriptsBody>(r#"{"numeric_ids":[1],"x":1}"#).unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),

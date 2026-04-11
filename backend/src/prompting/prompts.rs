@@ -79,7 +79,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/prompts", get(list_prompts))
         .route(
-            "/api/v1/prompts/{legacy_id}",
+            "/api/v1/prompts/{numeric_id}",
             get(get_prompt).patch(patch_prompt),
         )
 }
@@ -139,10 +139,10 @@ async fn list_prompts(
 async fn get_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let def = slot_by_legacy_id(legacy_id).ok_or(ApiError::NotFound)?;
+    let def = slot_by_legacy_id(numeric_id).ok_or(ApiError::NotFound)?;
     let pool = state
         .pool
         .as_ref()
@@ -156,7 +156,7 @@ async fn get_prompt(
         "#,
     )
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -167,11 +167,11 @@ async fn get_prompt(
 async fn patch_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Path(legacy_id): Path<i32>,
+    Path(numeric_id): Path<i32>,
     Json(body): Json<PatchPromptBody>,
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let def = slot_by_legacy_id(legacy_id).ok_or(ApiError::NotFound)?;
+    let def = slot_by_legacy_id(numeric_id).ok_or(ApiError::NotFound)?;
     let pool = state
         .pool
         .as_ref()

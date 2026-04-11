@@ -21,6 +21,7 @@ use crate::state::AppState;
 #[derive(Debug, FromRow, Serialize)]
 pub struct ProjectRow {
     pub id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     pub name: Option<String>,
     pub intro: Option<String>,
@@ -37,6 +38,7 @@ pub struct ProjectRow {
 
 #[derive(Debug, FromRow, Serialize)]
 struct ScriptBrief {
+    #[serde(rename = "numeric_id")]
     legacy_id: i32,
     name: Option<String>,
     extract_state: Option<i32>,
@@ -465,7 +467,7 @@ async fn project_stats_by_id(
         WHERE owner_user_id = $2
           AND status = 'succeeded'
           AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
-          AND payload->>'project_legacy_id' = (
+          AND payload->>'project_numeric_id' = (
               SELECT legacy_id::text FROM app_project WHERE id = $1
           )
         "#,

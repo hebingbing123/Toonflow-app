@@ -34,7 +34,7 @@ class ProjectRow {
   factory ProjectRow.fromJson(Map<String, dynamic> json) {
     return ProjectRow(
       id: json['id'] as String,
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       intro: json['intro'] as String?,
       projectType: json['project_type'] as String?,
@@ -63,7 +63,7 @@ class ScriptBrief {
 
   factory ScriptBrief.fromJson(Map<String, dynamic> json) {
     return ScriptBrief(
-      legacyId: (json['legacy_id'] as num).toInt(),
+      legacyId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       extractState: json['extract_state'] == null
           ? null

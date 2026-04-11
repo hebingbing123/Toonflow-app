@@ -79,7 +79,7 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     for asset_id in &body.asset_ids {
         let payload = serde_json::json!({
             "source": "production.assets.batch-generate",
-            "project_legacy_id": body.project_id,
+            "project_numeric_id": body.project_id,
             "script_id": body.script_id,
             "asset_id": asset_id,
             "model": default_model,

@@ -20,27 +20,37 @@ pub(crate) struct NewAssetItem {
     pub(crate) desc: String,
     #[serde(rename = "type")]
     pub(crate) asset_type: String,
-    #[serde(default, alias = "scriptIds", alias = "scriptLegacyIds")]
-    pub(crate) script_legacy_ids: Vec<i32>,
+    #[serde(
+        default,
+        alias = "scriptIds",
+        alias = "scriptLegacyIds",
+        alias = "script_legacy_ids"
+    )]
+    pub(crate) script_numeric_ids: Vec<i32>,
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct ExistingRefItem {
     pub(crate) name: String,
-    #[serde(default, alias = "scriptIds", alias = "scriptLegacyIds")]
-    pub(crate) script_legacy_ids: Vec<i32>,
+    #[serde(
+        default,
+        alias = "scriptIds",
+        alias = "scriptLegacyIds",
+        alias = "script_legacy_ids"
+    )]
+    pub(crate) script_numeric_ids: Vec<i32>,
 }
 
 pub(crate) struct NewAssetItemFiltered {
     pub(crate) name: String,
     pub(crate) desc: String,
     pub(crate) asset_type: String,
-    pub(crate) script_legacy_ids: Vec<i32>,
+    pub(crate) script_numeric_ids: Vec<i32>,
 }
 
 pub(crate) struct ExistingRefItemFiltered {
     pub(crate) name: String,
-    pub(crate) script_legacy_ids: Vec<i32>,
+    pub(crate) script_numeric_ids: Vec<i32>,
 }
 
 pub(crate) fn filter_tool_new_assets(
@@ -58,15 +68,15 @@ pub(crate) fn filter_tool_new_assets(
         if name.is_empty() || !seen_name.insert(name.clone()) {
             continue;
         }
-        it.script_legacy_ids.retain(|id| valid.contains(id));
-        if it.script_legacy_ids.is_empty() {
+        it.script_numeric_ids.retain(|id| valid.contains(id));
+        if it.script_numeric_ids.is_empty() {
             continue;
         }
         out.push(NewAssetItemFiltered {
             name,
             desc: it.desc,
             asset_type: t,
-            script_legacy_ids: it.script_legacy_ids,
+            script_numeric_ids: it.script_numeric_ids,
         });
     }
     out
@@ -82,13 +92,13 @@ pub(crate) fn filter_tool_existing(
         if name.is_empty() {
             continue;
         }
-        it.script_legacy_ids.retain(|id| valid.contains(id));
-        if it.script_legacy_ids.is_empty() {
+        it.script_numeric_ids.retain(|id| valid.contains(id));
+        if it.script_numeric_ids.is_empty() {
             continue;
         }
         out.push(ExistingRefItemFiltered {
             name,
-            script_legacy_ids: it.script_legacy_ids,
+            script_numeric_ids: it.script_numeric_ids,
         });
     }
     out
@@ -103,12 +113,12 @@ fn extract_tool_schema() -> Value {
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "required": ["name", "desc", "type", "script_legacy_ids"],
+                    "required": ["name", "desc", "type", "script_numeric_ids"],
                     "properties": {
                         "name": { "type": "string" },
                         "desc": { "type": "string" },
                         "type": { "type": "string", "enum": ["role", "tool", "scene"] },
-                        "script_legacy_ids": {
+                        "script_numeric_ids": {
                             "type": "array",
                             "items": { "type": "integer" }
                         }
@@ -120,10 +130,10 @@ fn extract_tool_schema() -> Value {
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "required": ["name", "script_legacy_ids"],
+                    "required": ["name", "script_numeric_ids"],
                     "properties": {
                         "name": { "type": "string" },
-                        "script_legacy_ids": {
+                        "script_numeric_ids": {
                             "type": "array",
                             "items": { "type": "integer" }
                         }
@@ -229,7 +239,7 @@ mod tests {
                 name: "A".into(),
                 desc: "d".into(),
                 asset_type: "wizard".into(),
-                script_legacy_ids: vec![1],
+                script_numeric_ids: vec![1],
             }],
             &valid,
         );

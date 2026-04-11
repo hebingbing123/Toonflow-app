@@ -517,9 +517,9 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
     for item in &body.items {
         let payload = serde_json::json!({
             "source": "production.storyboard.batch-generate-image",
-            "project_legacy_id": body.project_id,
+            "project_numeric_id": body.project_id,
             "script_id": body.script_id,
-            "storyboard_id": item.storyboard_id,
+            "storyboard_numeric_id": item.storyboard_id,
             "prompt": item.prompt,
             "negative_prompt": item.negative_prompt,
             "model": item.model.as_deref().unwrap_or(default_model),

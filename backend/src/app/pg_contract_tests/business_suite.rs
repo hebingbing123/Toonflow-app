@@ -852,7 +852,7 @@ async fn promote_staging_populates_assets_and_links() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{}/assets?script_legacy_id={}",
+                    "/api/v1/projects/{}/assets?script_numeric_id={}",
                     promo_project_uuid, PROMO_SCRIPT_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))

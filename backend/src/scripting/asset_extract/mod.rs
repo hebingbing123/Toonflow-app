@@ -24,9 +24,9 @@ const DEFAULT_GROUP_SIZE: usize = 5;
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExtractAssetsBody {
-    /// Legacy **`o_project.id`** for the scripts' parent project.
-    pub project_legacy_id: i32,
-    pub script_legacy_ids: Vec<i32>,
+    /// Stable project integer id (`app_project.legacy_id`).
+    pub project_numeric_id: i32,
+    pub script_numeric_ids: Vec<i32>,
     #[serde(default = "default_group_size")]
     pub group_size: usize,
 }
@@ -60,13 +60,13 @@ async fn start_script_asset_extract(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
-    if body.project_legacy_id <= 0 {
+    if body.project_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
+            "project_numeric_id must be positive".into(),
         ));
     }
     let mut script_ids: Vec<i32> = body
-        .script_legacy_ids
+        .script_numeric_ids
         .into_iter()
         .filter(|id| *id > 0)
         .collect();
@@ -74,12 +74,12 @@ async fn start_script_asset_extract(
     script_ids.dedup();
     if script_ids.is_empty() {
         return Err(ApiError::BadRequest(
-            "script_legacy_ids must be non-empty".into(),
+            "script_numeric_ids must be non-empty".into(),
         ));
     }
     if script_ids.len() > MAX_SCRIPT_IDS {
         return Err(ApiError::BadRequest(format!(
-            "at most {MAX_SCRIPT_IDS} script_legacy_ids"
+            "at most {MAX_SCRIPT_IDS} script_numeric_ids"
         )));
     }
     let group_size = body.group_size.clamp(1, MAX_GROUP_SIZE);
@@ -87,7 +87,7 @@ async fn start_script_asset_extract(
     let pool = pool.clone();
     let cfg = cfg.clone();
     let client = state.http_client.clone();
-    let project_legacy_id = body.project_legacy_id;
+    let project_numeric_id = body.project_numeric_id;
 
     tokio::spawn(async move {
         if let Err(e) = extract_job::run_extract_job(
@@ -95,7 +95,7 @@ async fn start_script_asset_extract(
             cfg,
             client,
             uid,
-            project_legacy_id,
+            project_numeric_id,
             script_ids,
             group_size,
         )
@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn extract_body_rejects_unknown_fields() {
         let err = serde_json::from_str::<ExtractAssetsBody>(
-            r#"{"project_legacy_id":1,"script_legacy_ids":[1],"group_size":3,"x":1}"#,
+            r#"{"project_numeric_id":1,"script_numeric_ids":[1],"group_size":3,"x":1}"#,
         )
         .unwrap_err();
         assert!(

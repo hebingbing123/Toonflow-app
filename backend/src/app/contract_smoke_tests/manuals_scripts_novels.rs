@@ -563,7 +563,7 @@ async fn agents_memory_append_requires_database_with_jwt() {
 async fn scripts_export_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) =
-        post_json_bearer("/api/v1/scripts/export", &token, r#"{"legacy_ids":[1]}"#).await;
+        post_json_bearer("/api/v1/scripts/export", &token, r#"{"numeric_ids":[1]}"#).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -574,7 +574,7 @@ async fn scripts_extract_state_poll_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/scripts/extract-state/poll",
         &token,
-        r#"{"legacy_ids":[1]}"#,
+        r#"{"numeric_ids":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -587,7 +587,7 @@ async fn scripts_extract_assets_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/scripts/extract-assets",
         &token,
-        r#"{"project_legacy_id":1,"script_legacy_ids":[1]}"#,
+        r#"{"project_numeric_id":1,"script_numeric_ids":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

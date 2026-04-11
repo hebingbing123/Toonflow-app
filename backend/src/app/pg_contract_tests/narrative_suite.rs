@@ -38,9 +38,9 @@ async fn task_center_jobs_rest_roundtrip() {
         .unwrap();
     let (status, created_project) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "project={created_project}");
-    let legacy_project_id = created_project["legacy_id"]
+    let legacy_project_id = created_project["numeric_id"]
         .as_i64()
-        .expect("legacy project id") as i32;
+        .expect("numeric project id") as i32;
 
     let res = app
         .clone()
@@ -53,7 +53,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header("Idempotency-Key", idem_key.as_str())
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"flutter.probe","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"idem"}}}}"#
+                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"idem"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -80,7 +80,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header("Idempotency-Key", idem_key.as_str())
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"flutter.probe","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"idem-retry"}}}}"#
+                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"idem-retry"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -101,7 +101,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_GENERATE_IMAGE}","payload":{{"project_legacy_id":"{legacy_project_id}","scope":"task-center","marker":"failed"}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_GENERATE_IMAGE}","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"failed"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -139,7 +139,7 @@ async fn task_center_jobs_rest_roundtrip() {
     let task_projects = task_projects.as_array().expect("task project rows");
     assert!(
         task_projects.iter().any(|row| {
-            row["legacy_id"].as_i64() == Some(i64::from(legacy_project_id))
+            row["numeric_id"].as_i64() == Some(i64::from(legacy_project_id))
                 && row["name"].as_str() == Some(project_name.as_str())
         }),
         "task center project list should include created project: {task_projects:?}"
@@ -264,10 +264,13 @@ async fn task_center_jobs_rest_roundtrip() {
     let (status, task_detail) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "task_detail={task_detail}");
     assert_eq!(task_detail["id"], created_job["id"]);
-    assert_eq!(task_detail["legacy_task_id"], created_job["legacy_task_id"]);
+    assert_eq!(
+        task_detail["numeric_task_id"],
+        created_job["numeric_task_id"]
+    );
     let legacy_project_id_text = legacy_project_id.to_string();
     assert_eq!(
-        task_detail["payload"]["project_legacy_id"].as_str(),
+        task_detail["payload"]["project_numeric_id"].as_str(),
         Some(legacy_project_id_text.as_str())
     );
 
@@ -278,7 +281,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .method(Method::GET)
                 .uri(format!(
                     "/api/v1/jobs/task-detail/{}",
-                    created_job["legacy_task_id"]
+                    created_job["numeric_task_id"]
                         .as_i64()
                         .expect("legacy task id")
                 ))
@@ -297,8 +300,8 @@ async fn task_center_jobs_rest_roundtrip() {
     );
     assert_eq!(task_detail_by_int["id"], created_job["id"]);
     assert_eq!(
-        task_detail_by_int["legacy_task_id"],
-        created_job["legacy_task_id"]
+        task_detail_by_int["numeric_task_id"],
+        created_job["numeric_task_id"]
     );
 
     let res = app
@@ -308,7 +311,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .method(Method::GET)
                 .uri(format!(
                     "/api/v1/jobs/task-detail/{}",
-                    created_job["legacy_task_id"]
+                    created_job["numeric_task_id"]
                         .as_i64()
                         .expect("legacy task id")
                 ))
@@ -369,7 +372,7 @@ async fn novel_events_crud_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project id");
 
     // Add novels first to have chapter_ids to associate
@@ -556,7 +559,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     for body in [
@@ -724,7 +727,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     let non_zero: Vec<&serde_json::Value> = items
         .iter()
         .filter(|row| {
-            let Some(lid) = row["legacy_id"].as_i64() else {
+            let Some(lid) = row["numeric_id"].as_i64() else {
                 return false;
             };
             let lid = lid as i32;
@@ -787,7 +790,7 @@ async fn script_agent_plan_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let res = app
         .clone()

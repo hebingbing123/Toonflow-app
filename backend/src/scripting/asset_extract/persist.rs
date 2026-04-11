@@ -92,7 +92,7 @@ pub(crate) async fn persist_group(
         let Some(aid) = name_to_id.get(&na.name).copied() else {
             continue;
         };
-        for lid in &na.script_legacy_ids {
+        for lid in &na.script_numeric_ids {
             if let Some(sid) = legacy_to_script.get(lid) {
                 pairs.push((*sid, aid));
             }
@@ -102,7 +102,7 @@ pub(crate) async fn persist_group(
         let Some(aid) = name_to_id.get(&er.name).copied() else {
             continue;
         };
-        for lid in &er.script_legacy_ids {
+        for lid in &er.script_numeric_ids {
             if let Some(sid) = legacy_to_script.get(lid) {
                 pairs.push((*sid, aid));
             }

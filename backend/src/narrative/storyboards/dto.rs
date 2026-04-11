@@ -9,7 +9,9 @@ use uuid::Uuid;
 pub struct StoryboardRow {
     pub id: Uuid,
     pub script_id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
+    #[serde(rename = "numeric_script_id")]
     pub legacy_script_id: Option<i32>,
     pub prompt: Option<String>,
     pub file_path: Option<String>,
@@ -20,6 +22,7 @@ pub struct StoryboardRow {
     pub track: Option<String>,
     pub video_desc: Option<String>,
     pub should_generate_image: Option<i32>,
+    #[serde(rename = "numeric_project_id")]
     pub legacy_project_id: Option<i32>,
     pub flow_id: Option<i32>,
     pub sb_index: Option<i32>,
@@ -43,13 +46,13 @@ pub(super) struct PatchStoryboardBody {
     pub(super) track: Option<Value>,
     #[serde(default)]
     pub(super) video_desc: Option<Value>,
-    #[serde(default)]
+    #[serde(default, rename = "numeric_script_id")]
     pub(super) legacy_script_id: Option<Value>,
     #[serde(default)]
     pub(super) track_id: Option<Value>,
     #[serde(default)]
     pub(super) should_generate_image: Option<Value>,
-    #[serde(default)]
+    #[serde(default, rename = "numeric_project_id")]
     pub(super) legacy_project_id: Option<Value>,
     #[serde(default)]
     pub(super) flow_id: Option<Value>,
@@ -78,9 +81,9 @@ pub(super) struct CreateStoryboardBody {
     pub(super) video_desc: Option<String>,
     #[serde(default)]
     pub(super) should_generate_image: Option<i32>,
-    #[serde(default)]
+    #[serde(default, rename = "numeric_script_id")]
     pub(super) legacy_script_id: Option<i32>,
-    #[serde(default)]
+    #[serde(default, rename = "numeric_project_id")]
     pub(super) legacy_project_id: Option<i32>,
     #[serde(default)]
     pub(super) flow_id: Option<i32>,

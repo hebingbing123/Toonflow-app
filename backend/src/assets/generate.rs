@@ -241,8 +241,8 @@ async fn post_generate_assets(
     let asset_type = asset_type_str(&body.asset_type);
     let payload = json!({
         "source": "assets-generate.generate",
-        "project_legacy_id": body.project_id,
-        "asset_legacy_id": body.id,
+        "project_numeric_id": body.project_id,
+        "asset_numeric_id": body.id,
         "model": model,
         "resolution": resolution,
         "asset_type": asset_type,
@@ -296,8 +296,8 @@ async fn post_polish_assets_prompt(
 
     let payload = json!({
         "source": "assets-generate.polish-prompt",
-        "project_legacy_id": body.project_id,
-        "asset_legacy_id": body.assets_id,
+        "project_numeric_id": body.project_id,
+        "asset_numeric_id": body.assets_id,
         "asset_type": asset_type,
         "name": name,
         "describe": describe,
@@ -372,7 +372,7 @@ async fn post_batch_generate_image_assets(
         let image_base64 = normalize_optional_base64(it.base64.as_deref(), "items[].base64")?;
         let asset_type = asset_type_str(&it.asset_type);
         items_json.push(json!({
-            "asset_legacy_id": it.id,
+            "asset_numeric_id": it.id,
             "asset_type": asset_type,
             "name": name,
             "prompt": prompt,
@@ -390,7 +390,7 @@ async fn post_batch_generate_image_assets(
 
     let payload = json!({
         "source": "assets-generate.batch-generate",
-        "project_legacy_id": body.project_id,
+        "project_numeric_id": body.project_id,
         "model": model,
         "resolution": resolution,
         "concurrent_count": body.concurrent_count,
@@ -457,7 +457,7 @@ async fn post_batch_polish_assets_prompt(
             )));
         }
         items_json.push(json!({
-            "asset_legacy_id": it.assets_id,
+            "asset_numeric_id": it.assets_id,
             "asset_type": asset_type,
             "name": name,
             "describe": describe,
@@ -473,7 +473,7 @@ async fn post_batch_polish_assets_prompt(
 
     let payload = json!({
         "source": "assets-generate.batch-polish",
-        "project_legacy_id": body.project_id,
+        "project_numeric_id": body.project_id,
         "concurrent_count": body.concurrent_count,
         "items": items_json,
     });
@@ -533,7 +533,7 @@ async fn post_cancel_generate(
                   || jsonb_build_object(
                     'cancelled', true,
                     'cancel_source', 'legacy.assets-generate.cancel-generate',
-                    'cancel_legacy_image_id', $2
+                    'cancel_numeric_image_id', $2
                   ),
                 updated_at = NOW()
             WHERE j.owner_user_id = $1
@@ -543,15 +543,15 @@ async fn post_cancel_generate(
                 SELECT 1
                 FROM target_assets t
                 WHERE (
-                  (j.payload ? 'asset_legacy_id')
-                  AND (j.payload->>'asset_legacy_id') ~ '^[0-9]+$'
-                  AND (j.payload->>'asset_legacy_id')::int = t.legacy_id
+                  (j.payload ? 'asset_numeric_id')
+                  AND (j.payload->>'asset_numeric_id') ~ '^[0-9]+$'
+                  AND (j.payload->>'asset_numeric_id')::int = t.legacy_id
                 ) OR EXISTS (
                   SELECT 1
                   FROM jsonb_array_elements(COALESCE(j.payload->'items', '[]'::jsonb)) it
-                  WHERE (it ? 'asset_legacy_id')
-                    AND (it->>'asset_legacy_id') ~ '^[0-9]+$'
-                    AND (it->>'asset_legacy_id')::int = t.legacy_id
+                  WHERE (it ? 'asset_numeric_id')
+                    AND (it->>'asset_numeric_id') ~ '^[0-9]+$'
+                    AND (it->>'asset_numeric_id')::int = t.legacy_id
                 )
               )
             RETURNING j.legacy_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at

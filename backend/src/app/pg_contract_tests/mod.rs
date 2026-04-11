@@ -1013,7 +1013,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}"
+                    "/api/v1/projects/{project_uuid}/assets?script_numeric_id={script_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1049,7 +1049,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}&limit=10&page=1"
+                    "/api/v1/projects/{project_uuid}/assets?script_numeric_id={script_leg}&limit=10&page=1"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1092,7 +1092,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}"
+                    "/api/v1/projects/{project_uuid}/assets?script_numeric_id={script_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))

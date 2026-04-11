@@ -113,12 +113,12 @@ pub async fn invoke_sub_agent_tool(
     };
     let project_hint = ctx
         .project_legacy_id
-        .map(|id| format!("project_legacy_id={id}"))
-        .unwrap_or_else(|| "project_legacy_id=unset".into());
+        .map(|id| format!("project_numeric_id={id}"))
+        .unwrap_or_else(|| "project_numeric_id=unset".into());
     let script_hint = ctx
         .script_legacy_id
-        .map(|id| format!("script_legacy_id={id}"))
-        .unwrap_or_else(|| "script_legacy_id=unset".into());
+        .map(|id| format!("script_numeric_id={id}"))
+        .unwrap_or_else(|| "script_numeric_id=unset".into());
     let context_note = format!(
         "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
     );

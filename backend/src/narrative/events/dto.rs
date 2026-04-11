@@ -9,6 +9,7 @@ use uuid::Uuid;
 pub struct EventWithChapters {
     pub id: Uuid,
     pub project_id: Uuid,
+    #[serde(rename = "numeric_id")]
     pub legacy_id: i32,
     pub name: String,
     pub detail: String,

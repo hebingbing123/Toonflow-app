@@ -51,7 +51,7 @@ async fn asset_image_file_local_storage_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let _legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let _legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -72,7 +72,7 @@ async fn asset_image_file_local_storage_roundtrip() {
         .unwrap();
     let (status, asset_row) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "asset={asset_row}");
-    let asset_leg = asset_row["legacy_id"].as_i64().expect("asset legacy_id") as i32;
+    let asset_leg = asset_row["numeric_id"].as_i64().expect("asset numeric_id") as i32;
     let asset_id = Uuid::parse_str(asset_row["id"].as_str().expect("asset id")).unwrap();
 
     let api_file_path =
@@ -175,7 +175,7 @@ async fn assets_generate_enqueue_four_kinds() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let _project_uuid = created["id"].as_str().expect("project uuid");
 
     let gen_body = format!(
@@ -313,7 +313,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let project_id: Uuid = sqlx::query_scalar(
         r#"SELECT id FROM public.app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
@@ -370,8 +370,8 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.single",
-            "project_legacy_id": legacy_id,
-            "asset_legacy_id": asset_legacy_id
+            "project_numeric_id": legacy_id,
+            "asset_numeric_id": asset_legacy_id
         })
         .to_string(),
     )
@@ -391,9 +391,9 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.batch",
-            "project_legacy_id": legacy_id,
+            "project_numeric_id": legacy_id,
             "items": [
-                { "asset_legacy_id": asset_legacy_id, "name": "probe", "prompt": "probe" }
+                { "asset_numeric_id": asset_legacy_id, "name": "probe", "prompt": "probe" }
             ]
         })
         .to_string(),
@@ -414,8 +414,8 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.unrelated",
-            "project_legacy_id": legacy_id,
-            "asset_legacy_id": asset_legacy_id + 999
+            "project_numeric_id": legacy_id,
+            "asset_numeric_id": asset_legacy_id + 999
         })
         .to_string(),
     )
@@ -715,7 +715,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_a) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_a={list_a}");
     assert_eq!(list_a["total"].as_i64(), Some(1));
-    let asset_a_legacy_id = list_a["items"][0]["legacy_id"]
+    let asset_a_legacy_id = list_a["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_a legacy id") as i32;
     assert_eq!(
@@ -926,7 +926,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .unwrap();
     let (status, list_b) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_b={list_b}");
-    let asset_b_legacy_id = list_b["items"][0]["legacy_id"]
+    let asset_b_legacy_id = list_b["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_b legacy id") as i32;
 
@@ -967,7 +967,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_c) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_c={list_c}");
     assert_eq!(list_c["total"].as_i64(), Some(1), "list_c={list_c}");
-    let asset_c_legacy_id = list_c["items"][0]["legacy_id"]
+    let asset_c_legacy_id = list_c["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_c legacy id") as i32;
 
@@ -988,7 +988,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_d) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_d={list_d}");
     assert_eq!(list_d["total"].as_i64(), Some(1), "list_d={list_d}");
-    let asset_d_legacy_id = list_d["items"][0]["legacy_id"]
+    let asset_d_legacy_id = list_d["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_d legacy id") as i32;
 
@@ -1076,9 +1076,9 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["legacy_id"]
+    let project_legacy_id = created_project["numeric_id"]
         .as_i64()
-        .expect("project legacy id") as i32;
+        .expect("project numeric id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
 
     let parent_a_name = format!("pg_parent_a_{}", Uuid::new_v4());
@@ -1105,7 +1105,9 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "parent_a={parent_a}");
-    let parent_a_legacy_id = parent_a["legacy_id"].as_i64().expect("parent_a legacy id") as i32;
+    let parent_a_legacy_id = parent_a["numeric_id"]
+        .as_i64()
+        .expect("parent_a numeric id") as i32;
 
     let (status, parent_b) = read_json_response(
         app.clone()
@@ -1126,7 +1128,9 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "parent_b={parent_b}");
-    let parent_b_legacy_id = parent_b["legacy_id"].as_i64().expect("parent_b legacy id") as i32;
+    let parent_b_legacy_id = parent_b["numeric_id"]
+        .as_i64()
+        .expect("parent_b numeric id") as i32;
 
     let (status, child_a) = read_json_response(
         app.clone()
@@ -1147,7 +1151,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "child_a={child_a}");
-    let child_a_legacy_id = child_a["legacy_id"].as_i64().expect("child_a legacy id") as i32;
+    let child_a_legacy_id = child_a["numeric_id"].as_i64().expect("child_a numeric id") as i32;
 
     let (status, child_b) = read_json_response(
         app.clone()
@@ -1168,7 +1172,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "child_b={child_b}");
-    let child_b_legacy_id = child_b["legacy_id"].as_i64().expect("child_b legacy id") as i32;
+    let child_b_legacy_id = child_b["numeric_id"].as_i64().expect("child_b numeric id") as i32;
 
     let parent_a_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id
@@ -1393,9 +1397,9 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["legacy_id"]
+    let project_legacy_id = created_project["numeric_id"]
         .as_i64()
-        .expect("project legacy id") as i32;
+        .expect("project numeric id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
 
     let ready_asset_name = format!("pg_polling_ready_{}", Uuid::new_v4());
@@ -1420,7 +1424,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "ready_asset={ready_asset}");
-    let ready_asset_legacy_id = ready_asset["legacy_id"]
+    let ready_asset_legacy_id = ready_asset["numeric_id"]
         .as_i64()
         .expect("ready asset legacy id") as i32;
 
@@ -1443,7 +1447,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "running_asset={running_asset}");
-    let running_asset_legacy_id = running_asset["legacy_id"]
+    let running_asset_legacy_id = running_asset["numeric_id"]
         .as_i64()
         .expect("running asset legacy id") as i32;
 
@@ -1563,7 +1567,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 )
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"asset_legacy_id":{ready_asset_legacy_id}}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_legacy_id},"asset_numeric_id":{ready_asset_legacy_id},"asset_type":"role","name":"pg_polish_ready","describe":"d"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -1592,7 +1596,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 )
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"asset_legacy_id":{running_asset_legacy_id}}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_legacy_id},"asset_numeric_id":{running_asset_legacy_id},"asset_type":"role","name":"pg_polish_running","describe":"d"}}}}"#
                 )))
                 .unwrap(),
         )

@@ -517,7 +517,7 @@ void main() {
                 workspaceLastToolResultData: const <String, dynamic>{
                   'items': <Map<String, dynamic>>[
                     <String, dynamic>{
-                      'legacy_id': 21,
+                      'numeric_id': 21,
                       'chapter_index': 1,
                       'chapter': '雨夜归乡',
                       'chapter_data': '女主在暴雨中回到旧站台。',

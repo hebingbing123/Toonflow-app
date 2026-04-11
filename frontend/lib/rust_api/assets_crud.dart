@@ -12,7 +12,7 @@ Future<ListAssetsResponse> fetchProjectAssetsByProjectId(
 }) async {
   final qp = <String, String>{};
   if (scriptLegacyId != null) {
-    qp['script_legacy_id'] = '$scriptLegacyId';
+    qp['script_numeric_id'] = '$scriptLegacyId';
   }
   if (assetType != null && assetType.isNotEmpty) {
     qp['asset_type'] = assetType;

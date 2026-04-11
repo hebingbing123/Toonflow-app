@@ -246,8 +246,8 @@ List<int> _extractEntityIds(Object? value) {
   for (final row in value.whereType<Map<String, dynamic>>()) {
     final rawId =
         row['id'] ??
-        row['legacy_id'] ??
-        row['legacyId'] ??
+        row['numeric_id'] ??
+        row['numericId'] ??
         row['storyboardId'] ??
         row['assetId'] ??
         row['assetsId'];
