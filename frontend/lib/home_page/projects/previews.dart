@@ -2,6 +2,115 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+class ProjectsActionsBar extends StatelessWidget {
+  const ProjectsActionsBar({
+    super.key,
+    required this.loadingProjects,
+    required this.loadingProjectsSummary,
+    required this.loadingArtStyles,
+    required this.creatingProject,
+    required this.onLoadProjects,
+    required this.onLoadProjectsSummary,
+    required this.onLoadArtStyles,
+    required this.onOpenArtStylesWorkbench,
+    required this.onOpenCreativeManualsWorkbench,
+    required this.onOpenAgentMemoryWorkbench,
+    required this.onCreateEmptyProject,
+  });
+
+  final bool loadingProjects;
+  final bool loadingProjectsSummary;
+  final bool loadingArtStyles;
+  final bool creatingProject;
+  final VoidCallback onLoadProjects;
+  final VoidCallback onLoadProjectsSummary;
+  final VoidCallback onLoadArtStyles;
+  final VoidCallback onOpenArtStylesWorkbench;
+  final VoidCallback onOpenCreativeManualsWorkbench;
+  final VoidCallback onOpenAgentMemoryWorkbench;
+  final VoidCallback onCreateEmptyProject;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilledButton.tonal(
+          onPressed: (loadingProjects || creatingProject) ? null : onLoadProjects,
+          child: Text(loadingProjects ? '加载中…' : '加载项目列表'),
+        ),
+        FilledButton.tonal(
+          onPressed:
+              (loadingProjectsSummary || creatingProject)
+              ? null
+              : onLoadProjectsSummary,
+          child: Text(loadingProjectsSummary ? '加载中…' : '查看项目摘要'),
+        ),
+        FilledButton.tonal(
+          onPressed: (loadingArtStyles || creatingProject) ? null : onLoadArtStyles,
+          child: Text(loadingArtStyles ? '加载中…' : '加载美术风格'),
+        ),
+        FilledButton.tonal(
+          onPressed: creatingProject ? null : onOpenArtStylesWorkbench,
+          child: const Text('打开画风工作台'),
+        ),
+        FilledButton.tonal(
+          onPressed: creatingProject ? null : onOpenCreativeManualsWorkbench,
+          child: const Text('打开创作手册工作台'),
+        ),
+        FilledButton.tonal(
+          onPressed: creatingProject ? null : onOpenAgentMemoryWorkbench,
+          child: const Text('打开记忆工作台'),
+        ),
+        FilledButton.tonal(
+          onPressed: (loadingProjects || creatingProject)
+              ? null
+              : onCreateEmptyProject,
+          child: Text(creatingProject ? '创建中…' : '新建空项目'),
+        ),
+      ],
+    );
+  }
+}
+
+class ProjectsCompatibilityPanel extends StatelessWidget {
+  const ProjectsCompatibilityPanel({
+    super.key,
+    required this.outlineColor,
+    required this.loadingAgentMemory,
+    required this.onProbeAgentMemory,
+  });
+
+  final Color outlineColor;
+  final bool loadingAgentMemory;
+  final VoidCallback onProbeAgentMemory;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: EdgeInsets.zero,
+      title: const Text('兼容性检查'),
+      subtitle: Text(
+        '保留首项目 Agent memory probe 作为回归入口，默认折叠',
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: outlineColor),
+      ),
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.tonal(
+            onPressed: loadingAgentMemory ? null : onProbeAgentMemory,
+            child: Text(loadingAgentMemory ? '请求中…' : '查询首个项目记忆'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class ProjectsArtStylesPreview extends StatelessWidget {
   const ProjectsArtStylesPreview({
     super.key,
@@ -18,7 +127,10 @@ class ProjectsArtStylesPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        Text('${artStyles.length} 条画风', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          '${artStyles.length} 条画风',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 4),
         ...artStyles.take(5).map(
           (style) => ListTile(
@@ -55,7 +167,10 @@ class ProjectsListPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        Text('${projects.length} 个项目', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          '${projects.length} 个项目',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         ...projects.map(
           (project) => ListTile(
             dense: true,

@@ -113,74 +113,25 @@ class ProjectsSection extends StatelessWidget {
           ).textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: (loadingProjects || creatingProject)
-                  ? null
-                  : onLoadProjects,
-              child: Text(loadingProjects ? '加载中…' : '加载项目列表'),
-            ),
-            FilledButton.tonal(
-              onPressed: (loadingProjectsSummary || creatingProject)
-                  ? null
-                  : onLoadProjectsSummary,
-              child: Text(loadingProjectsSummary ? '加载中…' : '查看项目摘要'),
-            ),
-            FilledButton.tonal(
-              onPressed: (loadingArtStyles || creatingProject)
-                  ? null
-                  : onLoadArtStyles,
-              child: Text(loadingArtStyles ? '加载中…' : '加载美术风格'),
-            ),
-            FilledButton.tonal(
-              onPressed: creatingProject
-                  ? null
-                  : () => _openArtStylesWorkbench(context),
-              child: const Text('打开画风工作台'),
-            ),
-            FilledButton.tonal(
-              onPressed: creatingProject
-                  ? null
-                  : () => _openCreativeManualsWorkbench(context),
-              child: const Text('打开创作手册工作台'),
-            ),
-            FilledButton.tonal(
-              onPressed: creatingProject
-                  ? null
-                  : () => _openAgentMemoryWorkbench(context),
-              child: const Text('打开记忆工作台'),
-            ),
-            FilledButton.tonal(
-              onPressed: (loadingProjects || creatingProject)
-                  ? null
-                  : onCreateEmptyProject,
-              child: Text(creatingProject ? '创建中…' : '新建空项目'),
-            ),
-          ],
+        ProjectsActionsBar(
+          loadingProjects: loadingProjects,
+          loadingProjectsSummary: loadingProjectsSummary,
+          loadingArtStyles: loadingArtStyles,
+          creatingProject: creatingProject,
+          onLoadProjects: onLoadProjects,
+          onLoadProjectsSummary: onLoadProjectsSummary,
+          onLoadArtStyles: () => onLoadArtStyles(),
+          onOpenArtStylesWorkbench: () => _openArtStylesWorkbench(context),
+          onOpenCreativeManualsWorkbench: () =>
+              _openCreativeManualsWorkbench(context),
+          onOpenAgentMemoryWorkbench: () => _openAgentMemoryWorkbench(context),
+          onCreateEmptyProject: onCreateEmptyProject,
         ),
         const SizedBox(height: 8),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          title: const Text('兼容性检查'),
-          subtitle: Text(
-            '保留首项目 Agent memory probe 作为回归入口，默认折叠',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FilledButton.tonal(
-                onPressed: loadingAgentMemory ? null : onProbeAgentMemory,
-                child: Text(loadingAgentMemory ? '请求中…' : '查询首个项目记忆'),
-              ),
-            ),
-          ],
+        ProjectsCompatibilityPanel(
+          outlineColor: outline,
+          loadingAgentMemory: loadingAgentMemory,
+          onProbeAgentMemory: onProbeAgentMemory,
         ),
         if (projectsSummaryLine != null) ...[
           const SizedBox(height: 8),

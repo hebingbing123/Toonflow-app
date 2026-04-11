@@ -1,16 +1,16 @@
-//! Webhook signature verification.
+//! Webhook 签名验证。
 //!
-//! Supports two schemes, selected by which header is present:
+//! 支持两种方案，根据存在的请求头选择：
 //!
-//! 1. **Toonflow native** (`X-Toonflow-Signature: sha256=<hex>`):
-//!    HMAC-SHA256 of raw body with `BILLING_WEBHOOK_SECRET`.
+//! 1. **Toonflow 原生** (`X-Toonflow-Signature: sha256=<hex>`)：
+//!    使用 `BILLING_WEBHOOK_SECRET` 对原始请求体进行 HMAC-SHA256。
 //!
-//! 2. **Stripe** (`Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]`):
-//!    Stripe's signed-payload scheme: `HMAC-SHA256("<unix>.<raw_body>")`.
-//!    Tolerance window: `BILLING_STRIPE_TOLERANCE_SECS` (default 300 s).
-//!    Requires `BILLING_WEBHOOK_SECRET` to hold the Stripe endpoint secret (`whsec_...`).
+//! 2. **Stripe** (`Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]`：
+//!    Stripe 的签名负载方案：`HMAC-SHA256("<unix>.<raw_body>")`。
+//!    容差窗口：`BILLING_STRIPE_TOLERANCE_SECS`（默认 300 秒）。
+//!    要求 `BILLING_WEBHOOK_SECRET` 保存 Stripe 端点密钥（`whsec_...`）。
 //!
-//! If neither header is present → `InvalidWebhookSignature`.
+//! 如果两个请求头都不存在 → `InvalidWebhookSignature`。
 
 use axum::http::HeaderMap;
 use hmac::{Hmac, Mac};

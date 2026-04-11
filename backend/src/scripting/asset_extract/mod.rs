@@ -1,9 +1,9 @@
-//! Async **script asset extraction** (legacy `extractAssets`): LLM tool call + `app_asset` / `app_script_asset`.
+//! 异步脚本资产提取（遗留 `extractAssets`）：LLM 工具调用 + `app_asset` / `app_script_asset`。
 //!
-//! HTTP returns immediately (**`200`** + **`accepted`**) while work runs in **`tokio::spawn`** (matches legacy Express
-//! `res.send` then background loop). Requires **`OPENAI_API_KEY`** / **`LLM_API_KEY`** and **`DATABASE_URL`**.
+//! HTTP 立即返回（`200` + `accepted`），工作在 `tokio::spawn` 中运行（匹配遗留 Express 的 `res.send` 然后后台循环）。
+//! 需要 `OPENAI_API_KEY` / `LLM_API_KEY` 和 `DATABASE_URL`。
 //!
-//! Submodules: [`extract_job`], [`tool`], [`persist`], [`util`].
+//! 子模块：`extract_job`、`tool`、`persist`、`util`。
 
 use axum::{extract::State, http::HeaderMap, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};

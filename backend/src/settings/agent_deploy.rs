@@ -1,7 +1,8 @@
-//! Legacy **`/api/setting/agentDeploy/*`**: SQLite **`o_agentDeploy`** + vendor join; local key writes.
-//! SaaS keeps the four static rows from **`initDB`**, but persists per-user model selection in
-//! **`app_user_profile.agent_deploy_config`**. Keys still do not travel over HTTP; **`set-key`**
-//! is an explicit no-op success so clients can stop treating it as a broken endpoint.
+//! 代理部署模块：遗留 `/api/setting/agentDeploy/*`。
+//!
+//! SQLite `o_agentDeploy` + 提供商连接；本地密钥写入。
+//! SaaS 保留来自 `initDB` 的四个静态行，但将每个用户的模型选择持久化到 `app_user_profile.agent_deploy_config`。
+//! 密钥仍不通过 HTTP 传输；`set-key` 是显式的无操作成功，以便客户端可以停止将其视为损坏的端点。
 
 use axum::{
     extract::{Json, State},
