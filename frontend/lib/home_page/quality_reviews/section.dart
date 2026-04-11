@@ -89,40 +89,21 @@ class QualityReviewsSection extends StatelessWidget {
           ).textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: () => _openQualityWorkbench(context),
-              child: const Text('打开质量工作台'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
-              child: Text(loadingQualityReviews ? '…' : '加载评审列表'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingQualityBadCases ? null : onLoadQualityBadCases,
-              child: Text(loadingQualityBadCases ? '…' : '查看坏例'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingQualityStats ? null : onLoadQualityStats,
-              child: Text(loadingQualityStats ? '…' : '查看质量统计'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingQualityStagePassRate
-                  ? null
-                  : onLoadQualityStagePassRate,
-              child: Text(loadingQualityStagePassRate ? '…' : '查看阶段通过率'),
-            ),
-          ],
+        QualityReviewsActionsBar(
+          loadingQualityReviews: loadingQualityReviews,
+          loadingQualityBadCases: loadingQualityBadCases,
+          loadingQualityStats: loadingQualityStats,
+          loadingQualityStagePassRate: loadingQualityStagePassRate,
+          onOpenWorkbench: () => _openQualityWorkbench(context),
+          onLoadQualityReviews: onLoadQualityReviews,
+          onLoadQualityBadCases: onLoadQualityBadCases,
+          onLoadQualityStats: onLoadQualityStats,
+          onLoadQualityStagePassRate: onLoadQualityStagePassRate,
         ),
         const SizedBox(height: 8),
-        Text(
-          reviewSummary,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: outline),
+        QualityReviewsSummaryPreview(
+          outlineColor: outline,
+          reviewSummary: reviewSummary,
         ),
         const SizedBox(height: 8),
         QualityReviewsCompatibilityPanel(
