@@ -3,7 +3,6 @@
 
 mod agent_memory;
 mod app;
-mod art_styles;
 mod assets;
 mod auth;
 mod billing;
@@ -13,7 +12,6 @@ mod jobs;
 mod json_patch;
 mod llm;
 mod manuals;
-mod models_catalog;
 mod narrative;
 mod notify_hub;
 mod ops;

@@ -1,13 +1,11 @@
 //! Composes domain routers, rate limiting, middleware, and CORS.
 
 use crate::agent_memory;
-use crate::art_styles;
 use crate::assets;
 use crate::billing;
 use crate::harness;
 use crate::jobs;
 use crate::manuals;
-use crate::models_catalog;
 use crate::narrative;
 use crate::production_legacy;
 use crate::projects;
@@ -22,6 +20,7 @@ use crate::settings;
 use crate::skills;
 use crate::state::AppState;
 use crate::usage;
+use crate::vendor;
 
 use axum::{
     http::{header, HeaderName, Method},
@@ -62,12 +61,12 @@ pub fn build_router(state: AppState) -> Router {
     let user_limited = Router::new()
         .merge(strict_limited)
         .merge(agent_memory::router())
-        .merge(models_catalog::router())
+        .merge(vendor::catalog::router())
         .merge(projects::routes::router())
         .merge(projects::legacy::router())
         .merge(manuals::director::router())
         .merge(rest_legacy::general::router())
-        .merge(art_styles::router())
+        .merge(manuals::art_styles::router())
         .merge(narrative::novels::router())
         .merge(narrative::events::router())
         .merge(narrative::legacy::router())

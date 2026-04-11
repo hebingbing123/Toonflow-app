@@ -25,8 +25,8 @@ use serde_json::json;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST};
-use crate::models_catalog::vendor_catalog_summaries;
 use crate::state::{AppState, VendorConfig};
+use crate::vendor::catalog::vendor_catalog_summaries;
 use crate::vendor::credential::{encrypt, is_encryption_configured, key_hint};
 use uuid::Uuid;
 
@@ -34,7 +34,7 @@ use uuid::Uuid;
 #[serde(rename_all = "camelCase")]
 struct VendorSummaryItem {
     #[serde(flatten)]
-    catalog: crate::models_catalog::VendorCatalogSummary,
+    catalog: crate::vendor::catalog::VendorCatalogSummary,
     /// User configuration for this vendor (if any).
     #[serde(skip_serializing_if = "Option::is_none")]
     user_config: Option<crate::state::VendorConfigEntry>,

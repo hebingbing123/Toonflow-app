@@ -229,7 +229,7 @@ pub(super) async fn run_vendor_model_test(
 fn resolve_vendor_probe_targets(
     raw_vendor_id: &str,
 ) -> (
-    Option<crate::models_catalog::VendorCatalogLookup>,
+    Option<crate::vendor::catalog::VendorCatalogLookup>,
     String,
     Vec<String>,
 ) {
