@@ -1,0 +1,54 @@
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::FromRow;
+use uuid::Uuid;
+
+#[derive(Debug, FromRow, Serialize)]
+pub struct JobRow {
+    pub legacy_task_id: i64,
+    pub id: Uuid,
+    pub owner_user_id: Uuid,
+    pub kind: String,
+    pub status: String,
+    pub payload: Value,
+    pub result: Option<Value>,
+    pub error_message: Option<String>,
+    pub idempotency_key: Option<String>,
+    /// Worker label (`WORKER_ID` env) when `running`; set on claim.
+    pub claimed_by: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub(super) struct ListJobsQuery {
+    #[serde(default)]
+    pub(super) kind: Option<String>,
+    #[serde(default)]
+    pub(super) status: Option<String>,
+    #[serde(default)]
+    pub(super) limit: Option<i64>,
+    #[serde(default)]
+    pub(super) offset: Option<i64>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateJobBody {
+    pub kind: String,
+    #[serde(default)]
+    pub payload: Value,
+}
+
+#[derive(Debug, FromRow, Serialize)]
+pub(super) struct JobKindSummaryRow {
+    pub(super) kind: String,
+    pub(super) job_count: i64,
+}
+
+#[derive(Debug, FromRow, Serialize)]
+pub(super) struct JobStatusSummaryRow {
+    pub(super) status: String,
+    pub(super) job_count: i64,
+}

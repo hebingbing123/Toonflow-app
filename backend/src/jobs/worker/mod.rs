@@ -1,14 +1,8 @@
-//! 任务 Worker：轮询并执行队列中的任务。
+//! Polls `queued` jobs and runs a minimal in-process worker (MVP). Scales with `FOR UPDATE SKIP LOCKED`.
+//! Running jobs can be cancelled via REST; finish updates use `WHERE status = 'running'` so they never
+//! overwrite `cancelled`.
 //!
-//! 使用 `FOR UPDATE SKIP LOCKED` 实现可扩展的分布式任务处理。
-//! 运行中的任务可通过 REST 取消；完成更新使用 `WHERE status = 'running'` 确保不会覆盖已取消状态。
-//!
-//! 子模块：
-//! - `common` — 错误处理和取消探测
-//! - `asset_polish` — 资产提示词优化
-//! - `asset_image` — 资产图片生成
-//! - `vendor` — 提供商测试
-//! - `video` — 视频生成
+//! Submodules: [`common`] (errors + cancel probe), [`asset_polish`], [`asset_image`], [`vendor`], [`video`].
 
 use std::time::Duration;
 
