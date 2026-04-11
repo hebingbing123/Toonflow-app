@@ -1,0 +1,71 @@
+part of '../../../home_page.dart';
+
+extension _HomePageProjectEditorNovels on _HomePageState {
+  Widget _buildProjectNovelsSection({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required String token,
+    required ProjectRow p,
+    required List<ListNovelsResponse?> novelsRef,
+    required List<ListNovelEventsResponse?> novelEventsRef,
+    required List<bool> novelsLoading,
+    required List<bool> novelsBusy,
+    required List<bool> novelEventsLoading,
+    required List<bool> assetsBusy,
+    required List<bool> assetsLoading,
+    required List<bool> assetsScriptFilterLoading,
+    required Future<void> Function() reloadAssetsAndStats,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('小说与事件', style: Theme.of(ctx).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        _buildProjectNovelsWorkbenchSection(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          novelsRef: novelsRef,
+          novelsLoading: novelsLoading,
+          novelsBusy: novelsBusy,
+          assetsBusy: assetsBusy,
+          assetsLoading: assetsLoading,
+          assetsScriptFilterLoading: assetsScriptFilterLoading,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+        ),
+        const SizedBox(height: 8),
+        _buildProjectNovelEventsWorkbenchSection(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          novelsRef: novelsRef,
+          novelEventsRef: novelEventsRef,
+          novelsLoading: novelsLoading,
+          novelsBusy: novelsBusy,
+          novelEventsLoading: novelEventsLoading,
+          assetsBusy: assetsBusy,
+          assetsLoading: assetsLoading,
+          assetsScriptFilterLoading: assetsScriptFilterLoading,
+        ),
+        const SizedBox(height: 8),
+        _buildProjectNovelsCompatibilitySection(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          novelsRef: novelsRef,
+          novelEventsRef: novelEventsRef,
+          novelsLoading: novelsLoading,
+          novelsBusy: novelsBusy,
+          novelEventsLoading: novelEventsLoading,
+          assetsBusy: assetsBusy,
+          assetsLoading: assetsLoading,
+          assetsScriptFilterLoading: assetsScriptFilterLoading,
+        ),
+      ],
+    );
+  }
+}
