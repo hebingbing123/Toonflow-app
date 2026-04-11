@@ -39,7 +39,7 @@ pub(super) fn search_ilike(raw: Option<String>) -> Option<String> {
 
 pub(super) async fn count_novel_events(
     pool: &PgPool,
-    project_legacy_id: i32,
+    project_id: Uuid,
     uid: Uuid,
     search_pat: Option<&str>,
 ) -> Result<i64, ApiError> {
@@ -47,9 +47,9 @@ pub(super) async fn count_novel_events(
         "SELECT COUNT(DISTINCT e.id)::BIGINT
          FROM app_novel_event e
          INNER JOIN app_project p ON p.id = e.project_id
-         WHERE p.legacy_id = ",
+         WHERE p.id = ",
     );
-    qb.push_bind(project_legacy_id);
+    qb.push_bind(project_id);
     qb.push(" AND p.owner_user_id = ");
     qb.push_bind(uid);
     if let Some(pat) = search_pat {
@@ -64,7 +64,7 @@ pub(super) async fn count_novel_events(
 
 pub(super) async fn list_event_rows(
     pool: &PgPool,
-    project_legacy_id: i32,
+    project_id: Uuid,
     uid: Uuid,
     limit: i64,
     offset: i64,
@@ -88,9 +88,9 @@ pub(super) async fn list_event_rows(
         INNER JOIN app_project p ON p.id = e.project_id
         LEFT JOIN app_novel_event_chapter ec ON ec.event_id = e.id
         LEFT JOIN app_novel n ON n.id = ec.novel_id
-        WHERE p.legacy_id = "#,
+        WHERE p.id = "#,
     );
-    qb.push_bind(project_legacy_id);
+    qb.push_bind(project_id);
     qb.push(" AND p.owner_user_id = ");
     qb.push_bind(uid);
     if let Some(pat) = search_pat {
@@ -114,7 +114,7 @@ pub(super) async fn list_event_rows(
 
 pub(super) async fn list_legacy_event_rows(
     pool: &PgPool,
-    project_legacy_id: i32,
+    project_id: Uuid,
     uid: Uuid,
     limit: i64,
     offset: i64,
@@ -136,9 +136,9 @@ pub(super) async fn list_legacy_event_rows(
         INNER JOIN app_project p ON p.id = e.project_id
         LEFT JOIN app_novel_event_chapter ec ON ec.event_id = e.id
         LEFT JOIN app_novel n ON n.id = ec.novel_id
-        WHERE p.legacy_id = "#,
+        WHERE p.id = "#,
     );
-    qb.push_bind(project_legacy_id);
+    qb.push_bind(project_id);
     qb.push(" AND p.owner_user_id = ");
     qb.push_bind(uid);
     if let Some(pat) = search_pat {

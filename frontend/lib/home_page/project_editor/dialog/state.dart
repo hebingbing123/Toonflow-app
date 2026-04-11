@@ -67,9 +67,9 @@ class _ProjectEditorDialogState {
     }
 
     try {
-      novelEventsRef[0] = await fetchProjectNovelEventsByLegacyId(
+      novelEventsRef[0] = await fetchProjectNovelEventsByProjectId(
         token,
-        projectLegacyId,
+        projectId,
       );
     } catch (_) {
       novelEventsRef[0] = null;

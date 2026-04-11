@@ -80,9 +80,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                         setDialogState(() => novelEventsLoading[0] = true);
                         try {
                           novelEventsRef[0] =
-                              await fetchProjectNovelEventsByLegacyId(
+                              await fetchProjectNovelEventsByProjectId(
                                 token,
-                                p.legacyId,
+                                p.id,
                               );
                         } on RustApiException catch (e) {
                           if (ctx.mounted) {
@@ -152,9 +152,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
     Future<void> refreshWorkbench(StateSetter setLocalState) async {
       setDialogState(() => novelEventsLoading[0] = true);
       try {
-        novelEventsRef[0] = await fetchProjectNovelEventsByLegacyId(
+        novelEventsRef[0] = await fetchProjectNovelEventsByProjectId(
           token,
-          p.legacyId,
+          p.id,
         );
       } finally {
         if (ctx.mounted) {
@@ -285,9 +285,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                   ? null
                                   : () => runAction(() async {
                                       final rows =
-                                          await fetchProjectNovelEventsByLegacyId(
+                                          await fetchProjectNovelEventsByProjectId(
                                             token,
-                                            p.legacyId,
+                                            p.id,
                                             search: searchCtrl.text.trim(),
                                             page: 1,
                                             limit: 10,
@@ -351,9 +351,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                               ? null
                               : () => runAction(() async {
                                   final created =
-                                      await createProjectNovelEventUnderLegacy(
+                                      await createProjectNovelEventUnderProject(
                                         token,
-                                        p.legacyId,
+                                        p.id,
                                         name: createNameCtrl.text.trim(),
                                         detail: createDetailCtrl.text.trim(),
                                         chapterIds: _parseLegacyIdList(
@@ -427,9 +427,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                     selectedEventIdCtrl.text.trim(),
                                   );
                                   final message =
-                                      await patchProjectNovelEventByLegacyIds(
+                                      await patchProjectNovelEventByProjectIds(
                                         token,
-                                        p.legacyId,
+                                        p.id,
                                         eventId,
                                         {
                                           'name': patchNameCtrl.text.trim(),
@@ -464,9 +464,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                         selectedEventIdCtrl.text.trim(),
                                       );
                                       final message =
-                                          await deleteProjectNovelEventByLegacyIds(
+                                          await deleteProjectNovelEventByProjectIds(
                                             token,
-                                            p.legacyId,
+                                            p.id,
                                             eventId,
                                           );
                                       await refreshWorkbench(setLocalState);
@@ -483,7 +483,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           controller: batchDeleteIdsCtrl,
                           decoration: const InputDecoration(
                             labelText: '批量删除事件 IDs',
-                            helperText: '调用 legacy batch-delete；用逗号分隔',
+                            helperText: 'POST …/projects/{uuid}/novel-events/batch-delete；用逗号分隔',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -495,8 +495,9 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                     batchDeleteIdsCtrl.text,
                                   );
                                   final message =
-                                      await postLegacyNovelEventsBatchDelete(
+                                      await postProjectNovelEventsBatchDeleteByProjectId(
                                         token,
+                                        p.id,
                                         ids,
                                       );
                                   await refreshWorkbench(setLocalState);
