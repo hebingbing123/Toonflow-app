@@ -1,54 +1,28 @@
-//! Legacy **`POST /api/setting/vendorConfig/getVendorList`** returned SQLite **`o_vendorConfig`**
-//! rows (including **`inputValues`** secrets).
-//! SaaS: **`GET …/vendors/summary`** merges the static catalog with per-user **`vendor_config`**
-//! from `app_user_profile`.
-//! **`POST …/vendors/{add,update,delete,enable,update-code,code-from-link}`** persists vendor
-//! metadata in Postgres-backed user config, but never executes TS, fetches remote code, or stores
-//! API keys. Custom / linked vendor code is stored as metadata only.
-//! **`POST …/model-test`** validates the legacy body, enqueues **`settings.vendor.model_test`**;
-//! the worker then performs a live probe:
-//! text / image prefer stored vendor credentials and fall back to server LLM env,
-//! while video resolves provider-specific minimal generation requests.
-//! API keys (`inputValues`) are intentionally NOT stored; use server env or vault.
-
-use std::collections::HashMap;
-
 use axum::{
-    extract::State,
+    extract::{Path, State},
     http::HeaderMap,
     routing::{get, post},
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
 use serde_json::json;
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST};
-use crate::state::{AppState, VendorConfig};
+use crate::state::AppState;
 use crate::vendor::catalog::vendor_catalog_summaries;
 use crate::vendor::credential::{encrypt, is_encryption_configured, key_hint};
-use uuid::Uuid;
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct VendorSummaryItem {
-    #[serde(flatten)]
-    catalog: crate::vendor::catalog::VendorCatalogSummary,
-    /// User configuration for this vendor (if any).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    user_config: Option<crate::state::VendorConfigEntry>,
-}
+use super::dto::{
+    AddVendorBody, CredentialResponse, DeleteVendorBody, EnableVendorBody, StoreCredentialBody,
+    UpdateVendorBody, UpdateVendorCodeBody, UpdateVendorResponse, VendorCodeFromLinkBody,
+    VendorModelTestBody, VendorSummaryItem, VendorsSummaryResponse,
+};
+use super::store::{load_vendor_config, save_vendor_config};
+use super::MAX_VENDOR_MODEL_TEST_FIELD_LEN;
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct VendorsSummaryResponse {
-    vendors: Vec<VendorSummaryItem>,
-    /// **`static_catalog`** merged with per-user **`vendor_config`**.
-    source: &'static str,
-}
-
-async fn get_vendors_summary(
+pub(super) async fn get_vendors_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<VendorsSummaryResponse>, ApiError> {
@@ -81,19 +55,7 @@ async fn get_vendors_summary(
     }))
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct VendorModelTestBody {
-    model_name: String,
-    /// Legacy field **`type`**: **`text`** | **`image`** | **`video`**.
-    #[serde(rename = "type")]
-    kind: String,
-    id: String,
-}
-
-const MAX_VENDOR_MODEL_TEST_FIELD_LEN: usize = 512;
-
-async fn post_vendor_model_test(
+pub(super) async fn post_vendor_model_test(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorModelTestBody>,
@@ -137,94 +99,7 @@ async fn post_vendor_model_test(
     Ok(Json(row))
 }
 
-async fn load_vendor_config(pool: &sqlx::PgPool, uid: Uuid) -> Result<VendorConfig, ApiError> {
-    let row: Option<sqlx::types::Json<VendorConfig>> = sqlx::query_scalar(
-        r#"
-        SELECT vendor_config FROM app_user_profile WHERE user_id = $1
-        "#,
-    )
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(row.map(|j| j.0).unwrap_or_default())
-}
-
-async fn save_vendor_config(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    cfg: &VendorConfig,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        INSERT INTO app_user_profile (user_id, vendor_config)
-        VALUES ($1, $2)
-        ON CONFLICT (user_id) DO UPDATE SET vendor_config = $2
-        "#,
-    )
-    .bind(uid)
-    .bind(sqlx::types::Json(cfg))
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(())
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct AddVendorBody {
-    ts_code: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct UpdateVendorBody {
-    id: String,
-    /// User-defined display name (optional).
-    #[serde(default)]
-    display_name: Option<String>,
-    /// Selected model IDs from this vendor.
-    #[serde(default)]
-    selected_models: Vec<String>,
-    /// Additional non-sensitive settings key-value pairs.
-    #[serde(default)]
-    settings: HashMap<String, String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct UpdateVendorResponse {
-    vendor_id: String,
-    message: &'static str,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct DeleteVendorBody {
-    id: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct EnableVendorBody {
-    id: String,
-    enable: i64,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct UpdateVendorCodeBody {
-    id: String,
-    ts_code: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct VendorCodeFromLinkBody {
-    link: String,
-}
-
-async fn post_add_vendor(
+pub(super) async fn post_add_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddVendorBody>,
@@ -265,7 +140,7 @@ async fn post_add_vendor(
     })))
 }
 
-async fn post_update_vendor(
+pub(super) async fn post_update_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorBody>,
@@ -309,7 +184,7 @@ async fn post_update_vendor(
     }))
 }
 
-async fn post_delete_vendor(
+pub(super) async fn post_delete_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteVendorBody>,
@@ -351,7 +226,7 @@ async fn post_delete_vendor(
     })))
 }
 
-async fn post_enable_vendor(
+pub(super) async fn post_enable_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EnableVendorBody>,
@@ -377,7 +252,7 @@ async fn post_enable_vendor(
     })))
 }
 
-async fn post_update_vendor_code(
+pub(super) async fn post_update_vendor_code(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorCodeBody>,
@@ -408,7 +283,7 @@ async fn post_update_vendor_code(
     })))
 }
 
-async fn post_vendor_code_from_link(
+pub(super) async fn post_vendor_code_from_link(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorCodeFromLinkBody>,
@@ -460,26 +335,7 @@ async fn post_vendor_code_from_link(
     })))
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct StoreCredentialBody {
-    vendor_id: String,
-    api_key: Option<String>,
-    api_secret: Option<String>,
-    api_token: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct CredentialResponse {
-    vendor_id: String,
-    key_hint: Option<String>,
-    has_secret: bool,
-    has_token: bool,
-    message: &'static str,
-}
-
-async fn post_store_credential(
+pub(super) async fn post_store_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<StoreCredentialBody>,
@@ -545,10 +401,10 @@ async fn post_store_credential(
 }
 
 #[allow(clippy::type_complexity)]
-async fn get_credential(
+pub(super) async fn get_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
-    axum::extract::Path(vendor_id): axum::extract::Path<String>,
+    Path(vendor_id): Path<String>,
 ) -> Result<Json<CredentialResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let vendor_id = vendor_id.trim();
@@ -588,10 +444,10 @@ async fn get_credential(
     }))
 }
 
-async fn delete_credential(
+pub(super) async fn delete_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
-    axum::extract::Path(vendor_id): axum::extract::Path<String>,
+    Path(vendor_id): Path<String>,
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let vendor_id = vendor_id.trim();
@@ -626,7 +482,7 @@ async fn delete_credential(
     })))
 }
 
-pub fn router() -> Router<AppState> {
+pub(super) fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/settings/vendors/summary", get(get_vendors_summary))
         .route(
@@ -653,114 +509,4 @@ pub fn router() -> Router<AppState> {
             "/api/v1/settings/vendors/credential/{vendor_id}",
             get(get_credential).delete(delete_credential),
         )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn vendor_model_test_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<VendorModelTestBody>(
-            r#"{"modelName":"gpt-4","type":"text","id":"1","extra":1}"#,
-        );
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn vendor_model_test_body_accepts_valid() {
-        let b: VendorModelTestBody =
-            serde_json::from_str(r#"{"modelName":"gpt-4","type":"text","id":"vendor-1"}"#).unwrap();
-        assert_eq!(b.model_name, "gpt-4");
-        assert_eq!(b.kind, "text");
-        assert_eq!(b.id, "vendor-1");
-    }
-
-    #[test]
-    fn update_vendor_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<UpdateVendorBody>(
-            r#"{"id":"v1","displayName":"Test","extra":1}"#,
-        );
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn update_vendor_body_accepts_minimal() {
-        let b: UpdateVendorBody = serde_json::from_str(r#"{"id":"v1"}"#).unwrap();
-        assert_eq!(b.id, "v1");
-        assert_eq!(b.display_name, None);
-        assert!(b.selected_models.is_empty());
-        assert!(b.settings.is_empty());
-    }
-
-    #[test]
-    fn update_vendor_body_accepts_full() {
-        let b: UpdateVendorBody = serde_json::from_str(
-            r#"{"id":"v1","displayName":"My Vendor","selectedModels":["m1","m2"],"settings":{"k1":"v1"}}"#,
-        )
-        .unwrap();
-        assert_eq!(b.id, "v1");
-        assert_eq!(b.display_name, Some("My Vendor".to_string()));
-        assert_eq!(b.selected_models, vec!["m1", "m2"]);
-        assert_eq!(b.settings.get("k1"), Some(&"v1".to_string()));
-    }
-
-    #[test]
-    fn store_credential_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<StoreCredentialBody>(
-            r#"{"vendorId":"v1","apiKey":"k","extra":1}"#,
-        );
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn store_credential_body_accepts_minimal() {
-        let b: StoreCredentialBody = serde_json::from_str(r#"{"vendorId":"v1"}"#).unwrap();
-        assert_eq!(b.vendor_id, "v1");
-        assert_eq!(b.api_key, None);
-        assert_eq!(b.api_secret, None);
-        assert_eq!(b.api_token, None);
-    }
-
-    #[test]
-    fn store_credential_body_accepts_full() {
-        let b: StoreCredentialBody = serde_json::from_str(
-            r#"{"vendorId":"v1","apiKey":"key123","apiSecret":"secret456","apiToken":"token789"}"#,
-        )
-        .unwrap();
-        assert_eq!(b.vendor_id, "v1");
-        assert_eq!(b.api_key, Some("key123".to_string()));
-        assert_eq!(b.api_secret, Some("secret456".to_string()));
-        assert_eq!(b.api_token, Some("token789".to_string()));
-    }
-
-    #[test]
-    fn credential_response_serialize() {
-        let resp = CredentialResponse {
-            vendor_id: "v1".to_string(),
-            key_hint: Some("k***3".to_string()),
-            has_secret: true,
-            has_token: false,
-            message: "Test",
-        };
-        let json = serde_json::to_string(&resp).unwrap();
-        assert!(json.contains("\"vendorId\":\"v1\""));
-        assert!(json.contains("\"keyHint\":\"k***3\""));
-        assert!(json.contains("\"hasSecret\":true"));
-        assert!(json.contains("\"hasToken\":false"));
-    }
-
-    #[test]
-    fn enable_vendor_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<EnableVendorBody>(r#"{"id":"v1","enable":1,"extra":true}"#);
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn enable_vendor_body_accepts_valid() {
-        let b: EnableVendorBody = serde_json::from_str(r#"{"id":"v1","enable":1}"#).unwrap();
-        assert_eq!(b.id, "v1");
-        assert_eq!(b.enable, 1);
-    }
 }
