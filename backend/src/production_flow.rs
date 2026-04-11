@@ -1,6 +1,6 @@
 //! 制作流程 JSON 加载与项目/剧本归属解析。
 //!
-//! 供 **`/api/v1/production/get-flow-data`** 与 Harness 工具共用，避免 Harness 依赖 `production_legacy` 路由模块。
+//! 供 **`/api/v1/production/get-flow-data`** 与 Harness 工具共用，与 **`production`** 路由模块解耦（共享领域逻辑而非 HTTP 树）。
 
 use serde_json::{json, Map, Value};
 use sqlx::FromRow;

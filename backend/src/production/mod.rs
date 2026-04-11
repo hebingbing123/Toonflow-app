@@ -1,8 +1,8 @@
-//! 遗留 `/api/production/*` 生产模块。
+//! **`POST /api/v1/production/*`** 制作工作台 HTTP 路由（与旧 Electron **`/api/production/**`** 对齐的契约面）。
 //!
-//! 处理 SQLite `o_video`、`o_videoConfig`、`o_agentWorkData`（制作流程）和 OSS 路径。
+//! 数据在 PG（如 **`app_production_flow`**、**`app_storyboard`**、视频轨等）；历史命名见迁移文档。
 //! 子模块：
-//! - `workbench` — 制作工作台（流程、分镜、视频、轨道、图片编辑、资产）
+//! - `workbench` — 流程、分镜、视频、轨道、图片编辑、资产
 
 use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};

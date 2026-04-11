@@ -13,7 +13,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct BatchGenerateAssetsImageBody {
+pub(in crate::production) struct BatchGenerateAssetsImageBody {
     project_id: i32,
     script_id: i32,
     asset_ids: Vec<i32>,
@@ -25,12 +25,12 @@ pub(in crate::production_legacy) struct BatchGenerateAssetsImageBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct BatchGenerateAssetsImageResponse {
+pub(in crate::production) struct BatchGenerateAssetsImageResponse {
     enqueued: Vec<JobRow>,
     total: usize,
 }
 
-pub(in crate::production_legacy) async fn post_assets_batch_generate_image(
+pub(in crate::production) async fn post_assets_batch_generate_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchGenerateAssetsImageBody>,
@@ -99,19 +99,19 @@ pub(in crate::production_legacy) async fn post_assets_batch_generate_image(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct DeleteAssetsDerivativeBody {
+pub(in crate::production) struct DeleteAssetsDerivativeBody {
     project_id: i32,
     asset_ids: Vec<i32>,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct DeleteAssetsDerivativeResponse {
+pub(in crate::production) struct DeleteAssetsDerivativeResponse {
     deleted: i64,
     asset_ids: Vec<i32>,
 }
 
-pub(in crate::production_legacy) async fn post_assets_delete_derivative(
+pub(in crate::production) async fn post_assets_delete_derivative(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteAssetsDerivativeBody>,
@@ -159,7 +159,7 @@ pub(in crate::production_legacy) async fn post_assets_delete_derivative(
 
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct AssetDataItem {
+pub(in crate::production) struct AssetDataItem {
     id: i32,
     name: String,
     #[serde(rename = "type")]
@@ -171,14 +171,14 @@ pub(in crate::production_legacy) struct AssetDataItem {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct AssetsDataResponse {
+pub(in crate::production) struct AssetsDataResponse {
     assets: Vec<AssetDataItem>,
     total: i64,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct GetAssetsDataBody {
+pub(in crate::production) struct GetAssetsDataBody {
     project_id: i32,
     #[serde(default)]
     asset_type: Option<String>,
@@ -188,7 +188,7 @@ pub(in crate::production_legacy) struct GetAssetsDataBody {
     offset: Option<i64>,
 }
 
-pub(in crate::production_legacy) async fn post_assets_get_data(
+pub(in crate::production) async fn post_assets_get_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GetAssetsDataBody>,
@@ -267,14 +267,14 @@ pub(in crate::production_legacy) async fn post_assets_get_data(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct AssetsPollingImageBody {
+pub(in crate::production) struct AssetsPollingImageBody {
     project_id: i32,
     asset_ids: Vec<i32>,
 }
 
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct AssetImageStatus {
+pub(in crate::production) struct AssetImageStatus {
     asset_id: i32,
     image_count: i64,
     latest_state: Option<String>,
@@ -282,11 +282,11 @@ pub(in crate::production_legacy) struct AssetImageStatus {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct AssetsPollingImageResponse {
+pub(in crate::production) struct AssetsPollingImageResponse {
     statuses: Vec<AssetImageStatus>,
 }
 
-pub(in crate::production_legacy) async fn post_assets_polling_image(
+pub(in crate::production) async fn post_assets_polling_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AssetsPollingImageBody>,
@@ -333,7 +333,7 @@ pub(in crate::production_legacy) async fn post_assets_polling_image(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct UpdateAssetsUrlBody {
+pub(in crate::production) struct UpdateAssetsUrlBody {
     project_id: i32,
     asset_id: i32,
     image_url: String,
@@ -341,13 +341,13 @@ pub(in crate::production_legacy) struct UpdateAssetsUrlBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct UpdateAssetsUrlResponse {
+pub(in crate::production) struct UpdateAssetsUrlResponse {
     asset_id: i32,
     image_url: String,
     message: &'static str,
 }
 
-pub(in crate::production_legacy) async fn post_assets_update_url(
+pub(in crate::production) async fn post_assets_update_url(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateAssetsUrlBody>,

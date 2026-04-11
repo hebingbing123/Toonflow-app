@@ -11,7 +11,7 @@ use crate::jobs;
 use crate::manuals;
 use crate::metering;
 use crate::narrative;
-use crate::production_legacy;
+use crate::production;
 use crate::projects;
 use crate::prompting;
 use crate::scripting;
@@ -64,7 +64,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(manuals::art_styles::router())
         .merge(narrative::novels::router())
         .merge(narrative::events::router())
-        .merge(production_legacy::router())
+        .merge(production::router())
         .merge(assets::router())
         .merge(scripting::scripts::router())
         .merge(scripting::agent::router())

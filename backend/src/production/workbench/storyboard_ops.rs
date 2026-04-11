@@ -19,8 +19,8 @@ use crate::state::AppState;
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct StoryboardIdListBody {
-    pub(in crate::production_legacy) ids: Vec<i32>,
+pub(in crate::production) struct StoryboardIdListBody {
+    pub(in crate::production) ids: Vec<i32>,
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -58,7 +58,7 @@ struct ExportImageShotRef {
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct ExportImageBody {
+pub(in crate::production) struct ExportImageBody {
     shot_id: Vec<ExportImageShotRef>,
 }
 
@@ -83,7 +83,7 @@ struct BatchGenerateImageItem {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct BatchGenerateImageBody {
+pub(in crate::production) struct BatchGenerateImageBody {
     project_id: i32,
     script_id: i32,
     items: Vec<BatchGenerateImageItem>,
@@ -95,12 +95,12 @@ pub(in crate::production_legacy) struct BatchGenerateImageBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct BatchGenerateImageResponse {
+pub(in crate::production) struct BatchGenerateImageResponse {
     enqueued: Vec<JobRow>,
     total: usize,
 }
 
-pub(in crate::production_legacy) async fn post_get_production_data(
+pub(in crate::production) async fn post_get_production_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
@@ -147,7 +147,7 @@ pub(in crate::production_legacy) async fn post_get_production_data(
     Ok(JsonResponse(ProductionGetProductionDataResponse { data: rows }).into_response())
 }
 
-pub(in crate::production_legacy) async fn post_storyboard_polling_image(
+pub(in crate::production) async fn post_storyboard_polling_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
@@ -192,7 +192,7 @@ pub(in crate::production_legacy) async fn post_storyboard_polling_image(
     Ok(StatusCode::OK.into_response())
 }
 
-pub(in crate::production_legacy) async fn post_export_image(
+pub(in crate::production) async fn post_export_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<ExportImageBody>,
@@ -469,7 +469,7 @@ fn mime_to_extension(mime: &str) -> Option<&'static str> {
     }
 }
 
-pub(in crate::production_legacy) async fn post_storyboard_batch_generate_image(
+pub(in crate::production) async fn post_storyboard_batch_generate_image(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchGenerateImageBody>,

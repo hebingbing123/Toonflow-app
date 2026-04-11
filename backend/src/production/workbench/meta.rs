@@ -13,7 +13,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct GenerateVideoPromptBody {
+pub(in crate::production) struct GenerateVideoPromptBody {
     project_id: i32,
     script_id: i32,
     #[serde(default)]
@@ -25,13 +25,13 @@ pub(in crate::production_legacy) struct GenerateVideoPromptBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct GenerateVideoPromptResponse {
+pub(in crate::production) struct GenerateVideoPromptResponse {
     prompt: String,
     model: String,
     duration: i32,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_generate_video_prompt(
+pub(in crate::production) async fn post_workbench_generate_video_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GenerateVideoPromptBody>,
@@ -87,21 +87,21 @@ pub(in crate::production_legacy) async fn post_workbench_generate_video_prompt(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct GetGenerateDataBody {
+pub(in crate::production) struct GetGenerateDataBody {
     project_id: i32,
     script_id: i32,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct GetGenerateDataResponse {
+pub(in crate::production) struct GetGenerateDataResponse {
     project_id: i32,
     script_id: i32,
     generated_videos: Vec<VideoItem>,
     generating_jobs: Vec<JobRow>,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_get_generate_data(
+pub(in crate::production) async fn post_workbench_get_generate_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GetGenerateDataBody>,
@@ -174,7 +174,7 @@ pub(in crate::production_legacy) async fn post_workbench_get_generate_data(
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct VideoModelDetailResponse {
+pub(in crate::production) struct VideoModelDetailResponse {
     model_id: String,
     model_name: String,
     provider: String,
@@ -183,7 +183,7 @@ pub(in crate::production_legacy) struct VideoModelDetailResponse {
     features: Vec<String>,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_get_video_model_detail(
+pub(in crate::production) async fn post_workbench_get_video_model_detail(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<JsonResponse<VideoModelDetailResponse>, ApiError> {

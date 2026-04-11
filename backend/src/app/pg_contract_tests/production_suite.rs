@@ -4,7 +4,7 @@ use zip::ZipArchive;
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract -- --ignored"]
-async fn production_legacy_endpoints_minimal_roundtrip() {
+async fn production_endpoints_minimal_roundtrip() {
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")

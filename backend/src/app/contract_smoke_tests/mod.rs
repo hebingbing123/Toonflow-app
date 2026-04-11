@@ -7,7 +7,7 @@ mod helpers;
 mod asset_jobs_tasks_legacy_post;
 mod health_models_billing_vendors;
 mod manuals_scripts_novels;
-mod production_legacy;
+mod production_http_smoke;
 mod rest_projects_settings_skills;
 mod skills_legacy_asset_posts;
 mod storyboards_art_styles_agents;

@@ -11,7 +11,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct AddTrackBody {
+pub(in crate::production) struct AddTrackBody {
     project_id: i32,
     script_id: i32,
     track_name: String,
@@ -22,13 +22,13 @@ pub(in crate::production_legacy) struct AddTrackBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct AddTrackResponse {
+pub(in crate::production) struct AddTrackResponse {
     track_id: i32,
     track_name: String,
     message: &'static str,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_add_track(
+pub(in crate::production) async fn post_workbench_add_track(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddTrackBody>,
@@ -123,7 +123,7 @@ pub(in crate::production_legacy) async fn post_workbench_add_track(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct DeleteTrackBody {
+pub(in crate::production) struct DeleteTrackBody {
     project_id: i32,
     script_id: i32,
     track_id: i32,
@@ -131,12 +131,12 @@ pub(in crate::production_legacy) struct DeleteTrackBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct DeleteTrackResponse {
+pub(in crate::production) struct DeleteTrackResponse {
     track_id: i32,
     message: &'static str,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_delete_track(
+pub(in crate::production) async fn post_workbench_delete_track(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteTrackBody>,
@@ -219,7 +219,7 @@ pub(in crate::production_legacy) async fn post_workbench_delete_track(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct DeleteVideoBody {
+pub(in crate::production) struct DeleteVideoBody {
     project_id: i32,
     script_id: i32,
     storyboard_id: i32,
@@ -227,12 +227,12 @@ pub(in crate::production_legacy) struct DeleteVideoBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct DeleteVideoResponse {
+pub(in crate::production) struct DeleteVideoResponse {
     storyboard_id: i32,
     message: &'static str,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_delete_video(
+pub(in crate::production) async fn post_workbench_delete_video(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteVideoBody>,
@@ -282,7 +282,7 @@ pub(in crate::production_legacy) async fn post_workbench_delete_video(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production_legacy) struct SelectVideoBody {
+pub(in crate::production) struct SelectVideoBody {
     project_id: i32,
     script_id: i32,
     storyboard_id: i32,
@@ -291,13 +291,13 @@ pub(in crate::production_legacy) struct SelectVideoBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(in crate::production_legacy) struct SelectVideoResponse {
+pub(in crate::production) struct SelectVideoResponse {
     storyboard_id: i32,
     video_url: String,
     message: &'static str,
 }
 
-pub(in crate::production_legacy) async fn post_workbench_select_video(
+pub(in crate::production) async fn post_workbench_select_video(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<SelectVideoBody>,

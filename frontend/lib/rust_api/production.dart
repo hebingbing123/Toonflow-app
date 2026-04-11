@@ -9,7 +9,7 @@ part 'production_assets_api.dart';
 part 'production_assets_models.dart';
 part 'production_edit_image_api.dart';
 part 'production_edit_image_models.dart';
-part 'production_legacy_routes.dart';
+part 'production_routes.dart';
 part 'production_storyboard_batch.dart';
 part 'production_storyboard_data_models.dart';
 part 'production_storyboard_data.dart';

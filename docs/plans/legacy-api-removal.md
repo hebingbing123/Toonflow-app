@@ -1,12 +1,12 @@
 # Legacy API 收敛 / 移除计划
 
-**范围说明（避免误解「一次做完本文档」）**：§一–§三多为**清单与依赖图**；§四进度表中 **C–D**（整棵 `*legacy*` HTTP 模块删除、PG 删 **`legacy_id` 列**）与 **B·其余域**（资产旧 POST、`production_legacy`、`harness`/jobs payload 等）属于**多里程碑工程**，无法在单次门禁/提交内安全清空。实施时以 **阶段 B 按域竖切**为单位推进，每域通过后 **`yarn refactor:check`** 再合并。
+**范围说明（避免误解「一次做完本文档」）**：§一–§三多为**清单与依赖图**；§四进度表中 **C–D**（整棵 `*legacy*` HTTP 模块删除、PG 删 **`legacy_id` 列**）与 **B·其余域**（资产旧 POST、`harness`/jobs payload 等）属于**多里程碑工程**，无法在单次门禁/提交内安全清空。实施时以 **阶段 B 按域竖切**为单位推进，每域通过后 **`yarn refactor:check`** 再合并。
 
 ## 术语（避免混谈）
 
 | 概念 | 含义 | 收敛难度 |
 |------|------|----------|
-| **HTTP 模块名带 `legacy`** | ~~`narrative::legacy`~~（已删）、**`production_legacy`** 等独立路由树 | 中–高：删路由前须改 Flutter |
+| **HTTP 模块名带 `legacy`** | ~~`narrative::legacy`~~（已删）；制作域已更名为 **`production`**（非 legacy 目录名）；**`assets/legacy*`** 等仍存 | 中–高：删路由前须改 Flutter |
 | **URL 中含 `/legacy/{整型 id}`** | 如 `GET /api/v1/art-styles/legacy/1`（画风等资源仍常见） | 中：按域竖切为 UUID 项目段或资源 UUID |
 | **请求体旧形状** | `projectId`、`camelCase` 与旧 Electron 对齐的 POST | 中：需换客户端 body + 后端 handler |
 | **列 `legacy_id`（PG）** | 各 `app_*` 表常见整型外键/排序 | 低–高：属 **Schema**，可与 HTTP 分阶段 |
@@ -20,8 +20,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| `backend/src/app/router.rs` | ~~`rest_legacy::*`~~ **已移除**；~~**`narrative::legacy`**~~ **已移除**；~~**`scripting::legacy`**~~ **已并入 `scripting::scripts`**；仍含 **`production_legacy`** 等 |
-| `backend/src/main.rs` | 顶层 **`mod production_legacy`** 等（与 `lib` 式入口二选一场景以实际 crate 根为准） |
+| `backend/src/app/router.rs` | ~~`rest_legacy::*`~~ **已移除**；~~**`narrative::legacy`**~~ **已移除**；~~**`scripting::legacy`**~~ **已并入 `scripting::scripts`**；**`production::router()`**（**`/api/v1/production/*`**） |
+| `backend/src/main.rs` | 顶层 **`mod production`**、**`mod production_flow`** 等 |
 
 ### 2. 独立 legacy 路由模块（整棵可随「该域下线」删除）
 
@@ -31,8 +31,8 @@
 | `backend/src/projects/mod.rs` | 仅 **`pub mod routes`** |
 | ~~`backend/src/narrative/legacy/*`~~ | **已删除**（原 **`/api/v1/novels/*`**）；事件生成迁至 **`POST …/projects/{project_id}/novel-events/generate-events`**；`novels_legacy_api` / `novels_events` 的 **`postLegacy*`** 为 Dart 侧兼容包装，内部走 **`/api/v1/projects/{uuid}/novels*`** 与 **`…/novel-events*`** |
 | `backend/src/narrative/mod.rs` | **`novels` / `events` / `storyboards`**（无 `legacy`） |
-| `backend/src/production_legacy/mod.rs` | 生产工作台旧路径 `/api/production/*`、等 |
-| `backend/src/production_legacy/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
+| `backend/src/production/mod.rs` | **`POST /api/v1/production/*`** 路由表 |
+| `backend/src/production/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
 | ~~`backend/src/rest_legacy/*`~~ | **已删除**（原 **`POST /api/v1/general/*`**、**`POST /api/v1/tasks/*`**）；任务中心改 **`GET /api/v1/jobs/page`**、**`GET …/jobs/task-detail/{task_id}`** 等 |
 | ~~`backend/src/scripting/legacy.rs`~~ | **已删除**；**`POST …/projects/{project_id}/scripts/get-script-api`** 现由 **`scripting/scripts.rs`** 注册 |
 | `backend/src/scripting/mod.rs` | **`agent` / `asset_extract` / `scripts`**（无 `legacy` 子模块） |
@@ -49,7 +49,7 @@
 | `backend/src/narrative/events/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。**已删除** `…/projects/legacy/{id}/novel-events*` 与 **`POST /api/v1/novels/events/*`** |
 | `backend/src/narrative/storyboards/*` | **主路径**：`…/projects/{project_id}/scripts/{script_legacy_id}/storyboards`、`…/projects/{project_id}/storyboards/{storyboard_legacy_id}`。**已删除** `…/scripts/legacy/.../storyboards` 与 **`…/storyboards/legacy/{id}`** |
 
-### 4. 其它后端引用（删 `production_legacy` 前需评估）
+### 4. 其它后端引用（制作域与 Harness）
 
 | 文件 | 说明 |
 |------|------|
@@ -61,7 +61,7 @@
 
 | 路径 | 说明 |
 |------|------|
-| `backend/src/app/contract_smoke_tests/production_legacy.rs` | 烟雾：生产 legacy |
+| `backend/src/app/contract_smoke_tests/production_http_smoke.rs` | 烟雾：**`/api/v1/production/*`**（无 DB → **503** 等） |
 | `backend/src/app/contract_smoke_tests/skills_legacy_asset_posts.rs` | 烟雾：skills + 旧资产 POST |
 | `backend/src/app/contract_smoke_tests/asset_jobs_tasks_legacy_post.rs` | 烟雾：资产/jobs/tasks/旧 project POST |
 | `backend/src/app/contract_smoke_tests/*.rs`（其余） | 多处用例含 `/legacy/` 或 `legacy_id` 断言 |
@@ -245,7 +245,7 @@
 | **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与旧路径一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID。**已删除** `POST …/projects/legacy/.../scripts` 与 **`…/scripts/legacy/{id}`** 剧本本体 CRUD（分镜 REST 见 **B·竖切 5**） |
 | **B·竖切 7：`get-script-api`（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/get-script-api`（`ensure_owned_project_pk` + body 可选 `name`）。Flutter `postScriptsGetScriptApiByProjectId`；剧本/项目脚本工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/get-script-api` **已删除** |
 | **B·竖切 8：`batch-add` 剧本（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/batch-add`（body 仅 **`data`**，与 legacy 插入/锁一致）。Flutter `postScriptsBatchAddByProjectId`；项目剧本批量工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/batch-add` **已删除** |
-| **B·其余域** | 部分 | **`POST /api/v1/assets/*`** 等旧形 body、**`production_legacy`**、**`harness`/jobs 整型 payload** 仍待竖切；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 已与当前 **UUID 项目段**主路径对齐（避免仍写已删的 **`…/projects/legacy/...`** 项目删改统计等） |
+| **B·其余域** | 部分 | **`POST /api/v1/assets/*`** 等旧形 body、**`harness`/jobs 整型 payload** 仍待竖切；制作 HTTP 模块已更名为 **`production`**（路径不变）；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 等与 **UUID 项目段**主路径对齐 |
 | **C–D** | 未做 | 大块删 `*legacy*` 模块与删 PG `legacy_id` 列 |
 
 ### 阶段 A：盘点与契约标记（低风险）
@@ -271,7 +271,7 @@
 3. ~~`rest_legacy::{general,tasks}`~~ **已删除**。
 4. ~~`scripting::legacy`~~ **已并入 `scripting::scripts`**（路由不变）。
 5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
-6. `production_legacy` — **最后**：HTTP 树仍在此 crate；**`load_owned_production_flow_json` / `resolve_owned_production_scope`** 已迁至 **`production_flow`**，Harness **不再**依赖 `production_legacy` 取流程 JSON。
+6. **Production HTTP**：目录 **`backend/src/production/`**（模块名 **`production`**，**`/api/v1/production/*`** 不变）；流程 JSON 在 **`production_flow`**，Harness **只**依赖 **`production_flow`** 读合并后的 flow。
 
 **顺序补充（与 §7–§8 对齐）**：
 
@@ -316,7 +316,7 @@
 |------|------|
 | **只改 URL 不改队列** | `app_generation_job` payload、`worker` 反查仍用 **`legacy_id`/`legacy_image_id`**；删路由前确认无在途任务或做好 payload 版本迁移。 |
 | **只改 REST 不改 Harness** | `HarnessContext`、各 `domain_*` 工具仍以整型项目/剧本 id 查库；需 **同一里程碑** 内定义新上下文字段并改 Flutter WS 客户端。 |
-| **`production_legacy` 过早删除** | HTTP 路由仍集中在该模块；流程加载已抽至 **`production_flow`**，删 crate 前须把 **`router()`** 迁出或改名。 |
+| **制作 HTTP 面过早删除** | **`production::router()`** 仍为产品工作台真源；流程合并逻辑在 **`production_flow`**，删路由前须完整迁移 Flutter/契约。 |
 | **OpenAPI / smoke / pg_contract 不同步** | 仅删 `router()` 会导致 CI 仍测旧路径或反之；每域保持 **契约三件套** 同 PR。 |
 | **画风 / Prompts 漏网** | `art-styles/legacy`、`prompts/{legacy_id}` 不在 `narrative::legacy` 树内；易被「按目录删 legacy」误伤或遗漏。 |
 | **Staging 与删列** | `legacy_staging`、`promote_legacy_from_staging` 与 **`legacy_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |
