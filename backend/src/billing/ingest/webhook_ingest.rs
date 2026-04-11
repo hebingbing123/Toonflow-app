@@ -1,0 +1,85 @@
+//! Insert idempotent webhook row and run profile upsert in one transaction.
+
+use serde_json::Value;
+
+use crate::billing::provider_rules::is_informational_event;
+use crate::error::ApiError;
+
+use super::apply_plan::apply_plan_from_webhook_payload;
+use super::event_parse::{
+    build_provider_event_id, parse_event_created_at, parse_event_type, parse_raw_event_id,
+};
+
+pub(crate) async fn ingest_webhook(
+    pool: &sqlx::PgPool,
+    v: &Value,
+) -> Result<(bool, Option<i64>, bool, String, bool), ApiError> {
+    let raw_event_id = parse_raw_event_id(v).ok_or_else(|| {
+        ApiError::BadRequest(
+            "JSON body must include a non-empty id (or event_id/eventId/notify_id/notifyId) for deduplication"
+                .into(),
+        )
+    })?;
+
+    let normalized = crate::billing::provider_rules::normalize_webhook(v);
+    let provider = normalized.provider.clone();
+    let provider_event_id = build_provider_event_id(provider.as_deref(), &raw_event_id);
+    let event_type = parse_event_type(v);
+    let event_created_at = parse_event_created_at(v);
+    let informational_event = is_informational_event(v);
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let inserted = sqlx::query_scalar::<_, i64>(
+        r#"
+        INSERT INTO app_billing_webhook_event (
+          provider_event_id,
+          payload,
+          provider,
+          raw_event_id,
+          event_type,
+          event_created_at,
+          is_informational_event
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (provider_event_id) DO NOTHING
+        RETURNING id
+        "#,
+    )
+    .bind(&provider_event_id)
+    .bind(v)
+    .bind(provider.as_deref())
+    .bind(&raw_event_id)
+    .bind(event_type.as_deref())
+    .bind(event_created_at)
+    .bind(informational_event)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(row_id) = inserted else {
+        tx.commit()
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        return Ok((true, None, false, provider_event_id, informational_event));
+    };
+
+    let profile_updated = apply_plan_from_webhook_payload(&mut tx, v)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok((
+        false,
+        Some(row_id),
+        profile_updated,
+        provider_event_id,
+        informational_event,
+    ))
+}

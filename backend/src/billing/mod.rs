@@ -1,5 +1,5 @@
 //! Billing provider webhooks (§12 / §13): HMAC-verified ingestion + idempotent dedupe by provider event id.
-//! On first receipt, optional `user_id` + `plan_tier` upsert `app_user_profile`.
+//! On first receipt, optional `user_id` + `plan_tier` upsert `app_user_profile`（`ingest/` 子模块）。
 
 mod ingest;
 mod provider_adapter;
