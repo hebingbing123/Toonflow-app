@@ -1,4 +1,6 @@
-//! `X-Request-Id` propagation and JSON [`crate::error::ErrorBody`] `request_id` injection.
+//! 请求 ID 中间件。
+//!
+//! `X-Request-Id` 传播和 JSON [`crate::error::ErrorBody`] `request_id` 注入。
 
 use axum::{body::Body, extract::Request, http::header, middleware::Next, response::Response};
 use serde_json::{json, Value};

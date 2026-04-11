@@ -1,19 +1,19 @@
-//! Multi-layer rate limiting via [`tower_governor`] (token bucket).
+//! 多层速率限制模块（基于 `tower_governor` 令牌桶）。
 //!
-//! ## Layer 1: Global IP-based rate limiting
-//! Default: ~50 req/s per IP (`1000 / 20`), burst 100.
-//! Tune with `RATE_LIMIT_REFILL_MS` and `RATE_LIMIT_BURST`.
-//! Set `RATE_LIMIT_TRUST_FORWARDED_HEADERS=1` only behind a trusted reverse proxy.
+//! ## 第一层：基于 IP 的全局速率限制
+//! 默认：每个 IP 约 50 req/s（`1000 / 20`），突发 100。
+//! 通过 `RATE_LIMIT_REFILL_MS` 和 `RATE_LIMIT_BURST` 调整。
+//! 仅在受信任的反向代理后设置 `RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`。
 //!
-//! ## Layer 2: Per-user rate limiting (JWT-based)
-//! ~10 req/s per user, burst 30. Stricter to prevent user abuse.
-//! Falls back to IP for anonymous users.
+//! ## 第二层：基于用户的速率限制（JWT）
+//! 每个用户约 10 req/s，突发 30。更严格以防止用户滥用。
+//! 匿名用户回退到 IP。
 //!
-//! ## Layer 3: Per-endpoint rate limiting (strict)
-//! ~5 req/s per endpoint per user, burst 10.
-//! For high-frequency endpoints like jobs, harness.
+//! ## 第三层：基于端点的速率限制（严格）
+//! 每个端点每个用户约 5 req/s，突发 10。
+//! 用于高频端点如 jobs、harness。
 //!
-//! Excludes liveness/version/ping routes and **`POST /api/v1/webhooks/billing`**.
+//! 排除健康检查/版本/探测路由和 `POST /api/v1/webhooks/billing`。
 
 mod layer;
 
