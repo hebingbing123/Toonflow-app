@@ -1825,7 +1825,7 @@ paths:
       description: |
         One round-trip totals for **`owner_user_id = JWT sub`**: rows in **`app_project`**, **`app_script`** (via owned projects), **`app_storyboard`** (via owned script trees), **`app_novel`** (via owned projects), **`app_asset`** with **`asset_type = 'role'`** (same rule as **`GET …/stats`** **`role_count`**), **`app_art_style`** (user-wide presets), and all **`app_asset`** rows (via owned projects).
         **`video_count`** is **`0`** until video rows are modeled in Postgres (same placeholder as **`GET …/stats`**).
-        Complements per-project **`GET /api/v1/projects/legacy/{legacy_id}/stats`**.
+        Complements per-project **`GET /api/v1/projects/{project_id}/stats`**.
       security:
         - bearerAuth: []
       responses:
@@ -1891,7 +1891,7 @@ paths:
       operationId: postProjectDeleteProjectV1
       description: |
         Parity with **`POST /api/project/delProject`**. Body **`{ "id" }`** is **`app_project.legacy_id`**.
-        Same deletion semantics as **`DELETE /api/v1/projects/legacy/{legacy_id}`** (including **`app_agent_memory`** cleanup).
+        Same deletion semantics as **`DELETE /api/v1/projects/{project_id}`** (including **`app_agent_memory`** cleanup).
       security:
         - bearerAuth: []
       requestBody:
@@ -2338,7 +2338,7 @@ paths:
       summary: Project overview counts by UUID
       operationId: getProjectStatsByProjectIdV1
       description: |
-        Same response as **`GET /api/v1/projects/legacy/{legacy_id}/stats`**, keyed by **`app_project.id`** (UUID).
+        Returns script/storyboard/role/novel/video counts for **`app_project.id`** (UUID path).
       security:
         - bearerAuth: []
       parameters:
@@ -2380,7 +2380,7 @@ paths:
       summary: Project detail by UUID
       operationId: getProjectByProjectIdV1
       description: |
-        Same response as **`GET /api/v1/projects/legacy/{legacy_id}`**, keyed by **`app_project.id`**.
+        Project row plus script briefs for **`app_project.id`** (UUID path).
       security:
         - bearerAuth: []
       parameters:
@@ -2420,7 +2420,7 @@ paths:
       summary: Partially update project by UUID
       operationId: patchProjectByProjectIdV1
       description: |
-        Same semantics as **`PATCH /api/v1/projects/legacy/{legacy_id}`**.
+        JSON merge patch for **`app_project`** text columns (see **`PatchProjectBody`**).
       security:
         - bearerAuth: []
       parameters:
@@ -2472,7 +2472,7 @@ paths:
       summary: Delete project by UUID
       operationId: deleteProjectByProjectIdV1
       description: |
-        Same semantics as **`DELETE /api/v1/projects/legacy/{legacy_id}`** (including **`app_agent_memory`** cleanup by **`legacy_project_id`**).
+        Deletes **`app_project`** by UUID; cascades scripts/storyboards/novels; clears **`app_agent_memory`** for that project’s **`legacy_project_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -2686,187 +2686,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Project not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{legacy_id}:
-    get:
-      deprecated: true
-      tags: [projects]
-      summary: Project detail by legacy integer id
-      operationId: getProjectByLegacyIdV1
-      description: |
-        Resolves `app_project` by `legacy_id` and current user; includes child `app_script` rows.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProjectDetailResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No project with that legacy id for this user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    patch:
-      deprecated: true
-      tags: [projects]
-      summary: Partially update project by legacy id
-      operationId: patchProjectByLegacyIdV1
-      description: |
-        JSON merge patch for text columns on `app_project`. Omit a key to leave that column unchanged;
-        `null` or empty string clears the column. At least one listed property must appear in the body.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PatchProjectBody"
-      responses:
-        "200":
-          description: Updated project row
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProjectRow"
-        "400":
-          description: Invalid body, no fields to apply, unknown properties, or malformed JSON
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No project with that legacy id for this user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    delete:
-      deprecated: true
-      tags: [projects]
-      summary: Delete project by legacy id
-      operationId: deleteProjectByLegacyIdV1
-      description: |
-        Deletes the row in **`app_project`** for the current user. Child **`app_script`** / **`app_storyboard`** rows cascade (FK **`ON DELETE CASCADE`**).
-        Also deletes **`app_agent_memory`** for the same **`legacy_project_id`** and user (not FK-linked to the project).
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "204":
-          description: Deleted
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No project with that legacy id for this user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{legacy_id}/stats:
-    get:
-      deprecated: true
-      tags: [projects]
-      summary: Project overview counts by legacy id
-      operationId: getProjectStatsByLegacyIdV1
-      description: |
-        Bearer JWT. Resolves **`app_project`** by **`legacy_id`** and owner; returns **`app_script`** / **`app_storyboard`** counts.
-        **`role_count`** is the number of **`app_asset`** rows with **`asset_type = 'role'`** for the project.
-        **`novel_count`** is the number of **`app_novel`** rows for the project.
-        **`video_count`** remains **`0`** until video rows are modeled in Postgres (legacy **`o_video`**).
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProjectStatsResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No project with that legacy id for this user
           content:
             application/json:
               schema:

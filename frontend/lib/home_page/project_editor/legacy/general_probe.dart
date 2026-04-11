@@ -113,16 +113,16 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                 setDialogState(() => generalLegacyBusy[0] = true);
                 final pr = detail.project;
                 try {
-                  final updated = await updateProjectByLegacyId(
+                  final updated = await updateProjectByProjectId(
                     token,
-                    p.legacyId,
+                    p.id,
                     <String, dynamic>{'name': pr.name ?? ''},
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'PATCH …/projects/legacy/${p.legacyId} name noop → ${updated.name ?? "(null)"}',
+                        'PATCH …/projects/{id} name noop → ${updated.name ?? "(null)"}',
                       ),
                     ),
                   );
@@ -139,7 +139,7 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'PATCH projects/legacy (name noop)',
+          generalLegacyBusy[0] ? 'general…' : 'PATCH projects/{id} (name noop)',
         ),
       ),
     ];

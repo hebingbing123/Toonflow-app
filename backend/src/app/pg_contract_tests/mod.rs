@@ -300,12 +300,13 @@ async fn projects_create_stats_delete_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
     let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -908,7 +909,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1124,7 +1125,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1448,7 +1449,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1483,7 +1484,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::DELETE)
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}"))
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1497,7 +1498,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let res = app
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/stats"))
+                .uri(format!("/api/v1/projects/{project_uuid}/stats"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())

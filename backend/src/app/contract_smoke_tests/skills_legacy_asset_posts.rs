@@ -639,7 +639,7 @@ async fn projects_list_requires_database_with_jwt() {
 
 #[tokio::test]
 async fn project_stats_unauthorized_without_bearer() {
-    let (status, v) = get_json("/api/v1/projects/legacy/1/stats").await;
+    let (status, v) = get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/stats").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }

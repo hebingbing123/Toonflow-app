@@ -41,7 +41,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                 if (ok != true || !ctx.mounted) return;
                 setDialogState(() => dialogState.saving[0] = true);
                 try {
-                  await deleteProjectByLegacyId(token, p.legacyId);
+                  await deleteProjectByProjectId(token, p.id);
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   if (!mounted) return;
@@ -74,7 +74,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
             : () async {
                 setDialogState(() => dialogState.saving[0] = true);
                 try {
-                  await updateProjectByLegacyId(token, p.legacyId, {
+                  await updateProjectByProjectId(token, p.id, {
                     'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
                     'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
                   });

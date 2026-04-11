@@ -80,7 +80,7 @@
 
 | 路径 | 说明 |
 |------|------|
-| `backend/src/projects/routes.rs` | **并行**：`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`、`GET …/stats`（UUID）；仍保留 `…/projects/legacy/{legacy_id}` 等同行为（与 `projects::legacy` 旧 POST 并存，删 legacy 段时要一起盘点） |
+| `backend/src/projects/routes.rs` | **主路径**：`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`、`GET …/stats`（UUID）。**已删除** `GET`/`PATCH`/`DELETE …/projects/legacy/{legacy_id}` 与 `GET …/projects/legacy/{legacy_id}/stats`（与竖切 1 对齐） |
 | `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{id}`、`GET …/cover`（封面落盘路径也按 `legacy_id` 命名，见 `AppState` 注释） |
 | `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{legacy_id}`（对齐旧 `o_prompt.id` 1–3） |
 | `backend/src/scripting/scripts.rs` | **并行**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；仍保留 `…/projects/legacy/{id}/scripts`、`…/scripts/legacy/{id}`；旧 `POST …/scripts/batch-add` 已移除 |
@@ -240,7 +240,7 @@
 |--------|------|------|
 | **E（§八）** | 已完成 | 根 `data/` 收敛、`scripts/` 清理、多语言 `docs/README.*` 截断等见 §8 表格 |
 | **A** | 部分 | OpenAPI 已对「按 legacy 项目 id」的 get/patch/delete/stats 标 `deprecated`；全量 `merge` 列表与「API→屏幕」表可由本文件 §一/§二 继续维护 |
-| **B·竖切 1：项目 UUID** | 已落地（主路径） | 后端：`GET\|PATCH\|DELETE /api/v1/projects/{project_id}`、`GET …/stats`。Flutter 项目详情/统计已走 UUID。legacy 路由仍注册 |
+| **B·竖切 1：项目 UUID** | 已落地（主路径） | 后端：`GET\|PATCH\|DELETE /api/v1/projects/{project_id}`、`GET …/stats`。Flutter `updateProjectByProjectId` / `deleteProjectByProjectId`；**已删除** `…/projects/legacy/{id}` 项目详情与 stats 旧路径 |
 | **B·竖切 2：项目资产 REST（UUID 项目段）** | 已落地（主路径） | 后端：`/api/v1/projects/{project_id}/assets` 全树（含 corner-scape、图片 CRUD、`scripts/{sid}/assets/{aid}` 关联）。资产仍用 **`asset_legacy_id`** 路径段。Flutter `rust_api` 新增 `fetchProjectAssetsByProjectId`、`createProjectAssetUnderProject` 等；项目编辑器资产 UI 主路径已切换。legacy `…/projects/legacy/.../assets*` 仍保留并已标 **`deprecated`** |
 | **B·竖切 3：项目小说 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novels`，`GET\|PATCH\|DELETE …/novels/{novel_legacy_id}`。Flutter `novels_rest_api` 与项目编辑器小说列表/工作台已切 UUID。**未迁**：`/api/v1/novels/*` 旧 POST、部分 legacy 路径仍注册 |
 | **B·竖切 4：项目小说事件 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。`POST …/novels/events/get-events` 仍按 body **`projectId`（legacy）** 解析为 UUID 后查询。Flutter `novels_events` 与项目编辑器事件列表/工作台主路径已切 UUID；legacy `…/projects/legacy/.../novel-events*` 仍保留并已标 **`deprecated`** |

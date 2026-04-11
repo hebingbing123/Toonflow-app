@@ -100,16 +100,15 @@ Future<ProjectRow> createProject(
   return ProjectRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/legacy/{legacy_id}` — merge patch for `name` / `intro` only.
+/// `PATCH /api/v1/projects/{project_id}` — merge patch; see `patchProjectByProjectIdV1`.
 ///
 /// [body] must only include keys allowed by OpenAPI `PatchProjectBody` (unknown keys → HTTP 400).
-/// See `patchProjectByLegacyIdV1`.
-Future<ProjectRow> updateProjectByLegacyId(
+Future<ProjectRow> updateProjectByProjectId(
   String accessToken,
-  int legacyId,
+  String projectId,
   Map<String, dynamic> body,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId');
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId');
   final res = await http
       .patch(
         uri,
@@ -133,9 +132,9 @@ Future<ProjectRow> updateProjectByLegacyId(
   return ProjectRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/projects/legacy/{legacy_id}` — see `deleteProjectByLegacyIdV1`.
-Future<void> deleteProjectByLegacyId(String accessToken, int legacyId) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId');
+/// `DELETE /api/v1/projects/{project_id}` — see `deleteProjectByProjectIdV1`.
+Future<void> deleteProjectByProjectId(String accessToken, String projectId) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId');
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));

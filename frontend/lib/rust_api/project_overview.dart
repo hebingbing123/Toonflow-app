@@ -136,50 +136,12 @@ Future<ProjectDetail> fetchProjectByProjectId(
   return ProjectDetail.fromJson(map);
 }
 
-/// `GET /api/v1/projects/legacy/{legacy_id}` — project plus script briefs. See `getProjectByLegacyIdV1`.
-Future<ProjectDetail> fetchProjectByLegacyId(
-  String accessToken,
-  int legacyId,
-) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId');
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return ProjectDetail.fromJson(map);
-}
-
 /// `GET /api/v1/projects/{project_id}/stats` — see `getProjectStatsByProjectIdV1`.
 Future<ProjectStats> fetchProjectStatsByProjectId(
   String accessToken,
   String projectId,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/stats');
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return ProjectStats.fromJson(map);
-}
-
-/// `GET /api/v1/projects/legacy/{legacy_id}/stats` — see `getProjectStatsByLegacyIdV1`.
-Future<ProjectStats> fetchProjectStatsByLegacyId(
-  String accessToken,
-  int legacyId,
-) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/legacy/$legacyId/stats');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
