@@ -1,26 +1,9 @@
-//! Queue abstraction layer supporting PostgreSQL (default) and Redis (optional) backends.
+//! 队列抽象层，支持 PostgreSQL（默认）和 Redis（可选）后端。
 #![allow(dead_code)]
 //!
-//! Provides a unified interface for job queuing with automatic fallback:
-//! - If `REDIS_URL` is set and Redis is available, use Redis for faster queue operations
-//! - Otherwise, fall back to PostgreSQL `FOR UPDATE SKIP LOCKED` (existing behavior)
-//!
-//! ## Usage
-//! ```rust
-//! use crate::queue::{Queue, JobPayload};
-//!
-//! // Enqueue a job
-//! queue.enqueue(JobPayload {
-//!     kind: "video_generate",
-//!     user_id: uuid,
-//!     payload: json!({...}),
-//! }).await?;
-//!
-//! // Dequeue (called by worker)
-//! if let Some(job) = queue.dequeue().await? {
-//!     process_job(job).await;
-//! }
-//! ```
+//! 提供统一的任务队列接口，自动回退：
+//! - 如果设置了 `REDIS_URL` 且 Redis 可用，使用 Redis 进行更快的队列操作
+//! - 否则回退到 PostgreSQL `FOR UPDATE SKIP LOCKED`（现有行为）
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
