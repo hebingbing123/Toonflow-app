@@ -1,3 +1,7 @@
+//! 提示词质量审查模块。
+//!
+//! 质量规则 CRUD 和提示词质量检查处理器。
+
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,
