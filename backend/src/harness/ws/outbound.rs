@@ -1,4 +1,4 @@
-//! Outbound WebSocket JSON envelopes (`error.occurred`, `session.*`, tool results).
+//! 出站 WebSocket JSON 信封（`error.occurred`、`session.*`、工具结果）。
 
 use axum::extract::ws::{Message, WebSocket};
 use serde_json::{json, Value};

@@ -1,4 +1,4 @@
-//! WebSocket branches for **`agent.script.attach`**, **`agent.production.attach`**, **`agent.context.update`**.
+//! WebSocket 分支（`agent.script.attach`、`agent.production.attach`、`agent.context.update`）。
 
 use axum::extract::ws::WebSocket;
 use serde_json::{json, Value};

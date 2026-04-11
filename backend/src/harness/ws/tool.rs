@@ -1,4 +1,4 @@
-//! WebSocket branch for **`harness.tool.invoke`** → **`harness.tool.result`** / `error.occurred`.
+//! WebSocket 分支（`harness.tool.invoke` → `harness.tool.result` / `error.occurred`）。
 
 use axum::extract::ws::WebSocket;
 use serde_json::{json, Value};
