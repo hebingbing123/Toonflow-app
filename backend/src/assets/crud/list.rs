@@ -1,4 +1,6 @@
-//! Paginated project asset list (`GET …/assets`).
+//! 分页项目资产列表（`GET …/assets`）。
+//!
+//! 支持按类型、名称过滤的分页查询。
 
 use axum::{
     extract::{Path, Query, State},

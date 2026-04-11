@@ -1,4 +1,6 @@
-//! Helpers shared with [`super::super::crud_images`] and background jobs.
+//! 与 [`super::super::crud_images`] 和后台任务共享的辅助函数。
+//!
+//! 资产 ID 解析和元数据解析辅助函数。
 
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
