@@ -147,6 +147,8 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 > ชื่อผู้ใช้: `admin`  
 > รหัสผ่าน: `admin123`
 
+> **หมายเหตุ (2026):** ส่วน Docker / คลาวด์ / PM2 / `data/serve` / Electron ด้านล่างอธิบาย **สแต็กเก่าที่ถอดออกแล้ว** โปรดใช้ [README.md](../README.md) ที่ราก repo ส่วน **Monorepo（Rust + Flutter）** และ **`backend/README.md`**
+
 ## การใช้ Docker
 
 ### สิ่งที่ต้องเตรียม

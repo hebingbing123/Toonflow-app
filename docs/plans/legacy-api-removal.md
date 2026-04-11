@@ -329,16 +329,16 @@
 | 文件 | 说明 |
 |------|------|
 | **`refactor-check.sh`** | 现行 CI/门禁，**保留**。 |
-| **`license.ts`** | Node/Bun + **`license-checker`** 思路；`package.json` 仍有 **`"license": "bun run scripts/license.ts"`**，但根 **`package.json` 依赖已极简化**，脚本是否仍能跑通需单独验证；属 **旧 Node 工具链遗留**，可改为 Rust/cargo-deny 或删除脚本并下掉 npm script。 |
-| **`installer.nsh`** | NSIS **Electron 安装器**宏（VC++ 运行库等）；当前仓库若已无 **electron-builder** 引用，则多为 **死文件**，可删或移入 `archive/`。 |
-| **`logo.ico` / `logo.png`** | 未见与 Flutter `windows/`、`macos/` 或 CI 的明确引用（宜 **`rg scripts/logo`** 后再定）；可能是旧桌面安装包素材。 |
+| **`license.ts`** | **已从 Git 删除**；根 **`package.json`** 已移除 **`license`** script（原依赖 **`license-checker`** 已不在 `devDependencies`）。第三方清单可后续用 **`cargo deny`** 等单独引入。 |
+| **`installer.nsh`** | **已删除**（无 electron-builder 引用）。 |
+| **`logo.ico` / `logo.png`** | **已删除**（`scripts/` 下旧安装包素材，无代码引用）。 |
 
 ### 8.3 `docs/`
 
 | 类别 | 说明 |
 |------|------|
 | **契约与路线** | **`openapi.yaml`**、**`websocket-events.md`**、**`plans/*.md`**、**`migration/*.md`** — **保留**；其中 migration 文档描述 SQLite→PG，与 **在线 legacy API** 是两件事，但同属「旧栈退场」叙事。 |
-| **多语言 README** | **`docs/README.*.md`**（及根 **`README.md`**）中仍可能出现旧 **`data/serve/app.js`**、Electron 启动描述等；需在 **产品对外文档** 刷新为 Flutter + Rust 真源，或标注「历史」避免新贡献者误跟。 |
+| **多语言 README** | 根 **`README.md`** 已替换 Docker/PM2/旧技术栈/旧目录树为 **Rust+Flutter** 摘要；**`docs/README.*.md`** 在 Docker 节前已加 **「旧栈已下线」** 提示并指向根 README。下文仍含详细旧步骤，仅供考古。 |
 | **静态图** | **`docs/*.png`**、`sponsored/`、`atomgitLogo.svg` 等 — 营销/展示用，非 API legacy；仅在做 **文档归档** 时评估是否迁出仓库。 |
 
 ### 8.4 `.gitignore` 中与旧栈相关的条目（提示）

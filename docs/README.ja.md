@@ -147,6 +147,8 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 > アカウント：`admin`  
 > パスワード：`admin123`
 
+> **注（2026）**: 以下の Docker / クラウド / PM2 / `data/serve` / Electron の記述は **廃止した旧スタック** 向けです。現在はリポジトリルートの [README.md](../README.md)「Monorepo（Rust + Flutter）」と **`backend/README.md`** を参照してください。
+
 ## Dockerデプロイ
 
 ### 前提条件

@@ -147,6 +147,9 @@ After installation, launch the program to start using this service.
 > Username: `admin`  
 > Password: `admin123`
 
+> **Note (2026):** Sections below about **Docker, cloud, PM2, `data/serve`, and Electron** describe the **removed** legacy stack. Use the [root README.md](../README.md) **Monorepo (Rust + Flutter)** section and **`backend/README.md`** instead.  
+> **说明：** 以下 Docker / 云端 / PM2 等针对旧栈，实操请以根目录 [README.md](../README.md)「Monorepo（Rust + Flutter）」为准。
+
 ## Docker Deployment
 
 ### Prerequisites

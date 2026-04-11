@@ -13,14 +13,12 @@
     "url": "https://github.com/HBAI-Ltd/Toonflow-app/issues",
     "email": "ltlctools@outlook.com"
   },
-  "main": "build/main.js",
   "packageManager": "yarn@1.0.0",
   "engines": {
     "node": ">=1.0.0"
   },
   "scripts": {
     "lint": "tsc --noEmit",
-    "license": "bun run scripts/license.ts",
     "refactor:check": "bash scripts/refactor-check.sh"
   },
   "dependencies": {},

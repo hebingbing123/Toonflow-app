@@ -147,6 +147,8 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 > Логин: `admin`  
 > Пароль: `admin123`
 
+> **Примечание (2026):** разделы ниже про Docker / облако / PM2 / `data/serve` / Electron относятся к **снятому со стека Electron+Node**. Актуальная схема — в [README.md](../README.md), раздел **Monorepo（Rust + Flutter）**, и в **`backend/README.md`**.
+
 ## Развертывание через Docker
 
 ### Предварительные требования

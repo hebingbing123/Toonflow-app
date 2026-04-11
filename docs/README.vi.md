@@ -147,6 +147,8 @@ Cài đặt xong, mở chương trình là có thể bắt đầu sử dụng.
 > Tài khoản: `admin`  
 > Mật khẩu: `admin123`
 
+> **Ghi chú (2026):** Các mục Docker / cloud / PM2 / `data/serve` / Electron bên dưới mô tả **stack cũ đã gỡ**. Hãy làm theo [README.md](../README.md) mục **Monorepo（Rust + Flutter）** và **`backend/README.md`**.
+
 ## Triển khai Docker
 
 ### Điều kiện

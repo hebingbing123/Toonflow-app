@@ -190,152 +190,19 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 > 账号：`admin`  
 > 密码：`admin123`
 
-## Docker 部署
+## Docker 与自建服务（新栈）
 
-### 前置条件
+旧版 **`yarn docker:local`**、根目录 **`data/serve`**、固定端口 **10588** 等与 Electron 内嵌 Node 一体的方案 **已移除**。自建 API 请参考：
 
-- 已安装 [Docker](https://docs.docker.com/get-docker/)（版本 20.10+）
+- **`backend/README.md`**：`cargo run --bin toonflow-server`、**`DATABASE_URL`**（Supabase Postgres）及可选存储/模型环境变量  
+- **`supabase/`** 与 **`docs/migration/database-migrations.md`**  
+- 契约：**`docs/openapi.yaml`**、**`docs/websocket-events.md`**
 
-### 方式一：在线部署
-
-待完善，暂时使用本地构建。
-
-### 方式二：本地构建
-
-使用本地已有的源码直接构建，适合开发者或已克隆仓库的用户，这需要你在本地安装 git：
-
-```shell
-# 先克隆项目（如已有则跳过）
-git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
-
-# 使用 docker-compose 本地构建并启动
-yarn docker:local
-
-# 或者手动构建
-docker build -t toonflow .
-docker run -d -p <本地端口>:10588 -v <本地数据路径>:/app/data toonflow
-
-# 此时在相应端口的 /web/index.html 路径即可访问页面
-# 例如 http://localhost:10588/web/index.html
-```
-
-### 服务端口说明
-
-| 端口    | 用途     | 部署映射      |
-| ------- | -------- | ------------- |
-| `10588` | 软件界面 | `10588:10588` |
-
-**环境变量说明：**
-
-| 变量       | 说明                               |
-| ---------- | ---------------------------------- |
-| `NODE_ENV` | 运行环境，`prod` 表示生产环境      |
-| `PORT`     | 服务监听端口（默认 10588）         |
-| `OSSURL`   | 文件存储访问地址，用于静态资源访问 |
-
----
+容器镜像若仍引用历史 Dockerfile，以路线图 **[`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)** 为准逐步替换。
 
 ## 云端部署
 
-### 一、服务器环境要求
-
-- **系统**：Ubuntu 20.04+ / CentOS 7+
-- **Node.js**：24.x（推荐，最低 23.11.1+）
-- **内存**：2GB+
-
-### 二、服务器部署
-
-#### 1. 安装环境
-
-```bash
-# 安装 Node.js
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source ~/.bashrc
-nvm install 24
-# 安装 Yarn 和 PM2
-npm install -g yarn pm2
-```
-
-#### 2. 部署项目
-
-**从 GitHub 克隆：**
-
-```bash
-cd /opt
-git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
-yarn install
-yarn build
-```
-
-**从 Gitee 克隆（国内推荐）：**
-
-```bash
-cd /opt
-git clone https://gitee.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
-yarn install
-yarn build
-```
-
-#### 3. 配置 PM2
-
-创建 `pm2.json` 文件：
-
-```json
-{
-  "name": "toonflow-app",
-  "script": "data/serve/app.js",
-  "instances": "max",
-  "exec_mode": "cluster",
-  "env": {
-    "NODE_ENV": "prod",
-    "PORT": 10588,
-    "OSSURL": "http://127.0.0.1:10588/"
-  }
-}
-```
-
-**环境变量说明：**
-
-| 变量       | 说明                               |
-| ---------- | ---------------------------------- |
-| `NODE_ENV` | 运行环境，`prod` 表示生产环境      |
-| `PORT`     | 服务监听端口                       |
-| `OSSURL`   | 文件存储访问地址，用于静态资源访问 |
-
----
-
-#### 4. 启动服务
-
-```bash
-pm2 start pm2.json
-pm2 startup
-pm2 save
-```
-
-#### 5. 常用命令
-
-```bash
-pm2 list              # 查看进程
-pm2 logs toonflow-app # 查看日志
-pm2 restart all       # 重启服务
-pm2 monit             # 监控面板
-```
-
-> ⚠️ **首次登录**  
-> 账号：`admin`  
-> 密码：`admin123`
-
-#### 6. 部署前端网站
-
-如需单独部署或定制前端界面，请参考前端仓库：
-
-- **GitHub**：[Toonflow-web](https://github.com/HBAI-Ltd/Toonflow-web)
-- **Gitee**：[Toonflow-web](https://gitee.com/HBAI-Ltd/Toonflow-web)
-
-> 💡 **说明**：本仓库已内置编译好的前端资源，普通用户无需单独部署前端。前端仓库仅供需要二次开发的开发者使用。
+旧版 **Node + PM2 + `data/serve/app.js`** 已下线。请在具备 **Postgres（推荐 Supabase）** 的环境中部署 **`backend/`**，客户端将 **`API_BASE_URL`** 指向该服务（见 **`frontend/README.md`**）。
 
 ---
 
@@ -348,186 +215,53 @@ pm2 monit             # 监控面板
 >
 > 欢迎开发者们共同参与 Toonflow 的共创。如有兴趣加入，请在交流群内联系主理人 ACT
 
-## 🛠️ 技术栈
+## 🛠️ 技术栈（当前）
 
-| 类别       | 技术                                                                                      |
-| ---------- | ----------------------------------------------------------------------------------------- |
-| 运行时     | Node.js 23.11.1+                                                                          |
-| 语言       | TypeScript 5.x                                                                            |
-| 后端框架   | Express 5                                                                                 |
-| 数据库     | SQLite（better-sqlite3 / knex）                                                           |
-| AI 集成    | Vercel AI SDK（OpenAI / Anthropic / Google / DeepSeek / 智谱 / MiniMax / 通义千问 / xAI） |
-| 本地推理   | @huggingface/transformers（ONNX）                                                         |
-| 实时通信   | Socket.IO                                                                                 |
-| 桌面客户端 | Electron 40                                                                               |
-| 图像处理   | Sharp                                                                                     |
-| 容器化     | Docker                                                                                    |
+| 类别     | 技术 |
+| -------- | ---- |
+| 服务端   | Rust（Axum）、SQLx、Tokio |
+| 客户端   | Flutter（桌面 / Web） |
+| 数据库   | Supabase Postgres + Auth（RLS） |
+| 实时     | WebSocket **`/api/v1/ws`** + Harness 协议 |
+| 契约     | OpenAPI 3.1、**`docs/websocket-events.md`** |
 
 ## 开发环境准备
 
-- **Node.js**：版本要求 23.11.1 及以上
-- **Yarn**：推荐作为项目包管理器
+- **Rust**：见根目录 **`rust-toolchain.toml`**
+- **Flutter**：与 **`frontend/pubspec.yaml`** 对齐的稳定版
+- **Node / Yarn**：仅用于根目录 **`yarn lint`**（`tsc --noEmit`）与 **`yarn refactor:check`**
 
-## 快速启动项目
+## 快速开始（开发者）
 
-1. **克隆项目**
+```bash
+git clone https://github.com/HBAI-Ltd/Toonflow-app.git
+cd Toonflow-app
+yarn install
+yarn refactor:check
+```
 
-   **从 GitHub 克隆：**
+- **后端**：`cd backend && cargo run --bin toonflow-server`（默认 **8666**，详见 **`backend/README.md`**）
+- **前端**：**`frontend/README.md`**（`API_BASE_URL`、`SUPABASE_*` 等）
 
-   ```bash
-   git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-   cd Toonflow-app
-   ```
-
-   **从 Gitee 克隆（国内推荐）：**
-
-   ```bash
-   git clone https://gitee.com/HBAI-Ltd/Toonflow-app.git
-   cd Toonflow-app
-   ```
-
-2. **安装依赖**
-
-   请先在项目根目录下执行以下命令以安装依赖项：
-
-   ```bash
-   yarn install
-   ```
-
-3. **启动开发环境**
-
-   本项目包含 **后端 API 服务** 和 **前端页面** 两部分，请根据需要选择启动方式：
-
-   - **方式一：仅启动后端服务**
-
-     ```bash
-     yarn dev
-     ```
-
-     > ⚠️ 此命令仅启动后端 API 服务（端口 10588），**不包含前端页面**。直接访问 `http://localhost:10588` 只能调用 API 接口，无法看到完整的网页界面。如需同时使用前端页面，请配合前端项目单独启动，或使用下方的 GUI 模式。
-
-   - **方式二：启动 Electron 桌面客户端**
-
-     ```bash
-     yarn dev:gui
-     ```
-
-     > 此命令会同时启动后端服务和 Electron 桌面窗口，自带内置前端页面，开箱即用，无需额外配置。适合想要完整体验所有功能的开发者。
-
-   - **方式三：生产模式启动**
-
-     ```bash
-     yarn start
-     ```
-
-     > 以生产模式直接运行编译后的服务（需先执行 `yarn build`）。
-
-4. **项目打包**
-
-   - 编译并生成 TypeScript 文件：
-
-     ```bash
-     yarn build
-     ```
-
-   - 打包为 Windows 平台可执行程序：
-
-     ```bash
-     yarn dist:win
-     ```
-
-   - 打包为 Mac 平台可执行程序：
-
-     ```bash
-     yarn dist:mac
-     ```
-
-   - 打包为 Linux 平台可执行程序：
-
-     ```bash
-     yarn dist:linux
-     ```
-
-5. **代码质量检查**
-
-   - 进行全局语法和规范检查：
-
-     ```bash
-     yarn lint
-     ```
-
-6. **AI 调试面板（可选）**
-
-   启动 AI SDK 的可视化调试工具，方便调试 AI 调用：
-
-   ```bash
-   yarn debug:ai
-   ```
+```bash
+yarn lint             # 根目录 TypeScript 配置体检（可选）
+```
 
 ## 前端开发
 
-如需修改前端界面，请前往前端仓库进行开发：
+本仓库 **`frontend/`** 即为 Flutter 客户端源码。旧 **`Toonflow-web` → `data/web`** 的集成方式已废弃；历史仓库 **Toonflow-web** 仅供参考。
 
-- **GitHub**：[Toonflow-web](https://github.com/HBAI-Ltd/Toonflow-web)
-- **Gitee**：[Toonflow-web](https://gitee.com/HBAI-Ltd/Toonflow-web)
-
-前端构建后，将 `dist` 目录内容复制到本项目的 `data/web` 目录即可集成。
-
-## 项目结构
+## 仓库结构（摘要）
 
 ```
-📂 build/                    # 编译产物
-📂 data/                     # 运行时数据
-│  ├─ 📂 models/            # 本地推理模型（ONNX）
-│  ├─ 📂 oss/               # 对象存储（素材/角色/场景）
-│  ├─ 📂 serve/             # 生产环境入口
-│  ├─ 📂 skills/            # Agent 技能提示词
-│  └─ 📂 web/               # 前端编译产物（内置）
-📂 docs/                     # 文档资源
-📂 env/                      # 环境配置
-📂 scripts/                  # 构建与辅助脚本
-📂 src/
-├─ 📂 agents/               # AI Agent 模块
-│  ├─ 📂 productionAgent/   # 生产 Agent
-│  └─ 📂 scriptAgent/       # 剧本 Agent
-├─ 📂 lib/                  # 公共库（数据库初始化、响应格式）
-├─ 📂 middleware/            # 中间件
-├─ 📂 routes/               # 路由模块
-│  ├─ 📂 agents/            # Agent 记忆管理
-│  ├─ 📂 artStyle/          # 画风管理
-│  ├─ 📂 assets/            # 素材管理
-│  ├─ 📂 assetsGenerate/    # 素材生成
-│  ├─ 📂 cornerScape/       # 分镜管理
-│  ├─ 📂 general/           # 通用接口
-│  ├─ 📂 login/             # 登录认证
-│  ├─ 📂 migrate/           # 数据迁移
-│  ├─ 📂 modelSelect/       # 模型选择
-│  ├─ 📂 novel/             # 小说管理
-│  ├─ 📂 other/             # 其他功能
-│  ├─ 📂 production/        # 制作管理
-│  ├─ 📂 project/           # 项目管理
-│  ├─ 📂 script/            # 剧本生成
-│  ├─ 📂 scriptAgent/       # 剧本 Agent 接口
-│  ├─ 📂 setting/           # 系统设置
-│  ├─ 📂 task/              # 任务管理
-│  └─ 📂 test/              # 测试接口
-├─ 📂 socket/               # WebSocket 实时通信
-├─ 📂 types/                # TypeScript 类型声明
-├─ 📂 utils/                # 工具函数
-├─ 📄 app.ts                # 应用入口
-├─ 📄 core.ts               # 核心初始化
-├─ 📄 env.ts                # 环境变量处理
-├─ 📄 err.ts                # 错误处理
-├─ 📄 logger.ts             # 日志模块
-├─ 📄 router.ts             # 路由注册
-└─ 📄 utils.ts              # 通用工具
-📄 Dockerfile                # Docker 构建文件
-📄 electron-builder.yml      # Electron 打包配置
-📄 skillList.json            # 技能清单
-📄 LICENSE                   # 许可证（Apache-2.0）
-📄 NOTICES.txt               # 第三方依赖声明
-📄 package.json              # 项目配置
-📄 tsconfig.json             # TypeScript 配置
+backend/                 # Rust API、任务 worker、Harness
+frontend/                # Flutter 应用
+backend/data/skills/     # 打包技能 Markdown（运行时真源）
+docs/openapi.yaml
+docs/plans/
+supabase/migrations/
+scripts/refactor-check.sh
+package.json             # yarn lint / yarn refactor:check
 ```
 
 ---
@@ -537,9 +271,9 @@ pm2 monit             # 监控面板
 | 仓库             | 说明                               | GitHub                                             | Gitee                                            |
 | ---------------- | ---------------------------------- | -------------------------------------------------- | ------------------------------------------------ |
 | **Toonflow-app** | 完整客户端（本仓库，推荐普通用户） | [GitHub](https://github.com/HBAI-Ltd/Toonflow-app) | [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-app) |
-| **Toonflow-web** | 前端源代码（适合前端开发者）       | [GitHub](https://github.com/HBAI-Ltd/Toonflow-web) | [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-web) |
+| **Toonflow-web** | 旧版 Web 前端（历史参考）         | [GitHub](https://github.com/HBAI-Ltd/Toonflow-web) | [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-web) |
 
-> 💡 **提示**：如果您只是想使用 Toonflow，直接下载本仓库的客户端即可。前端仓库仅供需要二次开发或定制前端界面的开发者使用。
+> 💡 **提示**：当前主客户端在 **`frontend/`**（Flutter）。**Toonflow-web** 为旧栈参考仓库。
 
 ---
 
@@ -600,17 +334,13 @@ Toonflow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 # 🙏 致谢
 
-感谢以下开源项目为 Toonflow 提供强大支持：
+感谢以下开源项目为 Toonflow 提供支持（当前栈节选）：
 
-- [Express](https://expressjs.com/) - 快速、开放、极简的 Node.js Web 框架
-- [AI SDK](https://ai-sdk.dev/) - 面向 TypeScript 的 AI 工具包
-- [Better-SQLite3](https://github.com/WiseLibs/better-sqlite3) - 高性能 SQLite3 绑定库
-- [Sharp](https://sharp.pixelplumbing.com/) - 高性能 Node.js 图像处理库
-- [Axios](https://axios-http.com/) - 基于 Promise 的 HTTP 客户端
-- [Zod](https://zod.dev/) - TypeScript 优先的模式验证库
-- [Socket.IO](https://socket.io/) - 实时双向事件通信引擎
-- [Electron](https://www.electronjs.org/) - 跨平台桌面应用开发框架
-- [Hugging Face Transformers](https://huggingface.co/docs/transformers.js) - 本地 ML 推理库
+- [Rust](https://www.rust-lang.org/) / [Tokio](https://tokio.rs/) / [Axum](https://github.com/tokio-rs/axum)
+- [Flutter](https://flutter.dev/)
+- [Supabase](https://supabase.com/)
+- [SQLx](https://github.com/launchbadge/sqlx)
+- [PostgreSQL](https://www.postgresql.org/)
 
 感谢以下组织/单位/个人为 Toonflow 提供支持：
 

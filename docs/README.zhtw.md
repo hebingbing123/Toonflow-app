@@ -147,6 +147,9 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 > 用戶名：`admin`  
 > 密碼：`admin123`
 
+> **說明（2026）**：以下 Docker、雲端、PM2、`data/serve`、Electron 等段落描述 **已下線的舊棧**，請勿再依此部署。當前真源見倉庫根目錄 [README.md](../README.md)「Monorepo（Rust + Flutter）」與 **`backend/README.md`**。  
+> **Note:** Legacy sections below; follow root [README.md](../README.md) for the Rust + Flutter stack.
+
 ## Docker部署
 
 ### 前置準備
