@@ -1,54 +1,230 @@
 # Legacy API 收敛 / 移除计划
 
-## 目标与边界
+## 术语（避免混谈）
 
-在 **无旧 Electron/Node 线上服务**、**客户端与数据可控** 的前提下，将「为旧 SQLite / 旧路由形状保留的 HTTP 面」逐步收敛为 **仅保留一套清晰的新契约**（以 UUID + REST 为主），并减少心智负担与重复实现。
-
-**注意**：Postgres 表中的列名 **`legacy_id`（整型）** 与 HTTP 路径里的 **`/legacy/`` 不是同一概念。
-
-- **列 `legacy_id`**：迁移与排序、对账时常仍有用；是否删除列属于 **Schema 迁移**，需单独设计，可与 HTTP 收敛 **并行或后置**。
-- **路径 `/api/v1/.../legacy/{id}`**：属于 **对外 API 形状**；收敛时优先改客户端调用，再删路由。
-
-## 为何不能「一键删目录」
-
-- **Flutter** 仍广泛调用 `projects/legacy`、`novels_legacy_api`、`projects_legacy_compat`、各 `compatibility/` 与 `legacy/` probe（见 `frontend/lib/rust_api/*`、`home_page/project_editor/**`）。
-- **OpenAPI / `contract_smoke_tests` / `pg_contract_tests`** 将上述路径列为契约与回归真源。
-- **路线图**（`docs/plans/harness-rust-flutter.md`）已记录「parity / 正式工作台 + 兼容折叠区」并存形态；去掉 legacy 前需 **产品确认**：哪些折叠区可删、哪些正式入口已 100% 覆盖旧能力。
-
-## 推荐实施顺序（全栈一起动，但分波交付）
-
-### 波 0：冻结现状（1–2 天）
-
-- 列出 **所有** 含 `legacy` 的 **HTTP 路由**（`backend/src/app/router.rs` 与各 `::legacy::router`）。
-- 列出 **Flutter** 侧每个 legacy 调用的 **唯一调用点**（按 feature 分组）。
-- 在 OpenAPI 中为「拟废弃」路径打 **`deprecated: true`**（可选，便于代码检索与客户端告警）。
-
-### 波 1：选一条竖切试点（建议：项目下资源只读 → 再写）
-
-- 例如：**项目资产** 已以 `GET/POST/PATCH …/projects/legacy/{id}/assets` 为主；先保证 **仅 UUID 路径**（若后端尚无则补）与 **Flutter 主路径** 切换，再标记旧路径 deprecated，最后删路由与测试。
-- 验收：`yarn refactor:check`、关键 `pg_contract_tests` 场景更新或替换。
-
-### 波 2：小说 / 事件 / 任务 等同理
-
-- `narrative::legacy`、`rest_legacy::tasks`、`projects::legacy` 等按 **调用量与风险** 排序；每波：**后端双轨（短期）→ 前端切换 → 删旧轨**。
-
-### 波 3：生产 / 脚本 legacy
-
-- `production_legacy`、`scripting::legacy` 工作量大，建议在所有 CRUD 竖切完成后再动。
-
-### 波 4：Schema（可选）
-
-- 若产品确认 **永不再暴露整型 id**，再评估：`legacy_id` 列保留（内部）、或只读、或迁移脚本后删除 —— **需备份与迁移窗口**。
-
-## 门禁
-
-- 每波合并前：**OpenAPI 可解析**、**契约/烟雾测试更新**、**Flutter analyze** 通过（与 `scripts/refactor-check.sh` 一致）。
-- 禁止「只删后端路由、客户端未改」的合并。
-
-## 与 `master` 的关系
-
-`master` 仅作 **历史对照**；移除 legacy **不以恢复 master 代码为目标**，而以 **当前仓库契约 + 产品行为** 为准。
+| 概念 | 含义 | 收敛难度 |
+|------|------|----------|
+| **HTTP 模块名带 `legacy`** | `narrative::legacy`、`production_legacy` 等独立路由树 | 中–高：删路由前须改 Flutter |
+| **URL 中含 `/legacy/{整型 id}`** | 如 `GET /api/v1/projects/legacy/1/assets` | 中：可逐步改为 UUID 路径 |
+| **请求体旧形状** | `projectId`、`camelCase` 与旧 Electron 对齐的 POST | 中：需换客户端 body + 后端 handler |
+| **列 `legacy_id`（PG）** | 各 `app_*` 表常见整型外键/排序 | 低–高：属 **Schema**，可与 HTTP 分阶段 |
+| **迁移工具 `legacy_import`** | `backend/src/bin/legacy_import.rs` | 通常 **保留**（与「在线 API 废弃」无关） |
 
 ---
 
-*文档版本：随首波试点更新 checklist 与路径表。*
+## 一、后端涉及文件（按目录）
+
+### 1. 路由入口（改动时必看）
+
+| 文件 | 说明 |
+|------|------|
+| `backend/src/app/router.rs` | `merge(projects::legacy)`、`rest_legacy::*`、`narrative::legacy`、`production_legacy`、`scripting::legacy` 等 |
+| `backend/src/main.rs` | 顶层 `mod production_legacy`、`mod rest_legacy`（与 `lib` 式入口二选一场景以实际 crate 根为准） |
+
+### 2. 独立 legacy 路由模块（整棵可随「该域下线」删除）
+
+| 路径 | 职责摘要 |
+|------|----------|
+| `backend/src/projects/legacy.rs` | `POST /api/v1/project/*`（getProject、addProject、editProject…） |
+| `backend/src/projects/mod.rs` | `pub mod legacy` |
+| `backend/src/narrative/legacy/mod.rs` | 小说旧形：`/api/v1/novels/*` |
+| `backend/src/narrative/legacy/dto.rs` | DTO |
+| `backend/src/narrative/legacy/handlers.rs` | Handlers |
+| `backend/src/narrative/legacy/extraction.rs` | 事件抽取任务 |
+| `backend/src/narrative/legacy/tests.rs` | 单元测试 |
+| `backend/src/narrative/mod.rs` | `pub mod legacy` |
+| `backend/src/production_legacy/mod.rs` | 生产工作台旧路径 `/api/production/*`、等 |
+| `backend/src/production_legacy/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
+| `backend/src/rest_legacy/mod.rs` | 未收拢域入口 |
+| `backend/src/rest_legacy/general.rs` | general 旧 POST |
+| `backend/src/rest_legacy/tasks.rs` | tasks 旧形 |
+| `backend/src/scripting/legacy.rs` | 脚本相关旧路由 |
+| `backend/src/scripting/mod.rs` | `pub mod legacy` |
+| `backend/src/assets/legacy.rs` | 资产 legacy 聚合 |
+| `backend/src/assets/legacy_query/mod.rs` | 旧查询面入口 |
+| `backend/src/assets/legacy_query/*.rs` | get_assets_api、get_image、material、polling、batch_generation、upload_clip 等 |
+| `backend/src/assets/mod.rs` | `mod legacy`、`mod legacy_query`、测试 `use legacy::*` |
+
+### 3. 路径含 `legacy`、但**不在**上述 `legacy` 目录的 REST（收敛时要同步 OpenAPI + Flutter）
+
+| 路径 | 说明 |
+|------|------|
+| `backend/src/narrative/novels/*` | `…/projects/legacy/{id}/novels` |
+| `backend/src/narrative/events/*` | `…/novel-events` 等 |
+| `backend/src/narrative/storyboards/*` | `…/scripts/legacy/{id}/storyboards`、`…/storyboards/legacy/{id}` |
+
+### 4. 其它后端引用（删 `production_legacy` 前需评估）
+
+| 文件 | 说明 |
+|------|------|
+| `backend/src/harness/invoke/domain_production.rs` | `crate::production_legacy::load_owned_production_flow_json` |
+
+### 5. 契约与集成测试
+
+| 路径 | 说明 |
+|------|------|
+| `backend/src/app/contract_smoke_tests/production_legacy.rs` | 烟雾：生产 legacy |
+| `backend/src/app/contract_smoke_tests/skills_legacy_asset_posts.rs` | 烟雾：skills + 旧资产 POST |
+| `backend/src/app/contract_smoke_tests/asset_jobs_tasks_legacy_post.rs` | 烟雾：资产/jobs/tasks/旧 project POST |
+| `backend/src/app/contract_smoke_tests/*.rs`（其余） | 多处用例含 `/legacy/` 或 `legacy_id` 断言 |
+| `backend/src/app/pg_contract_tests/mod.rs` 及 `*_suite.rs` | 需 DB 的契约；大量 `projects/legacy`、`legacy_id` |
+
+### 6. 数据迁移 CLI（一般**不**随 HTTP legacy 删除）
+
+| 文件 | 说明 |
+|------|------|
+| `backend/src/bin/legacy_import.rs` | SQLite → PG 导入工具；名称含 legacy，**不等于**在线 API |
+
+---
+
+## 二、前端涉及文件（`legacy` 字符串命中；含 URL/字段/目录名）
+
+以下为 **`frontend/lib` 下 `*.dart` 且包含 `legacy` 的清单**（用于全量替换/收敛时检索；部分仅为注释或 `legacyId` 字段名）。
+
+### `rust_api/`（API 封装层，优先改）
+
+- `rust_api/assets_api.dart`
+- `rust_api/assets_crud.dart`
+- `rust_api/assets_generate.dart`
+- `rust_api/assets_images.dart`
+- `rust_api/assets_models.dart`
+- `rust_api/art_styles.dart`
+- `rust_api/catalog_memory_models.dart`
+- `rust_api/core.dart`
+- `rust_api/index.dart`
+- `rust_api/novels_events.dart`
+- `rust_api/novels_events_models.dart`
+- `rust_api/novels_legacy_api.dart`
+- `rust_api/novels_models.dart`
+- `rust_api/novels_rest_api.dart`
+- `rust_api/production.dart`
+- `rust_api/project_overview.dart`
+- `rust_api/projects_legacy.dart`
+- `rust_api/projects_legacy_compat.dart`
+- `rust_api/prompts_api.dart`
+- `rust_api/scripts_api.dart`
+- `rust_api/scripts_storyboards_models.dart`
+- `rust_api/settings_about_danger.dart`
+- `rust_api/settings_agent_deploy.dart`
+- `rust_api/settings_memory_config_api.dart`
+- `rust_api/skills_api.dart`
+- `rust_api/status_auth_me.dart`
+- `rust_api/storyboards_api.dart`
+- `rust_api/system_status_api.dart`
+- `rust_api/tasks_legacy.dart`
+
+### `home_page/`（工作台 / 探针 / 兼容区）
+
+- `home_page.dart`
+- `home_page/agent_workspaces/controller.dart`
+- `home_page/agent_workspaces/contexts/production/support.dart`
+- `home_page/agent_workspaces/contexts/script/support.dart`
+- `home_page/project_editor/dialog/actions.dart`
+- `home_page/project_editor/dialog/content.dart`
+- `home_page/project_editor/editor.dart`
+- `home_page/project_editor/legacy/general_probe.dart`
+- `home_page/project_editor/legacy/project_probe.dart`
+- `home_page/project_editor/legacy/tasks_probe.dart`
+- `home_page/project_editor/assets/assets.dart`
+- `home_page/project_editor/assets/clip_upload.dart`
+- `home_page/project_editor/assets/compatibility/crud.dart`
+- `home_page/project_editor/assets/compatibility/images.dart`
+- `home_page/project_editor/assets/compatibility/relations.dart`
+- `home_page/project_editor/assets/corner_scape.dart`
+- `home_page/project_editor/assets/dialogs.dart`
+- `home_page/project_editor/assets/generation/dialog.dart`
+- `home_page/project_editor/assets/generation/section.dart`
+- `home_page/project_editor/assets/generation/support.dart`
+- `home_page/project_editor/assets/images.dart`
+- `home_page/project_editor/assets/support.dart`
+- `home_page/project_editor/assets/workbench.dart`
+- `home_page/project_editor/novels/compatibility/actions.dart`
+- `home_page/project_editor/novels/events/actions.dart`
+- `home_page/project_editor/novels/events/section.dart`
+- `home_page/project_editor/novels/support.dart`
+- `home_page/project_editor/novels/workbench.dart`
+- `home_page/project_editor/scripts/probe.dart`
+- `home_page/project_editor/scripts/scripts.dart`
+- `home_page/project_editor/scripts/workbench.dart`
+- `home_page/projects/controller.dart`
+- `home_page/projects/previews.dart`
+- `home_page/projects/section.dart`
+- `home_page/projects/workbenches/agent_memory.dart`
+- `home_page/quality_reviews/previews.dart`
+- `home_page/script_editor/batch_dialog.dart`
+- `home_page/script_editor/editor.dart`
+- `home_page/script_editor/storyboards.dart`
+- `home_page/script_editor/support.dart`
+- `home_page/storyboard_editor/editor.dart`
+- `home_page/storyboard_editor/support.dart`
+- `home_page/system_probes/account/settings.dart`
+- `home_page/system_probes/content.dart`
+- `home_page/system_probes/models_catalog/settings_probe.dart`
+- `home_page/task_center/controller.dart`
+- `home_page/task_center/previews.dart`
+- `home_page/task_center/section.dart`
+- `home_page/task_center/support.dart`
+
+> **说明**：若某文件仅含 `legacyId` 模型字段，收敛 HTTP 后可能**只改名段/模型**而未必删文件。
+
+---
+
+## 三、文档与配置
+
+| 路径 | 说明 |
+|------|------|
+| `docs/openapi.yaml` | 大量 `/legacy/` 与旧形 body；收敛时逐路径 `deprecated` 或删除 |
+| `docs/websocket-events.md` | 少量 `legacy` 提及；随契约改 |
+| `docs/plans/harness-rust-flutter.md` | 总路线；收敛完成后可更新「parity/兼容区」描述 |
+| `supabase/migrations/*.sql` | 多表含 `legacy_id` 列；属 **Schema 波次**，见下文 |
+
+---
+
+## 四、推荐实施方案与步骤（可勾选）
+
+### 阶段 A：盘点与契约标记（低风险）
+
+1. 自 `backend/src/app/router.rs` 导出完整 **legacy 相关 `merge` 列表**，与 OpenAPI 路径 diff。
+2. 自 Flutter `rust_api/*.dart` 建立 **API → 屏幕入口** 表（谁调用谁）。
+3. 对「计划废弃」的 operationId 在 OpenAPI 加 **`deprecated: true`**（可选同步生成客户端告警）。
+
+### 阶段 B：按域竖切（每一域：后端 ⇄ 前端 ⇄ 文档 ⇄ 测试）
+
+对单一域（例如「项目资产 CRUD」）重复：
+
+1. **设计目标契约**（仅 UUID 路径或统一 query；禁止双义 body）。
+2. **后端**：实现新路由或扩展现有 `projects/routes`；必要时短期 **双轨**（新旧并存）。
+3. **Flutter**：主路径切到新 API；折叠区/probe 下线或改调新 API。
+4. **OpenAPI / smoke / pg_contract**：删旧或改为测新路径。
+5. **删除**旧 `router()` 注册与死代码；跑 `yarn refactor:check`。
+
+### 阶段 C：大块 legacy 模块删除顺序（建议）
+
+1. `projects::legacy`（旧 `POST /api/v1/project/*`）— 与 `projects_legacy` / compat 封装绑定。
+2. `narrative::legacy`（`/api/v1/novels/*`）— 与 `novels_legacy_api` 绑定。
+3. `rest_legacy::{general,tasks}`。
+4. `scripting::legacy`。
+5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
+6. `production_legacy` — **最后**：依赖多、`harness` 有引用，需单独迁移 `load_owned_production_flow_json` 或等价能力。
+
+### 阶段 D：Schema（可选、独立窗口）
+
+1. 确认是否仍需要 **整型**对外暴露；若否，仅 HTTP 收敛即可先不动列。
+2. 若需删 `legacy_id` 列：新迁移、`UPDATE` 回填、双写期、再删列 —— **备份与回滚预案** 必备。
+
+---
+
+## 五、门禁（每波合并前）
+
+- `bash scripts/refactor-check.sh`（或等价的 `yarn refactor:check`）通过。
+- 禁止仅改后端路由而不改 Flutter 可执行路径。
+
+---
+
+## 六、与 `master` 的关系
+
+`master` 仅作历史对照；本计划以 **当前仓库** 的 OpenAPI 与 Flutter 调用为准。
+
+---
+
+*文档版本：含全量文件清单；实施时按阶段 B 逐域勾选并更新本文「进度」小节（可自行追加）。*

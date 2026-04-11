@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'script.dart';
+import '../contexts/production/action_panels.dart';
 import '../contexts/production/card_panels.dart';
 import '../contexts/production/context_snapshot.dart';
 import '../contexts/production/flow_logic.dart';
@@ -85,19 +86,10 @@ class _AgentWorkspaceProductionCardState
   }
 
   Widget _buildPromptTemplates() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: widget.productionPromptPresets
-          .map(
-            (AgentWorkspacePromptPreset preset) => ActionChip(
-              label: Text(preset.label),
-              onPressed: widget.busy
-                  ? null
-                  : () => widget.onSelectPrompt(preset.prompt),
-            ),
-          )
-          .toList(growable: false),
+    return ProductionWorkspacePromptTemplatesPanel(
+      busy: widget.busy,
+      presets: widget.productionPromptPresets,
+      onSelectPrompt: widget.onSelectPrompt,
     );
   }
 
@@ -282,19 +274,17 @@ class _AgentWorkspaceProductionCardState
   Widget _buildArgumentTemplates() {
     final templates = _argumentTemplates();
     if (templates.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: templates
+    return ProductionWorkspaceArgumentTemplatesPanel(
+      busy: widget.busy,
+      templates: templates
           .map(
-            (entry) => ActionChip(
-              label: Text(entry.label),
-              onPressed: widget.busy
-                  ? null
-                  : () => _applyToolArgsTemplate(entry.args, entry.label),
+            (entry) => ProductionWorkspaceArgumentTemplateEntry(
+              label: entry.label,
+              payload: entry.args,
             ),
           )
           .toList(growable: false),
+      onApplyTemplate: _applyToolArgsTemplate,
     );
   }
 
@@ -326,35 +316,11 @@ class _AgentWorkspaceProductionCardState
   Widget _buildActionCandidateTemplates(BuildContext context) {
     final suggestions = _buildActionSuggestions();
     if (suggestions.isEmpty) return const SizedBox.shrink();
-    final ids = _buildActionCandidateIds();
-    final hasIdPreview = ids.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text('当前 flow 候选参数', style: Theme.of(context).textTheme.labelMedium),
-        if (hasIdPreview) ...<Widget>[
-          const SizedBox(height: 6),
-          Text(
-            '候选 ${ids.length} 项：${ids.take(8).join(", ")}${ids.length > 8 ? "…" : ""}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: suggestions
-              .map(
-                (suggestion) => ActionChip(
-                  label: Text(suggestion.label),
-                  onPressed: widget.busy
-                      ? null
-                      : () => _applyActionSuggestion(suggestion),
-                ),
-              )
-              .toList(growable: false),
-        ),
-      ],
+    return ProductionWorkspaceActionCandidatesPanel(
+      busy: widget.busy,
+      suggestions: suggestions,
+      candidateIds: _buildActionCandidateIds(),
+      onApplySuggestion: _applyActionSuggestion,
     );
   }
 
@@ -534,156 +500,45 @@ class _AgentWorkspaceProductionCardState
             const SizedBox(height: 10),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
-            TextField(
-              controller: widget.productionPromptController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: '工作区提示词',
-                helperText: '用于制作通道 harness.agent.run',
+            ProductionWorkspaceControlsPanel(
+              busy: widget.busy,
+              loadingProductionWorkspaceRun: widget.loadingProductionWorkspaceRun,
+              loadingProductionFlowProbe: widget.loadingProductionFlowProbe,
+              loadingProductionSubAgentRun: widget.loadingProductionSubAgentRun,
+              loadingProductionResultWriteback:
+                  widget.loadingProductionResultWriteback,
+              hasLastToolResult: widget.workspaceLastToolResultLine != null,
+              productionPromptController: widget.productionPromptController,
+              productionDomainArgsController:
+                  widget.productionDomainArgsController,
+              productionDomainToolPresets: widget.productionDomainToolPresets,
+              productionSubAgentPresets: widget.productionSubAgentPresets,
+              flowKeyPresets: widget.flowKeyPresets,
+              selectedProductionDomainTool: _resolveDropdownValue(
+                widget.productionDomainToolController.text.trim(),
+                widget.productionDomainToolPresets,
               ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _runProductionWorkspace,
-                  child: Text(
-                    widget.loadingProductionWorkspaceRun ? '…' : '运行制作工作流',
-                  ),
-                ),
-                SizedBox(
-                  width: 260,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _resolveDropdownValue(
-                      widget.productionDomainToolController.text.trim(),
-                      widget.productionDomainToolPresets,
-                    ),
-                    items: widget.productionDomainToolPresets
-                        .map(
-                          (String tool) => DropdownMenuItem<String>(
-                            value: tool,
-                            child: Text(tool),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: widget.busy
-                        ? null
-                        : (String? value) {
-                            if (value == null) return;
-                            widget.onProductionDomainToolChanged(value);
-                          },
-                    decoration: const InputDecoration(labelText: '制作域工具'),
-                  ),
-                ),
-                SizedBox(
-                  width: 220,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _resolveDropdownValue(
-                      widget.flowKeyController.text.trim(),
-                      widget.flowKeyPresets,
-                    ),
-                    items: widget.flowKeyPresets
-                        .map(
-                          (String key) => DropdownMenuItem<String>(
-                            value: key,
-                            child: Text(key),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: widget.busy
-                        ? null
-                        : (String? value) {
-                            if (value == null) return;
-                            widget.onFlowKeyChanged(value);
-                          },
-                    decoration: const InputDecoration(
-                      labelText: 'flow key',
-                      helperText: '作为 get_flowData key 和写回 key',
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 360,
-                  child: TextField(
-                    controller: widget.productionDomainArgsController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: '制作工具参数(JSON)',
-                      helperText: '非 get_flowData 时使用，例如 {"ids":[1,2]}',
-                    ),
-                  ),
-                ),
-                if (_argumentTemplates().isNotEmpty)
-                  SizedBox(
-                    width: 360,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          '参数模板',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 6),
-                        _buildArgumentTemplates(),
-                      ],
-                    ),
-                  ),
-                if (_buildActionSuggestions().isNotEmpty)
-                  SizedBox(
-                    width: 360,
-                    child: _buildActionCandidateTemplates(context),
-                  ),
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _probeProductionDomainTool,
-                  child: Text(
-                    widget.loadingProductionFlowProbe ? '…' : '读取制作工具',
-                  ),
-                ),
-                SizedBox(
-                  width: 300,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _resolveDropdownValue(
-                      widget.productionSubAgentToolController.text.trim(),
-                      widget.productionSubAgentPresets,
-                    ),
-                    items: widget.productionSubAgentPresets
-                        .map(
-                          (String tool) => DropdownMenuItem<String>(
-                            value: tool,
-                            child: Text(tool),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: widget.busy
-                        ? null
-                        : (String? value) {
-                            if (value == null) return;
-                            widget.onProductionSubAgentChanged(value);
-                          },
-                    decoration: const InputDecoration(labelText: '制作子代理工具'),
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _runProductionSubAgentTool,
-                  child: Text(
-                    widget.loadingProductionSubAgentRun ? '…' : '运行子代理',
-                  ),
-                ),
-                FilledButton(
-                  onPressed:
-                      widget.busy || widget.workspaceLastToolResultLine == null
-                      ? null
-                      : _writeBackProductionFlowResult,
-                  child: Text(
-                    widget.loadingProductionResultWriteback ? '…' : '写回工具结果',
-                  ),
-                ),
-              ],
+              selectedProductionSubAgentTool: _resolveDropdownValue(
+                widget.productionSubAgentToolController.text.trim(),
+                widget.productionSubAgentPresets,
+              ),
+              selectedFlowKey: _resolveDropdownValue(
+                widget.flowKeyController.text.trim(),
+                widget.flowKeyPresets,
+              ),
+              onRunProductionWorkspace: _runProductionWorkspace,
+              onProductionDomainToolChanged: widget.onProductionDomainToolChanged,
+              onFlowKeyChanged: widget.onFlowKeyChanged,
+              onProbeProductionDomainTool: _probeProductionDomainTool,
+              onProductionSubAgentChanged: widget.onProductionSubAgentChanged,
+              onRunProductionSubAgentTool: _runProductionSubAgentTool,
+              onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
+              argumentTemplates: _argumentTemplates().isEmpty
+                  ? null
+                  : _buildArgumentTemplates(),
+              actionCandidatePanel: _buildActionSuggestions().isEmpty
+                  ? null
+                  : _buildActionCandidateTemplates(context),
             ),
             ProductionWorkspaceStatusPanel(
               resultSummaryLines: resultSummaryLines,
