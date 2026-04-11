@@ -38,6 +38,7 @@ async fn production_legacy_endpoints_minimal_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     // Create script
     let res = app
@@ -45,7 +46,7 @@ async fn production_legacy_endpoints_minimal_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{project_id}/scripts"))
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -365,13 +366,14 @@ async fn production_workbench_video_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{project_id}/scripts"))
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1009,13 +1011,14 @@ async fn production_assets_derivative_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{project_id}/assets"))
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

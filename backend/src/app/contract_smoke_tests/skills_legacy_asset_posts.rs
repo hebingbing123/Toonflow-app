@@ -34,7 +34,11 @@ async fn skill_binary_rejects_markdown_extension_with_jwt() {
 #[tokio::test]
 async fn project_assets_list_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/assets", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -472,8 +476,11 @@ async fn assets_polling_prompt_assets_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_assets_list_pagination_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        get_json_bearer("/api/v1/projects/legacy/1/assets?page=1&limit=2", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets?page=1&limit=2",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -482,7 +489,7 @@ async fn project_assets_list_pagination_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_assets_list_combined_filters_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let uri = "/api/v1/projects/legacy/1/assets?script_legacy_id=1&asset_type=role&name=probe&page=1&limit=2";
+    let uri = "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets?script_legacy_id=1&asset_type=role&name=probe&page=1&limit=2";
     let (status, v) = get_json_bearer(uri, &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
@@ -492,7 +499,7 @@ async fn project_assets_list_combined_filters_requires_database_with_jwt() {
 async fn project_assets_create_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/legacy/1/assets",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets",
         &token,
         r#"{"name":"contract_smoke_role","type":"role"}"#,
     )
@@ -504,8 +511,11 @@ async fn project_assets_create_requires_database_with_jwt() {
 #[tokio::test]
 async fn script_asset_link_put_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        put_empty_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1", &token).await;
+    let (status, v) = put_empty_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/scripts/1/assets/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -513,8 +523,11 @@ async fn script_asset_link_put_requires_database_with_jwt() {
 #[tokio::test]
 async fn script_asset_unlink_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        delete_empty_bearer("/api/v1/projects/legacy/1/scripts/1/assets/1", &token).await;
+    let (status, v) = delete_empty_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/scripts/1/assets/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -522,7 +535,11 @@ async fn script_asset_unlink_delete_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_asset_get_by_legacy_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/assets/1", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -531,7 +548,7 @@ async fn project_asset_get_by_legacy_requires_database_with_jwt() {
 async fn project_asset_patch_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = patch_json_bearer(
-        "/api/v1/projects/legacy/1/assets/1",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/1",
         &token,
         r#"{"name":"patched"}"#,
     )
@@ -543,7 +560,11 @@ async fn project_asset_patch_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_asset_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = delete_empty_bearer("/api/v1/projects/legacy/1/assets/1", &token).await;
+    let (status, v) = delete_empty_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -683,14 +704,19 @@ async fn art_style_cover_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn project_assets_list_unauthorized_without_bearer() {
-    let (status, v) = get_json("/api/v1/projects/legacy/1/assets").await;
+    let (status, v) =
+        get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/assets").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
 async fn corner_scape_assets_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/projects/legacy/1/assets/corner-scape", "{}").await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/corner-scape",
+        "{}",
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -699,7 +725,7 @@ async fn corner_scape_assets_unauthorized_without_bearer() {
 async fn corner_scape_assets_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/legacy/1/assets/corner-scape",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/corner-scape",
         &token,
         "{}",
     )
@@ -712,7 +738,7 @@ async fn corner_scape_assets_requires_database_with_jwt() {
 async fn corner_scape_assets_rejects_bad_types_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/legacy/1/assets/corner-scape",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/assets/corner-scape",
         &token,
         r#"{"types":["clip"]}"#,
     )

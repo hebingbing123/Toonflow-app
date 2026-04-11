@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// Row from **`GET …/projects/legacy/{id}/assets`** — OpenAPI **`AssetRow`**.
+/// Row from **`GET …/projects/{project_id}/assets`** — OpenAPI **`AssetRow`**.
 class AssetRow {
   const AssetRow({
     required this.id,

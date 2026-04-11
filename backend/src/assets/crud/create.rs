@@ -13,7 +13,7 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::ADV_LOCK_ASSET_LEGACY;
-use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use super::resolve::ensure_owned_project_pk;
 
 async fn create_project_asset_inner(
     pool: &sqlx::PgPool,
@@ -111,20 +111,4 @@ pub(crate) async fn create_project_asset_for_project(
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
     create_project_asset_inner(pool, project_id, body).await
-}
-
-pub(crate) async fn create_project_asset(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CreateAssetBody>,
-) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    create_project_asset_inner(pool, project_uuid, body).await
 }

@@ -1,6 +1,6 @@
 //! 与 [`super::super::crud_images`] 和后台任务共享的辅助函数。
 //!
-//! 资产 ID 解析和元数据解析辅助函数。
+//! 资产 ID 解析（UUID 项目段）与元数据解析；队列侧仍可按 **`project_legacy_id`** 解析（见 **`resolve_asset_id_for_job`**）。
 
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
@@ -49,31 +49,6 @@ pub(crate) async fn ensure_owned_project_pk(
     } else {
         Err(ApiError::NotFound)
     }
-}
-
-pub(crate) async fn resolve_owned_asset_id(
-    pool: &PgPool,
-    uid: Uuid,
-    project_legacy_id: i32,
-    asset_legacy_id: i32,
-) -> Result<Uuid, ApiError> {
-    let id: Option<Uuid> = sqlx::query_scalar(
-        r#"
-        SELECT a.id
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.legacy_id = $1
-          AND p.owner_user_id = $2
-          AND a.legacy_id = $3
-        "#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .bind(asset_legacy_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    id.ok_or(ApiError::NotFound)
 }
 
 pub(crate) async fn resolve_owned_asset_id_for_project(
@@ -141,32 +116,6 @@ pub async fn next_asset_image_sort_index(
             .fetch_one(pool)
             .await?;
     Ok(max.map_or(0, |m| m.saturating_add(1)))
-}
-
-pub(crate) async fn resolve_owned_asset_id_and_metadata(
-    pool: &PgPool,
-    uid: Uuid,
-    project_legacy_id: i32,
-    asset_legacy_id: i32,
-) -> Result<(Uuid, Value), ApiError> {
-    let row: Option<(Uuid, SqlxJson<Value>)> = sqlx::query_as(
-        r#"
-        SELECT a.id, a.metadata
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.legacy_id = $1
-          AND p.owner_user_id = $2
-          AND a.legacy_id = $3
-        "#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .bind(asset_legacy_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let (id, meta) = row.ok_or(ApiError::NotFound)?;
-    Ok((id, meta.0))
 }
 
 pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(

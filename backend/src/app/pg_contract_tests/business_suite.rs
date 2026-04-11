@@ -795,6 +795,15 @@ async fn promote_staging_populates_assets_and_links() {
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
     let app = build_router(contract_state(pool.clone(), secret));
 
+    let promo_project_uuid: Uuid = sqlx::query_scalar(
+        r#"SELECT id FROM public.app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+    )
+    .bind(PROMO_PROJECT_LEG)
+    .bind(sub)
+    .fetch_one(&pool)
+    .await
+    .expect("promoted project pk");
+
     let res = app
         .clone()
         .oneshot(
@@ -820,10 +829,7 @@ async fn promote_staging_populates_assets_and_links() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets",
-                    PROMO_PROJECT_LEG
-                ))
+                .uri(format!("/api/v1/projects/{}/assets", promo_project_uuid))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -846,8 +852,8 @@ async fn promote_staging_populates_assets_and_links() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets?script_legacy_id={}",
-                    PROMO_PROJECT_LEG, PROMO_SCRIPT_LEG
+                    "/api/v1/projects/{}/assets?script_legacy_id={}",
+                    promo_project_uuid, PROMO_SCRIPT_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -870,8 +876,8 @@ async fn promote_staging_populates_assets_and_links() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/corner-scape",
-                    PROMO_PROJECT_LEG
+                    "/api/v1/projects/{}/assets/corner-scape",
+                    promo_project_uuid
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -905,8 +911,8 @@ async fn promote_staging_populates_assets_and_links() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/{}/images",
-                    PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    "/api/v1/projects/{}/assets/{}/images",
+                    promo_project_uuid, PROMO_ASSET_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -937,8 +943,8 @@ async fn promote_staging_populates_assets_and_links() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/{}",
-                    PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    "/api/v1/projects/{}/assets/{}",
+                    promo_project_uuid, PROMO_ASSET_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -956,8 +962,8 @@ async fn promote_staging_populates_assets_and_links() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/{}/images",
-                    PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    "/api/v1/projects/{}/assets/{}/images",
+                    promo_project_uuid, PROMO_ASSET_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -978,8 +984,8 @@ async fn promote_staging_populates_assets_and_links() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/{}",
-                    PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    "/api/v1/projects/{}/assets/{}",
+                    promo_project_uuid, PROMO_ASSET_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -1000,8 +1006,8 @@ async fn promote_staging_populates_assets_and_links() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/assets/{}/images",
-                    PROMO_PROJECT_LEG, PROMO_ASSET_LEG
+                    "/api/v1/projects/{}/assets/{}/images",
+                    promo_project_uuid, PROMO_ASSET_LEG
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))

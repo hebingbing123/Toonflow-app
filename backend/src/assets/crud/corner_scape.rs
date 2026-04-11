@@ -15,7 +15,7 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::normalize_corner_types_filter;
-use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use super::resolve::ensure_owned_project_pk;
 
 async fn list_corner_scape_assets_inner(
     pool: &sqlx::PgPool,
@@ -128,22 +128,5 @@ pub(crate) async fn list_corner_scape_assets_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    list_corner_scape_assets_inner(pool, uid, project_id, body).await
-}
-
-pub(crate) async fn list_corner_scape_assets(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CornerScapeBody>,
-) -> Result<Json<CornerScapeResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let _ = normalize_corner_types_filter(body.types.clone())?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
     list_corner_scape_assets_inner(pool, uid, project_id, body).await
 }

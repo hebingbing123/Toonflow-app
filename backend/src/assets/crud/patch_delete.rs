@@ -17,7 +17,7 @@ use crate::http_kit::json_patch::{
 use crate::state::AppState;
 
 use super::super::models::*;
-use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use super::resolve::ensure_owned_project_pk;
 
 fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
     let p = parse_optional_text_field(v, "asset_type")?;
@@ -229,22 +229,6 @@ pub(crate) async fn patch_project_asset_for_project(
     patch_project_asset_inner(pool, uid, project_id, asset_legacy_id, body).await
 }
 
-pub(crate) async fn patch_project_asset_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-    Json(body): Json<PatchAssetBody>,
-) -> Result<Json<AssetRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    patch_project_asset_inner(pool, uid, project_id, asset_legacy_id, body).await
-}
-
 async fn delete_project_asset_inner(
     pool: &PgPool,
     uid: Uuid,
@@ -290,20 +274,5 @@ pub(crate) async fn delete_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_project_asset_inner(pool, uid, project_id, asset_legacy_id).await
-}
-
-pub(crate) async fn delete_project_asset_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
     delete_project_asset_inner(pool, uid, project_id, asset_legacy_id).await
 }

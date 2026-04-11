@@ -259,28 +259,6 @@ Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(
   return ListAssetImagesResponse.fromJson(map);
 }
 
-/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `listProjectAssetImagesByLegacyIdsV1`.
-Future<ListAssetImagesResponse> fetchProjectAssetImagesByLegacyIds(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId,
-) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images',
-  );
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return ListAssetImagesResponse.fromJson(map);
-}
-
 /// `GET /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}` — see `getProjectAssetImageByProjectIdV1`.
 Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
   String accessToken,
@@ -290,29 +268,6 @@ Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId',
-  );
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return AssetImageRow.fromJson(map);
-}
-
-/// `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `getProjectAssetImageByLegacyIdsV1`.
-Future<AssetImageRow> fetchProjectAssetImageByLegacyIds(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId,
-  String imageId,
-) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -338,17 +293,6 @@ Uri projectAssetImageFileV1UriByProjectId(
   );
 }
 
-/// Builds `GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}/file` — OpenAPI `getProjectAssetImageFileByLegacyIdsV1`.
-Uri projectAssetImageFileV1Uri(
-  int projectLegacyId,
-  int assetLegacyId,
-  String imageId,
-) {
-  return Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId/file',
-  );
-}
-
 /// Fetches image bytes from [`projectAssetImageFileV1UriByProjectId`].
 Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
   String accessToken,
@@ -358,33 +302,6 @@ Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
 ) async {
   final uri = projectAssetImageFileV1UriByProjectId(
     projectId,
-    assetLegacyId,
-    imageId,
-  );
-  final res = await http
-      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 120));
-  if (res.statusCode != 200) {
-    throw RustApiException(
-      res.body.isNotEmpty ? res.body : 'binary response ${res.statusCode}',
-      statusCode: res.statusCode,
-    );
-  }
-  return res.bodyBytes;
-}
-
-/// Fetches image bytes from [`projectAssetImageFileV1Uri`].
-///
-/// When **`file_path`** is **`https?`**, the server responds with **307**; this client follows redirects and returns the final body (**`200`**).
-/// Rows without **`https?`** **`file_path`** and without **`metadata.storage == local`** typically yield **404** from this route.
-Future<Uint8List> fetchProjectAssetImageFileByLegacyIds(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId,
-  String imageId,
-) async {
-  final uri = projectAssetImageFileV1Uri(
-    projectLegacyId,
     assetLegacyId,
     imageId,
   );
@@ -482,51 +399,6 @@ Future<AssetImageRow> createProjectAssetImageForProject(
   return AssetImageRow.fromJson(map);
 }
 
-/// `POST /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByLegacyIdsV1`.
-Future<AssetImageRow> createProjectAssetImage(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId, {
-  String? filePath,
-  String? state,
-  int? sortIndex,
-}) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images',
-  );
-  final body = <String, dynamic>{};
-  if (filePath != null) {
-    body['file_path'] = filePath;
-  }
-  if (state != null) {
-    body['state'] = state;
-  }
-  if (sortIndex != null) {
-    body['sort_index'] = sortIndex;
-  }
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 201) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return AssetImageRow.fromJson(map);
-}
-
 /// `PATCH …/projects/{project_id}/assets/.../images/{image_id}` — see `patchProjectAssetImageByProjectIdV1`.
 Future<AssetImageRow> patchProjectAssetImageByProjectIds(
   String accessToken,
@@ -561,42 +433,6 @@ Future<AssetImageRow> patchProjectAssetImageByProjectIds(
   return AssetImageRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `patchProjectAssetImageByLegacyIdsV1`.
-///
-/// [body] must match OpenAPI **`PatchAssetImageBody`** (at least one of **`file_path`**, **`state`**, **`sort_index`**).
-Future<AssetImageRow> patchProjectAssetImageByLegacyIds(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId,
-  String imageId,
-  Map<String, dynamic> body,
-) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
-  );
-  final res = await http
-      .patch(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return AssetImageRow.fromJson(map);
-}
-
 /// `DELETE …/projects/{project_id}/assets/.../images/{image_id}` — see `deleteProjectAssetImageByProjectIdV1`.
 Future<void> deleteProjectAssetImageByProjectIds(
   String accessToken,
@@ -606,30 +442,6 @@ Future<void> deleteProjectAssetImageByProjectIds(
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId',
-  );
-  final res = await http
-      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 204) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-}
-
-/// `DELETE /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}` — see `deleteProjectAssetImageByLegacyIdsV1`.
-Future<void> deleteProjectAssetImageByLegacyIds(
-  String accessToken,
-  int projectLegacyId,
-  int assetLegacyId,
-  String imageId,
-) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/legacy/$projectLegacyId/assets/$assetLegacyId/images/$imageId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

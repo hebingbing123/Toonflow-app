@@ -97,6 +97,12 @@ async fn generate_and_store_asset_image(
                 JobRunError::Failed("asset not found for project or not owned".into())
             })?;
 
+    let project_id: Uuid = sqlx::query_scalar(r#"SELECT project_id FROM app_asset WHERE id = $1"#)
+        .bind(asset_id)
+        .fetch_one(ctx.pool)
+        .await
+        .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
     let (url, revised) = images_generation_or_edit_url(
         ctx.cfg,
         ctx.http_client,
@@ -125,7 +131,7 @@ async fn generate_and_store_asset_image(
             .await
             .map_err(|e| JobRunError::Failed(e.to_string()))?;
         let api_path = format!(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_row_id}/file"
+            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_row_id}/file"
         );
         let metadata = json!({
             "source": "jobs.worker.asset_image",

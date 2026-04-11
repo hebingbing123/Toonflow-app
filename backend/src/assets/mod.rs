@@ -264,10 +264,7 @@ pub fn router() -> Router<AppState> {
             post(post_legacy_get_assets_api),
         )
         .route("/api/v1/assets/get-image", post(post_legacy_get_image))
-        .route(
-            "/api/v1/assets/upload-clip",
-            post(post_legacy_upload_clip),
-        )
+        .route("/api/v1/assets/upload-clip", post(post_legacy_upload_clip))
         .route(
             "/api/v1/assets/get-material-data",
             post(post_legacy_get_material_data),
@@ -315,38 +312,6 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
             put(link_script_to_asset_for_project).delete(unlink_script_from_asset_for_project),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets",
-            get(list_project_assets).post(create_project_asset),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/corner-scape",
-            post(list_corner_scape_assets),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}/file",
-            get(get_project_asset_image_file),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images/{image_id}",
-            get(get_project_asset_image)
-                .patch(patch_project_asset_image)
-                .delete(delete_project_asset_image),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images",
-            get(list_project_asset_images).post(create_project_asset_image),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}",
-            get(get_project_asset_by_legacy)
-                .patch(patch_project_asset_by_legacy)
-                .delete(delete_project_asset_by_legacy),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
-            put(link_script_to_asset).delete(unlink_script_from_asset),
         )
         .merge(generate::router())
 }

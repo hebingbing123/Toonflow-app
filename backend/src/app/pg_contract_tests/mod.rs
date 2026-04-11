@@ -326,7 +326,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -351,7 +351,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/scripts"))
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -369,7 +369,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -389,7 +389,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -412,7 +412,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -444,7 +444,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}/images"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -471,7 +471,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}/images"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -532,7 +532,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}/images/{img_uuid}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -557,7 +557,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -577,7 +577,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -607,7 +607,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}/images/{img_uuid}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -627,7 +627,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -654,7 +654,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/{asset_leg}/images/{img_uuid}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_leg}/images/{img_uuid}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -673,7 +673,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/assets"))
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -694,7 +694,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -724,7 +724,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -755,7 +755,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -786,7 +786,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -833,7 +833,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -884,7 +884,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::POST)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets/corner-scape"
+                    "/api/v1/projects/{project_uuid}/assets/corner-scape"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -969,7 +969,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets?asset_type=role&name=pg_contract"
+                    "/api/v1/projects/{project_uuid}/assets?asset_type=role&name=pg_contract"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -993,7 +993,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets?asset_type=tool&name=pg_contract"
+                    "/api/v1/projects/{project_uuid}/assets?asset_type=tool&name=pg_contract"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1011,7 +1011,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}"
+                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1030,7 +1030,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::PUT)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/scripts/{script_leg}/assets/{asset_leg}"
+                    "/api/v1/projects/{project_uuid}/scripts/{script_leg}/assets/{asset_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1047,7 +1047,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}&limit=10&page=1"
+                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}&limit=10&page=1"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1073,7 +1073,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::DELETE)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/scripts/{script_leg}/assets/{asset_leg}"
+                    "/api/v1/projects/{project_uuid}/scripts/{script_leg}/assets/{asset_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1090,7 +1090,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/assets?script_legacy_id={script_leg}"
+                    "/api/v1/projects/{project_uuid}/assets?script_legacy_id={script_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))

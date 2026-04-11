@@ -16,7 +16,7 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::{normalize_list_asset_type_filter, normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
-use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use super::resolve::ensure_owned_project_pk;
 
 async fn count_project_assets_filtered(
     pool: &PgPool,
@@ -248,21 +248,5 @@ pub(crate) async fn list_project_assets_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    list_project_assets_inner(pool, uid, project_id, query).await
-}
-
-pub(crate) async fn list_project_assets(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    Query(query): Query<ListAssetsQuery>,
-    headers: HeaderMap,
-) -> Result<Json<ListAssetsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
     list_project_assets_inner(pool, uid, project_id, query).await
 }
