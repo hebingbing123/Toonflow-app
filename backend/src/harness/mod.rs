@@ -1,16 +1,16 @@
-//! Harness-oriented runtime boundaries for tools, permissions, and observation.
+//! Harness 运行时边界：工具、权限和观察。
 //!
-//! | Area | Role |
+//! | 模块 | 职责 |
 //! |------|------|
-//! | [`tools`] | Static catalog (`HarnessToolInfo`); source of truth for allowlists and OpenAPI/WS docs. |
-//! | [`http`] | REST under `/api/v1/harness/*` (e.g. tool listing). |
-//! | [`wire`] | Deserialize structs for WebSocket **`payload`** bodies (`harness.*`, `agent.*.attach`, `agent.chat.send`, `session.auth`). |
-//! | [`ws`] | **`/api/v1/ws`** stack: [`ws::upgrade`], [`ws::connection`], [`ws::auth`], [`ws::dispatch`], [`ws::outbound`], [`ws::session`], [`ws::tool`], [`ws::agent`], [`ws::chat`], [`ws::channel`]. |
-//! | [`invoke`] | Execute catalog tools (sync + async); gated by [`permissions`]. |
-//! | [`observe`] | `tracing` hooks for WS frames, tool runs, HTTP catalog, memory REST, generation jobs. |
-//! | [`isolate`] / [`wasm_runtime`] | Hard isolation backends (subprocess, embedded WASM). |
+//! | `tools` | 静态目录（`HarnessToolInfo`）；允许列表和 OpenAPI/WS 文档的真理源 |
+//! | `http` | `/api/v1/harness/*` 下的 REST（如工具列表） |
+//! | `wire` | WebSocket `payload` 体的反序列化结构 |
+//! | `ws` | `/api/v1/ws` 协议栈：升级、连接、认证、调度、出站、会话、工具、代理、聊天、频道 |
+//! | `invoke` | 执行目录工具（同步 + 异步）；由 `permissions` 控制 |
+//! | `observe` | 用于 WS 帧、工具运行、HTTP 目录、内存 REST、生成任务的追踪钩子 |
+//! | `isolate` / `wasm_runtime` | 硬隔离后端（子进程、嵌入式 WASM） |
 //!
-//! Agent / LLM orchestration (`harness.agent.run`, streaming chat) lives in `llm` and [`ws`]; the HTTP upgrade entry is [`ws::upgrade`].
+//! 代理/LLM 编排（`harness.agent.run`、流式聊天）位于 `llm` 和 `ws`；HTTP 升级入口是 `ws::upgrade`。
 
 pub mod http;
 pub mod invoke;
