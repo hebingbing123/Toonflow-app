@@ -21,81 +21,119 @@ use crate::metering::quota;
 use crate::metering::usage;
 use crate::state::AppState;
 
+/// 生成任务数据库行 (`app_generation_job`)。
+///
+/// 表示一个异步生成任务的完整状态。
 #[derive(Debug, FromRow, Serialize)]
 pub struct JobRow {
+    /// 遗留任务 ID（用于向后兼容）。
     pub legacy_task_id: i64,
+    /// 内部 UUID 主键。
     pub id: Uuid,
+    /// 任务所有者的用户 ID。
     pub owner_user_id: Uuid,
+    /// 任务类型（如 asset.generate.image）。
     pub kind: String,
+    /// 任务状态：queued、running、succeeded、failed、cancelled。
     pub status: String,
+    /// 任务输入参数 JSON。
     pub payload: serde_json::Value,
+    /// 任务成功结果 JSON。
     pub result: Option<serde_json::Value>,
+    /// 失败时的错误消息。
     pub error_message: Option<String>,
+    /// 幂等性键（用于重复请求检测）。
     pub idempotency_key: Option<String>,
-    /// Worker label (`WORKER_ID` env) when `running`; set on claim.
+    /// 认领此任务的 Worker 标识（WORKER_ID 环境变量），仅在 running 状态时设置。
     pub claimed_by: Option<String>,
+    /// 任务创建时间。
     pub created_at: DateTime<Utc>,
+    /// 任务最后更新时间。
     pub updated_at: DateTime<Utc>,
 }
 
+/// 任务列表查询参数。
 #[derive(Debug, Deserialize, Default)]
 struct ListJobsQuery {
-    /// Exact match on `kind` when set (after trim; empty omitted).
+    /// 按类型精确匹配（设置时，修剪后；空值省略）。
     #[serde(default)]
     kind: Option<String>,
-    /// Exact match on `status` when set (after trim; empty omitted).
+    /// 按状态精确匹配（设置时，修剪后；空值省略）。
     #[serde(default)]
     status: Option<String>,
-    /// Page size (1–100). Omitted → 100.
+    /// 每页大小（1-100），省略则为 100。
     #[serde(default)]
     limit: Option<i64>,
-    /// Rows to skip (>= 0). Omitted → 0.
+    /// 要跳过的行数（>= 0），省略则为 0。
     #[serde(default)]
     offset: Option<i64>,
 }
 
+/// 创建任务的请求体。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreateJobBody {
+    /// 任务类型。
     pub kind: String,
+    /// 任务输入参数。
     #[serde(default)]
     pub payload: serde_json::Value,
 }
 
+/// 按任务类型汇总的数据库行。
 #[derive(Debug, FromRow, Serialize)]
 struct JobKindSummaryRow {
+    /// 任务类型。
     kind: String,
+    /// 该类型的任务数量。
     job_count: i64,
 }
 
+/// 按任务状态汇总的数据库行。
 #[derive(Debug, FromRow, Serialize)]
 struct JobStatusSummaryRow {
+    /// 任务状态。
     status: String,
+    /// 该状态的任务数量。
     job_count: i64,
 }
 
-/// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker uses
-/// **`images/edits`** when payload has `image_base64`, otherwise **`images/generations`**,
-/// then inserts **`app_asset_image`** (**`file_path`** = provider URL or **`…/images/{id}/file`**
-/// when **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** is set).
+/// 单图资产生成（遗留 `POST …/assets-generate/generate`）。
+///
+/// Worker 在 payload 有 `image_base64` 时使用 `images/edits`，否则使用 `images/generations`，
+/// 然后插入 `app_asset_image`（`file_path` = 提供商 URL 或 `…/images/{id}/file`，
+/// 当设置了 `TOONFLOW_LOCAL_ASSET_IMAGE_DIR` 时）。
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
-/// Single prompt polish (legacy **`POST …/assets-generate/polish-prompt`**); worker calls chat completion when **`LlmConfig`** is set, else **`failed`**.
+/// 单条提示词优化（遗留 `POST …/assets-generate/polish-prompt`）。
+///
+/// Worker 在设置了 `LlmConfig` 时调用聊天补全，否则标记为 `failed`。
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
-/// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker runs one image call
-/// (prefer **`images/edits`** when `image_base64` exists, fallback **`images/generations`**) plus
-/// one **`app_asset_image`** insert per item when LLM key is set (same **`file_path`** rules as
-/// single-image).
+/// 批量图片生成（`POST …/assets-generate/batch-generate`）。
+///
+/// Worker 对每个项目运行一次图片调用（优先在 `image_base64` 存在时使用 `images/edits`，
+/// 否则使用 `images/generations`），并在设置了 LLM 键时为每个项目插入 `app_asset_image`
+/// （`file_path` 规则与单图相同）。
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
-/// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker runs **`chat_completion_assistant_text`** per item when **`LlmConfig`** is set (cooperative cancel between items), else **`failed`**.
+/// 批量提示词优化（`POST …/assets-generate/batch-polish`）。
+///
+/// Worker 在设置了 `LlmConfig` 时为每个项目运行 `chat_completion_assistant_text`
+/// （项目间支持协作取消），否则标记为 `failed`。
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
-/// Legacy **`modelTest`** probe (**`POST …/settings/vendors/model-test`**); worker performs a live
-/// text/image/video vendor probe using stored credentials when present, otherwise server env fallbacks.
+/// 遗留 modelTest 探测（`POST …/settings/vendors/model-test`）。
+///
+/// Worker 使用存储的凭据（如果存在）或服务器环境回退执行实时的文本/图片/视频提供商探测。
 pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_test";
-/// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
+/// Flutter / 集成探测（`POST /api/v1/jobs`）。
+///
+/// Worker 休眠约 1 秒后返回 `succeeded` 状态，结果为 `{ ok, probe }`。
 pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
-/// Video generation (**`POST …/production/workbench/generate-video`**); worker generates video from storyboard items.
+/// 视频生成（`POST …/production/workbench/generate-video`）。
+///
+/// Worker 根据分镜项目生成视频。
 pub const JOB_KIND_VIDEO_GENERATE: &str = "video.generate";
-/// Video export (**`POST …/production/export-image`** export as video); worker exports video file.
+/// 视频导出（`POST …/production/export-image` 作为视频导出）。
+///
+/// Worker 导出视频文件。
 pub const JOB_KIND_VIDEO_EXPORT: &str = "video.export";
 
 /// Enqueue **`queued`** job after quota check (no HTTP idempotency). Records **`generation_job.created`** usage.

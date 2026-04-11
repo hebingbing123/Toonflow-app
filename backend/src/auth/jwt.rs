@@ -3,12 +3,17 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::Deserialize;
 
+/// JWT 令牌声明（Claims）。
+///
+/// Supabase 风格的 JWT 结构，包含用户标识和过期时间。
 #[derive(Debug, Deserialize)]
 pub struct Claims {
+    /// 用户 UUID（主题）。
     pub sub: String,
-    // Present for JWT deserialization; validated by `jsonwebtoken::Validation`.
+    /// 过期时间戳（Unix 秒）。
     #[allow(dead_code)]
-    exp: i64,
+    pub exp: i64,
+    /// 用户邮箱（可选）。
     pub email: Option<String>,
 }
 
