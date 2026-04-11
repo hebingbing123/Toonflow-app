@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../contexts/script/card_panels.dart';
 import '../contexts/script/context_snapshot.dart';
+import '../contexts/script/status_panels.dart';
 import '../contexts/script/support.dart';
 
 class AgentWorkspacePromptPreset {
@@ -685,62 +686,19 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             ),
             const SizedBox(height: 8),
             _buildArgumentTemplates(),
-            if (_runningTaskLine != null ||
-                _taskStatusLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                _runningTaskLine ?? _taskStatusLine!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (resultSummaryLines.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
-              ...resultSummaryLines.map(
-                (String line) => Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
-                    line,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ),
-            ],
+            ScriptWorkspaceStatusPanel(
+              resultSummaryLines: resultSummaryLines,
+              workspaceAssistantText: widget.workspaceAssistantText,
+              previewAssistantText: _previewText,
+              runningTaskLine: _runningTaskLine,
+              taskStatusLine: _taskStatusLine,
+              scriptWritebackSourceLine: _scriptWritebackSourceLine,
+              scriptPlanWritebackLine: _scriptPlanWritebackLine,
+              workspaceWritebackLine: widget.workspaceWritebackLine,
+            ),
             _buildWorkspaceStagesPanel(context),
             _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
-            if (widget.workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
-              Text('最新助手结果', style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 4),
-              SelectableText(
-                _previewText(
-                  widget.workspaceAssistantText.trim(),
-                  maxChars: 720,
-                ),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (_scriptWritebackSourceLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                '写回来源：${_scriptWritebackSourceLine!}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (_scriptPlanWritebackLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                _scriptPlanWritebackLine!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (widget.workspaceWritebackLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                widget.workspaceWritebackLine!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
           ],
         ),
       ),
