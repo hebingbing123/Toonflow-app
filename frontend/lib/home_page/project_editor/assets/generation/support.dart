@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import '../../../rust_api.dart';
+import '../../../../rust_api.dart';
 
 List<int> sortUniqueAssetLegacyIds(Iterable<int> ids) {
   final sorted = SplayTreeSet<int>();

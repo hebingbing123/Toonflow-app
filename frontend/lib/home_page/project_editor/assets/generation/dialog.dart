@@ -1,4 +1,4 @@
-part of '../../../home_page.dart';
+part of '../../../../home_page.dart';
 
 class _AssetGenerationWorkbenchDialog extends StatefulWidget {
   const _AssetGenerationWorkbenchDialog({

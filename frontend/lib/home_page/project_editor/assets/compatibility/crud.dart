@@ -1,4 +1,4 @@
-part of '../../../home_page.dart';
+part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
   List<Widget> _buildProjectAssetsPrimaryActions({
