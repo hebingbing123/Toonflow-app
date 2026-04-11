@@ -315,7 +315,9 @@ async fn scripts_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -333,7 +335,9 @@ async fn scripts_crud_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::PATCH)
-                .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -352,7 +356,9 @@ async fn scripts_crud_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::DELETE)
-                .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -368,7 +374,9 @@ async fn scripts_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/scripts/legacy/{script_id}"))
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())

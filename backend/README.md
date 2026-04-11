@@ -49,7 +49,7 @@ cargo run
 
 新建剧本：**`POST /api/v1/projects/{project_id}/scripts`**（Bearer；**`project_id`** 为项目 UUID；JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`legacy_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
 
-剧本删除：**`DELETE /api/v1/scripts/legacy/{legacy_id}`**（Bearer）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
+剧本删除：**`DELETE /api/v1/projects/{project_id}/scripts/{script_legacy_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
 
 新建分镜：**`POST /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**（Bearer，JSON 体字段均可选）— 写入 **`app_storyboard`**；**`legacy_id`** 为事务内 **`pg_advisory_xact_lock(884_422_003)`** + 全表 **`MAX(legacy_id)+1`**；默认填充 **`legacy_script_id`**、**`legacy_project_id`**。旧 **`o_videoTrack`** 前置插入未实现。
 

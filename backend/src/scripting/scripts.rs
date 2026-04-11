@@ -180,12 +180,6 @@ pub fn router() -> Router<AppState> {
                 .patch(patch_script_for_project)
                 .delete(delete_script_for_project),
         )
-        .route(
-            "/api/v1/scripts/legacy/{legacy_id}",
-            get(get_script_by_legacy)
-                .patch(patch_script_by_legacy)
-                .delete(delete_script_by_legacy),
-        )
 }
 
 fn normalize_legacy_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32>, ApiError> {
@@ -497,35 +491,6 @@ async fn get_script_for_project(
     Ok(Json(row))
 }
 
-async fn get_script_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<Json<ScriptRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let row = sqlx::query_as::<_, ScriptRow>(
-        r#"
-        SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.legacy_id = $1 AND p.owner_user_id = $2
-        "#,
-    )
-    .bind(legacy_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    Ok(Json(row))
-}
-
 async fn patch_script_for_project(
     State(state): State<AppState>,
     Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
@@ -539,22 +504,7 @@ async fn patch_script_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_script_inner(pool, uid, script_legacy_id, body, Some(project_id)).await
-}
-
-async fn patch_script_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<PatchScriptBody>,
-) -> Result<Json<ScriptRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    patch_script_inner(pool, uid, legacy_id, body, None).await
+    patch_script_inner(pool, uid, script_legacy_id, body, project_id).await
 }
 
 async fn patch_script_inner(
@@ -562,7 +512,7 @@ async fn patch_script_inner(
     uid: Uuid,
     legacy_id: i32,
     body: PatchScriptBody,
-    project_id: Option<Uuid>,
+    project_id: Uuid,
 ) -> Result<Json<ScriptRow>, ApiError> {
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let content_patch = parse_optional_text_field(body.content, "content")?;
@@ -577,36 +527,20 @@ async fn patch_script_inner(
         ));
     }
 
-    let current = if let Some(pid) = project_id {
-        sqlx::query_as::<_, ScriptRow>(
-            r#"
-            SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
-            FROM app_script s
-            INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
-            "#,
-        )
-        .bind(legacy_id)
-        .bind(pid)
-        .bind(uid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    } else {
-        sqlx::query_as::<_, ScriptRow>(
-            r#"
-            SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
-            FROM app_script s
-            INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.legacy_id = $1 AND p.owner_user_id = $2
-            "#,
-        )
-        .bind(legacy_id)
-        .bind(uid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    }
+    let current = sqlx::query_as::<_, ScriptRow>(
+        r#"
+        SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        "#,
+    )
+    .bind(legacy_id)
+    .bind(project_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
     let new_name = match name_patch {
@@ -668,39 +602,6 @@ async fn delete_script_for_project(
     .bind(script_legacy_id)
     .bind(uid)
     .bind(project_id)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if res.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(StatusCode::NO_CONTENT)
-}
-
-async fn delete_script_by_legacy(
-    State(state): State<AppState>,
-    Path(legacy_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let res = sqlx::query(
-        r#"
-        DELETE FROM app_script s
-        USING app_project p
-        WHERE s.project_id = p.id
-          AND s.legacy_id = $1
-          AND p.owner_user_id = $2
-        "#,
-    )
-    .bind(legacy_id)
-    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

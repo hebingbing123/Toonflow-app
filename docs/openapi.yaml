@@ -4047,7 +4047,7 @@ paths:
       summary: Script by project UUID + script legacy id
       operationId: getScriptByProjectAndLegacyV1
       description: |
-        Same row as **`GET /api/v1/scripts/legacy/{legacy_id}`** when the script belongs to **`project_id`**.
+        Returns **`app_script`** for **`script_legacy_id`** when that script belongs to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -4093,7 +4093,9 @@ paths:
       summary: Partially update script (scoped to project UUID)
       operationId: patchScriptByProjectAndLegacyV1
       description: |
-        Same merge rules as **`PATCH /api/v1/scripts/legacy/{legacy_id}`**; script must belong to **`project_id`**.
+        Merge patch for `name`, `content`, `extract_state` (**`PatchScriptBody`**). Omit a key to leave unchanged;
+        `null` or `""` clears text fields; `null` clears `extract_state`. At least one key required.
+        Script must belong to **`project_id`** (UUID).
       security:
         - bearerAuth: []
       parameters:
@@ -6844,139 +6846,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Database unset, auth unset, or LLM not configured (`llm_not_configured`)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/scripts/legacy/{legacy_id}:
-    get:
-      deprecated: true
-      tags: [scripts]
-      summary: Script by legacy integer id (owner must own parent project)
-      operationId: getScriptByLegacyIdV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ScriptRow"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Script not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    patch:
-      deprecated: true
-      tags: [scripts]
-      summary: Partially update script by legacy id
-      operationId: patchScriptByLegacyIdV1
-      description: |
-        Merge patch for `name`, `content`, `extract_state`. Omit a key to leave unchanged;
-        `null` or `""` clears text fields; `null` clears `extract_state`. At least one key required.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PatchScriptBody"
-      responses:
-        "200":
-          description: Updated script row
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ScriptRow"
-        "400":
-          description: Invalid body, no fields to apply, unknown properties (only `name`, `content`, `extract_state`), or malformed JSON
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Script not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    delete:
-      deprecated: true
-      tags: [scripts]
-      summary: Delete script by legacy id
-      operationId: deleteScriptByLegacyIdV1
-      description: |
-        Deletes **`app_script`** when the row belongs to a project owned by the caller.
-        Child **`app_storyboard`** rows cascade (**`ON DELETE CASCADE`**).
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        "204":
-          description: Deleted
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Script not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
           content:
             application/json:
               schema:

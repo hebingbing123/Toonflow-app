@@ -352,6 +352,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
   Future<void> _writeBackScriptWorkspaceResult() async {
     final token = _session?.accessToken;
     if (token == null) return;
+    final projectLegacyId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
     final toolCandidate = _workspaceScriptWritebackCandidate?.trim();
     final assistantText = _workspaceAssistantText.trim();
@@ -360,8 +361,8 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final source = useToolCandidate
         ? (_workspaceScriptWritebackSource ?? 'tool:get_script_content')
         : 'assistant stream';
-    if (scriptId == null || content.isEmpty) {
-      setState(() => _error = 'script_id 与可回写结果必须有效');
+    if (projectLegacyId == null || scriptId == null || content.isEmpty) {
+      setState(() => _error = 'project_id/script_id 与可回写结果必须有效');
       return;
     }
 
@@ -372,8 +373,16 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     });
 
     try {
-      final updated = await updateScriptByLegacyId(
+      final projects = await postGeneralGetSingleProject(token, projectLegacyId);
+      if (projects.isEmpty) {
+        if (!mounted) return;
+        setState(() => _error = '未找到项目');
+        return;
+      }
+      final projectUuid = projects.first.id;
+      final updated = await updateScriptByProjectAndLegacyId(
         token,
+        projectUuid,
         scriptId,
         <String, dynamic>{'content': content},
       );

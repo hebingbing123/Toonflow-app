@@ -29,7 +29,11 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                     ],
                   );
                   for (final s in created.scripts) {
-                    await deleteScriptByLegacyId(token, s.legacyId);
+                    await deleteScriptByProjectAndLegacyId(
+                      token,
+                      p.id,
+                      s.legacyId,
+                    );
                   }
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -98,47 +102,16 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
                   final sid = scriptList.first.legacyId;
-                  final row = await fetchScriptByLegacyId(token, sid);
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'GET …/scripts/legacy/$sid：${row.name ?? "(null)"}',
-                      ),
-                    ),
-                  );
-                } on RustApiException catch (e) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                } finally {
-                  if (ctx.mounted) {
-                    setDialogState(() => scriptProbeBusy[0] = false);
-                  }
-                }
-              },
-        child: Text(scriptProbeBusy[0] ? 'script…' : 'GET scripts/legacy (首条)'),
-      ),
-      TextButton(
-        onPressed: scriptProbeBusy[0] || scriptList.isEmpty || saving[0]
-            ? null
-            : () async {
-                setDialogState(() => scriptProbeBusy[0] = true);
-                try {
-                  final sid = scriptList.first.legacyId;
-                  final cur = await fetchScriptByLegacyId(token, sid);
-                  final patched = await updateScriptByLegacyId(
+                  final row = await fetchScriptByProjectAndLegacyId(
                     token,
+                    p.id,
                     sid,
-                    <String, dynamic>{'name': cur.name ?? ''},
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'PATCH …/scripts/legacy/$sid name noop → ${patched.name ?? "(null)"}',
+                        'GET …/projects/{id}/scripts/$sid：${row.name ?? "(null)"}',
                       ),
                     ),
                   );
@@ -155,7 +128,49 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                 }
               },
         child: Text(
-          scriptProbeBusy[0] ? 'script…' : 'PATCH scripts/legacy (name noop)',
+          scriptProbeBusy[0] ? 'script…' : 'GET projects/…/scripts (首条)',
+        ),
+      ),
+      TextButton(
+        onPressed: scriptProbeBusy[0] || scriptList.isEmpty || saving[0]
+            ? null
+            : () async {
+                setDialogState(() => scriptProbeBusy[0] = true);
+                try {
+                  final sid = scriptList.first.legacyId;
+                  final cur = await fetchScriptByProjectAndLegacyId(
+                    token,
+                    p.id,
+                    sid,
+                  );
+                  final patched = await updateScriptByProjectAndLegacyId(
+                    token,
+                    p.id,
+                    sid,
+                    <String, dynamic>{'name': cur.name ?? ''},
+                  );
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'PATCH …/projects/{id}/scripts/$sid name noop → ${patched.name ?? "(null)"}',
+                      ),
+                    ),
+                  );
+                } on RustApiException catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(
+                      ctx,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => scriptProbeBusy[0] = false);
+                  }
+                }
+              },
+        child: Text(
+          scriptProbeBusy[0] ? 'script…' : 'PATCH projects/…/scripts (name noop)',
         ),
       ),
       TextButton(
