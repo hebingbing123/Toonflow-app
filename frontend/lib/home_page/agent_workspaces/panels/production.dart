@@ -6,6 +6,7 @@ import 'script.dart';
 import '../contexts/production/card_panels.dart';
 import '../contexts/production/context_snapshot.dart';
 import '../contexts/production/flow_logic.dart';
+import '../contexts/production/status_panels.dart';
 import '../contexts/production/support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
@@ -518,6 +519,7 @@ class _AgentWorkspaceProductionCardState
 
   @override
   Widget build(BuildContext context) {
+    final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -683,55 +685,18 @@ class _AgentWorkspaceProductionCardState
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              _runningTaskLine ?? _taskStatusLine ?? '等待执行：可直接用引导任务或表单按钮。',
-              style: Theme.of(context).textTheme.bodySmall,
+            ProductionWorkspaceStatusPanel(
+              resultSummaryLines: resultSummaryLines,
+              onApplySuggestedFlowKey: widget.onApplySuggestedFlowKey,
+              busy: widget.busy,
+              runningTaskLine: _runningTaskLine,
+              taskStatusLine: _taskStatusLine,
+              workspaceLastToolResultLine: widget.workspaceLastToolResultLine,
+              suggestedFlowKeyLine: _suggestedFlowKeyLine,
             ),
-            if (widget.workspaceLastToolResultLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                '最新工具结果：${widget.workspaceLastToolResultLine}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (_buildResultSummaryLines().isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
-              Text('结果摘要', style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 4),
-              ..._buildResultSummaryLines().map(
-                (String line) =>
-                    Text(line, style: Theme.of(context).textTheme.bodySmall),
-              ),
-            ],
             _buildWorkspaceStagesPanel(context),
             _buildWorkspaceDiagnosis(context),
             ..._buildContextSnapshot(context),
-            if (_suggestedFlowKeyLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      '建议写回 key：$_suggestedFlowKeyLine',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: widget.busy
-                        ? null
-                        : widget.onApplySuggestedFlowKey,
-                    child: const Text('使用该 key'),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 8),
-            Text(
-              '核心 key 回写策略：get_flowData 直接写回；资产/分镜/导演计划相关工具会先刷新对应 flow key 再写回。',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
           ],
         ),
       ),
