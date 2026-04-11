@@ -1,6 +1,6 @@
-//! 脚本 REST 路由（`GET /api/v1/scripts/*`）。
+//! 脚本 REST 路由（`GET`/`POST /api/v1/scripts/*` 与项目段脚本 API）。
 //!
-//! 脚本 CRUD、内容管理和资源列表处理器。
+//! 脚本 CRUD、导出/抽取轮询、**`POST …/projects/{project_id}/scripts/get-script-api`** 列表等。
 
 use axum::{
     body::Body,
@@ -159,6 +159,169 @@ async fn create_script_locked(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
+// ── `POST /api/v1/projects/{project_id}/scripts/get-script-api` ───────────────
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct GetScriptApiNameBody {
+    #[serde(default)]
+    name: Option<String>,
+}
+
+#[derive(Debug, FromRow)]
+struct GetScriptApiScriptRow {
+    id: Uuid,
+    legacy_id: i32,
+    name: Option<String>,
+    content: Option<String>,
+    extract_state: Option<i32>,
+    error_reason: Option<String>,
+    create_time_ms: Option<i64>,
+}
+
+#[derive(Debug, Serialize)]
+struct GetScriptApiRelatedAssetBrief {
+    id: i32,
+    name: String,
+}
+
+#[derive(Debug, Serialize)]
+struct GetScriptApiScriptListItem {
+    id: i32,
+    name: Option<String>,
+    content: Option<String>,
+    #[serde(rename = "extractState")]
+    extract_state: Option<i32>,
+    #[serde(rename = "errorReason")]
+    error_reason: Option<String>,
+    #[serde(rename = "createTime")]
+    create_time_ms: Option<i64>,
+    #[serde(rename = "relatedAssets")]
+    related_assets: Vec<GetScriptApiRelatedAssetBrief>,
+}
+
+#[derive(Debug, Serialize)]
+struct GetScriptApiResponse {
+    data: Vec<GetScriptApiScriptListItem>,
+}
+
+async fn get_script_api_for_project_uuid(
+    pool: &PgPool,
+    project_uuid: Uuid,
+    name: Option<String>,
+) -> Result<GetScriptApiResponse, ApiError> {
+    let name_sub = name
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_lowercase());
+
+    let scripts: Vec<GetScriptApiScriptRow> = if let Some(ref sub) = name_sub {
+        sqlx::query_as::<_, GetScriptApiScriptRow>(
+            r#"
+            SELECT s.id, s.legacy_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
+            FROM app_script s
+            WHERE s.project_id = $1
+              AND s.name IS NOT NULL
+              AND POSITION($2 IN LOWER(s.name)) > 0
+            ORDER BY s.legacy_id ASC
+            "#,
+        )
+        .bind(project_uuid)
+        .bind(sub)
+        .fetch_all(pool)
+        .await
+    } else {
+        sqlx::query_as::<_, GetScriptApiScriptRow>(
+            r#"
+            SELECT s.id, s.legacy_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
+            FROM app_script s
+            WHERE s.project_id = $1
+            ORDER BY s.legacy_id ASC
+            "#,
+        )
+        .bind(project_uuid)
+        .fetch_all(pool)
+        .await
+    }
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if scripts.is_empty() {
+        return Ok(GetScriptApiResponse { data: vec![] });
+    }
+
+    let ids: Vec<Uuid> = scripts.iter().map(|s| s.id).collect();
+
+    #[derive(Debug, FromRow)]
+    struct GetScriptApiAssetLinkRow {
+        script_id: Uuid,
+        legacy_id: i32,
+        name: String,
+    }
+
+    let links: Vec<GetScriptApiAssetLinkRow> = sqlx::query_as::<_, GetScriptApiAssetLinkRow>(
+        r#"
+        SELECT sa.script_id, a.legacy_id, a.name
+        FROM app_script_asset sa
+        INNER JOIN app_asset a ON a.id = sa.asset_id
+        WHERE sa.script_id = ANY($1)
+        ORDER BY a.legacy_id ASC
+        "#,
+    )
+    .bind(&ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut by_script: std::collections::HashMap<Uuid, Vec<GetScriptApiRelatedAssetBrief>> =
+        std::collections::HashMap::new();
+    for row in links {
+        by_script
+            .entry(row.script_id)
+            .or_default()
+            .push(GetScriptApiRelatedAssetBrief {
+                id: row.legacy_id,
+                name: row.name,
+            });
+    }
+
+    let data = scripts
+        .into_iter()
+        .map(|s| {
+            let related_assets = by_script.remove(&s.id).unwrap_or_default();
+            GetScriptApiScriptListItem {
+                id: s.legacy_id,
+                name: s.name,
+                content: s.content,
+                extract_state: s.extract_state,
+                error_reason: s.error_reason,
+                create_time_ms: s.create_time_ms,
+                related_assets,
+            }
+        })
+        .collect();
+
+    Ok(GetScriptApiResponse { data })
+}
+
+async fn post_get_script_api_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<GetScriptApiNameBody>,
+) -> Result<Json<GetScriptApiResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    let response = get_script_api_for_project_uuid(pool, project_id, body.name).await?;
+    Ok(Json(response))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/scripts/export", post(export_scripts_zip))
@@ -179,6 +342,10 @@ pub fn router() -> Router<AppState> {
             get(get_script_for_project)
                 .patch(patch_script_for_project)
                 .delete(delete_script_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/scripts/get-script-api",
+            post(post_get_script_api_for_project),
         )
 }
 

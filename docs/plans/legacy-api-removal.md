@@ -20,7 +20,7 @@
 
 | 文件 | 说明 |
 |------|------|
-| `backend/src/app/router.rs` | ~~`rest_legacy::*`~~ **已移除**；~~**`narrative::legacy`**~~ **已移除**；仍含 **`production_legacy`**、**`scripting::legacy`** 等 |
+| `backend/src/app/router.rs` | ~~`rest_legacy::*`~~ **已移除**；~~**`narrative::legacy`**~~ **已移除**；~~**`scripting::legacy`**~~ **已并入 `scripting::scripts`**；仍含 **`production_legacy`** 等 |
 | `backend/src/main.rs` | 顶层 **`mod production_legacy`** 等（与 `lib` 式入口二选一场景以实际 crate 根为准） |
 
 ### 2. 独立 legacy 路由模块（整棵可随「该域下线」删除）
@@ -34,8 +34,8 @@
 | `backend/src/production_legacy/mod.rs` | 生产工作台旧路径 `/api/production/*`、等 |
 | `backend/src/production_legacy/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
 | ~~`backend/src/rest_legacy/*`~~ | **已删除**（原 **`POST /api/v1/general/*`**、**`POST /api/v1/tasks/*`**）；任务中心改 **`GET /api/v1/jobs/page`**、**`GET …/jobs/task-detail/{task_id}`** 等 |
-| `backend/src/scripting/legacy.rs` | 仅保留 **`POST …/projects/{project_id}/scripts/get-script-api`**（body 仅可选 `name`）；旧 `POST …/scripts/get-script-api` 已移除 |
-| `backend/src/scripting/mod.rs` | `pub mod legacy` |
+| ~~`backend/src/scripting/legacy.rs`~~ | **已删除**；**`POST …/projects/{project_id}/scripts/get-script-api`** 现由 **`scripting/scripts.rs`** 注册 |
+| `backend/src/scripting/mod.rs` | **`agent` / `asset_extract` / `scripts`**（无 `legacy` 子模块） |
 | `backend/src/assets/legacy.rs` | 资产 legacy 聚合 |
 | `backend/src/assets/legacy_query/mod.rs` | 旧查询面入口 |
 | `backend/src/assets/legacy_query/*.rs` | get_assets_api、get_image、material、polling、batch_generation、upload_clip 等 |
@@ -46,7 +46,7 @@
 | 路径 | 说明 |
 |------|------|
 | `backend/src/narrative/novels/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novels`，`GET\|PATCH\|DELETE …/novels/{novel_legacy_id}`（UUID 项目段；**`novel_legacy_id`** 仍为 **`app_novel.legacy_id`**）。**已删除** `…/projects/legacy/{id}/novels*` |
-| `backend/src/narrative/events/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`；**`POST …/novels/events/*`** 旧形仍保留。**已删除** `…/projects/legacy/{id}/novel-events*` |
+| `backend/src/narrative/events/*` | **主路径**：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。**已删除** `…/projects/legacy/{id}/novel-events*` 与 **`POST /api/v1/novels/events/*`** |
 | `backend/src/narrative/storyboards/*` | **主路径**：`…/projects/{project_id}/scripts/{script_legacy_id}/storyboards`、`…/projects/{project_id}/storyboards/{storyboard_legacy_id}`。**已删除** `…/scripts/legacy/.../storyboards` 与 **`…/storyboards/legacy/{id}`** |
 
 ### 4. 其它后端引用（删 `production_legacy` 前需评估）
@@ -268,7 +268,7 @@
 1. ~~`projects::legacy`（旧 `POST /api/v1/project/get-project` 等）~~ **已删除**；Flutter `projects_legacy_compat` 仍保留同名封装，内部走 **`GET`/`POST`/`PATCH`/`DELETE /api/v1/projects*`**。
 2. ~~`narrative::legacy`（`/api/v1/novels/*`）~~ **已删除**；`novels_legacy_api` 保留 **`postLegacy*`** 名，内部仅调 UUID REST。
 3. ~~`rest_legacy::{general,tasks}`~~ **已删除**。
-4. `scripting::legacy`。
+4. ~~`scripting::legacy`~~ **已并入 `scripting::scripts`**（路由不变）。
 5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
 6. `production_legacy` — **最后**：依赖多、`harness` 有引用，需单独迁移 `load_owned_production_flow_json` 或等价能力。
 

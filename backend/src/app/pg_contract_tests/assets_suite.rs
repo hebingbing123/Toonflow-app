@@ -51,7 +51,7 @@ async fn asset_image_file_local_storage_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let _legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -176,7 +176,7 @@ async fn assets_generate_enqueue_four_kinds() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
     let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
-    let project_uuid = created["id"].as_str().expect("project uuid");
+    let _project_uuid = created["id"].as_str().expect("project uuid");
 
     let gen_body = format!(
         r#"{{"projectId":{legacy_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
