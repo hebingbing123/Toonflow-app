@@ -113,6 +113,35 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
   }
 }
 
+/// Renders the latest project and art-style summary lines returned by probes.
+class ProjectsSummaryPreview extends StatelessWidget {
+  const ProjectsSummaryPreview({
+    super.key,
+    this.projectsSummaryLine,
+    this.artStylesLine,
+  });
+
+  final String? projectsSummaryLine;
+  final String? artStylesLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (projectsSummaryLine != null) ...[
+          const SizedBox(height: 8),
+          SelectableText('项目摘要：$projectsSummaryLine'),
+        ],
+        if (artStylesLine != null) ...[
+          const SizedBox(height: 8),
+          SelectableText('美术风格：$artStylesLine'),
+        ],
+      ],
+    );
+  }
+}
+
 /// Shows a short list of available art styles with a quick path to management.
 class ProjectsArtStylesPreview extends StatelessWidget {
   const ProjectsArtStylesPreview({

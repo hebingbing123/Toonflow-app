@@ -133,14 +133,10 @@ class ProjectsSection extends StatelessWidget {
           loadingAgentMemory: loadingAgentMemory,
           onProbeAgentMemory: onProbeAgentMemory,
         ),
-        if (projectsSummaryLine != null) ...[
-          const SizedBox(height: 8),
-          SelectableText('项目摘要：$projectsSummaryLine'),
-        ],
-        if (artStylesLine != null) ...[
-          const SizedBox(height: 8),
-          SelectableText('美术风格：$artStylesLine'),
-        ],
+        ProjectsSummaryPreview(
+          projectsSummaryLine: projectsSummaryLine,
+          artStylesLine: artStylesLine,
+        ),
         if (artStyles != null) ...[
           ProjectsArtStylesPreview(
             artStyles: artStyles!,
