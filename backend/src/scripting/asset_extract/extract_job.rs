@@ -1,4 +1,4 @@
-//! Background job: load scripts, call LLM tool, persist assets.
+//! 后台任务：加载脚本，调用 LLM 工具，持久化资产。
 
 use sqlx::PgPool;
 use uuid::Uuid;
