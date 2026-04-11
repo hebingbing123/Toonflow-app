@@ -75,6 +75,7 @@ part 'home_page/script_editor_edit_image_workbench.dart';
 part 'home_page/script_editor_workbench.dart';
 part 'home_page/storyboard_editor.dart';
 part 'home_page/script_editor_storyboards_workbench.dart';
+part 'home_page/script_editor_storyboards_workbench_dialog.dart';
 part 'home_page/storyboard_editor_workbench.dart';
 part 'home_page/storyboard_editor_workbench_video.dart';
 
