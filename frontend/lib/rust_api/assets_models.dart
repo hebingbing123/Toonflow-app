@@ -50,7 +50,7 @@ class ListAssetsResponse {
   }
 }
 
-/// One row from legacy **`POST /api/v1/assets/get-assets-api`** (including nested children via **`sonAssets`**).
+/// One row from workbench **`POST …/projects/{project_id}/assets/workbench/nested`** (including nested children via **`sonAssets`**).
 class LegacyAssetGetAssetsApiItem {
   const LegacyAssetGetAssetsApiItem({
     required this.id,
@@ -101,7 +101,7 @@ class LegacyAssetGetAssetsApiItem {
   }
 }
 
-/// Body from legacy **`POST /api/v1/assets/get-assets-api`**.
+/// Body from workbench **`POST …/projects/{project_id}/assets/workbench/nested`**.
 class LegacyAssetGetAssetsApiResponse {
   const LegacyAssetGetAssetsApiResponse({
     required this.data,
@@ -246,7 +246,7 @@ class ListAssetImagesResponse {
   }
 }
 
-/// One item in legacy **`POST /api/v1/assets/get-image`** response **`tempAssets`**.
+/// One item in workbench **`POST …/projects/{project_id}/assets/workbench/image-bundle`** response **`tempAssets`**.
 class LegacyAssetGetImageTempAsset {
   const LegacyAssetGetImageTempAsset({
     this.legacyImageId,
@@ -279,7 +279,7 @@ class LegacyAssetGetImageTempAsset {
   }
 }
 
-/// Body of legacy **`POST /api/v1/assets/get-image`**.
+/// Body of workbench **`POST …/projects/{project_id}/assets/workbench/image-bundle`**.
 class LegacyAssetGetImageResponse {
   const LegacyAssetGetImageResponse({
     required this.id,
@@ -307,7 +307,7 @@ class LegacyAssetGetImageResponse {
   }
 }
 
-/// Body of legacy **`POST /api/v1/assets/upload-clip`**.
+/// Body of workbench **`POST …/projects/{project_id}/assets/workbench/upload-clip`**.
 class LegacyAssetUploadClipResponse {
   const LegacyAssetUploadClipResponse({required this.message});
 
@@ -320,7 +320,7 @@ class LegacyAssetUploadClipResponse {
   }
 }
 
-/// One row in legacy **`POST /api/v1/assets/get-material-data`** response **`data`**.
+/// One row in workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** response **`data`**.
 class LegacyAssetMaterialDataItem {
   const LegacyAssetMaterialDataItem({
     required this.id,
@@ -344,7 +344,7 @@ class LegacyAssetMaterialDataItem {
   }
 }
 
-/// One row in legacy **`POST /api/v1/assets/get-material-data`** response **`video`**.
+/// One row in workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** response **`video`**.
 class LegacyAssetMaterialVideoItem {
   const LegacyAssetMaterialVideoItem({
     required this.id,
@@ -365,7 +365,7 @@ class LegacyAssetMaterialVideoItem {
   }
 }
 
-/// Body of legacy **`POST /api/v1/assets/get-material-data`**.
+/// Body of workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** (empty **`{}`**).
 class LegacyAssetMaterialDataResponse {
   const LegacyAssetMaterialDataResponse({
     required this.data,
@@ -396,7 +396,7 @@ class LegacyAssetMaterialDataResponse {
   }
 }
 
-/// One row in legacy **`POST /api/v1/assets/batch-generation-data`** response **`data`**.
+/// One row in workbench **`POST …/projects/{project_id}/assets/workbench/batch-generation-data`** response **`data`**.
 class LegacyAssetBatchGenerationDataItem {
   const LegacyAssetBatchGenerationDataItem({
     required this.id,
@@ -425,7 +425,7 @@ class LegacyAssetBatchGenerationDataItem {
   }
 }
 
-/// Body of legacy **`POST /api/v1/assets/batch-generation-data`**.
+/// Body of workbench **`POST …/projects/{project_id}/assets/workbench/batch-generation-data`**.
 class LegacyAssetBatchGenerationDataResponse {
   const LegacyAssetBatchGenerationDataResponse({
     required this.data,
@@ -452,7 +452,7 @@ class LegacyAssetBatchGenerationDataResponse {
   }
 }
 
-/// One row in legacy **`POST /api/v1/assets/polling-image-assets`** response.
+/// One row in workbench **`POST …/projects/{project_id}/assets/workbench/polling-image-assets`** response.
 class LegacyAssetPollingImageAssetsItem {
   const LegacyAssetPollingImageAssetsItem({
     required this.id,
@@ -475,7 +475,7 @@ class LegacyAssetPollingImageAssetsItem {
   }
 }
 
-/// One row in legacy **`POST /api/v1/assets/polling-prompt-assets`** response.
+/// One row in workbench **`POST …/projects/{project_id}/assets/workbench/polling-prompt-assets`** response.
 class LegacyAssetPollingPromptAssetsItem {
   const LegacyAssetPollingPromptAssetsItem({
     required this.id,

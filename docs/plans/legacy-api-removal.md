@@ -1,6 +1,6 @@
 # Legacy API 收敛 / 移除计划
 
-**范围说明（避免误解「一次做完本文档」）**：§一–§三多为**清单与依赖图**；§四进度表中 **C–D**（整棵 `*legacy*` HTTP 模块删除、PG 删 **`legacy_id` 列**）与 **B·其余域**（资产旧 POST、`harness`/jobs payload 等）属于**多里程碑工程**，无法在单次门禁/提交内安全清空。实施时以 **阶段 B 按域竖切**为单位推进，每域通过后 **`yarn refactor:check`** 再合并。
+**范围说明（避免误解「一次做完本文档」）**：§一–§三多为**清单与依赖图**；§四进度表中 **C–D**（整棵 `*legacy*` HTTP 模块删除、PG 删 **`legacy_id` 列**）与 **B·其余域**（**`harness`/jobs 整型 payload、`asset_extract` 体字段、`assets-generate` 队列语义** 等；**资产侧**：顶层 **`POST /api/v1/assets/*` 已删除**，兼容写读已收拢到 **`POST …/projects/{project_id}/assets/workbench/*`**）属于**多里程碑工程**，无法在单次门禁/提交内安全清空。实施时以 **阶段 B 按域竖切**为单位推进，每域通过后 **`yarn refactor:check`** 再合并。
 
 ## 术语（避免混谈）
 
@@ -36,10 +36,10 @@
 | ~~`backend/src/rest_legacy/*`~~ | **已删除**（原 **`POST /api/v1/general/*`**、**`POST /api/v1/tasks/*`**）；任务中心改 **`GET /api/v1/jobs/page`**、**`GET …/jobs/task-detail/{task_id}`** 等 |
 | ~~`backend/src/scripting/legacy.rs`~~ | **已删除**；**`POST …/projects/{project_id}/scripts/get-script-api`** 现由 **`scripting/scripts.rs`** 注册 |
 | `backend/src/scripting/mod.rs` | **`agent` / `asset_extract` / `scripts`**（无 `legacy` 子模块） |
-| `backend/src/assets/legacy.rs` | 资产 legacy 聚合 |
-| `backend/src/assets/legacy_query/mod.rs` | 旧查询面入口 |
-| `backend/src/assets/legacy_query/*.rs` | get_assets_api、get_image、material、polling、batch_generation、upload_clip 等 |
-| `backend/src/assets/mod.rs` | `mod legacy`、`mod legacy_query`、测试 `use legacy::*` |
+| `backend/src/assets/legacy.rs` | 资产 **workbench 写路径** handler（**`POST …/projects/{project_id}/assets/workbench/{add,save,update,del,batch-delete,del-image}-assets`**）；**已删除**顶层 **`POST /api/v1/assets/*`** 注册 |
+| `backend/src/assets/legacy_query/mod.rs` | workbench **读路径** re-export（nested、image-bundle、material、polling、batch_generation、upload_clip） |
+| `backend/src/assets/legacy_query/*.rs` | 各 **`post_project_workbench_*`** 实现（语义对齐旧 **`get-assets-api`/`get-image`/…**，**`project_id`** 在 path，body 不再带整型 **`projectId`**） |
+| `backend/src/assets/mod.rs` | 注册 **`…/assets/workbench/*`**（须在 **`{asset_legacy_id}`** 动态段之前）；`mod legacy`、`mod legacy_query`、单元测试 |
 
 ### 3. 路径含 `legacy`、但**不在**上述 `legacy` 目录的 REST（收敛时要同步 OpenAPI + Flutter）
 
@@ -245,7 +245,8 @@
 | **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与旧路径一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID。**已删除** `POST …/projects/legacy/.../scripts` 与 **`…/scripts/legacy/{id}`** 剧本本体 CRUD（分镜 REST 见 **B·竖切 5**） |
 | **B·竖切 7：`get-script-api`（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/get-script-api`（`ensure_owned_project_pk` + body 可选 `name`）。Flutter `postScriptsGetScriptApiByProjectId`；剧本/项目脚本工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/get-script-api` **已删除** |
 | **B·竖切 8：`batch-add` 剧本（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/batch-add`（body 仅 **`data`**，与 legacy 插入/锁一致）。Flutter `postScriptsBatchAddByProjectId`；项目剧本批量工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/batch-add` **已删除** |
-| **B·其余域** | 部分 | **`POST /api/v1/assets/*`** 等旧形 body、**`harness`/jobs 整型 payload** 仍待竖切；制作 HTTP 模块已更名为 **`production`**（路径不变）；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 等与 **UUID 项目段**主路径对齐 |
+| **B·资产 workbench（旧 `/api/assets` 兼容面）** | 已落地 | **已删除**顶层 **`POST /api/v1/assets/*`**；**`POST …/projects/{project_id}/assets/workbench/{nested,image-bundle,upload-clip,material-data,batch-generation-data,polling-image-assets,polling-prompt-assets,add-assets,save-assets,update-assets,del-assets,batch-delete,del-image}`**（OpenAPI / **`contract_smoke`** / **`pg_contract`** / Flutter **`rust_api/assets_images.dart`** 已对齐） |
+| **B·其余域** | 部分 | **`harness`** / **`jobs`** 整型 payload、**`asset_extract`** **`project_legacy_id`** 体、**`settings::agent_memory`**、**`assets-generate`** 与 worker **`legacy_*` id** 等仍待竖切；制作 HTTP 模块已更名为 **`production`**（路径不变）；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 等与 **UUID 项目段**主路径对齐 |
 | **C–D** | 未做 | 大块删 `*legacy*` 模块与删 PG `legacy_id` 列 |
 
 ### 阶段 A：盘点与契约标记（低风险）
@@ -270,7 +271,7 @@
 2. ~~`narrative::legacy`（`/api/v1/novels/*`）~~ **已删除**；`novels_legacy_api` 保留 **`postLegacy*`** 名，内部仅调 UUID REST。
 3. ~~`rest_legacy::{general,tasks}`~~ **已删除**。
 4. ~~`scripting::legacy`~~ **已并入 `scripting::scripts`**（路由不变）。
-5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
+5. **`assets/legacy*` + `legacy_query`**：HTTP 已迁至 **`…/projects/{project_id}/assets/workbench/*`**；目录名仍含 *legacy*，待 **C** 波次与 **`assets-generate`/worker** 解耦后再评估改名或内聚到非 *legacy* 模块名。
 6. **Production HTTP**：目录 **`backend/src/production/`**（模块名 **`production`**，**`/api/v1/production/*`** 不变）；流程 JSON 在 **`production_flow`**，Harness **只**依赖 **`production_flow`** 读合并后的 flow。
 
 **顺序补充（与 §7–§8 对齐）**：
