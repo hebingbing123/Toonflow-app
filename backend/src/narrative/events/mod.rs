@@ -28,18 +28,6 @@ pub fn router() -> Router<AppState> {
             delete(handlers::delete_novel_event_for_project)
                 .patch(handlers::update_novel_event_for_project),
         )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/novel-events",
-            get(handlers::list_novel_events).post(handlers::create_novel_event),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/novel-events/batch-delete",
-            post(handlers::batch_delete_novel_events),
-        )
-        .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/novel-events/{event_legacy_id}",
-            delete(handlers::delete_novel_event).patch(handlers::update_novel_event),
-        )
         // Legacy POST routes matching old API
         .route(
             "/api/v1/novels/events/get-events",

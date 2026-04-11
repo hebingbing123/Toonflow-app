@@ -54,7 +54,7 @@ info:
 
     **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
-        **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/{project_id}/novel-events*`** (UUID 项目段) 为主路径；**`…/projects/legacy/{id}/novel-events*`** 已 **`deprecated`**。legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** 仍覆盖旧形，含异步事件生成触发。
+        **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/{project_id}/novel-events*`**（UUID 项目段；**`event_legacy_id`** = **`app_novel_event.legacy_id`**）。**已删除** **`…/projects/legacy/{id}/novel-events*`**。legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** 仍覆盖旧形，含异步事件生成触发。
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -9849,7 +9849,7 @@ paths:
       summary: List novel events with chapter associations (by project UUID)
       operationId: listProjectNovelEventsByProjectIdV1
       description: |
-        Same as **`GET /api/v1/projects/legacy/{project_legacy_id}/novel-events`**, keyed by **`app_project.id`** (UUID).
+        Paginated novel events for **`app_project.id`** = **`project_id`**, with chapter associations (**`chapterIndexes`** = novel **`legacy_id`** values).
       security:
         - bearerAuth: []
       parameters:
@@ -9911,7 +9911,7 @@ paths:
       summary: Create a novel event with chapter associations (by project UUID)
       operationId: createProjectNovelEventByProjectIdV1
       description: |
-        Same as **`POST /api/v1/projects/legacy/{project_legacy_id}/novel-events`**, keyed by **`app_project.id`** (UUID).
+        Creates **`app_novel_event`** under **`app_project.id`** = **`project_id`**; optional **`chapterIds`** are **`app_novel.legacy_id`** values in the same project.
       security:
         - bearerAuth: []
       parameters:
@@ -9959,7 +9959,7 @@ paths:
       summary: Batch delete novel events (by project UUID)
       operationId: batchDeleteProjectNovelEventsByProjectIdV1
       description: |
-        Same as **`POST /api/v1/projects/legacy/{project_legacy_id}/novel-events/batch-delete`**, scoped to **`app_project.id`** (UUID).
+        Deletes **`app_novel_event`** rows whose **`legacy_id`** is in **`ids`**, scoped to **`app_project.id`** = **`project_id`** and the authenticated owner.
       security:
         - bearerAuth: []
       parameters:
@@ -10007,7 +10007,7 @@ paths:
       summary: Update a novel event (by project UUID)
       operationId: updateProjectNovelEventByProjectIdV1
       description: |
-        Same as **`PATCH …/legacy/.../novel-events/{event_legacy_id}`** with **`project_id`** = **`app_project.id`**.
+        Updates the event identified by **`event_legacy_id`** (**`app_novel_event.legacy_id`**) under **`app_project.id`** = **`project_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -10086,243 +10086,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Event not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{project_legacy_id}/novel-events:
-    get:
-      deprecated: true
-      tags: [novel-events]
-      summary: List novel events with chapter associations
-      operationId: listNovelEventsV1
-      description: |
-        Returns paginated list of novel events for a project, with associated chapter indexes.
-        Supports search by event name (ILIKE).
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 200
-        - name: search
-          in: query
-          schema:
-            type: string
-          description: Search by event name (case-insensitive substring match)
-      responses:
-        "200":
-          description: List of events with chapter associations
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventListResponse"
-        "400":
-          description: Invalid parameters
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Database not configured
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    post:
-      deprecated: true
-      tags: [novel-events]
-      summary: Create a novel event with chapter associations
-      operationId: createNovelEventV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateNovelEventBody"
-      responses:
-        "200":
-          description: Event created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventCreateResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{project_legacy_id}/novel-events/{event_legacy_id}:
-    patch:
-      deprecated: true
-      tags: [novel-events]
-      summary: Update a novel event
-      operationId: updateNovelEventV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: event_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNovelEventBody"
-      responses:
-        "200":
-          description: Event updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventOkResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Event not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-    delete:
-      deprecated: true
-      tags: [novel-events]
-      summary: Delete a novel event
-      operationId: deleteNovelEventV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: event_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Event deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventOkResponse"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Event not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{project_legacy_id}/novel-events/batch-delete:
-    post:
-      deprecated: true
-      tags: [novel-events]
-      summary: Batch delete novel events
-      operationId: batchDeleteNovelEventsV1
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BatchDeleteNovelEventsBody"
-      responses:
-        "200":
-          description: Events deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventOkResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No matching events found
           content:
             application/json:
               schema:

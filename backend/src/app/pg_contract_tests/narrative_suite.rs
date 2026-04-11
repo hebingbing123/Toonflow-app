@@ -382,6 +382,7 @@ async fn novel_events_crud_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project id");
 
     // Add novels first to have chapter_ids to associate
     let add_novel_body = format!(
@@ -412,10 +413,7 @@ async fn novel_events_crud_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events",
-                    project_id
-                ))
+                .uri(format!("/api/v1/projects/{project_uuid}/novel-events",))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -434,10 +432,7 @@ async fn novel_events_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events",
-                    project_id
-                ))
+                .uri(format!("/api/v1/projects/{project_uuid}/novel-events",))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -461,8 +456,7 @@ async fn novel_events_crud_roundtrip() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events/{}",
-                    project_id, event_id
+                    "/api/v1/projects/{project_uuid}/novel-events/{event_id}",
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -480,10 +474,7 @@ async fn novel_events_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events",
-                    project_id
-                ))
+                .uri(format!("/api/v1/projects/{project_uuid}/novel-events",))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -502,8 +493,7 @@ async fn novel_events_crud_roundtrip() {
             Request::builder()
                 .method(Method::DELETE)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events/{}",
-                    project_id, event_id
+                    "/api/v1/projects/{project_uuid}/novel-events/{event_id}",
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -520,10 +510,7 @@ async fn novel_events_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!(
-                    "/api/v1/projects/legacy/{}/novel-events",
-                    project_id
-                ))
+                .uri(format!("/api/v1/projects/{project_uuid}/novel-events",))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())

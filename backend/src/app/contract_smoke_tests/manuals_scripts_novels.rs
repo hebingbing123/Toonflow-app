@@ -417,7 +417,7 @@ async fn novel_events_batch_delete_requires_database_with_jwt() {
 async fn project_novel_events_batch_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/legacy/1/novel-events/batch-delete",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novel-events/batch-delete",
         &token,
         r#"{"ids":[1]}"#,
     )

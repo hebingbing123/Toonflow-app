@@ -67,27 +67,6 @@ pub(super) async fn list_novel_events_for_project(
     list_novel_events_core(pool, uid, project_id, query).await
 }
 
-pub(super) async fn list_novel_events(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path(project_legacy_id): Path<i32>,
-    Query(query): Query<ListNovelEventsQuery>,
-) -> Result<JsonResponse<ListNovelEventsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    list_novel_events_core(pool, uid, project_id, query).await
-}
-
 async fn create_novel_event_core(
     pool: &PgPool,
     project_uuid: Uuid,
@@ -181,27 +160,6 @@ pub(super) async fn create_novel_event_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     create_novel_event_core(pool, project_id, body).await
-}
-
-pub(super) async fn create_novel_event(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path(project_legacy_id): Path<i32>,
-    Json(body): Json<CreateNovelEventBody>,
-) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    create_novel_event_core(pool, project_uuid, body).await
 }
 
 async fn update_novel_event_core(
@@ -329,27 +287,6 @@ pub(super) async fn update_novel_event_for_project(
     update_novel_event_core(pool, project_id, event_legacy_id, body).await
 }
 
-pub(super) async fn update_novel_event(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path((project_legacy_id, event_legacy_id)): Path<(i32, i32)>,
-    Json(body): Json<UpdateNovelEventBody>,
-) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 || event_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("ids must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    update_novel_event_core(pool, project_uuid, event_legacy_id, body).await
-}
-
 async fn delete_novel_event_core(
     pool: &PgPool,
     uid: Uuid,
@@ -398,26 +335,6 @@ pub(super) async fn delete_novel_event_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     delete_novel_event_core(pool, uid, project_id, event_legacy_id).await
-}
-
-pub(super) async fn delete_novel_event(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path((project_legacy_id, event_legacy_id)): Path<(i32, i32)>,
-) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 || event_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("ids must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    delete_novel_event_core(pool, uid, project_uuid, event_legacy_id).await
 }
 
 async fn batch_delete_novel_events_core(
@@ -483,27 +400,6 @@ pub(super) async fn batch_delete_novel_events_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     batch_delete_novel_events_core(pool, uid, project_id, body).await
-}
-
-pub(super) async fn batch_delete_novel_events(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path(project_legacy_id): Path<i32>,
-    Json(body): Json<BatchDeleteEventsBody>,
-) -> Result<JsonResponse<BatchDeleteEventsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    batch_delete_novel_events_core(pool, uid, project_uuid, body).await
 }
 
 pub(super) async fn post_get_events(
