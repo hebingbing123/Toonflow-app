@@ -397,30 +397,23 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       toolName: widget.workspaceLastToolName,
       result: widget.workspaceLastToolResultData,
     );
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: <Widget>[
+    return ScriptWorkspaceArgumentTemplatesPanel(
+      busy: widget.busy,
+      templates: <ScriptWorkspaceArgumentTemplateEntry>[
         ...templates.map(
-          (entry) => ActionChip(
-            label: Text(entry.label),
-            onPressed: widget.busy
-                ? null
-                : () => _applyToolArgsTemplate(entry.args, entry.label),
+          (entry) => ScriptWorkspaceArgumentTemplateEntry(
+            label: entry.label,
+            args: entry.args,
           ),
         ),
         ...suggestions.map(
-          (suggestion) => ActionChip(
-            label: Text(suggestion.label),
-            onPressed: widget.busy
-                ? null
-                : () => _applyToolArgsTemplate(
-                    jsonEncode(suggestion.payload),
-                    suggestion.label,
-                  ),
+          (suggestion) => ScriptWorkspaceArgumentTemplateEntry(
+            label: suggestion.label,
+            args: jsonEncode(suggestion.payload),
           ),
         ),
       ],
+      onApplyTemplate: _applyToolArgsTemplate,
     );
   }
 
@@ -535,124 +528,39 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
             const SizedBox(height: 10),
             _buildPromptTemplates(),
             const SizedBox(height: 8),
-            TextField(
-              controller: widget.scriptPromptController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: '工作区提示词',
-                helperText: '用于剧本通道 harness.agent.run',
+            ScriptWorkspaceControlsPanel(
+              busy: widget.busy,
+              loadingScriptWorkspaceRun: widget.loadingScriptWorkspaceRun,
+              loadingScriptDomainProbe: widget.loadingScriptDomainProbe,
+              loadingScriptSubAgentRun: widget.loadingScriptSubAgentRun,
+              loadingScriptResultWriteback: widget.loadingScriptResultWriteback,
+              loadingScriptPlanResultWriteback:
+                  widget.loadingScriptPlanResultWriteback,
+              canWriteBackScriptResult: _canWriteBackScriptResult,
+              canWriteBackScriptPlanResult: _canWriteBackScriptPlanResult,
+              canWriteBackScriptPlanViaUpdateData:
+                  _canWriteBackScriptPlanViaUpdateData,
+              scriptPromptController: widget.scriptPromptController,
+              scriptDomainArgsController: widget.scriptDomainArgsController,
+              scriptDomainToolPresets: widget.scriptDomainToolPresets,
+              scriptSubAgentPresets: widget.scriptSubAgentPresets,
+              selectedScriptDomainTool: _resolveDropdownValue(
+                widget.selectedScriptDomainTool,
+                widget.scriptDomainToolPresets,
               ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _runScriptWorkspace,
-                  child: Text(
-                    widget.loadingScriptWorkspaceRun ? '…' : '运行剧本工作流',
-                  ),
-                ),
-                SizedBox(
-                  width: 220,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _resolveDropdownValue(
-                      widget.selectedScriptDomainTool,
-                      widget.scriptDomainToolPresets,
-                    ),
-                    items: widget.scriptDomainToolPresets
-                        .map(
-                          (String tool) => DropdownMenuItem<String>(
-                            value: tool,
-                            child: Text(tool),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: widget.busy
-                        ? null
-                        : (String? value) {
-                            if (value == null) return;
-                            widget.onScriptDomainToolChanged(value);
-                          },
-                    decoration: const InputDecoration(labelText: '剧本域工具'),
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _probeScriptDomainTool,
-                  child: Text(
-                    widget.loadingScriptDomainProbe ? '…' : '读取剧本上下文',
-                  ),
-                ),
-                SizedBox(
-                  width: 320,
-                  child: TextField(
-                    controller: widget.scriptDomainArgsController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: '剧本工具参数(JSON)',
-                      helperText: '可选，例如 {"novelId":1}',
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 300,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _resolveDropdownValue(
-                      widget.scriptSubAgentToolController.text.trim(),
-                      widget.scriptSubAgentPresets,
-                    ),
-                    items: widget.scriptSubAgentPresets
-                        .map(
-                          (String tool) => DropdownMenuItem<String>(
-                            value: tool,
-                            child: Text(tool),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: widget.busy
-                        ? null
-                        : (String? value) {
-                            if (value == null) return;
-                            widget.onScriptSubAgentChanged(value);
-                          },
-                    decoration: const InputDecoration(labelText: '剧本子代理工具'),
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: widget.busy ? null : _runScriptSubAgentTool,
-                  child: Text(widget.loadingScriptSubAgentRun ? '…' : '运行子代理'),
-                ),
-                FilledButton(
-                  onPressed: widget.busy || !_canWriteBackScriptResult
-                      ? null
-                      : _writeBackScriptResult,
-                  child: Text(
-                    widget.loadingScriptResultWriteback ? '…' : '写回剧本',
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: widget.busy || !_canWriteBackScriptPlanResult
-                      ? null
-                      : _writeBackScriptPlanResult,
-                  child: Text(
-                    widget.loadingScriptPlanResultWriteback ? '…' : '写回计划数据',
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: widget.busy ||
-                          !_canWriteBackScriptPlanViaUpdateData
-                      ? null
-                      : _writeBackScriptPlanViaUpdateData,
-                  child: Text(
-                    widget.loadingScriptPlanResultWriteback
-                        ? '…'
-                        : 'update-data 写回',
-                  ),
-                ),
-              ],
+              selectedScriptSubAgentTool: _resolveDropdownValue(
+                widget.scriptSubAgentToolController.text.trim(),
+                widget.scriptSubAgentPresets,
+              ),
+              onRunScriptWorkspace: _runScriptWorkspace,
+              onScriptDomainToolChanged: widget.onScriptDomainToolChanged,
+              onProbeScriptDomainTool: _probeScriptDomainTool,
+              onScriptSubAgentChanged: widget.onScriptSubAgentChanged,
+              onRunScriptSubAgentTool: _runScriptSubAgentTool,
+              onWriteBackScriptResult: _writeBackScriptResult,
+              onWriteBackScriptPlanResult: _writeBackScriptPlanResult,
+              onWriteBackScriptPlanViaUpdateData:
+                  _writeBackScriptPlanViaUpdateData,
             ),
             const SizedBox(height: 8),
             _buildArgumentTemplates(),

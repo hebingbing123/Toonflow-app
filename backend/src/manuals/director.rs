@@ -1,5 +1,7 @@
-//! Parity with legacy **`/api/project/queryDirectorManual`**, **`addDirectorManual`**, **`editDirectorlManual`**, **`deleteDirectorManual`**:
-//! bundled **`story_skills`** tree (Markdown + images). Image paths are **relative under `data/skills`** (same as visual manual; clients fetch via **`GET /api/v1/skills/binary?path=`**).
+//! 导演手册模块。
+//!
+//! 与遗留 `/api/project/queryDirectorManual`、`addDirectorManual`、`editDirectorlManual`、`deleteDirectorManual` 兼容：
+//! 打包的 `story_skills` 树（Markdown + 图片）。图片路径是相对于 `data/skills` 的（与视觉手册相同；客户端通过 `GET /api/v1/skills/binary?path=` 获取）。
 
 use std::path::{Path, PathBuf};
 
