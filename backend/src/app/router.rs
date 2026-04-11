@@ -26,12 +26,7 @@ use crate::script_agent;
 use crate::script_asset_extract;
 use crate::scripts;
 use crate::scripts_legacy;
-use crate::settings_about;
-use crate::settings_agent_deploy;
-use crate::settings_danger;
-use crate::settings_dev;
-use crate::settings_memory_config;
-use crate::settings_vendors;
+use crate::settings;
 use crate::skills;
 use crate::state::AppState;
 use crate::storyboards;
@@ -101,12 +96,12 @@ pub fn build_router(state: AppState) -> Router {
         .merge(usage::router())
         .merge(prompts::router())
         .merge(quality_review::routes())
-        .merge(settings_about::router())
-        .merge(settings_agent_deploy::router())
-        .merge(settings_danger::router())
-        .merge(settings_dev::router())
-        .merge(settings_memory_config::router())
-        .merge(settings_vendors::router())
+        .merge(settings::about::router())
+        .merge(settings::agent_deploy::router())
+        .merge(settings::danger::router())
+        .merge(settings::dev::router())
+        .merge(settings::memory_config::router())
+        .merge(settings::vendors::router())
         .route("/api/v1/me", get(handlers::me))
         .route("/api/v1/ws", get(ws_upgrade))
         // Layer 1: Global IP-based rate limiting (~50 req/s per IP)

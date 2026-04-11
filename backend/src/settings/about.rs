@@ -226,7 +226,7 @@ static SETTINGS_ABOUT_ENV_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>
     std::sync::OnceLock::new();
 
 #[cfg(test)]
-pub(crate) async fn settings_about_env_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+pub(crate) async fn env_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
     SETTINGS_ABOUT_ENV_TEST_MUTEX
         .get_or_init(|| tokio::sync::Mutex::new(()))
         .lock()

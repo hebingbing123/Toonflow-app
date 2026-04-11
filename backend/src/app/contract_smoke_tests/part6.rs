@@ -1,5 +1,5 @@
 use super::helpers::*;
-use crate::settings_about::settings_about_env_test_lock;
+use crate::settings::about::env_test_lock;
 use axum::body::Body;
 use axum::extract::ConnectInfo;
 use axum::http::header;
@@ -219,7 +219,7 @@ async fn settings_about_check_update_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn settings_about_check_update_stub_ok_with_jwt() {
-    let _guard = settings_about_env_test_lock().await;
+    let _guard = env_test_lock().await;
     std::env::remove_var("TOONFLOW_UPDATE_LATEST_VERSION");
     std::env::remove_var("TOONFLOW_UPDATE_TIME");
     std::env::remove_var("TOONFLOW_UPDATE_TOONFLOW_URL");
@@ -243,7 +243,7 @@ async fn settings_about_check_update_stub_ok_with_jwt() {
 
 #[tokio::test]
 async fn settings_about_check_update_uses_env_manifest_with_jwt() {
-    let _guard = settings_about_env_test_lock().await;
+    let _guard = env_test_lock().await;
     std::env::set_var("TOONFLOW_UPDATE_LATEST_VERSION", "0.1.1");
     std::env::set_var("TOONFLOW_UPDATE_TIME", "2026-04-08T08:30:00Z");
     std::env::set_var(
