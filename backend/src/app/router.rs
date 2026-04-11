@@ -12,7 +12,6 @@ use crate::manuals;
 use crate::models_catalog;
 use crate::narrative;
 use crate::production_legacy;
-use crate::project_legacy;
 use crate::projects;
 use crate::prompts;
 use crate::quality_review;
@@ -67,8 +66,8 @@ pub fn build_router(state: AppState) -> Router {
         .merge(strict_limited)
         .merge(agent_memory::router())
         .merge(models_catalog::router())
-        .merge(projects::router())
-        .merge(project_legacy::router())
+        .merge(projects::routes::router())
+        .merge(projects::legacy::router())
         .merge(manuals::director::router())
         .merge(general_legacy::router())
         .merge(art_styles::router())

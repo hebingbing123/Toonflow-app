@@ -14,7 +14,7 @@ use crate::error::ApiError;
 use crate::projects::ProjectRow;
 use crate::state::AppState;
 
-/// Same as [`crate::projects`] advisory lock for allocating **`legacy_id`**.
+/// Advisory lock for allocating **`legacy_id`** (aligned with project **`legacy_id`** allocation in PG-backed project routes).
 const ADV_LOCK_PROJECT_LEGACY_ID: i64 = 884_422_001;
 
 #[derive(Debug, Deserialize, Default)]
