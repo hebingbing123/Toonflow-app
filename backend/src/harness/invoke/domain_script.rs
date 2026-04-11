@@ -1,4 +1,4 @@
-//! Script-domain Harness tools: get_planData, get_script_content, get_novel_text, get_novel_events.
+//! 脚本域 Harness 工具：get_planData、get_script_content、get_novel_text、get_novel_events。
 
 use serde::Serialize;
 use serde_json::Value;
