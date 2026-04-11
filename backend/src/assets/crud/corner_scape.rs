@@ -1,0 +1,126 @@
+//! `POST …/assets/corner-scape` — assets missing `assetsId` in metadata, with history images.
+
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+    Json,
+};
+use serde_json::Value;
+use sqlx::{Postgres, QueryBuilder};
+
+use crate::auth::require_user_uuid;
+use crate::error::ApiError;
+use crate::state::AppState;
+
+use super::super::models::*;
+use super::super::normalize_corner_types_filter;
+
+pub(crate) async fn list_corner_scape_assets(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<CornerScapeBody>,
+) -> Result<Json<CornerScapeResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    if project_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "project_legacy_id must be positive".into(),
+        ));
+    }
+
+    let type_filter = normalize_corner_types_filter(body.types)?;
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+        r#"
+        SELECT
+          a.id,
+          a.legacy_id,
+          a.name,
+          a.asset_type,
+          a.description,
+          a.create_time_ms,
+          a.metadata,
+          COALESCE(
+            (
+              SELECT jsonb_agg(
+                jsonb_build_object(
+                  'id', i.id,
+                  'file_path', i.file_path,
+                  'state', i.state,
+                  'sort_index', i.sort_index,
+                  'legacy_image_id', i.legacy_image_id
+                )
+                ORDER BY i.sort_index ASC, i.created_at ASC
+              )
+              FROM app_asset_image i
+              WHERE i.asset_id = a.id
+                AND i.state = '已完成'
+            ),
+            '[]'::jsonb
+          ) AS history_images
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.legacy_id = "#,
+    );
+    qb.push_bind(project_legacy_id);
+    qb.push(" AND p.owner_user_id = ");
+    qb.push_bind(uid);
+    qb.push(
+        r#"
+          AND (
+            NOT (a.metadata ? 'assetsId')
+            OR jsonb_typeof(a.metadata->'assetsId') = 'null'
+          )
+        "#,
+    );
+    if let Some(types) = type_filter.as_ref() {
+        qb.push(" AND a.asset_type IN (");
+        let mut sep = qb.separated(", ");
+        for t in types {
+            sep.push_bind(t);
+        }
+        qb.push(")");
+    }
+    qb.push(
+        r#"
+        ORDER BY CASE a.asset_type
+          WHEN 'role' THEN 1
+          WHEN 'scene' THEN 2
+          WHEN 'tool' THEN 3
+          ELSE 4
+        END,
+        a.legacy_id ASC
+        "#,
+    );
+
+    let rows: Vec<CornerScapeDbRow> = qb
+        .build_query_as()
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let items = rows
+        .into_iter()
+        .map(|r| CornerScapeAssetItem {
+            id: r.id,
+            legacy_id: r.legacy_id,
+            name: r.name,
+            asset_type: r.asset_type,
+            description: r.description,
+            create_time_ms: r.create_time_ms,
+            metadata: r.metadata.0,
+            history_images: match r.history_images.0 {
+                Value::Array(a) => a,
+                _ => Vec::new(),
+            },
+        })
+        .collect();
+
+    Ok(Json(CornerScapeResponse { items }))
+}

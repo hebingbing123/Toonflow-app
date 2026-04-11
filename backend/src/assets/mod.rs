@@ -4,7 +4,7 @@
 //! - [`models`]       – request/response types
 //! - [`legacy`]       – legacy POST write operations (add/update/save/del)
 //! - [`legacy_query`] – legacy POST read/query operations (get-image/upload-clip/material/polling)
-//! - [`crud`]         – REST CRUD for assets, corner-scape, script-asset links
+//! - [`crud`]         – REST CRUD for assets, corner-scape, script-asset links（`crud/*.rs` 按职责拆分）
 //! - [`crud_images`]  – REST CRUD for asset images
 //! - [`generate`]     – legacy **`/api/assetsGenerate/*`** enqueue + cancel
 
