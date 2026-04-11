@@ -135,7 +135,7 @@ Future<int> postAssetsGenerateBatchPolishV1(
 /// legacy image id is not found), **400** invalid id, **503** no DB.
 Future<int> postAssetsGenerateCancelGenerateV1(
   String accessToken, {
-  required int legacyImageId,
+  required int numericImageId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/cancel-generate');
   final res = await http
@@ -145,7 +145,7 @@ Future<int> postAssetsGenerateCancelGenerateV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'id': legacyImageId}),
+        body: jsonEncode({'id': numericImageId}),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;

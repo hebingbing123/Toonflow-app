@@ -7,11 +7,11 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
     required String token,
     required ProjectRow p,
     required List<bool> assetsBusy,
-    int? preferredAssetLegacyId,
+    int? preferredAssetNumericId,
   }) async {
     final typesCtrl = TextEditingController(text: 'role,clip,props');
     List<CornerScapeAssetItem> assets = const [];
-    int? selectedAssetLegacyId;
+    int? selectedAssetNumericId;
     String? selectedHistoryImageId;
     Uint8List? selectedPreviewBytes;
     bool loading = false;
@@ -24,16 +24,16 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
         summaryLine = summarizeCornerScapeSelection(
           assets,
           activeTypes: parseCornerScapeTypesInput(typesCtrl.text),
-          selectedAssetLegacyId: selectedAssetLegacyId,
+          selectedAssetNumericId: selectedAssetNumericId,
           selectedHistoryImageId: selectedHistoryImageId,
         );
       });
     }
 
     CornerScapeAssetItem? selectedAsset() {
-      if (selectedAssetLegacyId == null) return null;
+      if (selectedAssetNumericId == null) return null;
       for (final item in assets) {
-        if (item.legacyId == selectedAssetLegacyId) {
+        if (item.numericId == selectedAssetNumericId) {
           return item;
         }
       }
@@ -66,7 +66,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
       final bytes = await fetchCornerScapeHistoryImagePreviewBytes(
         token,
         p.id,
-        asset.legacyId,
+        asset.numericId,
         image,
       );
       setState(() {
@@ -92,25 +92,25 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
           p.id,
           types: activeTypes,
         );
-        selectedAssetLegacyId = response.items.isEmpty
+        selectedAssetNumericId = response.items.isEmpty
             ? null
-            : chooseInitialAssetLegacyId(
+            : chooseInitialAssetNumericId(
                 response.items
                     .map(
                       (item) => AssetRow(
                         id: item.id,
-                        legacyId: item.legacyId,
+                        numericId: item.numericId,
                         name: item.name,
                         assetType: item.assetType,
                       ),
                     )
                     .toList(growable: false),
-                preferredLegacyId:
-                    selectedAssetLegacyId ?? preferredAssetLegacyId,
+                preferredNumericId:
+                    selectedAssetNumericId ?? preferredAssetNumericId,
               );
         selectedHistoryImageId = chooseInitialCornerScapeHistoryImageId(
           response.items,
-          selectedAssetLegacyId: selectedAssetLegacyId,
+          selectedAssetNumericId: selectedAssetNumericId,
           preferredHistoryImageId: selectedHistoryImageId,
         );
         setState(() {
@@ -118,7 +118,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
           summaryLine = summarizeCornerScapeSelection(
             response.items,
             activeTypes: activeTypes,
-            selectedAssetLegacyId: selectedAssetLegacyId,
+            selectedAssetNumericId: selectedAssetNumericId,
             selectedHistoryImageId: selectedHistoryImageId,
           );
         });
@@ -126,14 +126,14 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
       } on RustApiException catch (e) {
         setState(() {
           summaryLine = '加载失败：$e';
-          selectedAssetLegacyId = null;
+          selectedAssetNumericId = null;
           selectedHistoryImageId = null;
           selectedPreviewBytes = null;
         });
       } catch (e) {
         setState(() {
           summaryLine = '加载失败：$e';
-          selectedAssetLegacyId = null;
+          selectedAssetNumericId = null;
           selectedHistoryImageId = null;
           selectedPreviewBytes = null;
         });
@@ -234,13 +234,13 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                             itemBuilder: (context, index) {
                               final item = assets[index];
                               final selectedFlag =
-                                  item.legacyId == selectedAssetLegacyId;
+                                  item.numericId == selectedAssetNumericId;
                               return ListTile(
                                 dense: true,
                                 selected: selectedFlag,
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
-                                  '#${item.legacyId} ${item.name}',
+                                  '#${item.numericId} ${item.name}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 subtitle: Text(
@@ -249,11 +249,11 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                                 ),
                                 onTap: () async {
                                   setState(() {
-                                    selectedAssetLegacyId = item.legacyId;
+                                    selectedAssetNumericId = item.numericId;
                                     selectedHistoryImageId =
                                         chooseInitialCornerScapeHistoryImageId(
                                           assets,
-                                          selectedAssetLegacyId: item.legacyId,
+                                          selectedAssetNumericId: item.numericId,
                                           preferredHistoryImageId:
                                               selectedHistoryImageId,
                                         );

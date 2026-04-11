@@ -4,16 +4,16 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
   const _ScriptWorkbenchPanel({
     required this.token,
     required this.projectId,
-    required this.projectLegacyId,
-    required this.scriptLegacyId,
+    required this.projectNumericId,
+    required this.scriptNumericId,
     required this.onExtractStateSynced,
     required this.onOpenEditImageWorkbench,
   });
 
   final String token;
   final String projectId;
-  final int projectLegacyId;
-  final int scriptLegacyId;
+  final int projectNumericId;
+  final int scriptNumericId;
   final void Function(int? extractState) onExtractStateSynced;
   final Future<void> Function() onOpenEditImageWorkbench;
 
@@ -47,7 +47,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
         widget.token,
         widget.projectId,
       );
-      final current = findScriptContextByLegacyId(rows, widget.scriptLegacyId);
+      final current = findScriptContextByNumericId(rows, widget.scriptNumericId);
       if (!mounted) return;
       setState(() {
         _scriptContext = current;
@@ -91,7 +91,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _exportCurrentScript() async {
-    final zip = await exportScriptsZip(widget.token, [widget.scriptLegacyId]);
+    final zip = await exportScriptsZip(widget.token, [widget.scriptNumericId]);
     final diagnosis = diagnoseScriptWorkbench(
       scriptContext: _scriptContext,
       extractStateRow: _extractStateRow,
@@ -107,11 +107,11 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   Future<void> _pollExtractState() async {
     final rows = await pollScriptExtractState(widget.token, [
-      widget.scriptLegacyId,
+      widget.scriptNumericId,
     ]);
-    final current = findScriptExtractStateByLegacyId(
+    final current = findScriptExtractStateByNumericId(
       rows,
-      widget.scriptLegacyId,
+      widget.scriptNumericId,
     );
     if (!mounted) return;
     final diagnosis = diagnoseScriptWorkbench(
@@ -138,8 +138,8 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   Future<void> _startExtractAssets() async {
     final accepted = await startScriptAssetExtract(
       widget.token,
-      projectNumericId: widget.projectLegacyId,
-      scriptNumericIds: [widget.scriptLegacyId],
+      projectNumericId: widget.projectNumericId,
+      scriptNumericIds: [widget.scriptNumericId],
     );
     await _refreshWorkbench();
     if (!mounted) return;

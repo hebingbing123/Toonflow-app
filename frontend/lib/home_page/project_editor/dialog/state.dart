@@ -17,7 +17,7 @@ class _ProjectEditorDialogState {
   final List<ListAssetsResponse?> assetsForScriptRef = <ListAssetsResponse?>[
     null,
   ];
-  final List<int?> assetsFilterScriptLegacyId = <int?>[null];
+  final List<int?> assetsFilterScriptNumericId = <int?>[null];
   final List<bool> assetsLoading = <bool>[false];
   final List<bool> assetsScriptFilterLoading = <bool>[false];
   final List<bool> assetsBusy = <bool>[false];
@@ -35,7 +35,7 @@ class _ProjectEditorDialogState {
   Future<void> reloadAssetsAndStats(
     String token,
     String projectId,
-    int projectLegacyId,
+    int projectNumericId,
   ) async {
     try {
       assetsRef[0] = await fetchProjectAssetsByProjectId(token, projectId);
@@ -43,13 +43,13 @@ class _ProjectEditorDialogState {
       assetsRef[0] = null;
     }
 
-    final scriptLegacyId = assetsFilterScriptLegacyId[0];
-    if (scriptLegacyId != null) {
+    final scriptNumericId = assetsFilterScriptNumericId[0];
+    if (scriptNumericId != null) {
       try {
         assetsForScriptRef[0] = await fetchProjectAssetsByProjectId(
           token,
           projectId,
-          scriptNumericId: scriptLegacyId,
+          scriptNumericId: scriptNumericId,
         );
       } catch (_) {
         assetsForScriptRef[0] = null;

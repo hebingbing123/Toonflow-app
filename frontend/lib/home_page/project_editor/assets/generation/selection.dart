@@ -4,14 +4,14 @@ part of '../../../../home_page.dart';
 class _AssetGenerationSelectionPanel extends StatelessWidget {
   const _AssetGenerationSelectionPanel({
     required this.busy,
-    required this.filterScriptLegacyId,
+    required this.filterScriptNumericId,
     required this.scopedAssets,
     required this.selectedIds,
     required this.onToggleAsset,
   });
 
   final bool busy;
-  final int? filterScriptLegacyId;
+  final int? filterScriptNumericId;
   final List<AssetRow> scopedAssets;
   final Set<int> selectedIds;
   final void Function(AssetRow asset, bool checked) onToggleAsset;
@@ -24,9 +24,9 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          filterScriptLegacyId == null
+          filterScriptNumericId == null
               ? '当前按项目全量资产操作；可在主视图先切换"按剧本筛选"再进入工作台。'
-              : '当前主视图已按剧本 #$filterScriptLegacyId 过滤资产，工作台默认沿用这批可见资产。',
+              : '当前主视图已按剧本 #$filterScriptNumericId 过滤资产，工作台默认沿用这批可见资产。',
           style: bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 12),
@@ -38,11 +38,11 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
               final asset = scopedAssets[index];
               return CheckboxListTile(
                 dense: true,
-                value: selectedIds.contains(asset.legacyId),
+                value: selectedIds.contains(asset.numericId),
                 onChanged: busy
                     ? null
                     : (checked) => onToggleAsset(asset, checked == true),
-                title: Text('#${asset.legacyId} ${asset.name}'),
+                title: Text('#${asset.numericId} ${asset.name}'),
                 subtitle: Text(
                   [
                     asset.assetType,

@@ -24,12 +24,12 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                 try {
                   final rows = await postGeneralGetSingleProject(
                     token,
-                    p.legacyId,
+                    p.numericId,
                   );
                   if (!ctx.mounted) return;
                   final line = rows.isEmpty
                       ? '0 行'
-                      : rows.map((r) => '#${r.legacyId} ${r.name ?? ""}').join('; ');
+                      : rows.map((r) => '#${r.numericId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text('compat getSingleProject（GET projects 过滤 legacy_id）：$line'),
@@ -67,12 +67,12 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   final msg1 = await postGeneralUpdateProject(
                     token,
                     <String, dynamic>{
-                      'id': p.legacyId,
+                      'id': p.numericId,
                       'intro': probeIntro,
                     },
                   );
                   final restoreBody = <String, dynamic>{
-                    'id': p.legacyId,
+                    'id': p.numericId,
                     if (origIntro.isEmpty) 'intro': null else 'intro': origIntro,
                   };
                   final msg2 = await postGeneralUpdateProject(

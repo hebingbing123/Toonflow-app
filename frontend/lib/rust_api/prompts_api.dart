@@ -16,11 +16,11 @@ Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
 }
 
 /// `GET /api/v1/prompts/{legacy_id}` — OpenAPI `getPromptByLegacyIdV1`.
-Future<PromptTemplateRowV1> fetchPromptByLegacyIdV1(
+Future<PromptTemplateRowV1> fetchPromptByNumericIdV1(
   String accessToken,
-  int legacyId,
+  int numericId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$legacyId');
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$numericId');
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 30));
@@ -34,15 +34,15 @@ Future<PromptTemplateRowV1> fetchPromptByLegacyIdV1(
   return PromptTemplateRowV1.fromJson(map);
 }
 
-/// `PATCH /api/v1/prompts/{legacy_id}` — OpenAPI `patchPromptByLegacyIdV1` (**`data`** only).
+/// `PATCH /api/v1/prompts/{legacy_id}` — OpenAPI `patchPromptByNumericIdV1` (**`data`** only).
 ///
 /// **`legacy_id`** must be **1**, **2**, or **3**. Returns the updated row (same shape as GET).
-Future<PromptTemplateRowV1> patchPromptByLegacyIdV1(
+Future<PromptTemplateRowV1> patchPromptByNumericIdV1(
   String accessToken,
-  int legacyId,
+  int numericId,
   String data,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$legacyId');
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts/$numericId');
   final res = await http
       .patch(
         uri,

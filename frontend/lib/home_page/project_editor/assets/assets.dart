@@ -118,7 +118,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('当前没有可编辑资产')));
       return;
     }
-    var selectedAssetLegacyId = list.first.legacyId;
+    var selectedAssetNumericId = list.first.numericId;
     final nameCtrl = TextEditingController(text: list.first.name);
     final typeCtrl = TextEditingController(text: list.first.assetType);
     final descriptionCtrl = TextEditingController(
@@ -139,14 +139,14 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<int>(
-                        initialValue: selectedAssetLegacyId,
+                        initialValue: selectedAssetNumericId,
                         decoration: const InputDecoration(labelText: '目标资产'),
                         items: list
                             .map(
                               (asset) => DropdownMenuItem<int>(
-                                value: asset.legacyId,
+                                value: asset.numericId,
                                 child: Text(
-                                  '#${asset.legacyId} ${asset.name}',
+                                  '#${asset.numericId} ${asset.name}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -155,10 +155,10 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                         onChanged: (v) {
                           if (v == null) return;
                           final selected = list.firstWhere(
-                            (asset) => asset.legacyId == v,
+                            (asset) => asset.numericId == v,
                           );
                           setState(() {
-                            selectedAssetLegacyId = v;
+                            selectedAssetNumericId = v;
                             nameCtrl.text = selected.name;
                             typeCtrl.text = selected.assetType;
                             descriptionCtrl.text = selected.description ?? '';
@@ -224,7 +224,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       await patchProjectAssetByProjectIds(
         token,
         p.id,
-        selectedAssetLegacyId,
+        selectedAssetNumericId,
         body,
       );
       if (!ctx.mounted) return;
@@ -233,7 +233,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       setDialogState(() => assetsBusy[0] = false);
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(SnackBar(content: Text('已更新资产 #$selectedAssetLegacyId')));
+      ).showSnackBar(SnackBar(content: Text('已更新资产 #$selectedAssetNumericId')));
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
@@ -267,7 +267,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('当前没有可删除资产')));
       return;
     }
-    var selectedAssetLegacyId = list.first.legacyId;
+    var selectedAssetNumericId = list.first.numericId;
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
@@ -278,14 +278,14 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               content: SizedBox(
                 width: 420,
                 child: DropdownButtonFormField<int>(
-                  initialValue: selectedAssetLegacyId,
+                  initialValue: selectedAssetNumericId,
                   decoration: const InputDecoration(labelText: '目标资产'),
                   items: list
                       .map(
                         (asset) => DropdownMenuItem<int>(
-                          value: asset.legacyId,
+                          value: asset.numericId,
                           child: Text(
-                            '#${asset.legacyId} ${asset.name}',
+                            '#${asset.numericId} ${asset.name}',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -293,7 +293,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                       .toList(),
                   onChanged: (v) {
                     if (v == null) return;
-                    setState(() => selectedAssetLegacyId = v);
+                    setState(() => selectedAssetNumericId = v);
                   },
                 ),
               ),
@@ -318,7 +318,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       await deleteProjectAssetByProjectIds(
         token,
         p.id,
-        selectedAssetLegacyId,
+        selectedAssetNumericId,
       );
       if (!ctx.mounted) return;
       await reloadAssetsAndStats();
@@ -326,7 +326,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       setDialogState(() => assetsBusy[0] = false);
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(SnackBar(content: Text('已删除资产 #$selectedAssetLegacyId')));
+      ).showSnackBar(SnackBar(content: Text('已删除资产 #$selectedAssetNumericId')));
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
@@ -358,8 +358,8 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先准备至少一个剧本和一个资产')));
       return;
     }
-    var selectedScriptLegacyId = scriptList.first.legacyId;
-    var selectedAssetLegacyId = list.first.legacyId;
+    var selectedScriptNumericId = scriptList.first.numericId;
+    var selectedAssetNumericId = list.first.numericId;
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
@@ -373,14 +373,14 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<int>(
-                      initialValue: selectedScriptLegacyId,
+                      initialValue: selectedScriptNumericId,
                       decoration: const InputDecoration(labelText: '剧本'),
                       items: scriptList
                           .map(
                             (script) => DropdownMenuItem<int>(
-                              value: script.legacyId,
+                              value: script.numericId,
                               child: Text(
-                                '#${script.legacyId} ${script.name ?? ""}',
+                                '#${script.numericId} ${script.name ?? ""}',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -388,19 +388,19 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                           .toList(),
                       onChanged: (v) {
                         if (v == null) return;
-                        setState(() => selectedScriptLegacyId = v);
+                        setState(() => selectedScriptNumericId = v);
                       },
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
-                      initialValue: selectedAssetLegacyId,
+                      initialValue: selectedAssetNumericId,
                       decoration: const InputDecoration(labelText: '资产'),
                       items: list
                           .map(
                             (asset) => DropdownMenuItem<int>(
-                              value: asset.legacyId,
+                              value: asset.numericId,
                               child: Text(
-                                '#${asset.legacyId} ${asset.name}',
+                                '#${asset.numericId} ${asset.name}',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -408,7 +408,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                           .toList(),
                       onChanged: (v) {
                         if (v == null) return;
-                        setState(() => selectedAssetLegacyId = v);
+                        setState(() => selectedAssetNumericId = v);
                       },
                     ),
                   ],
@@ -436,15 +436,15 @@ extension _HomePageProjectEditorAssets on _HomePageState {
         await unlinkScriptFromAssetByProjectIds(
           token,
           p.id,
-          selectedScriptLegacyId,
-          selectedAssetLegacyId,
+          selectedScriptNumericId,
+          selectedAssetNumericId,
         );
       } else {
         await linkScriptToAssetByProjectIds(
           token,
           p.id,
-          selectedScriptLegacyId,
-          selectedAssetLegacyId,
+          selectedScriptNumericId,
+          selectedAssetNumericId,
         );
       }
       if (!ctx.mounted) return;
@@ -455,8 +455,8 @@ extension _HomePageProjectEditorAssets on _HomePageState {
         SnackBar(
           content: Text(
             unlink
-                ? '已取消关联 script#$selectedScriptLegacyId · asset#$selectedAssetLegacyId'
-                : '已关联 script#$selectedScriptLegacyId · asset#$selectedAssetLegacyId',
+                ? '已取消关联 script#$selectedScriptNumericId · asset#$selectedAssetNumericId'
+                : '已关联 script#$selectedScriptNumericId · asset#$selectedAssetNumericId',
           ),
         ),
       );
@@ -481,7 +481,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ListAssetsResponse?> assetsRef,
     required List<ListAssetsResponse?> assetsForScriptRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsLoading,
     required List<bool> assetsScriptFilterLoading,
     required List<bool> assetsBusy,
@@ -498,13 +498,13 @@ extension _HomePageProjectEditorAssets on _HomePageState {
             scriptList: scriptList,
             visibleAssets: visibleAssets,
             assetsForScript: assetsForScript,
-            filterScriptLegacyId: assetsFilterScriptLegacyId[0],
+            filterScriptNumericId: assetsFilterScriptNumericId[0],
             assetsLoading: assetsLoading[0],
             assetsScriptFilterLoading: assetsScriptFilterLoading[0],
             assetsBusy: assetsBusy[0],
             onFilterChanged: (value) async {
               setDialogState(() => assetsScriptFilterLoading[0] = true);
-              assetsFilterScriptLegacyId[0] = value;
+              assetsFilterScriptNumericId[0] = value;
               if (value == null) {
                 assetsForScriptRef[0] = null;
               }
@@ -534,7 +534,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               scriptList: scriptList,
               assetsRef: assetsRef,
               assetsForScriptRef: assetsForScriptRef,
-              assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+              assetsFilterScriptNumericId: assetsFilterScriptNumericId,
               assetsBusy: assetsBusy,
               reloadAssetsAndStats: reloadAssetsAndStats,
             ),
@@ -580,7 +580,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                   token: token,
                   p: p,
                   assetsRef: assetsRef,
-                  assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                  assetsFilterScriptNumericId: assetsFilterScriptNumericId,
                   assetsLoading: assetsLoading,
                   assetsScriptFilterLoading: assetsScriptFilterLoading,
                   assetsBusy: assetsBusy,
@@ -604,7 +604,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
                   token: token,
                   p: p,
                   assetsRef: assetsRef,
-                  assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+                  assetsFilterScriptNumericId: assetsFilterScriptNumericId,
                   assetsLoading: assetsLoading,
                   assetsScriptFilterLoading: assetsScriptFilterLoading,
                   assetsBusy: assetsBusy,

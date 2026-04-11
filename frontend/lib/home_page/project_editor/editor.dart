@@ -43,7 +43,7 @@ extension _HomePageProjectEditor on _HomePageState {
             builder: (ctx, setDialogState) {
               return AlertDialog(
                 title: Text(
-                  detail.project.name ?? 'legacy #${detail.project.legacyId}',
+                  detail.project.name ?? 'legacy #${detail.project.numericId}',
                 ),
                 content: _buildProjectEditorDialogContent(
                   ctx: ctx,

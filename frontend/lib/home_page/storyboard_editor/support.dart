@@ -249,7 +249,7 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
   final readyAcrossAll = boardRows.where((row) {
     return resolveStoryboardGenerationPrompt(
           scriptStoryboard: row,
-          productionStoryboard: productionById[row.legacyId],
+          productionStoryboard: productionById[row.numericId],
         ) !=
         null;
   }).length;
@@ -274,15 +274,15 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
   var selectedReadyCount = 0;
   var selectedWithImageCount = 0;
   var selectedProductionCoverage = 0;
-  for (final legacyId in selected) {
+  for (final numericId in selected) {
     StoryboardRow? scriptRow;
     for (final row in boardRows) {
-      if (row.legacyId == legacyId) {
+      if (row.numericId == numericId) {
         scriptRow = row;
         break;
       }
     }
-    final productionRow = productionById[legacyId];
+    final productionRow = productionById[numericId];
     if (productionRow != null) {
       selectedProductionCoverage += 1;
     }
@@ -404,7 +404,7 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
 
   final storyboardVideos = storyboardScopedVideos(
     generatedVideos,
-    scriptStoryboard.legacyId,
+    scriptStoryboard.numericId,
   );
   if (generatingJobs.isNotEmpty) {
     return StoryboardWorkbenchDiagnosis(

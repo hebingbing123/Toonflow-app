@@ -7,7 +7,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
     required this.scriptList,
     required this.visibleAssets,
     required this.typeSelections,
-    required this.selectedScriptLegacyId,
+    required this.selectedScriptNumericId,
     required this.selectedType,
     required this.modelCtrl,
     required this.resolutionCtrl,
@@ -23,7 +23,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
   final List<ScriptBrief> scriptList;
   final List<AssetRow> visibleAssets;
   final Map<String, List<int>> typeSelections;
-  final int selectedScriptLegacyId;
+  final int selectedScriptNumericId;
   final String selectedType;
   final TextEditingController modelCtrl;
   final TextEditingController resolutionCtrl;
@@ -43,7 +43,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
           children: [
             Expanded(
               child: DropdownButtonFormField<int>(
-                initialValue: selectedScriptLegacyId,
+                initialValue: selectedScriptNumericId,
                 decoration: const InputDecoration(
                   labelText: '生成使用的剧本',
                   helperText: '批量出图会把所选资产投给这个剧本上下文',
@@ -51,9 +51,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                 items: scriptList
                     .map(
                       (script) => DropdownMenuItem<int>(
-                        value: script.legacyId,
+                        value: script.numericId,
                         child: Text(
-                          '#${script.legacyId} ${script.name ?? ""}',
+                          '#${script.numericId} ${script.name ?? ""}',
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

@@ -352,7 +352,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
   Future<void> _writeBackScriptWorkspaceResult() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectLegacyId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final projectNumericId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
     final toolCandidate = _workspaceScriptWritebackCandidate?.trim();
     final assistantText = _workspaceAssistantText.trim();
@@ -361,7 +361,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     final source = useToolCandidate
         ? (_workspaceScriptWritebackSource ?? 'tool:get_script_content')
         : 'assistant stream';
-    if (projectLegacyId == null || scriptId == null || content.isEmpty) {
+    if (projectNumericId == null || scriptId == null || content.isEmpty) {
       setState(() => _error = 'project_id/script_id 与可回写结果必须有效');
       return;
     }
@@ -373,14 +373,14 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
     });
 
     try {
-      final projects = await postGeneralGetSingleProject(token, projectLegacyId);
+      final projects = await postGeneralGetSingleProject(token, projectNumericId);
       if (projects.isEmpty) {
         if (!mounted) return;
         setState(() => _error = '未找到项目');
         return;
       }
       final projectUuid = projects.first.id;
-      final updated = await updateScriptByProjectAndLegacyId(
+      final updated = await updateScriptByProjectAndNumericId(
         token,
         projectUuid,
         scriptId,
@@ -390,7 +390,7 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
       setState(() {
         final updatedLen = updated.content?.length ?? 0;
         _workspaceWritebackLine =
-            '写回成功：script ${updated.legacyId} 已更新，source=$source，content 长度 $updatedLen。';
+            '写回成功：script ${updated.numericId} 已更新，source=$source，content 长度 $updatedLen。';
       });
     } catch (error) {
       _setErrorFromException(error);

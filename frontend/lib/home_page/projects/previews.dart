@@ -218,7 +218,7 @@ class ProjectsArtStylesPreview extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             title: Text(style.name),
             subtitle: Text(
-              '#${style.legacyId}'
+              '#${style.numericId}'
               '${(style.label ?? '').isEmpty ? '' : ' · ${style.label}'}',
             ),
             trailing: TextButton(onPressed: onManage, child: const Text('管理')),
@@ -256,8 +256,8 @@ class ProjectsListPreview extends StatelessWidget {
           (project) => ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            title: Text(project.name ?? '项目 #${project.legacyId}'),
-            subtitle: Text('#${project.legacyId} · ${project.id}'),
+            title: Text(project.name ?? '项目 #${project.numericId}'),
+            subtitle: Text('#${project.numericId} · ${project.id}'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onOpenProjectDetail(project),
           ),

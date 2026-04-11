@@ -42,7 +42,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             assetsLoading: dialogState.assetsLoading,
             assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
             reloadAssetsAndStats: () =>
-                dialogState.reloadAssetsAndStats(token, p.id, p.legacyId),
+                dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
           ),
           const SizedBox(height: 12),
           _buildProjectAssetsSection(
@@ -53,12 +53,12 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             scriptList: scriptList,
             assetsRef: dialogState.assetsRef,
             assetsForScriptRef: dialogState.assetsForScriptRef,
-            assetsFilterScriptLegacyId: dialogState.assetsFilterScriptLegacyId,
+            assetsFilterScriptNumericId: dialogState.assetsFilterScriptNumericId,
             assetsLoading: dialogState.assetsLoading,
             assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
             assetsBusy: dialogState.assetsBusy,
             reloadAssetsAndStats: () =>
-                dialogState.reloadAssetsAndStats(token, p.id, p.legacyId),
+                dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
           ),
           const SizedBox(height: 12),
           _buildProjectScriptsSection(

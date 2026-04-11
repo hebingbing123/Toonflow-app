@@ -3,19 +3,19 @@ part of '../../home_page.dart';
 extension _HomePageScriptEditor on _HomePageState {
   Future<void> _openScriptEditor(
     String token,
-    int scriptLegacyId, {
+    int scriptNumericId, {
     required String projectId,
-    required int projectLegacyId,
+    required int projectNumericId,
     Future<void> Function()? onScriptTreeMutated,
   }) async {
     final nameCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final stateCtrl = TextEditingController();
     try {
-      final script = await fetchScriptByProjectAndLegacyId(
+      final script = await fetchScriptByProjectAndNumericId(
         token,
         projectId,
-        scriptLegacyId,
+        scriptNumericId,
       );
       if (!mounted) return;
       nameCtrl.text = script.name ?? '';
@@ -28,7 +28,7 @@ extension _HomePageScriptEditor on _HomePageState {
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
               return AlertDialog(
-                title: Text('剧本 #${script.legacyId}'),
+                title: Text('剧本 #${script.numericId}'),
                 content: SizedBox(
                   width: 720,
                   child: SingleChildScrollView(
@@ -39,16 +39,16 @@ extension _HomePageScriptEditor on _HomePageState {
                         _ScriptWorkbenchPanel(
                           token: token,
                           projectId: projectId,
-                          projectLegacyId: projectLegacyId,
-                          scriptLegacyId: scriptLegacyId,
+                          projectNumericId: projectNumericId,
+                          scriptNumericId: scriptNumericId,
                           onExtractStateSynced: (extractState) {
                             stateCtrl.text = extractState?.toString() ?? '';
                           },
                           onOpenEditImageWorkbench: () =>
                               _openScriptEditImageWorkbenchDialog(
                                 token: token,
-                                projectLegacyId: projectLegacyId,
-                                scriptLegacyId: scriptLegacyId,
+                                projectNumericId: projectNumericId,
+                                scriptNumericId: scriptNumericId,
                               ),
                         ),
                         const SizedBox(height: 16),
@@ -84,8 +84,8 @@ extension _HomePageScriptEditor on _HomePageState {
                                 : () => _openScriptStoryboardsDialog(
                                     token: token,
                                     projectId: projectId,
-                                    projectLegacyId: projectLegacyId,
-                                    scriptLegacyId: scriptLegacyId,
+                                    projectNumericId: projectNumericId,
+                                    scriptNumericId: scriptNumericId,
                                   ),
                             child: const Text('分镜列表…'),
                           ),
@@ -108,7 +108,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               builder: (c) => AlertDialog(
                                 title: const Text('删除剧本？'),
                                 content: Text(
-                                  '将删除 script #${script.legacyId} 及其分镜（数据库级联）。',
+                                  '将删除 script #${script.numericId} 及其分镜（数据库级联）。',
                                 ),
                                 actions: [
                                   TextButton(
@@ -125,10 +125,10 @@ extension _HomePageScriptEditor on _HomePageState {
                             if (ok != true || !ctx.mounted) return;
                             setDialogState(() => saving[0] = true);
                             try {
-                              await deleteScriptByProjectAndLegacyId(
+                              await deleteScriptByProjectAndNumericId(
                                 token,
                                 projectId,
-                                scriptLegacyId,
+                                scriptNumericId,
                               );
                               if (!ctx.mounted) return;
                               await onScriptTreeMutated?.call();
@@ -178,10 +178,10 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                             try {
-                              await updateScriptByProjectAndLegacyId(
+                              await updateScriptByProjectAndNumericId(
                                 token,
                                 projectId,
-                                scriptLegacyId,
+                                scriptNumericId,
                                 {
                                   'name': nameCtrl.text.isEmpty
                                       ? null

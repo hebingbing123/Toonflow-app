@@ -22,7 +22,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   if (!ctx.mounted) return;
                   final line = items.isEmpty
                       ? '0 项'
-                      : items.map((e) => '#${e.id} ${e.name}').join('; ');
+                      : items.map((e) => '#${e.numericId} ${e.name}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text('compat getProject（GET projects）：$line'),
@@ -84,7 +84,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                     token,
                     page: 1,
                     limit: 10,
-                    projectId: p.legacyId,
+                    projectId: p.numericId,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -119,20 +119,20 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                     token,
                     page: 1,
                     limit: 1,
-                    projectId: p.legacyId,
+                    projectId: p.numericId,
                   );
                   if (r.data.isEmpty) {
-                    throw StateError('no task rows for project ${p.legacyId}');
+                    throw StateError('no task rows for project ${p.numericId}');
                   }
                   final row = await postTasksTaskDetails(
                     token,
-                    r.data.first.legacyTaskId,
+                    r.data.first.numericTaskId,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'compat task-details（GET jobs/task-detail）：#${row.legacyTaskId} -> ${row.kind}/${row.status}',
+                        'compat task-details（GET jobs/task-detail）：#${row.numericTaskId} -> ${row.kind}/${row.status}',
                       ),
                     ),
                   );

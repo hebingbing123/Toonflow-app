@@ -3,10 +3,10 @@ part of 'index.dart';
 /// Compat **`getSingleProject`**: lists owned projects and filters by **`legacy_id`** (no HTTP **`/general/*`**).
 Future<List<ProjectRow>> postGeneralGetSingleProject(
   String accessToken,
-  int legacyId,
+  int numericId,
 ) async {
   final rows = await _fetchAllProjectsPaged(accessToken);
-  return rows.where((r) => r.legacyId == legacyId).toList();
+  return rows.where((r) => r.numericId == numericId).toList();
 }
 
 /// Compat **`updateProject`**: maps camelCase fields to **`PATCH /api/v1/projects/{uuid}`**.
@@ -19,15 +19,15 @@ Future<String> postGeneralUpdateProject(
   Map<String, dynamic> body,
 ) async {
   final idRaw = body['id'];
-  final legacyId = idRaw is int
+  final numericId = idRaw is int
       ? idRaw
       : idRaw is num
       ? idRaw.toInt()
       : int.tryParse('$idRaw');
-  if (legacyId == null || legacyId <= 0) {
+  if (numericId == null || numericId <= 0) {
     throw RustApiException('invalid id', statusCode: 400);
   }
-  final projectId = await _projectIdForLegacyId(accessToken, legacyId);
+  final projectId = await _projectIdForNumericId(accessToken, numericId);
 
   final patch = <String, dynamic>{};
   if (body.containsKey('intro')) {
@@ -95,13 +95,13 @@ Future<List<ProjectRow>> _fetchAllProjectsPaged(String accessToken) async {
   return out;
 }
 
-Future<String> _projectIdForLegacyId(
+Future<String> _projectIdForNumericId(
   String accessToken,
-  int legacyId,
+  int numericId,
 ) async {
   final rows = await _fetchAllProjectsPaged(accessToken);
   for (final r in rows) {
-    if (r.legacyId == legacyId) {
+    if (r.numericId == numericId) {
       return r.id;
     }
   }
@@ -113,12 +113,12 @@ Future<List<ProjectRow>> postProjectGetProject(String accessToken) async {
   return _fetchAllProjectsPaged(accessToken);
 }
 
-/// [legacyId] is `app_project.legacy_id`. Uses **`DELETE /api/v1/projects/{project_id}`**.
+/// [numericId] is `app_project.legacy_id`. Uses **`DELETE /api/v1/projects/{project_id}`**.
 Future<String> postProjectDeleteProject(
   String accessToken,
-  int legacyId,
+  int numericId,
 ) async {
-  final id = await _projectIdForLegacyId(accessToken, legacyId);
+  final id = await _projectIdForNumericId(accessToken, numericId);
   await deleteProjectByProjectId(accessToken, id);
   return '删除项目成功';
 }
@@ -173,7 +173,7 @@ Future<String> postProjectEditProject(
   required String projectType,
   required String mode,
 }) async {
-  final projectId = await _projectIdForLegacyId(accessToken, id);
+  final projectId = await _projectIdForNumericId(accessToken, id);
   final modeOut = _effectiveProjectMode(type, mode);
   await updateProjectByProjectId(
     accessToken,

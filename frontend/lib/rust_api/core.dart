@@ -11,7 +11,7 @@ class RustApiException implements Exception {
 
 class JobRow {
   const JobRow({
-    required this.legacyTaskId,
+    required this.numericTaskId,
     required this.id,
     required this.ownerUserId,
     required this.kind,
@@ -25,7 +25,7 @@ class JobRow {
     required this.updatedAt,
   });
 
-  final int legacyTaskId;
+  final int numericTaskId;
   final String id;
   final String ownerUserId;
   final String kind;
@@ -42,7 +42,7 @@ class JobRow {
 
   factory JobRow.fromJson(Map<String, dynamic> json) {
     return JobRow(
-      legacyTaskId: (json['numeric_task_id'] as num).toInt(),
+      numericTaskId: (json['numeric_task_id'] as num).toInt(),
       id: json['id'] as String,
       ownerUserId: json['owner_user_id'] as String,
       kind: json['kind'] as String,

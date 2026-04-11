@@ -39,10 +39,10 @@ Future<ListNovelsResponse> fetchProjectNovelsByProjectId(
 Future<NovelRow> fetchProjectNovelByProjectIds(
   String accessToken,
   String projectId,
-  int novelLegacyId,
+  int novelNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelNumericId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -107,11 +107,11 @@ Future<NovelRow> createProjectNovelUnderProject(
 Future<NovelRow> patchProjectNovelByProjectIds(
   String accessToken,
   String projectId,
-  int novelLegacyId,
+  int novelNumericId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelNumericId',
   );
   final res = await http
       .patch(
@@ -140,10 +140,10 @@ Future<NovelRow> patchProjectNovelByProjectIds(
 Future<void> deleteProjectNovelByProjectIds(
   String accessToken,
   String projectId,
-  int novelLegacyId,
+  int novelNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/novels/$novelNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

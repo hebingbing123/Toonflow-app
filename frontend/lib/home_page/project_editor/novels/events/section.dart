@@ -36,7 +36,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
           Text(
             first == null
                 ? '用显式表单管理事件搜索、创建、更新、删除和批量删除，减少对 legacy probe 按钮的依赖。'
-                : '$summaryLine；首条 #${first.legacyId} ${first.name}。',
+                : '$summaryLine；首条 #${first.numericId} ${first.name}。',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
@@ -124,23 +124,23 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
     );
     final createDetailCtrl = TextEditingController(text: '在这里描述事件。');
     final createChapterIdsCtrl = TextEditingController(
-      text: chapters.take(2).map((e) => e.legacyId).join(','),
+      text: chapters.take(2).map((e) => e.numericId).join(','),
     );
     final selectedEventIdCtrl = TextEditingController(
-      text: firstEvent?.legacyId.toString() ?? '',
+      text: firstEvent?.numericId.toString() ?? '',
     );
     final patchNameCtrl = TextEditingController(text: firstEvent?.name ?? '');
     final patchDetailCtrl = TextEditingController(
       text: firstEvent?.detail ?? '',
     );
     final patchChapterIdsCtrl = TextEditingController(
-      text: _chapterIndexesToLegacyIds(
+      text: _chapterIndexesToNumericIds(
         chapters: chapters,
         indexes: firstEvent?.chapterIndexes ?? const <int>[],
       ).join(','),
     );
     final batchDeleteIdsCtrl = TextEditingController(
-      text: events.take(3).map((e) => e.legacyId).join(','),
+      text: events.take(3).map((e) => e.numericId).join(','),
     );
 
     List<NovelEventRow> previewRows = List<NovelEventRow>.from(events.take(6));
@@ -169,10 +169,10 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
             : '已刷新，共 ${refreshed.length} 条事件。';
         if (selectedEventIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
           final row = refreshed.first;
-          selectedEventIdCtrl.text = row.legacyId.toString();
+          selectedEventIdCtrl.text = row.numericId.toString();
           patchNameCtrl.text = row.name;
           patchDetailCtrl.text = row.detail;
-          patchChapterIdsCtrl.text = _chapterIndexesToLegacyIds(
+          patchChapterIdsCtrl.text = _chapterIndexesToNumericIds(
             chapters: novelsRef[0]?.items ?? const <NovelRow>[],
             indexes: row.chapterIndexes,
           ).join(',');
@@ -180,7 +180,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
         if (batchDeleteIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
           batchDeleteIdsCtrl.text = refreshed
               .take(3)
-              .map((e) => e.legacyId)
+              .map((e) => e.numericId)
               .join(',');
         }
       });
@@ -257,7 +257,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                   (row) => Padding(
                                     padding: const EdgeInsets.only(bottom: 6),
                                     child: Text(
-                                      '#${row.legacyId} · ${row.name} · 章节索引 ${row.chapterIndexes.join('/')}',
+                                      '#${row.numericId} · ${row.name} · 章节索引 ${row.chapterIndexes.join('/')}',
                                       style: Theme.of(
                                         dialogCtx,
                                       ).textTheme.bodySmall,
@@ -295,7 +295,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                       final legacy =
                                           await postLegacyNovelEventsGetEvents(
                                             token,
-                                            p.legacyId,
+                                            p.numericId,
                                             page: 1,
                                             limit: 10,
                                             search: searchCtrl.text.trim(),
@@ -356,19 +356,19 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                         p.id,
                                         name: createNameCtrl.text.trim(),
                                         detail: createDetailCtrl.text.trim(),
-                                        chapterIds: _parseLegacyIdList(
+                                        chapterIds: _parseNumericIdList(
                                           createChapterIdsCtrl.text,
                                         ),
                                       );
                                   await refreshWorkbench(setLocalState);
                                   setLocalState(() {
-                                    final legacyId = (created['id'] as num?)
+                                    final numericId = (created['id'] as num?)
                                         ?.toInt();
-                                    infoLine = legacyId == null
+                                    infoLine = numericId == null
                                         ? '已新增事件。'
-                                        : '已新增事件 #$legacyId。';
-                                    if (legacyId != null) {
-                                      selectedEventIdCtrl.text = legacyId
+                                        : '已新增事件 #$numericId。';
+                                    if (numericId != null) {
+                                      selectedEventIdCtrl.text = numericId
                                           .toString();
                                     }
                                     patchNameCtrl.text = createNameCtrl.text
@@ -434,7 +434,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                         {
                                           'name': patchNameCtrl.text.trim(),
                                           'detail': patchDetailCtrl.text.trim(),
-                                          'chapterIds': _parseLegacyIdList(
+                                          'chapterIds': _parseNumericIdList(
                                             patchChapterIdsCtrl.text,
                                           ),
                                         },
@@ -491,7 +491,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           onPressed: localBusy
                               ? null
                               : () => runAction(() async {
-                                  final ids = _parseLegacyIdList(
+                                  final ids = _parseNumericIdList(
                                     batchDeleteIdsCtrl.text,
                                   );
                                   final message =
@@ -538,7 +538,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
     }
   }
 
-  List<int> _chapterIndexesToLegacyIds({
+  List<int> _chapterIndexesToNumericIds({
     required List<NovelRow> chapters,
     required List<int> indexes,
   }) {
@@ -546,7 +546,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
       return const <int>[];
     }
     final byIndex = <int, int>{
-      for (final chapter in chapters) chapter.chapterIndex: chapter.legacyId,
+      for (final chapter in chapters) chapter.chapterIndex: chapter.numericId,
     };
     return indexes.map((index) => byIndex[index]).whereType<int>().toList();
   }

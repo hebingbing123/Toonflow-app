@@ -4,7 +4,7 @@ part of 'index.dart';
 class ArtStyleRow {
   const ArtStyleRow({
     required this.id,
-    required this.legacyId,
+    required this.numericId,
     required this.name,
     this.fileUrl,
     this.label,
@@ -12,7 +12,7 @@ class ArtStyleRow {
   });
 
   final String id;
-  final int legacyId;
+  final int numericId;
   final String name;
   final String? fileUrl;
   final String? label;
@@ -21,7 +21,7 @@ class ArtStyleRow {
   factory ArtStyleRow.fromJson(Map<String, dynamic> json) {
     return ArtStyleRow(
       id: json['id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       fileUrl: json['file_url'] as String?,
       label: json['label'] as String?,

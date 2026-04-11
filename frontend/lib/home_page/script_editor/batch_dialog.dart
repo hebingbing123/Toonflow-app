@@ -3,16 +3,16 @@ part of '../../home_page.dart';
 class _StoryboardBatchWorkbenchDialog extends StatefulWidget {
   const _StoryboardBatchWorkbenchDialog({
     required this.token,
-    required this.projectLegacyId,
-    required this.scriptLegacyId,
+    required this.projectNumericId,
+    required this.scriptNumericId,
     required this.boardsList,
     required this.onMutationStart,
     required this.onMutationEnd,
   });
 
   final String token;
-  final int projectLegacyId;
-  final int scriptLegacyId;
+  final int projectNumericId;
+  final int scriptNumericId;
   final List<StoryboardRow> boardsList;
   final VoidCallback onMutationStart;
   final VoidCallback onMutationEnd;
@@ -69,9 +69,9 @@ class _StoryboardBatchWorkbenchDialogState
     return values;
   }
 
-  StoryboardRow? _findScriptRow(int legacyId) {
+  StoryboardRow? _findScriptRow(int numericId) {
     for (final row in widget.boardsList) {
-      if (row.legacyId == legacyId) return row;
+      if (row.numericId == numericId) return row;
     }
     return null;
   }
@@ -115,10 +115,10 @@ class _StoryboardBatchWorkbenchDialogState
     try {
       final response = await postProductionGetStoryboardDataV1(
         widget.token,
-        projectId: widget.projectLegacyId,
-        scriptId: widget.scriptLegacyId,
+        projectId: widget.projectNumericId,
+        scriptId: widget.scriptNumericId,
       );
-      final ids = widget.boardsList.map((row) => row.legacyId).toSet();
+      final ids = widget.boardsList.map((row) => row.numericId).toSet();
       final filtered = response.data
           .where((row) => ids.contains(row.id))
           .toList(growable: false);
@@ -126,7 +126,7 @@ class _StoryboardBatchWorkbenchDialogState
         ..._selectedIds.where((id) => ids.contains(id)),
       };
       if (nextSelectedIds.isEmpty && widget.boardsList.isNotEmpty) {
-        nextSelectedIds.add(widget.boardsList.first.legacyId);
+        nextSelectedIds.add(widget.boardsList.first.numericId);
       }
       final nextSingleSelectedId =
           nextSelectedIds.length == 1 ? nextSelectedIds.first : null;
@@ -176,17 +176,17 @@ class _StoryboardBatchWorkbenchDialogState
     final suffix = _promptSuffixCtrl.text.trim();
     final negativePrompt = _negativePromptCtrl.text.trim();
     final items = <BatchGenerateImageItem>[];
-    for (final legacyId in selected) {
-      final scriptRow = _findScriptRow(legacyId);
+    for (final numericId in selected) {
+      final scriptRow = _findScriptRow(numericId);
       final prompt = resolveStoryboardGenerationPrompt(
         scriptStoryboard: scriptRow,
-        productionStoryboard: productionMap[legacyId],
+        productionStoryboard: productionMap[numericId],
       );
       if (prompt == null) continue;
       final combinedPrompt = suffix.isEmpty ? prompt : '$prompt\n$suffix';
       items.add(
         BatchGenerateImageItem(
-          storyboardId: legacyId,
+          storyboardId: numericId,
           prompt: combinedPrompt,
           negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
           model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
@@ -201,8 +201,8 @@ class _StoryboardBatchWorkbenchDialogState
     }
     final response = await postStoryboardBatchGenerateImageV1(
       widget.token,
-      projectId: widget.projectLegacyId,
-      scriptId: widget.scriptLegacyId,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       items: items,
       model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
       resolution: _resolutionCtrl.text.trim().isEmpty
@@ -232,11 +232,11 @@ class _StoryboardBatchWorkbenchDialogState
                 (row) =>
                     resolveStoryboardGenerationPrompt(
                       scriptStoryboard: row,
-                      productionStoryboard: productionMap[row.legacyId],
+                      productionStoryboard: productionMap[row.numericId],
                     ) !=
                     null,
               )
-              .map((row) => row.legacyId),
+              .map((row) => row.numericId),
         );
       _clearSelectionScopedOutputs();
       _statusLine = buildStoryboardBatchWorkbenchFollowUp(
@@ -603,12 +603,12 @@ class _StoryboardBatchWorkbenchDialogState
       itemCount: widget.boardsList.length,
       itemBuilder: (context, index) {
         final row = widget.boardsList[index];
-        final productionRow = productionMap[row.legacyId];
+        final productionRow = productionMap[row.numericId];
         final prompt = resolveStoryboardGenerationPrompt(
           scriptStoryboard: row,
           productionStoryboard: productionRow,
         );
-        final checked = _selectedIds.contains(row.legacyId);
+        final checked = _selectedIds.contains(row.numericId);
         return CheckboxListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
@@ -620,9 +620,9 @@ class _StoryboardBatchWorkbenchDialogState
                     final previousSingleSelectedId =
                         _selectedIds.length == 1 ? _selectedIds.first : null;
                     if (value == true) {
-                      _selectedIds.add(row.legacyId);
+                      _selectedIds.add(row.numericId);
                     } else {
-                      _selectedIds.remove(row.legacyId);
+                      _selectedIds.remove(row.numericId);
                     }
                     final nextSingleSelectedId =
                         _selectedIds.length == 1 ? _selectedIds.first : null;
@@ -631,7 +631,7 @@ class _StoryboardBatchWorkbenchDialogState
                     }
                   });
                 },
-          title: Text('#${row.legacyId}'),
+          title: Text('#${row.numericId}'),
           subtitle: Text(
             [
               _storyboardMetaLine(row, productionRow),

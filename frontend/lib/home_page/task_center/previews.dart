@@ -147,7 +147,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text('${job.kind} · ${job.status}'),
-            subtitle: Text('#${job.legacyTaskId} · ${job.id}'),
+            subtitle: Text('#${job.numericTaskId} · ${job.id}'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onSelectTaskJob(job),
           ),

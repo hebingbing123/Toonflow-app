@@ -215,7 +215,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
     }
   }
 
-  Future<void> _reloadRows({int? preferredLegacyId}) async {
+  Future<void> _reloadRows({int? preferredNumericId}) async {
     setState(() {
       _busy = true;
       _statusLine = '刷新画风列表中…';
@@ -230,13 +230,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
         _statusLine = '已刷新 ${response.total} 条画风。';
       });
       ArtStyleRow? target;
-      if (preferredLegacyId == null) {
+      if (preferredNumericId == null) {
         if (_rows.isNotEmpty) {
           target = _rows.first;
         }
       } else {
         for (final row in _rows) {
-          if (row.legacyId == preferredLegacyId) {
+          if (row.numericId == preferredNumericId) {
             target = row;
             break;
           }
@@ -279,13 +279,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
     try {
       final bytes = await fetchArtStyleCoverByNumericId(
         widget.accessToken,
-        numericId: selected.legacyId,
+        numericId: selected.numericId,
       );
       if (!mounted) return;
       setState(() {
         _coverBytes = bytes;
         _loadingCover = false;
-        _statusLine = '已读取画风 #${selected.legacyId} 封面。';
+        _statusLine = '已读取画风 #${selected.numericId} 封面。';
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
@@ -326,9 +326,9 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
             ? null
             : _fileUrlCtrl.text.trim(),
       );
-      await _reloadRows(preferredLegacyId: created.legacyId);
+      await _reloadRows(preferredNumericId: created.numericId);
       if (!mounted) return;
-      setState(() => _statusLine = '已新建画风 #${created.legacyId}。');
+      setState(() => _statusLine = '已新建画风 #${created.numericId}。');
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -367,12 +367,12 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
     try {
       final updated = await patchArtStyleByNumericId(
         widget.accessToken,
-        selected.legacyId,
+        selected.numericId,
         body,
       );
-      await _reloadRows(preferredLegacyId: updated.legacyId);
+      await _reloadRows(preferredNumericId: updated.numericId);
       if (!mounted) return;
-      setState(() => _statusLine = '已更新画风 #${updated.legacyId}。');
+      setState(() => _statusLine = '已更新画风 #${updated.numericId}。');
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -399,10 +399,10 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       _statusLine = '删除画风中…';
     });
     try {
-      await deleteArtStyleByNumericId(widget.accessToken, selected.legacyId);
+      await deleteArtStyleByNumericId(widget.accessToken, selected.numericId);
       await _reloadRows();
       if (!mounted) return;
-      setState(() => _statusLine = '已删除画风 #${selected.legacyId}。');
+      setState(() => _statusLine = '已删除画风 #${selected.numericId}。');
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -509,14 +509,14 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
               const SizedBox(height: 12),
               if (_rows.isNotEmpty)
                 DropdownButtonFormField<int>(
-                  initialValue: _selected?.legacyId,
+                  initialValue: _selected?.numericId,
                   decoration: const InputDecoration(labelText: '当前画风'),
                   items: _rows
                       .map(
                         (row) => DropdownMenuItem<int>(
-                          value: row.legacyId,
+                          value: row.numericId,
                           child: Text(
-                            '#${row.legacyId} ${row.name}',
+                            '#${row.numericId} ${row.name}',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -527,7 +527,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
                       : (value) {
                           if (value == null) return;
                           final row = _rows.firstWhere(
-                            (element) => element.legacyId == value,
+                            (element) => element.numericId == value,
                           );
                           _applySelection(row);
                         },

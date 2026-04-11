@@ -9,15 +9,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ListAssetsResponse?> assetsRef,
     required List<ListAssetsResponse?> assetsForScriptRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
     final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
-    var selectedAssetLegacyId = chooseInitialAssetLegacyId(visibleAssets);
-    var selectedScriptLegacyId = scriptList.isEmpty
+    var selectedAssetNumericId = chooseInitialAssetNumericId(visibleAssets);
+    var selectedScriptNumericId = scriptList.isEmpty
         ? null
-        : scriptList.first.legacyId;
+        : scriptList.first.numericId;
     String statusLine = visibleAssets.isEmpty
         ? '当前项目还没有资产，可直接在这里创建。'
         : summarizeProjectAssetRows(visibleAssets);
@@ -27,9 +27,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
       await reloadAssetsAndStats();
       final refreshed = assetsRef[0]?.items ?? const <AssetRow>[];
       setLocalState(() {
-        selectedAssetLegacyId = chooseInitialAssetLegacyId(
+        selectedAssetNumericId = chooseInitialAssetNumericId(
           refreshed,
-          preferredLegacyId: selectedAssetLegacyId,
+          preferredNumericId: selectedAssetNumericId,
         );
         statusLine = refreshed.isEmpty
             ? '当前项目还没有资产，可直接在这里创建。'
@@ -74,15 +74,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
             builder: (dialogCtx, setLocalState) {
               final assets = assetsRef[0]?.items ?? const <AssetRow>[];
               AssetRow? selectedAsset;
-              if (selectedAssetLegacyId != null) {
+              if (selectedAssetNumericId != null) {
                 for (final row in assets) {
-                  if (row.legacyId == selectedAssetLegacyId) {
+                  if (row.numericId == selectedAssetNumericId) {
                     selectedAsset = row;
                     break;
                   }
                 }
               }
-              final scopedAssets = assetsFilterScriptLegacyId[0] == null
+              final scopedAssets = assetsFilterScriptNumericId[0] == null
                   ? assets
                   : (assetsForScriptRef[0]?.items ?? const <AssetRow>[]);
               return AlertDialog(
@@ -120,7 +120,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                               const SizedBox(height: 6),
                               Text(
                                 summarizeScriptScopedAssets(
-                                  assetsFilterScriptLegacyId[0],
+                                  assetsFilterScriptNumericId[0],
                                   scopedAssets,
                                 ),
                                 style: Theme.of(dialogCtx).textTheme.bodySmall,
@@ -128,7 +128,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                               if (selectedAsset != null) ...[
                                 const SizedBox(height: 6),
                                 Text(
-                                  '当前焦点资产：#${selectedAsset.legacyId} ${selectedAsset.name} · ${selectedAsset.assetType}',
+                                  '当前焦点资产：#${selectedAsset.numericId} ${selectedAsset.name} · ${selectedAsset.assetType}',
                                   style: Theme.of(
                                     dialogCtx,
                                   ).textTheme.bodySmall,
@@ -139,7 +139,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<int?>(
-                          initialValue: selectedAssetLegacyId,
+                          initialValue: selectedAssetNumericId,
                           decoration: const InputDecoration(
                             labelText: '当前焦点资产',
                             helperText: '用于快速查看当前工作焦点；具体编辑在下方动作中完成。',
@@ -151,9 +151,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                             ),
                             ...assets.map(
                               (asset) => DropdownMenuItem<int?>(
-                                value: asset.legacyId,
+                                value: asset.numericId,
                                 child: Text(
-                                  '#${asset.legacyId} ${asset.name}',
+                                  '#${asset.numericId} ${asset.name}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -163,13 +163,13 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                               ? null
                               : (value) {
                                   setLocalState(
-                                    () => selectedAssetLegacyId = value,
+                                    () => selectedAssetNumericId = value,
                                   );
                                 },
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<int?>(
-                          initialValue: selectedScriptLegacyId,
+                          initialValue: selectedScriptNumericId,
                           decoration: const InputDecoration(
                             labelText: '当前焦点剧本',
                             helperText: '用于剧本-资产关联相关动作。',
@@ -181,9 +181,9 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                             ),
                             ...scriptList.map(
                               (script) => DropdownMenuItem<int?>(
-                                value: script.legacyId,
+                                value: script.numericId,
                                 child: Text(
-                                  '#${script.legacyId} ${script.name ?? ""}',
+                                  '#${script.numericId} ${script.name ?? ""}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -193,7 +193,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                               ? null
                               : (value) {
                                   setLocalState(
-                                    () => selectedScriptLegacyId = value,
+                                    () => selectedScriptNumericId = value,
                                   );
                                 },
                         ),
@@ -271,8 +271,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         scriptList: scriptList,
                                         assetsRef: assetsRef,
                                         assetsForScriptRef: assetsForScriptRef,
-                                        assetsFilterScriptLegacyId:
-                                            assetsFilterScriptLegacyId,
+                                        assetsFilterScriptNumericId:
+                                            assetsFilterScriptNumericId,
                                         assetsBusy: assetsBusy,
                                       ),
                                     ),
@@ -291,7 +291,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                       assetsBusy[0] ||
                                       assets.isEmpty ||
                                       scriptList.isEmpty ||
-                                      selectedScriptLegacyId == null
+                                      selectedScriptNumericId == null
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -316,7 +316,7 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                       assetsBusy[0] ||
                                       assets.isEmpty ||
                                       scriptList.isEmpty ||
-                                      selectedScriptLegacyId == null
+                                      selectedScriptNumericId == null
                                   ? null
                                   : () => runAction(
                                       setLocalState,
@@ -403,8 +403,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         assetsBusy: assetsBusy,
                                         reloadAssetsAndStats:
                                             reloadAssetsAndStats,
-                                        preferredAssetLegacyId:
-                                            selectedAssetLegacyId,
+                                        preferredAssetNumericId:
+                                            selectedAssetNumericId,
                                       ),
                                     ),
                               child: const Text('资产图片工作台'),
@@ -423,13 +423,13 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         scriptList: scriptList,
                                         assetsRef: assetsRef,
                                         assetsForScriptRef: assetsForScriptRef,
-                                        assetsFilterScriptLegacyId:
-                                            assetsFilterScriptLegacyId,
+                                        assetsFilterScriptNumericId:
+                                            assetsFilterScriptNumericId,
                                         assetsBusy: assetsBusy,
                                         reloadAssetsAndStats:
                                             reloadAssetsAndStats,
-                                        preferredAssetLegacyId:
-                                            selectedAssetLegacyId,
+                                        preferredAssetNumericId:
+                                            selectedAssetNumericId,
                                       ),
                                     ),
                               child: const Text('资产出图工作台'),
@@ -446,8 +446,8 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                                         token: token,
                                         p: p,
                                         assetsBusy: assetsBusy,
-                                        preferredAssetLegacyId:
-                                            selectedAssetLegacyId,
+                                        preferredAssetNumericId:
+                                            selectedAssetNumericId,
                                       ),
                                     ),
                               child: const Text('资产历史图工作台'),

@@ -47,7 +47,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                               await fetchCornerScapeHistoryImagePreviewBytes(
                                 token,
                                 p.id,
-                                a.legacyId,
+                                a.numericId,
                                 a.historyImages.first,
                               );
                         }
@@ -118,14 +118,14 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final row = await createProjectAssetImageForProject(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                           filePath: 'probe/hist_$ts.png',
                         );
                         if (!ctx.mounted) return;
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'POST …/assets/${first.legacyId}/images：${row.id.substring(0, 8)}…',
+                              'POST …/assets/${first.numericId}/images：${row.id.substring(0, 8)}…',
                             ),
                           ),
                         );
@@ -158,7 +158,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final list = await fetchProjectAssetImagesByProjectIds(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                         );
                         if (list.items.isEmpty) {
                           if (!ctx.mounted) return;
@@ -175,7 +175,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final one = await fetchProjectAssetImageByProjectIds(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                           img.id,
                         );
                         var fileSuffix = '';
@@ -184,7 +184,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                               await fetchProjectAssetImageFileByProjectIds(
                                 token,
                                 p.id,
-                                first.legacyId,
+                                first.numericId,
                                 one.id,
                               );
                           fileSuffix = ' …/file ${bytes.length}B';
@@ -232,7 +232,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final r = await postLegacyAssetsGetImage(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                         );
                         if (!ctx.mounted) return;
                         ScaffoldMessenger.of(ctx).showSnackBar(
@@ -432,7 +432,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final rows = await postLegacyAssetsPollingImageAssets(
                           token,
                           p.id,
-                          <int>[first.legacyId],
+                          <int>[first.numericId],
                         );
                         if (!ctx.mounted) return;
                         final one = rows.isEmpty ? null : rows.first;
@@ -476,7 +476,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final rows = await postLegacyAssetsPollingPromptAssets(
                           token,
                           p.id,
-                          <int>[first.legacyId],
+                          <int>[first.numericId],
                         );
                         if (!ctx.mounted) return;
                         final one = rows.isEmpty ? null : rows.first;
@@ -521,20 +521,20 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                         final row = await createProjectAssetImageForProject(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                           filePath: 'probe/patch_del_$ts.png',
                         );
                         final patched = await patchProjectAssetImageByProjectIds(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                           row.id,
                           {'state': '已完成', 'sort_index': row.sortIndex + 1},
                         );
                         await deleteProjectAssetImageByProjectIds(
                           token,
                           p.id,
-                          first.legacyId,
+                          first.numericId,
                           row.id,
                         );
                         if (!ctx.mounted) return;

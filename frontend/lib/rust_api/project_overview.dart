@@ -3,7 +3,7 @@ part of 'index.dart';
 class ProjectRow {
   const ProjectRow({
     required this.id,
-    required this.legacyId,
+    required this.numericId,
     this.name,
     this.intro,
     this.projectType,
@@ -18,7 +18,7 @@ class ProjectRow {
   });
 
   final String id;
-  final int legacyId;
+  final int numericId;
   final String? name;
   final String? intro;
   final String? projectType;
@@ -34,7 +34,7 @@ class ProjectRow {
   factory ProjectRow.fromJson(Map<String, dynamic> json) {
     return ProjectRow(
       id: json['id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       intro: json['intro'] as String?,
       projectType: json['project_type'] as String?,
@@ -55,15 +55,15 @@ class ProjectRow {
 /// OpenAPI **`BatchGenerateAssetsImageResponse`**.
 
 class ScriptBrief {
-  const ScriptBrief({required this.legacyId, this.name, this.extractState});
+  const ScriptBrief({required this.numericId, this.name, this.extractState});
 
-  final int legacyId;
+  final int numericId;
   final String? name;
   final int? extractState;
 
   factory ScriptBrief.fromJson(Map<String, dynamic> json) {
     return ScriptBrief(
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       extractState: json['extract_state'] == null
           ? null

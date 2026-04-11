@@ -3,8 +3,8 @@ part of '../../home_page.dart';
 extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
   Future<void> _openScriptEditImageWorkbenchDialog({
     required String token,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
   }) async {
     final uploadCtrl = TextEditingController();
     final flowIdCtrl = TextEditingController();
@@ -155,8 +155,8 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                                       final response =
                                           await postProductionEditImageUploadImageV1(
                                             token,
-                                            projectId: projectLegacyId,
-                                            scriptId: scriptLegacyId,
+                                            projectId: projectNumericId,
+                                            scriptId: scriptNumericId,
                                             base64Data: base64Data,
                                           );
                                       setState(() {

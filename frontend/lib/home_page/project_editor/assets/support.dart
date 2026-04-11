@@ -124,32 +124,32 @@ AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({
   );
 }
 
-List<int> collectVisibleAssetLegacyIds(Iterable<AssetRow> assets) {
+List<int> collectVisibleAssetNumericIds(Iterable<AssetRow> assets) {
   final ids = SplayTreeSet<int>();
   for (final asset in assets) {
-    if (asset.legacyId > 0) {
-      ids.add(asset.legacyId);
+    if (asset.numericId > 0) {
+      ids.add(asset.numericId);
     }
   }
   return ids.toList(growable: false);
 }
 
-int? chooseInitialAssetLegacyId(
+int? chooseInitialAssetNumericId(
   Iterable<AssetRow> assets, {
-  int? preferredLegacyId,
+  int? preferredNumericId,
 }) {
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
     return null;
   }
-  if (preferredLegacyId != null) {
+  if (preferredNumericId != null) {
     for (final asset in rows) {
-      if (asset.legacyId == preferredLegacyId) {
-        return preferredLegacyId;
+      if (asset.numericId == preferredNumericId) {
+        return preferredNumericId;
       }
     }
   }
-  return rows.first.legacyId;
+  return rows.first.numericId;
 }
 
 String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
@@ -167,23 +167,23 @@ String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
       .join(' · ');
   final sampleLine = rows
       .take(3)
-      .map((asset) => '#${asset.legacyId} ${asset.name}')
+      .map((asset) => '#${asset.numericId} ${asset.name}')
       .join(', ');
   return '资产 ${rows.length} 条 · $typeLine · 示例：$sampleLine';
 }
 
 String summarizeScriptScopedAssets(
-  int? scriptLegacyId,
+  int? scriptNumericId,
   Iterable<AssetRow> assets,
 ) {
-  if (scriptLegacyId == null) {
+  if (scriptNumericId == null) {
     return '当前按项目全量资产管理。';
   }
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
-    return '当前剧本 #$scriptLegacyId 下没有关联资产。';
+    return '当前剧本 #$scriptNumericId 下没有关联资产。';
   }
-  return '当前剧本 #$scriptLegacyId 下关联 ${rows.length} 条资产。';
+  return '当前剧本 #$scriptNumericId 下关联 ${rows.length} 条资产。';
 }
 
 List<String>? parseCornerScapeTypesInput(String raw) {
@@ -202,14 +202,14 @@ List<String>? parseCornerScapeTypesInput(String raw) {
 
 String? chooseInitialCornerScapeHistoryImageId(
   Iterable<CornerScapeAssetItem> assets, {
-  required int? selectedAssetLegacyId,
+  required int? selectedAssetNumericId,
   String? preferredHistoryImageId,
 }) {
-  if (selectedAssetLegacyId == null) {
+  if (selectedAssetNumericId == null) {
     return null;
   }
   for (final asset in assets) {
-    if (asset.legacyId != selectedAssetLegacyId) {
+    if (asset.numericId != selectedAssetNumericId) {
       continue;
     }
     if (asset.historyImages.isEmpty) {
@@ -230,7 +230,7 @@ String? chooseInitialCornerScapeHistoryImageId(
 String summarizeCornerScapeSelection(
   Iterable<CornerScapeAssetItem> assets, {
   List<String>? activeTypes,
-  int? selectedAssetLegacyId,
+  int? selectedAssetNumericId,
   String? selectedHistoryImageId,
 }) {
   final rows = assets.toList(growable: false);
@@ -245,9 +245,9 @@ String summarizeCornerScapeSelection(
     (sum, asset) => sum + asset.historyImages.length,
   );
   CornerScapeAssetItem? selectedAsset;
-  if (selectedAssetLegacyId != null) {
+  if (selectedAssetNumericId != null) {
     for (final asset in rows) {
-      if (asset.legacyId == selectedAssetLegacyId) {
+      if (asset.numericId == selectedAssetNumericId) {
         selectedAsset = asset;
         break;
       }
@@ -266,8 +266,8 @@ String summarizeCornerScapeSelection(
     }
   }
   final focusLine = selectedImage == null
-      ? '当前焦点 #${selectedAsset.legacyId} ${selectedAsset.name}，暂无选中历史图'
-      : '当前焦点 #${selectedAsset.legacyId} ${selectedAsset.name} · 图 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}';
+      ? '当前焦点 #${selectedAsset.numericId} ${selectedAsset.name}，暂无选中历史图'
+      : '当前焦点 #${selectedAsset.numericId} ${selectedAsset.name} · 图 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}';
   return '历史图过滤：$typeLine；已加载 ${rows.length} 条资产、$totalHistories 张历史图；$focusLine。';
 }
 
@@ -291,10 +291,10 @@ String? chooseInitialAssetImageId(
       return image.id;
     }
   }
-  final coverLegacyImageId = response.coverLegacyImageId;
-  if (coverLegacyImageId != null) {
+  final coverNumericImageId = response.coverNumericImageId;
+  if (coverNumericImageId != null) {
     for (final image in items) {
-      if (image.legacyImageId == coverLegacyImageId) {
+      if (image.numericImageId == coverNumericImageId) {
         return image.id;
       }
     }
@@ -319,8 +319,8 @@ String summarizeAssetImageSelection(
     }
   }
   selectedImage ??= response.items.first;
-  final coverLine = response.coverLegacyImageId == null
+  final coverLine = response.coverNumericImageId == null
       ? '当前未记录封面 legacy image'
-      : '封面 legacy image #${response.coverLegacyImageId}';
+      : '封面 legacy image #${response.coverNumericImageId}';
   return '已加载 ${response.items.length} 张图片；$coverLine；当前图片 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}。';
 }

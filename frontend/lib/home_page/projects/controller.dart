@@ -38,7 +38,7 @@ extension _HomePageProjectsController on _HomePageState {
       );
       return;
     }
-    final legacyId = projects.first.legacyId;
+    final numericId = projects.first.numericId;
     setState(() {
       _loadingAgentMemory = true;
       _error = null;
@@ -47,7 +47,7 @@ extension _HomePageProjectsController on _HomePageState {
     try {
       final rows = await queryAgentMemory(
         token,
-        projectId: legacyId,
+        projectId: numericId,
         agentType: 'scriptAgent',
       );
       if (!mounted) return;
@@ -55,7 +55,7 @@ extension _HomePageProjectsController on _HomePageState {
       try {
         final id = await appendAgentMemory(
           token,
-          projectId: legacyId,
+          projectId: numericId,
           agentType: 'scriptAgent',
           content: '[flutter probe] ${DateTime.now().toIso8601String()}',
         );
@@ -66,7 +66,7 @@ extension _HomePageProjectsController on _HomePageState {
       }
       setState(() {
         _agentMemoryBody =
-            '${rows.length} message(s) for project $legacyId$appendBit';
+            '${rows.length} message(s) for project $numericId$appendBit';
         _loadingAgentMemory = false;
       });
     } on RustApiException catch (e) {
@@ -158,19 +158,19 @@ extension _HomePageProjectsController on _HomePageState {
       final r = await fetchArtStyles(token);
       if (!mounted) return;
       var line =
-          'total=${r.total} · ${r.items.take(5).map((s) => '#${s.legacyId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
+          'total=${r.total} · ${r.items.take(5).map((s) => '#${s.numericId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
       try {
         final probeName =
             '[flutter probe art-style] ${DateTime.now().toIso8601String()}';
         final created = await createArtStyle(token, name: probeName);
-        await fetchArtStyleByNumericId(token, numericId: created.legacyId);
+        await fetchArtStyleByNumericId(token, numericId: created.numericId);
         await patchArtStyleByNumericId(
           token,
-          created.legacyId,
+          created.numericId,
           <String, dynamic>{'label': 'probe'},
         );
-        await deleteArtStyleByNumericId(token, created.legacyId);
-        line += ' · create→get→patch→del ok (#${created.legacyId})';
+        await deleteArtStyleByNumericId(token, created.numericId);
+        line += ' · create→get→patch→del ok (#${created.numericId})';
       } on RustApiException catch (e) {
         line += ' · crud -> ${e.statusCode}';
       }

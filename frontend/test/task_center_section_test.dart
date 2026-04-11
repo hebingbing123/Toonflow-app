@@ -18,7 +18,7 @@ void main() {
             loadingTaskDetailsLegacy: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: TextEditingController(),
-            taskProjects: const [LegacyTasksProjectItem(id: 9, name: '古风短剧')],
+            taskProjects: const [LegacyTasksProjectItem(numericId: 9, name: '古风短剧')],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
@@ -26,7 +26,7 @@ void main() {
             taskDetailUuidLine: null,
             taskApiJobs: const [
               JobRow(
-                legacyTaskId: 101,
+                numericTaskId: 101,
                 id: 'job-101',
                 ownerUserId: 'user-1',
                 kind: 'asset.generate.image',
@@ -73,7 +73,7 @@ void main() {
             loadingTaskDetailsLegacy: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: detailController,
-            taskProjects: const [LegacyTasksProjectItem(id: 9, name: '古风短剧')],
+            taskProjects: const [LegacyTasksProjectItem(numericId: 9, name: '古风短剧')],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
@@ -83,7 +83,7 @@ void main() {
                 '#101 · asset.generate.image · queued · uuid=job-101',
             taskApiJobs: const [
               JobRow(
-                legacyTaskId: 101,
+                numericTaskId: 101,
                 id: 'job-101',
                 ownerUserId: 'user-1',
                 kind: 'asset.generate.image',

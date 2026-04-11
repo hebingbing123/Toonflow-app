@@ -30,7 +30,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 try {
                   final pg = await postLegacyNovelEventsGetEvents(
                     token,
-                    p.legacyId,
+                    p.numericId,
                     page: 1,
                     limit: 10,
                   );
@@ -40,7 +40,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                     SnackBar(
                       content: Text(
                         first != null
-                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.legacyId} ${first.eventName}'
+                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.numericId} ${first.eventName}'
                             : 'POST …/novels/events/get-events：total=${pg.total}',
                       ),
                     ),
@@ -73,7 +73,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 try {
                   final pg = await postLegacyNovelEventsGetEvents(
                     token,
-                    p.legacyId,
+                    p.numericId,
                     page: 1,
                     limit: 10,
                   );
@@ -83,7 +83,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                     SnackBar(
                       content: Text(
                         first != null
-                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.legacyId} ${first.eventName}'
+                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.numericId} ${first.eventName}'
                             : 'POST …/novels/events/get-events：total=${pg.total}',
                       ),
                     ),

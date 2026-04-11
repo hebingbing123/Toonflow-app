@@ -71,7 +71,7 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
 }
 
 /// `GET /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
-Future<ScriptRow> fetchScriptByProjectAndLegacyId(
+Future<ScriptRow> fetchScriptByProjectAndNumericId(
   String accessToken,
   String projectId,
   int scriptNumericId,
@@ -93,7 +93,7 @@ Future<ScriptRow> fetchScriptByProjectAndLegacyId(
 }
 
 /// `PATCH /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
-Future<ScriptRow> updateScriptByProjectAndLegacyId(
+Future<ScriptRow> updateScriptByProjectAndNumericId(
   String accessToken,
   String projectId,
   int scriptNumericId,
@@ -126,7 +126,7 @@ Future<ScriptRow> updateScriptByProjectAndLegacyId(
 }
 
 /// `DELETE /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
-Future<void> deleteScriptByProjectAndLegacyId(
+Future<void> deleteScriptByProjectAndNumericId(
   String accessToken,
   String projectId,
   int scriptNumericId,

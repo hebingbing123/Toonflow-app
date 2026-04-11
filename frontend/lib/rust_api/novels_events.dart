@@ -84,11 +84,11 @@ Future<Map<String, dynamic>> createProjectNovelEventUnderProject(
 Future<String> patchProjectNovelEventByProjectIds(
   String accessToken,
   String projectId,
-  int eventLegacyId,
+  int eventNumericId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/$eventLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/$eventNumericId',
   );
   final res = await http
       .patch(
@@ -117,10 +117,10 @@ Future<String> patchProjectNovelEventByProjectIds(
 Future<String> deleteProjectNovelEventByProjectIds(
   String accessToken,
   String projectId,
-  int eventLegacyId,
+  int eventNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/$eventLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/$eventNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -142,7 +142,7 @@ Future<String> deleteProjectNovelEventByProjectIds(
 Future<String> postProjectNovelEventsBatchDeleteByProjectId(
   String accessToken,
   String projectId,
-  List<int> legacyIds,
+  List<int> numericIds,
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/batch-delete',
@@ -154,7 +154,7 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'ids': legacyIds}),
+        body: jsonEncode({'ids': numericIds}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
@@ -173,13 +173,13 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
 /// Compat: maps **`GET …/projects/{uuid}/novel-events`** to legacy **`{ list, total }`**.
 Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
   String accessToken,
-  int projectLegacyId, {
+  int projectNumericId, {
   required int page,
   required int limit,
   String? search,
 }) async {
   final projectUuid =
-      await _projectIdForLegacyId(accessToken, projectLegacyId);
+      await _projectIdForNumericId(accessToken, projectNumericId);
   final rows = await fetchProjectNovelEventsByProjectId(
     accessToken,
     projectUuid,
@@ -190,7 +190,7 @@ Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
   final list = rows.items
       .map(
         (e) => LegacyNovelEventRow(
-          legacyId: e.legacyId,
+          numericId: e.numericId,
           eventName: e.name,
           detail: e.detail.isEmpty ? null : e.detail,
           createTime: e.createTimeMs ?? 0,
@@ -204,14 +204,14 @@ Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
 /// Compat: **`POST …/projects/{uuid}/novel-events/batch-delete`** by event legacy ids.
 Future<String> postLegacyNovelEventsBatchDelete(
   String accessToken,
-  int projectLegacyId,
-  List<int> legacyIds,
+  int projectNumericId,
+  List<int> numericIds,
 ) async {
   final projectUuid =
-      await _projectIdForLegacyId(accessToken, projectLegacyId);
+      await _projectIdForNumericId(accessToken, projectNumericId);
   return postProjectNovelEventsBatchDeleteByProjectId(
     accessToken,
     projectUuid,
-    legacyIds,
+    numericIds,
   );
 }

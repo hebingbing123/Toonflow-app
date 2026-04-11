@@ -277,7 +277,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
 
     final cancelGenerate = await postAssetsGenerateCancelGenerateV1(
       token,
-      legacyImageId: 1,
+      numericImageId: 1,
     );
     _expectProbeStatus(
       label: 'POST assets-generate/cancel-generate',

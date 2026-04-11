@@ -76,7 +76,7 @@ extension _HomePageTaskCenterController on _HomePageState {
     });
     try {
       final projects = _taskProjects ?? await postTasksGetProject(token);
-      final projectId = projects.isEmpty ? null : projects.first.id;
+      final projectId = projects.isEmpty ? null : projects.first.numericId;
       final rows = await postTasksGetTaskApi(
         token,
         page: 1,
@@ -127,12 +127,12 @@ extension _HomePageTaskCenterController on _HomePageState {
       if (target == null) {
         throw StateError('no task rows available yet; run get-task-api first');
       }
-      final row = await postTasksTaskDetails(token, target.legacyTaskId);
+      final row = await postTasksTaskDetails(token, target.numericTaskId);
       if (!mounted) return;
       setState(() {
         _taskApiJobs = jobs;
         _taskDetailLegacyLine =
-            'taskId=${row.legacyTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
+            'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
         _loadingTaskDetailsLegacy = false;
       });
     } on RustApiException catch (e) {

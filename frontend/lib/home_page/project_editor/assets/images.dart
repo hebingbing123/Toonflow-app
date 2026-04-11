@@ -9,7 +9,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
     required List<ListAssetsResponse?> assetsRef,
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
-    int? preferredAssetLegacyId,
+    int? preferredAssetNumericId,
   }) async {
     final assets = assetsRef[0]?.items ?? const <AssetRow>[];
     if (assets.isEmpty) {
@@ -18,9 +18,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先创建资产再管理图片')));
       return;
     }
-    var selectedAssetLegacyId = chooseInitialAssetLegacyId(
+    var selectedAssetNumericId = chooseInitialAssetNumericId(
       assets,
-      preferredLegacyId: preferredAssetLegacyId,
+      preferredNumericId: preferredAssetNumericId,
     )!;
     String? selectedImageId;
     ListAssetImagesResponse? imagesResponse;
@@ -99,7 +99,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         final bytes = await fetchProjectAssetImageFileByProjectIds(
           token,
           p.id,
-          selectedAssetLegacyId,
+          selectedAssetNumericId,
           image.id,
         );
         setState(() => previewBytes = bytes);
@@ -138,7 +138,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         final response = await fetchProjectAssetImagesByProjectIds(
           token,
           p.id,
-          selectedAssetLegacyId,
+          selectedAssetNumericId,
         );
         final nextSelectedImageId = chooseInitialAssetImageId(
           response,
@@ -209,7 +209,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         await createProjectAssetImageForProject(
           token,
           p.id,
-          selectedAssetLegacyId,
+          selectedAssetNumericId,
           filePath: filePath.isEmpty ? null : filePath,
           state: state.isEmpty ? null : state,
           sortIndex: sort,
@@ -278,7 +278,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         await patchProjectAssetImageByProjectIds(
           token,
           p.id,
-          selectedAssetLegacyId,
+          selectedAssetNumericId,
           image.id,
           body,
         );
@@ -324,7 +324,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         await deleteProjectAssetImageByProjectIds(
           token,
           p.id,
-          selectedAssetLegacyId,
+          selectedAssetNumericId,
           image.id,
         );
         await reloadImages(setState);
@@ -408,14 +408,14 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<int>(
-                        initialValue: selectedAssetLegacyId,
+                        initialValue: selectedAssetNumericId,
                         decoration: const InputDecoration(labelText: '目标资产'),
                         items: assets
                             .map(
                               (asset) => DropdownMenuItem<int>(
-                                value: asset.legacyId,
+                                value: asset.numericId,
                                 child: Text(
-                                  '#${asset.legacyId} ${asset.name}',
+                                  '#${asset.numericId} ${asset.name}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -424,7 +424,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                         onChanged: (value) async {
                           if (value == null) return;
                           setState(() {
-                            selectedAssetLegacyId = value;
+                            selectedAssetNumericId = value;
                             imagesResponse = null;
                             selectedImageId = null;
                             previewBytes = null;

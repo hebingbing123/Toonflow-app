@@ -4,8 +4,8 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
   Future<void> _openStoryboardBatchWorkbenchDialog({
     required BuildContext ctx,
     required String token,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required StateSetter setBoardsState,
     required List<bool> actionBusy,
@@ -15,8 +15,8 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
       builder: (dialogCtx) {
         return _StoryboardBatchWorkbenchDialog(
           token: token,
-          projectLegacyId: projectLegacyId,
-          scriptLegacyId: scriptLegacyId,
+          projectNumericId: projectNumericId,
+          scriptNumericId: scriptNumericId,
           boardsList: boardsList,
           onMutationStart: () => setBoardsState(() => actionBusy[0] = true),
           onMutationEnd: () {

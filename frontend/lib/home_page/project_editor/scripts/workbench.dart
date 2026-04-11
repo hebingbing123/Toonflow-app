@@ -14,8 +14,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
   }) async {
     final filterCtrl = TextEditingController();
     final selectedIdsCtrl = TextEditingController(
-      text: encodeLegacyIdSelection(
-        scriptList.map((script) => script.legacyId),
+      text: encodeNumericIdSelection(
+        scriptList.map((script) => script.numericId),
       ),
     );
     final groupSizeCtrl = TextEditingController(text: '3');
@@ -42,8 +42,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
             ? '刷新完成，当前没有剧本。'
             : '刷新完成，共 ${scriptList.length} 条剧本。';
         if (previewRows.isEmpty) {
-          selectedIdsCtrl.text = encodeLegacyIdSelection(
-            scriptList.map((script) => script.legacyId),
+          selectedIdsCtrl.text = encodeNumericIdSelection(
+            scriptList.map((script) => script.numericId),
           );
         }
       });
@@ -82,9 +82,9 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
               }
 
               final previewOrLocalIds = previewRows.isNotEmpty
-                  ? previewRows.map((row) => row.legacyId)
-                  : scriptList.map((script) => script.legacyId);
-              final selectedIds = parseLegacyIdSelection(selectedIdsCtrl.text);
+                  ? previewRows.map((row) => row.numericId)
+                  : scriptList.map((script) => script.numericId);
+              final selectedIds = parseNumericIdSelection(selectedIdsCtrl.text);
               final diagnosis = diagnoseScriptBatchWorkbench(
                 selectedIds: selectedIds,
                 scripts: scriptList,
@@ -105,8 +105,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                       infoLine = rows.isEmpty
                           ? '上下文读取完成，但没有匹配剧本。'
                           : '已读取 ${rows.length} 条剧本上下文。';
-                      selectedIdsCtrl.text = encodeLegacyIdSelection(
-                        rows.map((row) => row.legacyId),
+                      selectedIdsCtrl.text = encodeNumericIdSelection(
+                        rows.map((row) => row.numericId),
                       );
                     });
                   };
@@ -138,7 +138,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                     .take(3)
                                     .map(
                                       (row) =>
-                                          '#${row.legacyId}:${row.extractState ?? 0}',
+                                          '#${row.numericId}:${row.extractState ?? 0}',
                                     )
                                     .join(' · ');
                           final nextDiagnosis = diagnoseScriptBatchWorkbench(
@@ -168,7 +168,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                           );
                           final accepted = await startScriptAssetExtract(
                             token,
-                            projectNumericId: p.legacyId,
+                            projectNumericId: p.numericId,
                             scriptNumericIds: selectedIds,
                             groupSize: groupSize,
                           );
@@ -275,8 +275,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                             ? '上下文读取完成，但没有匹配剧本。'
                                             : '已读取 ${rows.length} 条剧本上下文。';
                                         selectedIdsCtrl.text =
-                                            encodeLegacyIdSelection(
-                                              rows.map((row) => row.legacyId),
+                                            encodeNumericIdSelection(
+                                              rows.map((row) => row.numericId),
                                             );
                                       });
                                     }),
@@ -288,7 +288,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                   : () {
                                       setLocalState(() {
                                         selectedIdsCtrl.text =
-                                            encodeLegacyIdSelection(
+                                            encodeNumericIdSelection(
                                               previewOrLocalIds,
                                             );
                                       });
@@ -376,7 +376,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                               onPressed: localBusy
                                   ? null
                                   : () => runAction(() async {
-                                      final selected = parseLegacyIdSelection(
+                                      final selected = parseNumericIdSelection(
                                         selectedIdsCtrl.text,
                                       );
                                       if (selected.isEmpty) {
@@ -408,7 +408,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                               onPressed: localBusy
                                   ? null
                                   : () => runAction(() async {
-                                      final selected = parseLegacyIdSelection(
+                                      final selected = parseNumericIdSelection(
                                         selectedIdsCtrl.text,
                                       );
                                       if (selected.isEmpty) {
@@ -437,7 +437,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                                 .take(3)
                                                 .map(
                                                   (row) =>
-                                                      '#${row.legacyId}:${row.extractState ?? 0}',
+                                                      '#${row.numericId}:${row.extractState ?? 0}',
                                                 )
                                                 .join(' · ');
                                       setLocalState(() {
@@ -462,7 +462,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                               onPressed: localBusy
                                   ? null
                                   : () => runAction(() async {
-                                      final selected = parseLegacyIdSelection(
+                                      final selected = parseNumericIdSelection(
                                         selectedIdsCtrl.text,
                                       );
                                       if (selected.isEmpty) {
@@ -474,7 +474,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                       final accepted =
                                           await startScriptAssetExtract(
                                             token,
-                                            projectNumericId: p.legacyId,
+                                            projectNumericId: p.numericId,
                                             scriptNumericIds: selected,
                                             groupSize: groupSize,
                                           );
@@ -573,7 +573,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                   scriptList.addAll(
                                     created.scripts.map(
                                       (script) => ScriptBrief(
-                                        legacyId: script.legacyId,
+                                        numericId: script.numericId,
                                         name: script.name,
                                         extractState: script.extractState,
                                       ),
@@ -588,15 +588,15 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                   } catch (_) {}
                                   setLocalState(() {
                                     selectedIdsCtrl.text =
-                                        encodeLegacyIdSelection(
+                                        encodeNumericIdSelection(
                                           scriptList.map(
-                                            (script) => script.legacyId,
+                                            (script) => script.numericId,
                                           ),
                                         );
                                     final nextDiagnosis =
                                         diagnoseScriptBatchWorkbench(
                                           selectedIds: scriptList.map(
-                                            (script) => script.legacyId,
+                                            (script) => script.numericId,
                                           ),
                                           scripts: scriptList,
                                           previewRows: previewRows,
@@ -627,7 +627,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                       .take(6)
                                       .map(
                                         (script) =>
-                                            '#${script.legacyId} ${script.name ?? ''} · 提取状态 ${script.extractState ?? 0}',
+                                            '#${script.numericId} ${script.name ?? ''} · 提取状态 ${script.extractState ?? 0}',
                                       )
                                       .join('\n'),
                             style: Theme.of(dialogCtx).textTheme.bodySmall,
@@ -639,7 +639,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                 (row) => Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: Text(
-                                    '#${row.legacyId} ${row.name ?? ''} · 提取状态 ${row.extractState ?? 0} · 素材 ${summarizeRelatedScriptAssets(row.relatedAssets)}',
+                                    '#${row.numericId} ${row.name ?? ''} · 提取状态 ${row.extractState ?? 0} · 素材 ${summarizeRelatedScriptAssets(row.relatedAssets)}',
                                     style: Theme.of(
                                       dialogCtx,
                                     ).textTheme.bodySmall,

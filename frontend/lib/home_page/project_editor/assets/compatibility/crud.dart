@@ -7,7 +7,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
     required String token,
     required ProjectRow p,
     required List<ListAssetsResponse?> assetsRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsLoading,
     required List<bool> assetsScriptFilterLoading,
     required List<bool> assetsBusy,
@@ -64,13 +64,13 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   final row = await fetchProjectAssetByProjectIds(
                     token,
                     p.id,
-                    first.legacyId,
+                    first.numericId,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        '已读取资产 #${first.legacyId}：${row.name} (${row.assetType})',
+                        '已读取资产 #${first.numericId}：${row.name} (${row.assetType})',
                       ),
                     ),
                   );
@@ -103,7 +103,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   await patchProjectAssetByProjectIds(
                     token,
                     p.id,
-                    first.legacyId,
+                    first.numericId,
                     {'name': '${first.name}·patched'},
                   );
                   if (!ctx.mounted) return;
@@ -142,13 +142,13 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   await deleteProjectAssetByProjectIds(
                     token,
                     p.id,
-                    last.legacyId,
+                    last.numericId,
                   );
                   if (!ctx.mounted) return;
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text('已 DELETE 资产 #${last.legacyId}')),
+                      SnackBar(content: Text('已 DELETE 资产 #${last.numericId}')),
                     );
                   }
                 } on RustApiException catch (e) {
@@ -174,7 +174,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
     required String token,
     required ProjectRow p,
     required List<ListAssetsResponse?> assetsRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsLoading,
     required List<bool> assetsScriptFilterLoading,
     required List<bool> assetsBusy,
@@ -196,7 +196,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   final ids = page.items
-                      .map((a) => '#${a.legacyId}:${a.assetType}')
+                      .map((a) => '#${a.numericId}:${a.assetType}')
                       .join(', ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
@@ -236,7 +236,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   if (!ctx.mounted) return;
                   final ids = r.items
                       .take(4)
-                      .map((a) => '#${a.legacyId}:${a.name}')
+                      .map((a) => '#${a.numericId}:${a.name}')
                       .join(', ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
@@ -265,11 +265,11 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
             assetsBusy[0] ||
                 assetsLoading[0] ||
                 assetsScriptFilterLoading[0] ||
-                assetsFilterScriptLegacyId[0] == null
+                assetsFilterScriptNumericId[0] == null
             ? null
             : () async {
                 setDialogState(() => assetsBusy[0] = true);
-                final sid = assetsFilterScriptLegacyId[0]!;
+                final sid = assetsFilterScriptNumericId[0]!;
                 try {
                   final pg = await fetchProjectAssetsByProjectId(
                     token,
@@ -280,7 +280,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   final ids = pg.items
-                      .map((a) => '#${a.legacyId}:${a.assetType}')
+                      .map((a) => '#${a.numericId}:${a.assetType}')
                       .join(', ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(

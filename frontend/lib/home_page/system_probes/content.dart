@@ -21,8 +21,8 @@ extension _HomePageSystemProbesContent on _HomePageState {
       if (r1s.isNotEmpty) {
         final r1 = r1s.first;
         try {
-          await fetchPromptByLegacyIdV1(token, 1);
-          final patched = await patchPromptByLegacyIdV1(token, 1, r1.data);
+          await fetchPromptByNumericIdV1(token, 1);
+          final patched = await patchPromptByNumericIdV1(token, 1, r1.data);
           roundtrip = ' · GET/1+PATCH/1 ok (data_len=${patched.data.length})';
         } on RustApiException catch (e) {
           roundtrip = ' · GET/1+PATCH/1 -> ${e.statusCode}';

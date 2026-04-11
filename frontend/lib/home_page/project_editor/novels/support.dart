@@ -7,7 +7,7 @@ String summarizeNovelRows(Iterable<NovelRow> rows, {int maxItems = 4}) {
   }
   final visible = items
       .take(maxItems)
-      .map((row) => '#${row.legacyId}:${row.chapter}')
+      .map((row) => '#${row.numericId}:${row.chapter}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
   return '共 ${items.length} 条 · $visible$suffix';
@@ -23,7 +23,7 @@ String summarizeNovelEventRows(
   }
   final visible = items
       .take(maxItems)
-      .map((row) => '#${row.legacyId}:${row.name}')
+      .map((row) => '#${row.numericId}:${row.name}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
   return '事件 ${items.length} 条 · $visible$suffix';

@@ -3,9 +3,9 @@ part of 'index.dart';
 /// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (legacy **`getNovelData`**).
 Future<List<NovelRow>> postLegacyNovelsGetNovelData(
   String accessToken,
-  int projectLegacyId,
+  int projectNumericId,
 ) async {
-  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items;
 }
@@ -13,14 +13,14 @@ Future<List<NovelRow>> postLegacyNovelsGetNovelData(
 /// Compat: index list via **`GET …/novels`** (**`getNovelIndex`** shape).
 Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
   String accessToken,
-  int projectLegacyId,
+  int projectNumericId,
 ) async {
-  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items
       .map(
         (n) => LegacyNovelIndexItem(
-          legacyId: n.legacyId,
+          numericId: n.numericId,
           chapterIndex: n.chapterIndex,
           chapter: n.chapter,
         ),
@@ -28,16 +28,16 @@ Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
       .toList();
 }
 
-/// Compat: non-zero **`event_state`** among **`legacyIds`** (same project UUID).
+/// Compat: non-zero **`event_state`** among **`numericIds`** (same project UUID).
 Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
   String accessToken,
   String projectUuid,
-  List<int> legacyIds,
+  List<int> numericIds,
 ) async {
-  if (legacyIds.isEmpty) {
+  if (numericIds.isEmpty) {
     return [];
   }
-  final want = legacyIds.toSet();
+  final want = numericIds.toSet();
   final out = <LegacyNovelEventStateItem>[];
   var page = 1;
   const limit = 200;
@@ -49,10 +49,10 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
       limit: limit,
     );
     for (final row in batch.items) {
-      if (want.contains(row.legacyId) && row.eventState != 0) {
+      if (want.contains(row.numericId) && row.eventState != 0) {
         out.add(
           LegacyNovelEventStateItem(
-            legacyId: row.legacyId,
+            numericId: row.numericId,
             event: row.event,
             eventState: row.eventState,
             errorReason: row.errorReason,
@@ -65,18 +65,18 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
     }
     page++;
   }
-  out.sort((a, b) => a.legacyId.compareTo(b.legacyId));
+  out.sort((a, b) => a.numericId.compareTo(b.numericId));
   return out;
 }
 
 /// Compat: async event extraction — **`POST …/novel-events/generate-events`** (project UUID in path).
 Future<String> postLegacyNovelEventsGenerateEvents(
   String accessToken, {
-  required int projectLegacyId,
+  required int projectNumericId,
   required List<int> novelIds,
   int concurrentCount = 5,
 }) async {
-  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/generate-events',
   );
@@ -106,12 +106,12 @@ Future<String> postLegacyNovelEventsGenerateEvents(
 /// Compat: paginated list (**`getNovel`**: **`{ data, total }`**).
 Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   String accessToken,
-  int projectLegacyId, {
+  int projectNumericId, {
   required int page,
   required int limit,
   String? search,
 }) async {
-  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
   final res = await fetchProjectNovelsByProjectId(
     accessToken,
     projectId,
@@ -122,7 +122,7 @@ Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   final data = res.items
       .map(
         (n) => LegacyNovelPageRow(
-          legacyId: n.legacyId,
+          numericId: n.numericId,
           chapterIndex: n.chapterIndex,
           reel: n.reel,
           chapter: n.chapter,
@@ -139,13 +139,13 @@ Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
 /// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → success message, no HTTP).
 Future<String> postLegacyNovelsAddNovel(
   String accessToken,
-  int projectLegacyId,
+  int projectNumericId,
   List<LegacyNovelAddItem> data,
 ) async {
   if (data.isEmpty) {
     return '新增原文成功';
   }
-  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
   for (final item in data) {
     await createProjectNovelUnderProject(
       accessToken,
@@ -159,17 +159,17 @@ Future<String> postLegacyNovelsAddNovel(
   return '新增原文成功';
 }
 
-Future<String> _deleteNovelByLegacyIdScanningProjects(
+Future<String> _deleteNovelByNumericIdScanningProjects(
   String accessToken,
-  int novelLegacyId,
+  int novelNumericId,
 ) async {
-  if (novelLegacyId <= 0) {
+  if (novelNumericId <= 0) {
     throw RustApiException('id must be positive', statusCode: 400);
   }
   final projects = await _fetchAllProjectsPaged(accessToken);
   for (final p in projects) {
     try {
-      await deleteProjectNovelByProjectIds(accessToken, p.id, novelLegacyId);
+      await deleteProjectNovelByProjectIds(accessToken, p.id, novelNumericId);
       return '删除原文成功';
     } on RustApiException catch (e) {
       if (e.statusCode == 404) {
@@ -184,12 +184,12 @@ Future<String> _deleteNovelByLegacyIdScanningProjects(
 /// Compat: delete by **`app_novel.legacy_id`** (scans owned projects).
 Future<String> postLegacyNovelsDeleteNovel(
   String accessToken,
-  int novelLegacyId,
+  int novelNumericId,
 ) async {
-  return _deleteNovelByLegacyIdScanningProjects(accessToken, novelLegacyId);
+  return _deleteNovelByNumericIdScanningProjects(accessToken, novelNumericId);
 }
 
-Future<String> _patchNovelByLegacyIdScanningProjects(
+Future<String> _patchNovelByNumericIdScanningProjects(
   String accessToken, {
   required int id,
   required Object index,
@@ -242,7 +242,7 @@ Future<String> postLegacyNovelsUpdateNovel(
   required String chapterData,
   required String event,
 }) async {
-  return _patchNovelByLegacyIdScanningProjects(
+  return _patchNovelByNumericIdScanningProjects(
     accessToken,
     id: id,
     index: index,
@@ -257,16 +257,16 @@ Future<String> postLegacyNovelsUpdateNovel(
 Future<String> postLegacyNovelsBatchDelete(
   String accessToken,
   String projectUuid,
-  List<int> legacyIds,
+  List<int> numericIds,
 ) async {
-  if (legacyIds.isEmpty) {
+  if (numericIds.isEmpty) {
     throw RustApiException('请先选择需要删除的内容', statusCode: 400);
   }
-  if (legacyIds.length > 500) {
+  if (numericIds.length > 500) {
     throw RustApiException('too many ids', statusCode: 400);
   }
   var any = false;
-  for (final id in legacyIds) {
+  for (final id in numericIds) {
     try {
       await deleteProjectNovelByProjectIds(accessToken, projectUuid, id);
       any = true;

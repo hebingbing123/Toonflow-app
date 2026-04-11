@@ -55,7 +55,7 @@ Future<StoryboardRow> createStoryboardUnderProjectScript(
 }
 
 /// `GET /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`.
-Future<StoryboardRow> fetchStoryboardByProjectAndLegacyId(
+Future<StoryboardRow> fetchStoryboardByProjectAndNumericId(
   String accessToken,
   String projectId,
   int storyboardNumericId,
@@ -77,7 +77,7 @@ Future<StoryboardRow> fetchStoryboardByProjectAndLegacyId(
 }
 
 /// `PATCH /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}` — keys per OpenAPI `PatchStoryboardBody` only.
-Future<StoryboardRow> updateStoryboardByProjectAndLegacyId(
+Future<StoryboardRow> updateStoryboardByProjectAndNumericId(
   String accessToken,
   String projectId,
   int storyboardNumericId,
@@ -110,7 +110,7 @@ Future<StoryboardRow> updateStoryboardByProjectAndLegacyId(
 }
 
 /// `DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`.
-Future<void> deleteStoryboardByProjectAndLegacyId(
+Future<void> deleteStoryboardByProjectAndNumericId(
   String accessToken,
   String projectId,
   int storyboardNumericId,

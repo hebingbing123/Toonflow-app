@@ -27,7 +27,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 try {
                   final pg = await postLegacyNovelsGetNovel(
                     token,
-                    p.legacyId,
+                    p.numericId,
                     page: 1,
                     limit: 10,
                   );
@@ -37,7 +37,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                     SnackBar(
                       content: Text(
                         first != null
-                            ? 'POST …/novels/get-novel：total=${pg.total} · 首行 #${first.legacyId} ${first.chapter}'
+                            ? 'POST …/novels/get-novel：total=${pg.total} · 首行 #${first.numericId} ${first.chapter}'
                             : 'POST …/novels/get-novel：total=${pg.total}',
                       ),
                     ),
@@ -69,7 +69,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 try {
                   final rows = await postLegacyNovelsGetNovelData(
                     token,
-                    p.legacyId,
+                    p.numericId,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -106,7 +106,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 try {
                   final idx = await postLegacyNovelsGetNovelIndex(
                     token,
-                    p.legacyId,
+                    p.numericId,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -142,7 +142,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
+                  final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
                   final rows = await postLegacyNovelsGetNovelEventState(
                     token,
                     p.id,
@@ -183,10 +183,10 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
+                  final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
                   final msg = await postLegacyNovelEventsGenerateEvents(
                     token,
-                    projectLegacyId: p.legacyId,
+                    projectNumericId: p.numericId,
                     novelIds: ids.take(3).toList(),
                   );
                   if (!ctx.mounted) return;
@@ -224,7 +224,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 try {
                   final msg = await postLegacyNovelsAddNovel(
                     token,
-                    p.legacyId,
+                    p.numericId,
                     const [],
                   );
                   if (!ctx.mounted) return;
@@ -349,7 +349,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 try {
                   final msg = await postLegacyNovelsUpdateNovel(
                     token,
-                    id: n.legacyId,
+                    id: n.numericId,
                     index: n.chapterIndex,
                     reel: n.reel ?? '',
                     chapter: n.chapter,
@@ -360,7 +360,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/novels/update-novel noop #${n.legacyId}：$msg',
+                        'POST …/novels/update-novel noop #${n.numericId}：$msg',
                       ),
                     ),
                   );

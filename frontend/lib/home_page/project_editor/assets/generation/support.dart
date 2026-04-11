@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import '../../../../rust_api.dart';
 
-List<int> sortUniqueAssetLegacyIds(Iterable<int> ids) {
+List<int> sortUniqueAssetNumericIds(Iterable<int> ids) {
   final sorted = SplayTreeSet<int>();
   for (final id in ids) {
     if (id > 0) {
@@ -17,20 +17,20 @@ Map<String, List<int>> collectAssetIdsByType(Iterable<AssetRow> assets) {
   for (final asset in assets) {
     final type = asset.assetType.trim();
     if (type.isEmpty) continue;
-    grouped.putIfAbsent(type, () => <int>[]).add(asset.legacyId);
+    grouped.putIfAbsent(type, () => <int>[]).add(asset.numericId);
   }
   return <String, List<int>>{
     for (final entry in grouped.entries)
-      entry.key: sortUniqueAssetLegacyIds(entry.value),
+      entry.key: sortUniqueAssetNumericIds(entry.value),
   };
 }
 
-List<int> collectScopedAssetLegacyIds(
+List<int> collectScopedAssetNumericIds(
   Iterable<int> candidateIds,
   Iterable<AssetRow> visibleAssets,
 ) {
-  final visibleSet = visibleAssets.map((asset) => asset.legacyId).toSet();
-  return sortUniqueAssetLegacyIds(candidateIds.where(visibleSet.contains));
+  final visibleSet = visibleAssets.map((asset) => asset.numericId).toSet();
+  return sortUniqueAssetNumericIds(candidateIds.where(visibleSet.contains));
 }
 
 Map<String, List<int>> collectAssetIdsByImageState(
@@ -44,7 +44,7 @@ Map<String, List<int>> collectAssetIdsByImageState(
   }
   return <String, List<int>>{
     for (final entry in grouped.entries)
-      entry.key: sortUniqueAssetLegacyIds(entry.value),
+      entry.key: sortUniqueAssetNumericIds(entry.value),
   };
 }
 
@@ -58,30 +58,30 @@ Map<String, List<int>> collectAssetIdsByPromptState(
   }
   return <String, List<int>>{
     for (final entry in grouped.entries)
-      entry.key: sortUniqueAssetLegacyIds(entry.value),
+      entry.key: sortUniqueAssetNumericIds(entry.value),
   };
 }
 
 List<int> chooseVisibleAssetSelection(
   Iterable<AssetRow> assets, {
   Iterable<int>? preferredIds,
-  int? preferredLegacyId,
+  int? preferredNumericId,
 }) {
-  final visibleIds = sortUniqueAssetLegacyIds(
-    assets.map((asset) => asset.legacyId),
+  final visibleIds = sortUniqueAssetNumericIds(
+    assets.map((asset) => asset.numericId),
   );
   if (visibleIds.isEmpty) {
     return const <int>[];
   }
   final visibleSet = visibleIds.toSet();
-  final keptIds = sortUniqueAssetLegacyIds(
+  final keptIds = sortUniqueAssetNumericIds(
     (preferredIds ?? const <int>[]).where(visibleSet.contains),
   );
   if (keptIds.isNotEmpty) {
     return keptIds;
   }
-  if (preferredLegacyId != null && visibleSet.contains(preferredLegacyId)) {
-    return <int>[preferredLegacyId];
+  if (preferredNumericId != null && visibleSet.contains(preferredNumericId)) {
+    return <int>[preferredNumericId];
   }
   return <int>[visibleIds.first];
 }
@@ -170,9 +170,9 @@ String summarizeAssetWorkbenchSnapshot({
   String? lead,
 }) {
   final visibleById = <int, AssetRow>{
-    for (final asset in visibleAssets) asset.legacyId: asset,
+    for (final asset in visibleAssets) asset.numericId: asset,
   };
-  final scopedSelection = sortUniqueAssetLegacyIds(
+  final scopedSelection = sortUniqueAssetNumericIds(
     selectedIds.where(visibleById.containsKey),
   );
   final selectionLine = switch (scopedSelection.length) {

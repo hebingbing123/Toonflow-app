@@ -92,7 +92,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       scriptList.addAll(
         created.scripts.map(
           (s) => ScriptBrief(
-            legacyId: s.legacyId,
+            numericId: s.numericId,
             name: s.name,
             extractState: s.extractState,
           ),
@@ -103,7 +103,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       } catch (_) {}
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
-        selectedIds: scriptList.map((script) => script.legacyId),
+        selectedIds: scriptList.map((script) => script.numericId),
         scripts: scriptList,
         previewRows: const [],
       );
@@ -148,7 +148,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
   }) {
     final outline = Theme.of(ctx).colorScheme.outline;
     final allScriptIds = scriptList
-        .map((script) => script.legacyId)
+        .map((script) => script.numericId)
         .toList(growable: false);
     final overviewDiagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: allScriptIds,
@@ -209,7 +209,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
             ? '当前均为 idle 或已完成'
             : rows
                   .take(3)
-                  .map((row) => '#${row.legacyId}:${row.extractState ?? 0}')
+                  .map((row) => '#${row.numericId}:${row.extractState ?? 0}')
                   .join(' · ');
         if (!ctx.mounted) return;
         final nextDiagnosis = diagnoseScriptBatchWorkbench(
@@ -249,7 +249,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       try {
         final accepted = await startScriptAssetExtract(
           token,
-          projectNumericId: p.legacyId,
+          projectNumericId: p.numericId,
           scriptNumericIds: allScriptIds,
         );
         final rows = await pollScriptExtractState(token, allScriptIds);
@@ -475,7 +475,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       if (!ctx.mounted) return;
                       scriptList.add(
                         ScriptBrief(
-                          legacyId: s.legacyId,
+                          numericId: s.numericId,
                           name: s.name,
                           extractState: s.extractState,
                         ),
@@ -488,7 +488,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       } catch (_) {}
                       final nextDiagnosis = diagnoseScriptBatchWorkbench(
                         selectedIds: scriptList.map(
-                          (script) => script.legacyId,
+                          (script) => script.numericId,
                         ),
                         scripts: scriptList,
                         previewRows: const [],
@@ -497,12 +497,12 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       setDialogState(() {
                         saving[0] = false;
                         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-                          actionSummary: '已创建剧本 legacy #${s.legacyId}。',
+                          actionSummary: '已创建剧本 legacy #${s.numericId}。',
                           diagnosis: nextDiagnosis,
                         );
                       });
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('已创建剧本 legacy #${s.legacyId}')),
+                        SnackBar(content: Text('已创建剧本 legacy #${s.numericId}')),
                       );
                     } on RustApiException catch (e) {
                       if (ctx.mounted) {
@@ -558,7 +558,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(
-              '#${s.legacyId} ${s.name ?? ""}',
+              '#${s.numericId} ${s.name ?? ""}',
               style: Theme.of(ctx).textTheme.bodySmall,
             ),
             trailing: const Icon(Icons.edit_outlined, size: 18),
@@ -566,9 +566,9 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                 ? null
                 : () => _openScriptEditor(
                     token,
-                    s.legacyId,
+                    s.numericId,
                     projectId: p.id,
-                    projectLegacyId: p.legacyId,
+                    projectNumericId: p.numericId,
                     onScriptTreeMutated: () async {
                       final d = await fetchProjectByProjectId(token, p.id);
                       if (!ctx.mounted) return;

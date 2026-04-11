@@ -3,8 +3,8 @@ part of '../../home_page.dart';
 extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _reloadProductionStoryboardSummary({
     required String token,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
     required List<String?> productionSummaryLine,
     required List<bool> productionSummaryLoaded,
     required List<bool> productionSummaryLoading,
@@ -15,8 +15,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     try {
       final response = await postProductionGetStoryboardDataV1(
         token,
-        projectId: projectLegacyId,
-        scriptId: scriptLegacyId,
+        projectId: projectNumericId,
+        scriptId: scriptNumericId,
       );
       final preview = response.data
           .take(4)
@@ -44,7 +44,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<List<StoryboardRow>> _reloadScriptStoryboards({
     required String token,
     required String projectId,
-    required int scriptLegacyId,
+    required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required BuildContext ctx,
     required StateSetter setBoardsState,
@@ -56,7 +56,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       final fresh = await fetchStoryboardsForProjectScript(
         token,
         projectId,
-        scriptLegacyId,
+        scriptNumericId,
       );
       boardsList
         ..clear()
@@ -75,8 +75,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required StateSetter setBoardsState,
     required String token,
     required String projectId,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required List<bool> actionBusy,
     required List<String?> storyboardTaskLine,
@@ -154,8 +154,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       try {
         final added = await postStoryboardAddV1(
           token,
-          projectId: projectLegacyId,
-          scriptId: scriptLegacyId,
+          projectId: projectNumericId,
+          scriptId: scriptNumericId,
           prompt: prompt,
           duration: duration,
         );
@@ -163,7 +163,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         await _reloadScriptStoryboards(
           token: token,
           projectId: projectId,
-          scriptLegacyId: scriptLegacyId,
+          scriptNumericId: scriptNumericId,
           boardsList: boardsList,
           ctx: ctx,
           setBoardsState: setBoardsState,
@@ -172,8 +172,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadProductionStoryboardSummary(
           token: token,
-          projectLegacyId: projectLegacyId,
-          scriptLegacyId: scriptLegacyId,
+          projectNumericId: projectNumericId,
+          scriptNumericId: scriptNumericId,
           productionSummaryLine: productionSummaryLine,
           productionSummaryLoaded: productionSummaryLoaded,
           productionSummaryLoading: actionBusy,
@@ -218,8 +218,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required StateSetter setBoardsState,
     required String token,
     required String projectId,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required List<bool> actionBusy,
     required List<String?> storyboardTaskLine,
@@ -307,15 +307,15 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       try {
         final added = await postStoryboardBatchAddInfoV1(
           token,
-          projectId: projectLegacyId,
-          scriptId: scriptLegacyId,
+          projectId: projectNumericId,
+          scriptId: scriptNumericId,
           storyboards: payload,
         );
         if (!ctx.mounted) return;
         await _reloadScriptStoryboards(
           token: token,
           projectId: projectId,
-          scriptLegacyId: scriptLegacyId,
+          scriptNumericId: scriptNumericId,
           boardsList: boardsList,
           ctx: ctx,
           setBoardsState: setBoardsState,
@@ -324,8 +324,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadProductionStoryboardSummary(
           token: token,
-          projectLegacyId: projectLegacyId,
-          scriptLegacyId: scriptLegacyId,
+          projectNumericId: projectNumericId,
+          scriptNumericId: scriptNumericId,
           productionSummaryLine: productionSummaryLine,
           productionSummaryLoaded: productionSummaryLoaded,
           productionSummaryLoading: actionBusy,
@@ -368,14 +368,14 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _openScriptStoryboardsDialog({
     required String token,
     required String projectId,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
   }) async {
     try {
       final boards = await fetchStoryboardsForProjectScript(
         token,
         projectId,
-        scriptLegacyId,
+        scriptNumericId,
       );
       if (!mounted) return;
       final boardsList = List<StoryboardRow>.from(boards);
@@ -397,8 +397,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                   if (!ctx2.mounted) return;
                   await _reloadProductionStoryboardSummary(
                     token: token,
-                    projectLegacyId: projectLegacyId,
-                    scriptLegacyId: scriptLegacyId,
+                    projectNumericId: projectNumericId,
+                    scriptNumericId: scriptNumericId,
                     productionSummaryLine: productionSummaryLine,
                     productionSummaryLoaded: productionSummaryLoaded,
                     productionSummaryLoading: productionSummaryLoading,
@@ -488,8 +488,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       setBoardsState: setBoardsState,
                                       token: token,
                                       projectId: projectId,
-                                      projectLegacyId: projectLegacyId,
-                                      scriptLegacyId: scriptLegacyId,
+                                      projectNumericId: projectNumericId,
+                                      scriptNumericId: scriptNumericId,
                                       boardsList: boardsList,
                                       actionBusy: actionBusy,
                                       storyboardTaskLine: storyboardTaskLine,
@@ -508,8 +508,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       setBoardsState: setBoardsState,
                                       token: token,
                                       projectId: projectId,
-                                      projectLegacyId: projectLegacyId,
-                                      scriptLegacyId: scriptLegacyId,
+                                      projectNumericId: projectNumericId,
+                                      scriptNumericId: scriptNumericId,
                                       boardsList: boardsList,
                                       actionBusy: actionBusy,
                                       storyboardTaskLine: storyboardTaskLine,
@@ -526,7 +526,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                   : () => _reloadScriptStoryboards(
                                       token: token,
                                       projectId: projectId,
-                                      scriptLegacyId: scriptLegacyId,
+                                      scriptNumericId: scriptNumericId,
                                       boardsList: boardsList,
                                       ctx: ctx2,
                                       setBoardsState: setBoardsState,
@@ -541,8 +541,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       await _openStoryboardBatchWorkbenchDialog(
                                         ctx: ctx2,
                                         token: token,
-                                        projectLegacyId: projectLegacyId,
-                                        scriptLegacyId: scriptLegacyId,
+                                        projectNumericId: projectNumericId,
+                                        scriptNumericId: scriptNumericId,
                                         boardsList: boardsList,
                                         setBoardsState: setBoardsState,
                                         actionBusy: actionBusy,
@@ -551,7 +551,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       await _reloadScriptStoryboards(
                                         token: token,
                                         projectId: projectId,
-                                        scriptLegacyId: scriptLegacyId,
+                                        scriptNumericId: scriptNumericId,
                                         boardsList: boardsList,
                                         ctx: ctx2,
                                         setBoardsState: setBoardsState,
@@ -560,8 +560,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       if (!ctx2.mounted) return;
                                       await _reloadProductionStoryboardSummary(
                                         token: token,
-                                        projectLegacyId: projectLegacyId,
-                                        scriptLegacyId: scriptLegacyId,
+                                        projectNumericId: projectNumericId,
+                                        scriptNumericId: scriptNumericId,
                                         productionSummaryLine:
                                             productionSummaryLine,
                                         productionSummaryLoaded:
@@ -579,8 +579,8 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                   ? null
                                   : () => _reloadProductionStoryboardSummary(
                                       token: token,
-                                      projectLegacyId: projectLegacyId,
-                                      scriptLegacyId: scriptLegacyId,
+                                      projectNumericId: projectNumericId,
+                                      scriptNumericId: scriptNumericId,
                                       productionSummaryLine:
                                           productionSummaryLine,
                                       productionSummaryLoaded:
@@ -623,7 +623,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                   ];
                                   return ListTile(
                                     contentPadding: EdgeInsets.zero,
-                                    title: Text('#${b.legacyId}'),
+                                    title: Text('#${b.numericId}'),
                                     subtitle: Text(
                                       [
                                         if ((b.prompt ?? '').trim().isNotEmpty)
@@ -642,16 +642,16 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                         : () async {
                                             await _openStoryboardEditor(
                                               token,
-                                              b.legacyId,
+                                              b.numericId,
                                               projectId: projectId,
-                                              projectLegacyId: projectLegacyId,
-                                              scriptLegacyId: scriptLegacyId,
+                                              projectNumericId: projectNumericId,
+                                              scriptNumericId: scriptNumericId,
                                               onStoryboardTreeMutated: () async {
                                                 await _reloadScriptStoryboards(
                                                   token: token,
                                                   projectId: projectId,
-                                                  scriptLegacyId:
-                                                      scriptLegacyId,
+                                                  scriptNumericId:
+                                                      scriptNumericId,
                                                   boardsList: boardsList,
                                                   ctx: ctx2,
                                                   setBoardsState:
@@ -661,10 +661,10 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                                 if (!ctx2.mounted) return;
                                                 await _reloadProductionStoryboardSummary(
                                                   token: token,
-                                                  projectLegacyId:
-                                                      projectLegacyId,
-                                                  scriptLegacyId:
-                                                      scriptLegacyId,
+                                                  projectNumericId:
+                                                      projectNumericId,
+                                                  scriptNumericId:
+                                                      scriptNumericId,
                                                   productionSummaryLine:
                                                       productionSummaryLine,
                                                   productionSummaryLoaded:

@@ -9,14 +9,14 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ListAssetsResponse?> assetsRef,
     required List<ListAssetsResponse?> assetsForScriptRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsBusy,
   }) async {
     final typeCtrl = TextEditingController();
     final nameCtrl = TextEditingController();
     final pageCtrl = TextEditingController(text: '1');
     final limitCtrl = TextEditingController(text: '20');
-    int? selectedScriptLegacyId = assetsFilterScriptLegacyId[0];
+    int? selectedScriptNumericId = assetsFilterScriptNumericId[0];
     try {
       final confirmed = await showDialog<bool>(
         context: ctx,
@@ -31,7 +31,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       DropdownButtonFormField<int?>(
-                        initialValue: selectedScriptLegacyId,
+                        initialValue: selectedScriptNumericId,
                         decoration: const InputDecoration(labelText: '按剧本筛选'),
                         items: [
                           const DropdownMenuItem<int?>(
@@ -40,16 +40,16 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                           ),
                           ...scriptList.map(
                             (script) => DropdownMenuItem<int?>(
-                              value: script.legacyId,
+                              value: script.numericId,
                               child: Text(
-                                '#${script.legacyId} ${script.name ?? ""}',
+                                '#${script.numericId} ${script.name ?? ""}',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
                         ],
                         onChanged: (v) => setState(() {
-                          selectedScriptLegacyId = v;
+                          selectedScriptNumericId = v;
                         }),
                       ),
                       const SizedBox(height: 8),
@@ -124,7 +124,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       final filtered = await fetchProjectAssetsByProjectId(
         token,
         p.id,
-        scriptNumericId: selectedScriptLegacyId,
+        scriptNumericId: selectedScriptNumericId,
         assetType: typeCtrl.text.trim().isEmpty ? null : typeCtrl.text.trim(),
         name: nameCtrl.text.trim().isEmpty ? null : nameCtrl.text.trim(),
         page: page,
@@ -133,8 +133,8 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       if (!ctx.mounted) return;
       setDialogState(() {
         assetsRef[0] = filtered;
-        assetsFilterScriptLegacyId[0] = selectedScriptLegacyId;
-        if (selectedScriptLegacyId != null) {
+        assetsFilterScriptNumericId[0] = selectedScriptNumericId;
+        if (selectedScriptNumericId != null) {
           assetsForScriptRef[0] = filtered;
         } else {
           assetsForScriptRef[0] = null;
@@ -181,7 +181,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
     final base64Ctrl = TextEditingController(
       text: 'data:image/png;base64,AA==',
     );
-    var selectedScriptLegacyId = scriptList.first.legacyId;
+    var selectedScriptNumericId = scriptList.first.numericId;
     try {
       final confirmed = await showDialog<bool>(
         context: ctx,
@@ -197,14 +197,14 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<int>(
-                        initialValue: selectedScriptLegacyId,
+                        initialValue: selectedScriptNumericId,
                         decoration: const InputDecoration(labelText: '目标剧本'),
                         items: scriptList
                             .map(
                               (s) => DropdownMenuItem<int>(
-                                value: s.legacyId,
+                                value: s.numericId,
                                 child: Text(
-                                  '#${s.legacyId} ${s.name ?? ""}',
+                                  '#${s.numericId} ${s.name ?? ""}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -212,7 +212,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
                             .toList(),
                         onChanged: (v) {
                           if (v == null) return;
-                          setState(() => selectedScriptLegacyId = v);
+                          setState(() => selectedScriptNumericId = v);
                         },
                       ),
                       const SizedBox(height: 8),
@@ -255,8 +255,8 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       setDialogState(() => assetsBusy[0] = true);
       final uploaded = await postProductionEditImageUploadImageV1(
         token,
-        projectId: p.legacyId,
-        scriptId: selectedScriptLegacyId,
+        projectId: p.numericId,
+        scriptId: selectedScriptNumericId,
         base64Data: payload,
       );
       if (!ctx.mounted) return;

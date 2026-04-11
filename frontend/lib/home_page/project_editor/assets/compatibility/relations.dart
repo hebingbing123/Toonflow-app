@@ -25,8 +25,8 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
             ? null
             : () async {
                 setDialogState(() => assetsBusy[0] = true);
-                final sid = scriptList.first.legacyId;
-                final aid = assetsRef[0]!.items.first.legacyId;
+                final sid = scriptList.first.numericId;
+                final aid = assetsRef[0]!.items.first.numericId;
                 try {
                   await linkScriptToAssetByProjectIds(
                     token,
@@ -68,8 +68,8 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
             ? null
             : () async {
                 setDialogState(() => assetsBusy[0] = true);
-                final sid = scriptList.first.legacyId;
-                final aid = assetsRef[0]!.items.first.legacyId;
+                final sid = scriptList.first.numericId;
+                final aid = assetsRef[0]!.items.first.numericId;
                 try {
                   await unlinkScriptFromAssetByProjectIds(
                     token,

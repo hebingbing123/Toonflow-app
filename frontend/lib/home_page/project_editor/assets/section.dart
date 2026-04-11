@@ -6,7 +6,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
     required this.scriptList,
     required this.visibleAssets,
     required this.assetsForScript,
-    required this.filterScriptLegacyId,
+    required this.filterScriptNumericId,
     required this.assetsLoading,
     required this.assetsScriptFilterLoading,
     required this.assetsBusy,
@@ -18,7 +18,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
   final List<ScriptBrief> scriptList;
   final List<AssetRow> visibleAssets;
   final List<AssetRow>? assetsForScript;
-  final int? filterScriptLegacyId;
+  final int? filterScriptNumericId;
   final bool assetsLoading;
   final bool assetsScriptFilterLoading;
   final bool assetsBusy;
@@ -36,7 +36,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(summarizeProjectAssetRows(visibleAssets), style: bodySmall),
-        if (filterScriptLegacyId != null) ...[
+        if (filterScriptNumericId != null) ...[
           const SizedBox(height: 6),
           if (assetsScriptFilterLoading)
             Text(
@@ -45,7 +45,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
             )
           else if (assetsForScript != null)
             Text(
-              summarizeScriptScopedAssets(filterScriptLegacyId, assetsForScript!),
+              summarizeScriptScopedAssets(filterScriptNumericId, assetsForScript!),
               style: bodySmall,
             )
           else
@@ -58,7 +58,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: DropdownButton<int?>(
-              value: filterScriptLegacyId,
+              value: filterScriptNumericId,
               isExpanded: true,
               hint: const Text('按剧本筛选资产列表'),
               items: [
@@ -68,9 +68,9 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
                 ),
                 ...scriptList.map(
                   (script) => DropdownMenuItem<int?>(
-                    value: script.legacyId,
+                    value: script.numericId,
                     child: Text(
-                      '#${script.legacyId} ${script.name ?? ""}',
+                      '#${script.numericId} ${script.name ?? ""}',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

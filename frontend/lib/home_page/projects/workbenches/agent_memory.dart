@@ -41,7 +41,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _projectIdCtrl = TextEditingController(
       text: widget.initialProjects.isEmpty
           ? ''
-          : widget.initialProjects.first.legacyId.toString(),
+          : widget.initialProjects.first.numericId.toString(),
     );
     _agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     _episodesIdCtrl = TextEditingController();
@@ -76,7 +76,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       setState(() {
         _projects = rows;
         if (_projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
-          _projectIdCtrl.text = rows.first.legacyId.toString();
+          _projectIdCtrl.text = rows.first.numericId.toString();
         }
         _statusLine = '已刷新 ${rows.length} 个项目。';
         _loadingProjects = false;
@@ -259,7 +259,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
               if (_projects.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '项目 ${_projects.length} 个 · ${_projects.take(4).map((p) => '#${p.legacyId} ${p.name ?? "未命名项目"}').join(', ')}${_projects.length > 4 ? '…' : ''}',
+                  '项目 ${_projects.length} 个 · ${_projects.take(4).map((p) => '#${p.numericId} ${p.name ?? "未命名项目"}').join(', ')}${_projects.length > 4 ? '…' : ''}',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),

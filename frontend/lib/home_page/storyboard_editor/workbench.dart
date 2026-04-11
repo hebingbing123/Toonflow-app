@@ -3,9 +3,9 @@ part of '../../home_page.dart';
 class _StoryboardWorkbenchPanel extends StatefulWidget {
   const _StoryboardWorkbenchPanel({
     required this.token,
-    required this.storyLegacyId,
-    required this.projectLegacyId,
-    required this.scriptLegacyId,
+    required this.storyNumericId,
+    required this.projectNumericId,
+    required this.scriptNumericId,
     required this.scriptStoryboard,
     required this.readPromptText,
     required this.readVideoDescriptionText,
@@ -13,9 +13,9 @@ class _StoryboardWorkbenchPanel extends StatefulWidget {
   });
 
   final String token;
-  final int storyLegacyId;
-  final int projectLegacyId;
-  final int scriptLegacyId;
+  final int storyNumericId;
+  final int projectNumericId;
+  final int scriptNumericId;
   final StoryboardRow scriptStoryboard;
   final String Function() readPromptText;
   final String Function() readVideoDescriptionText;
@@ -163,12 +163,12 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     try {
       final productionRow = await postStoryboardGetDataV1(
         widget.token,
-        storyboardId: widget.storyLegacyId,
+        storyboardId: widget.storyNumericId,
       );
       final productionRows = await postProductionGetStoryboardDataV1(
         widget.token,
-        projectId: widget.projectLegacyId,
-        scriptId: widget.scriptLegacyId,
+        projectId: widget.projectNumericId,
+        scriptId: widget.scriptNumericId,
       );
       if (!mounted) return;
       setState(() {
@@ -236,8 +236,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       final model = await postWorkbenchGetVideoModelDetailV1(widget.token);
       final generateData = await postWorkbenchGetGenerateDataV1(
         widget.token,
-        projectId: widget.projectLegacyId,
-        scriptId: widget.scriptLegacyId,
+        projectId: widget.projectNumericId,
+        scriptId: widget.scriptNumericId,
       );
       if (!mounted) return;
       setState(() {
@@ -341,10 +341,10 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     }
     final status = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
-      projectId: widget.projectLegacyId,
-      scriptId: widget.scriptLegacyId,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       uploadData: [
-        <String, dynamic>{'id': widget.storyLegacyId, 'sources': sourceImage},
+        <String, dynamic>{'id': widget.storyNumericId, 'sources': sourceImage},
       ],
       prompt: prompt,
       model: _modelDetail?.modelId ?? 'kling-v1',
@@ -445,7 +445,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     );
     final storyboardVideos = storyboardScopedVideos(
       _generateData?.generatedVideos ?? const [],
-      widget.storyLegacyId,
+      widget.storyNumericId,
     );
     final diagnosis = _currentDiagnosis();
     VoidCallback? recommendedAction;
@@ -473,7 +473,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             : () => _runDialogAction(() async {
                 final preview = await postStoryboardPreviewImageV1(
                   widget.token,
-                  storyboardId: widget.storyLegacyId,
+                  storyboardId: widget.storyNumericId,
                 );
                 _imageUrlCtrl.text = preview.imageUrl ?? '';
                 await _refreshProductionData();
@@ -502,7 +502,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                     return;
                   }
                   if (_trackNameCtrl.text.trim().isEmpty) {
-                    _trackNameCtrl.text = '分镜 ${widget.storyLegacyId} 视频轨';
+                    _trackNameCtrl.text = '分镜 ${widget.storyNumericId} 视频轨';
                   }
                   _setWorkbenchFollowUp('已预填新轨道名称，下一步可直接新增轨道。');
                 });
@@ -513,8 +513,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             : () => _runDialogAction(() async {
                 final generated = await postWorkbenchGenerateVideoPromptV1(
                   widget.token,
-                  projectId: widget.projectLegacyId,
-                  scriptId: widget.scriptLegacyId,
+                  projectId: widget.projectNumericId,
+                  scriptId: widget.scriptNumericId,
                   imageUrl: resolveStoryboardSourceImageUrl(
                     productionStoryboard: _productionRow,
                     draftImageUrl: _imageUrlCtrl.text,
@@ -618,7 +618,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                   : () => _runDialogAction(() async {
                       final preview = await postStoryboardPreviewImageV1(
                         widget.token,
-                        storyboardId: widget.storyLegacyId,
+                        storyboardId: widget.storyNumericId,
                       );
                       _imageUrlCtrl.text = preview.imageUrl ?? '';
                       await _refreshProductionData();
@@ -643,7 +643,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                       }
                       final response = await postStoryboardUpdateUrlV1(
                         widget.token,
-                        storyboardId: widget.storyLegacyId,
+                        storyboardId: widget.storyNumericId,
                         imageUrl: imageUrl,
                       );
                       _imageUrlCtrl.text = response.imageUrl;
@@ -662,7 +662,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
                   : () => _runDialogAction(() async {
                       await postStoryboardRemoveFrameV1(
                         widget.token,
-                        storyboardId: widget.storyLegacyId,
+                        storyboardId: widget.storyNumericId,
                       );
                       _imageUrlCtrl.clear();
                       await _refreshProductionData();
@@ -710,8 +710,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             if (name.isEmpty) throw const FormatException('轨道名称不能为空');
             final response = await postWorkbenchAddTrackV1(
               widget.token,
-              projectId: widget.projectLegacyId,
-              scriptId: widget.scriptLegacyId,
+              projectId: widget.projectNumericId,
+              scriptId: widget.scriptNumericId,
               trackName: name,
             );
             _trackIdCtrl.text = response.trackId.toString();
@@ -728,8 +728,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             }
             await postWorkbenchDeleteTrackV1(
               widget.token,
-              projectId: widget.projectLegacyId,
-              scriptId: widget.scriptLegacyId,
+              projectId: widget.projectNumericId,
+              scriptId: widget.scriptNumericId,
               trackId: trackId,
             );
             if (_productionRow?.trackId == trackId) _trackIdCtrl.clear();
@@ -741,8 +741,8 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onGenerateVideoPrompt: () => _runDialogAction(() async {
             final generated = await postWorkbenchGenerateVideoPromptV1(
               widget.token,
-              projectId: widget.projectLegacyId,
-              scriptId: widget.scriptLegacyId,
+              projectId: widget.projectNumericId,
+              scriptId: widget.scriptNumericId,
               imageUrl: resolveStoryboardSourceImageUrl(
                 productionStoryboard: _productionRow,
                 draftImageUrl: _imageUrlCtrl.text,
@@ -762,9 +762,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onSelectVideo: (video) => _runDialogAction(() async {
             await postWorkbenchSelectVideoV1(
               widget.token,
-              projectId: widget.projectLegacyId,
-              scriptId: widget.scriptLegacyId,
-              storyboardId: widget.storyLegacyId,
+              projectId: widget.projectNumericId,
+              scriptId: widget.scriptNumericId,
+              storyboardId: widget.storyNumericId,
               videoUrl: video.videoUrl!.trim(),
             );
             await _refreshProductionData(syncTrackId: true);
@@ -775,9 +775,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onDeleteCurrentVideo: () => _runDialogAction(() async {
             await postWorkbenchDeleteVideoV1(
               widget.token,
-              projectId: widget.projectLegacyId,
-              scriptId: widget.scriptLegacyId,
-              storyboardId: widget.storyLegacyId,
+              projectId: widget.projectNumericId,
+              scriptId: widget.scriptNumericId,
+              storyboardId: widget.storyNumericId,
             );
             await _refreshProductionData(syncTrackId: true);
             await _refreshWorkbenchData();

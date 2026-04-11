@@ -48,7 +48,7 @@ class AssetDataItemV1 {
     required this.name,
     required this.type,
     this.describe,
-    this.coverLegacyImageId,
+    this.coverNumericImageId,
     this.createdAt,
   });
 
@@ -56,7 +56,7 @@ class AssetDataItemV1 {
   final String name;
   final String type;
   final String? describe;
-  final int? coverLegacyImageId;
+  final int? coverNumericImageId;
   final DateTime? createdAt;
 
   factory AssetDataItemV1.fromJson(Map<String, dynamic> json) {
@@ -68,9 +68,9 @@ class AssetDataItemV1 {
       name: json['name'] as String,
       type: json['type'] as String,
       describe: json['describe'] as String?,
-      coverLegacyImageId: json['coverLegacyImageId'] == null
+      coverNumericImageId: json['coverNumericImageId'] == null
           ? null
-          : (json['coverLegacyImageId'] as num).toInt(),
+          : (json['coverNumericImageId'] as num).toInt(),
       createdAt: parsed,
     );
   }

@@ -4,7 +4,7 @@ part of 'index.dart';
 class AssetRow {
   const AssetRow({
     required this.id,
-    required this.legacyId,
+    required this.numericId,
     required this.name,
     required this.assetType,
     this.description,
@@ -12,7 +12,7 @@ class AssetRow {
   });
 
   final String id;
-  final int legacyId;
+  final int numericId;
   final String name;
   final String assetType;
   final String? description;
@@ -21,7 +21,7 @@ class AssetRow {
   factory AssetRow.fromJson(Map<String, dynamic> json) {
     return AssetRow(
       id: json['id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       assetType: json['asset_type'] as String,
       description: json['description'] as String?,
@@ -132,14 +132,14 @@ class CornerScapeHistoryImage {
     required this.sortIndex,
     this.filePath,
     this.state,
-    this.legacyImageId,
+    this.numericImageId,
   });
 
   final String id;
   final int sortIndex;
   final String? filePath;
   final String? state;
-  final int? legacyImageId;
+  final int? numericImageId;
 
   factory CornerScapeHistoryImage.fromJson(Map<String, dynamic> json) {
     return CornerScapeHistoryImage(
@@ -147,7 +147,7 @@ class CornerScapeHistoryImage {
       sortIndex: (json['sort_index'] as num).toInt(),
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
-      legacyImageId: (json['numeric_image_id'] as num?)?.toInt(),
+      numericImageId: (json['numeric_image_id'] as num?)?.toInt(),
     );
   }
 }
@@ -156,7 +156,7 @@ class CornerScapeHistoryImage {
 class CornerScapeAssetItem {
   const CornerScapeAssetItem({
     required this.id,
-    required this.legacyId,
+    required this.numericId,
     required this.name,
     required this.assetType,
     this.description,
@@ -166,7 +166,7 @@ class CornerScapeAssetItem {
   });
 
   final String id;
-  final int legacyId;
+  final int numericId;
   final String name;
   final String assetType;
   final String? description;
@@ -182,7 +182,7 @@ class CornerScapeAssetItem {
     final meta = json['metadata'];
     return CornerScapeAssetItem(
       id: json['id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String,
       assetType: json['asset_type'] as String,
       description: json['description'] as String?,
@@ -201,7 +201,7 @@ class AssetImageRow {
     required this.sortIndex,
     this.filePath,
     this.state,
-    this.legacyImageId,
+    this.numericImageId,
     this.selected,
   });
 
@@ -210,7 +210,7 @@ class AssetImageRow {
   final int sortIndex;
   final String? filePath;
   final String? state;
-  final int? legacyImageId;
+  final int? numericImageId;
 
   /// Present on **`GET …/images`** list items only (`AssetImageListItem`).
   final bool? selected;
@@ -222,7 +222,7 @@ class AssetImageRow {
       sortIndex: (json['sort_index'] as num).toInt(),
       filePath: json['file_path'] as String?,
       state: json['state'] as String?,
-      legacyImageId: (json['numeric_image_id'] as num?)?.toInt(),
+      numericImageId: (json['numeric_image_id'] as num?)?.toInt(),
       selected: json['selected'] as bool?,
     );
   }
@@ -230,15 +230,15 @@ class AssetImageRow {
 
 /// OpenAPI **`ListAssetImagesResponse`**.
 class ListAssetImagesResponse {
-  const ListAssetImagesResponse({this.coverLegacyImageId, required this.items});
+  const ListAssetImagesResponse({this.coverNumericImageId, required this.items});
 
-  final int? coverLegacyImageId;
+  final int? coverNumericImageId;
   final List<AssetImageRow> items;
 
   factory ListAssetImagesResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['items'] as List<dynamic>;
     return ListAssetImagesResponse(
-      coverLegacyImageId: (json['cover_numeric_image_id'] as num?)?.toInt(),
+      coverNumericImageId: (json['cover_numeric_image_id'] as num?)?.toInt(),
       items: raw
           .map((e) => AssetImageRow.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -249,7 +249,7 @@ class ListAssetImagesResponse {
 /// One item in workbench **`POST …/projects/{project_id}/assets/workbench/image-bundle`** response **`tempAssets`**.
 class LegacyAssetGetImageTempAsset {
   const LegacyAssetGetImageTempAsset({
-    this.legacyImageId,
+    this.numericImageId,
     required this.imageUuid,
     required this.filePath,
     required this.assetsId,
@@ -258,7 +258,7 @@ class LegacyAssetGetImageTempAsset {
     required this.selected,
   });
 
-  final int? legacyImageId;
+  final int? numericImageId;
   final String imageUuid;
   final String filePath;
   final int assetsId;
@@ -268,7 +268,7 @@ class LegacyAssetGetImageTempAsset {
 
   factory LegacyAssetGetImageTempAsset.fromJson(Map<String, dynamic> json) {
     return LegacyAssetGetImageTempAsset(
-      legacyImageId: (json['id'] as num?)?.toInt(),
+      numericImageId: (json['id'] as num?)?.toInt(),
       imageUuid: json['imageUuid'] as String? ?? '',
       filePath: json['filePath'] as String? ?? '',
       assetsId: (json['assetsId'] as num).toInt(),

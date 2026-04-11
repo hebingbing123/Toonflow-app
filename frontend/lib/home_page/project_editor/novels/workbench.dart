@@ -36,7 +36,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
           Text(
             first == null
                 ? '用显式表单完成章节新增、搜索、查看、更新、删除和事件生成，不再依赖首条/末条 probe 按钮。'
-                : '$summaryLine；首条 #${first.legacyId} ${first.chapter}，末条 #${last!.legacyId} ${last.chapter}。',
+                : '$summaryLine；首条 #${first.numericId} ${first.chapter}，末条 #${last!.numericId} ${last.chapter}。',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
@@ -99,12 +99,12 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         try {
                           final ids = novels
                               .take(3)
-                              .map((e) => e.legacyId)
+                              .map((e) => e.numericId)
                               .toList();
                           final message =
                               await postLegacyNovelEventsGenerateEvents(
                                 token,
-                                projectLegacyId: p.legacyId,
+                                projectNumericId: p.numericId,
                                 novelIds: ids,
                               );
                           if (!ctx.mounted) return;
@@ -156,21 +156,21 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
     );
     final createBodyCtrl = TextEditingController(text: '在这里填写章节正文。');
     final selectedNovelIdCtrl = TextEditingController(
-      text: first?.legacyId.toString() ?? '',
+      text: first?.numericId.toString() ?? '',
     );
     final patchChapterCtrl = TextEditingController(text: first?.chapter ?? '');
     final patchBodyCtrl = TextEditingController(text: first?.chapterData ?? '');
     final deleteNovelIdCtrl = TextEditingController(
-      text: last?.legacyId.toString() ?? '',
+      text: last?.numericId.toString() ?? '',
     );
     final generateIdsCtrl = TextEditingController(
-      text: currentItems.take(3).map((e) => e.legacyId).join(','),
+      text: currentItems.take(3).map((e) => e.numericId).join(','),
     );
-    final legacyIdsCtrl = TextEditingController(
-      text: currentItems.take(3).map((e) => e.legacyId).join(','),
+    final numericIdsCtrl = TextEditingController(
+      text: currentItems.take(3).map((e) => e.numericId).join(','),
     );
     final batchDeleteIdsCtrl = TextEditingController(
-      text: currentItems.skip(1).take(2).map((e) => e.legacyId).join(','),
+      text: currentItems.skip(1).take(2).map((e) => e.numericId).join(','),
     );
 
     List<NovelRow> previewRows = List<NovelRow>.from(currentItems.take(6));
@@ -188,17 +188,17 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
             ? '章节列表为空。'
             : '已刷新，共 ${refreshed.length} 条章节。';
         if (selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-          selectedNovelIdCtrl.text = refreshed.first.legacyId.toString();
+          selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
           patchChapterCtrl.text = refreshed.first.chapter;
           patchBodyCtrl.text = refreshed.first.chapterData;
         }
         if (deleteNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-          deleteNovelIdCtrl.text = refreshed.last.legacyId.toString();
+          deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
         }
         if (generateIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
           generateIdsCtrl.text = refreshed
               .take(3)
-              .map((e) => e.legacyId)
+              .map((e) => e.numericId)
               .join(',');
         }
       });
@@ -275,7 +275,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   (row) => Padding(
                                     padding: const EdgeInsets.only(bottom: 6),
                                     child: Text(
-                                      '#${row.legacyId} · ${row.chapter} · 事件状态 ${row.eventState}',
+                                      '#${row.numericId} · ${row.chapter} · 事件状态 ${row.eventState}',
                                       style: Theme.of(
                                         dialogCtx,
                                       ).textTheme.bodySmall,
@@ -363,8 +363,8 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   await refreshWorkbench(setLocalState);
                                   setLocalState(() {
                                     infoLine =
-                                        '已新增章节 #${created.legacyId} ${created.chapter}。';
-                                    selectedNovelIdCtrl.text = created.legacyId
+                                        '已新增章节 #${created.numericId} ${created.chapter}。';
+                                    selectedNovelIdCtrl.text = created.numericId
                                         .toString();
                                     patchChapterCtrl.text = created.chapter;
                                     patchBodyCtrl.text = created.chapterData;
@@ -406,7 +406,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                       setLocalState(() {
                                         patchChapterCtrl.text = row.chapter;
                                         patchBodyCtrl.text = row.chapterData;
-                                        infoLine = '已读取章节 #${row.legacyId}。';
+                                        infoLine = '已读取章节 #${row.numericId}。';
                                       });
                                     }),
                               child: const Text('读取章节'),
@@ -451,7 +451,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                       );
                                   await refreshWorkbench(setLocalState);
                                   setLocalState(() {
-                                    infoLine = '已更新章节 #${row.legacyId}。';
+                                    infoLine = '已更新章节 #${row.numericId}。';
                                   });
                                 }),
                           child: const Text('保存章节'),
@@ -502,7 +502,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           onPressed: localBusy
                               ? null
                               : () => runAction(() async {
-                                  final ids = _parseLegacyIdList(
+                                  final ids = _parseNumericIdList(
                                     generateIdsCtrl.text,
                                   );
                                   if (ids.isEmpty) {
@@ -511,7 +511,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   final message =
                                       await postLegacyNovelEventsGenerateEvents(
                                         token,
-                                        projectLegacyId: p.legacyId,
+                                        projectNumericId: p.numericId,
                                         novelIds: ids,
                                       );
                                   await refreshWorkbench(setLocalState);
@@ -528,7 +528,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         ),
                         const SizedBox(height: 8),
                         TextField(
-                          controller: legacyIdsCtrl,
+                          controller: numericIdsCtrl,
                           decoration: const InputDecoration(
                             labelText: 'Legacy 查询章节 IDs',
                             helperText:
@@ -547,7 +547,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                       final rows =
                                           await postLegacyNovelsGetNovelData(
                                             token,
-                                            p.legacyId,
+                                            p.numericId,
                                           );
                                       final sample = rows.isEmpty
                                           ? '空列表'
@@ -555,7 +555,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .take(2)
                                                 .map(
                                                   (row) =>
-                                                      '#${row.legacyId} ${row.chapter}',
+                                                      '#${row.numericId} ${row.chapter}',
                                                 )
                                                 .join(' · ');
                                       setLocalState(() {
@@ -572,7 +572,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                       final rows =
                                           await postLegacyNovelsGetNovelIndex(
                                             token,
-                                            p.legacyId,
+                                            p.numericId,
                                           );
                                       final sample = rows.isEmpty
                                           ? '空列表'
@@ -580,7 +580,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .take(3)
                                                 .map(
                                                   (row) =>
-                                                      '#${row.legacyId}:${row.chapterIndex}',
+                                                      '#${row.numericId}:${row.chapterIndex}',
                                                 )
                                                 .join(' · ');
                                       setLocalState(() {
@@ -594,8 +594,8 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                               onPressed: localBusy
                                   ? null
                                   : () => runAction(() async {
-                                      final ids = _parseLegacyIdList(
-                                        legacyIdsCtrl.text,
+                                      final ids = _parseNumericIdList(
+                                        numericIdsCtrl.text,
                                       );
                                       if (ids.isEmpty) {
                                         throw const FormatException(
@@ -614,7 +614,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .take(3)
                                                 .map(
                                                   (row) =>
-                                                      '#${row.legacyId}:${row.eventState}',
+                                                      '#${row.numericId}:${row.eventState}',
                                                 )
                                                 .join(' · ');
                                       setLocalState(() {
@@ -640,7 +640,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           onPressed: localBusy
                               ? null
                               : () => runAction(() async {
-                                  final ids = _parseLegacyIdList(
+                                  final ids = _parseNumericIdList(
                                     batchDeleteIdsCtrl.text,
                                   );
                                   if (ids.isEmpty) {
@@ -686,12 +686,12 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
       patchBodyCtrl.dispose();
       deleteNovelIdCtrl.dispose();
       generateIdsCtrl.dispose();
-      legacyIdsCtrl.dispose();
+      numericIdsCtrl.dispose();
       batchDeleteIdsCtrl.dispose();
     }
   }
 
-  List<int> _parseLegacyIdList(String raw) {
+  List<int> _parseNumericIdList(String raw) {
     return raw
         .split(',')
         .map((part) => part.trim())

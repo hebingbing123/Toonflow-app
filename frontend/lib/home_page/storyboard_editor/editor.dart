@@ -3,10 +3,10 @@ part of '../../home_page.dart';
 extension _HomePageStoryboardEditor on _HomePageState {
   Future<void> _openStoryboardEditor(
     String token,
-    int storyLegacyId, {
+    int storyNumericId, {
     required String projectId,
-    required int projectLegacyId,
-    required int scriptLegacyId,
+    required int projectNumericId,
+    required int scriptNumericId,
     Future<void> Function()? onStoryboardTreeMutated,
   }) async {
     final promptCtrl = TextEditingController();
@@ -15,10 +15,10 @@ extension _HomePageStoryboardEditor on _HomePageState {
     final sbIdxCtrl = TextEditingController();
     final sgiCtrl = TextEditingController();
     try {
-      final row = await fetchStoryboardByProjectAndLegacyId(
+      final row = await fetchStoryboardByProjectAndNumericId(
         token,
         projectId,
-        storyLegacyId,
+        storyNumericId,
       );
       if (!mounted) return;
       promptCtrl.text = row.prompt ?? '';
@@ -34,7 +34,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               return AlertDialog(
-                title: Text('Storyboard #${row.legacyId}'),
+                title: Text('Storyboard #${row.numericId}'),
                 content: SizedBox(
                   width: 720,
                   child: SingleChildScrollView(
@@ -44,9 +44,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                       children: [
                         _StoryboardWorkbenchPanel(
                           token: token,
-                          storyLegacyId: storyLegacyId,
-                          projectLegacyId: projectLegacyId,
-                          scriptLegacyId: scriptLegacyId,
+                          storyNumericId: storyNumericId,
+                          projectNumericId: projectNumericId,
+                          scriptNumericId: scriptNumericId,
                           scriptStoryboard: row,
                           readPromptText: () => promptCtrl.text,
                           readVideoDescriptionText: () => videoCtrl.text,
@@ -119,7 +119,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               builder: (c) => AlertDialog(
                                 title: const Text('删除分镜？'),
                                 content: Text(
-                                  '将删除 storyboard #${row.legacyId}。',
+                                  '将删除 storyboard #${row.numericId}。',
                                 ),
                                 actions: [
                                   TextButton(
@@ -136,10 +136,10 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             if (ok != true || !ctx.mounted) return;
                             setDialogState(() => saving[0] = true);
                             try {
-                              await deleteStoryboardByProjectAndLegacyId(
+                              await deleteStoryboardByProjectAndNumericId(
                                 token,
                                 projectId,
-                                storyLegacyId,
+                                storyNumericId,
                               );
                               if (!ctx.mounted) return;
                               await onStoryboardTreeMutated?.call();
@@ -203,10 +203,10 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               }
                             }
                             try {
-                              await updateStoryboardByProjectAndLegacyId(
+                              await updateStoryboardByProjectAndNumericId(
                                 token,
                                 projectId,
-                                storyLegacyId,
+                                storyNumericId,
                                 {
                                   'prompt': promptCtrl.text.isEmpty
                                       ? null

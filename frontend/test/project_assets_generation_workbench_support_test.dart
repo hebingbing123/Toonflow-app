@@ -3,28 +3,28 @@ import 'package:toonflow_app/home_page/project_editor/assets/generation/support.
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {
-  test('sortUniqueAssetLegacyIds removes duplicates and sorts ascending', () {
-    expect(sortUniqueAssetLegacyIds([3, 2, 3, -1, 1]), [1, 2, 3]);
+  test('sortUniqueAssetNumericIds removes duplicates and sorts ascending', () {
+    expect(sortUniqueAssetNumericIds([3, 2, 3, -1, 1]), [1, 2, 3]);
   });
 
   test('collectAssetIdsByType groups visible assets by type', () {
     final grouped = collectAssetIdsByType(const [
-      AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-      AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-      AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+      AssetRow(id: 'a', numericId: 7, name: 'Hero', assetType: 'role'),
+      AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+      AssetRow(id: 'c', numericId: 5, name: 'Villain', assetType: 'role'),
     ]);
 
     expect(grouped['props'], [3]);
     expect(grouped['role'], [5, 7]);
   });
 
-  test('collectScopedAssetLegacyIds keeps only currently visible ids', () {
-    final scoped = collectScopedAssetLegacyIds(
+  test('collectScopedAssetNumericIds keeps only currently visible ids', () {
+    final scoped = collectScopedAssetNumericIds(
       const [5, 99, 3],
       const [
-        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-        AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+        AssetRow(id: 'a', numericId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', numericId: 5, name: 'Villain', assetType: 'role'),
       ],
     );
 
@@ -34,12 +34,12 @@ void main() {
   test('chooseVisibleAssetSelection keeps visible preferred ids', () {
     final selection = chooseVisibleAssetSelection(
       const [
-        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-        AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+        AssetRow(id: 'a', numericId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', numericId: 5, name: 'Villain', assetType: 'role'),
       ],
       preferredIds: const [99, 5, 7],
-      preferredLegacyId: 3,
+      preferredNumericId: 3,
     );
 
     expect(selection, [5, 7]);
@@ -48,15 +48,15 @@ void main() {
   test('chooseVisibleAssetSelection falls back to focused or first asset', () {
     expect(
       chooseVisibleAssetSelection(const [
-        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-      ], preferredLegacyId: 7),
+        AssetRow(id: 'a', numericId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+      ], preferredNumericId: 7),
       [7],
     );
     expect(
       chooseVisibleAssetSelection(const [
-        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'a', numericId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
       ]),
       [3],
     );
@@ -194,8 +194,8 @@ void main() {
       final line = summarizeAssetWorkbenchSnapshot(
         lead: '已发起批量出图',
         visibleAssets: const [
-          AssetRow(id: '11', legacyId: 11, name: 'Hero', assetType: 'role'),
-          AssetRow(id: '12', legacyId: 12, name: 'Sword', assetType: 'props'),
+          AssetRow(id: '11', numericId: 11, name: 'Hero', assetType: 'role'),
+          AssetRow(id: '12', numericId: 12, name: 'Sword', assetType: 'props'),
         ],
         selectedIds: const [11, 12],
         productionData: const AssetsDataResponseV1(

@@ -4,7 +4,7 @@ class ScriptRow {
   const ScriptRow({
     required this.id,
     required this.projectId,
-    required this.legacyId,
+    required this.numericId,
     this.name,
     this.content,
     this.extractState,
@@ -13,7 +13,7 @@ class ScriptRow {
 
   final String id;
   final String projectId;
-  final int legacyId;
+  final int numericId;
   final String? name;
   final String? content;
   final int? extractState;
@@ -23,7 +23,7 @@ class ScriptRow {
     return ScriptRow(
       id: json['id'] as String,
       projectId: json['project_id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String?,
       content: json['content'] as String?,
       extractState: json['extract_state'] == null
@@ -39,16 +39,16 @@ class ScriptRow {
 /// Linked asset brief on **`POST …/projects/{project_id}/scripts/get-script-api`** — JSON **`id`** = **`app_asset.legacy_id`**.
 class LegacyScriptRelatedAssetBrief {
   const LegacyScriptRelatedAssetBrief({
-    required this.legacyId,
+    required this.numericId,
     required this.name,
   });
 
-  final int legacyId;
+  final int numericId;
   final String name;
 
   factory LegacyScriptRelatedAssetBrief.fromJson(Map<String, dynamic> json) {
     return LegacyScriptRelatedAssetBrief(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
     );
   }
@@ -57,7 +57,7 @@ class LegacyScriptRelatedAssetBrief {
 /// One script row from **`POST …/projects/{project_id}/scripts/get-script-api`** (camelCase **`extractState`**, **`relatedAssets`**, …).
 class LegacyScriptsGetScriptApiItem {
   const LegacyScriptsGetScriptApiItem({
-    required this.legacyId,
+    required this.numericId,
     this.name,
     this.content,
     this.extractState,
@@ -66,7 +66,7 @@ class LegacyScriptsGetScriptApiItem {
     required this.relatedAssets,
   });
 
-  final int legacyId;
+  final int numericId;
   final String? name;
   final String? content;
   final int? extractState;
@@ -77,7 +77,7 @@ class LegacyScriptsGetScriptApiItem {
   factory LegacyScriptsGetScriptApiItem.fromJson(Map<String, dynamic> json) {
     final raw = json['relatedAssets'] as List<dynamic>? ?? [];
     return LegacyScriptsGetScriptApiItem(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       name: json['name'] as String?,
       content: json['content'] as String?,
       extractState: json['extractState'] == null
@@ -101,18 +101,18 @@ class LegacyScriptsGetScriptApiItem {
 /// Row from **`POST /api/v1/scripts/extract-state/poll`** — OpenAPI **`ScriptExtractStatePollRow`**.
 class ScriptExtractStatePollRow {
   const ScriptExtractStatePollRow({
-    required this.legacyId,
+    required this.numericId,
     this.extractState,
     this.errorReason,
   });
 
-  final int legacyId;
+  final int numericId;
   final int? extractState;
   final String? errorReason;
 
   factory ScriptExtractStatePollRow.fromJson(Map<String, dynamic> json) {
     return ScriptExtractStatePollRow(
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       extractState: json['extract_state'] == null
           ? null
           : (json['extract_state'] as num).toInt(),
@@ -180,8 +180,8 @@ class StoryboardRow {
   const StoryboardRow({
     required this.id,
     required this.scriptId,
-    required this.legacyId,
-    this.legacyScriptId,
+    required this.numericId,
+    this.numericScriptId,
     this.prompt,
     this.filePath,
     this.duration,
@@ -191,7 +191,7 @@ class StoryboardRow {
     this.track,
     this.videoDesc,
     this.shouldGenerateImage,
-    this.legacyProjectId,
+    this.numericProjectId,
     this.flowId,
     this.sbIndex,
     this.createTimeMs,
@@ -199,8 +199,8 @@ class StoryboardRow {
 
   final String id;
   final String scriptId;
-  final int legacyId;
-  final int? legacyScriptId;
+  final int numericId;
+  final int? numericScriptId;
   final String? prompt;
   final String? filePath;
   final String? duration;
@@ -210,7 +210,7 @@ class StoryboardRow {
   final String? track;
   final String? videoDesc;
   final int? shouldGenerateImage;
-  final int? legacyProjectId;
+  final int? numericProjectId;
   final int? flowId;
   final int? sbIndex;
   final int? createTimeMs;
@@ -220,8 +220,8 @@ class StoryboardRow {
     return StoryboardRow(
       id: json['id'] as String,
       scriptId: json['script_id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
-      legacyScriptId: ni('numeric_script_id'),
+      numericId: (json['numeric_id'] as num).toInt(),
+      numericScriptId: ni('numeric_script_id'),
       prompt: json['prompt'] as String?,
       filePath: json['file_path'] as String?,
       duration: json['duration'] as String?,
@@ -231,7 +231,7 @@ class StoryboardRow {
       track: json['track'] as String?,
       videoDesc: json['video_desc'] as String?,
       shouldGenerateImage: ni('should_generate_image'),
-      legacyProjectId: ni('numeric_project_id'),
+      numericProjectId: ni('numeric_project_id'),
       flowId: ni('flow_id'),
       sbIndex: ni('sb_index'),
       createTimeMs: json['create_time_ms'] == null

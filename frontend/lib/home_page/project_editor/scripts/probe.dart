@@ -29,10 +29,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                     ],
                   );
                   for (final s in created.scripts) {
-                    await deleteScriptByProjectAndLegacyId(
+                    await deleteScriptByProjectAndNumericId(
                       token,
                       p.id,
-                      s.legacyId,
+                      s.numericId,
                     );
                   }
                   if (!ctx.mounted) return;
@@ -71,7 +71,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       : rows
                             .take(2)
                             .map(
-                              (r) => '#${r.legacyId} rel=${r.relatedAssets.length}',
+                              (r) => '#${r.numericId} rel=${r.relatedAssets.length}',
                             )
                             .join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -101,8 +101,8 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final sid = scriptList.first.legacyId;
-                  final row = await fetchScriptByProjectAndLegacyId(
+                  final sid = scriptList.first.numericId;
+                  final row = await fetchScriptByProjectAndNumericId(
                     token,
                     p.id,
                     sid,
@@ -137,13 +137,13 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final sid = scriptList.first.legacyId;
-                  final cur = await fetchScriptByProjectAndLegacyId(
+                  final sid = scriptList.first.numericId;
+                  final cur = await fetchScriptByProjectAndNumericId(
                     token,
                     p.id,
                     sid,
                   );
-                  final patched = await updateScriptByProjectAndLegacyId(
+                  final patched = await updateScriptByProjectAndNumericId(
                     token,
                     p.id,
                     sid,
@@ -179,7 +179,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final ids = scriptList.map((s) => s.legacyId).toList();
+                  final ids = scriptList.map((s) => s.numericId).toList();
                   final zip = await exportScriptsZip(token, ids);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
@@ -209,14 +209,14 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final ids = scriptList.map((s) => s.legacyId).toList();
+                  final ids = scriptList.map((s) => s.numericId).toList();
                   final rows = await pollScriptExtractState(token, ids);
                   if (!ctx.mounted) return;
                   final sample = rows.isEmpty
                       ? '（empty：均在提取中或 idle）'
                       : rows
                             .take(3)
-                            .map((r) => '#${r.legacyId} state=${r.extractState}')
+                            .map((r) => '#${r.numericId} state=${r.extractState}')
                             .join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
@@ -245,10 +245,10 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final ids = scriptList.map((s) => s.legacyId).toList();
+                  final ids = scriptList.map((s) => s.numericId).toList();
                   final acc = await startScriptAssetExtract(
                     token,
-                    projectNumericId: p.legacyId,
+                    projectNumericId: p.numericId,
                     scriptNumericIds: ids,
                   );
                   if (!ctx.mounted) return;

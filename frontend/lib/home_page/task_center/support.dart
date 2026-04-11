@@ -10,7 +10,7 @@ String summarizeTaskProjects(
   }
   final visible = items
       .take(maxItems)
-      .map((row) => '#${row.id} ${row.name}')
+      .map((row) => '#${row.numericId} ${row.name}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
   return '项目 ${items.length} 个 · $visible$suffix';
@@ -36,7 +36,7 @@ String summarizeTaskJobs(Iterable<JobRow> rows, {int maxItems = 4}) {
   }
   final visible = items
       .take(maxItems)
-      .map((row) => '#${row.legacyTaskId} ${row.kind}:${row.status}')
+      .map((row) => '#${row.numericTaskId} ${row.kind}:${row.status}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
   return '任务 ${items.length} 条 · $visible$suffix';
@@ -46,7 +46,7 @@ String formatTaskJobDetails(JobRow row) {
   final payloadKeys = row.payload.keys.take(4).join(', ');
   final resultKeys = row.result?.keys.take(4).join(', ');
   return [
-    '#${row.legacyTaskId}',
+    '#${row.numericTaskId}',
     row.kind,
     row.status,
     'uuid=${row.id}',

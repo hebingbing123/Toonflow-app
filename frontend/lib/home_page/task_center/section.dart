@@ -195,12 +195,12 @@ class _TaskCenterWorkbenchDialogState
     _projectIdCtrl = TextEditingController(
       text: widget.initialProjects.isEmpty
           ? ''
-          : widget.initialProjects.first.id.toString(),
+          : widget.initialProjects.first.numericId.toString(),
     );
     _legacyTaskIdCtrl = TextEditingController(
       text: widget.initialJobs.isEmpty
           ? ''
-          : widget.initialJobs.first.legacyTaskId.toString(),
+          : widget.initialJobs.first.numericTaskId.toString(),
     );
     _uuidCtrl = TextEditingController(
       text: widget.initialJobs.isEmpty ? '' : widget.initialJobs.first.id,
@@ -236,7 +236,7 @@ class _TaskCenterWorkbenchDialogState
       setState(() {
         _projects = rows;
         if (_projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
-          _projectIdCtrl.text = rows.first.id.toString();
+          _projectIdCtrl.text = rows.first.numericId.toString();
         }
         _statusLine = '已读取 ${rows.length} 个任务项目。';
         _loadingProjects = false;
@@ -315,7 +315,7 @@ class _TaskCenterWorkbenchDialogState
             '${taskClass.isEmpty ? '' : ' taskClass=$taskClass'}'
             ' · total=${rows.total} · page_rows=${jobs.length}';
         if (jobs.isNotEmpty) {
-          _legacyTaskIdCtrl.text = jobs.first.legacyTaskId.toString();
+          _legacyTaskIdCtrl.text = jobs.first.numericTaskId.toString();
           _uuidCtrl.text = jobs.first.id;
         }
         _statusLine = '已刷新 ${jobs.length} 条任务。';
@@ -384,7 +384,7 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _uuidDetails = formatTaskJobDetails(row);
-        _legacyTaskIdCtrl.text = row.legacyTaskId.toString();
+        _legacyTaskIdCtrl.text = row.numericTaskId.toString();
         _loadingUuidDetails = false;
       });
     } on RustApiException catch (e) {
@@ -542,11 +542,11 @@ class _TaskCenterWorkbenchDialogState
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         title: Text('${job.kind} · ${job.status}'),
-                        subtitle: Text('#${job.legacyTaskId} · ${job.id}'),
+                        subtitle: Text('#${job.numericTaskId} · ${job.id}'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           setState(() {
-                            _legacyTaskIdCtrl.text = job.legacyTaskId
+                            _legacyTaskIdCtrl.text = job.numericTaskId
                                 .toString();
                             _uuidCtrl.text = job.id;
                           });

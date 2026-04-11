@@ -91,24 +91,24 @@ String buildScriptBatchWorkbenchFollowUp({
   return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
 }
 
-LegacyScriptsGetScriptApiItem? findScriptContextByLegacyId(
+LegacyScriptsGetScriptApiItem? findScriptContextByNumericId(
   Iterable<LegacyScriptsGetScriptApiItem> rows,
-  int legacyId,
+  int numericId,
 ) {
   for (final row in rows) {
-    if (row.legacyId == legacyId) {
+    if (row.numericId == numericId) {
       return row;
     }
   }
   return null;
 }
 
-ScriptExtractStatePollRow? findScriptExtractStateByLegacyId(
+ScriptExtractStatePollRow? findScriptExtractStateByNumericId(
   Iterable<ScriptExtractStatePollRow> rows,
-  int legacyId,
+  int numericId,
 ) {
   for (final row in rows) {
-    if (row.legacyId == legacyId) {
+    if (row.numericId == numericId) {
       return row;
     }
   }
@@ -195,10 +195,10 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
   }
 
   final previewById = <int, LegacyScriptsGetScriptApiItem>{
-    for (final row in previewRows) row.legacyId: row,
+    for (final row in previewRows) row.numericId: row,
   };
   final scriptById = <int, ScriptBrief>{
-    for (final row in scripts) row.legacyId: row,
+    for (final row in scripts) row.numericId: row,
   };
 
   var runningCount = 0;
@@ -290,7 +290,7 @@ String formatBinarySize(int bytes) {
   return '${mb.toStringAsFixed(mb >= 10 ? 0 : 1)} MB';
 }
 
-List<int> parseLegacyIdSelection(String raw) {
+List<int> parseNumericIdSelection(String raw) {
   final seen = <int>{};
   final values = <int>[];
   for (final token in raw.split(RegExp(r'[^0-9]+'))) {
@@ -307,7 +307,7 @@ List<int> parseLegacyIdSelection(String raw) {
   return values;
 }
 
-String encodeLegacyIdSelection(Iterable<int> ids) {
+String encodeNumericIdSelection(Iterable<int> ids) {
   return ids.map((id) => id.toString()).join(',');
 }
 
@@ -315,17 +315,17 @@ List<ScriptBrief> syncScriptExtractStates(
   Iterable<ScriptBrief> scripts,
   Iterable<ScriptExtractStatePollRow> rows,
 ) {
-  final byLegacyId = <int, ScriptExtractStatePollRow>{
-    for (final row in rows) row.legacyId: row,
+  final byNumericId = <int, ScriptExtractStatePollRow>{
+    for (final row in rows) row.numericId: row,
   };
   return scripts
       .map((script) {
-        final next = byLegacyId[script.legacyId];
+        final next = byNumericId[script.numericId];
         if (next == null) {
           return script;
         }
         return ScriptBrief(
-          legacyId: script.legacyId,
+          numericId: script.numericId,
           name: script.name,
           extractState: next.extractState,
         );
@@ -337,17 +337,17 @@ List<LegacyScriptsGetScriptApiItem> syncScriptPreviewExtractStates(
   Iterable<LegacyScriptsGetScriptApiItem> rows,
   Iterable<ScriptExtractStatePollRow> updates,
 ) {
-  final byLegacyId = <int, ScriptExtractStatePollRow>{
-    for (final row in updates) row.legacyId: row,
+  final byNumericId = <int, ScriptExtractStatePollRow>{
+    for (final row in updates) row.numericId: row,
   };
   return rows
       .map((row) {
-        final next = byLegacyId[row.legacyId];
+        final next = byNumericId[row.numericId];
         if (next == null) {
           return row;
         }
         return LegacyScriptsGetScriptApiItem(
-          legacyId: row.legacyId,
+          numericId: row.numericId,
           name: row.name,
           content: row.content,
           extractState: next.extractState,

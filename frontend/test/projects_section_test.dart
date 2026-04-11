@@ -21,7 +21,7 @@ void main() {
             artStyles: const [
               ArtStyleRow(
                 id: 'style-1',
-                legacyId: 11,
+                numericId: 11,
                 name: '水墨古风',
                 label: 'ink',
                 prompt: 'soft ink wash',
@@ -66,7 +66,7 @@ void main() {
             artStyles: const [
               ArtStyleRow(
                 id: 'style-1',
-                legacyId: 11,
+                numericId: 11,
                 name: '水墨古风',
                 label: 'ink',
                 prompt: 'soft ink wash',
@@ -150,7 +150,7 @@ void main() {
             projects: const [
               ProjectRow(
                 id: 'project-1',
-                legacyId: 11,
+                numericId: 11,
                 name: '项目一',
                 createTimeMs: 1,
               ),

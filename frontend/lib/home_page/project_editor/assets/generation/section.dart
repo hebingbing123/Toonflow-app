@@ -9,13 +9,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ListAssetsResponse?> assetsRef,
     required List<ListAssetsResponse?> assetsForScriptRef,
-    required List<int?> assetsFilterScriptLegacyId,
+    required List<int?> assetsFilterScriptNumericId,
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
-    int? preferredAssetLegacyId,
+    int? preferredAssetNumericId,
   }) async {
     List<AssetRow> visibleAssets() {
-      final filtered = assetsFilterScriptLegacyId[0] == null
+      final filtered = assetsFilterScriptNumericId[0] == null
           ? null
           : assetsForScriptRef[0];
       return (filtered ?? assetsRef[0])?.items ?? const <AssetRow>[];
@@ -35,13 +35,13 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
       return;
     }
 
-    final initialFocusedAssetLegacyId = chooseInitialAssetLegacyId(
+    final initialFocusedAssetNumericId = chooseInitialAssetNumericId(
       seededAssets,
-      preferredLegacyId: preferredAssetLegacyId,
+      preferredNumericId: preferredAssetNumericId,
     );
     final initialSelectedIds = chooseVisibleAssetSelection(
       seededAssets,
-      preferredLegacyId: initialFocusedAssetLegacyId,
+      preferredNumericId: initialFocusedAssetNumericId,
     );
 
     await showDialog<void>(
@@ -52,11 +52,11 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
           project: p,
           scriptList: scriptList,
           visibleAssets: visibleAssets,
-          assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+          assetsFilterScriptNumericId: assetsFilterScriptNumericId,
           initialSelectedIds: initialSelectedIds,
-          initialFocusedAssetLegacyId: initialFocusedAssetLegacyId,
-          initialScriptLegacyId:
-              assetsFilterScriptLegacyId[0] ?? scriptList.first.legacyId,
+          initialFocusedAssetNumericId: initialFocusedAssetNumericId,
+          initialScriptNumericId:
+              assetsFilterScriptNumericId[0] ?? scriptList.first.numericId,
           onMutationStart: () => setDialogState(() => assetsBusy[0] = true),
           onMutationEnd: () {
             if (ctx.mounted) setDialogState(() => assetsBusy[0] = false);

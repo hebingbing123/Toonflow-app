@@ -24,7 +24,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   if (!ctx.mounted) return;
                   final line = rows.isEmpty
                       ? '0 项'
-                      : rows.map((r) => '#${r.legacyId} ${r.name ?? ""}').join('; ');
+                      : rows.map((r) => '#${r.numericId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(content: Text('GET …/projects（compat 列表）：$line')),
                   );
@@ -56,7 +56,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                 try {
                   final msg = await postProjectEditProject(
                     token,
-                    id: pr.legacyId,
+                    id: pr.numericId,
                     name: pr.name ?? '',
                     intro: pr.intro ?? '',
                     type: pr.mode ?? '',
@@ -73,7 +73,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/project/edit-project noop #${pr.legacyId}：$msg',
+                        'POST …/project/edit-project noop #${pr.numericId}：$msg',
                       ),
                     ),
                   );
@@ -227,12 +227,12 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                     );
                     return;
                   }
-                  await postProjectDeleteProject(token, match.legacyId);
+                  await postProjectDeleteProject(token, match.numericId);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST add-project → delete legacy#${match.legacyId} ok',
+                        'POST add-project → delete legacy#${match.numericId} ok',
                       ),
                     ),
                   );

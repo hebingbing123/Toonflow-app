@@ -5,7 +5,7 @@ class NovelEventRow {
   const NovelEventRow({
     required this.id,
     required this.projectId,
-    required this.legacyId,
+    required this.numericId,
     required this.name,
     required this.detail,
     this.createTimeMs,
@@ -14,7 +14,7 @@ class NovelEventRow {
 
   final String id;
   final String projectId;
-  final int legacyId;
+  final int numericId;
   final String name;
   final String detail;
   final int? createTimeMs;
@@ -26,7 +26,7 @@ class NovelEventRow {
     return NovelEventRow(
       id: json['id'] as String,
       projectId: json['project_id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       name: json['name'] as String? ?? '',
       detail: json['detail'] as String? ?? '',
       createTimeMs: json['create_time_ms'] == null
@@ -58,14 +58,14 @@ class ListNovelEventsResponse {
 /// Compat event row (**`get-events`** shape); mapped from **`GET …/novel-events`**.
 class LegacyNovelEventRow {
   const LegacyNovelEventRow({
-    required this.legacyId,
+    required this.numericId,
     required this.eventName,
     this.detail,
     required this.createTime,
     required this.chapters,
   });
 
-  final int legacyId;
+  final int numericId;
   final String eventName;
   final String? detail;
   final int createTime;
@@ -74,7 +74,7 @@ class LegacyNovelEventRow {
   factory LegacyNovelEventRow.fromJson(Map<String, dynamic> json) {
     final rawChapters = json['chapters'] as List<dynamic>? ?? const [];
     return LegacyNovelEventRow(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       eventName: json['eventName'] as String? ?? '',
       detail: json['detail'] as String?,
       createTime: (json['createTime'] as num?)?.toInt() ?? 0,

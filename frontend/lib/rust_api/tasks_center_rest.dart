@@ -1,15 +1,15 @@
 part of 'index.dart';
 
 class LegacyTasksProjectItem {
-  const LegacyTasksProjectItem({required this.id, required this.name});
+  const LegacyTasksProjectItem({required this.numericId, required this.name});
 
-  /// `app_project.legacy_id`.
-  final int id;
+  /// `app_project.legacy_id` (compat JSON key **`id`**).
+  final int numericId;
   final String name;
 
   factory LegacyTasksProjectItem.fromJson(Map<String, dynamic> json) {
     return LegacyTasksProjectItem(
-      id: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       name: json['name'] as String,
     );
   }
@@ -54,7 +54,7 @@ Future<List<LegacyTasksProjectItem>> postTasksGetProject(
     if (n.isEmpty) {
       continue;
     }
-    out.add(LegacyTasksProjectItem(id: r.legacyId, name: n));
+    out.add(LegacyTasksProjectItem(numericId: r.numericId, name: n));
   }
   return out;
 }

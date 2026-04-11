@@ -7,7 +7,7 @@ void main() {
     final summary = summarizeNovelRows([
       NovelRow(
         id: 'n1',
-        legacyId: 11,
+        numericId: 11,
         chapterIndex: 1,
         chapter: '第一章',
         chapterData: 'a',
@@ -15,7 +15,7 @@ void main() {
       ),
       NovelRow(
         id: 'n2',
-        legacyId: 12,
+        numericId: 12,
         chapterIndex: 2,
         chapter: '第二章',
         chapterData: 'b',
@@ -23,7 +23,7 @@ void main() {
       ),
       NovelRow(
         id: 'n3',
-        legacyId: 13,
+        numericId: 13,
         chapterIndex: 3,
         chapter: '第三章',
         chapterData: 'c',
@@ -31,7 +31,7 @@ void main() {
       ),
       NovelRow(
         id: 'n4',
-        legacyId: 14,
+        numericId: 14,
         chapterIndex: 4,
         chapter: '第四章',
         chapterData: 'd',
@@ -39,7 +39,7 @@ void main() {
       ),
       NovelRow(
         id: 'n5',
-        legacyId: 15,
+        numericId: 15,
         chapterIndex: 5,
         chapter: '第五章',
         chapterData: 'e',
@@ -59,7 +59,7 @@ void main() {
       NovelEventRow(
         id: 'e1',
         projectId: 'p1',
-        legacyId: 21,
+        numericId: 21,
         name: '事件一',
         detail: 'a',
         chapterIndexes: [1],
@@ -67,7 +67,7 @@ void main() {
       NovelEventRow(
         id: 'e2',
         projectId: 'p1',
-        legacyId: 22,
+        numericId: 22,
         name: '事件二',
         detail: 'b',
         chapterIndexes: [2],
@@ -75,7 +75,7 @@ void main() {
       NovelEventRow(
         id: 'e3',
         projectId: 'p1',
-        legacyId: 23,
+        numericId: 23,
         name: '事件三',
         detail: 'c',
         chapterIndexes: [3],
@@ -83,7 +83,7 @@ void main() {
       NovelEventRow(
         id: 'e4',
         projectId: 'p1',
-        legacyId: 24,
+        numericId: 24,
         name: '事件四',
         detail: 'd',
         chapterIndexes: [4],

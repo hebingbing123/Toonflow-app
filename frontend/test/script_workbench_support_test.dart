@@ -3,11 +3,11 @@ import 'package:toonflow_app/home_page/script_editor/support.dart';
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {
-  test('findScriptContextByLegacyId returns matching row', () {
-    final row = findScriptContextByLegacyId(const [
-      LegacyScriptsGetScriptApiItem(legacyId: 1, relatedAssets: []),
+  test('findScriptContextByNumericId returns matching row', () {
+    final row = findScriptContextByNumericId(const [
+      LegacyScriptsGetScriptApiItem(numericId: 1, relatedAssets: []),
       LegacyScriptsGetScriptApiItem(
-        legacyId: 7,
+        numericId: 7,
         name: 'target',
         relatedAssets: [],
       ),
@@ -16,11 +16,11 @@ void main() {
     expect(row?.name, 'target');
   });
 
-  test('findScriptExtractStateByLegacyId returns matching row', () {
-    final row = findScriptExtractStateByLegacyId(const [
-      ScriptExtractStatePollRow(legacyId: 3, extractState: 0),
+  test('findScriptExtractStateByNumericId returns matching row', () {
+    final row = findScriptExtractStateByNumericId(const [
+      ScriptExtractStatePollRow(numericId: 3, extractState: 0),
       ScriptExtractStatePollRow(
-        legacyId: 9,
+        numericId: 9,
         extractState: -1,
         errorReason: 'llm_not_configured',
       ),
@@ -43,11 +43,11 @@ void main() {
 
   test('summarizeRelatedScriptAssets compacts long asset list', () {
     final summary = summarizeRelatedScriptAssets(const [
-      LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A'),
-      LegacyScriptRelatedAssetBrief(legacyId: 2, name: '场景 B'),
-      LegacyScriptRelatedAssetBrief(legacyId: 3, name: '道具 C'),
-      LegacyScriptRelatedAssetBrief(legacyId: 4, name: '镜头 D'),
-      LegacyScriptRelatedAssetBrief(legacyId: 5, name: '音乐 E'),
+      LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+      LegacyScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
+      LegacyScriptRelatedAssetBrief(numericId: 3, name: '道具 C'),
+      LegacyScriptRelatedAssetBrief(numericId: 4, name: '镜头 D'),
+      LegacyScriptRelatedAssetBrief(numericId: 5, name: '音乐 E'),
     ]);
 
     expect(summary, '角色 A、场景 B、道具 C、镜头 D 等 5 项');
@@ -66,11 +66,11 @@ void main() {
   test('diagnoseScriptWorkbench suggests retry when extract failed', () {
     final diagnosis = diagnoseScriptWorkbench(
       scriptContext: const LegacyScriptsGetScriptApiItem(
-        legacyId: 7,
+        numericId: 7,
         relatedAssets: [],
       ),
       extractStateRow: const ScriptExtractStatePollRow(
-        legacyId: 7,
+        numericId: 7,
         extractState: -1,
         errorReason: 'llm_not_configured',
       ),
@@ -87,11 +87,11 @@ void main() {
   test('diagnoseScriptWorkbench suggests polling while extract runs', () {
     final diagnosis = diagnoseScriptWorkbench(
       scriptContext: const LegacyScriptsGetScriptApiItem(
-        legacyId: 7,
+        numericId: 7,
         relatedAssets: [],
       ),
       extractStateRow: const ScriptExtractStatePollRow(
-        legacyId: 7,
+        numericId: 7,
         extractState: 2,
       ),
     );
@@ -106,7 +106,7 @@ void main() {
   test('diagnoseScriptWorkbench suggests extract when no assets exist', () {
     final diagnosis = diagnoseScriptWorkbench(
       scriptContext: const LegacyScriptsGetScriptApiItem(
-        legacyId: 7,
+        numericId: 7,
         extractState: 0,
         relatedAssets: [],
       ),
@@ -124,10 +124,10 @@ void main() {
     () {
       final diagnosis = diagnoseScriptWorkbench(
         scriptContext: const LegacyScriptsGetScriptApiItem(
-          legacyId: 7,
+          numericId: 7,
           extractState: 0,
           relatedAssets: [
-            LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A'),
+            LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
           ],
         ),
       );
@@ -143,7 +143,7 @@ void main() {
   test('buildScriptWorkbenchFollowUp appends next step guidance', () {
     final diagnosis = diagnoseScriptWorkbench(
       scriptContext: const LegacyScriptsGetScriptApiItem(
-        legacyId: 7,
+        numericId: 7,
         extractState: 0,
         relatedAssets: [],
       ),
@@ -179,8 +179,8 @@ void main() {
     final diagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: const [3, 4],
       scripts: const [
-        ScriptBrief(legacyId: 3, extractState: 2),
-        ScriptBrief(legacyId: 4, extractState: 0),
+        ScriptBrief(numericId: 3, extractState: 2),
+        ScriptBrief(numericId: 4, extractState: 0),
       ],
       previewRows: const [],
     );
@@ -198,8 +198,8 @@ void main() {
       final diagnosis = diagnoseScriptBatchWorkbench(
         selectedIds: const [3, 4],
         scripts: const [
-          ScriptBrief(legacyId: 3, extractState: 0),
-          ScriptBrief(legacyId: 4, extractState: 0),
+          ScriptBrief(numericId: 3, extractState: 0),
+          ScriptBrief(numericId: 4, extractState: 0),
         ],
         previewRows: const [],
       );
@@ -216,8 +216,8 @@ void main() {
     final diagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: const [3, 4],
       scripts: const [
-        ScriptBrief(legacyId: 3, extractState: -1),
-        ScriptBrief(legacyId: 4, extractState: 0),
+        ScriptBrief(numericId: 3, extractState: -1),
+        ScriptBrief(numericId: 4, extractState: 0),
       ],
       previewRows: const [],
     );
@@ -235,20 +235,20 @@ void main() {
       final diagnosis = diagnoseScriptBatchWorkbench(
         selectedIds: const [7, 8],
         scripts: const [
-          ScriptBrief(legacyId: 7, extractState: 0),
-          ScriptBrief(legacyId: 8, extractState: 0),
+          ScriptBrief(numericId: 7, extractState: 0),
+          ScriptBrief(numericId: 8, extractState: 0),
         ],
         previewRows: const [
           LegacyScriptsGetScriptApiItem(
-            legacyId: 7,
+            numericId: 7,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A'),
+              LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
             ],
           ),
           LegacyScriptsGetScriptApiItem(
-            legacyId: 8,
+            numericId: 8,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(legacyId: 2, name: '场景 B'),
+              LegacyScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
             ],
           ),
         ],
@@ -268,14 +268,14 @@ void main() {
       final diagnosis = diagnoseScriptBatchWorkbench(
         selectedIds: const [7, 8],
         scripts: const [
-          ScriptBrief(legacyId: 7, extractState: 0),
-          ScriptBrief(legacyId: 8, extractState: 0),
+          ScriptBrief(numericId: 7, extractState: 0),
+          ScriptBrief(numericId: 8, extractState: 0),
         ],
         previewRows: const [
           LegacyScriptsGetScriptApiItem(
-            legacyId: 7,
+            numericId: 7,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(legacyId: 1, name: '角色 A'),
+              LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
             ],
           ),
         ],
@@ -293,8 +293,8 @@ void main() {
     final diagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: const [3, 4],
       scripts: const [
-        ScriptBrief(legacyId: 3, extractState: 2),
-        ScriptBrief(legacyId: 4, extractState: 0),
+        ScriptBrief(numericId: 3, extractState: 2),
+        ScriptBrief(numericId: 4, extractState: 0),
       ],
       previewRows: const [],
     );
@@ -314,21 +314,21 @@ void main() {
     expect(formatBinarySize(2 * 1024 * 1024), '2.0 MB');
   });
 
-  test('parseLegacyIdSelection keeps unique positive ids in order', () {
-    expect(parseLegacyIdSelection('9, 2\n0, x, 9, 4'), [9, 2, 4]);
+  test('parseNumericIdSelection keeps unique positive ids in order', () {
+    expect(parseNumericIdSelection('9, 2\n0, x, 9, 4'), [9, 2, 4]);
   });
 
-  test('encodeLegacyIdSelection joins ids for text fields', () {
-    expect(encodeLegacyIdSelection(const [3, 8, 13]), '3,8,13');
+  test('encodeNumericIdSelection joins ids for text fields', () {
+    expect(encodeNumericIdSelection(const [3, 8, 13]), '3,8,13');
   });
 
   test('syncScriptExtractStates updates matching scripts only', () {
     final synced = syncScriptExtractStates(
       const [
-        ScriptBrief(legacyId: 1, name: 'a', extractState: 0),
-        ScriptBrief(legacyId: 2, name: 'b', extractState: 0),
+        ScriptBrief(numericId: 1, name: 'a', extractState: 0),
+        ScriptBrief(numericId: 2, name: 'b', extractState: 0),
       ],
-      const [ScriptExtractStatePollRow(legacyId: 2, extractState: -1)],
+      const [ScriptExtractStatePollRow(numericId: 2, extractState: -1)],
     );
 
     expect(synced.first.extractState, 0);
@@ -339,19 +339,19 @@ void main() {
     final synced = syncScriptPreviewExtractStates(
       const [
         LegacyScriptsGetScriptApiItem(
-          legacyId: 1,
+          numericId: 1,
           extractState: 0,
           relatedAssets: [],
         ),
         LegacyScriptsGetScriptApiItem(
-          legacyId: 2,
+          numericId: 2,
           extractState: 0,
           relatedAssets: [],
         ),
       ],
       const [
         ScriptExtractStatePollRow(
-          legacyId: 2,
+          numericId: 2,
           extractState: -1,
           errorReason: 'failed',
         ),

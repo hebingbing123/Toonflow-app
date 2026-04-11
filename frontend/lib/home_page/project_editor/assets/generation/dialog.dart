@@ -6,10 +6,10 @@ class _AssetGenerationWorkbenchDialog extends StatefulWidget {
     required this.project,
     required this.scriptList,
     required this.visibleAssets,
-    required this.assetsFilterScriptLegacyId,
+    required this.assetsFilterScriptNumericId,
     required this.initialSelectedIds,
-    required this.initialFocusedAssetLegacyId,
-    required this.initialScriptLegacyId,
+    required this.initialFocusedAssetNumericId,
+    required this.initialScriptNumericId,
     required this.onMutationStart,
     required this.onMutationEnd,
     required this.reloadAssetsAndStats,
@@ -19,10 +19,10 @@ class _AssetGenerationWorkbenchDialog extends StatefulWidget {
   final ProjectRow project;
   final List<ScriptBrief> scriptList;
   final List<AssetRow> Function() visibleAssets;
-  final List<int?> assetsFilterScriptLegacyId;
+  final List<int?> assetsFilterScriptNumericId;
   final Iterable<int> initialSelectedIds;
-  final int? initialFocusedAssetLegacyId;
-  final int initialScriptLegacyId;
+  final int? initialFocusedAssetNumericId;
+  final int initialScriptNumericId;
   final VoidCallback onMutationStart;
   final VoidCallback onMutationEnd;
   final Future<void> Function() reloadAssetsAndStats;
@@ -41,8 +41,8 @@ class _AssetGenerationWorkbenchDialogState
   late final TextEditingController _batchLimitCtrl;
 
   late final Set<int> _selectedIds;
-  int? _focusedAssetLegacyId;
-  late int _selectedScriptLegacyId;
+  int? _focusedAssetNumericId;
+  late int _selectedScriptNumericId;
   String _selectedType = '';
   bool _loadingSummary = false;
   bool _busyMutation = false;
@@ -62,8 +62,8 @@ class _AssetGenerationWorkbenchDialogState
     _batchNameCtrl = TextEditingController();
     _batchLimitCtrl = TextEditingController(text: '10');
     _selectedIds = <int>{...widget.initialSelectedIds};
-    _focusedAssetLegacyId = widget.initialFocusedAssetLegacyId;
-    _selectedScriptLegacyId = widget.initialScriptLegacyId;
+    _focusedAssetNumericId = widget.initialFocusedAssetNumericId;
+    _selectedScriptNumericId = widget.initialScriptNumericId;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       await _syncWorkbenchSnapshot(includeProductionSummary: true);
@@ -88,15 +88,15 @@ class _AssetGenerationWorkbenchDialogState
         .toList(growable: false);
   }
 
-  List<int> _sortedSelection() => sortUniqueAssetLegacyIds(_selectedIds);
+  List<int> _sortedSelection() => sortUniqueAssetNumericIds(_selectedIds);
 
   void _applySelection(Iterable<int> ids, String label) {
-    final next = sortUniqueAssetLegacyIds(ids);
+    final next = sortUniqueAssetNumericIds(ids);
     setState(() {
       _selectedIds
         ..clear()
         ..addAll(next);
-      _focusedAssetLegacyId = next.isEmpty ? _focusedAssetLegacyId : next.first;
+      _focusedAssetNumericId = next.isEmpty ? _focusedAssetNumericId : next.first;
       _statusLine = next.isEmpty
           ? '$label：没有可选资产'
           : '$label：已选择 ${next.length} 条资产';
@@ -104,7 +104,7 @@ class _AssetGenerationWorkbenchDialogState
   }
 
   void _applyScopedSelection(Iterable<int> candidateIds, String label) {
-    final next = collectScopedAssetLegacyIds(
+    final next = collectScopedAssetNumericIds(
       candidateIds,
       _filteredVisibleAssets(),
     );
@@ -112,7 +112,7 @@ class _AssetGenerationWorkbenchDialogState
       _selectedIds
         ..clear()
         ..addAll(next);
-      _focusedAssetLegacyId = next.isEmpty ? null : next.first;
+      _focusedAssetNumericId = next.isEmpty ? null : next.first;
       _statusLine = next.isEmpty
           ? '$label：当前可见资产中没有匹配项'
           : '$label：已选择 ${next.length} 条资产';
@@ -133,7 +133,7 @@ class _AssetGenerationWorkbenchDialogState
       if (includeProductionSummary) {
         nextProductionData = await postProductionAssetsGetAssetsDataV1(
           widget.token,
-          projectId: widget.project.legacyId,
+          projectId: widget.project.numericId,
           assetType: _selectedType.isEmpty ? null : _selectedType,
         );
       }
@@ -142,7 +142,7 @@ class _AssetGenerationWorkbenchDialogState
       if (selected.isNotEmpty) {
         nextPollingData = await postProductionAssetsPollingImageV1(
           widget.token,
-          projectId: widget.project.legacyId,
+          projectId: widget.project.numericId,
           assetIds: selected,
         );
         nextPromptPollingData = await postLegacyAssetsPollingPromptAssets(
@@ -155,7 +155,7 @@ class _AssetGenerationWorkbenchDialogState
       final nextSelection = chooseVisibleAssetSelection(
         currentVisibleAssets,
         preferredIds: _selectedIds,
-        preferredLegacyId: _focusedAssetLegacyId,
+        preferredNumericId: _focusedAssetNumericId,
       );
       if (!mounted) return;
       setState(() {
@@ -165,7 +165,7 @@ class _AssetGenerationWorkbenchDialogState
         _selectedIds
           ..clear()
           ..addAll(nextSelection);
-        _focusedAssetLegacyId = _selectedIds.isEmpty
+        _focusedAssetNumericId = _selectedIds.isEmpty
             ? null
             : _selectedIds.first;
         _statusLine = summarizeAssetWorkbenchSnapshot(
@@ -206,16 +206,16 @@ class _AssetGenerationWorkbenchDialogState
   void _toggleAssetSelection(AssetRow asset, bool checked) {
     setState(() {
       if (checked) {
-        _selectedIds.add(asset.legacyId);
-        _focusedAssetLegacyId = asset.legacyId;
+        _selectedIds.add(asset.numericId);
+        _focusedAssetNumericId = asset.numericId;
         if (_selectedIds.length == 1) {
           _imageUrlCtrl.clear();
         }
       } else {
-        _selectedIds.remove(asset.legacyId);
-        if (_focusedAssetLegacyId == asset.legacyId) {
-          final remaining = sortUniqueAssetLegacyIds(_selectedIds);
-          _focusedAssetLegacyId = remaining.isEmpty ? null : remaining.first;
+        _selectedIds.remove(asset.numericId);
+        if (_focusedAssetNumericId == asset.numericId) {
+          final remaining = sortUniqueAssetNumericIds(_selectedIds);
+          _focusedAssetNumericId = remaining.isEmpty ? null : remaining.first;
         }
       }
     });
@@ -256,7 +256,7 @@ class _AssetGenerationWorkbenchDialogState
                 scriptList: widget.scriptList,
                 visibleAssets: visible,
                 typeSelections: typeSelections,
-                selectedScriptLegacyId: _selectedScriptLegacyId,
+                selectedScriptNumericId: _selectedScriptNumericId,
                 selectedType: _selectedType,
                 modelCtrl: _modelCtrl,
                 resolutionCtrl: _resolutionCtrl,
@@ -264,7 +264,7 @@ class _AssetGenerationWorkbenchDialogState
                 batchNameCtrl: _batchNameCtrl,
                 batchLimitCtrl: _batchLimitCtrl,
                 onScriptChanged: (value) {
-                  setState(() => _selectedScriptLegacyId = value);
+                  setState(() => _selectedScriptNumericId = value);
                 },
                 onImageUrlChanged: (_) => setState(() {}),
                 onTypeChanged: (nextType) async {
@@ -276,14 +276,14 @@ class _AssetGenerationWorkbenchDialogState
                   final nextSelection = chooseVisibleAssetSelection(
                     nextVisibleAssets,
                     preferredIds: _selectedIds,
-                    preferredLegacyId: _focusedAssetLegacyId,
+                    preferredNumericId: _focusedAssetNumericId,
                   );
                   setState(() {
                     _selectedType = nextType;
                     _selectedIds
                       ..clear()
                       ..addAll(nextSelection);
-                    _focusedAssetLegacyId = _selectedIds.isEmpty
+                    _focusedAssetNumericId = _selectedIds.isEmpty
                         ? null
                         : _selectedIds.first;
                     _statusLine = nextType.isEmpty
@@ -345,12 +345,12 @@ class _AssetGenerationWorkbenchDialogState
                   }
                 }),
                 onSelectAllVisible: () => _applySelection(
-                  scopedAssets.map((a) => a.legacyId),
+                  scopedAssets.map((a) => a.numericId),
                   '已全选当前可见资产',
                 ),
                 onRebuildSelectionByType: () => _applySelection(
                   _selectedType.isEmpty
-                      ? scopedAssets.map((a) => a.legacyId)
+                      ? scopedAssets.map((a) => a.numericId)
                       : (typeSelections[_selectedType] ?? const <int>[]),
                   _selectedType.isEmpty
                       ? '已按全部类型重建选择'
@@ -361,8 +361,8 @@ class _AssetGenerationWorkbenchDialogState
                   final response =
                       await postProductionAssetsBatchGenerateAssetsImageV1(
                         widget.token,
-                        projectId: widget.project.legacyId,
-                        scriptId: _selectedScriptLegacyId,
+                        projectId: widget.project.numericId,
+                        scriptId: _selectedScriptNumericId,
                         assetIds: selected,
                         model: _modelCtrl.text.trim().isEmpty
                             ? null
@@ -380,7 +380,7 @@ class _AssetGenerationWorkbenchDialogState
                 onPollImageStatuses: () => _runMutation(() async {
                   final response = await postProductionAssetsPollingImageV1(
                     widget.token,
-                    projectId: widget.project.legacyId,
+                    projectId: widget.project.numericId,
                     assetIds: selected,
                   );
                   if (mounted) {
@@ -419,7 +419,7 @@ class _AssetGenerationWorkbenchDialogState
                   final response =
                       await postProductionAssetsDeleteAssetsDerivativeV1(
                         widget.token,
-                        projectId: widget.project.legacyId,
+                        projectId: widget.project.numericId,
                         assetIds: selected,
                       );
                   await widget.reloadAssetsAndStats();
@@ -432,7 +432,7 @@ class _AssetGenerationWorkbenchDialogState
                 onUpdateImageUrl: () => _runMutation(() async {
                   final response = await postProductionAssetsUpdateAssetsUrlV1(
                     widget.token,
-                    projectId: widget.project.legacyId,
+                    projectId: widget.project.numericId,
                     assetId: selectedSingleAssetId!,
                     imageUrl: _imageUrlCtrl.text.trim(),
                   );
@@ -474,7 +474,7 @@ class _AssetGenerationWorkbenchDialogState
               ),
               _AssetGenerationSelectionPanel(
                 busy: _busyMutation,
-                filterScriptLegacyId: widget.assetsFilterScriptLegacyId[0],
+                filterScriptNumericId: widget.assetsFilterScriptNumericId[0],
                 scopedAssets: scopedAssets,
                 selectedIds: _selectedIds,
                 onToggleAsset: _toggleAssetSelection,

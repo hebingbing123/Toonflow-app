@@ -21,7 +21,7 @@ void main() {
     () {
       final diagnosis = diagnoseStoryboardList(
         boards: const [
-          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
         ],
         productionSummaryLoaded: false,
       );
@@ -36,7 +36,7 @@ void main() {
   test('diagnoseStoryboardList routes to editing when prompts are missing', () {
     final diagnosis = diagnoseStoryboardList(
       boards: const [
-        StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '  '),
+        StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '  '),
       ],
       productionSummaryLoaded: true,
     );
@@ -52,8 +52,8 @@ void main() {
       actionSummary: '已批量新增 2 条分镜。',
       diagnosis: diagnoseStoryboardList(
         boards: const [
-          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
-          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+          StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', numericId: 12, scriptId: '3', prompt: '镜头二'),
         ],
         productionSummaryLoaded: true,
       ),
@@ -68,8 +68,8 @@ void main() {
       final diagnosis = diagnoseStoryboardBatchWorkbench(
         selectedIds: const <int>[],
         boards: const [
-          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
-          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '  '),
+          StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', numericId: 12, scriptId: '3', prompt: '  '),
         ],
         productionRows: const [],
       );
@@ -87,8 +87,8 @@ void main() {
       final diagnosis = diagnoseStoryboardBatchWorkbench(
         selectedIds: const [11, 12],
         boards: const [
-          StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
-          StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+          StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
+          StoryboardRow(id: '2', numericId: 12, scriptId: '3', prompt: '镜头二'),
         ],
         productionRows: const [
           ProductionStoryboardItemV1(id: 11, prompt: '镜头一'),
@@ -110,7 +110,7 @@ void main() {
         boards: const [
           StoryboardRow(
             id: '1',
-            legacyId: 11,
+            numericId: 11,
             scriptId: '3',
             prompt: '镜头一',
             filePath: 'poster.png',
@@ -136,8 +136,8 @@ void main() {
         diagnosis: diagnoseStoryboardBatchWorkbench(
           selectedIds: const [11, 12],
           boards: const [
-            StoryboardRow(id: '1', legacyId: 11, scriptId: '3', prompt: '镜头一'),
-            StoryboardRow(id: '2', legacyId: 12, scriptId: '3', prompt: '镜头二'),
+            StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
+            StoryboardRow(id: '2', numericId: 12, scriptId: '3', prompt: '镜头二'),
           ],
           productionRows: const [
             ProductionStoryboardItemV1(id: 11, prompt: '镜头一'),
@@ -154,7 +154,7 @@ void main() {
     final diagnosis = diagnoseStoryboardWorkbench(
       scriptStoryboard: const StoryboardRow(
         id: '1',
-        legacyId: 11,
+        numericId: 11,
         scriptId: '3',
         prompt: '镜头一',
       ),
@@ -180,7 +180,7 @@ void main() {
       final diagnosis = diagnoseStoryboardWorkbench(
         scriptStoryboard: const StoryboardRow(
           id: '1',
-          legacyId: 11,
+          numericId: 11,
           scriptId: '3',
           prompt: '镜头一',
         ),
@@ -205,7 +205,7 @@ void main() {
     final diagnosis = diagnoseStoryboardWorkbench(
       scriptStoryboard: const StoryboardRow(
         id: '1',
-        legacyId: 11,
+        numericId: 11,
         scriptId: '3',
         prompt: '镜头一',
         trackId: 4,
@@ -235,7 +235,7 @@ void main() {
       final diagnosis = diagnoseStoryboardWorkbench(
         scriptStoryboard: const StoryboardRow(
           id: '1',
-          legacyId: 11,
+          numericId: 11,
           scriptId: '3',
           prompt: '镜头一',
         ),
@@ -265,7 +265,7 @@ void main() {
       final withJobs = diagnoseStoryboardWorkbench(
         scriptStoryboard: const StoryboardRow(
           id: '1',
-          legacyId: 11,
+          numericId: 11,
           scriptId: '3',
           prompt: '镜头一',
         ),
@@ -277,7 +277,7 @@ void main() {
         generatedVideos: const [],
         generatingJobs: const [
           JobRow(
-            legacyTaskId: 1,
+            numericTaskId: 1,
             id: 'job-1',
             ownerUserId: 'u',
             kind: 'video',
@@ -296,7 +296,7 @@ void main() {
       final withVideos = diagnoseStoryboardWorkbench(
         scriptStoryboard: const StoryboardRow(
           id: '1',
-          legacyId: 11,
+          numericId: 11,
           scriptId: '3',
           prompt: '镜头一',
         ),
@@ -332,7 +332,7 @@ void main() {
       diagnosis: diagnoseStoryboardWorkbench(
         scriptStoryboard: const StoryboardRow(
           id: '1',
-          legacyId: 11,
+          numericId: 11,
           scriptId: '3',
           prompt: '镜头一',
         ),
@@ -380,7 +380,7 @@ void main() {
     final ids = collectStoryboardTrackIds(
       scriptStoryboard: const StoryboardRow(
         id: '1',
-        legacyId: 11,
+        numericId: 11,
         scriptId: '3',
         prompt: 'p',
         trackId: 4,
@@ -464,7 +464,7 @@ void main() {
         resolveStoryboardGenerationPrompt(
           scriptStoryboard: const StoryboardRow(
             id: '1',
-            legacyId: 11,
+            numericId: 11,
             scriptId: '3',
             prompt: ' script prompt ',
           ),
@@ -480,7 +480,7 @@ void main() {
         resolveStoryboardGenerationPrompt(
           scriptStoryboard: const StoryboardRow(
             id: '1',
-            legacyId: 11,
+            numericId: 11,
             scriptId: '3',
             prompt: '   ',
           ),

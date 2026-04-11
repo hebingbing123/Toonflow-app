@@ -3,7 +3,7 @@ part of 'index.dart';
 class NovelRow {
   NovelRow({
     required this.id,
-    required this.legacyId,
+    required this.numericId,
     required this.chapterIndex,
     this.reel,
     required this.chapter,
@@ -15,7 +15,7 @@ class NovelRow {
   });
 
   final String id;
-  final int legacyId;
+  final int numericId;
   final int chapterIndex;
   final String? reel;
   final String chapter;
@@ -28,7 +28,7 @@ class NovelRow {
   factory NovelRow.fromJson(Map<String, dynamic> json) {
     return NovelRow(
       id: json['id'] as String,
-      legacyId: (json['numeric_id'] as num).toInt(),
+      numericId: (json['numeric_id'] as num).toInt(),
       chapterIndex: (json['chapter_index'] as num).toInt(),
       reel: json['reel'] as String?,
       chapter: json['chapter'] as String? ?? '',
@@ -64,18 +64,18 @@ class ListNovelsResponse {
 /// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class LegacyNovelIndexItem {
   const LegacyNovelIndexItem({
-    required this.legacyId,
+    required this.numericId,
     required this.chapterIndex,
     required this.chapter,
   });
 
-  final int legacyId;
+  final int numericId;
   final int chapterIndex;
   final String chapter;
 
   factory LegacyNovelIndexItem.fromJson(Map<String, dynamic> json) {
     return LegacyNovelIndexItem(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       chapterIndex: (json['index'] as num).toInt(),
       chapter: json['chapter'] as String? ?? '',
     );
@@ -85,20 +85,20 @@ class LegacyNovelIndexItem {
 /// Compat row; filled client-side from **`GET …/novels`** (**`event_state != 0`**).
 class LegacyNovelEventStateItem {
   const LegacyNovelEventStateItem({
-    required this.legacyId,
+    required this.numericId,
     this.event,
     required this.eventState,
     this.errorReason,
   });
 
-  final int legacyId;
+  final int numericId;
   final String? event;
   final int eventState;
   final String? errorReason;
 
   factory LegacyNovelEventStateItem.fromJson(Map<String, dynamic> json) {
     return LegacyNovelEventStateItem(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       event: json['event'] as String?,
       eventState: (json['eventState'] as num).toInt(),
       errorReason: json['errorReason'] as String?,
@@ -109,7 +109,7 @@ class LegacyNovelEventStateItem {
 /// Compat paginated row (**`getNovel`** shape); fields map from REST **`NovelRow`** (snake_case JSON).
 class LegacyNovelPageRow {
   const LegacyNovelPageRow({
-    required this.legacyId,
+    required this.numericId,
     required this.chapterIndex,
     this.reel,
     required this.chapter,
@@ -119,7 +119,7 @@ class LegacyNovelPageRow {
     this.errorReason,
   });
 
-  final int legacyId;
+  final int numericId;
   final int chapterIndex;
   final String? reel;
   final String chapter;
@@ -130,7 +130,7 @@ class LegacyNovelPageRow {
 
   factory LegacyNovelPageRow.fromJson(Map<String, dynamic> json) {
     return LegacyNovelPageRow(
-      legacyId: (json['id'] as num).toInt(),
+      numericId: (json['id'] as num).toInt(),
       chapterIndex: (json['index'] as num).toInt(),
       reel: json['reel'] as String?,
       chapter: json['chapter'] as String? ?? '',

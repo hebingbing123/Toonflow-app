@@ -6,7 +6,7 @@ void main() {
     final ids = extractScriptWorkspaceNovelIds(<String, dynamic>{
       'items': <Map<String, dynamic>>[
         <String, dynamic>{'numeric_id': 11},
-        <String, dynamic>{'legacyId': 12},
+        <String, dynamic>{'numericId': 12},
         <String, dynamic>{'id': 13},
       ],
     });

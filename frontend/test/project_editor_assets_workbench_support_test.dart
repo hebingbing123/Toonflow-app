@@ -81,38 +81,38 @@ void main() {
     expect(text, contains('可继续更新 file_path。'));
   });
 
-  test('collectVisibleAssetLegacyIds sorts and deduplicates ids', () {
+  test('collectVisibleAssetNumericIds sorts and deduplicates ids', () {
     expect(
-      collectVisibleAssetLegacyIds(const [
-        AssetRow(id: 'a', legacyId: 9, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-        AssetRow(id: 'c', legacyId: 9, name: 'Hero-dup', assetType: 'role'),
+      collectVisibleAssetNumericIds(const [
+        AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', numericId: 9, name: 'Hero-dup', assetType: 'role'),
       ]),
       [3, 9],
     );
   });
 
-  test('chooseInitialAssetLegacyId prefers existing preferred id', () {
+  test('chooseInitialAssetNumericId prefers existing preferred id', () {
     expect(
-      chooseInitialAssetLegacyId(const [
-        AssetRow(id: 'a', legacyId: 9, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-      ], preferredLegacyId: 3),
+      chooseInitialAssetNumericId(const [
+        AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+      ], preferredNumericId: 3),
       3,
     );
     expect(
-      chooseInitialAssetLegacyId(const [
-        AssetRow(id: 'a', legacyId: 9, name: 'Hero', assetType: 'role'),
-      ], preferredLegacyId: 100),
+      chooseInitialAssetNumericId(const [
+        AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+      ], preferredNumericId: 100),
       9,
     );
   });
 
   test('summarizeProjectAssetRows reports counts and examples', () {
     final line = summarizeProjectAssetRows(const [
-      AssetRow(id: 'a', legacyId: 9, name: 'Hero', assetType: 'role'),
-      AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-      AssetRow(id: 'c', legacyId: 5, name: 'Mage', assetType: 'role'),
+      AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+      AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+      AssetRow(id: 'c', numericId: 5, name: 'Mage', assetType: 'role'),
     ]);
 
     expect(line, contains('资产 3 条'));
@@ -126,8 +126,8 @@ void main() {
     expect(summarizeScriptScopedAssets(12, const []), '当前剧本 #12 下没有关联资产。');
     expect(
       summarizeScriptScopedAssets(12, const [
-        AssetRow(id: 'a', legacyId: 9, name: 'Hero', assetType: 'role'),
-        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
       ]),
       '当前剧本 #12 下关联 2 条资产。',
     );
@@ -150,7 +150,7 @@ void main() {
           const [
             CornerScapeAssetItem(
               id: 'asset-a',
-              legacyId: 9,
+              numericId: 9,
               name: 'Hero',
               assetType: 'role',
               metadata: {},
@@ -160,7 +160,7 @@ void main() {
               ],
             ),
           ],
-          selectedAssetLegacyId: 9,
+          selectedAssetNumericId: 9,
           preferredHistoryImageId: 'img-2',
         ),
         'img-2',
@@ -170,7 +170,7 @@ void main() {
           const [
             CornerScapeAssetItem(
               id: 'asset-a',
-              legacyId: 9,
+              numericId: 9,
               name: 'Hero',
               assetType: 'role',
               metadata: {},
@@ -179,7 +179,7 @@ void main() {
               ],
             ),
           ],
-          selectedAssetLegacyId: 9,
+          selectedAssetNumericId: 9,
           preferredHistoryImageId: 'missing',
         ),
         'img-1',
@@ -192,7 +192,7 @@ void main() {
       const [
         CornerScapeAssetItem(
           id: 'asset-a',
-          legacyId: 9,
+          numericId: 9,
           name: 'Hero',
           assetType: 'role',
           metadata: {},
@@ -202,7 +202,7 @@ void main() {
         ),
         CornerScapeAssetItem(
           id: 'asset-b',
-          legacyId: 11,
+          numericId: 11,
           name: 'Sword',
           assetType: 'props',
           metadata: {},
@@ -210,7 +210,7 @@ void main() {
         ),
       ],
       activeTypes: const ['props', 'role'],
-      selectedAssetLegacyId: 9,
+      selectedAssetNumericId: 9,
       selectedHistoryImageId: 'img-1',
     );
 
@@ -227,19 +227,19 @@ void main() {
       expect(
         chooseInitialAssetImageId(
           const ListAssetImagesResponse(
-            coverLegacyImageId: 8,
+            coverNumericImageId: 8,
             items: [
               AssetImageRow(
                 id: 'img-1',
                 assetId: 'asset-a',
                 sortIndex: 1,
-                legacyImageId: 7,
+                numericImageId: 7,
               ),
               AssetImageRow(
                 id: 'img-2',
                 assetId: 'asset-a',
                 sortIndex: 2,
-                legacyImageId: 8,
+                numericImageId: 8,
                 selected: true,
               ),
             ],
@@ -252,19 +252,19 @@ void main() {
       expect(
         chooseInitialAssetImageId(
           const ListAssetImagesResponse(
-            coverLegacyImageId: 8,
+            coverNumericImageId: 8,
             items: [
               AssetImageRow(
                 id: 'img-1',
                 assetId: 'asset-a',
                 sortIndex: 1,
-                legacyImageId: 7,
+                numericImageId: 7,
               ),
               AssetImageRow(
                 id: 'img-2',
                 assetId: 'asset-a',
                 sortIndex: 2,
-                legacyImageId: 8,
+                numericImageId: 8,
                 selected: true,
               ),
             ],
@@ -276,19 +276,19 @@ void main() {
       expect(
         chooseInitialAssetImageId(
           const ListAssetImagesResponse(
-            coverLegacyImageId: 9,
+            coverNumericImageId: 9,
             items: [
               AssetImageRow(
                 id: 'img-1',
                 assetId: 'asset-a',
                 sortIndex: 1,
-                legacyImageId: 7,
+                numericImageId: 7,
               ),
               AssetImageRow(
                 id: 'img-2',
                 assetId: 'asset-a',
                 sortIndex: 2,
-                legacyImageId: 9,
+                numericImageId: 9,
               ),
             ],
           ),
@@ -301,20 +301,20 @@ void main() {
   test('summarizeAssetImageSelection reports cover and current image', () {
     final line = summarizeAssetImageSelection(
       const ListAssetImagesResponse(
-        coverLegacyImageId: 8,
+        coverNumericImageId: 8,
         items: [
           AssetImageRow(
             id: 'img-1',
             assetId: 'asset-a',
             sortIndex: 1,
-            legacyImageId: 7,
+            numericImageId: 7,
           ),
           AssetImageRow(
             id: 'img-2',
             assetId: 'asset-a',
             sortIndex: 2,
             state: 'done',
-            legacyImageId: 8,
+            numericImageId: 8,
           ),
         ],
       ),
