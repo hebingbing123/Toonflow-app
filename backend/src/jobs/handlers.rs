@@ -1,3 +1,7 @@
+//! 任务 REST 路由（`GET /api/v1/jobs/*`）。
+//!
+//! 任务列表、详情、取消和状态查询处理器。
+
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,

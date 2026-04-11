@@ -1,3 +1,7 @@
+//! 脚本 REST 路由（`GET /api/v1/scripts/*`）。
+//!
+//! 脚本 CRUD、内容管理和资源列表处理器。
+
 use axum::{
     body::Body,
     extract::{Path, State},
