@@ -1,4 +1,6 @@
-//! Fan-out of server-initiated WebSocket text frames to authenticated users (e.g. job status).
+//! WebSocket 通知中心。
+//!
+//! 服务器发起的 WebSocket 文本帧扇出到认证用户（如任务状态更新）。
 
 use std::collections::HashMap;
 use std::sync::Arc;

@@ -1,3 +1,7 @@
+//! API 错误类型定义。
+//!
+//! 定义 HTTP API 的错误响应类型，包括错误体结构和常用错误枚举。
+
 use axum::{
     http::{header, HeaderValue, StatusCode},
     response::{IntoResponse, Response},

@@ -1,4 +1,6 @@
-//! Legacy SQLite **`o_setting`** keys for memory / RAG UI (**camelCase** JSON).
+//! 内存配置模块。
+//!
+//! 遗留 SQLite `o_setting` 键，用于内存 / RAG UI（驼峰式 JSON）。
 
 use serde::{Deserialize, Serialize};
 
