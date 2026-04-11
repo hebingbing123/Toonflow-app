@@ -27,6 +27,7 @@ part 'home_page/project_editor_assets_links_probe.dart';
 part 'home_page/project_editor_assets_corner_scape_workbench.dart';
 part 'home_page/project_editor_assets_clip_upload_workbench.dart';
 part 'home_page/project_editor_assets_generation_workbench.dart';
+part 'home_page/project_editor_assets_generation_workbench_dialog.dart';
 part 'home_page/project_editor_assets_images_workbench.dart';
 part 'home_page/project_editor_assets_workbench.dart';
 part 'home_page/project_editor_novels_legacy_actions.dart';
