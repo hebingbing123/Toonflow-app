@@ -1,4 +1,6 @@
-//! Legacy **`POST …/upload-clip`**.
+//! 遗留 `POST …/upload-clip`。
+//!
+//! 上传片段端点。
 
 use axum::{extract::State, http::HeaderMap, Json};
 use uuid::Uuid;
