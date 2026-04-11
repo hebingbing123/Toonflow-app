@@ -1,4 +1,7 @@
-//! Stable JSON error shape for HTTP API (`code`, `message`, optional `request_id`).
+//! 错误模块：HTTP API 的稳定 JSON 错误格式。
+//!
+//! 提供统一的错误响应结构（code、message、可选的 request_id），
+//! 确保 API 错误格式的一致性。
 
 mod api_error;
 

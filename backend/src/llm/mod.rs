@@ -1,5 +1,10 @@
-//! OpenAI-compatible Chat Completions (streaming) for agent turns and
-//! **`images/generations`** / **`images/edits`** for asset jobs.
+//! LLM 模块：OpenAI 兼容的聊天补全和图像生成。
+//!
+//! 为代理对话提供流式聊天补全，为资产生成任务提供 `images/generations` 和 `images/edits` 功能。
+//! 子模块：
+//! - `openai` — OpenAI API 客户端
+//! - `agent_loop` — 代理执行循环
+//! - `envelope` — 消息信封处理
 
 mod agent_loop;
 mod envelope;
