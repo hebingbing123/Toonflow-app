@@ -52,7 +52,7 @@ info:
 
     **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
-    **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
+    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`legacy_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
 
         **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/{project_id}/novel-events*`**（UUID 项目段；**`event_legacy_id`** = **`app_novel_event.legacy_id`**）。**已删除** **`…/projects/legacy/{id}/novel-events*`**。legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** 仍覆盖旧形，含异步事件生成触发。
 
@@ -69,8 +69,6 @@ tags:
     description: Auth probe (Supabase JWT)
   - name: projects
     description: User-owned projects (Postgres + RLS)
-  - name: general
-    description: Legacy general dashboard POST routes (old `/api/general/*`)
   - name: assets
     description: Script-linked assets per project (`app_asset`, `app_script_asset`; Postgres + RLS); corner-scape listing for legacy UI parity
   - name: scripts
@@ -7807,90 +7805,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/general/get-single-project:
-    post:
-      tags: [general]
-      summary: Legacy general — get one project by legacy id
-      operationId: postGeneralGetSingleProjectV1
-      description: |
-        Parity with **`POST /api/general/getSingleProject`**. Body **`{ "id" }`** is **`app_project.legacy_id`**.
-        Response **`{ "data": [...] }`** is 0 or 1 **`ProjectRow`**.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyGeneralGetSingleProjectBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyGeneralGetSingleProjectResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/general/update-project:
-    post:
-      tags: [general]
-      summary: Legacy general — patch project fields by legacy id
-      operationId: postGeneralUpdateProjectV1
-      description: |
-        Parity with **`POST /api/general/updateProject`**. At least one of **`intro`**, **`type`** (stored as **`mode`**),
-        **`artStyle`**, **`videoRatio`**, **`projectType`** must be present (string or JSON **`null`** to clear).
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyGeneralUpdateProjectBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyGeneralUpdateProjectResponse"
-        "400":
-          description: No patch fields or invalid field types
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project legacy id not found for caller
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
   /api/v1/projects/{project_id}/scripts/get-script-api:
     post:
       tags: [scripts]
@@ -12783,25 +12697,6 @@ components:
               format: int32
               minimum: 1
 
-    LegacyGeneralGetSingleProjectBody:
-      type: object
-      required: [id]
-      additionalProperties: false
-      properties:
-        id:
-          type: integer
-          format: int32
-          description: app_project.legacy_id
-
-    LegacyGeneralGetSingleProjectResponse:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/ProjectRow"
-
     LegacyProjectDeleteProjectBody:
       type: object
       required: [id]
@@ -13062,39 +12957,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LegacyDirectorManualDataSlot"
-
-    LegacyGeneralUpdateProjectBody:
-      type: object
-      required: [id]
-      additionalProperties: false
-      properties:
-        id:
-          type: integer
-          format: int32
-        intro:
-          type: string
-          nullable: true
-        type:
-          type: string
-          nullable: true
-          description: Stored as app_project.mode
-        artStyle:
-          type: string
-          nullable: true
-        videoRatio:
-          type: string
-          nullable: true
-        projectType:
-          type: string
-          nullable: true
-
-    LegacyGeneralUpdateProjectResponse:
-      type: object
-      required: [message]
-      properties:
-        message:
-          type: string
-          example: 修改成功
 
     ScriptsGetScriptApiNameBody:
       type: object

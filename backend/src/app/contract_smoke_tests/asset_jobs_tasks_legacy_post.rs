@@ -627,37 +627,44 @@ async fn tasks_task_details_requires_database_for_uuid_task_id_with_jwt() {
 }
 
 #[tokio::test]
-async fn general_get_single_project_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/general/get-single-project", r#"{"id":1}"#).await;
+async fn projects_get_by_id_unauthorized_without_bearer() {
+    let (status, v) = get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn general_get_single_project_requires_database_with_jwt() {
+async fn projects_get_by_id_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/general/get-single-project", &token, r#"{"id":1}"#).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
-async fn general_update_project_requires_field_besides_id_with_jwt() {
+async fn projects_patch_empty_body_requires_database_before_validation_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/general/update-project", &token, r#"{"id":1}"#).await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
+    let (status, v) = patch_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
+        &token,
+        r#"{}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
-async fn general_update_project_requires_database_with_jwt() {
+async fn projects_patch_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/general/update-project",
+    let (status, v) = patch_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
         &token,
-        r#"{"id":1,"intro":"x"}"#,
+        r#"{"intro":"x"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

@@ -1752,7 +1752,7 @@ async fn legacy_project_crud_roundtrip() {
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
-async fn legacy_general_project_update_roundtrip() {
+async fn projects_patch_partial_fields_roundtrip() {
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")
@@ -1795,90 +1795,95 @@ async fn legacy_general_project_update_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
     let project_uuid = Uuid::parse_str(created["id"].as_str().expect("project id")).unwrap();
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/general/get-single-project")
+                .method(Method::GET)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, before_update) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "before_update={before_update}");
-    assert_eq!(
-        before_update["data"][0]["intro"].as_str(),
-        Some("before update")
-    );
-    assert_eq!(before_update["data"][0]["mode"].as_str(), Some("orig-mode"));
-    assert_eq!(
-        before_update["data"][0]["art_style"].as_str(),
-        Some("orig-style")
-    );
+    let proj = &before_update["project"];
+    assert_eq!(proj["intro"].as_str(), Some("before update"));
+    assert_eq!(proj["mode"].as_str(), Some("orig-mode"));
+    assert_eq!(proj["art_style"].as_str(), Some("orig-style"));
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/general/update-project")
+                .method(Method::PATCH)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"id":{legacy_id},"intro":"after update","type":"legacy-mode","artStyle":null,"videoRatio":"1:1","projectType":"series"}}"#
-                )))
+                .body(Body::from("{}"))
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, updated) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "updated={updated}");
-    assert_eq!(updated["message"].as_str(), Some("修改成功"));
+    let (status, empty_patch) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST, "empty_patch={empty_patch}");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/general/get-single-project")
+                .method(Method::PATCH)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                .body(Body::from(
+                    r#"{"intro":"after update","mode":"legacy-mode","art_style":null,"video_ratio":"1:1","project_type":"series"}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, patched) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "patched={patched}");
+    assert_eq!(patched["intro"].as_str(), Some("after update"));
+    assert_eq!(patched["mode"].as_str(), Some("legacy-mode"));
+    assert!(patched["art_style"].is_null());
+    assert_eq!(patched["video_ratio"].as_str(), Some("1:1"));
+    assert_eq!(patched["project_type"].as_str(), Some("series"));
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::GET)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, after_update) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "after_update={after_update}");
+    let row = &after_update["project"];
     assert_eq!(
-        after_update["data"][0]["name"].as_str(),
+        row["name"].as_str(),
         created["name"].as_str(),
-        "legacy general wrapper must preserve untouched fields"
+        "PATCH must preserve untouched fields"
     );
-    assert_eq!(
-        after_update["data"][0]["intro"].as_str(),
-        Some("after update")
-    );
-    assert_eq!(
-        after_update["data"][0]["mode"].as_str(),
-        Some("legacy-mode")
-    );
-    assert!(after_update["data"][0]["art_style"].is_null());
-    assert_eq!(after_update["data"][0]["video_ratio"].as_str(), Some("1:1"));
-    assert_eq!(
-        after_update["data"][0]["project_type"].as_str(),
-        Some("series")
-    );
+    assert_eq!(row["intro"].as_str(), Some("after update"));
+    assert_eq!(row["mode"].as_str(), Some("legacy-mode"));
+    assert!(row["art_style"].is_null());
+    assert_eq!(row["video_ratio"].as_str(), Some("1:1"));
+    assert_eq!(row["project_type"].as_str(), Some("series"));
 
     let stored: (Option<String>, Option<String>, Option<String>, Option<String>) = sqlx::query_as(
         "SELECT intro, mode, art_style, project_type FROM public.app_project WHERE id = $1 AND owner_user_id = $2",

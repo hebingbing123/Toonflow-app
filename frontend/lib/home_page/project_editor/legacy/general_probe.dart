@@ -32,7 +32,7 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                       : rows.map((r) => '#${r.legacyId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('POST …/general/get-single-project：$line'),
+                      content: Text('compat getSingleProject（GET projects 过滤 legacy_id）：$line'),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -48,7 +48,7 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'POST general get-single-project',
+          generalLegacyBusy[0] ? 'general…' : 'compat getSingleProject',
         ),
       ),
       TextButton(
@@ -83,7 +83,7 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/general/update-project：$msg1 → restored ($msg2)',
+                        'compat updateProject（PATCH projects）：$msg1 → restored ($msg2)',
                       ),
                     ),
                   );
@@ -100,7 +100,7 @@ extension _HomePageProjectEditorLegacyGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'POST general update-project',
+          generalLegacyBusy[0] ? 'general…' : 'compat updateProject',
         ),
       ),
       TextButton(

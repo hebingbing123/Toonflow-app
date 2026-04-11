@@ -1,61 +1,59 @@
 part of 'index.dart';
 
-/// `POST /api/v1/general/get-single-project` — legacy **`getSingleProject`**; **`id`** = **`app_project.legacy_id`**.
+/// Compat **`getSingleProject`**: lists owned projects and filters by **`legacy_id`** (no HTTP **`/general/*`**).
 Future<List<ProjectRow>> postGeneralGetSingleProject(
   String accessToken,
   int legacyId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/general/get-single-project');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'id': legacyId}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final data = map['data'] as List<dynamic>;
-  return data
-      .map((e) => ProjectRow.fromJson(e as Map<String, dynamic>))
-      .toList();
+  final rows = await _fetchAllProjectsPaged(accessToken);
+  return rows.where((r) => r.legacyId == legacyId).toList();
 }
 
-/// `POST /api/v1/general/update-project` — legacy **`updateProject`**.
+/// Compat **`updateProject`**: maps camelCase fields to **`PATCH /api/v1/projects/{uuid}`**.
 ///
 /// [body] must include **`id`** (legacy project id) and at least one of **`intro`**,
-/// **`type`**, **`artStyle`**, **`videoRatio`**, **`projectType`** (use JSON **`null`** in the map to clear).
+/// **`type`** (→ **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`**
+/// (use **`null`** in the map to clear).
 Future<String> postGeneralUpdateProject(
   String accessToken,
   Map<String, dynamic> body,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/general/update-project');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+  final idRaw = body['id'];
+  final legacyId = idRaw is int
+      ? idRaw
+      : idRaw is num
+      ? idRaw.toInt()
+      : int.tryParse('$idRaw');
+  if (legacyId == null || legacyId <= 0) {
+    throw RustApiException('invalid id', statusCode: 400);
   }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+  final projectId = await _projectIdForLegacyId(accessToken, legacyId);
+
+  final patch = <String, dynamic>{};
+  if (body.containsKey('intro')) {
+    patch['intro'] = body['intro'];
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+  if (body.containsKey('type')) {
+    patch['mode'] = body['type'];
   }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  if (body.containsKey('artStyle')) {
+    patch['art_style'] = body['artStyle'];
+  }
+  if (body.containsKey('videoRatio')) {
+    patch['video_ratio'] = body['videoRatio'];
+  }
+  if (body.containsKey('projectType')) {
+    patch['project_type'] = body['projectType'];
+  }
+  if (patch.isEmpty) {
+    throw RustApiException(
+      'expected at least one of intro, type, artStyle, videoRatio, projectType',
+      statusCode: 400,
+    );
+  }
+
+  await updateProjectByProjectId(accessToken, projectId, patch);
+  return '修改成功';
 }
 
 /// Mirrors legacy **`type` vs `mode`** merge: prefer non-empty **`mode`**, else **`type`**.

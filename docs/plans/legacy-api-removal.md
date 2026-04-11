@@ -28,7 +28,7 @@
 | 路径 | 职责摘要 |
 |------|----------|
 | ~~`backend/src/projects/legacy.rs`~~ | **已删除**（原 **`POST /api/v1/project/get-project`** 等）；项目 CRUD 仅 **`projects/routes.rs`**（**`/api/v1/projects`**） |
-| `backend/src/projects/mod.rs` | `pub mod legacy` |
+| `backend/src/projects/mod.rs` | 仅 **`pub mod routes`** |
 | `backend/src/narrative/legacy/mod.rs` | 小说旧形：`/api/v1/novels/*` |
 | `backend/src/narrative/legacy/dto.rs` | DTO |
 | `backend/src/narrative/legacy/handlers.rs` | Handlers |
@@ -37,8 +37,8 @@
 | `backend/src/narrative/mod.rs` | `pub mod legacy` |
 | `backend/src/production_legacy/mod.rs` | 生产工作台旧路径 `/api/production/*`、等 |
 | `backend/src/production_legacy/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
-| `backend/src/rest_legacy/mod.rs` | 未收拢域入口 |
-| `backend/src/rest_legacy/general.rs` | general 旧 POST |
+| `backend/src/rest_legacy/mod.rs` | 未收拢域入口（现仅 **`tasks`**） |
+| ~~`backend/src/rest_legacy/general.rs`~~ | **已删除**（原 **`POST /api/v1/general/get-single-project`**、**`update-project`**）；Flutter compat 走 **`GET`/`PATCH /api/v1/projects*`** |
 | `backend/src/rest_legacy/tasks.rs` | tasks 旧形 |
 | `backend/src/scripting/legacy.rs` | 仅保留 **`POST …/projects/{project_id}/scripts/get-script-api`**（body 仅可选 `name`）；旧 `POST …/scripts/get-script-api` 已移除 |
 | `backend/src/scripting/mod.rs` | `pub mod legacy` |
@@ -273,7 +273,7 @@
 
 1. ~~`projects::legacy`（旧 `POST /api/v1/project/get-project` 等）~~ **已删除**；Flutter `projects_legacy_compat` 仍保留同名封装，内部走 **`GET`/`POST`/`PATCH`/`DELETE /api/v1/projects*`**。
 2. `narrative::legacy`（`/api/v1/novels/*`）— 与 `novels_legacy_api` 绑定。
-3. `rest_legacy::{general,tasks}`。
+3. ~~`rest_legacy::general`~~ **已删除**；`rest_legacy::tasks`。
 4. `scripting::legacy`。
 5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
 6. `production_legacy` — **最后**：依赖多、`harness` 有引用，需单独迁移 `load_owned_production_flow_json` 或等价能力。
