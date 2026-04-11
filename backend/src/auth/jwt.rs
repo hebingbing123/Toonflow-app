@@ -1,4 +1,4 @@
-//! Supabase-style HS256 JWT decode (`sub`, `exp`, `aud: authenticated`).
+//! Supabase 风格 HS256 JWT 解码（`sub`、`exp`、`aud: authenticated`）。
 
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::Deserialize;

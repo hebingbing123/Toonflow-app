@@ -1,4 +1,4 @@
-//! Request/response types for the assets API.
+//! 资产 API 的请求/响应类型。
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
