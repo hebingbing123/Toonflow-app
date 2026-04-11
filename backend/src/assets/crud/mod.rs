@@ -31,8 +31,9 @@ pub(crate) use patch_delete::{
     delete_project_asset_by_legacy, delete_project_asset_for_project,
     patch_project_asset_by_legacy, patch_project_asset_for_project,
 };
-pub use resolve::{next_asset_image_sort_index, resolve_asset_id_for_job};
 pub(crate) use resolve::{
-    resolve_owned_asset_id, resolve_owned_asset_id_and_metadata,
+    ensure_owned_project_pk, resolve_owned_asset_id, resolve_owned_asset_id_and_metadata,
     resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
+    resolve_owned_project_pk_by_legacy,
 };
+pub use resolve::{next_asset_image_sort_index, resolve_asset_id_for_job};

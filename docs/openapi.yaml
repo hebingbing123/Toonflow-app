@@ -5005,8 +5005,275 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/novels:
+    get:
+      tags: [novels]
+      summary: List novel chapters for a project (by project UUID)
+      operationId: listProjectNovelsByProjectIdV1
+      description: |
+        Same as **`GET /api/v1/projects/legacy/{project_legacy_id}/novels`**, keyed by **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListNovelsResponse"
+        "400":
+          description: Invalid query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [novels]
+      summary: Create novel chapter under a project (by project UUID)
+      operationId: createProjectNovelByProjectIdV1
+      description: |
+        Same as **`POST /api/v1/projects/legacy/{project_legacy_id}/novels`**, keyed by **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNovelBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelRow"
+        "400":
+          description: Unknown JSON properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/{project_id}/novels/{novel_legacy_id}:
+    get:
+      tags: [novels]
+      summary: Get one novel chapter (by project UUID + novel legacy id)
+      operationId: getProjectNovelByProjectIdV1
+      description: |
+        Same as **`GET …/legacy/.../novels/{novel_legacy_id}`** with **`project_id`** = **`app_project.id`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: novel_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [novels]
+      summary: Patch novel chapter (by project UUID)
+      operationId: patchProjectNovelByProjectIdV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: novel_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchNovelBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelRow"
+        "400":
+          description: Invalid patch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [novels]
+      summary: Delete a novel chapter (by project UUID)
+      operationId: deleteProjectNovelByProjectIdV1
+      description: |
+        Same semantics as **`DELETE …/legacy/.../novels/{novel_legacy_id}`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: novel_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/novels:
     get:
+      deprecated: true
       tags: [novels]
       summary: List novel chapters for a project
       operationId: listProjectNovelsByLegacyV1
@@ -5074,6 +5341,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     post:
+      deprecated: true
       tags: [novels]
       summary: Create novel chapter under a project
       operationId: createProjectNovelByLegacyV1
@@ -5128,6 +5396,7 @@ paths:
 
   /api/v1/projects/legacy/{project_legacy_id}/novels/{novel_legacy_id}:
     get:
+      deprecated: true
       tags: [novels]
       summary: Get one novel chapter by legacy ids
       operationId: getProjectNovelByLegacyIdsV1
@@ -5172,6 +5441,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     patch:
+      deprecated: true
       tags: [novels]
       summary: Patch novel chapter fields
       operationId: patchProjectNovelByLegacyIdsV1
@@ -5228,6 +5498,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     delete:
+      deprecated: true
       tags: [novels]
       summary: Delete a novel chapter
       operationId: deleteProjectNovelByLegacyIdsV1

@@ -26,7 +26,7 @@ extension _HomePageProjectEditor on _HomePageState {
       }
       ListNovelsResponse? novelsSnap;
       try {
-        novelsSnap = await fetchProjectNovelsByLegacyId(token, p.legacyId);
+        novelsSnap = await fetchProjectNovelsByProjectId(token, p.id);
       } catch (_) {
         novelsSnap = null;
       }

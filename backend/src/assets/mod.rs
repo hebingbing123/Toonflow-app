@@ -17,6 +17,9 @@ pub mod models;
 
 pub use crud::{next_asset_image_sort_index, resolve_asset_id_for_job};
 
+/// Shared by other domains (e.g. narrative novels) that scope rows by **`app_project.id`**.
+pub(crate) use crud::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+
 use axum::{
     routing::{get, post, put},
     Router,

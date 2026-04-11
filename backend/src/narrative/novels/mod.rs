@@ -18,6 +18,16 @@ use crate::state::AppState;
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
+            "/api/v1/projects/{project_id}/novels",
+            get(handlers::list_novels_for_project).post(handlers::create_novel_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/novels/{novel_legacy_id}",
+            get(handlers::get_novel_for_project)
+                .patch(handlers::patch_novel_for_project)
+                .delete(handlers::delete_novel_for_project),
+        )
+        .route(
             "/api/v1/projects/legacy/{project_legacy_id}/novels",
             get(handlers::list_novels).post(handlers::create_novel),
         )

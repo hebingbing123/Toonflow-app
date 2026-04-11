@@ -291,7 +291,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           decoration: const InputDecoration(
                             labelText: '搜索章节关键字',
                             helperText:
-                                '调用 GET /projects/legacy/{id}/novels?search=',
+                                '调用 GET /projects/{project_uuid}/novels?search=',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -304,9 +304,9 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   ? null
                                   : () => runAction(() async {
                                       final rows =
-                                          await fetchProjectNovelsByLegacyId(
+                                          await fetchProjectNovelsByProjectId(
                                             token,
-                                            p.legacyId,
+                                            p.id,
                                             search: searchCtrl.text.trim(),
                                             page: 1,
                                             limit: 10,
@@ -354,9 +354,9 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                               ? null
                               : () => runAction(() async {
                                   final created =
-                                      await createProjectNovelUnderLegacy(
+                                      await createProjectNovelUnderProject(
                                         token,
-                                        p.legacyId,
+                                        p.id,
                                         chapter: createChapterCtrl.text.trim(),
                                         chapterData: createBodyCtrl.text.trim(),
                                       );
@@ -398,9 +398,9 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                         selectedNovelIdCtrl.text.trim(),
                                       );
                                       final row =
-                                          await fetchProjectNovelByLegacyIds(
+                                          await fetchProjectNovelByProjectIds(
                                             token,
-                                            p.legacyId,
+                                            p.id,
                                             id,
                                           );
                                       setLocalState(() {
@@ -438,9 +438,9 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                     selectedNovelIdCtrl.text.trim(),
                                   );
                                   final row =
-                                      await patchProjectNovelByLegacyIds(
+                                      await patchProjectNovelByProjectIds(
                                         token,
-                                        p.legacyId,
+                                        p.id,
                                         id,
                                         {
                                           'chapter': patchChapterCtrl.text
@@ -477,9 +477,9 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   final id = int.parse(
                                     deleteNovelIdCtrl.text.trim(),
                                   );
-                                  await deleteProjectNovelByLegacyIds(
+                                  await deleteProjectNovelByProjectIds(
                                     token,
-                                    p.legacyId,
+                                    p.id,
                                     id,
                                   );
                                   await refreshWorkbench(setLocalState);
