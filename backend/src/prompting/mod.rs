@@ -1,4 +1,9 @@
-//! User prompt templates, quality review REST, and on-disk skills.
+//! 用户提示词模板、质量审查 REST 和磁盘技能。
+//!
+//! 子模块：
+//! - `prompts` — 提示词模板
+//! - `quality` — 质量审查
+//! - `skills` — 磁盘技能
 
 pub mod prompts;
 pub mod quality;
