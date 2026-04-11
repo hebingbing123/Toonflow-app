@@ -1,4 +1,4 @@
-//! Image generation jobs (`asset.generate.*`) — OpenAI images API + `app_asset_image` rows.
+//! 图片生成任务（`asset.generate.*`）— OpenAI 图片 API + `app_asset_image` 行。
 
 use std::path::Path;
 

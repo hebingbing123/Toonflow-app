@@ -1,4 +1,4 @@
-//! LLM polish jobs (`asset.polish.*`).
+//! LLM 优化任务（`asset.polish.*`）。
 
 use serde_json::json;
 

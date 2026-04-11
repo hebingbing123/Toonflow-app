@@ -1,4 +1,4 @@
-//! Shared worker error type and cancel polling helper.
+//! 共享的 Worker 错误类型和取消轮询辅助函数。
 
 use sqlx::PgPool;
 use uuid::Uuid;
