@@ -1,7 +1,7 @@
-//! Vendor credential encryption utilities.
+//! 提供商凭证加密工具。
 //!
-//! NOTE: This is a framework implementation using AES-256-GCM with a key derived from
-//! environment variable. Production should integrate with a proper KMS (AWS KMS, HashiCorp Vault, etc.)
+//! 注意：这是使用 AES-256-GCM 的框架实现，密钥派生自环境变量。
+//! 生产环境应集成适当的 KMS（AWS KMS、HashiCorp Vault 等）。
 
 #![allow(dead_code)]
 

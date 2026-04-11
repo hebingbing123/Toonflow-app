@@ -1,6 +1,7 @@
-//! Video generation provider abstraction supporting Runway, Pika, and Kling.
-//! Each provider has its own API format and authentication method.
-//! This module provides a unified interface for video generation.
+//! 视频生成提供商抽象层，支持 Runway、Pika 和 Kling。
+//!
+//! 每个提供商都有自己的 API 格式和认证方法。
+//! 此模块为视频生成提供统一接口。
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
