@@ -2,6 +2,38 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+/// Keeps the top-level task center actions together before drill-down content.
+class TaskCenterActionsBar extends StatelessWidget {
+  const TaskCenterActionsBar({
+    super.key,
+    required this.loadingTaskApi,
+    required this.onOpenWorkbench,
+    required this.onLoadTaskApi,
+  });
+
+  final bool loadingTaskApi;
+  final VoidCallback onOpenWorkbench;
+  final VoidCallback onLoadTaskApi;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilledButton.tonal(
+          onPressed: onOpenWorkbench,
+          child: const Text('打开任务工作台'),
+        ),
+        FilledButton.tonal(
+          onPressed: loadingTaskApi ? null : onLoadTaskApi,
+          child: Text(loadingTaskApi ? '…' : '刷新任务摘要'),
+        ),
+      ],
+    );
+  }
+}
+
 /// Encapsulates legacy task probes so the main task center keeps only domain flow.
 class TaskCenterCompatibilityPanel extends StatelessWidget {
   const TaskCenterCompatibilityPanel({

@@ -94,19 +94,10 @@ class TaskCenterSection extends StatelessWidget {
           ).textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: () => _openTaskWorkbench(context),
-              child: const Text('打开任务工作台'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingTaskApi ? null : onLoadTaskApi,
-              child: Text(loadingTaskApi ? '…' : '刷新任务摘要'),
-            ),
-          ],
+        TaskCenterActionsBar(
+          loadingTaskApi: loadingTaskApi,
+          onOpenWorkbench: () => _openTaskWorkbench(context),
+          onLoadTaskApi: onLoadTaskApi,
         ),
         const SizedBox(height: 8),
         TaskCenterSummaryPreview(

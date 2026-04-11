@@ -1,4 +1,4 @@
-//! Project-scoped novel HTTP types and row mapping.
+//! 项目范围的小说 HTTP 类型和行映射。
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
