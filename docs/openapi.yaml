@@ -1548,11 +1548,11 @@ paths:
   /api/v1/models/text-default:
     get:
       tags: [models]
-      summary: Default text model id (legacy getTextModel stub parity)
+      summary: Default text model id (getTextModel stub parity)
       operationId: getTextModelDefaultV1
       description: |
-        Bearer JWT. Legacy **`POST /api/setting/getTextModel`** returned envelope **`data`** **`"123"`** (unused stub).
-        This route keeps **`legacy_placeholder`** **`"123"`** and adds **`default_model_id`** — resolved in priority order:
+        Bearer JWT. Historical **`POST /api/setting/getTextModel`** returned envelope **`data`** **`"123"`** (unused stub).
+        This route returns **`stub_placeholder`** **`"123"`** and **`default_model_id`** — resolved in priority order:
         1. Per-user preference stored via **`PATCH /api/v1/models/text-default`** (if still valid in catalog).
         2. **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env (composite id matching catalog).
         3. First **`type: text`** model in **`models_catalog.json`** walk order.
@@ -8660,11 +8660,11 @@ components:
 
     TextModelDefaultResponse:
       type: object
-      required: [legacy_placeholder, default_model_id]
+      required: [stub_placeholder, default_model_id]
       properties:
-        legacy_placeholder:
+        stub_placeholder:
           type: string
-          description: Same as legacy **`getTextModel`** **`data`** field (stub).
+          description: Same as historical **`getTextModel`** **`data`** field (stub).
           example: "123"
         default_model_id:
           type: string

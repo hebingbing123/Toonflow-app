@@ -246,8 +246,8 @@ fn default_text_model_composite_id() -> String {
 
 #[derive(Debug, Serialize)]
 struct TextModelDefaultResponse {
-    /// Legacy **`POST /api/setting/getTextModel`** returned this string as envelope **`data`** (stub).
-    legacy_placeholder: &'static str,
+    /// Historical **`POST /api/setting/getTextModel`** returned this string as envelope **`data`** (stub).
+    stub_placeholder: &'static str,
     /// Composite id for **`GET /api/v1/models/detail?model_id=`**.
     default_model_id: String,
 }
@@ -280,7 +280,7 @@ async fn text_model_default(
         .unwrap_or_else(default_text_model_composite_id);
 
     Ok(Json(TextModelDefaultResponse {
-        legacy_placeholder: "123",
+        stub_placeholder: "123",
         default_model_id,
     }))
 }
@@ -336,7 +336,7 @@ async fn patch_text_model_default(
         .unwrap_or_else(default_text_model_composite_id);
 
     Ok(Json(TextModelDefaultResponse {
-        legacy_placeholder: "123",
+        stub_placeholder: "123",
         default_model_id,
     }))
 }

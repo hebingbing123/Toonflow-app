@@ -236,7 +236,7 @@ class TextModelDefaultV1 {
 
   factory TextModelDefaultV1.fromJson(Map<String, dynamic> json) {
     return TextModelDefaultV1(
-      stubPlaceholder: json['legacy_placeholder'] as String,
+      stubPlaceholder: json['stub_placeholder'] as String,
       defaultModelId: json['default_model_id'] as String,
     );
   }
