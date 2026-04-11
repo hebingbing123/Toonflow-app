@@ -1,4 +1,4 @@
-//! Prompt loading and small helpers for persistence.
+//! 提示词加载和持久化的小辅助函数。
 
 pub(crate) const ADV_LOCK_ASSET_LEGACY_ID: i64 = 884_422_004;
 

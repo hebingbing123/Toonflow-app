@@ -1,4 +1,4 @@
-//! Transactional `app_asset` / `app_script_asset` writes for one extraction batch.
+//! 事务性 `app_asset` / `app_script_asset` 写入，用于单次提取批次。
 
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
