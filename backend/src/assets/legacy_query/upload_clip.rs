@@ -1,6 +1,4 @@
-//! 遗留 `POST …/upload-clip` — 上传片段。
-//!
-//! 接收 base64 编码的图片数据，将其关联到指定项目的资产。
+//! Legacy **`POST …/upload-clip`**.
 
 use axum::{extract::State, http::HeaderMap, Json};
 use uuid::Uuid;

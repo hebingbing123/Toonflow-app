@@ -1,3 +1,7 @@
+//! OpenAI 兼容 API 客户端。
+//!
+//! 聊天补全和图像生成端点，支持流式响应。
+
 use base64::Engine;
 use futures_util::StreamExt;
 use reqwest::multipart::{Form, Part};

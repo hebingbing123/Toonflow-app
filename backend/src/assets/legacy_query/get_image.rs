@@ -1,6 +1,4 @@
-//! 遗留 `POST …/get-image` — 获取资产图片。
-//!
-//! 返回指定资产的图片列表，包括临时生成的图片和选中的封面图。
+//! Legacy **`POST …/get-image`**.
 
 use axum::{extract::State, http::HeaderMap, Json};
 

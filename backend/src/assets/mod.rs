@@ -1,12 +1,12 @@
-//! 资产模块：项目范围的 `app_asset` HTTP API 和 `app_script_asset` 关联。
+//! Project-scoped **`app_asset`** HTTP API and **`app_script_asset`** links.
 //!
-//! 子模块：
-//! - `models` — 请求/响应类型
-//! - `legacy` — 遗留 POST 写入操作（添加/更新/保存/删除）
-//! - `legacy_query` — 遗留 POST 读取/查询
-//! - `crud` — REST CRUD 资产操作、角景、脚本-资产关联
-//! - `crud_images` — 资产图片 REST CRUD
-//! - `generate` — 遗留 `/api/assetsGenerate/*` 入队和取消
+//! Submodules:
+//! - [`models`]       – request/response types
+//! - [`legacy`]       – legacy POST write operations (add/update/save/del)
+//! - [`legacy_query`] – legacy POST read/query（`legacy_query/*.rs` 按端点拆分）
+//! - [`crud`]         – REST CRUD for assets, corner-scape, script-asset links（`crud/*.rs` 按职责拆分）
+//! - [`crud_images`]  – REST CRUD for asset images
+//! - [`generate`]     – legacy **`/api/assetsGenerate/*`** enqueue + cancel
 
 mod crud;
 mod crud_images;

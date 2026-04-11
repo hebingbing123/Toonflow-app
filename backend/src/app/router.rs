@@ -1,7 +1,4 @@
-//! 路由组合、限流、中间件和 CORS 配置。
-//!
-//! 组合各业务域路由（assets、billing、jobs、settings 等），
-//! 配置限流中间件和 CORS 策略，构建完整应用路由。
+//! Composes domain routers, rate limiting, middleware, and CORS.
 
 use crate::assets;
 use crate::billing;

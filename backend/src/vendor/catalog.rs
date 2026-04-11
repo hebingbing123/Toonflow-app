@@ -1,6 +1,5 @@
-//! 静态模型/提供商目录（编译时 JSON）。
-//!
-//! 与遗留 `modelSelect/getModelList` 兼容，无需 Postgres `o_vendorConfig` 即可过滤。
+//! Static model/vendor catalog (compile-time JSON). Parity with legacy `modelSelect/getModelList`
+//! filtering without Postgres `o_vendorConfig`.
 
 use std::sync::LazyLock;
 

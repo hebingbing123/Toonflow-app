@@ -1,3 +1,9 @@
+//! PostgreSQL 契约测试（真实数据库）。
+//!
+//! 端到端测试覆盖核心业务场景：资产、项目、计费、叙事、制作工作台。
+//!
+//! 测试需要 Postgres 连接；使用临时数据库并回滚。
+
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;

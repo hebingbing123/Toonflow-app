@@ -1,7 +1,3 @@
-//! 子代理模块。
-//!
-//! 执行 Harness 子代理工具，通过读取技能文件并调用 LLM 完成任务。
-
 use serde_json::{json, Value};
 
 use crate::harness::HarnessContext;

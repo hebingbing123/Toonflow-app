@@ -1,4 +1,4 @@
-//! 小说事件（遗留 `o_event` / `o_eventChapter`）：CRUD 和章节关联。
+//! Novel events (legacy **`o_event`** / **`o_eventChapter`**): CRUD and chapter associations.
 
 mod dto;
 mod handlers;

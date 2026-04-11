@@ -1,4 +1,4 @@
-//! LLM 工具模式、响应解析和模型输出过滤。
+//! LLM tool schema, response parsing, and filtering of model output.
 
 use serde::Deserialize;
 use serde_json::{json, Value};

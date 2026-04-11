@@ -1,4 +1,4 @@
-//! 插入幂等性 Webhook 行并在一个事务中运行配置文件更新。
+//! Insert idempotent webhook row and run profile upsert in one transaction.
 
 use serde_json::Value;
 

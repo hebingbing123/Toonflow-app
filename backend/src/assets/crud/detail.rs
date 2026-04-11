@@ -1,7 +1,4 @@
-//! `GET …/assets/{asset_legacy_id}` — 读取单个资产详情。
-//!
-//! 处理 GET /api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id} 请求，
-//! 返回资产的完整信息包括元数据。
+//! `GET …/assets/{id}` — single asset row.
 
 use axum::{
     extract::{Path, State},

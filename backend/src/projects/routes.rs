@@ -1,3 +1,7 @@
+//! 项目 REST 路由（`POST /api/v1/projects/*`）。
+//!
+//! 项目 CRUD 和遗留项目端点的处理器。
+
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},

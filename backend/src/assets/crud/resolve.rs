@@ -1,7 +1,4 @@
-//! 资产 ID 解析辅助函数。
-//!
-//! 提供资产 UUID 解析功能，供 [`super::super::crud_images`] 和后台任务使用。
-//! 支持通过遗留 ID 解析资产 UUID 并验证用户所有权。
+//! Helpers shared with [`super::super::crud_images`] and background jobs.
 
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};

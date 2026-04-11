@@ -1,4 +1,4 @@
-//! 制作工作台 HTTP 处理器（遗留 `/api/v1/production/*`）。
+//! Production workbench HTTP handlers (legacy `/api/v1/production/*`).
 
 pub mod assets;
 pub mod edit_image;

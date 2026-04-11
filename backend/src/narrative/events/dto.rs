@@ -1,4 +1,4 @@
-//! 小说事件 HTTP API 的请求/响应类型。
+//! Request/response types for novel events HTTP API.
 
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;

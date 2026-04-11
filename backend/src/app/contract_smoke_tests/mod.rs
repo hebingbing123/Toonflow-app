@@ -1,6 +1,7 @@
-//! OpenAPI/HTTP 契约冒烟测试（无真实数据库）：认证格式、验证顺序和 **503** 路径。
+//! OpenAPI/HTTP contract smoke tests (no real DB): auth shape, validation order, and **503** paths.
 //!
-//! 模块按**功能面**（路由/域）分组，而不是按运行顺序。旧的数字 `partN.rs` 名称被删除，改为描述性文件名。
+//! Modules are grouped by **surface area** (routes / domain), not by run order. Older numeric
+//! `partN.rs` names were removed in favor of descriptive file names.
 
 mod helpers;
 

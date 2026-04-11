@@ -1,7 +1,4 @@
-//! `PATCH / DELETE …/assets/{id}` — 更新或删除资产。
-//!
-//! 处理资产部分更新（PATCH）和删除（DELETE）请求，
-//! 更新时支持修改名称、描述、类型和封面图片。
+//! `PATCH` / `DELETE` project asset by legacy ids.
 
 use axum::{
     extract::{Path, State},

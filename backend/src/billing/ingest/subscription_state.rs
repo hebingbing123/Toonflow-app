@@ -1,4 +1,4 @@
-//! 订阅字段解析和合并规则，用于 Webhook 驱动的配置文件更新。
+//! Subscription field parsing and merge rules for webhook-driven profile updates.
 
 use chrono::{DateTime, Utc};
 use serde_json::Value;

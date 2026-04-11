@@ -1,4 +1,4 @@
-//! 分镜 HTTP 类型和行映射。
+//! Storyboard HTTP types and row mapping.
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

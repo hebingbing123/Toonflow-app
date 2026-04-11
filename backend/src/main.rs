@@ -1,6 +1,5 @@
-//! Toonflow HTTP API 入口点。
-//!
-//! 默认监听端口：8666（可通过 `PORT` 覆盖）。
+//! Toonflow HTTP API entrypoint.
+//! Default listen port: 8666 (override with `PORT`).
 
 mod app;
 mod assets;

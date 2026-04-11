@@ -1,7 +1,5 @@
-//! 脚本代理模块：遗留 `/api/scriptAgent/*`。
-//!
-//! Postgres `app_script_agent_plan` + `app_script` 同步。
-//! 形状匹配旧的 `validateFields` 请求体；成功的 JSON 遵循 `{ code, data, message }`（在适用处）。
+//! Legacy **`/api/scriptAgent/*`**: Postgres **`app_script_agent_plan`** + **`app_script`** sync.
+//! Shapes match old **`validateFields`** bodies; success JSON follows **`{ code, data, message }`** where applicable.
 
 use axum::{
     extract::{Json, State},

@@ -1,14 +1,4 @@
-//! 遗留 POST 资产读取/查询操作。
-//!
-//! 子模块：
-//! - `get_assets_api` — 获取资产 API（父子资产树）
-//! - `get_image` — 获取资产图片
-//! - `upload_clip` — 上传片段
-//! - `material` — 素材数据
-//! - `polling` — 轮询资产状态
-//! - `batch_generation` — 批量生成数据查询
-//!
-//! 写入操作位于 [`super::legacy`]。
+//! Legacy POST asset read/query operations (get-assets-api, get-image, upload-clip, material, polling).
 
 mod batch_generation;
 mod get_assets_api;

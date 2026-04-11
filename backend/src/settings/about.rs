@@ -1,8 +1,9 @@
-//! 关于模块：遗留 `/api/setting/about/checkUpdate`（远程 `update.json`）和 `downloadApp`（本地安装程序/zip 应用）。
-//!
-//! SaaS Rust API 不获取桌面清单。相反，`check-update` 可以读取环境驱动的发布清单并与服务器 crate 版本比较；
-//! 如果未设置，它安全地回退到 `needUpdate: false` 并返回当前版本。
-//! `download-app` 验证 `url` 然后返回 **200** 策略响应 — Flutter 应用使用平台商店/安装程序，不使用此遗留端点。
+//! Legacy **`/api/setting/about/checkUpdate`** (remote **`update.json`**) and **`downloadApp`** (local installer / zip apply).
+//! SaaS Rust API does not fetch the desktop manifest. Instead, **`check-update`** can read an
+//! env-driven release manifest and compare it with the server crate version; if unset, it safely
+//! falls back to **`needUpdate: false`** with the current version.
+//! **`download-app`** validates **`url`** then returns a **200** policy response — Flutter apps
+//! use platform stores/installers, not this legacy endpoint.
 
 use axum::{
     extract::{Json, State},

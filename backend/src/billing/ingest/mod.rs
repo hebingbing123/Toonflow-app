@@ -1,11 +1,6 @@
-//! 幂等性 Webhook 行插入 + 可选的 `app_user_profile` 更新。
+//! Idempotent webhook row insert + optional `app_user_profile` upsert.
 //!
-//! 处理计费 Webhook 事件，支持 Stripe、支付宝等提供商。
-//! 子模块：
-//! - `subscription_state` — 订阅状态管理
-//! - `apply_plan` — 应用计费计划
-//! - `webhook_ingest` — Webhook 摄取主逻辑
-//! - `event_parse` — 事件解析
+//! Submodules: [`subscription_state`], [`apply_plan`], [`webhook_ingest`], [`event_parse`].
 
 mod apply_plan;
 mod event_parse;

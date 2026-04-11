@@ -1,5 +1,5 @@
-//! 遗留 `/api/novel/*` 读/删除和分页 CRUD 形式的 `POST` 路由（位于 `/api/v1/novels/*` 下）。
-//! `id` / `projectId` 指 `app_novel.legacy_id` / `app_project.legacy_id`。
+//! Legacy **`/api/novel/*`** read/delete and paginated CRUD-shaped **`POST`** routes under **`/api/v1/novels/*`**.
+//! **`id`** / **`projectId`** refer to **`app_novel.legacy_id`** / **`app_project.legacy_id`**.
 
 mod dto;
 mod extraction;

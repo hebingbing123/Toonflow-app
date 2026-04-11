@@ -1,4 +1,4 @@
-//! 提供商设置 HTTP API 的请求/响应类型。
+//! Request/response types for vendor settings HTTP API.
 
 use std::collections::HashMap;
 

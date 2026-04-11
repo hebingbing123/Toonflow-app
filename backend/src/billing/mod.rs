@@ -1,13 +1,5 @@
-//! 计费模块：提供商 Webhook 处理（§12 / §13）。
-//!
-//! HMAC 验证的摄取 + 按提供商事件 ID 的幂等去重。
-//! 首次接收时，可选的 `user_id` + `plan_tier` 会更新 `app_user_profile`。
-//!
-//! 子模块：
-//! - `ingest` — Webhook 摄取和处理
-//! - `verify` — HMAC 签名验证
-//! - `provider_adapter` — 提供商适配器
-//! - `provider_rules` — 提供商规则
+//! Billing provider webhooks (§12 / §13): HMAC-verified ingestion + idempotent dedupe by provider event id.
+//! On first receipt, optional `user_id` + `plan_tier` upsert `app_user_profile`（`ingest/` 子模块）。
 
 mod ingest;
 mod provider_adapter;
@@ -73,82 +65,49 @@ async fn post_billing_webhook(
     Ok(Json(out))
 }
 
-/// 计费 webhook 事件列表查询参数。
 #[derive(Debug, Deserialize, Default)]
 struct BillingEventsQuery {
-    /// 是否仅返回信息性事件。
     informational_event: Option<bool>,
-    /// 按提供商过滤（stripe、alipay、paddle）。
     provider: Option<String>,
-    /// 按原始事件 ID 精确匹配。
     raw_event_id: Option<String>,
-    /// 按原始事件 ID 前缀匹配。
     raw_event_id_prefix: Option<String>,
-    /// 按事件类型过滤。
     event_type: Option<String>,
-    /// 按提供商事件 ID 精确匹配。
     provider_event_id: Option<String>,
-    /// 按提供商事件 ID 前缀匹配。
     provider_event_id_prefix: Option<String>,
-    /// 事件创建时间范围起始（RFC3339）。
     event_created_from: Option<String>,
-    /// 事件创建时间范围结束（RFC3339）。
     event_created_to: Option<String>,
-    /// 记录创建时间范围起始（RFC3339）。
     created_from: Option<String>,
-    /// 记录创建时间范围结束（RFC3339）。
     created_to: Option<String>,
-    /// 按 ID 最小值过滤。
     id_min: Option<i64>,
-    /// 按 ID 最大值过滤。
     id_max: Option<i64>,
-    /// 排序方式：id_desc 或 id_asc。
     sort: Option<String>,
-    /// 返回记录数限制（1-200）。
     limit: Option<i64>,
-    /// 分页偏移量。
     offset: Option<i64>,
 }
 
-/// 计费 webhook 事件列表项。
 #[derive(Debug, Serialize, FromRow)]
 struct BillingWebhookEventItem {
-    /// 内部记录 ID。
     id: i64,
-    /// 提供商分配的事件 ID（幂等性键）。
     provider_event_id: String,
-    /// 提供商名称（stripe、alipay、paddle）。
     #[serde(skip_serializing_if = "Option::is_none")]
     provider: Option<String>,
-    /// 提供商原始事件 ID。
     #[serde(skip_serializing_if = "Option::is_none")]
     raw_event_id: Option<String>,
-    /// 事件类型（如 subscription.created）。
     #[serde(skip_serializing_if = "Option::is_none")]
     event_type: Option<String>,
-    /// 提供商事件创建时间。
     #[serde(skip_serializing_if = "Option::is_none")]
     event_created_at: Option<DateTime<Utc>>,
-    /// 是否为信息性事件（不计入计费）。
     is_informational_event: bool,
-    /// 本地记录创建时间。
     created_at: DateTime<Utc>,
 }
 
-/// 计费 webhook 事件列表响应。
 #[derive(Debug, Serialize)]
 struct BillingWebhookEventsResponse {
-    /// 事件列表。
     items: Vec<BillingWebhookEventItem>,
-    /// 总记录数。
     total: i64,
-    /// 请求的限制数。
     limit: i64,
-    /// 请求的偏移量。
     offset: i64,
-    /// 是否还有更多记录。
     has_more: bool,
-    /// 下一页偏移量（如果没有更多则为 null）。
     #[serde(skip_serializing_if = "Option::is_none")]
     next_offset: Option<i64>,
 }
