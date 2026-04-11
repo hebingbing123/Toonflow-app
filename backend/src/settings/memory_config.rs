@@ -4,7 +4,7 @@
 //! Rust 将每个用户配置持久化到 `app_user_profile.memory_config`（JSONB），服务器默认值作为回退。
 //!
 //! `POST …/clear-agent-memories`：遗留 `delAllMemory` 的 SaaS 映射（SQLite 擦除整个 `memories` 表）。
-//! Rust 仅清除 `JWT sub` + `projectId` + `agentType` + 可选 `episodesId` 的 `app_agent_memory` — 
+//! Rust 仅清除 `JWT sub` + `projectId` + `agentType` + 可选 `episodesId` 的 `app_agent_memory` —
 //! 与 `POST /api/v1/agents/memory/clear` 且 `clearType: all` 的相同行。
 
 use axum::{
