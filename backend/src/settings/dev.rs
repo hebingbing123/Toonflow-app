@@ -1,5 +1,7 @@
-//! Legacy **`/api/setting/dev/getSwitchAiDevTool`** / **`updateSwitchAiDevTool`**: AI dev-tool toggle was SQLite **`o_setting`**.
-//! Rust keeps a process-local override with env bootstrap; restart falls back to **`TOONFLOW_SWITCH_AI_DEV_TOOL`**.
+//! 开发者设置模块。
+//!
+//! 遗留 `/api/setting/dev/getSwitchAiDevTool` / `updateSwitchAiDevTool`：AI 开发工具切换曾是 SQLite `o_setting`。
+//! Rust 保持进程本地覆盖，环境引导；重启回退到 `TOONFLOW_SWITCH_AI_DEV_TOOL`。
 
 use axum::{
     extract::{Json, State},
