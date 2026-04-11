@@ -1,4 +1,11 @@
-//! HTTP router composition and core JSON routes (`/health`, `/api/v1/me`, …).
+//! 应用模块：HTTP 路由组合和核心 JSON 路由。
+//!
+//! 子模块：
+//! - `handlers` — 核心处理器（健康检查、版本、用户信息）
+//! - `router` — 路由构建
+//! - `ops` — 操作命令
+//! - `contract_smoke_tests` — 契约冒烟测试
+//! - `pg_contract_tests` — PostgreSQL 契约测试
 
 mod handlers;
 pub mod ops;

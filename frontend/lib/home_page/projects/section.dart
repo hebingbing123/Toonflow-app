@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'previews.dart';
 import 'workbenches/agent_memory.dart';
 import 'workbenches/creative_manuals.dart';
 import '../../rust_api.dart';
@@ -190,50 +191,17 @@ class ProjectsSection extends StatelessWidget {
           SelectableText('美术风格：$artStylesLine'),
         ],
         if (artStyles != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            '${artStyles!.length} 条画风',
-            style: Theme.of(context).textTheme.labelLarge,
+          ProjectsArtStylesPreview(
+            artStyles: artStyles!,
+            onManage: () => _openArtStylesWorkbench(context),
           ),
-          const SizedBox(height: 4),
-          ...artStyles!
-              .take(5)
-              .map(
-                (style) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(style.name),
-                  subtitle: Text(
-                    '#${style.legacyId}'
-                    '${(style.label ?? '').isEmpty ? '' : ' · ${style.label}'}',
-                  ),
-                  trailing: TextButton(
-                    onPressed: () => _openArtStylesWorkbench(context),
-                    child: const Text('管理'),
-                  ),
-                ),
-              ),
         ],
         if (projects != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            '${projects!.length} 个项目',
-            style: Theme.of(context).textTheme.labelLarge,
+          ProjectsListPreview(
+            projects: projects!,
+            onOpenProjectDetail: onOpenProjectDetail,
+            agentMemoryBody: agentMemoryBody,
           ),
-          ...projects!.map(
-            (project) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(project.name ?? '项目 #${project.legacyId}'),
-              subtitle: Text('#${project.legacyId} · ${project.id}'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => onOpenProjectDetail(project),
-            ),
-          ),
-          if (agentMemoryBody != null) ...[
-            const SizedBox(height: 8),
-            SelectableText('项目记忆：$agentMemoryBody'),
-          ],
         ],
       ],
     );
