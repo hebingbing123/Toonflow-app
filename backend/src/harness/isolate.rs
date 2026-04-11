@@ -1,8 +1,8 @@
-//! Process-isolated Harness tools: spawn the same binary with a hidden subcommand so allowlisted
-//! tool logic runs outside the API process (address-space boundary), as a vm2-style replacement path.
+//! 进程隔离的 Harness 工具。
 //!
-//! Concurrency is capped by **`HARNESS_ISOLATE_MAX_CONCURRENT`** (default **4**) so many parallel
-//! `isolated.echo` calls cannot exhaust process/file descriptors.
+//! 通过隐藏子命令启动相同二进制文件，使白名单工具逻辑在 API 进程外运行（地址空间边界），
+//! 作为 vm2 风格的替代路径。
+//! 并发数由 `HARNESS_ISOLATE_MAX_CONCURRENT` 限制（默认 4），防止并行 `isolated.echo` 调用耗尽进程/文件描述符。
 
 use std::sync::LazyLock;
 use std::time::Duration;

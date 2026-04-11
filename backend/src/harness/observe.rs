@@ -1,3 +1,7 @@
+//! Harness 观察模块。
+//!
+//! 提供追踪上下文和日志记录功能，用于监控 Harness 工具执行。
+
 use super::HarnessContext;
 use std::time::Instant;
 use uuid::Uuid;
