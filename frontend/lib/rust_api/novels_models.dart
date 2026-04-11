@@ -61,7 +61,7 @@ class ListNovelsResponse {
   }
 }
 
-/// Row from **`POST /api/v1/novels/get-novel-index`** — **`id`** is **`app_novel.legacy_id`**.
+/// Compat row (**`getNovelIndex`** shape); filled from **`GET …/projects/{uuid}/novels`**.
 class LegacyNovelIndexItem {
   const LegacyNovelIndexItem({
     required this.legacyId,
@@ -82,7 +82,7 @@ class LegacyNovelIndexItem {
   }
 }
 
-/// Row from **`POST /api/v1/novels/get-novel-event-state`**.
+/// Compat row; filled client-side from **`GET …/novels`** (**`event_state != 0`**).
 class LegacyNovelEventStateItem {
   const LegacyNovelEventStateItem({
     required this.legacyId,
@@ -106,7 +106,7 @@ class LegacyNovelEventStateItem {
   }
 }
 
-/// Row from **`POST /api/v1/novels/get-novel`** — response uses **camelCase** (**`chapterData`**, …).
+/// Compat paginated row (**`getNovel`** shape); fields map from REST **`NovelRow`** (snake_case JSON).
 class LegacyNovelPageRow {
   const LegacyNovelPageRow({
     required this.legacyId,
@@ -142,7 +142,7 @@ class LegacyNovelPageRow {
   }
 }
 
-/// **`POST /api/v1/novels/get-novel`** — **`{ data, total }`**.
+/// Compat **`{ data, total }`** for **`getNovel`**; built from **`GET …/novels`**.
 class LegacyNovelPagedResponse {
   const LegacyNovelPagedResponse({required this.data, required this.total});
 
@@ -160,7 +160,7 @@ class LegacyNovelPagedResponse {
   }
 }
 
-/// One entry for **`POST /api/v1/novels/add-novel`** **`data`** (camelCase **`chapterData`**).
+/// One batch item for compat **`add-novel`**; sent as **`POST …/novels`** bodies.
 class LegacyNovelAddItem {
   const LegacyNovelAddItem({
     required this.index,

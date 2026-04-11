@@ -198,20 +198,21 @@ async fn scripts_batch_add_by_project_id_requires_database_with_jwt() {
     assert_eq!(v["code"], "database_error");
 }
 
+const SMOKE_PROJECT_UUID: &str = "00000000-0000-0000-0000-000000000001";
+
 #[tokio::test]
-async fn novels_get_novel_data_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/novels/get-novel-data", r#"{"projectId":1}"#).await;
+async fn project_novels_list_unauthorized_without_bearer() {
+    let (status, v) = get_json(&format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels",)).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn novels_get_novel_data_requires_database_with_jwt() {
+async fn project_novels_list_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/get-novel-data",
+    let (status, v) = get_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels"),
         &token,
-        r#"{"projectId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -219,12 +220,23 @@ async fn novels_get_novel_data_requires_database_with_jwt() {
 }
 
 #[tokio::test]
-async fn novels_get_novel_index_requires_database_with_jwt() {
+async fn project_novels_create_unauthorized_without_bearer() {
+    let (status, v) = post_json(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels"),
+        r#"{"chapter":"c"}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn project_novels_create_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/novels/get-novel-index",
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels"),
         &token,
-        r#"{"projectId":1}"#,
+        r#"{"chapter":"c"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -232,19 +244,108 @@ async fn novels_get_novel_index_requires_database_with_jwt() {
 }
 
 #[tokio::test]
-async fn novels_get_novel_event_state_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/novels/get-novel-event-state", r#"{"ids":[1]}"#).await;
+async fn project_novels_get_one_unauthorized_without_bearer() {
+    let (status, v) = get_json(&format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1",)).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn novels_get_novel_event_state_requires_database_with_jwt() {
+async fn project_novels_get_one_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/get-novel-event-state",
+    let (status, v) = get_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1"),
         &token,
-        r#"{"ids":[1]}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn project_novels_list_bad_page_requires_database_before_validation() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels?page=0&limit=10"),
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn project_novels_delete_unauthorized_without_bearer() {
+    let (status, v) =
+        delete_empty_no_bearer(&format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1",)).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn project_novels_delete_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = delete_empty_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1"),
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn project_novels_patch_unauthorized_without_bearer() {
+    let (status, v) = patch_json_no_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1"),
+        r#"{"chapter":"x"}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn project_novels_patch_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = patch_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novels/1"),
+        &token,
+        r#"{"chapter":"x"}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn project_novel_events_list_unauthorized_without_bearer() {
+    let (status, v) = get_json(&format!(
+        "/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events",
+    ))
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn project_novel_events_list_bad_page_requires_database_before_validation() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events?page=0&limit=20"),
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn project_novel_events_list_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events?page=1&limit=20"),
+        &token,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -254,8 +355,8 @@ async fn novels_get_novel_event_state_requires_database_with_jwt() {
 #[tokio::test]
 async fn novel_events_generate_unauthorized_without_bearer() {
     let (status, v) = post_json(
-        "/api/v1/novels/events/generate-events",
-        r#"{"projectId":1,"novelIds":[1]}"#,
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events/generate-events"),
+        r#"{"novelIds":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -265,31 +366,18 @@ async fn novel_events_generate_unauthorized_without_bearer() {
 #[tokio::test]
 async fn novel_events_generate_validates_payload_before_database() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/generate-events",
-        &token,
-        r#"{"projectId":1,"novelIds":[]}"#,
-    )
-    .await;
+    let uri = format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events/generate-events");
+    let (status, v) = post_json_bearer(&uri, &token, r#"{"novelIds":[]}"#).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/generate-events",
-        &token,
-        r#"{"projectId":1,"novelIds":[1],"concurrentCount":0}"#,
-    )
-    .await;
+    let (status, v) =
+        post_json_bearer(&uri, &token, r#"{"novelIds":[1],"concurrentCount":0}"#).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 
-    // upper bound: concurrentCount > MAX_GENERATE_EVENTS_CONCURRENCY (20) → 400
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/generate-events",
-        &token,
-        r#"{"projectId":1,"novelIds":[1],"concurrentCount":9999}"#,
-    )
-    .await;
+    let (status, v) =
+        post_json_bearer(&uri, &token, r#"{"novelIds":[1],"concurrentCount":9999}"#).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
 }
@@ -298,115 +386,9 @@ async fn novel_events_generate_validates_payload_before_database() {
 async fn novel_events_generate_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/generate-events",
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events/generate-events"),
         &token,
-        r#"{"projectId":1,"novelIds":[1],"concurrentCount":5}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novels_batch_delete_empty_ids_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/novels/batch-delete", &token, r#"{"ids":[]}"#).await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novels_batch_delete_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        post_json_bearer("/api/v1/novels/batch-delete", &token, r#"{"ids":[1]}"#).await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novel_events_get_events_unauthorized_without_bearer() {
-    let (status, v) = post_json(
-        "/api/v1/novels/events/get-events",
-        r#"{"projectId":1,"page":1,"limit":20}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novel_events_get_events_validates_payload_before_database() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/get-events",
-        &token,
-        r#"{"projectId":0,"page":1,"limit":20}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/get-events",
-        &token,
-        r#"{"projectId":1,"page":0,"limit":20}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/get-events",
-        &token,
-        r#"{"projectId":1,"page":1,"limit":0}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novel_events_get_events_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/get-events",
-        &token,
-        r#"{"projectId":1,"page":1,"limit":20,"search":"事件"}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novel_events_batch_delete_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/novels/events/batch-delete", r#"{"ids":[1]}"#).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novel_events_batch_delete_validates_payload_before_database() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/batch-delete",
-        &token,
-        r#"{"ids":[]}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novel_events_batch_delete_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/events/batch-delete",
-        &token,
-        r#"{"ids":[1]}"#,
+        r#"{"novelIds":[1],"concurrentCount":5}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -417,126 +399,11 @@ async fn novel_events_batch_delete_requires_database_with_jwt() {
 async fn project_novel_events_batch_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novel-events/batch-delete",
+        &format!("/api/v1/projects/{SMOKE_PROJECT_UUID}/novel-events/batch-delete"),
         &token,
         r#"{"ids":[1]}"#,
     )
     .await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novels_get_novel_unauthorized_without_bearer() {
-    let (status, v) = post_json(
-        "/api/v1/novels/get-novel",
-        r#"{"projectId":1,"page":1,"limit":10}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novels_get_novel_bad_page_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/get-novel",
-        &token,
-        r#"{"projectId":1,"page":0,"limit":10}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novels_get_novel_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/get-novel",
-        &token,
-        r#"{"projectId":1,"page":1,"limit":10}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novels_add_novel_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/novels/add-novel", r#"{"projectId":1,"data":[]}"#).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novels_add_novel_empty_data_ok_with_jwt_without_database() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer(
-        "/api/v1/novels/add-novel",
-        &token,
-        r#"{"projectId":1,"data":[]}"#,
-    )
-    .await;
-    assert_eq!(status, StatusCode::OK);
-    assert_eq!(v["message"], "新增原文成功");
-}
-
-#[tokio::test]
-async fn novels_add_novel_with_rows_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let body = r#"{"projectId":1,"data":[{"index":1,"reel":"","chapter":"c","chapterData":"d"}]}"#;
-    let (status, v) = post_json_bearer("/api/v1/novels/add-novel", &token, body).await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novels_delete_novel_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/novels/delete-novel", r#"{"id":1}"#).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novels_delete_novel_bad_id_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/novels/delete-novel", &token, r#"{"id":0}"#).await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novels_delete_novel_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/novels/delete-novel", &token, r#"{"id":1}"#).await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn novels_update_novel_unauthorized_without_bearer() {
-    let body = r#"{"id":1,"index":1,"reel":"","chapter":"c","chapterData":"d","event":""}"#;
-    let (status, v) = post_json("/api/v1/novels/update-novel", body).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn novels_update_novel_bad_id_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let body = r#"{"id":0,"index":1,"reel":"","chapter":"c","chapterData":"d","event":""}"#;
-    let (status, v) = post_json_bearer("/api/v1/novels/update-novel", &token, body).await;
-    assert_eq!(status, StatusCode::BAD_REQUEST);
-    assert_eq!(v["code"], "bad_request");
-}
-
-#[tokio::test]
-async fn novels_update_novel_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
-    let body = r#"{"id":1,"index":1,"reel":"","chapter":"c","chapterData":"d","event":""}"#;
-    let (status, v) = post_json_bearer("/api/v1/novels/update-novel", &token, body).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }

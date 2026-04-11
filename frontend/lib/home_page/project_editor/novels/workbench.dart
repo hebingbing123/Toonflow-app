@@ -104,7 +104,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           final message =
                               await postLegacyNovelEventsGenerateEvents(
                                 token,
-                                projectId: p.legacyId,
+                                projectLegacyId: p.legacyId,
                                 novelIds: ids,
                               );
                           if (!ctx.mounted) return;
@@ -511,7 +511,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   final message =
                                       await postLegacyNovelEventsGenerateEvents(
                                         token,
-                                        projectId: p.legacyId,
+                                        projectLegacyId: p.legacyId,
                                         novelIds: ids,
                                       );
                                   await refreshWorkbench(setLocalState);
@@ -605,6 +605,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                       final rows =
                                           await postLegacyNovelsGetNovelEventState(
                                             token,
+                                            p.id,
                                             ids,
                                           );
                                       final sample = rows.isEmpty
@@ -648,6 +649,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   final message =
                                       await postLegacyNovelsBatchDelete(
                                         token,
+                                        p.id,
                                         ids,
                                       );
                                   await refreshWorkbench(setLocalState);

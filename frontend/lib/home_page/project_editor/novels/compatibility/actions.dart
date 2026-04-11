@@ -143,7 +143,11 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
-                  final rows = await postLegacyNovelsGetNovelEventState(token, ids);
+                  final rows = await postLegacyNovelsGetNovelEventState(
+                    token,
+                    p.id,
+                    ids,
+                  );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
@@ -182,14 +186,14 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                   final ids = novelsRef[0]!.items.map((e) => e.legacyId).toList();
                   final msg = await postLegacyNovelEventsGenerateEvents(
                     token,
-                    projectId: p.legacyId,
+                    projectLegacyId: p.legacyId,
                     novelIds: ids.take(3).toList(),
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/novels/events/generate-events：$msg',
+                        'POST …/novel-events/generate-events：$msg',
                       ),
                     ),
                   );
@@ -254,7 +258,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  await postLegacyNovelsBatchDelete(token, const []);
+                  await postLegacyNovelsBatchDelete(token, p.id, const []);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(

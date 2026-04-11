@@ -54,7 +54,7 @@ info:
 
     **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`legacy_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
 
-        **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/{project_id}/novel-events*`**（UUID 项目段；**`event_legacy_id`** = **`app_novel_event.legacy_id`**）。**已删除** **`…/projects/legacy/{id}/novel-events*`**。legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** 仍覆盖旧形，含异步事件生成触发。
+        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_legacy_id}`**（**`novel_legacy_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_legacy_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_legacy_api` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -7811,359 +7811,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/novels/get-novel-data:
-    post:
-      tags: [novels]
-      summary: Legacy — list all novels for a project (full rows)
-      operationId: postNovelsGetNovelDataV1
-      description: |
-        Parity with **`POST /api/novel/getNovelData`**. **`projectId`** is **`app_project.legacy_id`**.
-        Returns **`{ "data": [NovelRow] }`** ordered by **`chapter_index`**.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelProjectIdBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelDataResponse"
-        "400":
-          description: Invalid projectId
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/get-novel-index:
-    post:
-      tags: [novels]
-      summary: Legacy — novel chapter index list (id, index, chapter)
-      operationId: postNovelsGetNovelIndexV1
-      description: |
-        Parity with **`POST /api/novel/getNovelIndex`**. **`id`** is **`app_novel.legacy_id`**; **`index`** is **`chapter_index`**.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelProjectIdBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelIndexResponse"
-        "400":
-          description: Invalid projectId
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/get-novel-event-state:
-    post:
-      tags: [novels]
-      summary: Legacy — query non-zero novel event states by legacy ids
-      operationId: postNovelsGetNovelEventStateV1
-      description: |
-        Parity with **`POST /api/novel/getNovelEventState`**. **`ids`** are **`app_novel.legacy_id`**.
-        Returns rows where **`eventState != 0`** for the caller-owned project novels.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelGetNovelEventStateBody"
-      responses:
-        "200":
-          description: OK (possibly empty)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelEventStateResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/get-novel:
-    post:
-      tags: [novels]
-      summary: Legacy — paginated novel list (legacy id + chapter fields)
-      operationId: postNovelsGetNovelV1
-      description: |
-        Parity with **`POST /api/novel/getNovel`**. **`projectId`** is **`app_project.legacy_id`**.
-        **`page`** ≥ **1**, **`limit`** ≥ **1** (capped at **200**). Optional **`search`** filters **`chapter`** (**ILIKE**).
-        Each row **`id`** is **`app_novel.legacy_id`**; **`index`** is **`chapter_index`** (**camelCase** response).
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelGetNovelBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelGetNovelResponse"
-        "400":
-          description: Invalid projectId, page, or limit
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/add-novel:
-    post:
-      tags: [novels]
-      summary: Legacy — batch add novels under a project
-      operationId: postNovelsAddNovelV1
-      description: |
-        Parity with **`POST /api/novel/addNovel`**. **`projectId`** is **`app_project.legacy_id`**.
-        At most **200** items in **`data`**. Empty **`data`** returns **200** with **`message`** **`新增原文成功`** without touching the database.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelAddNovelBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
-        "400":
-          description: Invalid projectId or too many rows in data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project legacy id not found for caller
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/delete-novel:
-    post:
-      tags: [novels]
-      summary: Legacy — delete one novel by legacy id
-      operationId: postNovelsDeleteNovelV1
-      description: |
-        Parity with **`POST /api/novel/deleteNovel`**. **`id`** is **`app_novel.legacy_id`** (must be positive).
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelDeleteNovelBody"
-      responses:
-        "200":
-          description: Row deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
-        "400":
-          description: Non-positive id
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No matching owned row
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/update-novel:
-    post:
-      tags: [novels]
-      summary: Legacy — update one novel by legacy id
-      operationId: postNovelsUpdateNovelV1
-      description: |
-        Parity with **`POST /api/novel/updateNovel`**. **`id`** is **`app_novel.legacy_id`**.
-        **`index`** may be a JSON number or numeric string. Empty **`event`** clears **`event`** to null in Postgres.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelUpdateNovelBody"
-      responses:
-        "200":
-          description: Row updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
-        "400":
-          description: Non-positive id or invalid index
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No matching owned row
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/batch-delete:
-    post:
-      tags: [novels]
-      summary: Legacy — delete novels by legacy ids (owned rows only)
-      operationId: postNovelsBatchDeleteV1
-      description: |
-        Parity with **`POST /api/novel/batchDeleteNovel`**. Deletes **`app_novel`** rows whose **`legacy_id`** is in **`ids`** and whose project is owned by the caller.
-        Does not replicate SQLite **`o_eventChapter`** / **`o_event`** deletes. Empty **`ids`** → **400**. At most **500** ids per request.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyNovelBatchDeleteBody"
-      responses:
-        "200":
-          description: At least one row deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
-        "400":
-          description: Empty ids, too many ids, or invalid payload
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: No matching owned rows deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
 
   /api/v1/settings/vendors/credential:
     post:
@@ -8456,6 +8103,61 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/novel-events/generate-events:
+    post:
+      tags: [novel-events]
+      summary: Trigger async chapter event extraction (LLM)
+      operationId: postProjectNovelEventsGenerateEventsV1
+      description: |
+        Resets selected **`app_novel`** rows (**`event`** cleared, **`event_state = 0`**) and runs background LLM extraction.
+        **`novelIds`** are **`app_novel.legacy_id`** values in the given project. Returns **`{ "message": "生成事件成功" }`** immediately.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateNovelEventsBody"
+      responses:
+        "200":
+          description: Trigger accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
+        "400":
+          description: Invalid body, empty novelIds, invalid concurrentCount, or no matching chapters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured or database error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/{project_id}/novel-events/{event_legacy_id}:
     patch:
       tags: [novel-events]
@@ -8546,110 +8248,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/novels/events/get-events:
-    post:
-      tags: [novel-events]
-      summary: Legacy — list novel events (old API shape)
-      operationId: postNovelEventsGetEventsV1
-      description: |
-        Parity with POST /api/novel/event/getEvent. Returns events with associated chapter indexes.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyGetEventsBody"
-      responses:
-        "200":
-          description: List of events
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelEventListResponse"
-        "400":
-          description: Invalid parameters
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/events/batch-delete:
-    post:
-      tags: [novel-events]
-      summary: Legacy — batch delete novel events
-      operationId: postNovelEventsBatchDeleteV1
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BatchDeleteNovelEventsBody"
-      responses:
-        "200":
-          description: Events deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NovelEventOkResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/novels/events/generate-events:
-    post:
-      tags: [novel-events]
-      summary: Legacy — trigger async novel event generation
-      operationId: postNovelEventsGenerateEventsV1
-      description: |
-        Parity with **`POST /api/novel/event/generateEvents`**.
-        Resets selected novels to **`eventState = 0`** and starts async event extraction.
-        Returns immediately with **`message: 生成事件成功`**.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyGenerateNovelEventsBody"
-      responses:
-        "200":
-          description: Trigger accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyNovelOkMessageResponse"
-        "400":
-          description: Invalid projectId, empty novelIds, invalid concurrentCount, or no matching chapters
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
 
   /api/v1/quality/reviews:
     get:
@@ -12992,6 +12590,23 @@ components:
         message:
           type: string
           description: e.g. 新增原文成功, 删除原文成功, 更新原文成功
+
+    GenerateNovelEventsBody:
+      type: object
+      required: [novelIds]
+      additionalProperties: false
+      properties:
+        novelIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        concurrentCount:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 5
+          description: Max effective value is 20
 
     LegacyGenerateNovelEventsBody:
       type: object

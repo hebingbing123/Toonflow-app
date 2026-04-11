@@ -170,68 +170,48 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
   return map['message'] as String? ?? '';
 }
 
-/// `POST /api/v1/novels/events/get-events` — legacy event list shape.
+/// Compat: maps **`GET …/projects/{uuid}/novel-events`** to legacy **`{ list, total }`**.
 Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
   String accessToken,
-  int projectId, {
+  int projectLegacyId, {
   required int page,
   required int limit,
   String? search,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/get-events');
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'page': page,
-    'limit': limit,
-  };
-  if (search != null && search.isNotEmpty) {
-    body['search'] = search;
-  }
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
+  final projectUuid =
+      await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final rows = await fetchProjectNovelEventsByProjectId(
+    accessToken,
+    projectUuid,
+    search: search,
+    page: page,
+    limit: limit,
+  );
+  final list = rows.items
+      .map(
+        (e) => LegacyNovelEventRow(
+          legacyId: e.legacyId,
+          eventName: e.name,
+          detail: e.detail.isEmpty ? null : e.detail,
+          createTime: e.createTimeMs ?? 0,
+          chapters: e.chapterIndexes,
+        ),
       )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyNovelEventsPagedResponse.fromJson(map);
+      .toList();
+  return LegacyNovelEventsPagedResponse(list: list, total: rows.total);
 }
 
-/// `POST /api/v1/novels/events/batch-delete` — legacy batch delete by event legacy ids.
+/// Compat: **`POST …/projects/{uuid}/novel-events/batch-delete`** by event legacy ids.
 Future<String> postLegacyNovelEventsBatchDelete(
   String accessToken,
+  int projectLegacyId,
   List<int> legacyIds,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/batch-delete');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'ids': legacyIds}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  final projectUuid =
+      await _projectIdForLegacyId(accessToken, projectLegacyId);
+  return postProjectNovelEventsBatchDeleteByProjectId(
+    accessToken,
+    projectUuid,
+    legacyIds,
+  );
 }

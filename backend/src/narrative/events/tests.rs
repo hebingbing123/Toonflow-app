@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use super::dto::{
     BatchDeleteEventsBody, BatchDeleteEventsResponse, CreateNovelEventBody, EventWithChapters,
-    LegacyGetEventsBody, ListNovelEventsQuery, UpdateNovelEventBody,
+    GenerateNovelEventsBody, ListNovelEventsQuery, UpdateNovelEventBody,
 };
 use super::query::{self, search_ilike};
 
@@ -77,28 +77,24 @@ fn batch_delete_events_body_accepts_valid() {
 }
 
 #[test]
-fn legacy_get_events_body_rejects_unknown_fields() {
-    let err = serde_json::from_str::<LegacyGetEventsBody>(
-        r#"{"projectId":1,"page":1,"limit":20,"extra":1}"#,
+fn generate_novel_events_body_rejects_unknown_fields() {
+    let err = serde_json::from_str::<GenerateNovelEventsBody>(
+        r#"{"novelIds":[1],"concurrentCount":2,"extra":1}"#,
     );
     assert!(err.is_err());
 }
 
 #[test]
-fn legacy_get_events_body_accepts_valid() {
-    let b: LegacyGetEventsBody =
-        serde_json::from_str(r#"{"projectId":1,"page":1,"limit":20}"#).unwrap();
-    assert_eq!(b.project_id, 1);
-    assert_eq!(b.page, 1);
-    assert_eq!(b.limit, 20);
-    assert_eq!(b.search, None);
+fn generate_novel_events_body_accepts_valid() {
+    assert!(serde_json::from_str::<GenerateNovelEventsBody>(
+        r#"{"novelIds":[1,2],"concurrentCount":3}"#,
+    )
+    .is_ok());
 }
 
 #[test]
-fn legacy_get_events_body_accepts_with_search() {
-    let b: LegacyGetEventsBody =
-        serde_json::from_str(r#"{"projectId":1,"page":1,"limit":20,"search":"test"}"#).unwrap();
-    assert_eq!(b.search, Some("test".to_string()));
+fn generate_novel_events_body_default_concurrency() {
+    assert!(serde_json::from_str::<GenerateNovelEventsBody>(r#"{"novelIds":[9]}"#).is_ok());
 }
 
 #[test]

@@ -64,7 +64,6 @@ pub fn build_router(state: AppState) -> Router {
         .merge(manuals::art_styles::router())
         .merge(narrative::novels::router())
         .merge(narrative::events::router())
-        .merge(narrative::legacy::router())
         .merge(production_legacy::router())
         .merge(assets::router())
         .merge(scripting::scripts::router())

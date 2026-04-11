@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
+use sqlx::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
@@ -93,13 +94,29 @@ pub struct BatchDeleteEventsResponse {
     pub message: &'static str,
 }
 
-/// Legacy POST route matching old API shape.
+#[derive(Debug, Serialize)]
+pub(super) struct NovelOkMessageResponse {
+    pub(super) message: &'static str,
+}
+
+/// Body for **`POST …/novel-events/generate-events`** (project UUID in path).
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct LegacyGetEventsBody {
-    pub(crate) project_id: i32,
-    pub(crate) page: u32,
-    pub(crate) limit: u32,
-    #[serde(default)]
-    pub(crate) search: Option<String>,
+pub(super) struct GenerateNovelEventsBody {
+    pub(super) novel_ids: Vec<i32>,
+    #[serde(default = "default_generate_events_concurrency")]
+    pub(super) concurrent_count: usize,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub(super) struct NovelEventExtractionRow {
+    pub(super) id: Uuid,
+    pub(super) chapter_index: i32,
+    pub(super) reel: Option<String>,
+    pub(super) chapter: String,
+    pub(super) chapter_data: String,
+}
+
+fn default_generate_events_concurrency() -> usize {
+    super::DEFAULT_GENERATE_EVENTS_CONCURRENCY
 }

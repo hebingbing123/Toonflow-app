@@ -373,26 +373,27 @@ async fn novel_events_crud_roundtrip() {
     let project_uuid = created["id"].as_str().expect("project id");
 
     // Add novels first to have chapter_ids to associate
-    let add_novel_body = format!(
-        r#"{{"projectId":{},"data":[{{"index":1,"reel":"卷一","chapter":"第一章","chapterData":"第一章内容"}},{{"index":2,"reel":"卷一","chapter":"第二章","chapterData":"第二章内容"}}]}}"#,
-        project_id
-    );
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/add-novel")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(add_novel_body))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, _) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "add novels");
+    for body in [
+        r#"{"chapter_index":1,"reel":"卷一","chapter":"第一章","chapter_data":"第一章内容"}"#,
+        r#"{"chapter_index":2,"reel":"卷一","chapter":"第二章","chapter_data":"第二章内容"}"#,
+    ] {
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/{project_uuid}/novels"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(status, StatusCode::CREATED, "add novel");
+    }
 
     // Create event
     let create_body = r#"{"name":"测试事件","detail":"事件详情","chapterIds":[1,2]}"#.to_string();
@@ -434,7 +435,7 @@ async fn novel_events_crud_roundtrip() {
     let items = list["items"].as_array().expect("items");
     assert_eq!(items.len(), 1);
     assert_eq!(items[0]["name"].as_str(), Some("测试事件"));
-    let chapters = items[0]["chapterIndexes"].as_array().expect("chapters");
+    let chapters = items[0]["chapter_indexes"].as_array().expect("chapters");
     assert_eq!(chapters.len(), 2);
 
     // Update event
@@ -556,27 +557,33 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
-    let add_novel_body = format!(
-        r#"{{"projectId":{},"data":[{{"index":1,"reel":"卷一","chapter":"第一章","chapterData":"第一章内容"}},{{"index":2,"reel":"卷一","chapter":"第二章","chapterData":"第二章内容"}}]}}"#,
-        project_legacy_id
-    );
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/add-novel")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(add_novel_body))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, add_msg) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "add_msg={add_msg}");
+    for body in [
+        r#"{"chapter_index":1,"reel":"卷一","chapter":"第一章","chapter_data":"第一章内容"}"#,
+        r#"{"chapter_index":2,"reel":"卷一","chapter":"第二章","chapter_data":"第二章内容"}"#,
+    ] {
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri(format!("/api/v1/projects/{project_uuid}/novels"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (status, _) = read_json_response(res).await;
+        assert_eq!(
+            status,
+            StatusCode::CREATED,
+            "add novel for generate-events test"
+        );
+    }
 
     let novel_rows: Vec<(i32,)> = sqlx::query_as(
         r#"
@@ -615,7 +622,6 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     .expect("seed existing events");
 
     let payload = serde_json::json!({
-        "projectId": project_legacy_id,
         "novelIds": novel_legacy_ids,
         "concurrentCount": 2
     });
@@ -624,7 +630,9 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/novels/events/generate-events")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novel-events/generate-events"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -700,30 +708,39 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel-event-state")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    serde_json::json!({ "ids": novel_legacy_ids }).to_string(),
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?page=1&limit=50"
                 ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, state_rows) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "state_rows={state_rows}");
-    let data = state_rows["data"].as_array().expect("state data array");
+    let (status, novel_json) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "novel_json={novel_json}");
+    let items = novel_json["items"].as_array().expect("novel items");
+    let non_zero: Vec<&serde_json::Value> = items
+        .iter()
+        .filter(|row| {
+            let Some(lid) = row["legacy_id"].as_i64() else {
+                return false;
+            };
+            let lid = lid as i32;
+            novel_legacy_ids.contains(&lid) && row["event_state"].as_i64().unwrap_or(0) != 0
+        })
+        .collect();
     assert_eq!(
-        data.len(),
+        non_zero.len(),
         2,
-        "both novels should be visible in non-zero legacy event state list: {state_rows}"
+        "both novels should appear with non-zero event_state: {novel_json:?}"
     );
     assert!(
-        data.iter()
+        non_zero
+            .iter()
             .all(|row| row["event_state"].as_i64() == Some(-1)),
-        "legacy event_state should expose fallback failures: {state_rows}"
+        "event_state should expose fallback failures: {novel_json:?}"
     );
 
     let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")

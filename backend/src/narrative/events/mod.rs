@@ -1,9 +1,12 @@
-//! 小说事件（遗留 `o_event` / `o_eventChapter`）：CRUD 和章节关联。
+//! 小说事件：CRUD、章节关联与章节事件抽取。
 
 mod dto;
+mod extraction;
 mod handlers;
 mod query;
 
+pub(crate) const DEFAULT_GENERATE_EVENTS_CONCURRENCY: usize = 5;
+pub(crate) const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
 pub(crate) const MAX_EVENT_BATCH_DELETE: usize = 500;
 pub(crate) const MAX_EVENT_LIST_LIMIT: i64 = 200;
 
@@ -24,18 +27,13 @@ pub fn router() -> Router<AppState> {
             post(handlers::batch_delete_novel_events_for_project),
         )
         .route(
+            "/api/v1/projects/{project_id}/novel-events/generate-events",
+            post(handlers::post_generate_novel_events_for_project),
+        )
+        .route(
             "/api/v1/projects/{project_id}/novel-events/{event_legacy_id}",
             delete(handlers::delete_novel_event_for_project)
                 .patch(handlers::update_novel_event_for_project),
-        )
-        // Legacy POST routes matching old API
-        .route(
-            "/api/v1/novels/events/get-events",
-            post(handlers::post_get_events),
-        )
-        .route(
-            "/api/v1/novels/events/batch-delete",
-            post(handlers::post_batch_delete_events),
         )
 }
 

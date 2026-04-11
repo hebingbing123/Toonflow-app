@@ -55,7 +55,7 @@ class ListNovelEventsResponse {
   }
 }
 
-/// Row from **`POST /api/v1/novels/events/get-events`**.
+/// Compat event row (**`get-events`** shape); mapped from **`GET …/novel-events`**.
 class LegacyNovelEventRow {
   const LegacyNovelEventRow({
     required this.legacyId,
@@ -83,7 +83,7 @@ class LegacyNovelEventRow {
   }
 }
 
-/// **`POST /api/v1/novels/events/get-events`** — legacy paginated list.
+/// Compat **`{ list, total }`**; built from **`GET …/novel-events`**.
 class LegacyNovelEventsPagedResponse {
   const LegacyNovelEventsPagedResponse({
     required this.list,

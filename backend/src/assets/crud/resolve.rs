@@ -8,28 +8,6 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
-/// Resolve **`app_project.id`** for an owned project by **`legacy_id`**.
-pub(crate) async fn resolve_owned_project_pk_by_legacy(
-    pool: &PgPool,
-    uid: Uuid,
-    project_legacy_id: i32,
-) -> Result<Uuid, ApiError> {
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
-        ));
-    }
-    let id: Option<Uuid> = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    id.ok_or(ApiError::NotFound)
-}
-
 /// **404** if the UUID project is missing or not owned by **`uid`**.
 pub(crate) async fn ensure_owned_project_pk(
     pool: &PgPool,

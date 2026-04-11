@@ -11,17 +11,19 @@ use serde_json::Value;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::dto::{
     BatchDeleteEventsBody, BatchDeleteEventsResponse, CreateNovelEventBody, EventWithChapters,
-    LegacyGetEventsBody, ListNovelEventsQuery, ListNovelEventsResponse, UpdateNovelEventBody,
+    GenerateNovelEventsBody, ListNovelEventsQuery, ListNovelEventsResponse,
+    NovelEventExtractionRow, NovelOkMessageResponse, UpdateNovelEventBody,
 };
-use super::query::{count_novel_events, list_event_rows, list_legacy_event_rows, search_ilike};
-use super::{MAX_EVENT_BATCH_DELETE, MAX_EVENT_LIST_LIMIT};
+use super::extraction::{resolve_event_extraction_prompt, run_novel_event_extraction_task};
+use super::query::{count_novel_events, list_event_rows, search_ilike};
+use super::{MAX_EVENT_BATCH_DELETE, MAX_EVENT_LIST_LIMIT, MAX_GENERATE_EVENTS_CONCURRENCY};
 
 async fn list_novel_events_core(
     pool: &PgPool,
@@ -402,56 +404,22 @@ pub(super) async fn batch_delete_novel_events_for_project(
     batch_delete_novel_events_core(pool, uid, project_id, body).await
 }
 
-pub(super) async fn post_get_events(
+pub(super) async fn post_generate_novel_events_for_project(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<LegacyGetEventsBody>,
-) -> Result<JsonResponse<Value>, ApiError> {
+    Path(project_uuid): Path<Uuid>,
+    Json(body): Json<GenerateNovelEventsBody>,
+) -> Result<JsonResponse<NovelOkMessageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
+    if body.novel_ids.is_empty() {
+        return Err(ApiError::BadRequest("novelIds must not be empty".into()));
     }
-    if body.page < 1 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
+    if body.concurrent_count == 0 {
+        return Err(ApiError::BadRequest("concurrentCount must be >= 1".into()));
     }
-    if body.limit < 1 {
-        return Err(ApiError::BadRequest("limit must be positive".into()));
-    }
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, body.project_id).await?;
-
-    let lim = i64::from(body.limit).min(MAX_EVENT_LIST_LIMIT);
-    let off = i64::from(body.page.saturating_sub(1)) * lim;
-    let search_pat = search_ilike(body.search);
-    let search_ref = search_pat.as_deref();
-    let total = count_novel_events(pool, project_id, uid, search_ref).await?;
-    let rows = list_legacy_event_rows(pool, project_id, uid, lim, off, search_ref).await?;
-
-    Ok(JsonResponse(serde_json::json!({
-        "list": rows,
-        "total": total
-    })))
-}
-
-pub(super) async fn post_batch_delete_events(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<BatchDeleteEventsBody>,
-) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if body.ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must not be empty".into()));
-    }
-    if body.ids.len() > MAX_EVENT_BATCH_DELETE {
+    if body.concurrent_count > MAX_GENERATE_EVENTS_CONCURRENCY {
         return Err(ApiError::BadRequest(format!(
-            "ids must contain at most {MAX_EVENT_BATCH_DELETE} entries",
+            "concurrentCount must be at most {MAX_GENERATE_EVENTS_CONCURRENCY}"
         )));
     }
 
@@ -460,31 +428,55 @@ pub(super) async fn post_batch_delete_events(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    ensure_owned_project_pk(pool, uid, project_uuid).await?;
 
-    sqlx::query(
+    let novels: Vec<NovelEventExtractionRow> = sqlx::query_as(
         r#"
-        DELETE FROM app_novel_event e
-        USING app_project p
-        WHERE e.project_id = p.id
-          AND p.owner_user_id = $1
-          AND e.legacy_id = ANY($2)
+        SELECT n.id, n.chapter_index, n.reel, n.chapter, n.chapter_data
+        FROM app_novel n
+        INNER JOIN app_project p ON p.id = n.project_id
+        WHERE p.id = $1
+          AND p.owner_user_id = $2
+          AND n.legacy_id = ANY($3)
+        ORDER BY n.chapter_index ASC, n.legacy_id ASC
         "#,
     )
+    .bind(project_uuid)
     .bind(uid)
-    .bind(&body.ids)
-    .execute(&mut *tx)
+    .bind(&body.novel_ids)
+    .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if novels.is_empty() {
+        return Err(ApiError::BadRequest("没有对应章节".into()));
+    }
 
-    Ok(JsonResponse(serde_json::json!({
-        "message": "删除事件成功"
-    })))
+    let ids: Vec<Uuid> = novels.iter().map(|n| n.id).collect();
+    sqlx::query(
+        r#"
+        UPDATE app_novel
+        SET event = NULL, event_state = 0, error_reason = NULL, updated_at = NOW()
+        WHERE id = ANY($1)
+        "#,
+    )
+    .bind(&ids)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let prompt = resolve_event_extraction_prompt(pool, uid).await?;
+    let pool_clone = pool.clone();
+    let llm = state.llm.clone();
+    let http_client = state.http_client.clone();
+    let concurrency = body.concurrent_count;
+
+    tokio::spawn(async move {
+        run_novel_event_extraction_task(pool_clone, llm, http_client, prompt, novels, concurrency)
+            .await;
+    });
+
+    Ok(JsonResponse(NovelOkMessageResponse {
+        message: "生成事件成功",
+    }))
 }

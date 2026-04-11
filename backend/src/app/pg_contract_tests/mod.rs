@@ -1160,94 +1160,60 @@ async fn projects_create_stats_delete_roundtrip() {
     assert_eq!(status, StatusCode::OK, "novel_list={novel_list}");
     assert!(novel_list["total"].as_i64().unwrap_or(0) >= 1);
 
-    // Legacy POST `/api/v1/novels/*` (Electron-shaped) round-trip vs same `app_novel` rows.
+    // REST `GET/POST/PATCH/DELETE …/projects/{uuid}/novels*` parity on the same rows.
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel-data")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?page=1&limit=200"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"projectId":{legacy_id}}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, legacy_data) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "legacy_data={legacy_data}");
-    let rows = legacy_data["data"].as_array().expect("legacy data array");
+    let (status, list_all) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "list_all={list_all}");
+    let rows = list_all["items"].as_array().expect("novel items");
     assert!(
         rows.iter()
-            .any(|r| { r["legacy_id"].as_i64() == Some(i64::from(novel_leg)) }),
-        "expected REST novel legacy_id in get-novel-data: {legacy_data}"
+            .any(|r| r["legacy_id"].as_i64() == Some(i64::from(novel_leg))),
+        "expected novel legacy_id in list: {list_all}"
     );
-
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel-index")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"projectId":{legacy_id}}}"#)))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, legacy_idx) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "legacy_idx={legacy_idx}");
-    let idx_rows = legacy_idx["data"].as_array().expect("legacy index array");
     assert!(
-        idx_rows
-            .iter()
-            .any(|r| r["id"].as_i64() == Some(i64::from(novel_leg))),
-        "expected novel_leg in get-novel-index: {legacy_idx}"
+        rows.iter().any(|r| {
+            r["legacy_id"].as_i64() == Some(i64::from(novel_leg))
+                && r["chapter_index"].is_number()
+                && r["chapter"].is_string()
+        }),
+        "expected index/chapter fields (legacy get-novel-index shape): {list_all}"
     );
 
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel-event-state")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"ids":[{novel_leg}]}}"#)))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, legacy_event_state) = read_json_response(res).await;
-    assert_eq!(
-        status,
-        StatusCode::OK,
-        "legacy_event_state={legacy_event_state}"
-    );
-    let event_rows = legacy_event_state["data"]
-        .as_array()
-        .expect("legacy event state array");
+    let non_zero: Vec<&serde_json::Value> = rows
+        .iter()
+        .filter(|r| {
+            r["legacy_id"].as_i64() == Some(i64::from(novel_leg))
+                && r["event_state"].as_i64().unwrap_or(0) != 0
+        })
+        .collect();
     assert!(
-        event_rows.is_empty(),
-        "freshly created novels should not expose non-zero event_state rows: {legacy_event_state}"
+        non_zero.is_empty(),
+        "fresh novels should not expose non-zero event_state: {list_all}"
     );
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?page=1&limit=10"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{legacy_id},"page":1,"limit":10}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -1255,42 +1221,41 @@ async fn projects_create_stats_delete_roundtrip() {
     let (status, get_pg) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "get_novel={get_pg}");
     assert_eq!(get_pg["total"].as_i64(), Some(1));
-    let page_rows = get_pg["data"].as_array().expect("get-novel data");
-    assert_eq!(page_rows[0]["id"].as_i64(), Some(i64::from(novel_leg)));
-
-    let add_body = format!(
-        r#"{{"projectId":{legacy_id},"data":[{{"index":99,"reel":"lr","chapter":"pg_legacy_add_chapter","chapterData":"d0"}}]}}"#
+    let page_rows = get_pg["items"].as_array().expect("paged items");
+    assert_eq!(
+        page_rows[0]["legacy_id"].as_i64(),
+        Some(i64::from(novel_leg))
     );
+
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/novels/add-novel")
+                .uri(format!("/api/v1/projects/{project_uuid}/novels"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(add_body))
+                .body(Body::from(
+                    r#"{"chapter_index":99,"reel":"lr","chapter":"pg_legacy_add_chapter","chapter_data":"d0"}"#,
+                ))
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, add_msg) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "add_novel={add_msg}");
-    assert_eq!(add_msg["message"].as_str(), Some("新增原文成功"));
+    let (status, _) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::CREATED, "add novel via REST");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?page=1&limit=10"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{legacy_id},"page":1,"limit":10}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -1298,48 +1263,46 @@ async fn projects_create_stats_delete_roundtrip() {
     let (status, two_rows) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "two_rows={two_rows}");
     assert_eq!(two_rows["total"].as_i64(), Some(2));
-    let added_leg = two_rows["data"]
+    let added_leg = two_rows["items"]
         .as_array()
-        .expect("data")
+        .expect("items")
         .iter()
         .find(|r| r["chapter"].as_str() == Some("pg_legacy_add_chapter"))
-        .expect("added chapter row")["id"]
+        .expect("added chapter row")["legacy_id"]
         .as_i64()
         .expect("added legacy id") as i32;
 
-    let upd = format!(
-        r#"{{"id":{added_leg},"index":99,"reel":"","chapter":"pg_legacy_patched","chapterData":"d1","event":""}}"#
-    );
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/update-novel")
+                .method(Method::PATCH)
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels/{added_leg}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(upd))
+                .body(Body::from(
+                    r#"{"chapter":"pg_legacy_patched","chapter_data":"d1","reel":"","event":""}"#,
+                ))
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, upd_msg) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "update_novel={upd_msg}");
-    assert_eq!(upd_msg["message"].as_str(), Some("更新原文成功"));
+    let (status, _) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "patch novel");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?search=pg_legacy_pat&page=1&limit=10"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{legacy_id},"page":1,"limit":10,"search":"pg_legacy_pat"}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -1352,32 +1315,29 @@ async fn projects_create_stats_delete_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/delete-novel")
+                .method(Method::DELETE)
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels/{added_leg}"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{added_leg}}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, del_msg) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "delete_novel={del_msg}");
-    assert_eq!(del_msg["message"].as_str(), Some("删除原文成功"));
+    assert_eq!(res.status(), StatusCode::NO_CONTENT, "delete novel");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/novels/get-novel")
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/novels?page=1&limit=10"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{legacy_id},"page":1,"limit":10}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await

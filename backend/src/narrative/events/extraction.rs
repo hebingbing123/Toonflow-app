@@ -1,11 +1,12 @@
+//! 小说章节异步事件抽取（LLM），由 **`generate-events`** 触发。
+
 use futures_util::stream::{self, StreamExt};
 use sqlx::PgPool;
 
 use super::dto::NovelEventExtractionRow;
+use super::MAX_GENERATE_EVENTS_CONCURRENCY;
 use crate::error::ApiError;
 use crate::llm::{chat_completion_assistant_text, LlmConfig};
-
-const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
 const DEFAULT_EVENT_EXTRACTION_PROMPT: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/data/prompt_defaults/eventExtraction.txt"

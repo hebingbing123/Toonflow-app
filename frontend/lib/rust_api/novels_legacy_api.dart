@@ -1,95 +1,85 @@
 part of 'index.dart';
 
-/// `POST /api/v1/novels/get-novel-data` — full **`NovelRow`** list (legacy Electron **`getNovelData`**).
+/// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (legacy **`getNovelData`**).
 Future<List<NovelRow>> postLegacyNovelsGetNovelData(
   String accessToken,
-  int projectId,
+  int projectLegacyId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/get-novel-data');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'projectId': projectId}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final raw = map['data'] as List<dynamic>;
-  return raw.map((e) => NovelRow.fromJson(e as Map<String, dynamic>)).toList();
+  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
+  return res.items;
 }
 
-/// `POST /api/v1/novels/get-novel-index` — **`{ id, index, chapter }`** per row (**`getNovelIndex`**).
+/// Compat: index list via **`GET …/novels`** (**`getNovelIndex`** shape).
 Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
   String accessToken,
-  int projectId,
+  int projectLegacyId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/get-novel-index');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'projectId': projectId}),
+  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
+  return res.items
+      .map(
+        (n) => LegacyNovelIndexItem(
+          legacyId: n.legacyId,
+          chapterIndex: n.chapterIndex,
+          chapter: n.chapter,
+        ),
       )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final raw = map['data'] as List<dynamic>;
-  return raw
-      .map((e) => LegacyNovelIndexItem.fromJson(e as Map<String, dynamic>))
       .toList();
 }
 
-/// `POST /api/v1/novels/get-novel-event-state` — rows where legacy **`eventState != 0`**.
+/// Compat: non-zero **`event_state`** among **`legacyIds`** (same project UUID).
 Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
   String accessToken,
+  String projectUuid,
   List<int> legacyIds,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/get-novel-event-state');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'ids': legacyIds}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+  if (legacyIds.isEmpty) {
+    return [];
   }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final raw = map['data'] as List<dynamic>;
-  return raw
-      .map((e) => LegacyNovelEventStateItem.fromJson(e as Map<String, dynamic>))
-      .toList();
+  final want = legacyIds.toSet();
+  final out = <LegacyNovelEventStateItem>[];
+  var page = 1;
+  const limit = 200;
+  while (true) {
+    final batch = await fetchProjectNovelsByProjectId(
+      accessToken,
+      projectUuid,
+      page: page,
+      limit: limit,
+    );
+    for (final row in batch.items) {
+      if (want.contains(row.legacyId) && row.eventState != 0) {
+        out.add(
+          LegacyNovelEventStateItem(
+            legacyId: row.legacyId,
+            event: row.event,
+            eventState: row.eventState,
+            errorReason: row.errorReason,
+          ),
+        );
+      }
+    }
+    if (batch.items.length < limit || page * limit >= batch.total) {
+      break;
+    }
+    page++;
+  }
+  out.sort((a, b) => a.legacyId.compareTo(b.legacyId));
+  return out;
 }
 
-/// `POST /api/v1/novels/events/generate-events` — legacy event generation trigger (async).
+/// Compat: async event extraction — **`POST …/novel-events/generate-events`** (project UUID in path).
 Future<String> postLegacyNovelEventsGenerateEvents(
   String accessToken, {
-  required int projectId,
+  required int projectLegacyId,
   required List<int> novelIds,
   int concurrentCount = 5,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/events/generate-events');
+  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/generate-events',
+  );
   final res = await http
       .post(
         uri,
@@ -98,7 +88,6 @@ Future<String> postLegacyNovelEventsGenerateEvents(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'projectId': projectId,
           'novelIds': novelIds,
           'concurrentCount': concurrentCount,
         }),
@@ -114,106 +103,136 @@ Future<String> postLegacyNovelEventsGenerateEvents(
   return map['message'] as String? ?? '';
 }
 
-/// `POST /api/v1/novels/get-novel` — paginated list + **`total`** (**`getNovel`**).
+/// Compat: paginated list (**`getNovel`**: **`{ data, total }`**).
 Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   String accessToken,
-  int projectId, {
+  int projectLegacyId, {
   required int page,
   required int limit,
   String? search,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/get-novel');
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'page': page,
-    'limit': limit,
-  };
-  if (search != null && search.isNotEmpty) {
-    body['search'] = search;
-  }
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
+  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  final res = await fetchProjectNovelsByProjectId(
+    accessToken,
+    projectId,
+    search: search,
+    page: page,
+    limit: limit,
+  );
+  final data = res.items
+      .map(
+        (n) => LegacyNovelPageRow(
+          legacyId: n.legacyId,
+          chapterIndex: n.chapterIndex,
+          reel: n.reel,
+          chapter: n.chapter,
+          chapterData: n.chapterData,
+          event: n.event,
+          eventState: n.eventState,
+          errorReason: n.errorReason,
+        ),
       )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyNovelPagedResponse.fromJson(map);
+      .toList();
+  return LegacyNovelPagedResponse(data: data, total: res.total);
 }
 
-/// `POST /api/v1/novels/add-novel` — returns Chinese **`message`** (empty **`data`** is OK without DB).
+/// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → success message, no HTTP).
 Future<String> postLegacyNovelsAddNovel(
   String accessToken,
-  int projectId,
+  int projectLegacyId,
   List<LegacyNovelAddItem> data,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/add-novel');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'projectId': projectId,
-          'data': data.map((e) => e.toJson()).toList(),
-        }),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+  if (data.isEmpty) {
+    return '新增原文成功';
   }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+  final projectId = await _projectIdForLegacyId(accessToken, projectLegacyId);
+  for (final item in data) {
+    await createProjectNovelUnderProject(
+      accessToken,
+      projectId,
+      chapterIndex: item.index,
+      reel: item.reel,
+      chapter: item.chapter,
+      chapterData: item.chapterData,
+    );
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  return '新增原文成功';
 }
 
-/// `POST /api/v1/novels/delete-novel` — body **`{ "id": legacy_id }`**.
+Future<String> _deleteNovelByLegacyIdScanningProjects(
+  String accessToken,
+  int novelLegacyId,
+) async {
+  if (novelLegacyId <= 0) {
+    throw RustApiException('id must be positive', statusCode: 400);
+  }
+  final projects = await _fetchAllProjectsPaged(accessToken);
+  for (final p in projects) {
+    try {
+      await deleteProjectNovelByProjectIds(accessToken, p.id, novelLegacyId);
+      return '删除原文成功';
+    } on RustApiException catch (e) {
+      if (e.statusCode == 404) {
+        continue;
+      }
+      rethrow;
+    }
+  }
+  throw RustApiException('not found', statusCode: 404);
+}
+
+/// Compat: delete by **`app_novel.legacy_id`** (scans owned projects).
 Future<String> postLegacyNovelsDeleteNovel(
   String accessToken,
   int novelLegacyId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/delete-novel');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'id': novelLegacyId}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  return _deleteNovelByLegacyIdScanningProjects(accessToken, novelLegacyId);
 }
 
-/// `POST /api/v1/novels/update-novel` — **`index`** may be int or numeric string.
+Future<String> _patchNovelByLegacyIdScanningProjects(
+  String accessToken, {
+  required int id,
+  required Object index,
+  required String reel,
+  required String chapter,
+  required String chapterData,
+  required String event,
+}) async {
+  if (id <= 0) {
+    throw RustApiException('id must be positive', statusCode: 400);
+  }
+  final idx = index is int
+      ? index
+      : index is num
+      ? index.toInt()
+      : int.tryParse('$index');
+  if (idx == null) {
+    throw RustApiException('invalid index', statusCode: 400);
+  }
+  final projects = await _fetchAllProjectsPaged(accessToken);
+  final body = <String, dynamic>{
+    'chapter_index': idx,
+    'reel': reel,
+    'chapter': chapter,
+    'chapter_data': chapterData,
+    'event': event,
+  };
+  for (final p in projects) {
+    try {
+      await fetchProjectNovelByProjectIds(accessToken, p.id, id);
+    } on RustApiException catch (e) {
+      if (e.statusCode == 404) {
+        continue;
+      }
+      rethrow;
+    }
+    await patchProjectNovelByProjectIds(accessToken, p.id, id, body);
+    return '更新原文成功';
+  }
+  throw RustApiException('not found', statusCode: 404);
+}
+
+/// Compat: update by legacy id (**`index`** may be int or numeric string).
 Future<String> postLegacyNovelsUpdateNovel(
   String accessToken, {
   required int id,
@@ -223,62 +242,42 @@ Future<String> postLegacyNovelsUpdateNovel(
   required String chapterData,
   required String event,
 }) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/update-novel');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'id': id,
-          'index': index,
-          'reel': reel,
-          'chapter': chapter,
-          'chapterData': chapterData,
-          'event': event,
-        }),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
-  }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  return _patchNovelByLegacyIdScanningProjects(
+    accessToken,
+    id: id,
+    index: index,
+    reel: reel,
+    chapter: chapter,
+    chapterData: chapterData,
+    event: event,
+  );
 }
 
-/// `POST /api/v1/novels/batch-delete` — **`ids`** = **`app_novel.legacy_id`** (max **500**; empty → **400**).
+/// Compat: batch delete — **`DELETE …/novels/{legacy_id}`** per id under **`projectUuid`**.
 Future<String> postLegacyNovelsBatchDelete(
   String accessToken,
+  String projectUuid,
   List<int> legacyIds,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/novels/batch-delete');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'ids': legacyIds}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 400) {
-    throw RustApiException(res.body, statusCode: 400);
+  if (legacyIds.isEmpty) {
+    throw RustApiException('请先选择需要删除的内容', statusCode: 400);
   }
-  if (res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: 404);
+  if (legacyIds.length > 500) {
+    throw RustApiException('too many ids', statusCode: 400);
   }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+  var any = false;
+  for (final id in legacyIds) {
+    try {
+      await deleteProjectNovelByProjectIds(accessToken, projectUuid, id);
+      any = true;
+    } on RustApiException catch (e) {
+      if (e.statusCode != 404) {
+        rethrow;
+      }
+    }
   }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return map['message'] as String? ?? '';
+  if (!any) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  return '删除原文成功';
 }
