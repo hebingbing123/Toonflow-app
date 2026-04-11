@@ -276,6 +276,16 @@ async fn novel_events_generate_validates_payload_before_database() {
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
+
+    // upper bound: concurrentCount > MAX_GENERATE_EVENTS_CONCURRENCY (20) → 400
+    let (status, v) = post_json_bearer(
+        "/api/v1/novels/events/generate-events",
+        &token,
+        r#"{"projectId":1,"novelIds":[1],"concurrentCount":9999}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(v["code"], "bad_request");
 }
 
 #[tokio::test]

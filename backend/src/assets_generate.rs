@@ -161,6 +161,7 @@ const MAX_ASSET_TYPE_LEN: usize = 64;
 const MAX_DESCRIBE_LEN: usize = 48_000;
 /// Legacy batch calls can send many rows; cap payload size.
 const MAX_BATCH_ITEMS: usize = 50;
+const MAX_CONCURRENT_COUNT: i32 = 20;
 
 async fn resolve_owned_project_uuid(
     pool: &PgPool,
@@ -323,6 +324,11 @@ async fn post_batch_generate_image_assets(
                 "concurrentCount must be at least 1".into(),
             ));
         }
+        if n > MAX_CONCURRENT_COUNT {
+            return Err(ApiError::BadRequest(format!(
+                "concurrentCount must be at most {MAX_CONCURRENT_COUNT}"
+            )));
+        }
     }
 
     let model = trim_non_empty(body.model, "model")?;
@@ -411,6 +417,11 @@ async fn post_batch_polish_assets_prompt(
             return Err(ApiError::BadRequest(
                 "concurrentCount must be at least 1".into(),
             ));
+        }
+        if n > MAX_CONCURRENT_COUNT {
+            return Err(ApiError::BadRequest(format!(
+                "concurrentCount must be at most {MAX_CONCURRENT_COUNT}"
+            )));
         }
     }
 

@@ -25,6 +25,7 @@ const MAX_ADD_NOVEL_BATCH: usize = 200;
 const MAX_GET_NOVEL_LIMIT: i64 = 200;
 const ADV_LOCK_NOVEL_LEGACY: i64 = 884_422_006;
 const DEFAULT_GENERATE_EVENTS_CONCURRENCY: usize = 5;
+const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -660,6 +661,11 @@ async fn post_generate_novel_events(
     }
     if body.concurrent_count == 0 {
         return Err(ApiError::BadRequest("concurrentCount must be >= 1".into()));
+    }
+    if body.concurrent_count > MAX_GENERATE_EVENTS_CONCURRENCY {
+        return Err(ApiError::BadRequest(format!(
+            "concurrentCount must be at most {MAX_GENERATE_EVENTS_CONCURRENCY}"
+        )));
     }
 
     let pool = state
