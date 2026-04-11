@@ -1,15 +1,13 @@
-//! Plan-tier quota enforcement (§12.0 / §12.3).
+//! 套餐层级配额执行（§12.0 / §12.3）。
 //!
-//! **Free tier defaults** (overridable via env):
-//! - `QUOTA_FREE_DAILY_JOBS`: max generation jobs per natural day per user (default 20)
+//! **免费层默认值**（可通过环境变量覆盖）：
+//! - `QUOTA_FREE_DAILY_JOBS`：每个用户每个自然日最大生成任务数（默认 20）
 //!
-//! Per-user overrides can be stored in `app_user_profile.daily_job_quota` (nullable;
-//! NULL means "use tier default"). The migration adds that column.
+//! 每个用户的覆盖值可以存储在 `app_user_profile.daily_job_quota`（可为空；
+//! NULL 表示"使用层级默认值"）。迁移会添加该列。
 //!
-//! Quota check is **best-effort**: a small race window exists under high concurrency
-//! (two requests both pass the count check before either inserts). This is acceptable
-//! for MVP; a stricter approach would use a PG advisory lock or a counter table with
-//! `FOR UPDATE`.
+//! 配额检查是**尽力而为**的：在高并发下存在小的竞争窗口（两个请求都在插入前通过计数检查）。
+//! 这对于 MVP 是可接受的；更严格的方法会使用 PG 咨询锁或带 `FOR UPDATE` 的计数器表。
 
 use sqlx::PgPool;
 use uuid::Uuid;
