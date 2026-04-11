@@ -33,7 +33,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
     final generate = await postAssetsGenerateGenerateV1(
       token,
       projectId: 1,
-      assetLegacyId: 1,
+      assetNumericId: 1,
       model: '1:gpt-4o-mini',
       resolution: '1024x1024',
       type: 'role',

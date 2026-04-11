@@ -22,7 +22,7 @@ pub fn router() -> Router<AppState> {
             get(handlers::list_novels_for_project).post(handlers::create_novel_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/novels/{novel_legacy_id}",
+            "/api/v1/projects/{project_id}/novels/{novel_numeric_id}",
             get(handlers::get_novel_for_project)
                 .patch(handlers::patch_novel_for_project)
                 .delete(handlers::delete_novel_for_project),

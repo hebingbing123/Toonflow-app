@@ -124,7 +124,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       final filtered = await fetchProjectAssetsByProjectId(
         token,
         p.id,
-        scriptLegacyId: selectedScriptLegacyId,
+        scriptNumericId: selectedScriptLegacyId,
         assetType: typeCtrl.text.trim().isEmpty ? null : typeCtrl.text.trim(),
         name: nameCtrl.text.trim().isEmpty ? null : nameCtrl.text.trim(),
         page: page,

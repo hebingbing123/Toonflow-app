@@ -70,14 +70,14 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
   return BatchAddScriptResponseV1.fromJson(map);
 }
 
-/// `GET /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+/// `GET /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
 Future<ScriptRow> fetchScriptByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
+  int scriptNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -92,15 +92,15 @@ Future<ScriptRow> fetchScriptByProjectAndLegacyId(
   return ScriptRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+/// `PATCH /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
 Future<ScriptRow> updateScriptByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
+  int scriptNumericId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId',
   );
   final res = await http
       .patch(
@@ -125,14 +125,14 @@ Future<ScriptRow> updateScriptByProjectAndLegacyId(
   return ScriptRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+/// `DELETE /api/v1/projects/{project_id}/scripts/{script_numeric_id}`.
 Future<void> deleteScriptByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
+  int scriptNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -178,7 +178,7 @@ Future<ScriptRow> createScriptUnderProject(
 /// `POST /api/v1/scripts/export` — **`application/zip`** body. See `exportScriptsZipV1`.
 Future<Uint8List> exportScriptsZip(
   String accessToken,
-  List<int> legacyIds,
+  List<int> numericIds,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/export');
   final res = await http
@@ -188,7 +188,7 @@ Future<Uint8List> exportScriptsZip(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'numeric_ids': legacyIds}),
+        body: jsonEncode({'numeric_ids': numericIds}),
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode != 200) {
@@ -200,7 +200,7 @@ Future<Uint8List> exportScriptsZip(
 /// `POST /api/v1/scripts/extract-state/poll` — scripts with **`extract_state` ≠ 0**. See `pollScriptExtractStateV1`.
 Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
   String accessToken,
-  List<int> legacyIds,
+  List<int> numericIds,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-state/poll');
   final res = await http
@@ -210,7 +210,7 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'numeric_ids': legacyIds}),
+        body: jsonEncode({'numeric_ids': numericIds}),
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode != 200) {
@@ -225,14 +225,14 @@ Future<List<ScriptExtractStatePollRow>> pollScriptExtractState(
 /// `POST /api/v1/scripts/extract-assets` — background LLM extraction (**503** if LLM/DB unset). See `startScriptAssetExtractV1`.
 Future<ExtractAssetsAcceptedResponse> startScriptAssetExtract(
   String accessToken, {
-  required int projectLegacyId,
-  required List<int> scriptLegacyIds,
+  required int projectNumericId,
+  required List<int> scriptNumericIds,
   int? groupSize,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/extract-assets');
   final body = <String, dynamic>{
-    'project_numeric_id': projectLegacyId,
-    'script_numeric_ids': scriptLegacyIds,
+    'project_numeric_id': projectNumericId,
+    'script_numeric_ids': scriptNumericIds,
   };
   if (groupSize != null) {
     body['group_size'] = groupSize;

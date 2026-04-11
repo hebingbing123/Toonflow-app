@@ -255,10 +255,10 @@ async fn patch_novel_inner(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    novel_legacy_id: i32,
+    novel_numeric_id: i32,
     body: PatchNovelBody,
 ) -> Result<Json<NovelRow>, ApiError> {
-    if novel_legacy_id <= 0 {
+    if novel_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -296,7 +296,7 @@ async fn patch_novel_inner(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(novel_legacy_id)
+    .bind(novel_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -372,7 +372,7 @@ async fn patch_novel_inner(
     .bind(new_err.as_ref())
     .bind(project_id)
     .bind(uid)
-    .bind(novel_legacy_id)
+    .bind(novel_numeric_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -382,7 +382,7 @@ async fn patch_novel_inner(
 
 pub(super) async fn patch_novel_for_project(
     State(state): State<AppState>,
-    Path((project_id, novel_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, novel_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<PatchNovelBody>,
 ) -> Result<Json<NovelRow>, ApiError> {
@@ -393,16 +393,16 @@ pub(super) async fn patch_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_novel_inner(pool, uid, project_id, novel_legacy_id, body).await
+    patch_novel_inner(pool, uid, project_id, novel_numeric_id, body).await
 }
 
 async fn delete_novel_inner(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    novel_legacy_id: i32,
+    novel_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
-    if novel_legacy_id <= 0 {
+    if novel_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -418,7 +418,7 @@ async fn delete_novel_inner(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(novel_legacy_id)
+    .bind(novel_numeric_id)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -432,7 +432,7 @@ async fn delete_novel_inner(
 
 pub(super) async fn delete_novel_for_project(
     State(state): State<AppState>,
-    Path((project_id, novel_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, novel_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -442,16 +442,16 @@ pub(super) async fn delete_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_novel_inner(pool, uid, project_id, novel_legacy_id).await
+    delete_novel_inner(pool, uid, project_id, novel_numeric_id).await
 }
 
 async fn fetch_owned_novel_row(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    novel_legacy_id: i32,
+    novel_numeric_id: i32,
 ) -> Result<NovelRow, ApiError> {
-    if novel_legacy_id <= 0 {
+    if novel_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -468,7 +468,7 @@ async fn fetch_owned_novel_row(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(novel_legacy_id)
+    .bind(novel_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -479,7 +479,7 @@ async fn fetch_owned_novel_row(
 
 pub(super) async fn get_novel_for_project(
     State(state): State<AppState>,
-    Path((project_id, novel_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, novel_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<NovelRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -489,6 +489,6 @@ pub(super) async fn get_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    let row = fetch_owned_novel_row(pool, uid, project_id, novel_legacy_id).await?;
+    let row = fetch_owned_novel_row(pool, uid, project_id, novel_numeric_id).await?;
     Ok(Json(row))
 }

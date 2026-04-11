@@ -219,7 +219,7 @@ pub(super) fn normalize_upload_clip_data_uri(raw: &str) -> Result<String, ApiErr
 pub(super) async fn resolve_owned_asset_metadata(
     pool: &PgPool,
     uid: Uuid,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<LegacyOwnedAssetMetaRow, ApiError> {
     let row: Option<LegacyOwnedAssetMetaRow> = sqlx::query_as(
         r#"
@@ -231,7 +231,7 @@ pub(super) async fn resolve_owned_asset_metadata(
         "#,
     )
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -308,27 +308,27 @@ pub fn router() -> Router<AppState> {
             post(list_corner_scape_assets_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}/file",
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",
             get(get_project_asset_image_file_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}",
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
             get(get_project_asset_image_for_project)
                 .patch(patch_project_asset_image_for_project)
                 .delete(delete_project_asset_image_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images",
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images",
             get(list_project_asset_images_for_project).post(create_project_asset_image_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}",
+            "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
             get(get_project_asset_for_project)
                 .patch(patch_project_asset_for_project)
                 .delete(delete_project_asset_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
+            "/api/v1/projects/{project_id}/scripts/{script_numeric_id}/assets/{asset_numeric_id}",
             put(link_script_to_asset_for_project).delete(unlink_script_from_asset_for_project),
         )
         .merge(generate::router())

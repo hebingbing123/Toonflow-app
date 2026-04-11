@@ -248,8 +248,8 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   final ids = scriptList.map((s) => s.legacyId).toList();
                   final acc = await startScriptAssetExtract(
                     token,
-                    projectLegacyId: p.legacyId,
-                    scriptLegacyIds: ids,
+                    projectNumericId: p.legacyId,
+                    scriptNumericIds: ids,
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(

@@ -138,8 +138,8 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   Future<void> _startExtractAssets() async {
     final accepted = await startScriptAssetExtract(
       widget.token,
-      projectLegacyId: widget.projectLegacyId,
-      scriptLegacyIds: [widget.scriptLegacyId],
+      projectNumericId: widget.projectLegacyId,
+      scriptNumericIds: [widget.scriptLegacyId],
     );
     await _refreshWorkbench();
     if (!mounted) return;

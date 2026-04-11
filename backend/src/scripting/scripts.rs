@@ -340,7 +340,7 @@ pub fn router() -> Router<AppState> {
             post(post_scripts_batch_add_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/scripts/{script_legacy_id}",
+            "/api/v1/projects/{project_id}/scripts/{script_numeric_id}",
             get(get_script_for_project)
                 .patch(patch_script_for_project)
                 .delete(delete_script_for_project),
@@ -630,7 +630,7 @@ async fn post_scripts_batch_add_for_project(
 
 async fn get_script_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, script_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<ScriptRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -649,7 +649,7 @@ async fn get_script_for_project(
         WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
-    .bind(script_legacy_id)
+    .bind(script_numeric_id)
     .bind(project_id)
     .bind(uid)
     .fetch_optional(pool)
@@ -662,7 +662,7 @@ async fn get_script_for_project(
 
 async fn patch_script_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, script_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<PatchScriptBody>,
 ) -> Result<Json<ScriptRow>, ApiError> {
@@ -673,7 +673,7 @@ async fn patch_script_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_script_inner(pool, uid, script_legacy_id, body, project_id).await
+    patch_script_inner(pool, uid, script_numeric_id, body, project_id).await
 }
 
 async fn patch_script_inner(
@@ -747,7 +747,7 @@ async fn patch_script_inner(
 
 async fn delete_script_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, script_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -768,7 +768,7 @@ async fn delete_script_for_project(
           AND p.id = $3
         "#,
     )
-    .bind(script_legacy_id)
+    .bind(script_numeric_id)
     .bind(uid)
     .bind(project_id)
     .execute(pool)

@@ -44,7 +44,7 @@ Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
 Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/image-bundle',
@@ -56,7 +56,7 @@ Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'assetsId': assetLegacyId}),
+        body: jsonEncode({'assetsId': assetNumericId}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
@@ -184,7 +184,7 @@ Future<List<LegacyAssetPollingImageAssetsItem>>
 postLegacyAssetsPollingImageAssets(
   String accessToken,
   String projectId,
-  List<int> assetLegacyIds,
+  List<int> assetNumericIds,
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/polling-image-assets',
@@ -196,7 +196,7 @@ postLegacyAssetsPollingImageAssets(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'ids': assetLegacyIds}),
+        body: jsonEncode({'ids': assetNumericIds}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
@@ -220,7 +220,7 @@ Future<List<LegacyAssetPollingPromptAssetsItem>>
 postLegacyAssetsPollingPromptAssets(
   String accessToken,
   String projectId,
-  List<int> assetLegacyIds,
+  List<int> assetNumericIds,
 ) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/assets/workbench/polling-prompt-assets',
@@ -232,7 +232,7 @@ postLegacyAssetsPollingPromptAssets(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'ids': assetLegacyIds}),
+        body: jsonEncode({'ids': assetNumericIds}),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400) {
@@ -251,14 +251,14 @@ postLegacyAssetsPollingPromptAssets(
       .toList();
 }
 
-/// `GET /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images` — see `listProjectAssetImagesByProjectIdV1`.
+/// `GET /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images` — see `listProjectAssetImagesByProjectIdV1`.
 Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -273,15 +273,15 @@ Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(
   return ListAssetImagesResponse.fromJson(map);
 }
 
-/// `GET /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}` — see `getProjectAssetImageByProjectIdV1`.
+/// `GET /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}` — see `getProjectAssetImageByProjectIdV1`.
 Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   String imageId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -299,11 +299,11 @@ Future<AssetImageRow> fetchProjectAssetImageByProjectIds(
 /// Builds `GET …/projects/{project_id}/assets/.../file` — OpenAPI `getProjectAssetImageFileByProjectIdV1`.
 Uri projectAssetImageFileV1UriByProjectId(
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   String imageId,
 ) {
   return Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId/file',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId/file',
   );
 }
 
@@ -311,12 +311,12 @@ Uri projectAssetImageFileV1UriByProjectId(
 Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   String imageId,
 ) async {
   final uri = projectAssetImageFileV1UriByProjectId(
     projectId,
-    assetLegacyId,
+    assetNumericId,
     imageId,
   );
   final res = await http
@@ -339,7 +339,7 @@ Future<Uint8List> fetchProjectAssetImageFileByProjectIds(
 Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   CornerScapeHistoryImage img,
 ) async {
   final fp = img.filePath;
@@ -360,7 +360,7 @@ Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
     return await fetchProjectAssetImageFileByProjectIds(
       accessToken,
       projectId,
-      assetLegacyId,
+      assetNumericId,
       img.id,
     );
   } on RustApiException {
@@ -368,17 +368,17 @@ Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
   }
 }
 
-/// `POST /api/v1/projects/{project_id}/assets/{asset_legacy_id}/images` — see `createProjectAssetImageByProjectIdV1`.
+/// `POST /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images` — see `createProjectAssetImageByProjectIdV1`.
 Future<AssetImageRow> createProjectAssetImageForProject(
   String accessToken,
   String projectId,
-  int assetLegacyId, {
+  int assetNumericId, {
   String? filePath,
   String? state,
   int? sortIndex,
 }) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images',
   );
   final body = <String, dynamic>{};
   if (filePath != null) {
@@ -417,12 +417,12 @@ Future<AssetImageRow> createProjectAssetImageForProject(
 Future<AssetImageRow> patchProjectAssetImageByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   String imageId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId',
   );
   final res = await http
       .patch(
@@ -451,11 +451,11 @@ Future<AssetImageRow> patchProjectAssetImageByProjectIds(
 Future<void> deleteProjectAssetImageByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   String imageId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId/images/$imageId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId/images/$imageId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

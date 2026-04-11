@@ -81,10 +81,10 @@ async fn patch_project_asset_inner(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
     body: PatchAssetBody,
 ) -> Result<Json<AssetRow>, ApiError> {
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -116,7 +116,7 @@ async fn patch_project_asset_inner(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -172,7 +172,7 @@ async fn patch_project_asset_inner(
         .bind(project_id)
         .bind(uid)
         .bind(&new_name)
-        .bind(asset_legacy_id)
+        .bind(asset_numeric_id)
         .fetch_one(pool)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -205,7 +205,7 @@ async fn patch_project_asset_inner(
     .bind(SqlxJson(new_metadata))
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -216,7 +216,7 @@ async fn patch_project_asset_inner(
 
 pub(crate) async fn patch_project_asset_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<PatchAssetBody>,
 ) -> Result<Json<AssetRow>, ApiError> {
@@ -226,16 +226,16 @@ pub(crate) async fn patch_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_project_asset_inner(pool, uid, project_id, asset_legacy_id, body).await
+    patch_project_asset_inner(pool, uid, project_id, asset_numeric_id, body).await
 }
 
 async fn delete_project_asset_inner(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -251,7 +251,7 @@ async fn delete_project_asset_inner(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -265,7 +265,7 @@ async fn delete_project_asset_inner(
 
 pub(crate) async fn delete_project_asset_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -274,5 +274,5 @@ pub(crate) async fn delete_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_project_asset_inner(pool, uid, project_id, asset_legacy_id).await
+    delete_project_asset_inner(pool, uid, project_id, asset_numeric_id).await
 }

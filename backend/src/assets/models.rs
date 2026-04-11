@@ -36,7 +36,7 @@ pub struct AssetRow {
 pub struct ListAssetsQuery {
     /// 设置时，仅返回项目中关联到此脚本 (`app_script.legacy_id`) 的资产。
     #[serde(default, rename = "script_numeric_id")]
-    pub script_legacy_id: Option<i32>,
+    pub script_numeric_id: Option<i32>,
     /// role、tool 或 scene（遗留 getAssetsApi 的 type）。
     #[serde(default)]
     pub asset_type: Option<String>,

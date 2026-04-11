@@ -4,15 +4,15 @@ part of 'index.dart';
 Future<ListAssetsResponse> fetchProjectAssetsByProjectId(
   String accessToken,
   String projectId, {
-  int? scriptLegacyId,
+  int? scriptNumericId,
   String? assetType,
   String? name,
   int? page,
   int? limit,
 }) async {
   final qp = <String, String>{};
-  if (scriptLegacyId != null) {
-    qp['script_numeric_id'] = '$scriptLegacyId';
+  if (scriptNumericId != null) {
+    qp['script_numeric_id'] = '$scriptNumericId';
   }
   if (assetType != null && assetType.isNotEmpty) {
     qp['asset_type'] = assetType;
@@ -43,14 +43,14 @@ Future<ListAssetsResponse> fetchProjectAssetsByProjectId(
   return ListAssetsResponse.fromJson(map);
 }
 
-/// `GET /api/v1/projects/{project_id}/assets/{asset_legacy_id}` — see `getProjectAssetByProjectIdV1`.
+/// `GET /api/v1/projects/{project_id}/assets/{asset_numeric_id}` — see `getProjectAssetByProjectIdV1`.
 Future<AssetRow> fetchProjectAssetByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -104,17 +104,17 @@ Future<AssetRow> createProjectAssetUnderProject(
   return AssetRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/{project_id}/assets/{asset_legacy_id}` — see `patchProjectAssetByProjectIdV1`.
+/// `PATCH /api/v1/projects/{project_id}/assets/{asset_numeric_id}` — see `patchProjectAssetByProjectIdV1`.
 ///
-/// [body] must match OpenAPI **`PatchAssetBody`** (**`name`** / **`description`** / **`asset_type`** / **`cover_legacy_image_id`**).
+/// [body] must match OpenAPI **`PatchAssetBody`** (**`name`** / **`description`** / **`asset_type`** / **`cover_numeric_image_id`**).
 Future<AssetRow> patchProjectAssetByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId',
   );
   final res = await http
       .patch(
@@ -139,14 +139,14 @@ Future<AssetRow> patchProjectAssetByProjectIds(
   return AssetRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/projects/{project_id}/assets/{asset_legacy_id}` — see `deleteProjectAssetByProjectIdV1`.
+/// `DELETE /api/v1/projects/{project_id}/assets/{asset_numeric_id}` — see `deleteProjectAssetByProjectIdV1`.
 Future<void> deleteProjectAssetByProjectIds(
   String accessToken,
   String projectId,
-  int assetLegacyId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/assets/$assetNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -159,15 +159,15 @@ Future<void> deleteProjectAssetByProjectIds(
   }
 }
 
-/// `PUT …/projects/{project_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}` — see `linkScriptAssetByProjectIdV1`.
+/// `PUT …/projects/{project_id}/scripts/{script_numeric_id}/assets/{asset_numeric_id}` — see `linkScriptAssetByProjectIdV1`.
 Future<void> linkScriptToAssetByProjectIds(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
-  int assetLegacyId,
+  int scriptNumericId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId/assets/$assetLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/assets/$assetNumericId',
   );
   final res = await http
       .put(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -184,11 +184,11 @@ Future<void> linkScriptToAssetByProjectIds(
 Future<void> unlinkScriptFromAssetByProjectIds(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
-  int assetLegacyId,
+  int scriptNumericId,
+  int assetNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId/assets/$assetLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/assets/$assetNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

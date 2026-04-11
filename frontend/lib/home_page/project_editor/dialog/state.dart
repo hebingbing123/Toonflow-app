@@ -49,7 +49,7 @@ class _ProjectEditorDialogState {
         assetsForScriptRef[0] = await fetchProjectAssetsByProjectId(
           token,
           projectId,
-          scriptLegacyId: scriptLegacyId,
+          scriptNumericId: scriptLegacyId,
         );
       } catch (_) {
         assetsForScriptRef[0] = null;

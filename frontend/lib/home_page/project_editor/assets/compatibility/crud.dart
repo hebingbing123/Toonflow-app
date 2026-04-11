@@ -274,7 +274,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   final pg = await fetchProjectAssetsByProjectId(
                     token,
                     p.id,
-                    scriptLegacyId: sid,
+                    scriptNumericId: sid,
                     page: 1,
                     limit: 2,
                   );

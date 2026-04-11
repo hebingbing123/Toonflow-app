@@ -16,7 +16,7 @@ use super::resolve::ensure_owned_project_pk;
 
 pub(crate) async fn get_project_asset_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<AssetRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -25,7 +25,7 @@ pub(crate) async fn get_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -43,7 +43,7 @@ pub(crate) async fn get_project_asset_for_project(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

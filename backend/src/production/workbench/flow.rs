@@ -91,7 +91,7 @@ pub(crate) async fn post_save_flow_data(
             .collect::<Option<Vec<_>>>();
 
         if let Some(ordered_ids) = ordered_ids {
-            for (index, storyboard_legacy_id) in ordered_ids.iter().enumerate() {
+            for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {
                 sqlx::query(
                     r#"
                     UPDATE app_storyboard
@@ -101,7 +101,7 @@ pub(crate) async fn post_save_flow_data(
                     "#,
                 )
                 .bind(script_id)
-                .bind(storyboard_legacy_id)
+                .bind(storyboard_numeric_id)
                 .bind(index as i32)
                 .execute(pool)
                 .await

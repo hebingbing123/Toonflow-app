@@ -131,7 +131,8 @@ async fn generate_and_store_asset_image(
             .await
             .map_err(|e| JobRunError::Failed(e.to_string()))?;
         let api_path = format!(
-            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_row_id}/file"
+            "/api/v1/projects/{}/assets/{}/images/{}/file",
+            project_id, asset_legacy_id, image_row_id
         );
         let metadata = json!({
             "source": "jobs.worker.asset_image",

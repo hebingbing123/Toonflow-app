@@ -168,8 +168,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                           );
                           final accepted = await startScriptAssetExtract(
                             token,
-                            projectLegacyId: p.legacyId,
-                            scriptLegacyIds: selectedIds,
+                            projectNumericId: p.legacyId,
+                            scriptNumericIds: selectedIds,
                             groupSize: groupSize,
                           );
                           final rows = await pollScriptExtractState(
@@ -474,8 +474,8 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                       final accepted =
                                           await startScriptAssetExtract(
                                             token,
-                                            projectLegacyId: p.legacyId,
-                                            scriptLegacyIds: selected,
+                                            projectNumericId: p.legacyId,
+                                            scriptNumericIds: selected,
                                             groupSize: groupSize,
                                           );
                                       final rows = await pollScriptExtractState(

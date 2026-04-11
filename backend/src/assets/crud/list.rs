@@ -22,11 +22,11 @@ async fn count_project_assets_filtered(
     pool: &PgPool,
     project_id: Uuid,
     uid: Uuid,
-    script_legacy_id: Option<i32>,
+    script_numeric_id: Option<i32>,
     asset_type: Option<&str>,
     name_ilike: Option<&str>,
 ) -> Result<i64, ApiError> {
-    let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_legacy_id {
+    let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_numeric_id {
         let mut qb = QueryBuilder::new(
             r#"
             SELECT COUNT(DISTINCT a.id)::BIGINT
@@ -73,12 +73,12 @@ async fn select_project_assets_filtered(
     pool: &PgPool,
     project_id: Uuid,
     uid: Uuid,
-    script_legacy_id: Option<i32>,
+    script_numeric_id: Option<i32>,
     asset_type: Option<&str>,
     name_ilike: Option<&str>,
     limit_offset: Option<(i64, i64)>,
 ) -> Result<Vec<AssetRow>, ApiError> {
-    let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_legacy_id {
+    let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_numeric_id {
         let mut qb = QueryBuilder::new(
             r#"
             SELECT DISTINCT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
@@ -134,7 +134,7 @@ async fn list_project_assets_inner(
     project_id: Uuid,
     query: ListAssetsQuery,
 ) -> Result<Json<ListAssetsResponse>, ApiError> {
-    if let Some(sid) = query.script_legacy_id {
+    if let Some(sid) = query.script_numeric_id {
         if sid <= 0 {
             return Err(ApiError::BadRequest(
                 "script_numeric_id must be positive when set".into(),
@@ -202,7 +202,7 @@ async fn list_project_assets_inner(
             pool,
             project_id,
             uid,
-            query.script_legacy_id,
+            query.script_numeric_id,
             type_ref,
             name_ref,
         )
@@ -211,7 +211,7 @@ async fn list_project_assets_inner(
             pool,
             project_id,
             uid,
-            query.script_legacy_id,
+            query.script_numeric_id,
             type_ref,
             name_ref,
             limit_offset,
@@ -223,7 +223,7 @@ async fn list_project_assets_inner(
             pool,
             project_id,
             uid,
-            query.script_legacy_id,
+            query.script_numeric_id,
             type_ref,
             name_ref,
             None,

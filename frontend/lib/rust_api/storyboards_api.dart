@@ -1,13 +1,13 @@
 part of 'index.dart';
 
-/// `GET /api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards`.
+/// `GET /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards`.
 Future<List<StoryboardRow>> fetchStoryboardsForProjectScript(
   String accessToken,
   String projectId,
-  int scriptLegacyId,
+  int scriptNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId/storyboards',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/storyboards',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -21,15 +21,15 @@ Future<List<StoryboardRow>> fetchStoryboardsForProjectScript(
       .toList();
 }
 
-/// `POST /api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards`.
+/// `POST /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards`.
 Future<StoryboardRow> createStoryboardUnderProjectScript(
   String accessToken,
   String projectId,
-  int scriptLegacyId, {
+  int scriptNumericId, {
   Map<String, dynamic>? fields,
 }) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId/storyboards',
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptNumericId/storyboards',
   );
   final res = await http
       .post(
@@ -54,14 +54,14 @@ Future<StoryboardRow> createStoryboardUnderProjectScript(
   return StoryboardRow.fromJson(map);
 }
 
-/// `GET /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}`.
+/// `GET /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`.
 Future<StoryboardRow> fetchStoryboardByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int storyboardLegacyId,
+  int storyboardNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardNumericId',
   );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
@@ -76,15 +76,15 @@ Future<StoryboardRow> fetchStoryboardByProjectAndLegacyId(
   return StoryboardRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}` — keys per OpenAPI `PatchStoryboardBody` only.
+/// `PATCH /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}` — keys per OpenAPI `PatchStoryboardBody` only.
 Future<StoryboardRow> updateStoryboardByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int storyboardLegacyId,
+  int storyboardNumericId,
   Map<String, dynamic> body,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardNumericId',
   );
   final res = await http
       .patch(
@@ -109,14 +109,14 @@ Future<StoryboardRow> updateStoryboardByProjectAndLegacyId(
   return StoryboardRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}`.
+/// `DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`.
 Future<void> deleteStoryboardByProjectAndLegacyId(
   String accessToken,
   String projectId,
-  int storyboardLegacyId,
+  int storyboardNumericId,
 ) async {
   final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardLegacyId',
+    '$kApiBaseUrl/api/v1/projects/$projectId/storyboards/$storyboardNumericId',
   );
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})

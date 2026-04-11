@@ -1,7 +1,7 @@
 //! 资产图片 REST CRUD 操作。
 //!
 //! 处理 `app_asset_image` 行的列表、获取、文件、创建、更新和删除操作。
-//! 端点路径：`/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images`
+//! 端点路径：`/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images`
 
 use axum::{
     body::Body,
@@ -27,12 +27,12 @@ use super::models::*;
 
 pub(super) async fn list_project_asset_images_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<ListAssetImagesResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -42,7 +42,7 @@ pub(super) async fn list_project_asset_images_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let (asset_id, metadata) =
-        resolve_owned_asset_id_and_metadata_for_project(pool, uid, project_id, asset_legacy_id)
+        resolve_owned_asset_id_and_metadata_for_project(pool, uid, project_id, asset_numeric_id)
             .await?;
     let cover_legacy_image_id = metadata_cover_legacy_image_id(&metadata);
 
@@ -75,12 +75,12 @@ pub(super) async fn list_project_asset_images_for_project(
 
 pub(super) async fn get_project_asset_image_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id, image_id)): Path<(Uuid, i32, Uuid)>,
+    Path((project_id, asset_numeric_id, image_id)): Path<(Uuid, i32, Uuid)>,
     headers: HeaderMap,
 ) -> Result<Json<AssetImageRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -90,7 +90,7 @@ pub(super) async fn get_project_asset_image_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let asset_id =
-        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_legacy_id).await?;
+        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
 
     let row = sqlx::query_as::<_, AssetImageRow>(
         r#"
@@ -111,12 +111,12 @@ pub(super) async fn get_project_asset_image_for_project(
 
 pub(super) async fn get_project_asset_image_file_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id, image_id)): Path<(Uuid, i32, Uuid)>,
+    Path((project_id, asset_numeric_id, image_id)): Path<(Uuid, i32, Uuid)>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -126,7 +126,7 @@ pub(super) async fn get_project_asset_image_file_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let asset_id =
-        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_legacy_id).await?;
+        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
 
     let row = sqlx::query_as::<_, AssetImageFileSource>(
         r#"
@@ -180,13 +180,13 @@ pub(super) async fn get_project_asset_image_file_for_project(
 
 pub(super) async fn create_project_asset_image_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<CreateAssetImageBody>,
 ) -> Result<(StatusCode, Json<AssetImageRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -196,7 +196,7 @@ pub(super) async fn create_project_asset_image_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let asset_id =
-        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_legacy_id).await?;
+        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
 
     let file_path = body
         .file_path
@@ -234,13 +234,13 @@ pub(super) async fn create_project_asset_image_for_project(
 
 pub(super) async fn patch_project_asset_image_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id, image_id)): Path<(Uuid, i32, Uuid)>,
+    Path((project_id, asset_numeric_id, image_id)): Path<(Uuid, i32, Uuid)>,
     headers: HeaderMap,
     Json(body): Json<PatchAssetImageBody>,
 ) -> Result<Json<AssetImageRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -250,7 +250,7 @@ pub(super) async fn patch_project_asset_image_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let asset_id =
-        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_legacy_id).await?;
+        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
 
     let fp_patch = parse_optional_text_field(body.file_path, "file_path")?;
     let st_patch = parse_optional_text_field(body.state, "state")?;
@@ -325,12 +325,12 @@ pub(super) async fn patch_project_asset_image_for_project(
 
 pub(super) async fn delete_project_asset_image_for_project(
     State(state): State<AppState>,
-    Path((project_id, asset_legacy_id, image_id)): Path<(Uuid, i32, Uuid)>,
+    Path((project_id, asset_numeric_id, image_id)): Path<(Uuid, i32, Uuid)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -340,7 +340,7 @@ pub(super) async fn delete_project_asset_image_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let asset_id =
-        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_legacy_id).await?;
+        resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
 
     let res = sqlx::query(
         r#"

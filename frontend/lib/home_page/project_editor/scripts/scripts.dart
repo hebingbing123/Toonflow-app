@@ -249,8 +249,8 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       try {
         final accepted = await startScriptAssetExtract(
           token,
-          projectLegacyId: p.legacyId,
-          scriptLegacyIds: allScriptIds,
+          projectNumericId: p.legacyId,
+          scriptNumericIds: allScriptIds,
         );
         final rows = await pollScriptExtractState(token, allScriptIds);
         final synced = syncScriptExtractStates(scriptList, rows);

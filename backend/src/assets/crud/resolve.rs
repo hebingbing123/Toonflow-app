@@ -50,11 +50,11 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
-            "asset_legacy_id must be positive".into(),
+            "asset_numeric_id must be positive".into(),
         ));
     }
     let id: Option<Uuid> = sqlx::query_scalar(
@@ -69,7 +69,7 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -81,7 +81,7 @@ pub async fn resolve_asset_id_for_job(
     pool: &PgPool,
     owner_user_id: Uuid,
     project_legacy_id: i32,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<Option<Uuid>, sqlx::Error> {
     sqlx::query_scalar(
         r#"
@@ -95,7 +95,7 @@ pub async fn resolve_asset_id_for_job(
     )
     .bind(project_legacy_id)
     .bind(owner_user_id)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
 }
@@ -117,11 +117,11 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    asset_legacy_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<(Uuid, Value), ApiError> {
-    if asset_legacy_id <= 0 {
+    if asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
-            "asset_legacy_id must be positive".into(),
+            "asset_numeric_id must be positive".into(),
         ));
     }
     let row: Option<(Uuid, SqlxJson<Value>)> = sqlx::query_as(
@@ -136,7 +136,7 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

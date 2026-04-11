@@ -8,7 +8,7 @@ part of 'index.dart';
 Future<int> postAssetsGenerateGenerateV1(
   String accessToken, {
   required int projectId,
-  required int assetLegacyId,
+  required int assetNumericId,
   required String model,
   required String resolution,
   required String type,
@@ -21,7 +21,7 @@ Future<int> postAssetsGenerateGenerateV1(
     'projectId': projectId,
     'model': model,
     'resolution': resolution,
-    'id': assetLegacyId,
+    'id': assetNumericId,
     'type': type,
     'name': name,
     'prompt': prompt,

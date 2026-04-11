@@ -19,10 +19,10 @@ async fn resolve_script_and_asset_for_project(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
-    script_legacy_id: i32,
-    asset_legacy_id: i32,
+    script_numeric_id: i32,
+    asset_numeric_id: i32,
 ) -> Result<(Uuid, Uuid), ApiError> {
-    if script_legacy_id <= 0 || asset_legacy_id <= 0 {
+    if script_numeric_id <= 0 || asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
     let row: Option<(Uuid, Uuid)> = sqlx::query_as(
@@ -39,8 +39,8 @@ async fn resolve_script_and_asset_for_project(
     )
     .bind(project_id)
     .bind(uid)
-    .bind(script_legacy_id)
-    .bind(asset_legacy_id)
+    .bind(script_numeric_id)
+    .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -49,7 +49,7 @@ async fn resolve_script_and_asset_for_project(
 
 pub(crate) async fn link_script_to_asset_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id, asset_legacy_id)): Path<(Uuid, i32, i32)>,
+    Path((project_id, script_numeric_id, asset_numeric_id)): Path<(Uuid, i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -64,8 +64,8 @@ pub(crate) async fn link_script_to_asset_for_project(
         pool,
         uid,
         project_id,
-        script_legacy_id,
-        asset_legacy_id,
+        script_numeric_id,
+        asset_numeric_id,
     )
     .await?;
 
@@ -87,7 +87,7 @@ pub(crate) async fn link_script_to_asset_for_project(
 
 pub(crate) async fn unlink_script_from_asset_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id, asset_legacy_id)): Path<(Uuid, i32, i32)>,
+    Path((project_id, script_numeric_id, asset_numeric_id)): Path<(Uuid, i32, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -102,8 +102,8 @@ pub(crate) async fn unlink_script_from_asset_for_project(
         pool,
         uid,
         project_id,
-        script_legacy_id,
-        asset_legacy_id,
+        script_numeric_id,
+        asset_numeric_id,
     )
     .await?;
 

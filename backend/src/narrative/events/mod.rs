@@ -31,7 +31,7 @@ pub fn router() -> Router<AppState> {
             post(handlers::post_generate_novel_events_for_project),
         )
         .route(
-            "/api/v1/projects/{project_id}/novel-events/{event_legacy_id}",
+            "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
             delete(handlers::delete_novel_event_for_project)
                 .patch(handlers::update_novel_event_for_project),
         )

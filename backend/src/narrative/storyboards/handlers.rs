@@ -36,7 +36,7 @@ async fn create_storyboard_locked(
     tx: &mut Transaction<'_, Postgres>,
     script_uuid: Uuid,
     project_legacy_id: i32,
-    path_script_legacy_id: i32,
+    path_script_numeric_id: i32,
     body: CreateStoryboardBody,
 ) -> Result<StoryboardRow, ApiError> {
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
@@ -56,7 +56,7 @@ async fn create_storyboard_locked(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let now_ms = chrono::Utc::now().timestamp_millis();
-    let lsid = body.legacy_script_id.unwrap_or(path_script_legacy_id);
+    let lsid = body.legacy_script_id.unwrap_or(path_script_numeric_id);
     let lpid = body.legacy_project_id.unwrap_or(project_legacy_id);
 
     sqlx::query_as::<_, StoryboardRow>(
@@ -99,7 +99,7 @@ async fn create_storyboard_locked(
 
 pub(super) async fn list_by_script_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, script_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<StoryboardRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -124,7 +124,7 @@ pub(super) async fn list_by_script_for_project(
         "#,
     )
     .bind(project_id)
-    .bind(script_legacy_id)
+    .bind(script_numeric_id)
     .bind(uid)
     .fetch_all(pool)
     .await
@@ -135,7 +135,7 @@ pub(super) async fn list_by_script_for_project(
 
 pub(super) async fn create_under_script_for_project(
     State(state): State<AppState>,
-    Path((project_id, script_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, script_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<CreateStoryboardBody>,
 ) -> Result<(StatusCode, Json<StoryboardRow>), ApiError> {
@@ -161,7 +161,7 @@ pub(super) async fn create_under_script_for_project(
         "#,
     )
     .bind(project_id)
-    .bind(script_legacy_id)
+    .bind(script_numeric_id)
     .bind(uid)
     .fetch_optional(&mut *tx)
     .await
@@ -172,7 +172,7 @@ pub(super) async fn create_under_script_for_project(
         &mut tx,
         script_uuid,
         project_legacy_id,
-        script_legacy_id,
+        script_numeric_id,
         body,
     )
     .await?;
@@ -186,7 +186,7 @@ pub(super) async fn create_under_script_for_project(
 
 pub(super) async fn get_by_legacy_for_project(
     State(state): State<AppState>,
-    Path((project_id, storyboard_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<Json<StoryboardRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -209,7 +209,7 @@ pub(super) async fn get_by_legacy_for_project(
         WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
-    .bind(storyboard_legacy_id)
+    .bind(storyboard_numeric_id)
     .bind(project_id)
     .bind(uid)
     .fetch_optional(pool)
@@ -355,7 +355,7 @@ async fn patch_storyboard_row(
 
 pub(super) async fn patch_by_legacy_for_project(
     State(state): State<AppState>,
-    Path((project_id, storyboard_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
     Json(body): Json<PatchStoryboardBody>,
 ) -> Result<Json<StoryboardRow>, ApiError> {
@@ -366,7 +366,7 @@ pub(super) async fn patch_by_legacy_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_storyboard_row(pool, uid, storyboard_legacy_id, body, project_id).await
+    patch_storyboard_row(pool, uid, storyboard_numeric_id, body, project_id).await
 }
 
 async fn delete_storyboard_row(
@@ -402,7 +402,7 @@ async fn delete_storyboard_row(
 
 pub(super) async fn delete_by_legacy_for_project(
     State(state): State<AppState>,
-    Path((project_id, storyboard_legacy_id)): Path<(Uuid, i32)>,
+    Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
@@ -412,5 +412,5 @@ pub(super) async fn delete_by_legacy_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_storyboard_row(pool, uid, storyboard_legacy_id, project_id).await
+    delete_storyboard_row(pool, uid, storyboard_numeric_id, project_id).await
 }
