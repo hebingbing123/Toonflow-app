@@ -1,4 +1,4 @@
-//! Composes domain routers, rate limiting, middleware, and CORS.
+//! 组合域路由、速率限制、中间件和 CORS。
 
 use crate::assets;
 use crate::billing;

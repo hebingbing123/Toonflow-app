@@ -1,4 +1,6 @@
-//! Script ↔ asset link handlers.
+//! 脚本 ↔ 资产关联处理器。
+//!
+//! 处理脚本与资产之间的关联和解除关联操作。
 
 use axum::{
     extract::{Path, State},
