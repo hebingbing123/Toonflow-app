@@ -1,4 +1,4 @@
-//! Shared application state (DB pool, auth secret, LLM config, outbound HTTP, notify hub).
+//! 共享应用状态（数据库连接池、认证密钥、LLM 配置、出站 HTTP、通知中心）。
 
 mod from_env;
 mod memory_config;

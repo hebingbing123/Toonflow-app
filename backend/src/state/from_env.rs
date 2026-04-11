@@ -1,4 +1,4 @@
-//! Wire `AppState` from process environment (Postgres pool, JWT secret, LLM, HTTP client).
+//! 从进程环境构建 `AppState`（Postgres 连接池、JWT 密钥、LLM、HTTP 客户端）。
 
 use std::time::Duration;
 
