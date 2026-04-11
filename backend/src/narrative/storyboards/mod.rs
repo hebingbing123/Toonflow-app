@@ -1,4 +1,4 @@
-//! Storyboard CRUD under scripts / by legacy id.
+//! 脚本下的分镜 CRUD / 按遗留 ID。
 
 mod dto;
 mod handlers;
