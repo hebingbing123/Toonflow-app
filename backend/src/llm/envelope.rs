@@ -1,4 +1,4 @@
-//! JSON lines pushed to the WebSocket outbound channel (`type` + `schema_version` + `payload`).
+//! 推送到 WebSocket 出站通道的 JSON 行（`type` + `schema_version` + `payload`）。
 
 use serde_json::{json, Value};
 

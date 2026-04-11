@@ -1,4 +1,4 @@
-//! Multi-round OpenAI **tool calling** loop for the Harness agent (non-streaming completions).
+//! Harness 代理的多轮 OpenAI 工具调用循环（非流式补全）。
 
 use serde_json::{json, Value};
 use tokio::sync::mpsc::UnboundedSender;
