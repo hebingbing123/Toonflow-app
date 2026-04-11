@@ -66,7 +66,7 @@ mod tests {
     use tower::util::ServiceExt;
 
     use crate::app::build_router;
-    use crate::notify_hub::WsNotifyHub;
+    use crate::state::WsNotifyHub;
     use std::sync::Arc;
 
     use tokio::sync::RwLock;

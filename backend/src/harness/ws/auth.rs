@@ -20,7 +20,7 @@ pub struct WsConnectionSession {
     pub project_id: Option<i64>,
     pub script_id: Option<i64>,
     pub llm_cancel: CancellationToken,
-    /// `(user_id, subscription_id)` for [`crate::notify_hub::WsNotifyHub`].
+    /// `(user_id, subscription_id)` for [`crate::state::WsNotifyHub`].
     pub ws_notify: Option<(Uuid, Uuid)>,
 }
 

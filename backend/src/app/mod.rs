@@ -1,6 +1,7 @@
 //! HTTP router composition and core JSON routes (`/health`, `/api/v1/me`, …).
 
 mod handlers;
+pub mod ops;
 mod router;
 
 pub use router::build_router;

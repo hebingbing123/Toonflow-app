@@ -8,9 +8,8 @@ use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
-use super::{AppState, MemoryConfig};
+use super::{AppState, MemoryConfig, WsNotifyHub};
 use crate::llm::LlmConfig;
-use crate::notify_hub::WsNotifyHub;
 
 const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
 

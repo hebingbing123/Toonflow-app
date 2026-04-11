@@ -268,8 +268,8 @@ mod tests {
     use tokio::sync::RwLock;
 
     use super::*;
-    use crate::notify_hub::WsNotifyHub;
     use crate::state::MemoryConfig;
+    use crate::state::WsNotifyHub;
 
     fn test_state_without_llm() -> AppState {
         AppState {

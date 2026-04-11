@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::app::build_router;
 use crate::app::jwt_fixture;
-use crate::notify_hub::WsNotifyHub;
+use crate::state::WsNotifyHub;
 use crate::state::{AppState, MemoryConfig};
 
 /// Large enough for **`GET /api/v1/visual-manual`** (many bundled Markdown files).

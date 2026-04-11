@@ -14,8 +14,6 @@ mod llm;
 mod manuals;
 mod metering;
 mod narrative;
-mod notify_hub;
-mod ops;
 mod production_legacy;
 mod projects;
 mod prompting;
@@ -38,7 +36,7 @@ async fn main() {
 
     let _ = dotenvy::dotenv();
 
-    if let Some(result) = ops::maybe_run_from_args(args.iter().skip(1).cloned()).await {
+    if let Some(result) = app::ops::maybe_run_from_args(args.iter().skip(1).cloned()).await {
         if let Err(err) = result {
             eprintln!("{err:#}");
             std::process::exit(1);

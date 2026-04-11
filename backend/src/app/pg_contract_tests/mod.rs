@@ -22,7 +22,7 @@ use crate::jobs::{
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
 };
-use crate::notify_hub::WsNotifyHub;
+use crate::state::WsNotifyHub;
 use crate::state::{AppState, MemoryConfig};
 
 const MAX_JSON: usize = 65_536;

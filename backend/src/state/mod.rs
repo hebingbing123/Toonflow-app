@@ -2,6 +2,7 @@
 
 mod from_env;
 mod memory_config;
+mod notify_hub;
 mod vendor_config;
 
 use std::path::PathBuf;
@@ -11,9 +12,9 @@ use sqlx::PgPool;
 use tokio::sync::RwLock;
 
 use crate::llm::LlmConfig;
-use crate::notify_hub::WsNotifyHub;
 
 pub use memory_config::MemoryConfig;
+pub use notify_hub::WsNotifyHub;
 pub use vendor_config::{VendorConfig, VendorConfigEntry};
 
 #[derive(Clone)]
