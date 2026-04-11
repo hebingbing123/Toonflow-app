@@ -17,6 +17,17 @@ use crate::state::AppState;
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
+            "/api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards",
+            get(handlers::list_by_script_for_project)
+                .post(handlers::create_under_script_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}",
+            get(handlers::get_by_legacy_for_project)
+                .patch(handlers::patch_by_legacy_for_project)
+                .delete(handlers::delete_by_legacy_for_project),
+        )
+        .route(
             "/api/v1/scripts/legacy/{script_legacy_id}/storyboards",
             get(handlers::list_by_script_legacy).post(handlers::create_under_script_legacy),
         )

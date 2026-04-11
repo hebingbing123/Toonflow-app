@@ -4,6 +4,7 @@ extension _HomePageScriptEditor on _HomePageState {
   Future<void> _openScriptEditor(
     String token,
     int scriptLegacyId, {
+    required String projectId,
     required int projectLegacyId,
     Future<void> Function()? onScriptTreeMutated,
   }) async {
@@ -77,6 +78,7 @@ extension _HomePageScriptEditor on _HomePageState {
                                 ? null
                                 : () => _openScriptStoryboardsDialog(
                                     token: token,
+                                    projectId: projectId,
                                     projectLegacyId: projectLegacyId,
                                     scriptLegacyId: scriptLegacyId,
                                   ),

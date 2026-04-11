@@ -4,6 +4,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
   Future<void> _openStoryboardEditor(
     String token,
     int storyLegacyId, {
+    required String projectId,
     required int projectLegacyId,
     required int scriptLegacyId,
     Future<void> Function()? onStoryboardTreeMutated,
@@ -14,7 +15,11 @@ extension _HomePageStoryboardEditor on _HomePageState {
     final sbIdxCtrl = TextEditingController();
     final sgiCtrl = TextEditingController();
     try {
-      final row = await fetchStoryboardByLegacyId(token, storyLegacyId);
+      final row = await fetchStoryboardByProjectAndLegacyId(
+        token,
+        projectId,
+        storyLegacyId,
+      );
       if (!mounted) return;
       promptCtrl.text = row.prompt ?? '';
       stateCtrl.text = row.state ?? '';
@@ -131,8 +136,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             if (ok != true || !ctx.mounted) return;
                             setDialogState(() => saving[0] = true);
                             try {
-                              await deleteStoryboardByLegacyId(
+                              await deleteStoryboardByProjectAndLegacyId(
                                 token,
+                                projectId,
                                 storyLegacyId,
                               );
                               if (!ctx.mounted) return;
@@ -197,8 +203,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               }
                             }
                             try {
-                              await updateStoryboardByLegacyId(
+                              await updateStoryboardByProjectAndLegacyId(
                                 token,
+                                projectId,
                                 storyLegacyId,
                                 {
                                   'prompt': promptCtrl.text.isEmpty

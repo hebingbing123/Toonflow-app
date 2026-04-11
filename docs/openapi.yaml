@@ -8067,8 +8067,263 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards:
+    get:
+      tags: [storyboards]
+      summary: List storyboards for a script (by project UUID + script legacy id)
+      operationId: listStoryboardsByProjectAndScriptLegacyV1
+      description: |
+        Same as **`GET /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**, scoped with **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK (may be empty)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StoryboardRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned, or script not in project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      tags: [storyboards]
+      summary: Create storyboard under a script (by project UUID + script legacy id)
+      operationId: createStoryboardUnderProjectAndScriptLegacyV1
+      description: |
+        Same as **`POST /api/v1/scripts/legacy/{script_legacy_id}/storyboards`**, scoped with **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoryboardBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryboardRow"
+        "400":
+          description: Unknown JSON properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not owned under project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}:
+    get:
+      tags: [storyboards]
+      summary: Storyboard by legacy id (scoped to project UUID)
+      operationId: getStoryboardByProjectAndLegacyV1
+      description: |
+        Same row as **`GET /api/v1/storyboards/legacy/{legacy_id}`**, requiring the storyboard to belong to **`app_project.id`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: storyboard_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryboardRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not under project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [storyboards]
+      summary: Partially update storyboard (scoped to project UUID)
+      operationId: patchStoryboardByProjectAndLegacyV1
+      description: |
+        Same merge rules as **`PATCH /api/v1/storyboards/legacy/{legacy_id}`**; storyboard must belong to the given project.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: storyboard_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchStoryboardBody"
+      responses:
+        "200":
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryboardRow"
+        "400":
+          description: Invalid body or no fields to apply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not under project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [storyboards]
+      summary: Delete storyboard (scoped to project UUID)
+      operationId: deleteStoryboardByProjectAndLegacyV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: storyboard_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found or not under project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/scripts/legacy/{script_legacy_id}/storyboards:
     get:
+      deprecated: true
       tags: [storyboards]
       summary: List storyboards for a script (by script legacy id)
       operationId: listStoryboardsByScriptLegacyIdV1
@@ -8103,6 +8358,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     post:
+      deprecated: true
       tags: [storyboards]
       summary: Create storyboard under a script (allocates global storyboard legacy_id)
       operationId: createStoryboardUnderScriptLegacyV1
@@ -8160,6 +8416,7 @@ paths:
 
   /api/v1/storyboards/legacy/{legacy_id}:
     get:
+      deprecated: true
       tags: [storyboards]
       summary: Storyboard by legacy integer id
       operationId: getStoryboardByLegacyIdV1
@@ -8198,6 +8455,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     patch:
+      deprecated: true
       tags: [storyboards]
       summary: Partially update storyboard by legacy id
       operationId: patchStoryboardByLegacyIdV1
@@ -8251,6 +8509,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     delete:
+      deprecated: true
       tags: [storyboards]
       summary: Delete storyboard by legacy id
       operationId: deleteStoryboardByLegacyIdV1

@@ -43,6 +43,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
 
   Future<List<StoryboardRow>> _reloadScriptStoryboards({
     required String token,
+    required String projectId,
     required int scriptLegacyId,
     required List<StoryboardRow> boardsList,
     required BuildContext ctx,
@@ -52,7 +53,11 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     boardsLoading[0] = true;
     setBoardsState(() {});
     try {
-      final fresh = await fetchStoryboardsForScript(token, scriptLegacyId);
+      final fresh = await fetchStoryboardsForProjectScript(
+        token,
+        projectId,
+        scriptLegacyId,
+      );
       boardsList
         ..clear()
         ..addAll(fresh);
@@ -69,6 +74,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required BuildContext ctx,
     required StateSetter setBoardsState,
     required String token,
+    required String projectId,
     required int projectLegacyId,
     required int scriptLegacyId,
     required List<StoryboardRow> boardsList,
@@ -156,6 +162,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadScriptStoryboards(
           token: token,
+          projectId: projectId,
           scriptLegacyId: scriptLegacyId,
           boardsList: boardsList,
           ctx: ctx,
@@ -210,6 +217,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required BuildContext ctx,
     required StateSetter setBoardsState,
     required String token,
+    required String projectId,
     required int projectLegacyId,
     required int scriptLegacyId,
     required List<StoryboardRow> boardsList,
@@ -306,6 +314,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadScriptStoryboards(
           token: token,
+          projectId: projectId,
           scriptLegacyId: scriptLegacyId,
           boardsList: boardsList,
           ctx: ctx,
@@ -358,11 +367,16 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
 
   Future<void> _openScriptStoryboardsDialog({
     required String token,
+    required String projectId,
     required int projectLegacyId,
     required int scriptLegacyId,
   }) async {
     try {
-      final boards = await fetchStoryboardsForScript(token, scriptLegacyId);
+      final boards = await fetchStoryboardsForProjectScript(
+        token,
+        projectId,
+        scriptLegacyId,
+      );
       if (!mounted) return;
       final boardsList = List<StoryboardRow>.from(boards);
       await showDialog<void>(
@@ -473,6 +487,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       ctx: ctx2,
                                       setBoardsState: setBoardsState,
                                       token: token,
+                                      projectId: projectId,
                                       projectLegacyId: projectLegacyId,
                                       scriptLegacyId: scriptLegacyId,
                                       boardsList: boardsList,
@@ -492,6 +507,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       ctx: ctx2,
                                       setBoardsState: setBoardsState,
                                       token: token,
+                                      projectId: projectId,
                                       projectLegacyId: projectLegacyId,
                                       scriptLegacyId: scriptLegacyId,
                                       boardsList: boardsList,
@@ -509,6 +525,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                   ? null
                                   : () => _reloadScriptStoryboards(
                                       token: token,
+                                      projectId: projectId,
                                       scriptLegacyId: scriptLegacyId,
                                       boardsList: boardsList,
                                       ctx: ctx2,
@@ -533,6 +550,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                       if (!ctx2.mounted) return;
                                       await _reloadScriptStoryboards(
                                         token: token,
+                                        projectId: projectId,
                                         scriptLegacyId: scriptLegacyId,
                                         boardsList: boardsList,
                                         ctx: ctx2,
@@ -625,11 +643,13 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                                             await _openStoryboardEditor(
                                               token,
                                               b.legacyId,
+                                              projectId: projectId,
                                               projectLegacyId: projectLegacyId,
                                               scriptLegacyId: scriptLegacyId,
                                               onStoryboardTreeMutated: () async {
                                                 await _reloadScriptStoryboards(
                                                   token: token,
+                                                  projectId: projectId,
                                                   scriptLegacyId:
                                                       scriptLegacyId,
                                                   boardsList: boardsList,

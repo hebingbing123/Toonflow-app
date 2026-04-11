@@ -567,6 +567,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                 : () => _openScriptEditor(
                     token,
                     s.legacyId,
+                    projectId: p.id,
                     projectLegacyId: p.legacyId,
                     onScriptTreeMutated: () async {
                       final d = await fetchProjectByProjectId(token, p.id);
