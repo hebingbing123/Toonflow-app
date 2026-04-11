@@ -203,6 +203,24 @@ class _AssetGenerationWorkbenchDialogState
     }
   }
 
+  void _toggleAssetSelection(AssetRow asset, bool checked) {
+    setState(() {
+      if (checked) {
+        _selectedIds.add(asset.legacyId);
+        _focusedAssetLegacyId = asset.legacyId;
+        if (_selectedIds.length == 1) {
+          _imageUrlCtrl.clear();
+        }
+      } else {
+        _selectedIds.remove(asset.legacyId);
+        if (_focusedAssetLegacyId == asset.legacyId) {
+          final remaining = sortUniqueAssetLegacyIds(_selectedIds);
+          _focusedAssetLegacyId = remaining.isEmpty ? null : remaining.first;
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final visible = widget.visibleAssets();
@@ -276,22 +294,157 @@ class _AssetGenerationWorkbenchDialogState
                 },
               ),
               const SizedBox(height: 12),
-              _buildQueryActions(visible, scopedAssets, typeSelections),
-              const SizedBox(height: 8),
-              _buildMutationActions(
-                selected,
-                selectedSingleAssetId,
-                scopedAssets,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.assetsFilterScriptLegacyId[0] == null
-                    ? '当前按项目全量资产操作；可在主视图先切换"按剧本筛选"再进入工作台。'
-                    : '当前主视图已按剧本 #${widget.assetsFilterScriptLegacyId[0]} 过滤资产，工作台默认沿用这批可见资产。',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
+              _AssetGenerationActionsPanel(
+                loadingSummary: _loadingSummary,
+                busyMutation: _busyMutation,
+                visibleAssets: visible,
+                scopedAssets: scopedAssets,
+                typeSelections: typeSelections,
+                selectedType: _selectedType,
+                selected: selected,
+                selectedSingleAssetId: selectedSingleAssetId,
+                imageUrlCtrl: _imageUrlCtrl,
+                onSyncWorkbenchSnapshot: () =>
+                    _syncWorkbenchSnapshot(includeProductionSummary: true),
+                onLoadMaterialContext: () => _runMutation(() async {
+                  final response = await postLegacyAssetsGetMaterialData(
+                    widget.token,
+                    widget.project.id,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _materialData = response;
+                      _statusLine = summarizeLegacyAssetMaterialData(response);
+                    });
+                  }
+                }),
+                onLoadBatchCandidates: () => _runMutation(() async {
+                  final effectiveType = _selectedType.isEmpty
+                      ? visible.first.assetType.trim()
+                      : _selectedType;
+                  final limit = int.tryParse(_batchLimitCtrl.text.trim()) ?? 10;
+                  if (effectiveType.isEmpty) {
+                    throw const FormatException('批量候选读取需要有效资产类型');
+                  }
+                  if (limit <= 0) {
+                    throw const FormatException('候选 limit 需要大于 0');
+                  }
+                  final response = await postLegacyAssetsBatchGenerationData(
+                    widget.token,
+                    projectId: widget.project.id,
+                    assetType: effectiveType,
+                    name: _batchNameCtrl.text.trim(),
+                    limit: limit,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _batchData = response;
+                      _statusLine =
+                          '${summarizeLegacyBatchGenerationData(response)} · type=$effectiveType';
+                    });
+                  }
+                }),
+                onSelectAllVisible: () => _applySelection(
+                  scopedAssets.map((a) => a.legacyId),
+                  '已全选当前可见资产',
                 ),
+                onRebuildSelectionByType: () => _applySelection(
+                  _selectedType.isEmpty
+                      ? scopedAssets.map((a) => a.legacyId)
+                      : (typeSelections[_selectedType] ?? const <int>[]),
+                  _selectedType.isEmpty
+                      ? '已按全部类型重建选择'
+                      : '已按 $_selectedType 重建选择',
+                ),
+                onClearSelection: () => _applySelection(const <int>[], '已清空选择'),
+                onBatchGenerateImages: () => _runMutation(() async {
+                  final response =
+                      await postProductionAssetsBatchGenerateAssetsImageV1(
+                        widget.token,
+                        projectId: widget.project.legacyId,
+                        scriptId: _selectedScriptLegacyId,
+                        assetIds: selected,
+                        model: _modelCtrl.text.trim().isEmpty
+                            ? null
+                            : _modelCtrl.text.trim(),
+                        resolution: _resolutionCtrl.text.trim().isEmpty
+                            ? null
+                            : _resolutionCtrl.text.trim(),
+                      );
+                  await _syncWorkbenchSnapshot(
+                    includeProductionSummary: true,
+                    lead:
+                        '已为 ${response.total} 条资产创建出图任务，队列 ${response.enqueued.length} 条',
+                  );
+                }),
+                onPollImageStatuses: () => _runMutation(() async {
+                  final response = await postProductionAssetsPollingImageV1(
+                    widget.token,
+                    projectId: widget.project.legacyId,
+                    assetIds: selected,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _pollingData = response;
+                      _statusLine = summarizeAssetWorkbenchSnapshot(
+                        visibleAssets: scopedAssets,
+                        selectedIds: _selectedIds,
+                        productionData: _productionData,
+                        pollingData: _pollingData,
+                        promptPollingData: _promptPollingData,
+                      );
+                    });
+                  }
+                }),
+                onPollPromptStatuses: () => _runMutation(() async {
+                  final response = await postLegacyAssetsPollingPromptAssets(
+                    widget.token,
+                    widget.project.id,
+                    selected,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _promptPollingData = response;
+                      _statusLine = summarizeAssetWorkbenchSnapshot(
+                        visibleAssets: scopedAssets,
+                        selectedIds: _selectedIds,
+                        productionData: _productionData,
+                        pollingData: _pollingData,
+                        promptPollingData: _promptPollingData,
+                      );
+                    });
+                  }
+                }),
+                onDeleteDerivatives: () => _runMutation(() async {
+                  final response =
+                      await postProductionAssetsDeleteAssetsDerivativeV1(
+                        widget.token,
+                        projectId: widget.project.legacyId,
+                        assetIds: selected,
+                      );
+                  await widget.reloadAssetsAndStats();
+                  await _syncWorkbenchSnapshot(
+                    includeProductionSummary: true,
+                    lead:
+                        '已删除 ${response.deleted} 个衍生图记录，资产 ${response.assetIds.join(", ")}',
+                  );
+                }),
+                onUpdateImageUrl: () => _runMutation(() async {
+                  final response = await postProductionAssetsUpdateAssetsUrlV1(
+                    widget.token,
+                    projectId: widget.project.legacyId,
+                    assetId: selectedSingleAssetId!,
+                    imageUrl: _imageUrlCtrl.text.trim(),
+                  );
+                  await widget.reloadAssetsAndStats();
+                  await _syncWorkbenchSnapshot(
+                    includeProductionSummary: true,
+                    lead:
+                        '已更新资产 #${response.assetId} 封面 URL：${response.message}',
+                  );
+                }),
               ),
+              const SizedBox(height: 8),
               _AssetGenerationStatusPanel(
                 busy: _busyMutation,
                 statusLine: _statusLine,
@@ -319,54 +472,12 @@ class _AssetGenerationWorkbenchDialogState
                   '已按 prompt 状态 $label 重建选择',
                 ),
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 280,
-                child: ListView.builder(
-                  itemCount: scopedAssets.length,
-                  itemBuilder: (context, index) {
-                    final asset = scopedAssets[index];
-                    return CheckboxListTile(
-                      dense: true,
-                      value: _selectedIds.contains(asset.legacyId),
-                      onChanged: _busyMutation
-                          ? null
-                          : (checked) {
-                              setState(() {
-                                if (checked == true) {
-                                  _selectedIds.add(asset.legacyId);
-                                  _focusedAssetLegacyId = asset.legacyId;
-                                  if (_selectedIds.length == 1) {
-                                    _imageUrlCtrl.clear();
-                                  }
-                                } else {
-                                  _selectedIds.remove(asset.legacyId);
-                                  if (_focusedAssetLegacyId == asset.legacyId) {
-                                    final remaining = sortUniqueAssetLegacyIds(
-                                      _selectedIds,
-                                    );
-                                    _focusedAssetLegacyId = remaining.isEmpty
-                                        ? null
-                                        : remaining.first;
-                                  }
-                                }
-                              });
-                            },
-                      title: Text('#${asset.legacyId} ${asset.name}'),
-                      subtitle: Text(
-                        [
-                          asset.assetType,
-                          asset.description?.trim().isNotEmpty == true
-                              ? asset.description!.trim()
-                              : '无描述',
-                        ].join(' · '),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    );
-                  },
-                ),
+              _AssetGenerationSelectionPanel(
+                busy: _busyMutation,
+                filterScriptLegacyId: widget.assetsFilterScriptLegacyId[0],
+                scopedAssets: scopedAssets,
+                selectedIds: _selectedIds,
+                onToggleAsset: _toggleAssetSelection,
               ),
             ],
           ),
@@ -376,228 +487,6 @@ class _AssetGenerationWorkbenchDialogState
         TextButton(
           onPressed: _busyMutation ? null : () => Navigator.of(context).pop(),
           child: const Text('关闭'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQueryActions(
-    List<AssetRow> visible,
-    List<AssetRow> scopedAssets,
-    Map<String, List<int>> typeSelections,
-  ) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilledButton.tonal(
-          onPressed: _loadingSummary || _busyMutation
-              ? null
-              : () => _syncWorkbenchSnapshot(includeProductionSummary: true),
-          child: Text(_loadingSummary ? '同步中…' : '同步当前工作台摘要'),
-        ),
-        TextButton(
-          onPressed: _busyMutation
-              ? null
-              : () => _runMutation(() async {
-                  final response = await postLegacyAssetsGetMaterialData(
-                    widget.token,
-                    widget.project.id,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _materialData = response;
-                      _statusLine = summarizeLegacyAssetMaterialData(response);
-                    });
-                  }
-                }),
-          child: const Text('读取素材上下文'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || visible.isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final effectiveType = _selectedType.isEmpty
-                      ? visible.first.assetType.trim()
-                      : _selectedType;
-                  final limit = int.tryParse(_batchLimitCtrl.text.trim()) ?? 10;
-                  if (effectiveType.isEmpty) {
-                    throw const FormatException('批量候选读取需要有效资产类型');
-                  }
-                  if (limit <= 0) {
-                    throw const FormatException('候选 limit 需要大于 0');
-                  }
-                  final response = await postLegacyAssetsBatchGenerationData(
-                    widget.token,
-                    projectId: widget.project.id,
-                    assetType: effectiveType,
-                    name: _batchNameCtrl.text.trim(),
-                    limit: limit,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _batchData = response;
-                      _statusLine =
-                          '${summarizeLegacyBatchGenerationData(response)} · type=$effectiveType';
-                    });
-                  }
-                }),
-          child: const Text('读取批量候选'),
-        ),
-        TextButton(
-          onPressed: _busyMutation
-              ? null
-              : () => _applySelection(
-                  scopedAssets.map((a) => a.legacyId),
-                  '已全选当前可见资产',
-                ),
-          child: const Text('全选当前可见资产'),
-        ),
-        TextButton(
-          onPressed: _busyMutation
-              ? null
-              : () => _applySelection(
-                  _selectedType.isEmpty
-                      ? scopedAssets.map((a) => a.legacyId)
-                      : (typeSelections[_selectedType] ?? const <int>[]),
-                  _selectedType.isEmpty
-                      ? '已按全部类型重建选择'
-                      : '已按 $_selectedType 重建选择',
-                ),
-          child: const Text('按类型重建选择'),
-        ),
-        TextButton(
-          onPressed: _busyMutation
-              ? null
-              : () => _applySelection(const <int>[], '已清空选择'),
-          child: const Text('清空选择'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMutationActions(
-    List<int> selected,
-    int? selectedSingleAssetId,
-    List<AssetRow> scopedAssets,
-  ) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilledButton(
-          onPressed: _busyMutation || selected.isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final response =
-                      await postProductionAssetsBatchGenerateAssetsImageV1(
-                        widget.token,
-                        projectId: widget.project.legacyId,
-                        scriptId: _selectedScriptLegacyId,
-                        assetIds: selected,
-                        model: _modelCtrl.text.trim().isEmpty
-                            ? null
-                            : _modelCtrl.text.trim(),
-                        resolution: _resolutionCtrl.text.trim().isEmpty
-                            ? null
-                            : _resolutionCtrl.text.trim(),
-                      );
-                  await _syncWorkbenchSnapshot(
-                    includeProductionSummary: true,
-                    lead:
-                        '已为 ${response.total} 条资产创建出图任务，队列 ${response.enqueued.length} 条',
-                  );
-                }),
-          child: Text(_busyMutation ? '处理中…' : '批量发起资产出图'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || selected.isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final response = await postProductionAssetsPollingImageV1(
-                    widget.token,
-                    projectId: widget.project.legacyId,
-                    assetIds: selected,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _pollingData = response;
-                      _statusLine = summarizeAssetWorkbenchSnapshot(
-                        visibleAssets: scopedAssets,
-                        selectedIds: _selectedIds,
-                        productionData: _productionData,
-                        pollingData: _pollingData,
-                        promptPollingData: _promptPollingData,
-                      );
-                    });
-                  }
-                }),
-          child: const Text('轮询图片状态'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || selected.isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final response = await postLegacyAssetsPollingPromptAssets(
-                    widget.token,
-                    widget.project.id,
-                    selected,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _promptPollingData = response;
-                      _statusLine = summarizeAssetWorkbenchSnapshot(
-                        visibleAssets: scopedAssets,
-                        selectedIds: _selectedIds,
-                        productionData: _productionData,
-                        pollingData: _pollingData,
-                        promptPollingData: _promptPollingData,
-                      );
-                    });
-                  }
-                }),
-          child: const Text('轮询 prompt 状态'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || selected.isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final response =
-                      await postProductionAssetsDeleteAssetsDerivativeV1(
-                        widget.token,
-                        projectId: widget.project.legacyId,
-                        assetIds: selected,
-                      );
-                  await widget.reloadAssetsAndStats();
-                  await _syncWorkbenchSnapshot(
-                    includeProductionSummary: true,
-                    lead:
-                        '已删除 ${response.deleted} 个衍生图记录，资产 ${response.assetIds.join(", ")}',
-                  );
-                }),
-          child: const Text('清理衍生图'),
-        ),
-        TextButton(
-          onPressed:
-              _busyMutation ||
-                  selectedSingleAssetId == null ||
-                  _imageUrlCtrl.text.trim().isEmpty
-              ? null
-              : () => _runMutation(() async {
-                  final response = await postProductionAssetsUpdateAssetsUrlV1(
-                    widget.token,
-                    projectId: widget.project.legacyId,
-                    assetId: selectedSingleAssetId,
-                    imageUrl: _imageUrlCtrl.text.trim(),
-                  );
-                  await widget.reloadAssetsAndStats();
-                  await _syncWorkbenchSnapshot(
-                    includeProductionSummary: true,
-                    lead:
-                        '已更新资产 #${response.assetId} 封面 URL：${response.message}',
-                  );
-                }),
-          child: const Text('更新封面 URL'),
         ),
       ],
     );
