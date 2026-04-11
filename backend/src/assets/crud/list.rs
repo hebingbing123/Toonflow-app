@@ -128,11 +128,11 @@ async fn select_project_assets_filtered(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
-pub(crate)//! `GET …/assets` — 列出项目资产。
-//!
-//! 处理 GET /api/v1/projects/legacy/{project_legacy_id}/assets 请求，
-//! 支持分页、按类型过滤、按名称搜索。
-async fn list_project_assets(
+/// 列出项目资产。
+///
+/// 处理 GET /api/v1/projects/legacy/{project_legacy_id}/assets 请求，
+/// 支持分页、按类型过滤、按名称搜索。
+pub(crate) async fn list_project_assets(
     State(state): State<AppState>,
     Path(project_legacy_id): Path<i32>,
     Query(query): Query<ListAssetsQuery>,
