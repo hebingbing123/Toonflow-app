@@ -40,14 +40,21 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
 
     void syncStatusLine(StateSetter setState) {
       final response = imagesResponse;
-      if (response == null) {
-        return;
-      }
+      final diagnosis = diagnoseAssetImagesWorkbench(
+        imagesResponse: response,
+        selectedImageId: selectedImageId,
+        hasPreviewBytes: previewBytes != null,
+      );
       setState(() {
-        statusLine = summarizeAssetImageSelection(
-          response,
-          selectedImageId: selectedImageId,
-        );
+        final selectionLine = response == null
+            ? ''
+            : summarizeAssetImageSelection(
+                response,
+                selectedImageId: selectedImageId,
+              );
+        statusLine = selectionLine.isEmpty
+            ? '${diagnosis.summary} ${diagnosis.detail}'
+            : '$selectionLine ${diagnosis.detail}';
       });
     }
 
@@ -96,9 +103,27 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           image.id,
         );
         setState(() => previewBytes = bytes);
-        syncStatusLine(setState);
+        final diagnosis = diagnoseAssetImagesWorkbench(
+          imagesResponse: imagesResponse,
+          selectedImageId: selectedImageId,
+          hasPreviewBytes: true,
+        );
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFollowUp(
+            actionSummary: '已读取当前图片预览。',
+            diagnosis: diagnosis,
+          );
+        });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '预览失败：$e');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '读取当前图片预览失败。',
+            recommendedAction:
+                AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
+            error: e,
+            fallbackDetail: '建议先确认 file_path 或切换到其他图片后重试。',
+          );
+        });
       } finally {
         setState(() => loadingPreview = false);
       }
@@ -123,9 +148,13 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           imagesResponse = response;
           selectedImageId = nextSelectedImageId;
           previewBytes = null;
-          statusLine = summarizeAssetImageSelection(
-            response,
-            selectedImageId: nextSelectedImageId,
+          statusLine = buildAssetImagesWorkbenchFollowUp(
+            actionSummary: '已同步当前资产的图片列表。',
+            diagnosis: diagnoseAssetImagesWorkbench(
+              imagesResponse: response,
+              selectedImageId: nextSelectedImageId,
+              hasPreviewBytes: false,
+            ),
           );
         });
         syncPatchFieldsFromSelected(setState);
@@ -135,14 +164,24 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
           imagesResponse = null;
           selectedImageId = null;
           previewBytes = null;
-          statusLine = '加载失败：$e';
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '读取当前资产图片列表失败。',
+            recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
+            error: e,
+            fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
+          );
         });
       } catch (e) {
         setState(() {
           imagesResponse = null;
           selectedImageId = null;
           previewBytes = null;
-          statusLine = '加载失败：$e';
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '读取当前资产图片列表失败。',
+            recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
+            error: e,
+            fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
+          );
         });
       } finally {
         setState(() => loadingList = false);
@@ -177,9 +216,26 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         );
         await reloadImages(setState);
         await reloadAssetsAndStats();
-        setState(() => statusLine = '已新增资产图片');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFollowUp(
+            actionSummary: '已新增资产图片。',
+            diagnosis: diagnoseAssetImagesWorkbench(
+              imagesResponse: imagesResponse,
+              selectedImageId: selectedImageId,
+              hasPreviewBytes: previewBytes != null,
+            ),
+          );
+        });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '新增失败：$e');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '新增资产图片失败。',
+            recommendedAction:
+                AssetImagesWorkbenchRecommendedAction.createImage,
+            error: e,
+            fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
+          );
+        });
       } finally {
         setState(() => busyMutation = false);
         if (ctx.mounted) {
@@ -228,9 +284,26 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         );
         await reloadImages(setState);
         await reloadAssetsAndStats();
-        setState(() => statusLine = '已更新图片');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFollowUp(
+            actionSummary: '已更新当前图片。',
+            diagnosis: diagnoseAssetImagesWorkbench(
+              imagesResponse: imagesResponse,
+              selectedImageId: selectedImageId,
+              hasPreviewBytes: previewBytes != null,
+            ),
+          );
+        });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '更新失败：$e');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '更新当前图片失败。',
+            recommendedAction:
+                AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+            error: e,
+            fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+          );
+        });
       } finally {
         setState(() => busyMutation = false);
         if (ctx.mounted) {
@@ -256,14 +329,53 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         );
         await reloadImages(setState);
         await reloadAssetsAndStats();
-        setState(() => statusLine = '已删除图片');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFollowUp(
+            actionSummary: '已删除当前图片。',
+            diagnosis: diagnoseAssetImagesWorkbench(
+              imagesResponse: imagesResponse,
+              selectedImageId: selectedImageId,
+              hasPreviewBytes: previewBytes != null,
+            ),
+          );
+        });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '删除失败：$e');
+        setState(() {
+          statusLine = buildAssetImagesWorkbenchFailureNotice(
+            actionSummary: '删除当前图片失败。',
+            recommendedAction:
+                AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+            error: e,
+            fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+          );
+        });
       } finally {
         setState(() => busyMutation = false);
         if (ctx.mounted) {
           setDialogState(() => assetsBusy[0] = false);
         }
+      }
+    }
+
+    Future<void> runRecommendedAction(StateSetter setState) async {
+      final diagnosis = diagnoseAssetImagesWorkbench(
+        imagesResponse: imagesResponse,
+        selectedImageId: selectedImageId,
+        hasPreviewBytes: previewBytes != null,
+      );
+      switch (diagnosis.recommendedAction) {
+        case AssetImagesWorkbenchRecommendedAction.loadImages:
+          await reloadImages(setState);
+          break;
+        case AssetImagesWorkbenchRecommendedAction.createImage:
+          await createImage(setState);
+          break;
+        case AssetImagesWorkbenchRecommendedAction.previewSelectedImage:
+          await loadPreview(setState);
+          break;
+        case AssetImagesWorkbenchRecommendedAction.updateSelectedImage:
+          await patchImage(setState);
+          break;
       }
     }
 
@@ -282,6 +394,11 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
               }
               final imageItems =
                   imagesResponse?.items ?? const <AssetImageRow>[];
+              final diagnosis = diagnoseAssetImagesWorkbench(
+                imagesResponse: imagesResponse,
+                selectedImageId: selectedImageId,
+                hasPreviewBytes: previewBytes != null,
+              );
               return AlertDialog(
                 title: const Text('资产图片工作台'),
                 content: SizedBox(
@@ -315,6 +432,45 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                           });
                           await reloadImages(setState);
                         },
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(
+                              dialogCtx,
+                            ).colorScheme.outlineVariant,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              diagnosis.summary,
+                              style: Theme.of(dialogCtx).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              diagnosis.detail,
+                              style: Theme.of(dialogCtx).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            FilledButton.tonal(
+                              onPressed:
+                                  loadingList || loadingPreview || busyMutation
+                                  ? null
+                                  : () => runRecommendedAction(setState),
+                              child: Text(
+                                describeAssetImagesWorkbenchRecommendedAction(
+                                  diagnosis.recommendedAction,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Wrap(

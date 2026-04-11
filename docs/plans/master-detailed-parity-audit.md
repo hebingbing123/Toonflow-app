@@ -214,6 +214,7 @@
 - 项目详情资产区已新增“资产历史图工作台”：可按类型过滤查询 `corner-scape` 资产、浏览历史图列表并直接预览首图，把原先兼容性 `POST corner-scape` 查询从 probe 按钮收口为正式产品交互。
 - 项目详情资产区已新增“上传 Clip 资产”正式表单：可直接调用 `POST /api/v1/assets/upload-clip` 并回刷资产列表，把原先兼容性 `POST upload-clip` 从 probe 按钮收口到主工作流。
 - 项目详情资产区已新增“资产图片工作台”：可按目标资产加载图片列表，并在同一对话框内完成 `GET/POST/PATCH/DELETE …/assets/{aid}/images*` 与文件预览，替代原先分散的兼容性单按钮操作。
+- 资产图片工作台现也继续收口为共享诊断卡 + follow-up：会根据当前资产是否已同步图片列表、是否已有图片、是否已读取当前预览来自动推荐“读取图片列表 / 新增当前图片 / 读取当前预览 / 保存当前图片”，并把列表同步、预览、增删改结果统一写回下一步建议，减少资产图片流里仍需人工判断下一步的控制台式负担。
 - 项目详情资产区已新增“资产出图工作台”：可在项目资产主视图内按当前可见资产选择目标、同步 `production/assets/get-assets-data` 摘要、读取 legacy `get-material-data` / `batch-generation-data` / `polling-prompt-assets` 上下文、批量触发 `batch-generate-assets-image`、轮询图片状态、清理衍生图并更新单资产封面 URL，把 production + legacy 资产生成链路从 system probe/兼容性按钮收口回正式产品流。
 - Projects 页已新增“画风工作台”：可在同一对话框内刷新画风列表、查看 JWT 保护的本地封面、执行 `GET/POST/PATCH/DELETE …/art-styles*`，并直接调用 `POST /api/v1/art-styles/extract-prompt` 把多图输入转成可保存 prompt，替代首页原先仅有的列表加载与 CRUD 探针摘要。
 - 剧本编辑器已升级为脚本工作台入口：除基础字段编辑外，现可直接读取 `get-script-api` 当前脚本上下文、查看关联素材摘要、导出当前剧本 ZIP、轮询提取状态并发起当前剧本素材抽取，开始把“脚本导出与抽取流程”从 probe 操作收口到正式产品交互。
