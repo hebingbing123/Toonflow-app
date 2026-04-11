@@ -28,9 +28,9 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                 final sid = scriptList.first.legacyId;
                 final aid = assetsRef[0]!.items.first.legacyId;
                 try {
-                  await linkScriptToAssetByLegacyIds(
+                  await linkScriptToAssetByProjectIds(
                     token,
-                    p.legacyId,
+                    p.id,
                     sid,
                     aid,
                   );
@@ -71,9 +71,9 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                 final sid = scriptList.first.legacyId;
                 final aid = assetsRef[0]!.items.first.legacyId;
                 try {
-                  await unlinkScriptFromAssetByLegacyIds(
+                  await unlinkScriptFromAssetByProjectIds(
                     token,
-                    p.legacyId,
+                    p.id,
                     sid,
                     aid,
                   );

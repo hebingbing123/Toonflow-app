@@ -7,6 +7,7 @@ use axum::{
 };
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -14,9 +15,9 @@ use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
 use crate::state::AppState;
-use uuid::Uuid;
 
 use super::super::models::*;
+use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
 
 fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
     let p = parse_optional_text_field(v, "asset_type")?;
@@ -76,19 +77,14 @@ async fn cover_legacy_image_exists_for_asset(
     Ok(ok)
 }
 
-pub(crate) async fn patch_project_asset_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-    Json(body): Json<PatchAssetBody>,
+async fn patch_project_asset_inner(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    asset_legacy_id: i32,
+    body: PatchAssetBody,
 ) -> Result<Json<AssetRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
+    if asset_legacy_id <= 0 {
         return Err(ApiError::BadRequest("legacy ids must be positive".into()));
     }
 
@@ -113,12 +109,12 @@ pub(crate) async fn patch_project_asset_by_legacy(
         SELECT a.id, a.name, a.asset_type, a.description, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.legacy_id = $1
+        WHERE p.id = $1
           AND p.owner_user_id = $2
           AND a.legacy_id = $3
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_id)
     .bind(uid)
     .bind(asset_legacy_id)
     .fetch_optional(pool)
@@ -166,14 +162,14 @@ pub(crate) async fn patch_project_asset_by_legacy(
               SELECT 1
               FROM app_asset a
               INNER JOIN app_project p ON p.id = a.project_id
-              WHERE p.legacy_id = $1
+              WHERE p.id = $1
                 AND p.owner_user_id = $2
                 AND a.name = $3
                 AND a.legacy_id <> $4
             )
             "#,
         )
-        .bind(project_legacy_id)
+        .bind(project_id)
         .bind(uid)
         .bind(&new_name)
         .bind(asset_legacy_id)
@@ -197,7 +193,7 @@ pub(crate) async fn patch_project_asset_by_legacy(
             updated_at = NOW()
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.legacy_id = $5
+          AND p.id = $5
           AND p.owner_user_id = $6
           AND a.legacy_id = $7
         RETURNING a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
@@ -207,7 +203,7 @@ pub(crate) async fn patch_project_asset_by_legacy(
     .bind(&new_desc)
     .bind(&new_type)
     .bind(SqlxJson(new_metadata))
-    .bind(project_legacy_id)
+    .bind(project_id)
     .bind(uid)
     .bind(asset_legacy_id)
     .fetch_optional(pool)
@@ -216,6 +212,85 @@ pub(crate) async fn patch_project_asset_by_legacy(
     .ok_or(ApiError::NotFound)?;
 
     Ok(Json(row))
+}
+
+pub(crate) async fn patch_project_asset_for_project(
+    State(state): State<AppState>,
+    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    headers: HeaderMap,
+    Json(body): Json<PatchAssetBody>,
+) -> Result<Json<AssetRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    patch_project_asset_inner(pool, uid, project_id, asset_legacy_id, body).await
+}
+
+pub(crate) async fn patch_project_asset_by_legacy(
+    State(state): State<AppState>,
+    Path((project_legacy_id, asset_legacy_id)): Path<(i32, i32)>,
+    headers: HeaderMap,
+    Json(body): Json<PatchAssetBody>,
+) -> Result<Json<AssetRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
+    patch_project_asset_inner(pool, uid, project_id, asset_legacy_id, body).await
+}
+
+async fn delete_project_asset_inner(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    asset_legacy_id: i32,
+) -> Result<StatusCode, ApiError> {
+    if asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+
+    let res = sqlx::query(
+        r#"
+        DELETE FROM app_asset a
+        USING app_project p
+        WHERE a.project_id = p.id
+          AND p.id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub(crate) async fn delete_project_asset_for_project(
+    State(state): State<AppState>,
+    Path((project_id, asset_legacy_id)): Path<(Uuid, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    delete_project_asset_inner(pool, uid, project_id, asset_legacy_id).await
 }
 
 pub(crate) async fn delete_project_asset_by_legacy(
@@ -229,30 +304,6 @@ pub(crate) async fn delete_project_asset_by_legacy(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    if project_legacy_id <= 0 || asset_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
-    }
-
-    let res = sqlx::query(
-        r#"
-        DELETE FROM app_asset a
-        USING app_project p
-        WHERE a.project_id = p.id
-          AND p.legacy_id = $1
-          AND p.owner_user_id = $2
-          AND a.legacy_id = $3
-        "#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .bind(asset_legacy_id)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if res.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(StatusCode::NO_CONTENT)
+    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
+    delete_project_asset_inner(pool, uid, project_id, asset_legacy_id).await
 }

@@ -69,9 +69,9 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       }
 
       setDialogState(() => assetsBusy[0] = true);
-      await createProjectAssetUnderLegacy(
+      await createProjectAssetUnderProject(
         token,
-        p.legacyId,
+        p.id,
         name: name,
         type: type,
         description: descriptionCtrl.text.trim().isEmpty
@@ -221,9 +221,9 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       }
 
       setDialogState(() => assetsBusy[0] = true);
-      await patchProjectAssetByLegacyIds(
+      await patchProjectAssetByProjectIds(
         token,
-        p.legacyId,
+        p.id,
         selectedAssetLegacyId,
         body,
       );
@@ -315,9 +315,9 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     if (confirmed != true || !ctx.mounted) return;
     try {
       setDialogState(() => assetsBusy[0] = true);
-      await deleteProjectAssetByLegacyIds(
+      await deleteProjectAssetByProjectIds(
         token,
-        p.legacyId,
+        p.id,
         selectedAssetLegacyId,
       );
       if (!ctx.mounted) return;
@@ -433,16 +433,16 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     try {
       setDialogState(() => assetsBusy[0] = true);
       if (unlink) {
-        await unlinkScriptFromAssetByLegacyIds(
+        await unlinkScriptFromAssetByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedScriptLegacyId,
           selectedAssetLegacyId,
         );
       } else {
-        await linkScriptToAssetByLegacyIds(
+        await linkScriptToAssetByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedScriptLegacyId,
           selectedAssetLegacyId,
         );

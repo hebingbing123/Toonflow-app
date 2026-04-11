@@ -7,6 +7,7 @@ use axum::{
 };
 use serde_json::Value;
 use sqlx::{Postgres, QueryBuilder};
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -14,27 +15,15 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::normalize_corner_types_filter;
+use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
 
-pub(crate) async fn list_corner_scape_assets(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CornerScapeBody>,
+async fn list_corner_scape_assets_inner(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    body: CornerScapeBody,
 ) -> Result<Json<CornerScapeResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
-        ));
-    }
-
     let type_filter = normalize_corner_types_filter(body.types)?;
-
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -66,9 +55,9 @@ pub(crate) async fn list_corner_scape_assets(
           ) AS history_images
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.legacy_id = "#,
+        WHERE p.id = "#,
     );
-    qb.push_bind(project_legacy_id);
+    qb.push_bind(project_id);
     qb.push(" AND p.owner_user_id = ");
     qb.push_bind(uid);
     qb.push(
@@ -123,4 +112,38 @@ pub(crate) async fn list_corner_scape_assets(
         .collect();
 
     Ok(Json(CornerScapeResponse { items }))
+}
+
+pub(crate) async fn list_corner_scape_assets_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<CornerScapeBody>,
+) -> Result<Json<CornerScapeResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let _ = normalize_corner_types_filter(body.types.clone())?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    list_corner_scape_assets_inner(pool, uid, project_id, body).await
+}
+
+pub(crate) async fn list_corner_scape_assets(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<CornerScapeBody>,
+) -> Result<Json<CornerScapeResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let _ = normalize_corner_types_filter(body.types.clone())?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
+    list_corner_scape_assets_inner(pool, uid, project_id, body).await
 }

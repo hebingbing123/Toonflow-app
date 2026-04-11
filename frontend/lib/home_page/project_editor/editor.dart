@@ -20,7 +20,7 @@ extension _HomePageProjectEditor on _HomePageState {
       }
       ListAssetsResponse? assetsSnap;
       try {
-        assetsSnap = await fetchProjectAssetsByLegacyId(token, p.legacyId);
+        assetsSnap = await fetchProjectAssetsByProjectId(token, p.id);
       } catch (_) {
         assetsSnap = null;
       }

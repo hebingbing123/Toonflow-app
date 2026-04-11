@@ -38,7 +38,7 @@ class _ProjectEditorDialogState {
     int projectLegacyId,
   ) async {
     try {
-      assetsRef[0] = await fetchProjectAssetsByLegacyId(token, projectLegacyId);
+      assetsRef[0] = await fetchProjectAssetsByProjectId(token, projectId);
     } catch (_) {
       assetsRef[0] = null;
     }
@@ -46,9 +46,9 @@ class _ProjectEditorDialogState {
     final scriptLegacyId = assetsFilterScriptLegacyId[0];
     if (scriptLegacyId != null) {
       try {
-        assetsForScriptRef[0] = await fetchProjectAssetsByLegacyId(
+        assetsForScriptRef[0] = await fetchProjectAssetsByProjectId(
           token,
-          projectLegacyId,
+          projectId,
           scriptLegacyId: scriptLegacyId,
         );
       } catch (_) {

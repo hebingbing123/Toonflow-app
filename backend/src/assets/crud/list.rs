@@ -16,10 +16,11 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::{normalize_list_asset_type_filter, normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
+use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
 
 async fn count_project_assets_filtered(
     pool: &PgPool,
-    project_legacy_id: i32,
+    project_id: Uuid,
     uid: Uuid,
     script_legacy_id: Option<i32>,
     asset_type: Option<&str>,
@@ -33,9 +34,9 @@ async fn count_project_assets_filtered(
             INNER JOIN app_project p ON p.id = a.project_id
             INNER JOIN app_script_asset sa ON sa.asset_id = a.id
             INNER JOIN app_script s ON s.id = sa.script_id AND s.project_id = a.project_id
-            WHERE p.legacy_id = "#,
+            WHERE p.id = "#,
         );
-        qb.push_bind(project_legacy_id);
+        qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
         qb.push(" AND s.legacy_id = ");
@@ -47,9 +48,9 @@ async fn count_project_assets_filtered(
             SELECT COUNT(a.id)::BIGINT
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
-            WHERE p.legacy_id = "#,
+            WHERE p.id = "#,
         );
-        qb.push_bind(project_legacy_id);
+        qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
         qb
@@ -70,7 +71,7 @@ async fn count_project_assets_filtered(
 
 async fn select_project_assets_filtered(
     pool: &PgPool,
-    project_legacy_id: i32,
+    project_id: Uuid,
     uid: Uuid,
     script_legacy_id: Option<i32>,
     asset_type: Option<&str>,
@@ -85,9 +86,9 @@ async fn select_project_assets_filtered(
             INNER JOIN app_project p ON p.id = a.project_id
             INNER JOIN app_script_asset sa ON sa.asset_id = a.id
             INNER JOIN app_script s ON s.id = sa.script_id AND s.project_id = a.project_id
-            WHERE p.legacy_id = "#,
+            WHERE p.id = "#,
         );
-        qb.push_bind(project_legacy_id);
+        qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
         qb.push(" AND s.legacy_id = ");
@@ -99,9 +100,9 @@ async fn select_project_assets_filtered(
             SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
-            WHERE p.legacy_id = "#,
+            WHERE p.id = "#,
         );
-        qb.push_bind(project_legacy_id);
+        qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
         qb
@@ -127,24 +128,12 @@ async fn select_project_assets_filtered(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
-pub(crate) async fn list_project_assets(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    Query(query): Query<ListAssetsQuery>,
-    headers: HeaderMap,
+async fn list_project_assets_inner(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    query: ListAssetsQuery,
 ) -> Result<Json<ListAssetsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
-        ));
-    }
-
     if let Some(sid) = query.script_legacy_id {
         if sid <= 0 {
             return Err(ApiError::BadRequest(
@@ -157,13 +146,13 @@ pub(crate) async fn list_project_assets(
               SELECT 1
               FROM app_script s
               INNER JOIN app_project p ON p.id = s.project_id
-              WHERE p.legacy_id = $1
+              WHERE p.id = $1
                 AND p.owner_user_id = $2
                 AND s.legacy_id = $3
             )
             "#,
         )
-        .bind(project_legacy_id)
+        .bind(project_id)
         .bind(uid)
         .bind(sid)
         .fetch_one(pool)
@@ -211,7 +200,7 @@ pub(crate) async fn list_project_assets(
     let (items, total) = if limit_offset.is_some() {
         let total = count_project_assets_filtered(
             pool,
-            project_legacy_id,
+            project_id,
             uid,
             query.script_legacy_id,
             type_ref,
@@ -220,7 +209,7 @@ pub(crate) async fn list_project_assets(
         .await?;
         let items = select_project_assets_filtered(
             pool,
-            project_legacy_id,
+            project_id,
             uid,
             query.script_legacy_id,
             type_ref,
@@ -232,7 +221,7 @@ pub(crate) async fn list_project_assets(
     } else {
         let items = select_project_assets_filtered(
             pool,
-            project_legacy_id,
+            project_id,
             uid,
             query.script_legacy_id,
             type_ref,
@@ -245,4 +234,35 @@ pub(crate) async fn list_project_assets(
     };
 
     Ok(Json(ListAssetsResponse { items, total }))
+}
+
+pub(crate) async fn list_project_assets_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(query): Query<ListAssetsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<ListAssetsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    list_project_assets_inner(pool, uid, project_id, query).await
+}
+
+pub(crate) async fn list_project_assets(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    Query(query): Query<ListAssetsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<ListAssetsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
+    list_project_assets_inner(pool, uid, project_id, query).await
 }

@@ -35,9 +35,9 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                   : () async {
                       setDialogState(() => assetsBusy[0] = true);
                       try {
-                        final r = await fetchCornerScapeAssetsByLegacyId(
+                        final r = await fetchCornerScapeAssetsByProjectId(
                           token,
-                          p.legacyId,
+                          p.id,
                         );
                         Uint8List? cornerThumb;
                         if (r.items.isNotEmpty &&
@@ -46,7 +46,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                           cornerThumb =
                               await fetchCornerScapeHistoryImagePreviewBytes(
                                 token,
-                                p.legacyId,
+                                p.id,
                                 a.legacyId,
                                 a.historyImages.first,
                               );
@@ -115,9 +115,9 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       final first = assetsRef[0]!.items.first;
                       try {
                         final ts = DateTime.now().millisecondsSinceEpoch;
-                        final row = await createProjectAssetImage(
+                        final row = await createProjectAssetImageForProject(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                           filePath: 'probe/hist_$ts.png',
                         );
@@ -155,9 +155,9 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       setDialogState(() => assetsBusy[0] = true);
                       final first = assetsRef[0]!.items.first;
                       try {
-                        final list = await fetchProjectAssetImagesByLegacyIds(
+                        final list = await fetchProjectAssetImagesByProjectIds(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                         );
                         if (list.items.isEmpty) {
@@ -172,18 +172,18 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                           return;
                         }
                         final img = list.items.first;
-                        final one = await fetchProjectAssetImageByLegacyIds(
+                        final one = await fetchProjectAssetImageByProjectIds(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                           img.id,
                         );
                         var fileSuffix = '';
                         try {
                           final bytes =
-                              await fetchProjectAssetImageFileByLegacyIds(
+                              await fetchProjectAssetImageFileByProjectIds(
                                 token,
-                                p.legacyId,
+                                p.id,
                                 first.legacyId,
                                 one.id,
                               );
@@ -515,22 +515,22 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       final first = assetsRef[0]!.items.first;
                       try {
                         final ts = DateTime.now().millisecondsSinceEpoch;
-                        final row = await createProjectAssetImage(
+                        final row = await createProjectAssetImageForProject(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                           filePath: 'probe/patch_del_$ts.png',
                         );
-                        final patched = await patchProjectAssetImageByLegacyIds(
+                        final patched = await patchProjectAssetImageByProjectIds(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                           row.id,
                           {'state': '已完成', 'sort_index': row.sortIndex + 1},
                         );
-                        await deleteProjectAssetImageByLegacyIds(
+                        await deleteProjectAssetImageByProjectIds(
                           token,
-                          p.legacyId,
+                          p.id,
                           first.legacyId,
                           row.id,
                         );

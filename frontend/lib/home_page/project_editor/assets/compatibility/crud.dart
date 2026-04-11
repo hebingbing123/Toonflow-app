@@ -22,9 +22,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                 setDialogState(() => assetsBusy[0] = true);
                 try {
                   final ts = DateTime.now().millisecondsSinceEpoch;
-                  await createProjectAssetUnderLegacy(
+                  await createProjectAssetUnderProject(
                     token,
-                    p.legacyId,
+                    p.id,
                     name: 'role_probe_$ts',
                     type: 'role',
                   );
@@ -61,9 +61,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                 setDialogState(() => assetsBusy[0] = true);
                 final first = assetsRef[0]!.items.first;
                 try {
-                  final row = await fetchProjectAssetByLegacyIds(
+                  final row = await fetchProjectAssetByProjectIds(
                     token,
-                    p.legacyId,
+                    p.id,
                     first.legacyId,
                   );
                   if (!ctx.mounted) return;
@@ -100,9 +100,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                 setDialogState(() => assetsBusy[0] = true);
                 final first = assetsRef[0]!.items.first;
                 try {
-                  await patchProjectAssetByLegacyIds(
+                  await patchProjectAssetByProjectIds(
                     token,
-                    p.legacyId,
+                    p.id,
                     first.legacyId,
                     {'name': '${first.name}·patched'},
                   );
@@ -139,9 +139,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                 setDialogState(() => assetsBusy[0] = true);
                 final last = assetsRef[0]!.items.last;
                 try {
-                  await deleteProjectAssetByLegacyIds(
+                  await deleteProjectAssetByProjectIds(
                     token,
-                    p.legacyId,
+                    p.id,
                     last.legacyId,
                   );
                   if (!ctx.mounted) return;
@@ -188,9 +188,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
             : () async {
                 setDialogState(() => assetsBusy[0] = true);
                 try {
-                  final page = await fetchProjectAssetsByLegacyId(
+                  final page = await fetchProjectAssetsByProjectId(
                     token,
-                    p.legacyId,
+                    p.id,
                     page: 1,
                     limit: 2,
                   );
@@ -227,9 +227,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
             : () async {
                 setDialogState(() => assetsBusy[0] = true);
                 try {
-                  final r = await fetchProjectAssetsByLegacyId(
+                  final r = await fetchProjectAssetsByProjectId(
                     token,
-                    p.legacyId,
+                    p.id,
                     assetType: 'role',
                     name: 'probe',
                   );
@@ -271,9 +271,9 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                 setDialogState(() => assetsBusy[0] = true);
                 final sid = assetsFilterScriptLegacyId[0]!;
                 try {
-                  final pg = await fetchProjectAssetsByLegacyId(
+                  final pg = await fetchProjectAssetsByProjectId(
                     token,
-                    p.legacyId,
+                    p.id,
                     scriptLegacyId: sid,
                     page: 1,
                     limit: 2,

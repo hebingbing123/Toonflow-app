@@ -96,9 +96,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         previewBytes = null;
       });
       try {
-        final bytes = await fetchProjectAssetImageFileByLegacyIds(
+        final bytes = await fetchProjectAssetImageFileByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedAssetLegacyId,
           image.id,
         );
@@ -135,9 +135,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         statusLine = null;
       });
       try {
-        final response = await fetchProjectAssetImagesByLegacyIds(
+        final response = await fetchProjectAssetImagesByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedAssetLegacyId,
         );
         final nextSelectedImageId = chooseInitialAssetImageId(
@@ -206,9 +206,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       setDialogState(() => assetsBusy[0] = true);
       setState(() => busyMutation = true);
       try {
-        await createProjectAssetImage(
+        await createProjectAssetImageForProject(
           token,
-          p.legacyId,
+          p.id,
           selectedAssetLegacyId,
           filePath: filePath.isEmpty ? null : filePath,
           state: state.isEmpty ? null : state,
@@ -275,9 +275,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       setDialogState(() => assetsBusy[0] = true);
       setState(() => busyMutation = true);
       try {
-        await patchProjectAssetImageByLegacyIds(
+        await patchProjectAssetImageByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedAssetLegacyId,
           image.id,
           body,
@@ -321,9 +321,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       setDialogState(() => assetsBusy[0] = true);
       setState(() => busyMutation = true);
       try {
-        await deleteProjectAssetImageByLegacyIds(
+        await deleteProjectAssetImageByProjectIds(
           token,
-          p.legacyId,
+          p.id,
           selectedAssetLegacyId,
           image.id,
         );

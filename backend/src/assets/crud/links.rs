@@ -6,12 +6,14 @@ use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode},
 };
+use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 use sqlx::PgPool;
-use uuid::Uuid;
+
+use super::resolve::ensure_owned_project_pk;
 
 async fn resolve_script_and_asset_in_project(
     pool: &PgPool,
@@ -40,6 +42,112 @@ async fn resolve_script_and_asset_in_project(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     row.ok_or(ApiError::NotFound)
+}
+
+async fn resolve_script_and_asset_for_project(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    script_legacy_id: i32,
+    asset_legacy_id: i32,
+) -> Result<(Uuid, Uuid), ApiError> {
+    if script_legacy_id <= 0 || asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+    }
+    let row: Option<(Uuid, Uuid)> = sqlx::query_as(
+        r#"
+        SELECT s.id, a.id
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        INNER JOIN app_asset a ON a.project_id = p.id
+        WHERE p.id = $1
+          AND p.owner_user_id = $2
+          AND s.legacy_id = $3
+          AND a.legacy_id = $4
+        "#,
+    )
+    .bind(project_id)
+    .bind(uid)
+    .bind(script_legacy_id)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    row.ok_or(ApiError::NotFound)
+}
+
+pub(crate) async fn link_script_to_asset_for_project(
+    State(state): State<AppState>,
+    Path((project_id, script_legacy_id, asset_legacy_id)): Path<(Uuid, i32, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    let (script_id, asset_id) = resolve_script_and_asset_for_project(
+        pool,
+        uid,
+        project_id,
+        script_legacy_id,
+        asset_legacy_id,
+    )
+    .await?;
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_script_asset (script_id, asset_id)
+        VALUES ($1, $2)
+        ON CONFLICT (script_id, asset_id) DO NOTHING
+        "#,
+    )
+    .bind(script_id)
+    .bind(asset_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub(crate) async fn unlink_script_from_asset_for_project(
+    State(state): State<AppState>,
+    Path((project_id, script_legacy_id, asset_legacy_id)): Path<(Uuid, i32, i32)>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    let (script_id, asset_id) = resolve_script_and_asset_for_project(
+        pool,
+        uid,
+        project_id,
+        script_legacy_id,
+        asset_legacy_id,
+    )
+    .await?;
+
+    let res = sqlx::query(r#"DELETE FROM app_script_asset WHERE script_id = $1 AND asset_id = $2"#)
+        .bind(script_id)
+        .bind(asset_id)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if res.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub(crate) async fn link_script_to_asset(

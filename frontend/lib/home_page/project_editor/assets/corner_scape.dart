@@ -65,7 +65,7 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
       });
       final bytes = await fetchCornerScapeHistoryImagePreviewBytes(
         token,
-        p.legacyId,
+        p.id,
         asset.legacyId,
         image,
       );
@@ -87,9 +87,9 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
         selectedPreviewBytes = null;
       });
       try {
-        final response = await fetchCornerScapeAssetsByLegacyId(
+        final response = await fetchCornerScapeAssetsByProjectId(
           token,
-          p.legacyId,
+          p.id,
           types: activeTypes,
         );
         selectedAssetLegacyId = response.items.isEmpty

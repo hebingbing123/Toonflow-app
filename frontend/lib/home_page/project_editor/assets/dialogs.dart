@@ -121,9 +121,9 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       }
 
       setDialogState(() => assetsBusy[0] = true);
-      final filtered = await fetchProjectAssetsByLegacyId(
+      final filtered = await fetchProjectAssetsByProjectId(
         token,
-        p.legacyId,
+        p.id,
         scriptLegacyId: selectedScriptLegacyId,
         assetType: typeCtrl.text.trim().isEmpty ? null : typeCtrl.text.trim(),
         name: nameCtrl.text.trim().isEmpty ? null : nameCtrl.text.trim(),

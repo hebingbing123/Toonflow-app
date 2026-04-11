@@ -13,25 +13,13 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::ADV_LOCK_ASSET_LEGACY;
+use super::resolve::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
 
-pub(crate) async fn create_project_asset(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CreateAssetBody>,
+async fn create_project_asset_inner(
+    pool: &sqlx::PgPool,
+    project_uuid: Uuid,
+    body: CreateAssetBody,
 ) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
-        ));
-    }
-
     let name = body.name.trim().to_string();
     if name.is_empty() {
         return Err(ApiError::BadRequest("name must not be empty".into()));
@@ -53,16 +41,6 @@ pub(crate) async fn create_project_asset(
         .begin()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
 
     let exists: bool = sqlx::query_scalar(
         r#"SELECT EXISTS (SELECT 1 FROM app_asset WHERE project_id = $1 AND name = $2)"#,
@@ -117,4 +95,36 @@ pub(crate) async fn create_project_asset(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok((StatusCode::CREATED, Json(row)))
+}
+
+pub(crate) async fn create_project_asset_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<CreateAssetBody>,
+) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    create_project_asset_inner(pool, project_id, body).await
+}
+
+pub(crate) async fn create_project_asset(
+    State(state): State<AppState>,
+    Path(project_legacy_id): Path<i32>,
+    headers: HeaderMap,
+    Json(body): Json<CreateAssetBody>,
+) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let project_uuid = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
+    create_project_asset_inner(pool, project_uuid, body).await
 }

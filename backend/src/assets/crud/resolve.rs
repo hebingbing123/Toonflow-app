@@ -8,6 +8,49 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
+/// Resolve **`app_project.id`** for an owned project by **`legacy_id`**.
+pub(crate) async fn resolve_owned_project_pk_by_legacy(
+    pool: &PgPool,
+    uid: Uuid,
+    project_legacy_id: i32,
+) -> Result<Uuid, ApiError> {
+    if project_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "project_legacy_id must be positive".into(),
+        ));
+    }
+    let id: Option<Uuid> = sqlx::query_scalar(
+        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+    )
+    .bind(project_legacy_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    id.ok_or(ApiError::NotFound)
+}
+
+/// **404** if the UUID project is missing or not owned by **`uid`**.
+pub(crate) async fn ensure_owned_project_pk(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+) -> Result<(), ApiError> {
+    let ok: bool = sqlx::query_scalar(
+        r#"SELECT EXISTS (SELECT 1 FROM app_project WHERE id = $1 AND owner_user_id = $2)"#,
+    )
+    .bind(project_id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if ok {
+        Ok(())
+    } else {
+        Err(ApiError::NotFound)
+    }
+}
+
 pub(crate) async fn resolve_owned_asset_id(
     pool: &PgPool,
     uid: Uuid,
@@ -25,6 +68,36 @@ pub(crate) async fn resolve_owned_asset_id(
         "#,
     )
     .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    id.ok_or(ApiError::NotFound)
+}
+
+pub(crate) async fn resolve_owned_asset_id_for_project(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    asset_legacy_id: i32,
+) -> Result<Uuid, ApiError> {
+    if asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "asset_legacy_id must be positive".into(),
+        ));
+    }
+    let id: Option<Uuid> = sqlx::query_scalar(
+        r#"
+        SELECT a.id
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_id)
     .bind(uid)
     .bind(asset_legacy_id)
     .fetch_optional(pool)
@@ -87,6 +160,37 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata(
         "#,
     )
     .bind(project_legacy_id)
+    .bind(uid)
+    .bind(asset_legacy_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let (id, meta) = row.ok_or(ApiError::NotFound)?;
+    Ok((id, meta.0))
+}
+
+pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
+    pool: &PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    asset_legacy_id: i32,
+) -> Result<(Uuid, Value), ApiError> {
+    if asset_legacy_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "asset_legacy_id must be positive".into(),
+        ));
+    }
+    let row: Option<(Uuid, SqlxJson<Value>)> = sqlx::query_as(
+        r#"
+        SELECT a.id, a.metadata
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.id = $1
+          AND p.owner_user_id = $2
+          AND a.legacy_id = $3
+        "#,
+    )
+    .bind(project_id)
     .bind(uid)
     .bind(asset_legacy_id)
     .fetch_optional(pool)

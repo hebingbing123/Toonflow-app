@@ -282,6 +282,38 @@ pub fn router() -> Router<AppState> {
             post(post_legacy_polling_prompt_assets),
         )
         .route(
+            "/api/v1/projects/{project_id}/assets",
+            get(list_project_assets_for_project).post(create_project_asset_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/corner-scape",
+            post(list_corner_scape_assets_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}/file",
+            get(get_project_asset_image_file_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images/{image_id}",
+            get(get_project_asset_image_for_project)
+                .patch(patch_project_asset_image_for_project)
+                .delete(delete_project_asset_image_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}/images",
+            get(list_project_asset_images_for_project).post(create_project_asset_image_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/assets/{asset_legacy_id}",
+            get(get_project_asset_for_project)
+                .patch(patch_project_asset_for_project)
+                .delete(delete_project_asset_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
+            put(link_script_to_asset_for_project).delete(unlink_script_from_asset_for_project),
+        )
+        .route(
             "/api/v1/projects/legacy/{project_legacy_id}/assets",
             get(list_project_assets).post(create_project_asset),
         )
