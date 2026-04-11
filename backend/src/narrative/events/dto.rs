@@ -10,7 +10,7 @@ pub struct EventWithChapters {
     pub id: Uuid,
     pub project_id: Uuid,
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    pub numeric_id: i32,
     pub name: String,
     pub detail: String,
     pub create_time_ms: Option<i64>,
@@ -22,7 +22,7 @@ impl From<super::query::EventQueryRow> for EventWithChapters {
         Self {
             id: row.id,
             project_id: row.project_id,
-            legacy_id: row.legacy_id,
+            numeric_id: row.numeric_id,
             name: row.name,
             detail: row.detail,
             create_time_ms: row.create_time_ms,

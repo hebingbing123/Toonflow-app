@@ -51,7 +51,7 @@ async fn asset_image_file_local_storage_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let _legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
+    let _numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -175,11 +175,11 @@ async fn assets_generate_enqueue_four_kinds() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
+    let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let _project_uuid = created["id"].as_str().expect("project uuid");
 
     let gen_body = format!(
-        r#"{{"projectId":{legacy_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
+        r#"{{"projectId":{numeric_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
     );
     let res = app
         .clone()
@@ -206,7 +206,7 @@ async fn assets_generate_enqueue_four_kinds() {
     );
 
     let pol_body = format!(
-        r#"{{"assetsId":1,"projectId":{legacy_id},"type":"role","name":"n","describe":"d"}}"#
+        r#"{{"assetsId":1,"projectId":{numeric_id},"type":"role","name":"n","describe":"d"}}"#
     );
     let res = app
         .clone()
@@ -228,7 +228,7 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(job["status"].as_str(), Some("queued"));
 
     let bat_gen = format!(
-        r#"{{"projectId":{legacy_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
+        r#"{{"projectId":{numeric_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
     );
     let res = app
         .clone()
@@ -258,7 +258,7 @@ async fn assets_generate_enqueue_four_kinds() {
     );
 
     let bat_pol = format!(
-        r#"{{"projectId":{legacy_id},"items":[{{"assetsId":1,"type":"role","name":"n","describe":"d"}}]}}"#
+        r#"{{"projectId":{numeric_id},"items":[{{"assetsId":1,"type":"role","name":"n","describe":"d"}}]}}"#
     );
     let res = app
         .oneshot(
@@ -313,19 +313,19 @@ async fn assets_generate_cancel_generate_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
+    let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let project_id: Uuid = sqlx::query_scalar(
         r#"SELECT id FROM public.app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(sub)
     .fetch_one(&pool)
     .await
     .expect("project uuid by legacy");
 
     let asset_id = Uuid::new_v4();
-    let asset_legacy_id = 7_000_001_i32;
+    let asset_numeric_id = 7_000_001_i32;
     let now_ms = chrono::Utc::now().timestamp_millis();
     sqlx::query(
         r#"
@@ -335,7 +335,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     )
     .bind(asset_id)
     .bind(project_id)
-    .bind(asset_legacy_id)
+    .bind(asset_numeric_id)
     .bind(format!("cancel_probe_asset_{}", Uuid::new_v4()))
     .bind(now_ms)
     .execute(&pool)
@@ -343,7 +343,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .expect("insert app_asset");
 
     let image_id = Uuid::new_v4();
-    let legacy_image_id = 7_700_001_i32;
+    let numeric_image_id = 7_700_001_i32;
     sqlx::query(
         r#"
         INSERT INTO public.app_asset_image (id, asset_id, sort_index, file_path, state, legacy_image_id, metadata)
@@ -353,7 +353,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(image_id)
     .bind(asset_id)
     .bind("https://example.com/cancel-probe.png")
-    .bind(legacy_image_id)
+    .bind(numeric_image_id)
     .execute(&pool)
     .await
     .expect("insert app_asset_image");
@@ -370,8 +370,8 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.single",
-            "project_numeric_id": legacy_id,
-            "asset_numeric_id": asset_legacy_id
+            "project_numeric_id": numeric_id,
+            "asset_numeric_id": asset_numeric_id
         })
         .to_string(),
     )
@@ -391,9 +391,9 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.batch",
-            "project_numeric_id": legacy_id,
+            "project_numeric_id": numeric_id,
             "items": [
-                { "asset_numeric_id": asset_legacy_id, "name": "probe", "prompt": "probe" }
+                { "asset_numeric_id": asset_numeric_id, "name": "probe", "prompt": "probe" }
             ]
         })
         .to_string(),
@@ -414,8 +414,8 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(
         serde_json::json!({
             "source": "pg_contract.assets_generate.cancel.unrelated",
-            "project_numeric_id": legacy_id,
-            "asset_numeric_id": asset_legacy_id + 999
+            "project_numeric_id": numeric_id,
+            "asset_numeric_id": asset_numeric_id + 999
         })
         .to_string(),
     )
@@ -432,7 +432,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{legacy_image_id}}}"#)))
+                .body(Body::from(format!(r#"{{"id":{numeric_image_id}}}"#)))
                 .unwrap(),
         )
         .await
@@ -486,7 +486,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
             .as_ref()
             .and_then(|v| v.get("cancel_legacy_image_id"))
             .and_then(serde_json::Value::as_i64),
-        Some(i64::from(legacy_image_id))
+        Some(i64::from(numeric_image_id))
     );
 
     let unrelated_after: Option<String> =
@@ -601,7 +601,7 @@ async fn assets_upload_clip_roundtrip() {
         Some("data:application/octet-stream;base64,QUJDRA==")
     );
 
-    let clip_legacy_id = row["id"].as_i64().expect("clip legacy id") as i32;
+    let clip_numeric_id = row["id"].as_i64().expect("clip legacy id") as i32;
     let res = app
         .oneshot(
             Request::builder()
@@ -612,7 +612,7 @@ async fn assets_upload_clip_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"assetsId":{clip_legacy_id}}}"#)))
+                .body(Body::from(format!(r#"{{"assetsId":{clip_numeric_id}}}"#)))
                 .unwrap(),
         )
         .await
@@ -715,7 +715,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_a) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_a={list_a}");
     assert_eq!(list_a["total"].as_i64(), Some(1));
-    let asset_a_legacy_id = list_a["items"][0]["numeric_id"]
+    let asset_a_numeric_id = list_a["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_a legacy id") as i32;
     assert_eq!(
@@ -730,7 +730,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     );
 
     let save_body = format!(
-        r#"{{"id":{asset_a_legacy_id},"type":"role","prompt":"  p1  ","base64":"QUJDRA=="}}"#
+        r#"{{"id":{asset_a_numeric_id},"type":"role","prompt":"  p1  ","base64":"QUJDRA=="}}"#
     );
     let res = app
         .clone()
@@ -763,14 +763,16 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"assetsId":{asset_a_legacy_id}}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"assetsId":{asset_a_numeric_id}}}"#
+                )))
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, get_image) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "get_image={get_image}");
-    let image_legacy_id = get_image["imageId"].as_i64().expect("imageId") as i32;
+    let image_numeric_id = get_image["imageId"].as_i64().expect("imageId") as i32;
     assert_eq!(
         get_image["tempAssets"]
             .as_array()
@@ -781,7 +783,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     assert_eq!(get_image["tempAssets"][0]["selected"].as_bool(), Some(true));
 
     let update_body = format!(
-        r#"{{"id":{asset_a_legacy_id},"name":"{asset_a_name}_u","describe":"desc a2","remark":"  r2  ","prompt":"   "}}"#
+        r#"{{"id":{asset_a_numeric_id},"name":"{asset_a_name}_u","describe":"desc a2","remark":"  r2  ","prompt":"   "}}"#
     );
     let res = app
         .clone()
@@ -808,7 +810,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{project_uuid}/assets/{asset_a_legacy_id}"
+                    "/api/v1/projects/{project_uuid}/assets/{asset_a_numeric_id}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -838,7 +840,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     );
     assert_eq!(
         asset_after_update["metadata"]["imageId"].as_i64(),
-        Some(i64::from(image_legacy_id))
+        Some(i64::from(image_numeric_id))
     );
 
     let res = app
@@ -852,7 +854,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{image_legacy_id}}}"#)))
+                .body(Body::from(format!(r#"{{"id":{image_numeric_id}}}"#)))
                 .unwrap(),
         )
         .await
@@ -872,7 +874,9 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"assetsId":{asset_a_legacy_id}}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"assetsId":{asset_a_numeric_id}}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -926,7 +930,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
         .unwrap();
     let (status, list_b) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_b={list_b}");
-    let asset_b_legacy_id = list_b["items"][0]["numeric_id"]
+    let asset_b_numeric_id = list_b["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_b legacy id") as i32;
 
@@ -941,7 +945,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{asset_b_legacy_id}}}"#)))
+                .body(Body::from(format!(r#"{{"id":{asset_b_numeric_id}}}"#)))
                 .unwrap(),
         )
         .await
@@ -967,7 +971,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_c) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_c={list_c}");
     assert_eq!(list_c["total"].as_i64(), Some(1), "list_c={list_c}");
-    let asset_c_legacy_id = list_c["items"][0]["numeric_id"]
+    let asset_c_numeric_id = list_c["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_c legacy id") as i32;
 
@@ -988,11 +992,11 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     let (status, list_d) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_d={list_d}");
     assert_eq!(list_d["total"].as_i64(), Some(1), "list_d={list_d}");
-    let asset_d_legacy_id = list_d["items"][0]["numeric_id"]
+    let asset_d_numeric_id = list_d["items"][0]["numeric_id"]
         .as_i64()
         .expect("asset_d legacy id") as i32;
 
-    let batch_delete_body = format!(r#"{{"id":[{asset_c_legacy_id},{asset_d_legacy_id}]}}"#);
+    let batch_delete_body = format!(r#"{{"id":[{asset_c_numeric_id},{asset_d_numeric_id}]}}"#);
     let res = app
         .clone()
         .oneshot(
@@ -1076,7 +1080,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["numeric_id"]
+    let project_numeric_id = created_project["numeric_id"]
         .as_i64()
         .expect("project numeric id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
@@ -1105,7 +1109,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "parent_a={parent_a}");
-    let parent_a_legacy_id = parent_a["numeric_id"]
+    let parent_a_numeric_id = parent_a["numeric_id"]
         .as_i64()
         .expect("parent_a numeric id") as i32;
 
@@ -1128,7 +1132,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "parent_b={parent_b}");
-    let parent_b_legacy_id = parent_b["numeric_id"]
+    let parent_b_numeric_id = parent_b["numeric_id"]
         .as_i64()
         .expect("parent_b numeric id") as i32;
 
@@ -1151,7 +1155,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "child_a={child_a}");
-    let child_a_legacy_id = child_a["numeric_id"].as_i64().expect("child_a numeric id") as i32;
+    let child_a_numeric_id = child_a["numeric_id"].as_i64().expect("child_a numeric id") as i32;
 
     let (status, child_b) = read_json_response(
         app.clone()
@@ -1172,7 +1176,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "child_b={child_b}");
-    let child_b_legacy_id = child_b["numeric_id"].as_i64().expect("child_b numeric id") as i32;
+    let child_b_numeric_id = child_b["numeric_id"].as_i64().expect("child_b numeric id") as i32;
 
     let parent_a_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id
@@ -1180,9 +1184,9 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
            WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
              AND legacy_id = $3"#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
-    .bind(parent_a_legacy_id)
+    .bind(parent_a_numeric_id)
     .fetch_one(&pool)
     .await
     .expect("parent_a uuid");
@@ -1200,10 +1204,10 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           AND legacy_id = $4
         "#,
     )
-    .bind(project_legacy_id)
-    .bind(parent_a_legacy_id)
+    .bind(project_numeric_id)
+    .bind(parent_a_numeric_id)
     .bind(sub)
-    .bind(child_a_legacy_id)
+    .bind(child_a_numeric_id)
     .execute(&pool)
     .await
     .expect("child_a metadata.assetsId");
@@ -1221,15 +1225,15 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           AND legacy_id = $4
         "#,
     )
-    .bind(project_legacy_id)
-    .bind(parent_b_legacy_id)
+    .bind(project_numeric_id)
+    .bind(parent_b_numeric_id)
     .bind(sub)
-    .bind(child_b_legacy_id)
+    .bind(child_b_numeric_id)
     .execute(&pool)
     .await
     .expect("child_b metadata.assetsId");
 
-    let parent_a_image_legacy_id = 9_901_001;
+    let parent_a_image_numeric_id = 9_901_001;
     sqlx::query(
         r#"
         UPDATE app_asset
@@ -1243,10 +1247,10 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           AND legacy_id = $4
         "#,
     )
-    .bind(project_legacy_id)
-    .bind(parent_a_image_legacy_id)
+    .bind(project_numeric_id)
+    .bind(parent_a_image_numeric_id)
     .bind(sub)
-    .bind(parent_a_legacy_id)
+    .bind(parent_a_numeric_id)
     .execute(&pool)
     .await
     .expect("parent_a metadata.imageId");
@@ -1258,7 +1262,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
         "#,
     )
     .bind(parent_a_uuid)
-    .bind(parent_a_image_legacy_id)
+    .bind(parent_a_image_numeric_id)
     .execute(&pool)
     .await
     .expect("insert parent_a selected image");
@@ -1289,7 +1293,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     let first_parent = &rows[0];
     assert_eq!(
         first_parent["id"].as_i64(),
-        Some(i64::from(parent_a_legacy_id))
+        Some(i64::from(parent_a_numeric_id))
     );
     assert_eq!(
         first_parent["filePath"].as_str(),
@@ -1310,11 +1314,11 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     assert_eq!(first_children.len(), 1);
     assert_eq!(
         first_children[0]["id"].as_i64(),
-        Some(i64::from(child_a_legacy_id))
+        Some(i64::from(child_a_numeric_id))
     );
     assert_eq!(
         first_children[0]["assetsId"].as_i64(),
-        Some(i64::from(parent_a_legacy_id))
+        Some(i64::from(parent_a_numeric_id))
     );
 
     let res = app
@@ -1343,7 +1347,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     let second_parent = &rows[0];
     assert_eq!(
         second_parent["id"].as_i64(),
-        Some(i64::from(parent_b_legacy_id))
+        Some(i64::from(parent_b_numeric_id))
     );
     let second_children = second_parent["sonAssets"]
         .as_array()
@@ -1351,11 +1355,11 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     assert_eq!(second_children.len(), 1);
     assert_eq!(
         second_children[0]["id"].as_i64(),
-        Some(i64::from(child_b_legacy_id))
+        Some(i64::from(child_b_numeric_id))
     );
     assert_eq!(
         second_children[0]["assetsId"].as_i64(),
-        Some(i64::from(parent_b_legacy_id))
+        Some(i64::from(parent_b_numeric_id))
     );
 }
 
@@ -1397,7 +1401,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         StatusCode::CREATED,
         "created_project={created_project}"
     );
-    let project_legacy_id = created_project["numeric_id"]
+    let project_numeric_id = created_project["numeric_id"]
         .as_i64()
         .expect("project numeric id") as i32;
     let project_uuid = created_project["id"].as_str().expect("project uuid");
@@ -1424,7 +1428,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "ready_asset={ready_asset}");
-    let ready_asset_legacy_id = ready_asset["numeric_id"]
+    let ready_asset_numeric_id = ready_asset["numeric_id"]
         .as_i64()
         .expect("ready asset legacy id") as i32;
 
@@ -1447,7 +1451,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     )
     .await;
     assert_eq!(status, StatusCode::CREATED, "running_asset={running_asset}");
-    let running_asset_legacy_id = running_asset["numeric_id"]
+    let running_asset_numeric_id = running_asset["numeric_id"]
         .as_i64()
         .expect("running asset legacy id") as i32;
 
@@ -1457,9 +1461,9 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
            WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
              AND legacy_id = $3"#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
-    .bind(ready_asset_legacy_id)
+    .bind(ready_asset_numeric_id)
     .fetch_one(&pool)
     .await
     .expect("ready asset uuid");
@@ -1469,15 +1473,15 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
            WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
              AND legacy_id = $3"#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
-    .bind(running_asset_legacy_id)
+    .bind(running_asset_numeric_id)
     .fetch_one(&pool)
     .await
     .expect("running asset uuid");
 
-    let ready_image_legacy_id = 9_902_001;
-    let running_image_legacy_id = 9_902_002;
+    let ready_image_numeric_id = 9_902_001;
+    let running_image_numeric_id = 9_902_002;
 
     sqlx::query(
         r#"
@@ -1486,7 +1490,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         WHERE id = $2
         "#,
     )
-    .bind(ready_image_legacy_id)
+    .bind(ready_image_numeric_id)
     .bind(ready_asset_uuid)
     .execute(&pool)
     .await
@@ -1499,7 +1503,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         WHERE id = $2
         "#,
     )
-    .bind(running_image_legacy_id)
+    .bind(running_image_numeric_id)
     .bind(running_asset_uuid)
     .execute(&pool)
     .await
@@ -1514,9 +1518,9 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
         "#,
     )
     .bind(ready_asset_uuid)
-    .bind(ready_image_legacy_id)
+    .bind(ready_image_numeric_id)
     .bind(running_asset_uuid)
-    .bind(running_image_legacy_id)
+    .bind(running_image_numeric_id)
     .execute(&pool)
     .await
     .expect("insert selected images");
@@ -1533,7 +1537,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"ids":[{ready_asset_legacy_id},{running_asset_legacy_id}]}}"#
+                    r#"{{"ids":[{ready_asset_numeric_id},{running_asset_numeric_id}]}}"#
                 )))
                 .unwrap(),
         )
@@ -1545,7 +1549,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     assert_eq!(rows.len(), 1);
     assert_eq!(
         rows[0]["id"].as_i64(),
-        Some(i64::from(ready_asset_legacy_id))
+        Some(i64::from(ready_asset_numeric_id))
     );
     assert_eq!(
         rows[0]["filePath"].as_str(),
@@ -1567,7 +1571,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 )
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_legacy_id},"asset_numeric_id":{ready_asset_legacy_id},"asset_type":"role","name":"pg_polish_ready","describe":"d"}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_numeric_id},"asset_numeric_id":{ready_asset_numeric_id},"asset_type":"role","name":"pg_polish_ready","describe":"d"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -1596,7 +1600,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 )
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_legacy_id},"asset_numeric_id":{running_asset_legacy_id},"asset_type":"role","name":"pg_polish_running","describe":"d"}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_POLISH_PROMPT}","payload":{{"project_numeric_id":{project_numeric_id},"asset_numeric_id":{running_asset_numeric_id},"asset_type":"role","name":"pg_polish_running","describe":"d"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -1617,7 +1621,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"ids":[{ready_asset_legacy_id},{running_asset_legacy_id}]}}"#
+                    r#"{{"ids":[{ready_asset_numeric_id},{running_asset_numeric_id}]}}"#
                 )))
                 .unwrap(),
         )
@@ -1629,7 +1633,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     assert_eq!(rows.len(), 1);
     assert_eq!(
         rows[0]["id"].as_i64(),
-        Some(i64::from(ready_asset_legacy_id))
+        Some(i64::from(ready_asset_numeric_id))
     );
     assert_eq!(rows[0]["promptState"].as_str(), Some("失败"));
     assert_eq!(rows[0]["name"].as_str(), Some(ready_asset_name.as_str()));

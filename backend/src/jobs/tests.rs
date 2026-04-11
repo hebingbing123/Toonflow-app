@@ -13,7 +13,7 @@ use super::kinds::JOB_KIND_FLUTTER_PROBE;
 
 fn sample_job_row() -> JobRow {
     JobRow {
-        legacy_task_id: 1,
+        numeric_task_id: 1,
         id: Uuid::nil(),
         owner_user_id: Uuid::nil(),
         kind: JOB_KIND_FLUTTER_PROBE.into(),

@@ -35,7 +35,7 @@ fn trim_opt_sb(s: Option<String>) -> Option<String> {
 async fn create_storyboard_locked(
     tx: &mut Transaction<'_, Postgres>,
     script_uuid: Uuid,
-    project_legacy_id: i32,
+    project_numeric_id: i32,
     path_script_numeric_id: i32,
     body: CreateStoryboardBody,
 ) -> Result<StoryboardRow, ApiError> {
@@ -56,8 +56,8 @@ async fn create_storyboard_locked(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let now_ms = chrono::Utc::now().timestamp_millis();
-    let lsid = body.legacy_script_id.unwrap_or(path_script_numeric_id);
-    let lpid = body.legacy_project_id.unwrap_or(project_legacy_id);
+    let lsid = body.numeric_script_id.unwrap_or(path_script_numeric_id);
+    let lpid = body.numeric_project_id.unwrap_or(project_numeric_id);
 
     sqlx::query_as::<_, StoryboardRow>(
         r#"
@@ -152,7 +152,7 @@ pub(super) async fn create_under_script_for_project(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let (script_uuid, project_legacy_id): (Uuid, i32) = sqlx::query_as(
+    let (script_uuid, project_numeric_id): (Uuid, i32) = sqlx::query_as(
         r#"
         SELECT s.id, p.legacy_id
         FROM app_script s
@@ -171,7 +171,7 @@ pub(super) async fn create_under_script_for_project(
     let row = create_storyboard_locked(
         &mut tx,
         script_uuid,
-        project_legacy_id,
+        project_numeric_id,
         script_numeric_id,
         body,
     )
@@ -184,7 +184,7 @@ pub(super) async fn create_under_script_for_project(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
-pub(super) async fn get_by_legacy_for_project(
+pub(super) async fn get_by_numeric_id_for_project(
     State(state): State<AppState>,
     Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
@@ -223,7 +223,7 @@ pub(super) async fn get_by_legacy_for_project(
 async fn patch_storyboard_row(
     pool: &PgPool,
     uid: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     body: PatchStoryboardBody,
     project_id: Uuid,
 ) -> Result<Json<StoryboardRow>, ApiError> {
@@ -234,10 +234,10 @@ async fn patch_storyboard_row(
     let p_reason = parse_optional_text_field(body.reason, "reason")?;
     let p_track = parse_optional_text_field(body.track, "track")?;
     let p_video = parse_optional_text_field(body.video_desc, "video_desc")?;
-    let p_lsid = parse_optional_i32_field(body.legacy_script_id, "legacy_script_id")?;
+    let p_lsid = parse_optional_i32_field(body.numeric_script_id, "numeric_script_id")?;
     let p_tid = parse_optional_i32_field(body.track_id, "track_id")?;
     let p_sgi = parse_optional_i32_field(body.should_generate_image, "should_generate_image")?;
-    let p_lpid = parse_optional_i32_field(body.legacy_project_id, "legacy_project_id")?;
+    let p_lpid = parse_optional_i32_field(body.numeric_project_id, "numeric_project_id")?;
     let p_fid = parse_optional_i32_field(body.flow_id, "flow_id")?;
     let p_sbi = parse_optional_i32_field(body.sb_index, "sb_index")?;
 
@@ -272,7 +272,7 @@ async fn patch_storyboard_row(
         WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(project_id)
     .bind(uid)
     .fetch_optional(pool)
@@ -300,10 +300,10 @@ async fn patch_storyboard_row(
     let new_reason = merge_t(&p_reason, &current.reason);
     let new_track = merge_t(&p_track, &current.track);
     let new_video = merge_t(&p_video, &current.video_desc);
-    let new_lsid = merge_i(&p_lsid, current.legacy_script_id);
+    let new_lsid = merge_i(&p_lsid, current.numeric_script_id);
     let new_tid = merge_i(&p_tid, current.track_id);
     let new_sgi = merge_i(&p_sgi, current.should_generate_image);
-    let new_lpid = merge_i(&p_lpid, current.legacy_project_id);
+    let new_lpid = merge_i(&p_lpid, current.numeric_project_id);
     let new_fid = merge_i(&p_fid, current.flow_id);
     let new_sbi = merge_i(&p_sbi, current.sb_index);
 
@@ -353,7 +353,7 @@ async fn patch_storyboard_row(
     Ok(Json(row))
 }
 
-pub(super) async fn patch_by_legacy_for_project(
+pub(super) async fn patch_by_numeric_id_for_project(
     State(state): State<AppState>,
     Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,
@@ -372,7 +372,7 @@ pub(super) async fn patch_by_legacy_for_project(
 async fn delete_storyboard_row(
     pool: &PgPool,
     uid: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     project_id: Uuid,
 ) -> Result<StatusCode, ApiError> {
     let res = sqlx::query(
@@ -386,7 +386,7 @@ async fn delete_storyboard_row(
               AND p.id = $3
             "#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(uid)
     .bind(project_id)
     .execute(pool)
@@ -400,7 +400,7 @@ async fn delete_storyboard_row(
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub(super) async fn delete_by_legacy_for_project(
+pub(super) async fn delete_by_numeric_id_for_project(
     State(state): State<AppState>,
     Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
     headers: HeaderMap,

@@ -16,8 +16,8 @@ pub struct HarnessAgentWsParams {
     pub assistant_name: &'static str,
     pub user_id: Uuid,
     pub pool: Option<sqlx::PgPool>,
-    pub project_legacy_id: Option<i32>,
-    pub script_legacy_id: Option<i32>,
+    pub project_numeric_id: Option<i32>,
+    pub script_numeric_id: Option<i32>,
     pub max_rounds: usize,
     pub cancel: CancellationToken,
     pub out_tx: UnboundedSender<String>,
@@ -31,8 +31,8 @@ pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
         let ctx = HarnessContext::with_runtime_scope(
             p.user_id,
             p.pool,
-            p.project_legacy_id,
-            p.script_legacy_id,
+            p.project_numeric_id,
+            p.script_numeric_id,
             Some(p.cfg.clone()),
             Some(p.client.clone()),
         );

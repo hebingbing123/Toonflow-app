@@ -357,7 +357,7 @@ mod tests {
         let b: PatchAssetBody = serde_json::from_str(r#"{"cover_numeric_image_id":42}"#).unwrap();
         assert!(b.name.is_none());
         assert_eq!(
-            crate::http_kit::json_patch::parse_optional_i32_field(b.cover_legacy_image_id, "c")
+            crate::http_kit::json_patch::parse_optional_i32_field(b.cover_numeric_image_id, "c")
                 .unwrap(),
             FieldPatch::Set(Some(42))
         );

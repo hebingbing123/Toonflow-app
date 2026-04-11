@@ -28,7 +28,8 @@ pub struct ScriptRow {
     pub id: Uuid,
     pub project_id: Uuid,
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub name: Option<String>,
     pub content: Option<String>,
     pub extract_state: Option<i32>,
@@ -102,7 +103,8 @@ struct ScriptExtractPollBody {
 #[derive(Debug, Serialize, FromRow)]
 struct ScriptExtractPollRow {
     #[serde(rename = "numeric_id")]
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     extract_state: Option<i32>,
     error_reason: Option<String>,
 }
@@ -173,7 +175,8 @@ struct GetScriptApiNameBody {
 #[derive(Debug, FromRow)]
 struct GetScriptApiScriptRow {
     id: Uuid,
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     name: Option<String>,
     content: Option<String>,
     extract_state: Option<i32>,
@@ -257,7 +260,8 @@ async fn get_script_api_for_project_uuid(
     #[derive(Debug, FromRow)]
     struct GetScriptApiAssetLinkRow {
         script_id: Uuid,
-        legacy_id: i32,
+        #[sqlx(rename = "legacy_id")]
+        numeric_id: i32,
         name: String,
     }
 
@@ -282,7 +286,7 @@ async fn get_script_api_for_project_uuid(
             .entry(row.script_id)
             .or_default()
             .push(GetScriptApiRelatedAssetBrief {
-                id: row.legacy_id,
+                id: row.numeric_id,
                 name: row.name,
             });
     }
@@ -292,7 +296,7 @@ async fn get_script_api_for_project_uuid(
         .map(|s| {
             let related_assets = by_script.remove(&s.id).unwrap_or_default();
             GetScriptApiScriptListItem {
-                id: s.legacy_id,
+                id: s.numeric_id,
                 name: s.name,
                 content: s.content,
                 extract_state: s.extract_state,
@@ -351,7 +355,7 @@ pub fn router() -> Router<AppState> {
         )
 }
 
-fn normalize_legacy_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32>, ApiError> {
+fn normalize_numeric_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32>, ApiError> {
     ids.retain(|id| *id > 0);
     ids.sort_unstable();
     ids.dedup();
@@ -368,7 +372,7 @@ fn normalize_legacy_id_list(mut ids: Vec<i32>, max_len: usize) -> Result<Vec<i32
     Ok(ids)
 }
 
-fn zip_entry_name(legacy_id: i32, name: Option<&str>) -> String {
+fn zip_entry_name(numeric_id: i32, name: Option<&str>) -> String {
     let base_raw = name
         .map(str::trim)
         .filter(|s| !s.is_empty())
@@ -387,7 +391,7 @@ fn zip_entry_name(legacy_id: i32, name: Option<&str>) -> String {
     } else {
         safe.as_str()
     };
-    format!("{legacy_id}_{base}.txt")
+    format!("{numeric_id}_{base}.txt")
 }
 
 fn build_scripts_zip(
@@ -401,8 +405,8 @@ fn build_scripts_zip(
     {
         let mut zip = ZipWriter::new(&mut cursor);
         let options = FileOptions::default().compression_method(CompressionMethod::Deflated);
-        for (legacy_id, name, content) in rows {
-            let path = zip_entry_name(legacy_id, name.as_deref());
+        for (numeric_id, name, content) in rows {
+            let path = zip_entry_name(numeric_id, name.as_deref());
             zip.start_file(path, options)?;
             zip.write_all(content.unwrap_or_default().as_bytes())?;
         }
@@ -422,7 +426,7 @@ async fn export_scripts_zip(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_legacy_id_list(body.numeric_ids, MAX_SCRIPT_EXPORT)?;
+    let legacy_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXPORT)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -483,7 +487,7 @@ async fn poll_script_extract_state(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_legacy_id_list(body.numeric_ids, MAX_SCRIPT_EXTRACT_POLL)?;
+    let legacy_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXTRACT_POLL)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
@@ -679,7 +683,7 @@ async fn patch_script_for_project(
 async fn patch_script_inner(
     pool: &PgPool,
     uid: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     body: PatchScriptBody,
     project_id: Uuid,
 ) -> Result<Json<ScriptRow>, ApiError> {
@@ -704,7 +708,7 @@ async fn patch_script_inner(
         WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(project_id)
     .bind(uid)
     .fetch_optional(pool)

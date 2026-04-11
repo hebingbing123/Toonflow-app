@@ -111,7 +111,7 @@ pub(crate) struct VendorCatalogSummary {
 
 #[derive(Debug, Clone)]
 pub(crate) struct VendorCatalogLookup {
-    pub(crate) legacy_id: i32,
+    pub(crate) numeric_id: i32,
     pub(crate) name: String,
     pub(crate) slug: String,
 }
@@ -157,10 +157,10 @@ pub(crate) fn lookup_vendor_catalog(raw: &str) -> Option<VendorCatalogLookup> {
         return None;
     }
 
-    if let Ok(legacy_id) = trimmed.parse::<i32>() {
-        if let Some(v) = CATALOG.vendors.iter().find(|v| v.id == legacy_id) {
+    if let Ok(numeric_id) = trimmed.parse::<i32>() {
+        if let Some(v) = CATALOG.vendors.iter().find(|v| v.id == numeric_id) {
             return Some(VendorCatalogLookup {
-                legacy_id: v.id,
+                numeric_id: v.id,
                 name: v.name.clone(),
                 slug: vendor_slug(&v.name),
             });
@@ -177,7 +177,7 @@ pub(crate) fn lookup_vendor_catalog(raw: &str) -> Option<VendorCatalogLookup> {
         .iter()
         .find(|v| vendor_slug(&v.name) == normalized)
         .map(|v| VendorCatalogLookup {
-            legacy_id: v.id,
+            numeric_id: v.id,
             name: v.name.clone(),
             slug: vendor_slug(&v.name),
         })

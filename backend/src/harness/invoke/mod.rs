@@ -114,13 +114,13 @@ pub(super) fn map_api_error(err: crate::error::ApiError, fallback: &'static str)
     }
 }
 
-pub(super) fn project_legacy_from_ctx(ctx: &HarnessContext) -> Result<i32, InvokeError> {
-    ctx.project_legacy_id
+pub(super) fn project_numeric_from_ctx(ctx: &HarnessContext) -> Result<i32, InvokeError> {
+    ctx.project_numeric_id
         .filter(|v| *v > 0)
         .ok_or_else(|| InvokeError::MissingContext("project context not attached".into()))
 }
 
-pub(super) fn script_legacy_id_from_args_or_ctx(
+pub(super) fn script_numeric_id_from_args_or_ctx(
     ctx: &HarnessContext,
     arguments: &Value,
 ) -> Result<i32, InvokeError> {
@@ -129,7 +129,7 @@ pub(super) fn script_legacy_id_from_args_or_ctx(
         .and_then(Value::as_i64)
         .and_then(|v| i32::try_from(v).ok())
         .filter(|v| *v > 0);
-    from_args.or(ctx.script_legacy_id).ok_or_else(|| {
+    from_args.or(ctx.script_numeric_id).ok_or_else(|| {
         InvokeError::MissingContext("scriptId is required (arg or attach context)".into())
     })
 }

@@ -59,7 +59,7 @@ fn merge_metadata_image_id(mut meta: Value, patch: &FieldPatch<i32>) -> Value {
 async fn cover_legacy_image_exists_for_asset(
     pool: &PgPool,
     asset_id: Uuid,
-    legacy_image_id: i32,
+    numeric_image_id: i32,
 ) -> Result<bool, ApiError> {
     let ok: bool = sqlx::query_scalar(
         r#"
@@ -70,7 +70,7 @@ async fn cover_legacy_image_exists_for_asset(
         "#,
     )
     .bind(asset_id)
-    .bind(legacy_image_id)
+    .bind(numeric_image_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -92,7 +92,7 @@ async fn patch_project_asset_inner(
     let desc_patch = parse_optional_text_field(body.description, "description")?;
     let type_patch = parse_asset_type_patch(body.asset_type)?;
     let cover_patch =
-        parse_optional_i32_field(body.cover_legacy_image_id, "cover_legacy_image_id")?;
+        parse_optional_i32_field(body.cover_numeric_image_id, "cover_legacy_image_id")?;
 
     if matches!(name_patch, FieldPatch::Absent)
         && matches!(desc_patch, FieldPatch::Absent)

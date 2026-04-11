@@ -165,7 +165,7 @@ pub(in crate::production) struct AssetDataItem {
     #[serde(rename = "type")]
     asset_type: String,
     describe: Option<String>,
-    cover_legacy_image_id: Option<i32>,
+    cover_numeric_image_id: Option<i32>,
     created_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 

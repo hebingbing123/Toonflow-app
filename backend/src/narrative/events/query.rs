@@ -7,7 +7,7 @@ use crate::error::ApiError;
 pub(super) struct EventQueryRow {
     pub(super) id: Uuid,
     pub(super) project_id: Uuid,
-    pub(super) legacy_id: i32,
+    pub(super) numeric_id: i32,
     pub(super) name: String,
     pub(super) detail: String,
     pub(super) create_time_ms: Option<i64>,
@@ -63,7 +63,7 @@ pub(super) async fn list_event_rows(
         SELECT 
             e.id as "id!",
             e.project_id as "project_id!",
-            e.legacy_id as "legacy_id!",
+            e.legacy_id as "numeric_id!",
             e.name as "name!",
             e.detail as "detail!",
             e.create_time_ms,

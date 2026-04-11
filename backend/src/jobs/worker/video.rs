@@ -52,7 +52,7 @@ pub(super) async fn run_video_generate(
         .map(String::from);
     let seed = p.get("seed").and_then(|x| x.as_u64());
 
-    let project_legacy_id = p
+    let project_numeric_id = p
         .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok());
@@ -124,7 +124,7 @@ pub(super) async fn run_video_generate(
         .clone()
         .ok_or_else(|| JobRunError::Failed("no video URL in completed response".to_string()))?;
 
-    if let (Some(pid), Some(sid)) = (project_legacy_id, storyboard_id) {
+    if let (Some(pid), Some(sid)) = (project_numeric_id, storyboard_id) {
         if let Err(e) =
             store_video_reference(pool, row.owner_user_id, pid, sid, &video_url, &gen_resp).await
         {
@@ -139,7 +139,7 @@ pub(super) async fn run_video_generate(
         "task_id": gen_resp.task_id,
         "video_url": video_url,
         "preview_url": gen_resp.preview_url,
-        "project_numeric_id": project_legacy_id,
+        "project_numeric_id": project_numeric_id,
         "storyboard_numeric_id": storyboard_id,
     }))
 }
@@ -147,8 +147,8 @@ pub(super) async fn run_video_generate(
 async fn store_video_reference(
     pool: &PgPool,
     owner_user_id: Uuid,
-    project_legacy_id: i32,
-    storyboard_legacy_id: i32,
+    project_numeric_id: i32,
+    storyboard_numeric_id: i32,
     video_url: &str,
     _resp: &crate::vendor::video::VideoGenerationResponse,
 ) -> Result<(), sqlx::Error> {
@@ -166,8 +166,8 @@ async fn store_video_reference(
     )
     .bind(video_url)
     .bind(owner_user_id)
-    .bind(project_legacy_id)
-    .bind(storyboard_legacy_id)
+    .bind(project_numeric_id)
+    .bind(storyboard_numeric_id)
     .execute(pool)
     .await?;
 

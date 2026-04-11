@@ -299,7 +299,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let numeric_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -821,7 +821,7 @@ async fn projects_create_stats_delete_roundtrip() {
           AND a.legacy_id = $3
         "#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(sub)
     .bind(scene_leg)
     .execute(&pool_sql)
@@ -872,7 +872,7 @@ async fn projects_create_stats_delete_roundtrip() {
           AND a.legacy_id = $3
         "#,
     )
-    .bind(legacy_id)
+    .bind(numeric_id)
     .bind(sub)
     .bind(scene_leg)
     .execute(&pool_sql)
@@ -1523,7 +1523,7 @@ async fn legacy_project_crud_roundtrip() {
     let (status, added) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "added={added}");
     let project_uuid = added["id"].as_str().expect("project id").to_owned();
-    let legacy_id = added["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let numeric_id = added["legacy_id"].as_i64().expect("legacy_id") as i32;
 
     let res = app
         .clone()
@@ -1550,7 +1550,7 @@ async fn legacy_project_crud_roundtrip() {
         .expect("created project row");
     assert_eq!(
         created_row["legacy_id"].as_i64(),
-        Some(i64::from(legacy_id))
+        Some(i64::from(numeric_id))
     );
     assert_eq!(created_row["intro"].as_str(), Some("legacy intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
@@ -1569,7 +1569,7 @@ async fn legacy_project_crud_roundtrip() {
         "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
     )
     .bind(sub)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(&pool)
     .await
     .expect("select initial mode");
@@ -1623,7 +1623,7 @@ async fn legacy_project_crud_roundtrip() {
         .as_array()
         .and_then(|rows| {
             rows.iter()
-                .find(|row| row["legacy_id"].as_i64() == Some(i64::from(legacy_id)))
+                .find(|row| row["legacy_id"].as_i64() == Some(i64::from(numeric_id)))
         })
         .cloned()
         .expect("edited project row");
@@ -1645,7 +1645,7 @@ async fn legacy_project_crud_roundtrip() {
         "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
     )
     .bind(sub)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .fetch_optional(&pool)
     .await
     .expect("select edited mode");
@@ -1684,7 +1684,7 @@ async fn legacy_project_crud_roundtrip() {
     assert_eq!(status, StatusCode::OK, "after_delete={after_delete}");
     let still_present = after_delete.as_array().is_some_and(|rows| {
         rows.iter()
-            .any(|row| row["legacy_id"].as_i64() == Some(i64::from(legacy_id)))
+            .any(|row| row["legacy_id"].as_i64() == Some(i64::from(numeric_id)))
     });
     assert!(
         !still_present,

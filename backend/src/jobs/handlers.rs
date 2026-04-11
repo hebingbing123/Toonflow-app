@@ -213,7 +213,7 @@ fn compute_task_page_offset(page: i32, limit: i32) -> i64 {
 async fn fetch_job_by_legacy_task_id(
     pool: &sqlx::PgPool,
     uid: Uuid,
-    legacy_task_id: i64,
+    numeric_task_id: i64,
 ) -> Result<JobRow, ApiError> {
     sqlx::query_as::<_, JobRow>(
         r#"
@@ -223,7 +223,7 @@ async fn fetch_job_by_legacy_task_id(
         "#,
     )
     .bind(uid)
-    .bind(legacy_task_id)
+    .bind(numeric_task_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?

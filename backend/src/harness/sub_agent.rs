@@ -112,11 +112,11 @@ pub async fn invoke_sub_agent_tool(
         None => skill_doc.content,
     };
     let project_hint = ctx
-        .project_legacy_id
+        .project_numeric_id
         .map(|id| format!("project_numeric_id={id}"))
         .unwrap_or_else(|| "project_numeric_id=unset".into());
     let script_hint = ctx
-        .script_legacy_id
+        .script_numeric_id
         .map(|id| format!("script_numeric_id={id}"))
         .unwrap_or_else(|| "script_numeric_id=unset".into());
     let context_note = format!(

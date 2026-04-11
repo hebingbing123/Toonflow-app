@@ -9,7 +9,8 @@ use uuid::Uuid;
 pub struct NovelRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub chapter_index: i32,
     pub reel: Option<String>,
     pub chapter: String,

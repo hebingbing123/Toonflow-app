@@ -11,14 +11,14 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_legacy_id;
+use super::super::crud::ensure_owned_project_numeric_id;
 use super::super::metadata_cover_legacy_image_id;
 use super::super::models::*;
 
 async fn run_get_image(
     pool: &sqlx::PgPool,
     uid: uuid::Uuid,
-    project_legacy_id: i32,
+    project_numeric_id: i32,
     assets_id: i32,
 ) -> Result<LegacyGetImageResponse, ApiError> {
     let asset = sqlx::query_as::<_, LegacyGetImageAssetRow>(
@@ -34,7 +34,7 @@ async fn run_get_image(
         "#,
     )
     .bind(uid)
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(assets_id)
     .fetch_optional(pool)
     .await
@@ -59,18 +59,18 @@ async fn run_get_image(
     let temp_assets = rows
         .into_iter()
         .map(|row| LegacyGetImageTempAssetItem {
-            id: row.legacy_image_id,
+            id: row.numeric_image_id,
             image_uuid: row.id,
             file_path: row.file_path.unwrap_or_default(),
-            assets_id: asset.legacy_id,
+            assets_id: asset.numeric_id,
             asset_type: asset.asset_type.clone(),
             state: row.state,
-            selected: image_id.is_some_and(|x| row.legacy_image_id == Some(x)),
+            selected: image_id.is_some_and(|x| row.numeric_image_id == Some(x)),
         })
         .collect();
 
     Ok(LegacyGetImageResponse {
-        id: asset.legacy_id,
+        id: asset.numeric_id,
         image_id,
         temp_assets,
     })
@@ -90,7 +90,7 @@ pub(crate) async fn post_project_workbench_image_bundle(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
-    let out = run_get_image(pool, uid, project_legacy_id, body.assets_id).await?;
+    let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
+    let out = run_get_image(pool, uid, project_numeric_id, body.assets_id).await?;
     Ok(Json(out))
 }

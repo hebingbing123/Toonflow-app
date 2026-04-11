@@ -121,14 +121,14 @@ fn event_query_row_into_event_with_chapters() {
     let row = query::EventQueryRow {
         id: Uuid::new_v4(),
         project_id: Uuid::new_v4(),
-        legacy_id: 1,
+        numeric_id: 1,
         name: "Test Event".to_string(),
         detail: "Details".to_string(),
         create_time_ms: Some(1234567890),
         chapter_indexes: vec![1, 2, 3],
     };
     let event: EventWithChapters = row.into();
-    assert_eq!(event.legacy_id, 1);
+    assert_eq!(event.numeric_id, 1);
     assert_eq!(event.name, "Test Event");
     assert_eq!(event.detail, "Details");
     assert_eq!(event.create_time_ms, Some(1234567890));

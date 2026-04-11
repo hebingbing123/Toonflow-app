@@ -559,7 +559,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_legacy_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
+    let project_numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     for body in [
@@ -598,7 +598,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         ORDER BY n.chapter_index ASC, n.legacy_id ASC
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
     .fetch_all(&pool)
     .await
@@ -617,7 +617,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
           AND n.legacy_id = ANY($3)
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
     .bind(&novel_legacy_ids)
     .execute(&pool)
@@ -659,7 +659,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         ORDER BY n.chapter_index ASC, n.legacy_id ASC
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(sub)
     .bind(&novel_legacy_ids)
     .fetch_all(&pool)
@@ -685,7 +685,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
             ORDER BY n.chapter_index ASC, n.legacy_id ASC
             "#,
         )
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .bind(sub)
         .bind(&novel_legacy_ids)
         .fetch_all(&pool)
@@ -747,11 +747,11 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     );
 
     let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .execute(&pool)
         .await;
     let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .execute(&pool)
         .await;
 }

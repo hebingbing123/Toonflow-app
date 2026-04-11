@@ -123,9 +123,9 @@ fn trim_opt(s: &str) -> Option<String> {
 async fn resolve_owned_project_uuid(
     pool: &PgPool,
     uid: Uuid,
-    project_legacy_id: i32,
+    project_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
-    if project_legacy_id <= 0 {
+    if project_numeric_id <= 0 {
         return Err(ApiError::BadRequest("projectId must be positive".into()));
     }
     let id: Option<Uuid> = sqlx::query_scalar(
@@ -134,7 +134,7 @@ async fn resolve_owned_project_uuid(
         WHERE legacy_id = $1 AND owner_user_id = $2
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(uid)
     .fetch_optional(pool)
     .await

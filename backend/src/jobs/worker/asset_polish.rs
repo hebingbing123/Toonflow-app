@@ -50,11 +50,11 @@ pub(super) async fn run_asset_polish_prompt(
     };
 
     let p = &row.payload;
-    let project_legacy_id = p
+    let project_numeric_id = p
         .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
-    let asset_legacy_id = p
+    let asset_numeric_id = p
         .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
         .ok_or_else(|| JobRunError::Failed("payload missing asset_numeric_id".into()))?;
@@ -82,8 +82,8 @@ pub(super) async fn run_asset_polish_prompt(
 
     Ok(json!({
         "source": "assets-generate.polish-prompt",
-        "project_numeric_id": project_legacy_id,
-        "asset_numeric_id": asset_legacy_id,
+        "project_numeric_id": project_numeric_id,
+        "asset_numeric_id": asset_numeric_id,
         "polished_prompt": text,
     }))
 }
@@ -101,7 +101,7 @@ pub(super) async fn run_asset_polish_batch(
     };
 
     let p = &row.payload;
-    let project_legacy_id = p
+    let project_numeric_id = p
         .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
@@ -128,7 +128,7 @@ pub(super) async fn run_asset_polish_batch(
             return Err(JobRunError::Cancelled);
         }
 
-        let asset_legacy_id = item
+        let asset_numeric_id = item
             .get("asset_numeric_id")
             .and_then(|x| x.as_i64())
             .ok_or_else(|| JobRunError::Failed("item missing asset_numeric_id".into()))?;
@@ -150,14 +150,14 @@ pub(super) async fn run_asset_polish_batch(
                 .await?;
 
         out.push(json!({
-            "asset_numeric_id": asset_legacy_id,
+            "asset_numeric_id": asset_numeric_id,
             "polished_prompt": text,
         }));
     }
 
     Ok(json!({
         "source": "assets-generate.batch-polish",
-        "project_numeric_id": project_legacy_id,
+        "project_numeric_id": project_numeric_id,
         "items": out,
     }))
 }

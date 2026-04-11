@@ -17,7 +17,8 @@ pub struct AssetRow {
     pub id: Uuid,
     /// 向客户端暴露的稳定整数 ID（`app_asset.legacy_id` 列；JSON 键 **`numeric_id`**）。
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     /// 资产显示名称。
     pub name: String,
     /// 资产分类：role、tool 或 scene。
@@ -71,7 +72,7 @@ pub struct CornerScapeAssetItem {
     pub id: Uuid,
     /// 向客户端暴露的稳定整数 ID（JSON **`numeric_id`**）。
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    pub numeric_id: i32,
     /// 资产显示名称。
     pub name: String,
     /// 资产分类：role、tool 或 scene。
@@ -112,7 +113,8 @@ pub(super) struct CornerScapeDbRow {
     /// 内部 UUID 主键。
     pub id: Uuid,
     /// 遗留整数 ID。
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     /// 显示名称。
     pub name: String,
     /// 资产分类。
@@ -160,7 +162,7 @@ pub(super) struct PatchAssetBody {
     pub asset_type: Option<Value>,
     /// 封面图片稳定整数 ID，`null` 表示清除，或省略（JSON **`cover_numeric_image_id`**）。
     #[serde(default, rename = "cover_numeric_image_id")]
-    pub cover_legacy_image_id: Option<Value>,
+    pub cover_numeric_image_id: Option<Value>,
 }
 
 /// 单个 `app_asset_image` 行。
@@ -180,7 +182,8 @@ pub struct AssetImageRow {
     pub state: Option<String>,
     /// 图片的稳定整数 ID（`legacy_image_id` 列；JSON **`numeric_image_id`**）。
     #[serde(rename = "numeric_image_id")]
-    pub legacy_image_id: Option<i32>,
+    #[sqlx(rename = "legacy_image_id")]
+    pub numeric_image_id: Option<i32>,
 }
 
 /// 带选择标志的资产图片项。
@@ -202,7 +205,7 @@ pub struct AssetImageListItem {
 pub struct ListAssetImagesResponse {
     /// 当前选中的封面图片稳定整数 ID（JSON **`cover_numeric_image_id`**）。
     #[serde(rename = "cover_numeric_image_id")]
-    pub cover_legacy_image_id: Option<i32>,
+    pub cover_numeric_image_id: Option<i32>,
     /// 带选择标志的图片列表。
     pub items: Vec<AssetImageListItem>,
 }
@@ -468,7 +471,8 @@ pub(super) struct LegacyGetImageAssetRow {
     /// 内部 UUID。
     pub id: Uuid,
     /// 遗留整数 ID。
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     /// 资产类型分类。
     pub asset_type: String,
     /// 元数据 JSON。

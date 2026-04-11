@@ -23,9 +23,9 @@ pub fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}",
-            get(handlers::get_by_legacy_for_project)
-                .patch(handlers::patch_by_legacy_for_project)
-                .delete(handlers::delete_by_legacy_for_project),
+            get(handlers::get_by_numeric_id_for_project)
+                .patch(handlers::patch_by_numeric_id_for_project)
+                .delete(handlers::delete_by_numeric_id_for_project),
         )
 }
 

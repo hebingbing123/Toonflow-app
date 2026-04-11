@@ -44,7 +44,7 @@ pub(super) async fn list_project_asset_images_for_project(
     let (asset_id, metadata) =
         resolve_owned_asset_id_and_metadata_for_project(pool, uid, project_id, asset_numeric_id)
             .await?;
-    let cover_legacy_image_id = metadata_cover_legacy_image_id(&metadata);
+    let cover_numeric_image_id = metadata_cover_legacy_image_id(&metadata);
 
     let rows = sqlx::query_as::<_, AssetImageRow>(
         r#"
@@ -62,13 +62,13 @@ pub(super) async fn list_project_asset_images_for_project(
     let items: Vec<AssetImageListItem> = rows
         .into_iter()
         .map(|row| {
-            let selected = cover_legacy_image_id.is_some_and(|c| row.legacy_image_id == Some(c));
+            let selected = cover_numeric_image_id.is_some_and(|c| row.numeric_image_id == Some(c));
             AssetImageListItem { row, selected }
         })
         .collect();
 
     Ok(Json(ListAssetImagesResponse {
-        cover_legacy_image_id,
+        cover_numeric_image_id,
         items,
     }))
 }

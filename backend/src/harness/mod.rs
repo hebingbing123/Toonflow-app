@@ -36,9 +36,9 @@ pub struct HarnessContext {
     /// 数据库连接池（如果工具需要数据库访问）。
     pub pool: Option<sqlx::PgPool>,
     /// 当前项目的遗留 ID（用于项目范围工具）。
-    pub project_legacy_id: Option<i32>,
+    pub project_numeric_id: Option<i32>,
     /// 当前脚本的遗留 ID（用于脚本范围工具）。
-    pub script_legacy_id: Option<i32>,
+    pub script_numeric_id: Option<i32>,
     /// LLM 配置（用于需要 AI 调用的工具）。
     pub llm: Option<crate::llm::LlmConfig>,
     /// HTTP 客户端（用于需要外部 API 调用的工具）。
@@ -49,16 +49,16 @@ impl HarnessContext {
     pub fn with_runtime_scope(
         user_id: Uuid,
         pool: Option<sqlx::PgPool>,
-        project_legacy_id: Option<i32>,
-        script_legacy_id: Option<i32>,
+        project_numeric_id: Option<i32>,
+        script_numeric_id: Option<i32>,
         llm: Option<crate::llm::LlmConfig>,
         http_client: Option<reqwest::Client>,
     ) -> Self {
         Self {
             user_id,
             pool,
-            project_legacy_id,
-            script_legacy_id,
+            project_numeric_id,
+            script_numeric_id,
             llm,
             http_client,
         }

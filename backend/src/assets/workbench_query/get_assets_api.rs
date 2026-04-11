@@ -13,14 +13,14 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_legacy_id;
+use super::super::crud::ensure_owned_project_numeric_id;
 use super::super::models::*;
 use super::super::MAX_ASSET_LIST_LIMIT;
 
 async fn run_get_assets_api(
     pool: &sqlx::PgPool,
     uid: uuid::Uuid,
-    project_legacy_id: i32,
+    project_numeric_id: i32,
     body: &WorkbenchNestedAssetsBody,
 ) -> Result<LegacyGetAssetsApiResponse, ApiError> {
     let asset_type = body.asset_type.trim().to_lowercase();
@@ -55,7 +55,7 @@ async fn run_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .fetch_one(pool)
@@ -111,7 +111,7 @@ async fn run_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .bind(limit)
@@ -168,7 +168,7 @@ async fn run_get_assets_api(
         "#,
     )
     .bind(uid)
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(&asset_type)
     .bind(name_pattern.as_deref())
     .fetch_all(pool)
@@ -179,7 +179,7 @@ async fn run_get_assets_api(
     for row in children {
         let child = LegacyGetAssetsApiChildItem {
             id: row.id,
-            project_id: row.project_id.unwrap_or(project_legacy_id),
+            project_id: row.project_id.unwrap_or(project_numeric_id),
             asset_type: row.asset_type,
             name: row.name,
             assets_id: row.assets_id,
@@ -198,7 +198,7 @@ async fn run_get_assets_api(
         .into_iter()
         .map(|row| LegacyGetAssetsApiParentItem {
             id: row.id,
-            project_id: row.project_id.unwrap_or(project_legacy_id),
+            project_id: row.project_id.unwrap_or(project_numeric_id),
             asset_type: row.asset_type,
             name: row.name,
             assets_id: row.assets_id,
@@ -239,7 +239,7 @@ pub(crate) async fn post_project_workbench_nested_assets(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let project_legacy_id = ensure_owned_project_legacy_id(pool, uid, project_id).await?;
-    let out = run_get_assets_api(pool, uid, project_legacy_id, &body).await?;
+    let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
+    let out = run_get_assets_api(pool, uid, project_numeric_id, &body).await?;
     Ok(Json(out))
 }

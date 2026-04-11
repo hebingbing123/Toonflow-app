@@ -98,7 +98,7 @@ async fn list_corner_scape_assets_inner(
         .into_iter()
         .map(|r| CornerScapeAssetItem {
             id: r.id,
-            legacy_id: r.legacy_id,
+            numeric_id: r.numeric_id,
             name: r.name,
             asset_type: r.asset_type,
             description: r.description,

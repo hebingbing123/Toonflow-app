@@ -81,13 +81,13 @@ pub(crate) async fn dispatch_client_text(
         return;
     };
 
-    let project_legacy_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
-    let script_legacy_id = sess.script_id.and_then(|v| i32::try_from(v).ok());
+    let project_numeric_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
+    let script_numeric_id = sess.script_id.and_then(|v| i32::try_from(v).ok());
     let ctx = HarnessContext::with_runtime_scope(
         sess.user_id,
         state.pool.clone(),
-        project_legacy_id,
-        script_legacy_id,
+        project_numeric_id,
+        script_numeric_id,
         state.llm.clone(),
         Some(state.http_client.clone()),
     );
@@ -213,8 +213,8 @@ pub(crate) async fn dispatch_client_text(
                 assistant_name,
                 user_id: sess.user_id,
                 pool: state.pool.clone(),
-                project_legacy_id,
-                script_legacy_id,
+                project_numeric_id,
+                script_numeric_id,
                 max_rounds,
                 cancel,
                 out_tx: out_tx.clone(),

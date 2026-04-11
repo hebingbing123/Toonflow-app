@@ -1336,8 +1336,8 @@ async fn art_styles_base64_cover_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let legacy_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
-    let cover_uri = format!("/api/v1/art-styles/numeric/{legacy_id}/cover");
+    let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
+    let cover_uri = format!("/api/v1/art-styles/numeric/{numeric_id}/cover");
     assert_eq!(created["file_url"].as_str(), Some(cover_uri.as_str()));
 
     let res = app
@@ -1362,7 +1362,7 @@ async fn art_styles_base64_cover_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::PATCH)
-                .uri(format!("/api/v1/art-styles/numeric/{legacy_id}"))
+                .uri(format!("/api/v1/art-styles/numeric/{numeric_id}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))

@@ -5,7 +5,7 @@ use serde_json::Value;
 use sqlx::types::Json;
 
 use super::{
-    project_legacy_from_ctx, require_pool, script_legacy_id_from_args_or_ctx, InvokeError,
+    project_numeric_from_ctx, require_pool, script_numeric_id_from_args_or_ctx, InvokeError,
 };
 use crate::harness::HarnessContext;
 
@@ -13,7 +13,8 @@ use crate::harness::HarnessContext;
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessScriptRow {
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub name: Option<String>,
     pub content: Option<String>,
     pub extract_state: Option<i32>,
@@ -21,7 +22,8 @@ pub(super) struct HarnessScriptRow {
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessNovelRow {
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub chapter_index: i32,
     pub chapter: String,
     pub chapter_data: String,
@@ -30,7 +32,8 @@ pub(super) struct HarnessNovelRow {
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessNovelEventRow {
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub name: String,
     pub detail: String,
 }
@@ -45,10 +48,10 @@ pub(super) struct OwnedScriptScope {
 
 pub(super) async fn require_owned_script_scope(
     ctx: &HarnessContext,
-    script_legacy_id: i32,
+    script_numeric_id: i32,
 ) -> Result<OwnedScriptScope, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
     sqlx::query_as::<_, OwnedScriptScope>(
         r#"
         SELECT p.id AS project_id, s.id AS script_id
@@ -60,8 +63,8 @@ pub(super) async fn require_owned_script_scope(
         "#,
     )
     .bind(ctx.user_id)
-    .bind(project_legacy_id)
-    .bind(script_legacy_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
@@ -72,7 +75,7 @@ pub(super) async fn require_owned_script_scope(
 
 pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
 
     let project_uuid: uuid::Uuid = sqlx::query_scalar(
         r#"
@@ -80,7 +83,7 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
         WHERE legacy_id = $1 AND owner_user_id = $2
         "#,
     )
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .bind(ctx.user_id)
     .fetch_optional(pool)
     .await
@@ -112,7 +115,7 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
         "#,
     )
     .bind(ctx.user_id)
-    .bind(project_legacy_id)
+    .bind(project_numeric_id)
     .fetch_all(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
@@ -130,7 +133,7 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
     }
 
     let mut body = serde_json::json!({
-        "projectId": project_legacy_id,
+        "projectId": project_numeric_id,
         "agentType": "scriptAgent",
         "data": data,
     });
@@ -147,8 +150,8 @@ pub(super) async fn invoke_get_script_content(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
 
     let row: HarnessScriptRow = sqlx::query_as(
         r#"
@@ -161,8 +164,8 @@ pub(super) async fn invoke_get_script_content(
         "#,
     )
     .bind(ctx.user_id)
-    .bind(project_legacy_id)
-    .bind(script_legacy_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
@@ -177,14 +180,14 @@ pub(super) async fn invoke_get_novel_text(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let novel_legacy_id = arguments
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let novel_numeric_id = arguments
         .get("novelId")
         .and_then(Value::as_i64)
         .and_then(|v| i32::try_from(v).ok())
         .filter(|v| *v > 0);
 
-    let rows: Vec<HarnessNovelRow> = if let Some(novel_id) = novel_legacy_id {
+    let rows: Vec<HarnessNovelRow> = if let Some(novel_id) = novel_numeric_id {
         sqlx::query_as(
             r#"
             SELECT n.legacy_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
@@ -197,7 +200,7 @@ pub(super) async fn invoke_get_novel_text(
             "#,
         )
         .bind(ctx.user_id)
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .bind(novel_id)
         .fetch_all(pool)
         .await
@@ -215,7 +218,7 @@ pub(super) async fn invoke_get_novel_text(
             "#,
         )
         .bind(ctx.user_id)
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .fetch_all(pool)
         .await
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
@@ -223,7 +226,7 @@ pub(super) async fn invoke_get_novel_text(
 
     let total = rows.len();
     Ok(serde_json::json!({
-        "projectId": project_legacy_id,
+        "projectId": project_numeric_id,
         "items": rows,
         "total": total,
     }))
@@ -234,14 +237,14 @@ pub(super) async fn invoke_get_novel_events(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let novel_legacy_id = arguments
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let novel_numeric_id = arguments
         .get("novelId")
         .and_then(Value::as_i64)
         .and_then(|v| i32::try_from(v).ok())
         .filter(|v| *v > 0);
 
-    let rows: Vec<HarnessNovelEventRow> = if let Some(novel_id) = novel_legacy_id {
+    let rows: Vec<HarnessNovelEventRow> = if let Some(novel_id) = novel_numeric_id {
         sqlx::query_as(
             r#"
             SELECT e.legacy_id, e.name, e.detail
@@ -256,7 +259,7 @@ pub(super) async fn invoke_get_novel_events(
             "#,
         )
         .bind(ctx.user_id)
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .bind(novel_id)
         .fetch_all(pool)
         .await
@@ -274,7 +277,7 @@ pub(super) async fn invoke_get_novel_events(
             "#,
         )
         .bind(ctx.user_id)
-        .bind(project_legacy_id)
+        .bind(project_numeric_id)
         .fetch_all(pool)
         .await
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
@@ -282,7 +285,7 @@ pub(super) async fn invoke_get_novel_events(
 
     let total = rows.len();
     Ok(serde_json::json!({
-        "projectId": project_legacy_id,
+        "projectId": project_numeric_id,
         "items": rows,
         "total": total,
     }))

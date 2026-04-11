@@ -17,7 +17,8 @@ struct OwnedProductionScope {
 
 #[derive(Debug, FromRow)]
 struct ProductionAssetFlowRow {
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     name: String,
     asset_type: String,
     description: Option<String>,
@@ -27,7 +28,8 @@ struct ProductionAssetFlowRow {
 
 #[derive(Debug, FromRow)]
 struct ProductionStoryboardFlowRow {
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     prompt: Option<String>,
     file_path: Option<String>,
     duration: Option<String>,
@@ -43,8 +45,8 @@ struct ProductionStoryboardFlowRow {
 pub(crate) async fn resolve_owned_production_scope(
     pool: &sqlx::PgPool,
     uid: Uuid,
-    project_legacy_id: i32,
-    script_legacy_id: i32,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
 ) -> Result<(Uuid, Uuid, Option<String>), ApiError> {
     let scope = sqlx::query_as::<_, OwnedProductionScope>(
         r#"
@@ -60,8 +62,8 @@ pub(crate) async fn resolve_owned_production_scope(
         "#,
     )
     .bind(uid)
-    .bind(project_legacy_id)
-    .bind(script_legacy_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -123,8 +125,8 @@ fn build_production_asset_item(
         .map(|child| {
             let child_history = child.history_images.as_array().cloned().unwrap_or_default();
             json!({
-              "id": child.legacy_id,
-              "assetsId": row.legacy_id,
+              "id": child.numeric_id,
+              "assetsId": row.numeric_id,
               "name": child.name,
               "type": child.asset_type,
               "prompt": child.metadata.get("prompt").and_then(Value::as_str).unwrap_or_default(),
@@ -138,7 +140,7 @@ fn build_production_asset_item(
         .collect::<Vec<_>>();
 
     json!({
-      "id": row.legacy_id,
+      "id": row.numeric_id,
       "name": row.name,
       "type": row.asset_type,
       "prompt": prompt,
@@ -222,7 +224,7 @@ async fn load_production_flow_json(
                         .get("assetsId")
                         .and_then(Value::as_i64)
                         .and_then(|v| i32::try_from(v).ok())
-                        == Some(row.legacy_id)
+                        == Some(row.numeric_id)
                 })
                 .collect::<Vec<_>>();
             build_production_asset_item(row, &child_rows)
@@ -268,9 +270,9 @@ async fn load_production_flow_json(
     let storyboard_items = storyboards
         .into_iter()
         .map(|row| {
-            let saved_storyboard = saved_storyboard_by_id.get(&row.legacy_id);
+            let saved_storyboard = saved_storyboard_by_id.get(&row.numeric_id);
             json!({
-              "id": row.legacy_id,
+              "id": row.numeric_id,
               "index": row.sb_index,
               "duration": row.duration.as_deref().and_then(|v| v.parse::<i32>().ok()).unwrap_or(0),
               "prompt": row.prompt.clone().unwrap_or_default(),
@@ -316,10 +318,10 @@ async fn load_production_flow_json(
 pub(crate) async fn load_owned_production_flow_json(
     pool: &sqlx::PgPool,
     uid: Uuid,
-    project_legacy_id: i32,
-    script_legacy_id: i32,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
 ) -> Result<Value, ApiError> {
     let (project_id, script_id, script_content) =
-        resolve_owned_production_scope(pool, uid, project_legacy_id, script_legacy_id).await?;
+        resolve_owned_production_scope(pool, uid, project_numeric_id, script_numeric_id).await?;
     load_production_flow_json(pool, project_id, script_id, script_content).await
 }

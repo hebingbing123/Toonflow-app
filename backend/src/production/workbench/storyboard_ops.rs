@@ -64,7 +64,8 @@ pub(in crate::production) struct ExportImageBody {
 
 #[derive(Debug, FromRow)]
 struct ExportImageSourceRow {
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     file_path: Option<String>,
 }
 
@@ -303,12 +304,12 @@ async fn build_storyboard_export_zip(
         let file_path = row.file_path.as_deref().ok_or_else(|| {
             ApiError::BadRequest(format!(
                 "storyboard {} has no generated image to export",
-                row.legacy_id
+                row.numeric_id
             ))
         })?;
 
         let exported =
-            fetch_storyboard_export_bytes(state, owner_user_id, row.legacy_id, file_path).await?;
+            fetch_storyboard_export_bytes(state, owner_user_id, row.numeric_id, file_path).await?;
         archive
             .start_file(exported.filename, options)
             .map_err(|_| ApiError::Internal)?;
@@ -331,23 +332,25 @@ struct StoryboardExportFile {
 async fn fetch_storyboard_export_bytes(
     state: &AppState,
     owner_user_id: uuid::Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     file_path: &str,
 ) -> Result<StoryboardExportFile, ApiError> {
     if let Some((ext, bytes)) = decode_data_uri_image(file_path)? {
         return Ok(StoryboardExportFile {
-            filename: format!("storyboard-{legacy_id}.{ext}"),
+            filename: format!("storyboard-{numeric_id}.{ext}"),
             bytes,
         });
     }
 
     if file_path.starts_with("http://") || file_path.starts_with("https://") {
         let resp = state.http_client.get(file_path).send().await.map_err(|e| {
-            ApiError::BadRequest(format!("failed to fetch storyboard {legacy_id} image: {e}"))
+            ApiError::BadRequest(format!(
+                "failed to fetch storyboard {numeric_id} image: {e}"
+            ))
         })?;
         if !resp.status().is_success() {
             return Err(ApiError::BadRequest(format!(
-                "failed to fetch storyboard {legacy_id} image: upstream status {}",
+                "failed to fetch storyboard {numeric_id} image: upstream status {}",
                 resp.status()
             )));
         }
@@ -357,11 +360,11 @@ async fn fetch_storyboard_export_bytes(
             .and_then(|v| v.to_str().ok())
             .map(str::to_string);
         let bytes = resp.bytes().await.map_err(|e| {
-            ApiError::BadRequest(format!("failed to read storyboard {legacy_id} image: {e}"))
+            ApiError::BadRequest(format!("failed to read storyboard {numeric_id} image: {e}"))
         })?;
         let ext = infer_export_extension(file_path, content_type.as_deref());
         return Ok(StoryboardExportFile {
-            filename: format!("storyboard-{legacy_id}.{ext}"),
+            filename: format!("storyboard-{numeric_id}.{ext}"),
             bytes: bytes.to_vec(),
         });
     }
@@ -369,7 +372,7 @@ async fn fetch_storyboard_export_bytes(
     let path = std::path::Path::new(file_path);
     if path.is_absolute() {
         let bytes = tokio::fs::read(path).await.map_err(|e| {
-            ApiError::BadRequest(format!("failed to read storyboard {legacy_id} file: {e}"))
+            ApiError::BadRequest(format!("failed to read storyboard {numeric_id} file: {e}"))
         })?;
         let ext = path
             .extension()
@@ -377,7 +380,7 @@ async fn fetch_storyboard_export_bytes(
             .filter(|s| !s.is_empty())
             .unwrap_or("png");
         return Ok(StoryboardExportFile {
-            filename: format!("storyboard-{legacy_id}.{ext}"),
+            filename: format!("storyboard-{numeric_id}.{ext}"),
             bytes,
         });
     }
@@ -388,13 +391,13 @@ async fn fetch_storyboard_export_bytes(
             .as_ref()
             .ok_or_else(|| {
                 ApiError::BadRequest(format!(
-                    "storyboard {legacy_id} uses local storage but no local image directory is configured"
+                    "storyboard {numeric_id} uses local storage but no local image directory is configured"
                 ))
             })?;
         let local_path = base.join(owner_user_id.to_string()).join(rest);
         let bytes = tokio::fs::read(&local_path).await.map_err(|e| {
             ApiError::BadRequest(format!(
-                "failed to read storyboard {legacy_id} local file: {e}"
+                "failed to read storyboard {numeric_id} local file: {e}"
             ))
         })?;
         let ext = local_path
@@ -403,13 +406,13 @@ async fn fetch_storyboard_export_bytes(
             .filter(|s| !s.is_empty())
             .unwrap_or("png");
         return Ok(StoryboardExportFile {
-            filename: format!("storyboard-{legacy_id}.{ext}"),
+            filename: format!("storyboard-{numeric_id}.{ext}"),
             bytes,
         });
     }
 
     Err(ApiError::BadRequest(format!(
-        "storyboard {legacy_id} file_path is not exportable: expected http(s), data URI, or absolute file path"
+        "storyboard {numeric_id} file_path is not exportable: expected http(s), data URI, or absolute file path"
     )))
 }
 

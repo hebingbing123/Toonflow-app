@@ -22,7 +22,8 @@ use crate::state::AppState;
 pub struct ProjectRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub name: Option<String>,
     pub intro: Option<String>,
     pub project_type: Option<String>,
@@ -39,7 +40,8 @@ pub struct ProjectRow {
 #[derive(Debug, FromRow, Serialize)]
 struct ScriptBrief {
     #[serde(rename = "numeric_id")]
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     name: Option<String>,
     extract_state: Option<i32>,
 }
@@ -603,7 +605,7 @@ async fn delete_project_by_id(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let legacy_id: Option<i32> = sqlx::query_scalar(
+    let numeric_id: Option<i32> = sqlx::query_scalar(
         r#"
         SELECT legacy_id
         FROM app_project
@@ -616,7 +618,7 @@ async fn delete_project_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let Some(legacy_id) = legacy_id else {
+    let Some(numeric_id) = numeric_id else {
         tx.rollback()
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -631,7 +633,7 @@ async fn delete_project_by_id(
         "#,
     )
     .bind(uid)
-    .bind(legacy_id)
+    .bind(numeric_id)
     .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

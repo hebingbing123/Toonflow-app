@@ -38,7 +38,8 @@ const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提�
 pub struct ArtStyleRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
-    pub legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    pub numeric_id: i32,
     pub name: String,
     pub file_url: Option<String>,
     pub label: Option<String>,
@@ -187,27 +188,27 @@ fn parse_uploaded_cover(raw: &str) -> Result<Option<LocalArtStyleCover>, ApiErro
 fn art_style_cover_file_path(
     root: &FsPath,
     owner_user_id: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     ext: &str,
 ) -> PathBuf {
     root.join(owner_user_id.to_string())
-        .join(format!("{legacy_id}.{ext}"))
+        .join(format!("{numeric_id}.{ext}"))
 }
 
 fn existing_art_style_cover_paths(
     root: &FsPath,
     owner_user_id: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
 ) -> [PathBuf; 3] {
     [
-        art_style_cover_file_path(root, owner_user_id, legacy_id, "png"),
-        art_style_cover_file_path(root, owner_user_id, legacy_id, "jpg"),
-        art_style_cover_file_path(root, owner_user_id, legacy_id, "webp"),
+        art_style_cover_file_path(root, owner_user_id, numeric_id, "png"),
+        art_style_cover_file_path(root, owner_user_id, numeric_id, "jpg"),
+        art_style_cover_file_path(root, owner_user_id, numeric_id, "webp"),
     ]
 }
 
-async fn delete_local_art_style_cover_files(root: &FsPath, owner_user_id: Uuid, legacy_id: i32) {
-    for path in existing_art_style_cover_paths(root, owner_user_id, legacy_id) {
+async fn delete_local_art_style_cover_files(root: &FsPath, owner_user_id: Uuid, numeric_id: i32) {
+    for path in existing_art_style_cover_paths(root, owner_user_id, numeric_id) {
         let _ = fs::remove_file(path).await;
     }
 }
@@ -215,15 +216,15 @@ async fn delete_local_art_style_cover_files(root: &FsPath, owner_user_id: Uuid, 
 async fn persist_local_art_style_cover(
     root: &FsPath,
     owner_user_id: Uuid,
-    legacy_id: i32,
+    numeric_id: i32,
     cover: &LocalArtStyleCover,
 ) -> Result<(), ApiError> {
     let dir = root.join(owner_user_id.to_string());
     fs::create_dir_all(&dir)
         .await
         .map_err(|e| ApiError::BadRequest(format!("art style cover mkdir failed: {e}")))?;
-    delete_local_art_style_cover_files(root, owner_user_id, legacy_id).await;
-    let path = art_style_cover_file_path(root, owner_user_id, legacy_id, cover.ext);
+    delete_local_art_style_cover_files(root, owner_user_id, numeric_id).await;
+    let path = art_style_cover_file_path(root, owner_user_id, numeric_id, cover.ext);
     fs::write(&path, &cover.bytes)
         .await
         .map_err(|e| ApiError::BadRequest(format!("art style cover write failed: {e}")))?;

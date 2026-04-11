@@ -78,8 +78,8 @@ struct AssetImageGenCtx<'a> {
 
 async fn generate_and_store_asset_image(
     ctx: &AssetImageGenCtx<'_>,
-    project_legacy_id: i32,
-    asset_legacy_id: i32,
+    project_numeric_id: i32,
+    asset_numeric_id: i32,
     name: &str,
     prompt: &str,
     image_base64: Option<&str>,
@@ -90,7 +90,7 @@ async fn generate_and_store_asset_image(
     }
 
     let asset_id =
-        resolve_asset_id_for_job(ctx.pool, ctx.owner, project_legacy_id, asset_legacy_id)
+        resolve_asset_id_for_job(ctx.pool, ctx.owner, project_numeric_id, asset_numeric_id)
             .await
             .map_err(|e| JobRunError::Failed(e.to_string()))?
             .ok_or_else(|| {
@@ -132,7 +132,7 @@ async fn generate_and_store_asset_image(
             .map_err(|e| JobRunError::Failed(e.to_string()))?;
         let api_path = format!(
             "/api/v1/projects/{}/assets/{}/images/{}/file",
-            project_id, asset_legacy_id, image_row_id
+            project_id, asset_numeric_id, image_row_id
         );
         let metadata = json!({
             "source": "jobs.worker.asset_image",
@@ -177,7 +177,7 @@ async fn generate_and_store_asset_image(
     .map_err(|e| JobRunError::Failed(e.to_string()))?;
 
     Ok(json!({
-        "asset_numeric_id": asset_legacy_id,
+        "asset_numeric_id": asset_numeric_id,
         "asset_image_id": image_row_id,
         "image_url": image_url,
         "revised_prompt": revised,
@@ -202,12 +202,12 @@ pub(super) async fn run_asset_generate_image(
     }
 
     let p = &row.payload;
-    let project_legacy_id = p
+    let project_numeric_id = p
         .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
         .ok_or_else(|| JobRunError::Failed("payload missing project_numeric_id".into()))?;
-    let asset_legacy_id = p
+    let asset_numeric_id = p
         .get("asset_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
@@ -252,8 +252,8 @@ pub(super) async fn run_asset_generate_image(
 
     let body = generate_and_store_asset_image(
         &ctx,
-        project_legacy_id,
-        asset_legacy_id,
+        project_numeric_id,
+        asset_numeric_id,
         name,
         prompt,
         image_base64,
@@ -262,10 +262,10 @@ pub(super) async fn run_asset_generate_image(
 
     Ok(json!({
         "source": "assets-generate.generate",
-        "project_numeric_id": project_legacy_id,
+        "project_numeric_id": project_numeric_id,
         "image_model": image_model,
         "size": size,
-        "asset_numeric_id": asset_legacy_id,
+        "asset_numeric_id": asset_numeric_id,
         "asset_image_id": body["asset_image_id"],
         "image_url": body["image_url"],
         "revised_prompt": body["revised_prompt"],
@@ -286,7 +286,7 @@ pub(super) async fn run_asset_generate_batch(
     };
 
     let p = &row.payload;
-    let project_legacy_id = p
+    let project_numeric_id = p
         .get("project_numeric_id")
         .and_then(|x| x.as_i64())
         .and_then(|n| i32::try_from(n).ok())
@@ -339,7 +339,7 @@ pub(super) async fn run_asset_generate_batch(
             return Err(JobRunError::Cancelled);
         }
 
-        let asset_legacy_id = item
+        let asset_numeric_id = item
             .get("asset_numeric_id")
             .and_then(|x| x.as_i64())
             .and_then(|n| i32::try_from(n).ok())
@@ -353,8 +353,8 @@ pub(super) async fn run_asset_generate_batch(
 
         let one = generate_and_store_asset_image(
             &ctx,
-            project_legacy_id,
-            asset_legacy_id,
+            project_numeric_id,
+            asset_numeric_id,
             name,
             prompt,
             image_base64,
@@ -365,7 +365,7 @@ pub(super) async fn run_asset_generate_batch(
 
     Ok(json!({
         "source": "assets-generate.batch-generate",
-        "project_numeric_id": project_legacy_id,
+        "project_numeric_id": project_numeric_id,
         "image_model": image_model,
         "size": size,
         "items": out,

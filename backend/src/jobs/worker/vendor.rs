@@ -243,9 +243,9 @@ fn resolve_vendor_probe_targets(
         vendor_candidates.push(resolved_vendor_id.clone());
     }
     if let Some(vendor) = vendor.as_ref() {
-        let legacy_id = vendor.legacy_id.to_string();
-        if vendor_candidates.iter().all(|v| v != &legacy_id) {
-            vendor_candidates.push(legacy_id);
+        let numeric_id = vendor.numeric_id.to_string();
+        if vendor_candidates.iter().all(|v| v != &numeric_id) {
+            vendor_candidates.push(numeric_id);
         }
     }
     (vendor, resolved_vendor_id, vendor_candidates)

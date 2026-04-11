@@ -3,8 +3,8 @@
 use serde_json::{json, Value};
 
 use super::{
-    map_api_error, parse_i32_required, parse_ids_required, project_legacy_from_ctx, require_pool,
-    script_legacy_id_from_args_or_ctx, InvokeError,
+    map_api_error, parse_i32_required, parse_ids_required, project_numeric_from_ctx, require_pool,
+    script_numeric_id_from_args_or_ctx, InvokeError,
 };
 use crate::harness::HarnessContext;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
@@ -20,7 +20,8 @@ struct ParentAssetRow {
 
 #[derive(sqlx::FromRow)]
 struct StoryboardGenerateRow {
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     prompt: Option<String>,
 }
 
@@ -42,14 +43,14 @@ pub(super) async fn invoke_get_flow_data(
         key
     };
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
 
     let flow = crate::production_flow::load_owned_production_flow_json(
         pool,
         ctx.user_id,
-        project_legacy_id,
-        script_legacy_id,
+        project_numeric_id,
+        script_numeric_id,
     )
     .await
     .map_err(|e| map_api_error(e, "failed to read production flow data"))?;
@@ -64,9 +65,9 @@ pub(super) async fn invoke_add_derive_asset(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
-    let scope = require_owned_script_scope(ctx, script_legacy_id).await?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
+    let scope = require_owned_script_scope(ctx, script_numeric_id).await?;
     let assets_id = parse_i32_required(arguments, "assetsId")?;
     let name = arguments
         .get("name")
@@ -100,7 +101,7 @@ pub(super) async fn invoke_add_derive_asset(
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
     .ok_or_else(|| InvokeError::MissingContext("parent asset not found".into()))?;
 
-    if let Some(legacy_id) = maybe_legacy_id {
+    if let Some(numeric_id) = maybe_legacy_id {
         let updated = sqlx::query(
             r#"
             UPDATE app_asset
@@ -113,7 +114,7 @@ pub(super) async fn invoke_add_derive_asset(
             "#,
         )
         .bind(scope.project_id)
-        .bind(legacy_id)
+        .bind(numeric_id)
         .bind(assets_id)
         .bind(name)
         .bind(desc)
@@ -128,12 +129,12 @@ pub(super) async fn invoke_add_derive_asset(
         }
 
         return Ok(json!({
-            "id": legacy_id,
+            "id": numeric_id,
             "assetsId": assets_id,
             "name": name,
             "desc": desc,
-            "projectId": project_legacy_id,
-            "scriptId": script_legacy_id,
+            "projectId": project_numeric_id,
+            "scriptId": script_numeric_id,
             "operation": "updated",
         }));
     }
@@ -145,7 +146,7 @@ pub(super) async fn invoke_add_derive_asset(
         .await
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
-    let next_legacy_id: i32 = sqlx::query_scalar(
+    let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(a.legacy_id), 0) + 1
         FROM app_asset a
@@ -172,7 +173,7 @@ pub(super) async fn invoke_add_derive_asset(
     )
     .bind(new_id)
     .bind(scope.project_id)
-    .bind(next_legacy_id)
+    .bind(next_numeric_id)
     .bind(name)
     .bind(parent.asset_type)
     .bind(desc)
@@ -199,12 +200,12 @@ pub(super) async fn invoke_add_derive_asset(
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
     Ok(json!({
-        "id": next_legacy_id,
+        "id": next_numeric_id,
         "assetsId": assets_id,
         "name": name,
         "desc": desc,
-        "projectId": project_legacy_id,
-        "scriptId": script_legacy_id,
+        "projectId": project_numeric_id,
+        "scriptId": script_numeric_id,
         "operation": "created",
     }))
 }
@@ -214,9 +215,9 @@ pub(super) async fn invoke_del_derive_asset(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
-    let scope = require_owned_script_scope(ctx, script_legacy_id).await?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
+    let scope = require_owned_script_scope(ctx, script_numeric_id).await?;
     let assets_id = parse_i32_required(arguments, "assetsId")?;
     let derive_id = parse_i32_required(arguments, "id")?;
 
@@ -251,8 +252,8 @@ pub(super) async fn invoke_del_derive_asset(
     Ok(json!({
         "id": derive_id,
         "assetsId": assets_id,
-        "projectId": project_legacy_id,
-        "scriptId": script_legacy_id,
+        "projectId": project_numeric_id,
+        "scriptId": script_numeric_id,
         "deleted": true,
     }))
 }
@@ -262,9 +263,9 @@ pub(super) async fn invoke_generate_derive_asset(
     arguments: &Value,
 ) -> Result<Value, InvokeError> {
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
-    let scope = require_owned_script_scope(ctx, script_legacy_id).await?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
+    let scope = require_owned_script_scope(ctx, script_numeric_id).await?;
     let ids = parse_ids_required(arguments, "ids")?;
     let model = arguments
         .get("model")
@@ -308,8 +309,8 @@ pub(super) async fn invoke_generate_derive_asset(
     for asset_id in valid_ids {
         let payload = json!({
             "source": "production.assets.batch-generate",
-            "project_numeric_id": project_legacy_id,
-            "script_id": script_legacy_id,
+            "project_numeric_id": project_numeric_id,
+            "script_id": script_numeric_id,
             "asset_id": asset_id,
             "model": model,
             "resolution": resolution,
@@ -330,9 +331,9 @@ pub(super) async fn invoke_generate_storyboard(
 ) -> Result<Value, InvokeError> {
     let ids = parse_ids_required(arguments, "ids")?;
     let pool = require_pool(ctx)?;
-    let project_legacy_id = project_legacy_from_ctx(ctx)?;
-    let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
-    let scope = require_owned_script_scope(ctx, script_legacy_id).await?;
+    let project_numeric_id = project_numeric_from_ctx(ctx)?;
+    let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
+    let scope = require_owned_script_scope(ctx, script_numeric_id).await?;
     let model = arguments
         .get("model")
         .and_then(Value::as_str)
@@ -371,9 +372,9 @@ pub(super) async fn invoke_generate_storyboard(
     for row in rows {
         let payload = json!({
             "source": "production.storyboard.batch-generate-image",
-            "project_numeric_id": project_legacy_id,
-            "script_id": script_legacy_id,
-            "storyboard_numeric_id": row.legacy_id,
+            "project_numeric_id": project_numeric_id,
+            "script_id": script_numeric_id,
+            "storyboard_numeric_id": row.numeric_id,
             "prompt": row.prompt.unwrap_or_default(),
             "model": model,
             "resolution": resolution,

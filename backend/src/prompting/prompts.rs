@@ -15,7 +15,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Clone, Copy)]
 struct DefaultSlot {
-    legacy_id: i32,
+    numeric_id: i32,
     name: &'static str,
     kind: &'static str,
     body: &'static str,
@@ -23,7 +23,7 @@ struct DefaultSlot {
 
 const DEFAULT_SLOTS: [DefaultSlot; 3] = [
     DefaultSlot {
-        legacy_id: 1,
+        numeric_id: 1,
         name: "事件提取",
         kind: "eventExtraction",
         body: include_str!(concat!(
@@ -32,7 +32,7 @@ const DEFAULT_SLOTS: [DefaultSlot; 3] = [
         )),
     },
     DefaultSlot {
-        legacy_id: 2,
+        numeric_id: 2,
         name: "剧本资产提取",
         kind: "scriptAssetExtraction",
         body: include_str!(concat!(
@@ -41,7 +41,7 @@ const DEFAULT_SLOTS: [DefaultSlot; 3] = [
         )),
     },
     DefaultSlot {
-        legacy_id: 3,
+        numeric_id: 3,
         name: "视频提示词生成",
         kind: "videoPromptGeneration",
         body: include_str!(concat!(
@@ -53,7 +53,8 @@ const DEFAULT_SLOTS: [DefaultSlot; 3] = [
 
 #[derive(Debug, FromRow)]
 struct UserPromptRow {
-    legacy_id: i32,
+    #[sqlx(rename = "legacy_id")]
+    numeric_id: i32,
     name: Option<String>,
     kind: String,
     body: String,
@@ -84,8 +85,8 @@ pub fn router() -> Router<AppState> {
         )
 }
 
-fn slot_by_legacy_id(id: i32) -> Option<&'static DefaultSlot> {
-    DEFAULT_SLOTS.iter().find(|s| s.legacy_id == id)
+fn slot_by_numeric_id(id: i32) -> Option<&'static DefaultSlot> {
+    DEFAULT_SLOTS.iter().find(|s| s.numeric_id == id)
 }
 
 fn merge_slot(def: &'static DefaultSlot, row: Option<&UserPromptRow>) -> PromptTemplateJson {
@@ -97,7 +98,7 @@ fn merge_slot(def: &'static DefaultSlot, row: Option<&UserPromptRow>) -> PromptT
     let prompt_type = row.map(|r| r.kind.as_str()).unwrap_or(def.kind).to_string();
     let data = row.map(|r| r.body.as_str()).unwrap_or(def.body).to_string();
     PromptTemplateJson {
-        id: def.legacy_id,
+        id: def.numeric_id,
         name,
         prompt_type,
         data,
@@ -129,7 +130,7 @@ async fn list_prompts(
 
     let mut out = Vec::with_capacity(DEFAULT_SLOTS.len());
     for def in &DEFAULT_SLOTS {
-        let merged = rows.iter().find(|r| r.legacy_id == def.legacy_id);
+        let merged = rows.iter().find(|r| r.numeric_id == def.numeric_id);
         out.push(merge_slot(def, merged));
     }
 
@@ -142,7 +143,7 @@ async fn get_prompt(
     Path(numeric_id): Path<i32>,
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let def = slot_by_legacy_id(numeric_id).ok_or(ApiError::NotFound)?;
+    let def = slot_by_numeric_id(numeric_id).ok_or(ApiError::NotFound)?;
     let pool = state
         .pool
         .as_ref()
@@ -171,7 +172,7 @@ async fn patch_prompt(
     Json(body): Json<PatchPromptBody>,
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let def = slot_by_legacy_id(numeric_id).ok_or(ApiError::NotFound)?;
+    let def = slot_by_numeric_id(numeric_id).ok_or(ApiError::NotFound)?;
     let pool = state
         .pool
         .as_ref()
@@ -187,7 +188,7 @@ async fn patch_prompt(
         "#,
     )
     .bind(uid)
-    .bind(def.legacy_id)
+    .bind(def.numeric_id)
     .bind(def.name)
     .bind(def.kind)
     .bind(&body.data)
@@ -196,7 +197,7 @@ async fn patch_prompt(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(PromptTemplateJson {
-        id: def.legacy_id,
+        id: def.numeric_id,
         name: def.name.to_string(),
         prompt_type: def.kind.to_string(),
         data: body.data,
@@ -221,7 +222,7 @@ mod tests {
 
     #[test]
     fn default_slots_have_unique_legacy_ids() {
-        let mut ids: Vec<i32> = DEFAULT_SLOTS.iter().map(|s| s.legacy_id).collect();
+        let mut ids: Vec<i32> = DEFAULT_SLOTS.iter().map(|s| s.numeric_id).collect();
         ids.sort();
         ids.dedup();
         assert_eq!(ids.len(), DEFAULT_SLOTS.len());
@@ -229,21 +230,21 @@ mod tests {
 
     #[test]
     fn slot_by_legacy_id_finds_existing() {
-        assert!(slot_by_legacy_id(1).is_some());
-        assert!(slot_by_legacy_id(2).is_some());
-        assert!(slot_by_legacy_id(3).is_some());
+        assert!(slot_by_numeric_id(1).is_some());
+        assert!(slot_by_numeric_id(2).is_some());
+        assert!(slot_by_numeric_id(3).is_some());
     }
 
     #[test]
     fn slot_by_legacy_id_returns_none_for_invalid() {
-        assert!(slot_by_legacy_id(999).is_none());
+        assert!(slot_by_numeric_id(999).is_none());
     }
 
     #[test]
     fn merge_slot_uses_defaults_when_no_row() {
         let def = &DEFAULT_SLOTS[0];
         let merged = merge_slot(def, None);
-        assert_eq!(merged.id, def.legacy_id);
+        assert_eq!(merged.id, def.numeric_id);
         assert_eq!(merged.name, def.name);
         assert_eq!(merged.prompt_type, def.kind);
         assert_eq!(merged.data, def.body);
@@ -253,13 +254,13 @@ mod tests {
     fn merge_slot_uses_row_values_when_present() {
         let def = &DEFAULT_SLOTS[0];
         let row = UserPromptRow {
-            legacy_id: def.legacy_id,
+            numeric_id: def.numeric_id,
             name: Some("Custom Name".to_string()),
             kind: "customKind".to_string(),
             body: "custom body".to_string(),
         };
         let merged = merge_slot(def, Some(&row));
-        assert_eq!(merged.id, def.legacy_id);
+        assert_eq!(merged.id, def.numeric_id);
         assert_eq!(merged.name, "Custom Name");
         assert_eq!(merged.prompt_type, "customKind");
         assert_eq!(merged.data, "custom body");
@@ -269,7 +270,7 @@ mod tests {
     fn merge_slot_uses_default_name_when_row_name_empty() {
         let def = &DEFAULT_SLOTS[0];
         let row = UserPromptRow {
-            legacy_id: def.legacy_id,
+            numeric_id: def.numeric_id,
             name: Some("   ".to_string()),
             kind: "customKind".to_string(),
             body: "custom body".to_string(),

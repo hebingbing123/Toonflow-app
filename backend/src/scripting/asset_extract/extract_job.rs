@@ -236,7 +236,7 @@ async fn mark_script_failed(
     pool: &PgPool,
     project_uuid: Uuid,
     uid: Uuid,
-    script_legacy_id: i32,
+    script_numeric_id: i32,
     reason: &str,
 ) -> Result<(), String> {
     sqlx::query(
@@ -250,7 +250,7 @@ async fn mark_script_failed(
     )
     .bind(project_uuid)
     .bind(uid)
-    .bind(script_legacy_id)
+    .bind(script_numeric_id)
     .bind(reason)
     .execute(pool)
     .await
