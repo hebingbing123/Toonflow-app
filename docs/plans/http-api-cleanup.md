@@ -79,7 +79,7 @@
 |------|------|
 | `backend/src/projects/routes.rs` | **主路径**：`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`、`GET …/stats`（UUID）。**已删除** `GET`/`PATCH`/`DELETE …/projects/legacy/{legacy_id}` 与 `GET …/projects/legacy/{legacy_id}/stats`（与竖切 1 对齐） |
 | `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`、`GET …/numeric/{numeric_id}/cover`（磁盘文件名仍用 DB **`legacy_id`**，见 `AppState` 注释） |
-| `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{legacy_id}`（对齐旧 `o_prompt.id` 1–3） |
+| `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{numeric_id}`（对齐旧 `o_prompt.id` 1–3） |
 | `backend/src/scripting/scripts.rs` | **主路径**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`。**已删除** `…/projects/legacy/{id}/scripts` 与 **`…/scripts/legacy/{id}`**（剧本本体 `GET`/`PATCH`/`DELETE`）；分镜列表/创建见 **`narrative/storyboards`** UUID 路径。旧 `POST …/scripts/batch-add` 已移除 |
 | `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_legacy_id`** + **`script_legacy_ids[]`**（无 `/legacy/` 段但语义同旧栈） |
 | `backend/src/assets/generate.rs` | `assets-generate` 各 handler：`project_id`/`project_legacy_id`、`asset_legacy_id`、`legacy_image_id` 入队 payload；`cancel-generate` 按 **`legacy_image_id`** 协同取消 |
@@ -319,7 +319,7 @@
 | **只改 REST 不改 Harness** | `HarnessContext`、各 `domain_*` 工具仍以整型项目/剧本 id 查库；需 **同一里程碑** 内定义新上下文字段并改 Flutter WS 客户端。 |
 | **制作 HTTP 面过早删除** | **`production::router()`** 仍为产品工作台真源；流程合并逻辑在 **`production_flow`**，删路由前须完整迁移 Flutter/契约。 |
 | **OpenAPI / smoke / pg_contract 不同步** | 仅删 `router()` 会导致 CI 仍测旧路径或反之；每域保持 **契约三件套** 同 PR。 |
-| **画风 / Prompts** | 画风 URL 已用 **`/art-styles/numeric/...`**；**`prompts/{legacy_id}`** 仍为旧 **`o_prompt.id`** 槽位命名，不在已删的 **`narrative::legacy`** 树内。 |
+| **画风 / Prompts** | 画风 URL 已用 **`/art-styles/numeric/...`**；**`prompts/{numeric_id}`** 对应旧 **`o_prompt.id`** 槽位 1–3，不在已删的 **`narrative::legacy`** 树内。 |
 | **Staging 与删列** | `legacy_staging`、`promote_legacy_from_staging` 与 **`legacy_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |
 | **双源 `data/`** | 仓库根 **`data/`** 与 **`backend/data/`** 均跟踪大量 **`skills/`**、**`models/`**；Rust 运行时与 `include_str!` 均指向 **`backend/data/`**（如 `prompting/skills.rs`、`vendor/catalog.rs`）。根目录树易与 **`backend/data/`** 漂移、误改无效副本。 |
 
