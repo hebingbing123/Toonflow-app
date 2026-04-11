@@ -468,9 +468,9 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                 : () async {
                     setDialogState(() => saving[0] = true);
                     try {
-                      final s = await createScriptUnderProjectLegacy(
+                      final s = await createScriptUnderProject(
                         token,
-                        p.legacyId,
+                        p.id,
                       );
                       if (!ctx.mounted) return;
                       scriptList.add(

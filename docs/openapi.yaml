@@ -4949,8 +4949,209 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/scripts:
+    post:
+      tags: [scripts]
+      summary: Create script under a project (by project UUID; allocates global script legacy_id)
+      operationId: createScriptUnderProjectByProjectIdV1
+      description: |
+        Same as **`POST /api/v1/projects/legacy/{project_legacy_id}/scripts`**, keyed by **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScriptBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptRow"
+        "400":
+          description: Unknown JSON properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/{project_id}/scripts/{script_legacy_id}:
+    get:
+      tags: [scripts]
+      summary: Script by project UUID + script legacy id
+      operationId: getScriptByProjectAndLegacyV1
+      description: |
+        Same row as **`GET /api/v1/scripts/legacy/{legacy_id}`** when the script belongs to **`project_id`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptRow"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not in project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [scripts]
+      summary: Partially update script (scoped to project UUID)
+      operationId: patchScriptByProjectAndLegacyV1
+      description: |
+        Same merge rules as **`PATCH /api/v1/scripts/legacy/{legacy_id}`**; script must belong to **`project_id`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchScriptBody"
+      responses:
+        "200":
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptRow"
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not in project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [scripts]
+      summary: Delete script (scoped to project UUID)
+      operationId: deleteScriptByProjectAndLegacyV1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: script_legacy_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Script not found or not in project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{project_legacy_id}/scripts:
     post:
+      deprecated: true
       tags: [scripts]
       summary: Create script under a project (allocates global script legacy_id)
       operationId: createScriptUnderProjectLegacyV1
@@ -7939,6 +8140,7 @@ paths:
 
   /api/v1/scripts/legacy/{legacy_id}:
     get:
+      deprecated: true
       tags: [scripts]
       summary: Script by legacy integer id (owner must own parent project)
       operationId: getScriptByLegacyIdV1
@@ -7977,6 +8179,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     patch:
+      deprecated: true
       tags: [scripts]
       summary: Partially update script by legacy id
       operationId: patchScriptByLegacyIdV1
@@ -8030,6 +8233,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     delete:
+      deprecated: true
       tags: [scripts]
       summary: Delete script by legacy id
       operationId: deleteScriptByLegacyIdV1

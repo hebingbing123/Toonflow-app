@@ -12,7 +12,11 @@ extension _HomePageScriptEditor on _HomePageState {
     final contentCtrl = TextEditingController();
     final stateCtrl = TextEditingController();
     try {
-      final script = await fetchScriptByLegacyId(token, scriptLegacyId);
+      final script = await fetchScriptByProjectAndLegacyId(
+        token,
+        projectId,
+        scriptLegacyId,
+      );
       if (!mounted) return;
       nameCtrl.text = script.name ?? '';
       contentCtrl.text = script.content ?? '';
@@ -120,8 +124,9 @@ extension _HomePageScriptEditor on _HomePageState {
                             if (ok != true || !ctx.mounted) return;
                             setDialogState(() => saving[0] = true);
                             try {
-                              await deleteScriptByLegacyId(
+                              await deleteScriptByProjectAndLegacyId(
                                 token,
+                                projectId,
                                 scriptLegacyId,
                               );
                               if (!ctx.mounted) return;
@@ -172,8 +177,9 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                             try {
-                              await updateScriptByLegacyId(
+                              await updateScriptByProjectAndLegacyId(
                                 token,
+                                projectId,
                                 scriptLegacyId,
                                 {
                                   'name': nameCtrl.text.isEmpty

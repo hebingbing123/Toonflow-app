@@ -67,6 +67,111 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAdd(
   return BatchAddScriptResponseV1.fromJson(map);
 }
 
+/// `GET /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+Future<ScriptRow> fetchScriptByProjectAndLegacyId(
+  String accessToken,
+  String projectId,
+  int scriptLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+  );
+  final res = await http
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
+/// `PATCH /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+Future<ScriptRow> updateScriptByProjectAndLegacyId(
+  String accessToken,
+  String projectId,
+  int scriptLegacyId,
+  Map<String, dynamic> body,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+  );
+  final res = await http
+      .patch(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
+/// `DELETE /api/v1/projects/{project_id}/scripts/{script_legacy_id}`.
+Future<void> deleteScriptByProjectAndLegacyId(
+  String accessToken,
+  String projectId,
+  int scriptLegacyId,
+) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/$scriptLegacyId',
+  );
+  final res = await http
+      .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 204) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+}
+
+/// `POST /api/v1/projects/{project_id}/scripts` — see `createScriptUnderProjectByProjectIdV1`.
+Future<ScriptRow> createScriptUnderProject(
+  String accessToken,
+  String projectId, {
+  Map<String, dynamic>? fields,
+}) async {
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/projects/$projectId/scripts');
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(fields ?? <String, dynamic>{}),
+      )
+      .timeout(const Duration(seconds: 15));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 201) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ScriptRow.fromJson(map);
+}
+
 /// `GET /api/v1/scripts/legacy/{legacy_id}`. See `getScriptByLegacyIdV1`.
 Future<ScriptRow> fetchScriptByLegacyId(
   String accessToken,
