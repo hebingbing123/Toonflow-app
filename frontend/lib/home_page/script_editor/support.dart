@@ -1,4 +1,4 @@
-import '../rust_api.dart';
+import '../../rust_api.dart';
 
 class ScriptWorkbenchDiagnosis {
   const ScriptWorkbenchDiagnosis({

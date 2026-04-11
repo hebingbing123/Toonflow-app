@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/storyboard_workbench_support.dart';
+import 'package:toonflow_app/home_page/storyboard_editor/support.dart';
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {

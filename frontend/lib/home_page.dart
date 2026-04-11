@@ -7,11 +7,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
-import 'home_page/novel_workbench_support.dart';
+import 'home_page/project_editor/novels/support.dart';
 import 'home_page/project_editor/assets/generation_workbench_support.dart';
 import 'home_page/project_editor/assets/workbench_support.dart';
-import 'home_page/script_workbench_support.dart';
-import 'home_page/storyboard_workbench_support.dart';
+import 'home_page/script_editor/support.dart';
+import 'home_page/storyboard_editor/support.dart';
 import 'home_page/sections.dart';
 import 'home_page/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';

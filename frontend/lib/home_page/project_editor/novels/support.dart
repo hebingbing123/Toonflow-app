@@ -1,4 +1,4 @@
-import '../rust_api.dart';
+import '../../../rust_api.dart';
 
 String summarizeNovelRows(Iterable<NovelRow> rows, {int maxItems = 4}) {
   final items = rows.toList(growable: false);

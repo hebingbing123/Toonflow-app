@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import '../rust_api.dart';
+import '../../rust_api.dart';
 
 class StoryboardListDiagnosis {
   const StoryboardListDiagnosis({
