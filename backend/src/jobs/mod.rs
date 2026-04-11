@@ -1,5 +1,6 @@
 //! REST routes under `/api/v1/jobs` and the in-process poller in [`worker`].
 
+pub mod queue;
 pub mod worker;
 
 use axum::{

@@ -11,7 +11,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::json_patch::{parse_optional_i32_field, parse_optional_text_field, FieldPatch};
+use crate::http_kit::json_patch::{
+    parse_optional_i32_field, parse_optional_text_field, FieldPatch,
+};
 use crate::state::AppState;
 
 use super::crud::{resolve_owned_asset_id, resolve_owned_asset_id_and_metadata};

@@ -11,7 +11,7 @@ use serde_json::Value;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::json_patch::{parse_optional_text_field, FieldPatch};
+use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::projects::ProjectRow;
 use crate::state::AppState;
 

@@ -4,6 +4,10 @@ use crate::agent_memory;
 use crate::assets;
 use crate::billing;
 use crate::harness;
+use crate::http_kit::rate_limit::{
+    governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
+};
+use crate::http_kit::request_id_mw::inject_request_id_into_json_errors;
 use crate::jobs;
 use crate::manuals;
 use crate::metering;
@@ -11,10 +15,6 @@ use crate::narrative;
 use crate::production_legacy;
 use crate::projects;
 use crate::prompting;
-use crate::rate_limit::{
-    governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
-};
-use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::rest_legacy;
 use crate::scripting;
 use crate::settings;
