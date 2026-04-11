@@ -1,4 +1,6 @@
-//! Legacy **`POST …/get-material-data`**.
+//! 遗留 `POST …/get-material-data` — 素材数据查询。
+//!
+//! 返回项目中的素材资产和视频资源列表。
 
 use axum::{extract::State, http::HeaderMap, Json};
 

@@ -1,4 +1,6 @@
-//! Legacy **`POST …/batch-generation-data`**.
+//! 遗留 `POST …/batch-generation-data` — 批量生成数据查询。
+//!
+//! 返回适合批量生成工作流的资产分页列表。
 
 use axum::{extract::State, http::HeaderMap, Json};
 
