@@ -27,7 +27,7 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST};
 use crate::models_catalog::vendor_catalog_summaries;
 use crate::state::{AppState, VendorConfig};
-use crate::vendor_credential::{encrypt, is_encryption_configured, key_hint};
+use crate::vendor::credential::{encrypt, is_encryption_configured, key_hint};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize)]

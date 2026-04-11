@@ -709,7 +709,7 @@ fn load_system_prompt() -> String {
         }
         tracing::warn!(path = %p, "SCRIPT_ASSET_EXTRACT_PROMPT_PATH set but empty or unreadable");
     }
-    include_str!("../data/prompts/script_asset_extraction.default.txt").to_string()
+    include_str!("../../data/prompts/script_asset_extraction.default.txt").to_string()
 }
 
 #[cfg(test)]

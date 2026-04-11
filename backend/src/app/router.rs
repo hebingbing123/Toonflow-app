@@ -5,10 +5,10 @@ use crate::art_styles;
 use crate::assets;
 use crate::assets_generate;
 use crate::billing;
-use crate::director_manual;
 use crate::general_legacy;
 use crate::harness;
 use crate::jobs;
+use crate::manuals;
 use crate::models_catalog;
 use crate::novel_events;
 use crate::novels;
@@ -32,7 +32,6 @@ use crate::state::AppState;
 use crate::storyboards;
 use crate::tasks_legacy;
 use crate::usage;
-use crate::visual_manual;
 
 use axum::{
     http::{header, HeaderName, Method},
@@ -76,7 +75,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(models_catalog::router())
         .merge(projects::router())
         .merge(project_legacy::router())
-        .merge(director_manual::router())
+        .merge(manuals::director::router())
         .merge(general_legacy::router())
         .merge(art_styles::router())
         .merge(novels::router())
@@ -92,7 +91,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(storyboards::router())
         .merge(tasks_legacy::router())
         .merge(skills::router())
-        .merge(visual_manual::router())
+        .merge(manuals::visual::router())
         .merge(usage::router())
         .merge(prompts::router())
         .merge(quality_review::routes())

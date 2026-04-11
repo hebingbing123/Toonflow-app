@@ -149,7 +149,7 @@ async fn store_video_reference(
     project_legacy_id: i32,
     storyboard_legacy_id: i32,
     video_url: &str,
-    _resp: &crate::video_providers::VideoGenerationResponse,
+    _resp: &crate::vendor::video::VideoGenerationResponse,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
@@ -203,7 +203,7 @@ pub(super) async fn run_video_export(
     );
 
     let client = VideoProviderClient::new();
-    let export_req = crate::video_providers::VideoExportRequest {
+    let export_req = crate::vendor::video::VideoExportRequest {
         source_url: source_url.to_string(),
         format: format.to_string(),
         target_resolution: target_resolution.map(String::from),

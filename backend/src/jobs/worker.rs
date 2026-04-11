@@ -19,8 +19,8 @@ use crate::llm::{
 use crate::models_catalog::lookup_vendor_catalog;
 use crate::state::AppState;
 use crate::usage;
-use crate::vendor_credential::decrypt;
-use crate::video_providers::{
+use crate::vendor::credential::decrypt;
+use crate::vendor::video::{
     VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
 };
 

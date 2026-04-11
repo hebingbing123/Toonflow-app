@@ -8,13 +8,13 @@ mod assets;
 mod assets_generate;
 mod auth;
 mod billing;
-mod director_manual;
 mod error;
 mod general_legacy;
 mod harness;
 mod jobs;
 mod json_patch;
 mod llm;
+mod manuals;
 mod models_catalog;
 mod notify_hub;
 mod novel_events;
@@ -40,9 +40,7 @@ mod state;
 mod storyboards;
 mod tasks_legacy;
 mod usage;
-mod vendor_credential;
-mod video_providers;
-mod visual_manual;
+mod vendor;
 
 use std::net::SocketAddr;
 

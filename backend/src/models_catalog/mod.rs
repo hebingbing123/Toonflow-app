@@ -44,7 +44,7 @@ struct ModelDef {
 }
 
 static CATALOG: LazyLock<CatalogFile> = LazyLock::new(|| {
-    serde_json::from_str(include_str!("../data/models_catalog.json"))
+    serde_json::from_str(include_str!("../../data/models_catalog.json"))
         .expect("models_catalog.json must be valid JSON")
 });
 
