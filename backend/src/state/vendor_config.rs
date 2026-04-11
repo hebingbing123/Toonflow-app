@@ -1,6 +1,8 @@
-//! Per-user vendor configuration (non-sensitive: enabled vendors, model selection).
-//! API keys (inputValues) are intentionally NOT stored here; use server env or vault.
-//! TypeScript code (tsCode) execution is not supported in Rust backend.
+//! 提供商配置模块。
+//!
+//! 每个用户的提供商配置（非敏感：启用的提供商、模型选择）。
+//! API 密钥（inputValues）故意不存储在此处；使用服务器环境或 Vault。
+//! 不支持 TypeScript 代码（tsCode）执行。
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

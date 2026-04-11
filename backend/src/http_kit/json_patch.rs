@@ -1,4 +1,6 @@
-//! Shared JSON merge helpers for PATCH bodies (`Option<Value>` per field).
+//! JSON Patch 辅助函数。
+//!
+//! 共享的 JSON 合并辅助函数，用于 PATCH 请求体（每个字段 `Option<Value>`）。
 
 use serde_json::Value;
 
