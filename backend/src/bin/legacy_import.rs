@@ -1,11 +1,11 @@
-//! Import legacy `db2.sqlite` tables into `legacy_staging.snapshot` (JSONB rows).
+//! 将遗留 `db2.sqlite` 表导入 `legacy_staging.snapshot`（JSONB 行）。
 //!
-//! Usage:
+//! 用法：
 //! ```text
 //! SQLITE_PATH=/path/to/db2.sqlite DATABASE_URL=postgresql://... \
 //!   cargo run --bin toonflow-legacy-import --release
 //! ```
-//! Optional: `LEGACY_IMPORT_TRUNCATE=1` to `TRUNCATE legacy_staging.snapshot` first.
+//! 可选：`LEGACY_IMPORT_TRUNCATE=1` 首先执行 `TRUNCATE legacy_staging.snapshot`。
 
 use std::collections::HashMap;
 
