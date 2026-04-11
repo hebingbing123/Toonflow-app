@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+/// Keeps the legacy quality review regression entry isolated from the main flow.
 class QualityReviewsCompatibilityPanel extends StatelessWidget {
   const QualityReviewsCompatibilityPanel({
     super.key,
@@ -52,6 +53,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
   }
 }
 
+/// Displays a short, tappable slice of review results for the section overview.
 class QualityReviewsListPreview extends StatelessWidget {
   const QualityReviewsListPreview({
     super.key,

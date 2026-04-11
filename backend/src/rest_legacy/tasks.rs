@@ -1,5 +1,6 @@
-//! Legacy **`/api/task/*`** (Electron task center) as **`POST /api/v1/tasks/*`**.
-//! Maps to **`app_project`** / **`app_generation_job`** where shapes align; **`task-details`** accepts **`taskId`** as either a **UUID string** (`app_generation_job.id`) or a monotonic **integer** (`app_generation_job.legacy_task_id`) for legacy task-center compatibility.
+//! 遗留任务接口（Electron 任务中心）作为 `POST /api/v1/tasks/*`。
+//!
+//! 映射到 `app_project` / `app_generation_job`（在形状对齐处）；`task-details` 接受 `taskId` 作为 **UUID 字符串**（`app_generation_job.id`）或单调**整数**（`app_generation_job.legacy_task_id`）以兼容遗留任务中心。
 
 use axum::{
     extract::{Json, State},

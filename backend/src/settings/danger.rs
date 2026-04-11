@@ -1,5 +1,7 @@
-//! Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** wiped/rebuilt **local SQLite**.
-//! SaaS: **`POST`** endpoints accept **`{}`** only; **JWT** required; response **501** — no bulk wipe (use Supabase ops / account deletion flows).
+//! 危险操作模块。
+//!
+//! 遗留 `POST /api/other/deleteAllData` 和 `GET /api/setting/dbConfig/clearData` 擦除/重建**本地 SQLite**。
+//! SaaS：`POST` 端点仅接受 `{}`；需要 **JWT**；响应 **501** — 无批量擦除（使用 Supabase 操作/账户删除流程）。
 
 use axum::{
     extract::{Json, State},

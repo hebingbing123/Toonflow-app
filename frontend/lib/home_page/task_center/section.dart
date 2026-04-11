@@ -109,28 +109,12 @@ class TaskCenterSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          projectSummary,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: outline),
+        TaskCenterSummaryPreview(
+          outlineColor: outline,
+          projectSummary: projectSummary,
+          taskSummary: taskSummary,
+          taskCategoriesLine: taskCategoriesLine,
         ),
-        const SizedBox(height: 4),
-        Text(
-          taskSummary,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: outline),
-        ),
-        if (taskCategoriesLine != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            '分类摘要：$taskCategoriesLine',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-        ],
         const SizedBox(height: 8),
         TaskCenterCompatibilityPanel(
           outlineColor: outline,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+/// Groups the top-level project actions so the section stays focused on orchestration.
 class ProjectsActionsBar extends StatelessWidget {
   const ProjectsActionsBar({
     super.key,
@@ -74,6 +75,7 @@ class ProjectsActionsBar extends StatelessWidget {
   }
 }
 
+/// Wraps the legacy agent-memory probe used as a regression checkpoint.
 class ProjectsCompatibilityPanel extends StatelessWidget {
   const ProjectsCompatibilityPanel({
     super.key,
@@ -111,6 +113,7 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
   }
 }
 
+/// Shows a short list of available art styles with a quick path to management.
 class ProjectsArtStylesPreview extends StatelessWidget {
   const ProjectsArtStylesPreview({
     super.key,
@@ -149,6 +152,7 @@ class ProjectsArtStylesPreview extends StatelessWidget {
   }
 }
 
+/// Displays project rows as a lightweight overview before entering detail pages.
 class ProjectsListPreview extends StatelessWidget {
   const ProjectsListPreview({
     super.key,

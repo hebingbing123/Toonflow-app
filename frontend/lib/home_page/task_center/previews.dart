@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 
+/// Encapsulates legacy task probes so the main task center keeps only domain flow.
 class TaskCenterCompatibilityPanel extends StatelessWidget {
   const TaskCenterCompatibilityPanel({
     super.key,
@@ -91,6 +92,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
   }
 }
 
+/// Renders the current task list snapshot without owning any fetch state.
 class TaskCenterJobsPreview extends StatelessWidget {
   const TaskCenterJobsPreview({
     super.key,
@@ -118,6 +120,41 @@ class TaskCenterJobsPreview extends StatelessWidget {
             onTap: () => onSelectTaskJob(job),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// Shows the compact project/category/task summaries above the workbench entry.
+class TaskCenterSummaryPreview extends StatelessWidget {
+  const TaskCenterSummaryPreview({
+    super.key,
+    required this.outlineColor,
+    required this.projectSummary,
+    required this.taskSummary,
+    this.taskCategoriesLine,
+  });
+
+  final Color outlineColor;
+  final String projectSummary;
+  final String taskSummary;
+  final String? taskCategoriesLine;
+
+  @override
+  Widget build(BuildContext context) {
+    final bodySmall = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: outlineColor);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(projectSummary, style: bodySmall),
+        const SizedBox(height: 4),
+        Text(taskSummary, style: bodySmall),
+        if (taskCategoriesLine != null) ...[
+          const SizedBox(height: 4),
+          Text('分类摘要：$taskCategoriesLine', style: bodySmall),
+        ],
       ],
     );
   }
