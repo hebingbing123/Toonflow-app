@@ -1,4 +1,4 @@
-//! User prompt templates (parity with legacy SQLite **`o_prompt`** and **`/api/setting/promptManage/getPrompt`** / **`updatePrompt`**).
+//! 用户提示词模板（与遗留 SQLite `o_prompt` 和 `/api/setting/promptManage/getPrompt` / `updatePrompt` 兼容）。
 
 use axum::{
     extract::{Path, State},

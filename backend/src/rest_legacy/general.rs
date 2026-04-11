@@ -1,4 +1,4 @@
-//! Legacy **`/api/general/getSingleProject`** and **`updateProject`** as versioned **`POST`**.
+//! 遗留 `/api/general/getSingleProject` 和 `updateProject` 作为带版本的 `POST`。
 
 use axum::{
     extract::{Json, State},
