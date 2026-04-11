@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../contexts/script/action_panels.dart';
 import '../contexts/script/card_panels.dart';
 import '../contexts/script/context_snapshot.dart';
 import '../contexts/script/status_panels.dart';
@@ -359,64 +360,33 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
   }
 
   Widget _buildPromptTemplates() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: widget.scriptPromptPresets
-          .map(
-            (AgentWorkspacePromptPreset preset) => ActionChip(
-              label: Text(preset.label),
-              onPressed: widget.busy
-                  ? null
-                  : () => widget.onSelectPrompt(preset.prompt),
-            ),
-          )
-          .toList(growable: false),
+    return ScriptWorkspacePromptTemplatesPanel(
+      busy: widget.busy,
+      presets: widget.scriptPromptPresets,
+      onSelectPrompt: widget.onSelectPrompt,
     );
   }
 
   Widget _buildGuidedTasks() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: <Widget>[
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onScriptDomainToolChanged('get_planData');
-                  _probeScriptDomainTool();
-                },
-          child: const Text('1) 拉取 planData'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  widget.onScriptDomainToolChanged('get_script_content');
-                  _probeScriptDomainTool();
-                },
-          child: const Text('2) 拉取剧本正文'),
-        ),
-        FilledButton.tonal(
-          onPressed: widget.busy
-              ? null
-              : () {
-                  _applyScriptPromptIfEmpty(
-                    '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
-                  );
-                  widget.onScriptSubAgentChanged('run_sub_agent_script');
-                  _runScriptSubAgentTool();
-                },
-          child: const Text('3) 生成剧本草稿'),
-        ),
-        OutlinedButton(
-          onPressed: widget.busy || !_canWriteBackScriptResult
-              ? null
-              : _writeBackScriptResult,
-          child: const Text('4) 写回剧本'),
-        ),
-      ],
+    return ScriptWorkspaceGuidedTasksPanel(
+      busy: widget.busy,
+      canWriteBackScriptResult: _canWriteBackScriptResult,
+      onFetchPlanData: () {
+        widget.onScriptDomainToolChanged('get_planData');
+        _probeScriptDomainTool();
+      },
+      onFetchScriptContent: () {
+        widget.onScriptDomainToolChanged('get_script_content');
+        _probeScriptDomainTool();
+      },
+      onGenerateDraft: () {
+        _applyScriptPromptIfEmpty(
+          '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
+        );
+        widget.onScriptSubAgentChanged('run_sub_agent_script');
+        _runScriptSubAgentTool();
+      },
+      onWriteBackScript: _writeBackScriptResult,
     );
   }
 
