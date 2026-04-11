@@ -10,10 +10,10 @@ pub struct StoryboardRow {
     pub id: Uuid,
     pub script_id: Uuid,
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     #[serde(rename = "numeric_script_id")]
-    #[sqlx(rename = "legacy_script_id")]
+    #[sqlx(rename = "numeric_script_id")]
     pub numeric_script_id: Option<i32>,
     pub prompt: Option<String>,
     pub file_path: Option<String>,
@@ -25,7 +25,7 @@ pub struct StoryboardRow {
     pub video_desc: Option<String>,
     pub should_generate_image: Option<i32>,
     #[serde(rename = "numeric_project_id")]
-    #[sqlx(rename = "legacy_project_id")]
+    #[sqlx(rename = "numeric_project_id")]
     pub numeric_project_id: Option<i32>,
     pub flow_id: Option<i32>,
     pub sb_index: Option<i32>,

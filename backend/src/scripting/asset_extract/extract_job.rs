@@ -21,7 +21,7 @@ pub(crate) async fn run_extract_job(
     let system = load_system_prompt();
 
     let project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+        r#"SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $2"#,
     )
     .bind(project_numeric_id)
     .bind(uid)
@@ -38,7 +38,7 @@ pub(crate) async fn run_extract_job(
         WHERE s.project_id = p.id
           AND p.id = $1
           AND p.owner_user_id = $2
-          AND s.legacy_id = ANY($3)
+          AND s.numeric_id = ANY($3)
         "#,
     )
     .bind(project_uuid)
@@ -50,10 +50,10 @@ pub(crate) async fn run_extract_job(
 
     let script_map: Vec<(i32, Option<String>, Option<String>)> = sqlx::query_as(
         r#"
-        SELECT s.legacy_id, s.name, s.content
+        SELECT s.numeric_id, s.name, s.content
         FROM app_script s
-        WHERE s.project_id = $1 AND s.legacy_id = ANY($2)
-        ORDER BY s.legacy_id
+        WHERE s.project_id = $1 AND s.numeric_id = ANY($2)
+        ORDER BY s.numeric_id
         "#,
     )
     .bind(project_uuid)
@@ -108,7 +108,7 @@ async fn process_one_group(
             SELECT s.extract_state
             FROM app_script s
             INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.legacy_id = $1 AND s.project_id = $2 AND p.owner_user_id = $3
+            WHERE s.numeric_id = $1 AND s.project_id = $2 AND p.owner_user_id = $3
             "#,
         )
         .bind(sid)
@@ -139,7 +139,7 @@ async fn process_one_group(
         SET extract_state = 0, updated_at = NOW()
         FROM app_project p
         WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
-          AND s.legacy_id = ANY($3)
+          AND s.numeric_id = ANY($3)
         "#,
     )
     .bind(project_uuid)
@@ -219,7 +219,7 @@ async fn process_one_group(
         SET extract_state = 1, error_reason = NULL, updated_at = NOW()
         FROM app_project p
         WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
-          AND s.legacy_id = ANY($3)
+          AND s.numeric_id = ANY($3)
         "#,
     )
     .bind(project_uuid)
@@ -245,7 +245,7 @@ async fn mark_script_failed(
         SET extract_state = -1, error_reason = $4, updated_at = NOW()
         FROM app_project p
         WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
-          AND s.legacy_id = $3
+          AND s.numeric_id = $3
         "#,
     )
     .bind(project_uuid)

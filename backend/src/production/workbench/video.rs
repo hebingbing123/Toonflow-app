@@ -34,8 +34,8 @@ pub(in crate::production) async fn post_workbench_generate_video(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -94,8 +94,8 @@ pub(in crate::production) async fn post_workbench_get_video_list(
     let videos = sqlx::query_as::<_, VideoItem>(
         r#"
         SELECT
-          sb.legacy_id AS id,
-          sc.legacy_id AS script_id,
+          sb.numeric_id AS id,
+          sc.numeric_id AS script_id,
           sb.prompt,
           sb.file_path AS video_url,
           sb.duration,
@@ -106,7 +106,7 @@ pub(in crate::production) async fn post_workbench_get_video_list(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
           AND ($3::int4 IS NULL OR sb.track_id = $3)
@@ -130,7 +130,7 @@ pub(in crate::production) async fn post_workbench_get_video_list(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
           AND ($3::int4 IS NULL OR sb.track_id = $3)

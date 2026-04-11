@@ -24,7 +24,7 @@ const DEFAULT_GROUP_SIZE: usize = 5;
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExtractAssetsBody {
-    /// Stable project integer id (`app_project.legacy_id`).
+    /// Stable project integer id (`app_project.numeric_id`).
     pub project_numeric_id: i32,
     pub script_numeric_ids: Vec<i32>,
     #[serde(default = "default_group_size")]

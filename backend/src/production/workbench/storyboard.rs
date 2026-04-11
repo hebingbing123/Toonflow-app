@@ -53,8 +53,8 @@ pub(in crate::production) async fn post_storyboard_add(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -68,10 +68,10 @@ pub(in crate::production) async fn post_storyboard_add(
         return Err(ApiError::NotFound);
     }
 
-    // Get next legacy_id
+    // Get next numeric_id
     let next_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
@@ -87,15 +87,15 @@ pub(in crate::production) async fn post_storyboard_add(
     sqlx::query(
         r#"
         INSERT INTO app_storyboard (
-            script_id, legacy_id, legacy_script_id, prompt, duration,
+            script_id, numeric_id, numeric_script_id, prompt, duration,
             state, sb_index, created_at, updated_at
         )
         SELECT sc.id, $4, $3, $5, $6, '草稿', $7, NOW(), NOW()
         FROM app_script sc
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND sc.legacy_id = $3
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -104,7 +104,7 @@ pub(in crate::production) async fn post_storyboard_add(
     .bind(next_id)
     .bind(body.prompt.trim())
     .bind(body.duration.unwrap_or(5))
-    .bind(next_id) // sb_index = legacy_id for now
+    .bind(next_id) // sb_index = numeric_id for now
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -173,8 +173,8 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -188,10 +188,10 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         return Err(ApiError::NotFound);
     }
 
-    // Get base legacy_id
+    // Get base numeric_id
     let base_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0)
+        SELECT COALESCE(MAX(numeric_id), 0)
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
@@ -210,15 +210,15 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         sqlx::query(
             r#"
             INSERT INTO app_storyboard (
-                script_id, legacy_id, legacy_script_id, prompt, duration,
+                script_id, numeric_id, numeric_script_id, prompt, duration,
                 state, sb_index, created_at, updated_at
             )
             SELECT sc.id, $4, $3, $5, $6, '草稿', $7, NOW(), NOW()
             FROM app_script sc
             INNER JOIN app_project p ON p.id = sc.project_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-              AND sc.legacy_id = $3
+              AND p.numeric_id = $2
+              AND sc.numeric_id = $3
             "#,
         )
         .bind(uid)
@@ -267,8 +267,8 @@ pub(in crate::production) async fn post_storyboard_get_data(
     let row = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
         SELECT
-          sb.legacy_id AS id,
-          sb.legacy_script_id AS script_id,
+          sb.numeric_id AS id,
+          sb.numeric_script_id AS script_id,
           sb.prompt,
           sb.file_path AS url,
           sb.duration,
@@ -280,7 +280,7 @@ pub(in crate::production) async fn post_storyboard_get_data(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = $2
+          AND sb.numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -337,7 +337,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_storyboard.legacy_id = $2
+          AND app_storyboard.numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -396,7 +396,7 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_storyboard.legacy_id = $2
+          AND app_storyboard.numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -458,7 +458,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_storyboard.legacy_id = $2
+          AND app_storyboard.numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -506,8 +506,8 @@ pub(in crate::production) async fn post_get_storyboard_data(
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
         SELECT
-          sb.legacy_id AS id,
-          sb.legacy_script_id AS script_id,
+          sb.numeric_id AS id,
+          sb.numeric_script_id AS script_id,
           sb.prompt,
           sb.file_path AS url,
           sb.duration,
@@ -519,8 +519,8 @@ pub(in crate::production) async fn post_get_storyboard_data(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND sc.legacy_id = $3
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
         ORDER BY sb.sb_index ASC
         "#,
     )
@@ -574,7 +574,7 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = $2
+          AND sb.numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -632,7 +632,7 @@ pub(in crate::production) async fn post_storyboard_preview_image(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = $2
+          AND sb.numeric_id = $2
         "#,
     )
     .bind(uid)

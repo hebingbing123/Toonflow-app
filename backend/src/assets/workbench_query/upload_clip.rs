@@ -14,7 +14,7 @@ use crate::state::AppState;
 use super::super::crud::ensure_owned_project_pk;
 use super::super::models::*;
 use super::super::{
-    normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_LEGACY, ADV_LOCK_ASSET_LEGACY,
+    normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_NUMERIC, ADV_LOCK_ASSET_NUMERIC,
 };
 
 pub(crate) async fn post_project_workbench_upload_clip(
@@ -55,25 +55,25 @@ pub(crate) async fn post_project_workbench_upload_clip(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ASSET_LEGACY)
+        .bind(ADV_LOCK_ASSET_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ASSET_IMAGE_LEGACY)
+        .bind(ADV_LOCK_ASSET_IMAGE_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_asset_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_image_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_image_id), 0) + 1 FROM app_asset_image"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_image_id), 0) + 1 FROM app_asset_image"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -82,7 +82,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
     let asset_id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO app_asset (
-          project_id, legacy_id, name, asset_type, create_time_ms, metadata
+          project_id, numeric_id, name, asset_type, create_time_ms, metadata
         )
         VALUES (
           $1, $2, $3, 'clip', $4, jsonb_build_object('imageId', $5::integer)
@@ -102,7 +102,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
     sqlx::query(
         r#"
         INSERT INTO app_asset_image (
-          asset_id, sort_index, file_path, state, legacy_image_id
+          asset_id, sort_index, file_path, state, numeric_image_id
         )
         VALUES ($1, 0, $2, '已完成', $3)
         "#,

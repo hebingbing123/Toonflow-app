@@ -17,7 +17,7 @@ use super::crud::ensure_owned_project_pk;
 use super::models::*;
 use super::{
     merge_legacy_asset_metadata, normalize_upload_clip_data_uri, resolve_owned_asset_metadata,
-    ADV_LOCK_ASSET_IMAGE_LEGACY, ADV_LOCK_ASSET_LEGACY,
+    ADV_LOCK_ASSET_IMAGE_NUMERIC, ADV_LOCK_ASSET_NUMERIC,
 };
 
 pub(super) async fn post_project_workbench_add_assets(
@@ -55,13 +55,13 @@ pub(super) async fn post_project_workbench_add_assets(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ASSET_LEGACY)
+        .bind(ADV_LOCK_ASSET_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -77,7 +77,7 @@ pub(super) async fn post_project_workbench_add_assets(
     sqlx::query(
         r#"
         INSERT INTO app_asset (
-          project_id, legacy_id, name, asset_type, description, create_time_ms, metadata
+          project_id, numeric_id, name, asset_type, description, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         "#,
@@ -147,7 +147,7 @@ pub(super) async fn post_project_workbench_update_assets(
         WHERE a.project_id = p.id
           AND p.owner_user_id = $4
           AND p.id = $5
-          AND a.legacy_id = $6
+          AND a.numeric_id = $6
         "#,
     )
     .bind(name)
@@ -206,7 +206,7 @@ pub(super) async fn post_project_workbench_save_assets(
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
           AND p.id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -226,13 +226,13 @@ pub(super) async fn post_project_workbench_save_assets(
     {
         let file_path = normalize_upload_clip_data_uri(raw_base64)?;
         sqlx::query("SELECT pg_advisory_xact_lock($1)")
-            .bind(ADV_LOCK_ASSET_IMAGE_LEGACY)
+            .bind(ADV_LOCK_ASSET_IMAGE_NUMERIC)
             .execute(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
         let next_image_legacy: i32 = sqlx::query_scalar(
-            r#"SELECT COALESCE(MAX(legacy_image_id), 0) + 1 FROM app_asset_image"#,
+            r#"SELECT COALESCE(MAX(numeric_image_id), 0) + 1 FROM app_asset_image"#,
         )
         .fetch_one(&mut *tx)
         .await
@@ -252,7 +252,7 @@ pub(super) async fn post_project_workbench_save_assets(
 
         sqlx::query(
             r#"
-            INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, legacy_image_id)
+            INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, numeric_image_id)
             VALUES ($1, $2, $3, '已完成', $4)
             "#,
         )
@@ -283,7 +283,7 @@ pub(super) async fn post_project_workbench_save_assets(
         WHERE a.project_id = p.id
           AND p.owner_user_id = $2
           AND p.id = $3
-          AND a.legacy_id = $4
+          AND a.numeric_id = $4
         "#,
     )
     .bind(SqlxJson(metadata))
@@ -328,7 +328,7 @@ pub(super) async fn post_project_workbench_del_assets(
         WHERE a.project_id = p.id
           AND p.owner_user_id = $1
           AND p.id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -371,7 +371,7 @@ pub(super) async fn post_project_workbench_batch_delete_assets(
         WHERE a.project_id = p.id
           AND p.owner_user_id = $1
           AND p.id = $2
-          AND a.legacy_id = ANY($3)
+          AND a.numeric_id = ANY($3)
         "#,
     )
     .bind(uid)
@@ -432,7 +432,7 @@ pub(super) async fn post_project_workbench_del_image(
           AND a.project_id = p.id
           AND p.owner_user_id = $1
           AND p.id = $2
-          AND ai.legacy_image_id = $3
+          AND ai.numeric_image_id = $3
         "#,
     )
     .bind(uid)

@@ -19,7 +19,7 @@ use crate::http_kit::json_patch::{
 use crate::state::AppState;
 
 use super::dto::{CreateNovelBody, ListNovelsQuery, ListNovelsResponse, NovelRow, PatchNovelBody};
-use super::{ADV_LOCK_NOVEL_LEGACY, MAX_NOVEL_LIST_LIMIT};
+use super::{ADV_LOCK_NOVEL_NUMERIC, MAX_NOVEL_LIST_LIMIT};
 
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
@@ -80,7 +80,7 @@ async fn select_novels_filtered(
 ) -> Result<Vec<NovelRow>, ApiError> {
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
-        SELECT n.id, n.legacy_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
+        SELECT n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
                n.event, n.event_state, n.error_reason, n.create_time_ms
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
@@ -93,7 +93,7 @@ async fn select_novels_filtered(
         qb.push(" AND n.chapter ILIKE ");
         qb.push_bind(pat);
     }
-    qb.push(" ORDER BY n.chapter_index ASC, n.legacy_id ASC ");
+    qb.push(" ORDER BY n.chapter_index ASC, n.numeric_id ASC ");
     if let Some((lim, off)) = limit_offset {
         qb.push(" LIMIT ");
         qb.push_bind(lim);
@@ -189,14 +189,14 @@ async fn create_novel_inner(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_NOVEL_LEGACY)
+        .bind(ADV_LOCK_NOVEL_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_novel
         "#,
     )
@@ -209,11 +209,11 @@ async fn create_novel_inner(
     let row = sqlx::query_as::<_, NovelRow>(
         r#"
         INSERT INTO app_novel (
-          project_id, legacy_id, chapter_index, reel, chapter, chapter_data,
+          project_id, numeric_id, chapter_index, reel, chapter, chapter_data,
           event, event_state, error_reason, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, NULL, 0, NULL, $7, '{}'::jsonb)
-        RETURNING id, legacy_id, chapter_index, reel, chapter, chapter_data,
+        RETURNING id, numeric_id, chapter_index, reel, chapter, chapter_data,
                   event, event_state, error_reason, create_time_ms
         "#,
     )
@@ -285,13 +285,13 @@ async fn patch_novel_inner(
 
     let current = sqlx::query_as::<_, NovelRow>(
         r#"
-        SELECT n.id, n.legacy_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
+        SELECT n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
                n.event, n.event_state, n.error_reason, n.create_time_ms
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = $3
+          AND n.numeric_id = $3
         "#,
     )
     .bind(project_id)
@@ -358,8 +358,8 @@ async fn patch_novel_inner(
         WHERE n.project_id = p.id
           AND p.id = $8
           AND p.owner_user_id = $9
-          AND n.legacy_id = $10
-        RETURNING n.id, n.legacy_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
+          AND n.numeric_id = $10
+        RETURNING n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
                   n.event, n.event_state, n.error_reason, n.create_time_ms
         "#,
     )
@@ -413,7 +413,7 @@ async fn delete_novel_inner(
         WHERE n.project_id = p.id
           AND p.id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = $3
+          AND n.numeric_id = $3
         "#,
     )
     .bind(project_id)
@@ -457,13 +457,13 @@ async fn fetch_owned_novel_row(
 
     let row = sqlx::query_as::<_, NovelRow>(
         r#"
-        SELECT n.id, n.legacy_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
+        SELECT n.id, n.numeric_id, n.chapter_index, n.reel, n.chapter, n.chapter_data,
                n.event, n.event_state, n.error_reason, n.create_time_ms
         FROM app_novel n
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = $3
+          AND n.numeric_id = $3
         "#,
     )
     .bind(project_id)

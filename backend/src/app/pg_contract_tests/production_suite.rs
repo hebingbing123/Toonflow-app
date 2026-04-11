@@ -37,7 +37,7 @@ async fn production_endpoints_minimal_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     // Create script
@@ -57,7 +57,7 @@ async fn production_endpoints_minimal_roundtrip() {
         .unwrap();
     let (status, script) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "script={script}");
-    let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+    let script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
 
     // Test get-production-data (empty ids should fail)
     let res = app
@@ -220,11 +220,11 @@ async fn production_endpoints_minimal_roundtrip() {
     assert_eq!(body["url"].as_str(), Some("data:image/png;base64,AA=="));
 
     // Cleanup
-    let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+    let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1)")
         .bind(project_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;
@@ -365,7 +365,7 @@ async fn production_workbench_video_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -384,7 +384,7 @@ async fn production_workbench_video_roundtrip() {
         .unwrap();
     let (status, script) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "script={script}");
-    let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+    let script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
 
     let res = app
         .clone()
@@ -406,9 +406,9 @@ async fn production_workbench_video_roundtrip() {
         .unwrap();
     let (status, storyboard) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "storyboard={storyboard}");
-    let storyboard_id = storyboard["legacy_id"]
+    let storyboard_id = storyboard["numeric_id"]
         .as_i64()
-        .expect("storyboard legacy_id") as i32;
+        .expect("storyboard numeric_id") as i32;
 
     let res = app
         .clone()
@@ -434,9 +434,9 @@ async fn production_workbench_video_roundtrip() {
         StatusCode::CREATED,
         "storyboard_two={storyboard_two}"
     );
-    let storyboard_two_id = storyboard_two["legacy_id"]
+    let storyboard_two_id = storyboard_two["numeric_id"]
         .as_i64()
-        .expect("storyboard_two legacy_id") as i32;
+        .expect("storyboard_two numeric_id") as i32;
 
     let res = app
         .clone()
@@ -583,10 +583,10 @@ async fn production_workbench_video_roundtrip() {
     );
     let reordered_indexes: Vec<(i32, Option<i32>)> = sqlx::query_as(
         r#"
-        SELECT legacy_id, sb_index
+        SELECT numeric_id, sb_index
         FROM app_storyboard
-        WHERE legacy_id = ANY($1::int4[])
-        ORDER BY legacy_id ASC
+        WHERE numeric_id = ANY($1::int4[])
+        ORDER BY numeric_id ASC
         "#,
     )
     .bind(vec![storyboard_id, storyboard_two_id])
@@ -721,9 +721,9 @@ async fn production_workbench_video_roundtrip() {
         INNER JOIN app_project p ON p.id = vt.project_id
         INNER JOIN app_script s ON s.id = vt.script_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
-          AND vt.legacy_id = $4
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
+          AND vt.numeric_id = $4
         "#,
     )
     .bind(sub)
@@ -813,9 +813,9 @@ async fn production_workbench_video_roundtrip() {
         INNER JOIN app_project p ON p.id = vt.project_id
         INNER JOIN app_script s ON s.id = vt.script_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
-          AND vt.legacy_id = $4
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
+          AND vt.numeric_id = $4
         "#,
     )
     .bind(sub)
@@ -974,7 +974,7 @@ async fn production_workbench_video_roundtrip() {
     );
     assert_eq!(all_videos_after_delete_video["total"].as_i64(), Some(0));
 
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;
@@ -1014,7 +1014,7 @@ async fn production_assets_derivative_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -1035,7 +1035,7 @@ async fn production_assets_derivative_roundtrip() {
         .unwrap();
     let (status, asset) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "asset={asset}");
-    let asset_id = asset["legacy_id"].as_i64().expect("asset legacy_id") as i32;
+    let asset_id = asset["numeric_id"].as_i64().expect("asset numeric_id") as i32;
 
     let res = app
         .clone()
@@ -1159,7 +1159,7 @@ async fn production_assets_derivative_roundtrip() {
     );
     assert!(polling_after_delete["statuses"][0]["latest_state"].is_null());
 
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;

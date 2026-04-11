@@ -12,7 +12,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::models::*;
-use super::super::ADV_LOCK_ASSET_LEGACY;
+use super::super::ADV_LOCK_ASSET_NUMERIC;
 use super::resolve::ensure_owned_project_pk;
 
 async fn create_project_asset_inner(
@@ -58,13 +58,13 @@ async fn create_project_asset_inner(
     }
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ASSET_LEGACY)
+        .bind(ADV_LOCK_ASSET_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_asset"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -74,10 +74,10 @@ async fn create_project_asset_inner(
     let row = sqlx::query_as::<_, AssetRow>(
         r#"
         INSERT INTO app_asset (
-          project_id, legacy_id, name, asset_type, description, create_time_ms, metadata
+          project_id, numeric_id, name, asset_type, description, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
-        RETURNING id, legacy_id, name, asset_type, description, create_time_ms
+        RETURNING id, numeric_id, name, asset_type, description, create_time_ms
         "#,
     )
     .bind(project_uuid)

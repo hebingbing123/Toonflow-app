@@ -39,7 +39,7 @@ async fn count_project_assets_filtered(
         qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
-        qb.push(" AND s.legacy_id = ");
+        qb.push(" AND s.numeric_id = ");
         qb.push_bind(sid);
         qb
     } else {
@@ -81,7 +81,7 @@ async fn select_project_assets_filtered(
     let mut qb: QueryBuilder<Postgres> = if let Some(sid) = script_numeric_id {
         let mut qb = QueryBuilder::new(
             r#"
-            SELECT DISTINCT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+            SELECT DISTINCT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
             INNER JOIN app_script_asset sa ON sa.asset_id = a.id
@@ -91,13 +91,13 @@ async fn select_project_assets_filtered(
         qb.push_bind(project_id);
         qb.push(" AND p.owner_user_id = ");
         qb.push_bind(uid);
-        qb.push(" AND s.legacy_id = ");
+        qb.push(" AND s.numeric_id = ");
         qb.push_bind(sid);
         qb
     } else {
         let mut qb = QueryBuilder::new(
             r#"
-            SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+            SELECT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
             FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
             WHERE p.id = "#,
@@ -115,7 +115,7 @@ async fn select_project_assets_filtered(
         qb.push(" AND a.name ILIKE ");
         qb.push_bind(pat);
     }
-    qb.push(" ORDER BY a.legacy_id ASC ");
+    qb.push(" ORDER BY a.numeric_id ASC ");
     if let Some((lim, off)) = limit_offset {
         qb.push(" LIMIT ");
         qb.push_bind(lim);
@@ -148,7 +148,7 @@ async fn list_project_assets_inner(
               INNER JOIN app_project p ON p.id = s.project_id
               WHERE p.id = $1
                 AND p.owner_user_id = $2
-                AND s.legacy_id = $3
+                AND s.numeric_id = $3
             )
             "#,
         )

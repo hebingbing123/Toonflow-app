@@ -35,8 +35,8 @@ use models::LegacyOwnedAssetMetaRow;
 
 // ── Module-level constants ───────────────────────────────────────────────────
 
-pub(super) const ADV_LOCK_ASSET_LEGACY: i64 = 884_422_004;
-pub(super) const ADV_LOCK_ASSET_IMAGE_LEGACY: i64 = 884_422_005;
+pub(super) const ADV_LOCK_ASSET_NUMERIC: i64 = 884_422_004;
+pub(super) const ADV_LOCK_ASSET_IMAGE_NUMERIC: i64 = 884_422_005;
 pub(super) const MAX_ASSET_LIST_LIMIT: i64 = 200;
 const MAX_UPLOAD_CLIP_BASE64_LEN: usize = 24_000_000;
 
@@ -95,7 +95,7 @@ pub(super) fn merge_legacy_asset_metadata(
     metadata
 }
 
-pub(super) fn metadata_cover_legacy_image_id(metadata: &Value) -> Option<i32> {
+pub(super) fn metadata_cover_numeric_image_id(metadata: &Value) -> Option<i32> {
     let v = metadata.get("imageId")?;
     if v.is_null() {
         return None;
@@ -227,7 +227,7 @@ pub(super) async fn resolve_owned_asset_metadata(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND a.legacy_id = $2
+          AND a.numeric_id = $2
         "#,
     )
     .bind(uid)

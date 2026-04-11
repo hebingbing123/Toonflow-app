@@ -64,7 +64,6 @@ pub(in crate::production) struct ExportImageBody {
 
 #[derive(Debug, FromRow)]
 struct ExportImageSourceRow {
-    #[sqlx(rename = "legacy_id")]
     numeric_id: i32,
     file_path: Option<String>,
 }
@@ -122,8 +121,8 @@ pub(in crate::production) async fn post_get_production_data(
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
         SELECT
-          sb.legacy_id AS id,
-          sb.legacy_script_id AS script_id,
+          sb.numeric_id AS id,
+          sb.numeric_script_id AS script_id,
           sb.prompt,
           sb.file_path AS url,
           sb.duration,
@@ -135,8 +134,8 @@ pub(in crate::production) async fn post_get_production_data(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = ANY($2::int4[])
-        ORDER BY array_position($2::int4[], sb.legacy_id)
+          AND sb.numeric_id = ANY($2::int4[])
+        ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
     .bind(uid)
@@ -172,12 +171,12 @@ pub(in crate::production) async fn post_storyboard_polling_image(
 
     let owned_count = sqlx::query_scalar::<_, i64>(
         r#"
-        SELECT COUNT(DISTINCT sb.legacy_id)
+        SELECT COUNT(DISTINCT sb.numeric_id)
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = ANY($2::int4[])
+          AND sb.numeric_id = ANY($2::int4[])
         "#,
     )
     .bind(uid)
@@ -229,12 +228,12 @@ pub(in crate::production) async fn post_export_image(
 
     let owned_count = sqlx::query_scalar::<_, i64>(
         r#"
-        SELECT COUNT(DISTINCT sb.legacy_id)
+        SELECT COUNT(DISTINCT sb.numeric_id)
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = ANY($2::int4[])
+          AND sb.numeric_id = ANY($2::int4[])
         "#,
     )
     .bind(uid)
@@ -249,13 +248,13 @@ pub(in crate::production) async fn post_export_image(
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"
-        SELECT sb.legacy_id, sb.file_path
+        SELECT sb.numeric_id, sb.file_path
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND sb.legacy_id = ANY($2::int4[])
-        ORDER BY array_position($2::int4[], sb.legacy_id)
+          AND sb.numeric_id = ANY($2::int4[])
+        ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
     .bind(uid)
@@ -498,8 +497,8 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)

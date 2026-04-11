@@ -7,7 +7,7 @@ mod handlers;
 #[allow(unused_imports)]
 pub use dto::{CreateNovelBody, ListNovelsQuery, ListNovelsResponse, NovelRow, PatchNovelBody};
 
-pub(super) const ADV_LOCK_NOVEL_LEGACY: i64 = 884_422_006;
+pub(super) const ADV_LOCK_NOVEL_NUMERIC: i64 = 884_422_006;
 pub(super) const MAX_NOVEL_LIST_LIMIT: i64 = 200;
 
 use axum::routing::get;

@@ -30,7 +30,7 @@ async fn run_batch_generation_data(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = $3
           AND ($4::text IS NULL OR a.name ILIKE $4)
         "#,
@@ -47,7 +47,7 @@ async fn run_batch_generation_data(
     let data: Vec<LegacyBatchGenerationAssetItem> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           a.name AS name,
           a.asset_type AS asset_type,
           a.description AS description,
@@ -55,10 +55,10 @@ async fn run_batch_generation_data(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = $3
           AND ($4::text IS NULL OR a.name ILIKE $4)
-        ORDER BY a.create_time_ms DESC NULLS LAST, a.legacy_id DESC
+        ORDER BY a.create_time_ms DESC NULLS LAST, a.numeric_id DESC
         OFFSET $5
         LIMIT $6
         "#,

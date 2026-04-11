@@ -160,8 +160,8 @@ async fn store_video_reference(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $2
-          AND app_project.legacy_id = $3
-          AND app_storyboard.legacy_id = $4
+          AND app_project.numeric_id = $3
+          AND app_storyboard.numeric_id = $4
         "#,
     )
     .bind(video_url)

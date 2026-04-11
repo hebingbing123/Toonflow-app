@@ -59,8 +59,8 @@ pub(in crate::production) async fn post_workbench_add_track(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -80,7 +80,7 @@ pub(in crate::production) async fn post_workbench_add_track(
             WHERE sb.script_id = $1
           ), 0),
           COALESCE((
-            SELECT MAX(vt.legacy_id)
+            SELECT MAX(vt.numeric_id)
             FROM app_video_track vt
             WHERE vt.project_id = $2
               AND (vt.script_id = $1 OR vt.script_id IS NULL)
@@ -97,7 +97,7 @@ pub(in crate::production) async fn post_workbench_add_track(
     sqlx::query(
         r#"
         INSERT INTO app_video_track (
-          project_id, script_id, legacy_id, state, prompt, metadata
+          project_id, script_id, numeric_id, state, prompt, metadata
         )
         VALUES ($1, $2, $3, 'draft', $4, jsonb_build_object('track_name', $4))
         "#,
@@ -164,14 +164,14 @@ pub(in crate::production) async fn post_workbench_delete_track(
         USING app_project p
         WHERE vt.project_id = p.id
           AND p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND (vt.script_id IS NULL OR EXISTS (
             SELECT 1
             FROM app_script s
             WHERE s.id = vt.script_id
-              AND s.legacy_id = $3
+              AND s.numeric_id = $3
           ))
-          AND vt.legacy_id = $4
+          AND vt.numeric_id = $4
         "#,
     )
     .bind(uid)
@@ -190,8 +190,8 @@ pub(in crate::production) async fn post_workbench_delete_track(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_project.legacy_id = $2
-          AND app_script.legacy_id = $3
+          AND app_project.numeric_id = $2
+          AND app_script.numeric_id = $3
           AND app_storyboard.track_id = $4
         "#,
     )
@@ -257,9 +257,9 @@ pub(in crate::production) async fn post_workbench_delete_video(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_project.legacy_id = $2
-          AND app_script.legacy_id = $3
-          AND app_storyboard.legacy_id = $4
+          AND app_project.numeric_id = $2
+          AND app_script.numeric_id = $3
+          AND app_storyboard.numeric_id = $4
         "#,
     )
     .bind(uid)
@@ -325,9 +325,9 @@ pub(in crate::production) async fn post_workbench_select_video(
         WHERE app_storyboard.script_id = app_script.id
           AND app_script.project_id = app_project.id
           AND app_project.owner_user_id = $1
-          AND app_project.legacy_id = $2
-          AND app_script.legacy_id = $3
-          AND app_storyboard.legacy_id = $4
+          AND app_project.numeric_id = $2
+          AND app_script.numeric_id = $3
+          AND app_storyboard.numeric_id = $4
         "#,
     )
     .bind(uid)

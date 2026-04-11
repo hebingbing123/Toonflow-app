@@ -4,26 +4,26 @@ use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 use super::tool::{ExistingRefItemFiltered, NewAssetItemFiltered};
-use super::util::{trim_empty_opt, ADV_LOCK_ASSET_LEGACY_ID};
+use super::util::{trim_empty_opt, ADV_LOCK_ASSET_NUMERIC_ID};
 
 pub(crate) async fn persist_group(
     tx: &mut Transaction<'_, Postgres>,
     project_uuid: Uuid,
-    batch_legacy_ids: &[i32],
+    batch_numeric_ids: &[i32],
     new_assets: &[NewAssetItemFiltered],
     existing_refs: &[ExistingRefItemFiltered],
 ) -> Result<(), String> {
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ASSET_LEGACY_ID)
+        .bind(ADV_LOCK_ASSET_NUMERIC_ID)
         .execute(&mut **tx)
         .await
         .map_err(|e| e.to_string())?;
 
     let script_rows: Vec<(Uuid, i32)> = sqlx::query_as(
-        r#"SELECT id, legacy_id FROM app_script WHERE project_id = $1 AND legacy_id = ANY($2)"#,
+        r#"SELECT id, numeric_id FROM app_script WHERE project_id = $1 AND numeric_id = ANY($2)"#,
     )
     .bind(project_uuid)
-    .bind(batch_legacy_ids)
+    .bind(batch_numeric_ids)
     .fetch_all(&mut **tx)
     .await
     .map_err(|e| e.to_string())?;
@@ -31,7 +31,7 @@ pub(crate) async fn persist_group(
     let legacy_to_script: std::collections::HashMap<i32, Uuid> =
         script_rows.into_iter().map(|(id, lid)| (lid, id)).collect();
 
-    let script_uuids: Vec<Uuid> = batch_legacy_ids
+    let script_uuids: Vec<Uuid> = batch_numeric_ids
         .iter()
         .filter_map(|lid| legacy_to_script.get(lid).copied())
         .collect();
@@ -56,7 +56,7 @@ pub(crate) async fn persist_group(
 
     let now_ms = chrono::Utc::now().timestamp_millis();
     let mut next_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) FROM app_asset"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) FROM app_asset"#)
             .fetch_one(&mut **tx)
             .await
             .map_err(|e| e.to_string())?;
@@ -69,7 +69,7 @@ pub(crate) async fn persist_group(
         let id: Uuid = sqlx::query_scalar(
             r#"
             INSERT INTO app_asset (
-              project_id, legacy_id, name, asset_type, description, create_time_ms, metadata
+              project_id, numeric_id, name, asset_type, description, create_time_ms, metadata
             )
             VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
             RETURNING id

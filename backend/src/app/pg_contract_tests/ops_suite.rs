@@ -418,7 +418,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let res = app
         .clone()
@@ -607,13 +607,13 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
     );
 
     let _ = sqlx::query(
-        "DELETE FROM public.app_agent_memory WHERE owner_user_id = $1 AND legacy_project_id = $2",
+        "DELETE FROM public.app_agent_memory WHERE owner_user_id = $1 AND numeric_project_id = $2",
     )
     .bind(sub)
     .bind(project_id)
     .execute(&pool)
     .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;

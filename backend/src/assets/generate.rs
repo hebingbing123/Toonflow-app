@@ -180,7 +180,7 @@ async fn resolve_owned_project_uuid(
     let id: Option<Uuid> = sqlx::query_scalar(
         r#"
         SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
+        WHERE numeric_id = $1 AND owner_user_id = $2
         "#,
     )
     .bind(project_numeric_id)
@@ -507,7 +507,7 @@ async fn post_cancel_generate(
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE ai.asset_id = a.id
           AND p.owner_user_id = $1
-          AND ai.legacy_image_id = $2
+          AND ai.numeric_image_id = $2
         "#,
     )
     .bind(uid)
@@ -519,12 +519,12 @@ async fn post_cancel_generate(
     let cancelled_jobs = sqlx::query_as::<_, JobRow>(
         r#"
         WITH target_assets AS (
-            SELECT a.legacy_id
+            SELECT a.numeric_id
             FROM app_asset_image ai
             INNER JOIN app_asset a ON a.id = ai.asset_id
             INNER JOIN app_project p ON p.id = a.project_id
             WHERE p.owner_user_id = $1
-              AND ai.legacy_image_id = $2
+              AND ai.numeric_image_id = $2
         ),
         cancelled AS (
             UPDATE app_generation_job j
@@ -545,16 +545,16 @@ async fn post_cancel_generate(
                 WHERE (
                   (j.payload ? 'asset_numeric_id')
                   AND (j.payload->>'asset_numeric_id') ~ '^[0-9]+$'
-                  AND (j.payload->>'asset_numeric_id')::int = t.legacy_id
+                  AND (j.payload->>'asset_numeric_id')::int = t.numeric_id
                 ) OR EXISTS (
                   SELECT 1
                   FROM jsonb_array_elements(COALESCE(j.payload->'items', '[]'::jsonb)) it
                   WHERE (it ? 'asset_numeric_id')
                     AND (it->>'asset_numeric_id') ~ '^[0-9]+$'
-                    AND (it->>'asset_numeric_id')::int = t.legacy_id
+                    AND (it->>'asset_numeric_id')::int = t.numeric_id
                 )
               )
-            RETURNING j.legacy_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
+            RETURNING j.numeric_task_id, j.id, j.owner_user_id, j.kind, j.status, j.payload, j.result, j.error_message, j.idempotency_key, j.claimed_by, j.created_at, j.updated_at
         )
         SELECT * FROM cancelled
         "#,

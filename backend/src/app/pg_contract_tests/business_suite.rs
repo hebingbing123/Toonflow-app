@@ -634,15 +634,15 @@ async fn promote_staging_populates_assets_and_links() {
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     sqlx::query(
-        r#"INSERT INTO public.legacy_user_map (legacy_user_id, supabase_user_id)
+        r#"INSERT INTO public.import_user_map (import_user_id, supabase_user_id)
            VALUES ($1, $2)
-           ON CONFLICT (legacy_user_id) DO UPDATE SET supabase_user_id = EXCLUDED.supabase_user_id"#,
+           ON CONFLICT (import_user_id) DO UPDATE SET supabase_user_id = EXCLUDED.supabase_user_id"#,
     )
     .bind(PROMO_LEGACY_USER)
     .bind(sub)
     .execute(&pool)
     .await
-    .expect("legacy_user_map insert (requires existing auth.users id = CONTRACT_USER_SUB)");
+    .expect("import_user_map insert (requires existing auth.users id = CONTRACT_USER_SUB)");
 
     let project = serde_json::json!({
         "id": PROMO_PROJECT_LEG,
@@ -748,13 +748,13 @@ async fn promote_staging_populates_assets_and_links() {
     .await
     .expect("staging o_image");
 
-    sqlx::query("SELECT 1 FROM public.promote_legacy_from_staging() LIMIT 1")
+    sqlx::query("SELECT 1 FROM public.promote_import_snapshots() LIMIT 1")
         .execute(&pool)
         .await
-        .expect("promote_legacy_from_staging");
+        .expect("promote_import_snapshots");
 
     let asset_rows: i64 =
-        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM public.app_asset WHERE legacy_id = $1")
+        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM public.app_asset WHERE numeric_id = $1")
             .bind(PROMO_ASSET_LEG)
             .fetch_one(&pool)
             .await
@@ -765,7 +765,7 @@ async fn promote_staging_populates_assets_and_links() {
         r#"SELECT COUNT(*)::bigint FROM public.app_script_asset sa
            INNER JOIN public.app_script sc ON sc.id = sa.script_id
            INNER JOIN public.app_asset a ON a.id = sa.asset_id
-           WHERE sc.legacy_id = $1 AND a.legacy_id = $2"#,
+           WHERE sc.numeric_id = $1 AND a.numeric_id = $2"#,
     )
     .bind(PROMO_SCRIPT_LEG)
     .bind(PROMO_ASSET_LEG)
@@ -775,16 +775,16 @@ async fn promote_staging_populates_assets_and_links() {
     assert_eq!(link_rows, 1, "expected one promoted app_script_asset row");
 
     let promoted_img: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*)::bigint FROM public.app_asset_image WHERE legacy_image_id = $1",
+        "SELECT COUNT(*)::bigint FROM public.app_asset_image WHERE numeric_image_id = $1",
     )
     .bind(PROMO_IMAGE_LEG)
     .fetch_one(&pool)
     .await
-    .expect("count app_asset_image by legacy_image_id");
+    .expect("count app_asset_image by numeric_image_id");
     assert_eq!(promoted_img, 1, "expected one promoted app_asset_image row");
 
     let style_rows: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*)::bigint FROM public.app_art_style WHERE legacy_id = $1",
+        "SELECT COUNT(*)::bigint FROM public.app_art_style WHERE numeric_id = $1",
     )
     .bind(PROMO_ART_STYLE_LEG)
     .fetch_one(&pool)
@@ -796,7 +796,7 @@ async fn promote_staging_populates_assets_and_links() {
     let app = build_router(contract_state(pool.clone(), secret));
 
     let promo_project_uuid: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM public.app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+        r#"SELECT id FROM public.app_project WHERE numeric_id = $1 AND owner_user_id = $2"#,
     )
     .bind(PROMO_PROJECT_LEG)
     .bind(sub)
@@ -821,7 +821,7 @@ async fn promote_staging_populates_assets_and_links() {
     let sitems = styles_body["items"].as_array().expect("style items");
     let sfound = sitems
         .iter()
-        .find(|row| row["legacy_id"].as_i64() == Some(i64::from(PROMO_ART_STYLE_LEG)));
+        .find(|row| row["numeric_id"].as_i64() == Some(i64::from(PROMO_ART_STYLE_LEG)));
     let srow = sfound.expect("promoted art style in list");
     assert_eq!(srow["name"].as_str(), Some("pg_promote_style"));
 
@@ -842,7 +842,7 @@ async fn promote_staging_populates_assets_and_links() {
     let items = list["items"].as_array().expect("items");
     let found = items
         .iter()
-        .find(|row| row["legacy_id"].as_i64() == Some(i64::from(PROMO_ASSET_LEG)));
+        .find(|row| row["numeric_id"].as_i64() == Some(i64::from(PROMO_ASSET_LEG)));
     let row = found.expect("promoted asset in list");
     assert_eq!(row["name"].as_str(), Some("pg_promote_hero"));
     assert_eq!(row["asset_type"].as_str(), Some("role"));
@@ -866,7 +866,7 @@ async fn promote_staging_populates_assets_and_links() {
     assert_eq!(status, StatusCode::OK, "linked={linked}");
     assert_eq!(linked["total"], 1);
     assert_eq!(
-        linked["items"][0]["legacy_id"].as_i64(),
+        linked["items"][0]["numeric_id"].as_i64(),
         Some(i64::from(PROMO_ASSET_LEG))
     );
 
@@ -892,7 +892,7 @@ async fn promote_staging_populates_assets_and_links() {
     let citems = corner["items"].as_array().expect("corner items");
     let hero = citems
         .iter()
-        .find(|row| row["legacy_id"].as_i64() == Some(i64::from(PROMO_ASSET_LEG)))
+        .find(|row| row["numeric_id"].as_i64() == Some(i64::from(PROMO_ASSET_LEG)))
         .expect("promoted asset in corner-scape");
     let hist = hero["history_images"].as_array().expect("history_images");
     assert_eq!(hist.len(), 1);
@@ -902,7 +902,7 @@ async fn promote_staging_populates_assets_and_links() {
     );
     assert_eq!(hist[0]["state"].as_str(), Some("已完成"));
     assert_eq!(
-        hist[0]["legacy_image_id"].as_i64(),
+        hist[0]["numeric_image_id"].as_i64(),
         Some(i64::from(PROMO_IMAGE_LEG))
     );
 
@@ -924,7 +924,7 @@ async fn promote_staging_populates_assets_and_links() {
     let (status, promo_list_img) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "promo_list_img={promo_list_img}");
     assert_eq!(
-        promo_list_img["cover_legacy_image_id"].as_i64(),
+        promo_list_img["cover_numeric_image_id"].as_i64(),
         Some(i64::from(PROMO_IMAGE_LEG))
     );
     let plim = promo_list_img["items"]
@@ -933,7 +933,7 @@ async fn promote_staging_populates_assets_and_links() {
     assert_eq!(plim.len(), 1);
     assert_eq!(plim[0]["selected"], true);
     assert_eq!(
-        plim[0]["legacy_image_id"].as_i64(),
+        plim[0]["numeric_image_id"].as_i64(),
         Some(i64::from(PROMO_IMAGE_LEG))
     );
 
@@ -949,7 +949,7 @@ async fn promote_staging_populates_assets_and_links() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(r#"{"cover_legacy_image_id":null}"#))
+                .body(Body::from(r#"{"cover_numeric_image_id":null}"#))
                 .unwrap(),
         )
         .await
@@ -974,7 +974,7 @@ async fn promote_staging_populates_assets_and_links() {
         .unwrap();
     let (status, cleared_list) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "cleared_list={cleared_list}");
-    assert!(cleared_list["cover_legacy_image_id"].is_null());
+    assert!(cleared_list["cover_numeric_image_id"].is_null());
     let clim = cleared_list["items"].as_array().expect("cleared items");
     assert_eq!(clim[0]["selected"], false);
 
@@ -991,7 +991,7 @@ async fn promote_staging_populates_assets_and_links() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"cover_legacy_image_id":{}}}"#,
+                    r#"{{"cover_numeric_image_id":{}}}"#,
                     PROMO_IMAGE_LEG
                 )))
                 .unwrap(),
@@ -1019,7 +1019,7 @@ async fn promote_staging_populates_assets_and_links() {
     let (status, restored_list) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "restored_list={restored_list}");
     assert_eq!(
-        restored_list["cover_legacy_image_id"].as_i64(),
+        restored_list["cover_numeric_image_id"].as_i64(),
         Some(i64::from(PROMO_IMAGE_LEG))
     );
     let rlim = restored_list["items"].as_array().expect("restored items");
@@ -1200,7 +1200,7 @@ async fn art_styles_crud_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let leg = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let leg = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let res = app
         .clone()
@@ -1220,7 +1220,7 @@ async fn art_styles_crud_roundtrip() {
     let items = list["items"].as_array().expect("items");
     assert!(items
         .iter()
-        .any(|row| row["legacy_id"].as_i64() == Some(i64::from(leg))));
+        .any(|row| row["numeric_id"].as_i64() == Some(i64::from(leg))));
 
     let res = app
         .clone()

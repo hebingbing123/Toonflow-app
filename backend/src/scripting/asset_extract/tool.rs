@@ -24,7 +24,7 @@ pub(crate) struct NewAssetItem {
         default,
         alias = "scriptIds",
         alias = "scriptLegacyIds",
-        alias = "script_legacy_ids"
+        alias = "script_numeric_ids"
     )]
     pub(crate) script_numeric_ids: Vec<i32>,
 }
@@ -36,7 +36,7 @@ pub(crate) struct ExistingRefItem {
         default,
         alias = "scriptIds",
         alias = "scriptLegacyIds",
-        alias = "script_legacy_ids"
+        alias = "script_numeric_ids"
     )]
     pub(crate) script_numeric_ids: Vec<i32>,
 }

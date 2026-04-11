@@ -23,7 +23,7 @@ use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::llm::chat_completion_assistant_text;
 use crate::state::AppState;
 
-const ADV_LOCK_ART_STYLE_LEGACY: i64 = 884_422_008;
+const ADV_LOCK_ART_STYLE_NUMERIC: i64 = 884_422_008;
 const MAX_ART_STYLE_LIST: i64 = 500;
 const MAX_EXTRACT_IMAGES: usize = 16;
 /// Per-image cap for **`data:`** / URL strings (legacy **`extractStylePrompt`** had no limit).
@@ -38,7 +38,7 @@ const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提�
 pub struct ArtStyleRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub name: String,
     pub file_url: Option<String>,
@@ -301,10 +301,10 @@ async fn list_art_styles(
 
     let items = sqlx::query_as::<_, ArtStyleRow>(
         r#"
-        SELECT id, legacy_id, name, file_url, label, prompt
+        SELECT id, numeric_id, name, file_url, label, prompt
         FROM app_art_style
         WHERE owner_user_id = $1
-        ORDER BY legacy_id ASC
+        ORDER BY numeric_id ASC
         LIMIT $2
         "#,
     )
@@ -353,13 +353,13 @@ async fn create_art_style(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_ART_STYLE_LEGACY)
+        .bind(ADV_LOCK_ART_STYLE_NUMERIC)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_art_style"#)
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_art_style"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -367,10 +367,10 @@ async fn create_art_style(
     let row = sqlx::query_as::<_, ArtStyleRow>(
         r#"
         INSERT INTO app_art_style (
-          owner_user_id, legacy_id, name, file_url, label, prompt
+          owner_user_id, numeric_id, name, file_url, label, prompt
         )
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, legacy_id, name, file_url, label, prompt
+        RETURNING id, numeric_id, name, file_url, label, prompt
         "#,
     )
     .bind(uid)
@@ -418,9 +418,9 @@ async fn get_art_style_by_numeric_id(
 
     let row = sqlx::query_as::<_, ArtStyleRow>(
         r#"
-        SELECT id, legacy_id, name, file_url, label, prompt
+        SELECT id, numeric_id, name, file_url, label, prompt
         FROM app_art_style
-        WHERE owner_user_id = $1 AND legacy_id = $2
+        WHERE owner_user_id = $1 AND numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -466,9 +466,9 @@ async fn patch_art_style_by_numeric_id(
 
     let current = sqlx::query_as::<_, ArtStyleRow>(
         r#"
-        SELECT id, legacy_id, name, file_url, label, prompt
+        SELECT id, numeric_id, name, file_url, label, prompt
         FROM app_art_style
-        WHERE owner_user_id = $1 AND legacy_id = $2
+        WHERE owner_user_id = $1 AND numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -522,8 +522,8 @@ async fn patch_art_style_by_numeric_id(
             label = $3,
             prompt = $4,
             updated_at = NOW()
-        WHERE owner_user_id = $5 AND legacy_id = $6
-        RETURNING id, legacy_id, name, file_url, label, prompt
+        WHERE owner_user_id = $5 AND numeric_id = $6
+        RETURNING id, numeric_id, name, file_url, label, prompt
         "#,
     )
     .bind(&new_name)
@@ -566,7 +566,7 @@ async fn delete_art_style_by_numeric_id(
     }
 
     let res =
-        sqlx::query(r#"DELETE FROM app_art_style WHERE owner_user_id = $1 AND legacy_id = $2"#)
+        sqlx::query(r#"DELETE FROM app_art_style WHERE owner_user_id = $1 AND numeric_id = $2"#)
             .bind(uid)
             .bind(numeric_id)
             .execute(pool)
@@ -603,7 +603,7 @@ async fn get_art_style_cover_by_numeric_id(
         r#"
         SELECT file_url
         FROM app_art_style
-        WHERE owner_user_id = $1 AND legacy_id = $2
+        WHERE owner_user_id = $1 AND numeric_id = $2
         "#,
     )
     .bind(uid)

@@ -72,8 +72,8 @@ pub fn harness_tools_catalog_http(user_id: Uuid) {
 }
 
 /// REST **`/api/v1/agents/memory/*`** (parity with legacy agent memory).
-pub fn memory_http(user_id: Uuid, legacy_project_id: i32, op: &'static str) {
-    tracing::debug!(%user_id, legacy_project_id, %op, "harness.memory.http");
+pub fn memory_http(user_id: Uuid, numeric_project_id: i32, op: &'static str) {
+    tracing::debug!(%user_id, numeric_project_id, %op, "harness.memory.http");
 }
 
 /// Worker claimed or finished a row in **`app_generation_job`** (best-effort tracing).

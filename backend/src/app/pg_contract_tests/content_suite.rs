@@ -166,7 +166,7 @@ async fn storyboards_crud_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     // Create script
@@ -186,7 +186,7 @@ async fn storyboards_crud_roundtrip() {
         .unwrap();
     let (status, script) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "script={script}");
-    let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+    let script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
 
     // Get storyboards (empty)
     let res = app
@@ -209,16 +209,16 @@ async fn storyboards_crud_roundtrip() {
 
     // Cleanup
     let _ = sqlx::query(
-        "DELETE FROM public.app_storyboard WHERE script_id IN (SELECT id FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1))"
+        "DELETE FROM public.app_storyboard WHERE script_id IN (SELECT id FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1))"
     )
     .bind(project_id)
     .execute(&pool)
     .await;
-    let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+    let _ = sqlx::query("DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1)")
         .bind(project_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;
@@ -259,7 +259,7 @@ async fn scripts_crud_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
-    let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     // Create script
@@ -281,7 +281,7 @@ async fn scripts_crud_roundtrip() {
         .unwrap();
     let (status, script) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "script={script}");
-    let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
+    let script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
     assert_eq!(script["name"].as_str(), Some("test_script"));
 
     // Batch add scripts (UUID project path)
@@ -327,7 +327,7 @@ async fn scripts_crud_roundtrip() {
         .unwrap();
     let (status, got) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "get script={got}");
-    assert_eq!(got["legacy_id"].as_i64(), Some(i64::from(script_id)));
+    assert_eq!(got["numeric_id"].as_i64(), Some(i64::from(script_id)));
 
     // Update script
     let res = app
@@ -388,7 +388,7 @@ async fn scripts_crud_roundtrip() {
     assert_eq!(status, StatusCode::NOT_FOUND, "script should be deleted");
 
     // Cleanup
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;

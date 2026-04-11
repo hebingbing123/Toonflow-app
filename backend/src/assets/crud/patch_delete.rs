@@ -1,4 +1,4 @@
-//! `PATCH` / `DELETE` project asset by legacy ids.
+//! `PATCH` / `DELETE` project asset by stable numeric ids.
 
 use axum::{
     extract::{Path, State},
@@ -56,7 +56,7 @@ fn merge_metadata_image_id(mut meta: Value, patch: &FieldPatch<i32>) -> Value {
     meta
 }
 
-async fn cover_legacy_image_exists_for_asset(
+async fn cover_numeric_image_exists_for_asset(
     pool: &PgPool,
     asset_id: Uuid,
     numeric_image_id: i32,
@@ -65,7 +65,7 @@ async fn cover_legacy_image_exists_for_asset(
         r#"
         SELECT EXISTS (
           SELECT 1 FROM app_asset_image
-          WHERE asset_id = $1 AND legacy_image_id = $2
+          WHERE asset_id = $1 AND numeric_image_id = $2
         )
         "#,
     )
@@ -85,14 +85,14 @@ async fn patch_project_asset_inner(
     body: PatchAssetBody,
 ) -> Result<Json<AssetRow>, ApiError> {
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let desc_patch = parse_optional_text_field(body.description, "description")?;
     let type_patch = parse_asset_type_patch(body.asset_type)?;
     let cover_patch =
-        parse_optional_i32_field(body.cover_numeric_image_id, "cover_legacy_image_id")?;
+        parse_optional_i32_field(body.cover_numeric_image_id, "cover_numeric_image_id")?;
 
     if matches!(name_patch, FieldPatch::Absent)
         && matches!(desc_patch, FieldPatch::Absent)
@@ -100,7 +100,8 @@ async fn patch_project_asset_inner(
         && matches!(cover_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one of: name, description, asset_type, cover_legacy_image_id".into(),
+            "expected at least one of: name, description, asset_type, cover_numeric_image_id"
+                .into(),
         ));
     }
 
@@ -111,7 +112,7 @@ async fn patch_project_asset_inner(
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_id)
@@ -123,9 +124,9 @@ async fn patch_project_asset_inner(
     .ok_or(ApiError::NotFound)?;
 
     if let FieldPatch::Set(Some(leg)) = &cover_patch {
-        if !cover_legacy_image_exists_for_asset(pool, current.id, *leg).await? {
+        if !cover_numeric_image_exists_for_asset(pool, current.id, *leg).await? {
             return Err(ApiError::BadRequest(
-                "cover_legacy_image_id must match an app_asset_image row for this asset".into(),
+                "cover_numeric_image_id must match an app_asset_image row for this asset".into(),
             ));
         }
     }
@@ -165,7 +166,7 @@ async fn patch_project_asset_inner(
               WHERE p.id = $1
                 AND p.owner_user_id = $2
                 AND a.name = $3
-                AND a.legacy_id <> $4
+                AND a.numeric_id <> $4
             )
             "#,
         )
@@ -195,8 +196,8 @@ async fn patch_project_asset_inner(
         WHERE a.project_id = p.id
           AND p.id = $5
           AND p.owner_user_id = $6
-          AND a.legacy_id = $7
-        RETURNING a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+          AND a.numeric_id = $7
+        RETURNING a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
         "#,
     )
     .bind(&new_name)
@@ -236,7 +237,7 @@ async fn delete_project_asset_inner(
     asset_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let res = sqlx::query(
@@ -246,7 +247,7 @@ async fn delete_project_asset_inner(
         WHERE a.project_id = p.id
           AND p.id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_id)

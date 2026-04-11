@@ -32,7 +32,7 @@ pub struct AppState {
     /// and set **`app_asset_image.file_path`** to this API’s **`…/images/{id}/file`** path.
     pub local_asset_image_dir: Option<PathBuf>,
     /// When set, art-style create/patch may persist uploaded base64 covers under
-    /// **`{dir}/{user_id}/{legacy_id}.{ext}`** and serve them via **`GET …/art-styles/numeric/{id}/cover`**.
+    /// **`{dir}/{user_id}/{numeric_id}.{ext}`** and serve them via **`GET …/art-styles/numeric/{id}/cover`**.
     pub local_art_style_cover_dir: Option<PathBuf>,
 }
 

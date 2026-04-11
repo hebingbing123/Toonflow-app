@@ -50,15 +50,15 @@ async fn cleanup_promote_staging_fixtures(pool: &PgPool) {
         .bind(sub)
         .execute(pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(PROMO_PROJECT_LEG)
         .execute(pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_art_style WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_art_style WHERE numeric_id = $1")
         .bind(PROMO_ART_STYLE_LEG)
         .execute(pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.legacy_user_map WHERE legacy_user_id = $1")
+    let _ = sqlx::query("DELETE FROM public.import_user_map WHERE import_user_id = $1")
         .bind(PROMO_LEGACY_USER)
         .execute(pool)
         .await;
@@ -299,7 +299,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
-    let numeric_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     let project_uuid = created["id"].as_str().expect("project uuid");
 
     let res = app
@@ -362,7 +362,9 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, script_row) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "script={script_row}");
-    let script_leg = script_row["legacy_id"].as_i64().expect("script legacy_id") as i32;
+    let script_leg = script_row["numeric_id"]
+        .as_i64()
+        .expect("script numeric_id") as i32;
 
     let res = app
         .clone()
@@ -382,7 +384,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, asset_row) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "asset={asset_row}");
-    let asset_leg = asset_row["legacy_id"].as_i64().expect("asset legacy_id") as i32;
+    let asset_leg = asset_row["numeric_id"].as_i64().expect("asset numeric_id") as i32;
 
     let res = app
         .clone()
@@ -401,7 +403,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let (status, one_asset) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "one_asset={one_asset}");
     assert_eq!(
-        one_asset["legacy_id"].as_i64().expect("legacy_id"),
+        one_asset["numeric_id"].as_i64().expect("numeric_id"),
         i64::from(asset_leg)
     );
     assert_eq!(one_asset["name"].as_str(), Some("pg_contract_role_asset"));
@@ -427,7 +429,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let c1 = corner1["items"].as_array().expect("corner1 items");
     assert_eq!(c1.len(), 1);
     assert_eq!(
-        c1[0]["legacy_id"].as_i64().expect("leg"),
+        c1[0]["numeric_id"].as_i64().expect("leg"),
         i64::from(asset_leg)
     );
     assert_eq!(c1[0]["asset_type"].as_str(), Some("role"));
@@ -483,7 +485,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let (status, list_img) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "list_img={list_img}");
     assert!(
-        list_img["cover_legacy_image_id"].is_null(),
+        list_img["cover_numeric_image_id"].is_null(),
         "API-created asset has no metadata.imageId cover"
     );
     let lim = list_img["items"].as_array().expect("image list items");
@@ -491,8 +493,8 @@ async fn projects_create_stats_delete_roundtrip() {
     assert_eq!(lim[0]["id"].as_str(), Some(img_uuid));
     assert_eq!(lim[0]["selected"], false);
     assert!(
-        lim[0]["legacy_image_id"].is_null(),
-        "API-created image has no legacy_image_id"
+        lim[0]["numeric_image_id"].is_null(),
+        "API-created image has no numeric_image_id"
     );
 
     let res = app
@@ -551,7 +553,7 @@ async fn projects_create_stats_delete_roundtrip() {
         Some("pg_contract/corner_hist.png")
     );
     assert_eq!(one_img["state"].as_str(), Some("已完成"));
-    assert!(one_img["legacy_image_id"].is_null());
+    assert!(one_img["numeric_image_id"].is_null());
 
     let res = app
         .clone()
@@ -564,7 +566,7 @@ async fn projects_create_stats_delete_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(r#"{"cover_legacy_image_id":424242}"#))
+                .body(Body::from(r#"{"cover_numeric_image_id":424242}"#))
                 .unwrap(),
         )
         .await
@@ -688,7 +690,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, scene_row) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "scene_row={scene_row}");
-    let scene_leg = scene_row["legacy_id"].as_i64().expect("scene legacy_id") as i32;
+    let scene_leg = scene_row["numeric_id"].as_i64().expect("scene numeric_id") as i32;
 
     let res = app
         .clone()
@@ -747,7 +749,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .expect("corner scene filter");
     assert_eq!(cs.len(), 1);
     assert_eq!(
-        cs[0]["legacy_id"].as_i64().expect("leg"),
+        cs[0]["numeric_id"].as_i64().expect("leg"),
         i64::from(scene_leg)
     );
 
@@ -778,7 +780,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .expect("corner scene dedup filter");
     assert_eq!(csd.len(), 1);
     assert_eq!(
-        csd[0]["legacy_id"].as_i64().expect("leg"),
+        csd[0]["numeric_id"].as_i64().expect("leg"),
         i64::from(scene_leg)
     );
 
@@ -816,9 +818,9 @@ async fn projects_create_stats_delete_roundtrip() {
         SET metadata = jsonb_build_object('assetsId', 999999)
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.legacy_id = $1
+          AND p.numeric_id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(numeric_id)
@@ -856,7 +858,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .expect("corner after child metadata");
     assert_eq!(ch.len(), 1);
     assert_eq!(
-        ch[0]["legacy_id"].as_i64().expect("leg"),
+        ch[0]["numeric_id"].as_i64().expect("leg"),
         i64::from(asset_leg)
     );
     assert_eq!(ch[0]["history_images"].as_array().map(|a| a.len()), Some(1));
@@ -867,9 +869,9 @@ async fn projects_create_stats_delete_roundtrip() {
         SET metadata = '{}'::jsonb
         FROM app_project p
         WHERE a.project_id = p.id
-          AND p.legacy_id = $1
+          AND p.numeric_id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(numeric_id)
@@ -986,7 +988,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let items = by_type_name["items"].as_array().expect("items");
     assert_eq!(items.len(), 1);
     assert_eq!(
-        items[0]["legacy_id"].as_i64().expect("legacy_id"),
+        items[0]["numeric_id"].as_i64().expect("numeric_id"),
         i64::from(asset_leg)
     );
 
@@ -1121,7 +1123,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .unwrap();
     let (status, novel_row) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "novel_row={novel_row}");
-    let novel_leg = novel_row["legacy_id"].as_i64().expect("novel legacy_id") as i32;
+    let novel_leg = novel_row["numeric_id"].as_i64().expect("novel numeric_id") as i32;
 
     let res = app
         .clone()
@@ -1182,12 +1184,12 @@ async fn projects_create_stats_delete_roundtrip() {
     let rows = list_all["items"].as_array().expect("novel items");
     assert!(
         rows.iter()
-            .any(|r| r["legacy_id"].as_i64() == Some(i64::from(novel_leg))),
-        "expected novel legacy_id in list: {list_all}"
+            .any(|r| r["numeric_id"].as_i64() == Some(i64::from(novel_leg))),
+        "expected novel numeric_id in list: {list_all}"
     );
     assert!(
         rows.iter().any(|r| {
-            r["legacy_id"].as_i64() == Some(i64::from(novel_leg))
+            r["numeric_id"].as_i64() == Some(i64::from(novel_leg))
                 && r["chapter_index"].is_number()
                 && r["chapter"].is_string()
         }),
@@ -1197,7 +1199,7 @@ async fn projects_create_stats_delete_roundtrip() {
     let non_zero: Vec<&serde_json::Value> = rows
         .iter()
         .filter(|r| {
-            r["legacy_id"].as_i64() == Some(i64::from(novel_leg))
+            r["numeric_id"].as_i64() == Some(i64::from(novel_leg))
                 && r["event_state"].as_i64().unwrap_or(0) != 0
         })
         .collect();
@@ -1225,7 +1227,7 @@ async fn projects_create_stats_delete_roundtrip() {
     assert_eq!(get_pg["total"].as_i64(), Some(1));
     let page_rows = get_pg["items"].as_array().expect("paged items");
     assert_eq!(
-        page_rows[0]["legacy_id"].as_i64(),
+        page_rows[0]["numeric_id"].as_i64(),
         Some(i64::from(novel_leg))
     );
 
@@ -1270,7 +1272,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .expect("items")
         .iter()
         .find(|r| r["chapter"].as_str() == Some("pg_legacy_add_chapter"))
-        .expect("added chapter row")["legacy_id"]
+        .expect("added chapter row")["numeric_id"]
         .as_i64()
         .expect("added legacy id") as i32;
 
@@ -1523,7 +1525,7 @@ async fn legacy_project_crud_roundtrip() {
     let (status, added) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "added={added}");
     let project_uuid = added["id"].as_str().expect("project id").to_owned();
-    let numeric_id = added["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let numeric_id = added["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let res = app
         .clone()
@@ -1549,7 +1551,7 @@ async fn legacy_project_crud_roundtrip() {
         .cloned()
         .expect("created project row");
     assert_eq!(
-        created_row["legacy_id"].as_i64(),
+        created_row["numeric_id"].as_i64(),
         Some(i64::from(numeric_id))
     );
     assert_eq!(created_row["intro"].as_str(), Some("legacy intro"));
@@ -1566,7 +1568,7 @@ async fn legacy_project_crud_roundtrip() {
     assert_eq!(created_row["image_quality"].as_str(), Some("hd"));
 
     let stored_mode: Option<String> = sqlx::query_scalar(
-        "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
+        "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND numeric_id = $2",
     )
     .bind(sub)
     .bind(numeric_id)
@@ -1623,7 +1625,7 @@ async fn legacy_project_crud_roundtrip() {
         .as_array()
         .and_then(|rows| {
             rows.iter()
-                .find(|row| row["legacy_id"].as_i64() == Some(i64::from(numeric_id)))
+                .find(|row| row["numeric_id"].as_i64() == Some(i64::from(numeric_id)))
         })
         .cloned()
         .expect("edited project row");
@@ -1642,7 +1644,7 @@ async fn legacy_project_crud_roundtrip() {
     assert_eq!(edited_row["image_quality"].as_str(), Some("standard"));
 
     let stored_mode: Option<String> = sqlx::query_scalar(
-        "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2",
+        "SELECT mode FROM public.app_project WHERE owner_user_id = $1 AND numeric_id = $2",
     )
     .bind(sub)
     .bind(numeric_id)
@@ -1684,7 +1686,7 @@ async fn legacy_project_crud_roundtrip() {
     assert_eq!(status, StatusCode::OK, "after_delete={after_delete}");
     let still_present = after_delete.as_array().is_some_and(|rows| {
         rows.iter()
-            .any(|row| row["legacy_id"].as_i64() == Some(i64::from(numeric_id)))
+            .any(|row| row["numeric_id"].as_i64() == Some(i64::from(numeric_id)))
     });
     assert!(
         !still_present,

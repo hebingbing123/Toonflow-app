@@ -22,7 +22,7 @@ async fn run_get_material_data(
     let mut data: Vec<LegacyMaterialAssetItem> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           a.name AS name,
           COALESCE(sel.file_path, '') AS file_path,
           a.asset_type AS asset_type
@@ -34,7 +34,7 @@ async fn run_get_material_data(
           WHERE ai.asset_id = a.id
           ORDER BY
             CASE
-              WHEN ai.legacy_image_id = (
+              WHEN ai.numeric_image_id = (
                 CASE
                   WHEN jsonb_typeof(a.metadata->'imageId') = 'number'
                     THEN (a.metadata->>'imageId')::integer
@@ -49,9 +49,9 @@ async fn run_get_material_data(
           LIMIT 1
         ) sel ON TRUE
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = 'clip'
-        ORDER BY a.create_time_ms DESC NULLS LAST, a.legacy_id DESC
+        ORDER BY a.create_time_ms DESC NULLS LAST, a.numeric_id DESC
         "#,
     )
     .bind(uid)
@@ -70,22 +70,22 @@ async fn run_get_material_data(
     let video: Vec<LegacyMaterialVideoItem> = sqlx::query_as(
         r#"
         SELECT
-          v.legacy_id AS id,
+          v.numeric_id AS id,
           COALESCE(v.file_path, '') AS file_path,
           (
-            SELECT vt.legacy_id
+            SELECT vt.numeric_id
             FROM app_video_track vt
             WHERE vt.project_id = v.project_id
-              AND (vt.select_video_id = v.legacy_id OR vt.video_id = v.id)
+              AND (vt.select_video_id = v.numeric_id OR vt.video_id = v.id)
             ORDER BY vt.updated_at DESC, vt.created_at DESC, vt.id DESC
             LIMIT 1
           ) AS video_track_id
         FROM app_video v
         INNER JOIN app_project p ON p.id = v.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
-        ORDER BY v.legacy_id DESC
+        ORDER BY v.numeric_id DESC
         "#,
     )
     .bind(uid)

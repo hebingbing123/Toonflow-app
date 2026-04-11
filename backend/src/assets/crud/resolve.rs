@@ -1,6 +1,6 @@
 //! 与 [`super::super::crud_images`] 和后台任务共享的辅助函数。
 //!
-//! 资产 ID 解析（UUID 项目段）与元数据解析；队列侧仍可按 **`project_legacy_id`** 解析（见 **`resolve_asset_id_for_job`**）。
+//! 资产 ID 解析（UUID 项目段）与元数据解析；队列侧仍可按 **`project_numeric_id`** 解析（见 **`resolve_asset_id_for_job`**）。
 
 use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
@@ -29,14 +29,14 @@ pub(crate) async fn ensure_owned_project_pk(
     }
 }
 
-/// **404** if the project is missing or not owned; returns **`app_project.legacy_id`** for Electron-era payloads.
+/// **404** if the project is missing or not owned; returns **`app_project.numeric_id`** for Electron-era payloads.
 pub(crate) async fn ensure_owned_project_numeric_id(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
 ) -> Result<i32, ApiError> {
     let v: Option<i32> = sqlx::query_scalar(
-        r#"SELECT p.legacy_id FROM app_project p WHERE p.id = $1 AND p.owner_user_id = $2"#,
+        r#"SELECT p.numeric_id FROM app_project p WHERE p.id = $1 AND p.owner_user_id = $2"#,
     )
     .bind(project_id)
     .bind(uid)
@@ -64,7 +64,7 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_id)
@@ -88,9 +88,9 @@ pub async fn resolve_asset_id_for_job(
         SELECT a.id
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.legacy_id = $1
+        WHERE p.numeric_id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_numeric_id)
@@ -131,7 +131,7 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_id)

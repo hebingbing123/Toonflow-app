@@ -17,7 +17,7 @@ struct OwnedProductionScope {
 
 #[derive(Debug, FromRow)]
 struct ProductionAssetFlowRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     name: String,
     asset_type: String,
@@ -28,7 +28,7 @@ struct ProductionAssetFlowRow {
 
 #[derive(Debug, FromRow)]
 struct ProductionStoryboardFlowRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     prompt: Option<String>,
     file_path: Option<String>,
@@ -57,8 +57,8 @@ pub(crate) async fn resolve_owned_production_scope(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -82,14 +82,14 @@ fn json_i32(obj: &Map<String, Value>, key: &str) -> Option<i32> {
 }
 
 fn history_image_src(metadata: &Value, history_images: &[Value]) -> Option<String> {
-    let selected_legacy_image_id = metadata
+    let selected_numeric_image_id = metadata
         .get("imageId")
         .and_then(Value::as_i64)
         .and_then(|v| i32::try_from(v).ok());
-    if let Some(selected_id) = selected_legacy_image_id {
+    if let Some(selected_id) = selected_numeric_image_id {
         if let Some(src) = history_images.iter().find_map(|img| {
             let img_obj = img.as_object()?;
-            if json_i32(img_obj, "legacy_image_id") == Some(selected_id) {
+            if json_i32(img_obj, "numeric_image_id") == Some(selected_id) {
                 return json_string(img_obj, "file_path");
             }
             None
@@ -175,7 +175,7 @@ async fn load_production_flow_json(
     let rows = sqlx::query_as::<_, ProductionAssetFlowRow>(
         r#"
         SELECT
-          a.legacy_id,
+          a.numeric_id,
           a.name,
           a.asset_type,
           a.description,
@@ -185,7 +185,7 @@ async fn load_production_flow_json(
               SELECT jsonb_agg(
                 jsonb_build_object(
                   'file_path', i.file_path,
-                  'legacy_image_id', i.legacy_image_id,
+                  'numeric_image_id', i.numeric_image_id,
                   'sort_index', i.sort_index
                 )
                 ORDER BY i.sort_index ASC, i.created_at ASC
@@ -200,7 +200,7 @@ async fn load_production_flow_json(
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id
         WHERE a.project_id = $1
           AND sa.script_id = $2
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         "#,
     )
     .bind(project_id)
@@ -234,7 +234,7 @@ async fn load_production_flow_json(
     let storyboards = sqlx::query_as::<_, ProductionStoryboardFlowRow>(
         r#"
         SELECT
-          legacy_id,
+          numeric_id,
           prompt,
           file_path,
           duration,
@@ -246,7 +246,7 @@ async fn load_production_flow_json(
           sb_index
         FROM app_storyboard
         WHERE script_id = $1
-        ORDER BY COALESCE(sb_index, 2147483647), legacy_id
+        ORDER BY COALESCE(sb_index, 2147483647), numeric_id
         "#,
     )
     .bind(script_id)

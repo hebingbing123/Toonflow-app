@@ -12,7 +12,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::crud::ensure_owned_project_numeric_id;
-use super::super::metadata_cover_legacy_image_id;
+use super::super::metadata_cover_numeric_image_id;
 use super::super::models::*;
 
 async fn run_get_image(
@@ -23,12 +23,12 @@ async fn run_get_image(
 ) -> Result<LegacyGetImageResponse, ApiError> {
     let asset = sqlx::query_as::<_, LegacyGetImageAssetRow>(
         r#"
-        SELECT a.id, a.legacy_id, a.asset_type, a.metadata
+        SELECT a.id, a.numeric_id, a.asset_type, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND a.legacy_id = $3
+          AND p.numeric_id = $2
+          AND a.numeric_id = $3
         ORDER BY a.created_at DESC
         LIMIT 1
         "#,
@@ -41,11 +41,11 @@ async fn run_get_image(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    let image_id = metadata_cover_legacy_image_id(&asset.metadata.0);
+    let image_id = metadata_cover_numeric_image_id(&asset.metadata.0);
 
     let rows: Vec<AssetImageRow> = sqlx::query_as(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        SELECT id, asset_id, sort_index, file_path, state, numeric_image_id
         FROM app_asset_image
         WHERE asset_id = $1
         ORDER BY sort_index ASC, created_at ASC, id ASC

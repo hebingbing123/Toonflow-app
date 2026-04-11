@@ -63,7 +63,7 @@ pub(super) async fn list_event_rows(
         SELECT 
             e.id as "id!",
             e.project_id as "project_id!",
-            e.legacy_id as "numeric_id!",
+            e.numeric_id as "numeric_id!",
             e.name as "name!",
             e.detail as "detail!",
             e.create_time_ms,
@@ -86,8 +86,8 @@ pub(super) async fn list_event_rows(
         qb.push_bind(pat);
     }
     qb.push(
-        " GROUP BY e.id, e.project_id, e.legacy_id, e.name, e.detail, e.create_time_ms
-          ORDER BY e.create_time_ms DESC NULLS LAST, e.legacy_id DESC
+        " GROUP BY e.id, e.project_id, e.numeric_id, e.name, e.detail, e.create_time_ms
+          ORDER BY e.create_time_ms DESC NULLS LAST, e.numeric_id DESC
           LIMIT ",
     );
     qb.push_bind(limit);

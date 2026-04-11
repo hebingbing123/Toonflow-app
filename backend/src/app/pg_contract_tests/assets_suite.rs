@@ -316,7 +316,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
 
     let project_id: Uuid = sqlx::query_scalar(
-        r#"SELECT id FROM public.app_project WHERE legacy_id = $1 AND owner_user_id = $2"#,
+        r#"SELECT id FROM public.app_project WHERE numeric_id = $1 AND owner_user_id = $2"#,
     )
     .bind(numeric_id)
     .bind(sub)
@@ -329,7 +329,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     let now_ms = chrono::Utc::now().timestamp_millis();
     sqlx::query(
         r#"
-        INSERT INTO public.app_asset (id, project_id, legacy_id, name, asset_type, create_time_ms, metadata)
+        INSERT INTO public.app_asset (id, project_id, numeric_id, name, asset_type, create_time_ms, metadata)
         VALUES ($1, $2, $3, $4, 'role', $5, '{}'::jsonb)
         "#,
     )
@@ -346,7 +346,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     let numeric_image_id = 7_700_001_i32;
     sqlx::query(
         r#"
-        INSERT INTO public.app_asset_image (id, asset_id, sort_index, file_path, state, legacy_image_id, metadata)
+        INSERT INTO public.app_asset_image (id, asset_id, sort_index, file_path, state, numeric_image_id, metadata)
         VALUES ($1, $2, 0, $3, '生成中', $4, '{"seed":"cancel_roundtrip"}'::jsonb)
         "#,
     )
@@ -484,7 +484,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     assert_eq!(
         batch_result
             .as_ref()
-            .and_then(|v| v.get("cancel_legacy_image_id"))
+            .and_then(|v| v.get("cancel_numeric_image_id"))
             .and_then(serde_json::Value::as_i64),
         Some(i64::from(numeric_image_id))
     );
@@ -1181,8 +1181,8 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
     let parent_a_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id
            FROM app_asset
-           WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
-             AND legacy_id = $3"#,
+           WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $2)
+             AND numeric_id = $3"#,
     )
     .bind(project_numeric_id)
     .bind(sub)
@@ -1200,8 +1200,8 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           to_jsonb($2::integer),
           true
         )
-        WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $3)
-          AND legacy_id = $4
+        WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $3)
+          AND numeric_id = $4
         "#,
     )
     .bind(project_numeric_id)
@@ -1221,8 +1221,8 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           to_jsonb($2::integer),
           true
         )
-        WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $3)
-          AND legacy_id = $4
+        WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $3)
+          AND numeric_id = $4
         "#,
     )
     .bind(project_numeric_id)
@@ -1243,8 +1243,8 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
           to_jsonb($2::integer),
           true
         )
-        WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $3)
-          AND legacy_id = $4
+        WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $3)
+          AND numeric_id = $4
         "#,
     )
     .bind(project_numeric_id)
@@ -1257,7 +1257,7 @@ async fn assets_get_assets_api_parent_child_roundtrip() {
 
     sqlx::query(
         r#"
-        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, legacy_image_id, metadata)
+        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, numeric_image_id, metadata)
         VALUES ($1, 0, '/tmp/pg_parent_a_selected.png', '失败', $2, '{"errorReason":"provider_timeout"}'::jsonb)
         "#,
     )
@@ -1458,8 +1458,8 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     let ready_asset_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id
            FROM app_asset
-           WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
-             AND legacy_id = $3"#,
+           WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $2)
+             AND numeric_id = $3"#,
     )
     .bind(project_numeric_id)
     .bind(sub)
@@ -1470,8 +1470,8 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     let running_asset_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id
            FROM app_asset
-           WHERE project_id = (SELECT id FROM app_project WHERE legacy_id = $1 AND owner_user_id = $2)
-             AND legacy_id = $3"#,
+           WHERE project_id = (SELECT id FROM app_project WHERE numeric_id = $1 AND owner_user_id = $2)
+             AND numeric_id = $3"#,
     )
     .bind(project_numeric_id)
     .bind(sub)
@@ -1511,7 +1511,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
 
     sqlx::query(
         r#"
-        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, legacy_image_id)
+        INSERT INTO app_asset_image (asset_id, sort_index, file_path, state, numeric_image_id)
         VALUES
           ($1, 0, '/tmp/pg_polling_ready.png', '已完成', $2),
           ($3, 0, '/tmp/pg_polling_running.png', '生成中', $4)

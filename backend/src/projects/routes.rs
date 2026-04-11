@@ -22,7 +22,7 @@ use crate::state::AppState;
 pub struct ProjectRow {
     pub id: Uuid,
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub name: Option<String>,
     pub intro: Option<String>,
@@ -40,7 +40,7 @@ pub struct ProjectRow {
 #[derive(Debug, FromRow, Serialize)]
 struct ScriptBrief {
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     name: Option<String>,
     extract_state: Option<i32>,
@@ -129,8 +129,8 @@ struct CreateProjectBody {
     video_ratio: Option<String>,
 }
 
-/// Stable key for `pg_advisory_xact_lock` when allocating `app_project.legacy_id` (global uniqueness).
-const ADV_LOCK_PROJECT_LEGACY_ID: i64 = 884_422_001;
+/// Stable key for `pg_advisory_xact_lock` when allocating `app_project.numeric_id` (global uniqueness).
+const ADV_LOCK_PROJECT_NUMERIC_ID: i64 = 884_422_001;
 
 fn trim_opt(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
@@ -186,14 +186,14 @@ async fn create_project(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_PROJECT_LEGACY_ID)
+        .bind(ADV_LOCK_PROJECT_NUMERIC_ID)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_project
         "#,
     )
@@ -206,12 +206,12 @@ async fn create_project(
     let row = sqlx::query_as::<_, ProjectRow>(
         r#"
         INSERT INTO app_project (
-          owner_user_id, legacy_id, name, intro, project_type,
+          owner_user_id, numeric_id, name, intro, project_type,
           image_model, image_quality, video_model, art_style,
           director_manual, mode, video_ratio, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, '{}'::jsonb)
-        RETURNING id, legacy_id, name, intro, project_type,
+        RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms
         "#,
@@ -256,12 +256,12 @@ async fn list_projects(
 
     let rows = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type,
+        SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms
         FROM app_project
         WHERE owner_user_id = $1
-        ORDER BY create_time_ms DESC NULLS LAST, legacy_id DESC
+        ORDER BY create_time_ms DESC NULLS LAST, numeric_id DESC
         LIMIT $2 OFFSET $3
         "#,
     )
@@ -357,7 +357,7 @@ async fn get_project_by_id(
 
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type,
+        SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms
         FROM app_project
@@ -373,10 +373,10 @@ async fn get_project_by_id(
 
     let scripts = sqlx::query_as::<_, ScriptBrief>(
         r#"
-        SELECT legacy_id, name, extract_state
+        SELECT numeric_id, name, extract_state
         FROM app_script
         WHERE project_id = $1
-        ORDER BY legacy_id ASC
+        ORDER BY numeric_id ASC
         "#,
     )
     .bind(project.id)
@@ -470,7 +470,7 @@ async fn project_stats_by_id(
           AND status = 'succeeded'
           AND (kind ILIKE '%video%' OR kind ILIKE '%workbench%')
           AND payload->>'project_numeric_id' = (
-              SELECT legacy_id::text FROM app_project WHERE id = $1
+              SELECT numeric_id::text FROM app_project WHERE id = $1
           )
         "#,
     )
@@ -532,7 +532,7 @@ async fn patch_project_by_id(
 
     let current = sqlx::query_as::<_, ProjectRow>(
         r#"
-        SELECT id, legacy_id, name, intro, project_type,
+        SELECT id, numeric_id, name, intro, project_type,
                image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms
         FROM app_project
@@ -565,7 +565,7 @@ async fn patch_project_by_id(
             art_style = $7, director_manual = $8, mode = $9, video_ratio = $10,
             updated_at = NOW()
         WHERE id = $11 AND owner_user_id = $12
-        RETURNING id, legacy_id, name, intro, project_type,
+        RETURNING id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms
         "#,
@@ -607,7 +607,7 @@ async fn delete_project_by_id(
 
     let numeric_id: Option<i32> = sqlx::query_scalar(
         r#"
-        SELECT legacy_id
+        SELECT numeric_id
         FROM app_project
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -629,7 +629,7 @@ async fn delete_project_by_id(
         r#"
         DELETE FROM app_agent_memory
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
         "#,
     )
     .bind(uid)

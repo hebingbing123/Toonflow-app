@@ -126,17 +126,17 @@ fn normalize_role(role: Option<String>) -> String {
 pub(crate) async fn ensure_project_owned(
     pool: &PgPool,
     uid: Uuid,
-    legacy_project_id: i32,
+    numeric_project_id: i32,
 ) -> Result<(), ApiError> {
     let ok: bool = sqlx::query_scalar(
         r#"
         SELECT EXISTS(
           SELECT 1 FROM app_project
-          WHERE legacy_id = $1 AND owner_user_id = $2
+          WHERE numeric_id = $1 AND owner_user_id = $2
         )
         "#,
     )
-    .bind(legacy_project_id)
+    .bind(numeric_project_id)
     .bind(uid)
     .fetch_one(pool)
     .await
@@ -159,7 +159,7 @@ pub(crate) async fn delete_all_agent_memory_rows(
         r#"
         DELETE FROM app_agent_memory
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
           AND agent_type = $3
           AND episodes_id IS NOT DISTINCT FROM $4
         "#,
@@ -195,7 +195,7 @@ async fn query_memory(
         SELECT id, role, name, content, create_time_ms
         FROM app_agent_memory
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
           AND agent_type = $3
           AND episodes_id IS NOT DISTINCT FROM $4
           AND memory_type = 'message'
@@ -271,7 +271,7 @@ async fn clear_memory(
                 r#"
                 DELETE FROM app_agent_memory
                 WHERE owner_user_id = $1
-                  AND legacy_project_id = $2
+                  AND numeric_project_id = $2
                   AND agent_type = $3
                   AND episodes_id IS NOT DISTINCT FROM $4
                   AND memory_type = 'message'
@@ -288,7 +288,7 @@ async fn clear_memory(
                 r#"
                 DELETE FROM app_agent_memory
                 WHERE owner_user_id = $1
-                  AND legacy_project_id = $2
+                  AND numeric_project_id = $2
                   AND agent_type = $3
                   AND episodes_id IS NOT DISTINCT FROM $4
                   AND memory_type = 'summary'
@@ -308,7 +308,7 @@ async fn clear_memory(
                 UPDATE app_agent_memory
                 SET summarized = 0
                 WHERE owner_user_id = $1
-                  AND legacy_project_id = $2
+                  AND numeric_project_id = $2
                   AND agent_type = $3
                   AND episodes_id IS NOT DISTINCT FROM $4
                   AND memory_type = 'message'
@@ -326,7 +326,7 @@ async fn clear_memory(
                 r#"
                 DELETE FROM app_agent_memory
                 WHERE owner_user_id = $1
-                  AND legacy_project_id = $2
+                  AND numeric_project_id = $2
                   AND agent_type = $3
                   AND episodes_id IS NOT DISTINCT FROM $4
                   AND memory_type = 'summary'
@@ -381,7 +381,7 @@ async fn append_memory(
     let id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO app_agent_memory (
-          owner_user_id, legacy_project_id, episodes_id, agent_type,
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
           memory_type, role, name, content, summarized, create_time_ms
         )
         VALUES ($1, $2, $3, $4, 'message', $5, $6, $7, 0, $8)
@@ -442,7 +442,7 @@ async fn maybe_summarize_messages(
         r#"
         SELECT COUNT(*)::bigint FROM app_agent_memory
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
           AND episodes_id IS NOT DISTINCT FROM $3
           AND agent_type = $4
           AND memory_type = 'message'
@@ -465,7 +465,7 @@ async fn maybe_summarize_messages(
         r#"
         SELECT role, content FROM app_agent_memory
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
           AND episodes_id IS NOT DISTINCT FROM $3
           AND agent_type = $4
           AND memory_type = 'message'
@@ -531,7 +531,7 @@ async fn maybe_summarize_messages(
     sqlx::query(
         r#"
         INSERT INTO app_agent_memory (
-          owner_user_id, legacy_project_id, episodes_id, agent_type,
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
           memory_type, role, name, content, summarized, create_time_ms
         )
         VALUES ($1, $2, $3, $4, 'summary', 'assistant', 'summary', $5, 1, $6)
@@ -552,7 +552,7 @@ async fn maybe_summarize_messages(
         UPDATE app_agent_memory
         SET summarized = 1
         WHERE owner_user_id = $1
-          AND legacy_project_id = $2
+          AND numeric_project_id = $2
           AND episodes_id IS NOT DISTINCT FROM $3
           AND agent_type = $4
           AND memory_type = 'message'
@@ -560,7 +560,7 @@ async fn maybe_summarize_messages(
           AND id IN (
             SELECT id FROM app_agent_memory
             WHERE owner_user_id = $1
-              AND legacy_project_id = $2
+              AND numeric_project_id = $2
               AND episodes_id IS NOT DISTINCT FROM $3
               AND agent_type = $4
               AND memory_type = 'message'

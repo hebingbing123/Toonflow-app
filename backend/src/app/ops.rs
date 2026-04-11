@@ -116,8 +116,8 @@ const COUNT_QUERIES: &[(&str, &str)] = &[
         "SELECT COUNT(*)::bigint FROM public.app_user_profile WHERE user_id = $1",
     ),
     (
-        "legacy_user_maps",
-        "SELECT COUNT(*)::bigint FROM public.legacy_user_map WHERE supabase_user_id = $1",
+        "import_user_maps",
+        "SELECT COUNT(*)::bigint FROM public.import_user_map WHERE supabase_user_id = $1",
     ),
 ];
 
@@ -159,8 +159,8 @@ const DELETE_QUERIES: &[(&str, &str)] = &[
         "DELETE FROM public.app_project WHERE owner_user_id = $1",
     ),
     (
-        "legacy_user_maps",
-        "DELETE FROM public.legacy_user_map WHERE supabase_user_id = $1",
+        "import_user_maps",
+        "DELETE FROM public.import_user_map WHERE supabase_user_id = $1",
     ),
     (
         "user_profiles",

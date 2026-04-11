@@ -22,7 +22,7 @@ use crate::state::AppState;
 use super::crud::{
     resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
 };
-use super::metadata_cover_legacy_image_id;
+use super::metadata_cover_numeric_image_id;
 use super::models::*;
 
 pub(super) async fn list_project_asset_images_for_project(
@@ -44,11 +44,11 @@ pub(super) async fn list_project_asset_images_for_project(
     let (asset_id, metadata) =
         resolve_owned_asset_id_and_metadata_for_project(pool, uid, project_id, asset_numeric_id)
             .await?;
-    let cover_numeric_image_id = metadata_cover_legacy_image_id(&metadata);
+    let cover_numeric_image_id = metadata_cover_numeric_image_id(&metadata);
 
     let rows = sqlx::query_as::<_, AssetImageRow>(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        SELECT id, asset_id, sort_index, file_path, state, numeric_image_id
         FROM app_asset_image
         WHERE asset_id = $1
         ORDER BY sort_index ASC, created_at ASC
@@ -94,7 +94,7 @@ pub(super) async fn get_project_asset_image_for_project(
 
     let row = sqlx::query_as::<_, AssetImageRow>(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        SELECT id, asset_id, sort_index, file_path, state, numeric_image_id
         FROM app_asset_image
         WHERE id = $1 AND asset_id = $2
         "#,
@@ -217,7 +217,7 @@ pub(super) async fn create_project_asset_image_for_project(
         r#"
         INSERT INTO app_asset_image (asset_id, sort_index, file_path, state)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, asset_id, sort_index, file_path, state, legacy_image_id
+        RETURNING id, asset_id, sort_index, file_path, state, numeric_image_id
         "#,
     )
     .bind(asset_id)
@@ -267,7 +267,7 @@ pub(super) async fn patch_project_asset_image_for_project(
 
     let current = sqlx::query_as::<_, AssetImageRow>(
         r#"
-        SELECT id, asset_id, sort_index, file_path, state, legacy_image_id
+        SELECT id, asset_id, sort_index, file_path, state, numeric_image_id
         FROM app_asset_image
         WHERE id = $1 AND asset_id = $2
         "#,
@@ -307,7 +307,7 @@ pub(super) async fn patch_project_asset_image_for_project(
             sort_index = $3,
             updated_at = NOW()
         WHERE id = $4 AND asset_id = $5
-        RETURNING id, asset_id, sort_index, file_path, state, legacy_image_id
+        RETURNING id, asset_id, sort_index, file_path, state, numeric_image_id
         "#,
     )
     .bind(new_file)

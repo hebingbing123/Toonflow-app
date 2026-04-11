@@ -18,8 +18,8 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-/// Same advisory lock family as [`crate::scripting::scripts`] for allocating **`app_script.legacy_id`**.
-const ADV_LOCK_SCRIPT_LEGACY_ID: i64 = 884_422_002;
+/// Same advisory lock family as [`crate::scripting::scripts`] for allocating **`app_script.numeric_id`**.
+const ADV_LOCK_SCRIPT_NUMERIC_ID: i64 = 884_422_002;
 const MAX_PLAN_SCRIPT_ROWS: usize = 200;
 
 #[derive(Debug, Deserialize)]
@@ -131,7 +131,7 @@ async fn resolve_owned_project_uuid(
     let id: Option<Uuid> = sqlx::query_scalar(
         r#"
         SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
+        WHERE numeric_id = $1 AND owner_user_id = $2
         "#,
     )
     .bind(project_numeric_id)
@@ -165,10 +165,10 @@ async fn select_plan_row(
 async fn scripts_json_for_project(pool: &PgPool, project_uuid: Uuid) -> Result<Value, ApiError> {
     let rows: Vec<(i32, Option<String>, Option<String>)> = sqlx::query_as(
         r#"
-        SELECT legacy_id, name, content
+        SELECT numeric_id, name, content
         FROM app_script
         WHERE project_id = $1
-        ORDER BY legacy_id ASC
+        ORDER BY numeric_id ASC
         "#,
     )
     .bind(project_uuid)
@@ -296,7 +296,7 @@ async fn post_set_plan_data(
     let project_uuid: Uuid = sqlx::query_scalar(
         r#"
         SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
+        WHERE numeric_id = $1 AND owner_user_id = $2
         "#,
     )
     .bind(body.project_id)
@@ -327,7 +327,7 @@ async fn post_set_plan_data(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
+        .bind(ADV_LOCK_SCRIPT_NUMERIC_ID)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -343,7 +343,7 @@ async fn post_set_plan_data(
             FROM (
               SELECT id FROM app_script
               WHERE project_id = $2 AND name = $3
-              ORDER BY legacy_id ASC
+              ORDER BY numeric_id ASC
               LIMIT 1
             ) AS pick
             WHERE s.id = pick.id
@@ -359,7 +359,7 @@ async fn post_set_plan_data(
         if n_updated == 0 {
             let next_legacy: i32 = sqlx::query_scalar(
                 r#"
-                SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_script
+                SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_script
                 "#,
             )
             .fetch_one(&mut *tx)
@@ -369,7 +369,7 @@ async fn post_set_plan_data(
             sqlx::query(
                 r#"
                 INSERT INTO app_script (
-                  project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
+                  project_id, numeric_id, name, content, extract_state, create_time_ms, metadata
                 )
                 VALUES ($1, $2, $3, $4, NULL, $5, '{}'::jsonb)
                 "#,

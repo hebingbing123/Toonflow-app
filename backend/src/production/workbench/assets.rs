@@ -57,8 +57,8 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -139,8 +139,8 @@ pub(in crate::production) async fn post_assets_delete_derivative(
             SELECT a.id FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-              AND a.legacy_id = ANY($3::int4[])
+              AND p.numeric_id = $2
+              AND a.numeric_id = ANY($3::int4[])
         )
         "#,
     )
@@ -211,16 +211,16 @@ pub(in crate::production) async fn post_assets_get_data(
     let assets = sqlx::query_as::<_, AssetDataItem>(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           a.name,
           a.asset_type AS "type",
           a.describe,
-          a.cover_legacy_image_id,
+          a.cover_numeric_image_id,
           a.created_at
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND ($3::text IS NULL OR a.asset_type = $3)
         ORDER BY a.created_at DESC
         LIMIT $4 OFFSET $5
@@ -246,7 +246,7 @@ pub(in crate::production) async fn post_assets_get_data(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND ($3::text IS NULL OR a.asset_type = $3)
         "#,
     )
@@ -309,16 +309,16 @@ pub(in crate::production) async fn post_assets_polling_image(
     let statuses = sqlx::query_as::<_, AssetImageStatus>(
         r#"
         SELECT
-          a.legacy_id AS asset_id,
+          a.numeric_id AS asset_id,
           COUNT(ai.id) AS image_count,
           MAX(ai.state) AS latest_state
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         LEFT JOIN app_asset_image ai ON ai.asset_id = a.id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND a.legacy_id = ANY($3::int4[])
-        GROUP BY a.legacy_id
+          AND p.numeric_id = $2
+          AND a.numeric_id = ANY($3::int4[])
+        GROUP BY a.numeric_id
         "#,
     )
     .bind(uid)
@@ -376,8 +376,8 @@ pub(in crate::production) async fn post_assets_update_url(
         INNER JOIN app_project p ON p.id = a.project_id
         LEFT JOIN app_asset_image ai ON ai.asset_id = a.id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND a.legacy_id = $3
+          AND p.numeric_id = $2
+          AND a.numeric_id = $3
         GROUP BY a.id
         RETURNING id
         "#,

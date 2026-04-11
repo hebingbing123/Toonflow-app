@@ -42,7 +42,7 @@ async fn run_get_assets_api(
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = $3
           AND (
             NOT (a.metadata ? 'assetsId')
@@ -65,7 +65,7 @@ async fn run_get_assets_api(
     let parents: Vec<LegacyGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           CASE
             WHEN COALESCE(a.metadata->>'projectId', '') ~ '^[0-9]+$'
               THEN (a.metadata->>'projectId')::integer
@@ -90,13 +90,13 @@ async fn run_get_assets_api(
         INNER JOIN app_project p ON p.id = a.project_id
         LEFT JOIN app_asset_image ai
           ON ai.asset_id = a.id
-         AND ai.legacy_image_id = CASE
+         AND ai.numeric_image_id = CASE
            WHEN COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
              THEN (a.metadata->>'imageId')::integer
            ELSE NULL
          END
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = $3
           AND (
             NOT (a.metadata ? 'assetsId')
@@ -106,7 +106,7 @@ async fn run_get_assets_api(
             $4::text IS NULL
             OR a.name ILIKE $4
           )
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         LIMIT $5 OFFSET $6
         "#,
     )
@@ -123,7 +123,7 @@ async fn run_get_assets_api(
     let children: Vec<LegacyGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           CASE
             WHEN COALESCE(a.metadata->>'projectId', '') ~ '^[0-9]+$'
               THEN (a.metadata->>'projectId')::integer
@@ -148,13 +148,13 @@ async fn run_get_assets_api(
         INNER JOIN app_project p ON p.id = a.project_id
         LEFT JOIN app_asset_image ai
           ON ai.asset_id = a.id
-         AND ai.legacy_image_id = CASE
+         AND ai.numeric_image_id = CASE
            WHEN COALESCE(a.metadata->>'imageId', '') ~ '^[0-9]+$'
              THEN (a.metadata->>'imageId')::integer
            ELSE NULL
          END
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
+          AND p.numeric_id = $2
           AND a.asset_type = $3
           AND (
             a.metadata ? 'assetsId'
@@ -164,7 +164,7 @@ async fn run_get_assets_api(
             $4::text IS NULL
             OR a.name ILIKE $4
           )
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         "#,
     )
     .bind(uid)

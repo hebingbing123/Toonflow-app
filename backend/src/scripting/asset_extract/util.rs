@@ -1,6 +1,6 @@
 //! 提示词加载和持久化的小辅助函数。
 
-pub(crate) const ADV_LOCK_ASSET_LEGACY_ID: i64 = 884_422_004;
+pub(crate) const ADV_LOCK_ASSET_NUMERIC_ID: i64 = 884_422_004;
 
 pub(crate) fn trim_empty_opt(s: &str) -> Option<String> {
     let t = s.trim();

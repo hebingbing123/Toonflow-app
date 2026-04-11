@@ -13,7 +13,7 @@ use crate::harness::HarnessContext;
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessScriptRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub name: Option<String>,
     pub content: Option<String>,
@@ -22,7 +22,7 @@ pub(super) struct HarnessScriptRow {
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessNovelRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub chapter_index: i32,
     pub chapter: String,
@@ -32,7 +32,7 @@ pub(super) struct HarnessNovelRow {
 
 #[derive(sqlx::FromRow, Serialize)]
 pub(super) struct HarnessNovelEventRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub name: String,
     pub detail: String,
@@ -58,8 +58,8 @@ pub(super) async fn require_owned_script_scope(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(ctx.user_id)
@@ -80,7 +80,7 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
     let project_uuid: uuid::Uuid = sqlx::query_scalar(
         r#"
         SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
+        WHERE numeric_id = $1 AND owner_user_id = $2
         "#,
     )
     .bind(project_numeric_id)
@@ -107,11 +107,11 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
 
     let scripts: Vec<HarnessScriptRow> = sqlx::query_as(
         r#"
-        SELECT s.legacy_id, s.name, s.content, s.extract_state
+        SELECT s.numeric_id, s.name, s.content, s.extract_state
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1 AND p.legacy_id = $2
-        ORDER BY s.legacy_id
+        WHERE p.owner_user_id = $1 AND p.numeric_id = $2
+        ORDER BY s.numeric_id
         "#,
     )
     .bind(ctx.user_id)
@@ -155,12 +155,12 @@ pub(super) async fn invoke_get_script_content(
 
     let row: HarnessScriptRow = sqlx::query_as(
         r#"
-        SELECT s.legacy_id, s.name, s.content, s.extract_state
+        SELECT s.numeric_id, s.name, s.content, s.extract_state
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(ctx.user_id)
@@ -190,13 +190,13 @@ pub(super) async fn invoke_get_novel_text(
     let rows: Vec<HarnessNovelRow> = if let Some(novel_id) = novel_numeric_id {
         sqlx::query_as(
             r#"
-            SELECT n.legacy_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
+            SELECT n.numeric_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
             FROM app_novel n
             INNER JOIN app_project p ON p.id = n.project_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-              AND n.legacy_id = $3
-            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+              AND p.numeric_id = $2
+              AND n.numeric_id = $3
+            ORDER BY n.chapter_index ASC, n.numeric_id ASC
             "#,
         )
         .bind(ctx.user_id)
@@ -208,12 +208,12 @@ pub(super) async fn invoke_get_novel_text(
     } else {
         sqlx::query_as(
             r#"
-            SELECT n.legacy_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
+            SELECT n.numeric_id, n.chapter_index, n.chapter, n.chapter_data, n.event_state
             FROM app_novel n
             INNER JOIN app_project p ON p.id = n.project_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+              AND p.numeric_id = $2
+            ORDER BY n.chapter_index ASC, n.numeric_id ASC
             LIMIT 200
             "#,
         )
@@ -247,15 +247,15 @@ pub(super) async fn invoke_get_novel_events(
     let rows: Vec<HarnessNovelEventRow> = if let Some(novel_id) = novel_numeric_id {
         sqlx::query_as(
             r#"
-            SELECT e.legacy_id, e.name, e.detail
+            SELECT e.numeric_id, e.name, e.detail
             FROM app_novel_event e
             INNER JOIN app_project p ON p.id = e.project_id
             INNER JOIN app_novel_event_chapter ec ON ec.event_id = e.id
             INNER JOIN app_novel n ON n.id = ec.novel_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-              AND n.legacy_id = $3
-            ORDER BY e.legacy_id ASC
+              AND p.numeric_id = $2
+              AND n.numeric_id = $3
+            ORDER BY e.numeric_id ASC
             "#,
         )
         .bind(ctx.user_id)
@@ -267,12 +267,12 @@ pub(super) async fn invoke_get_novel_events(
     } else {
         sqlx::query_as(
             r#"
-            SELECT e.legacy_id, e.name, e.detail
+            SELECT e.numeric_id, e.name, e.detail
             FROM app_novel_event e
             INNER JOIN app_project p ON p.id = e.project_id
             WHERE p.owner_user_id = $1
-              AND p.legacy_id = $2
-            ORDER BY e.legacy_id ASC
+              AND p.numeric_id = $2
+            ORDER BY e.numeric_id ASC
             LIMIT 200
             "#,
         )

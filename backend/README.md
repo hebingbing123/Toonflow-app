@@ -35,9 +35,9 @@ cargo run
 2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
 3. `cargo run --bin toonflow-sqlite-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
 
-填充 `legacy_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_legacy_from_staging();` 写入 `app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`** / **`app_script_asset`** / **`app_art_style`** / **`app_user_prompt`** / **`app_asset_image`**（**`o_image`**；**`owner_user_id`** 取映射表中 **`legacy_user_id` 最小** 的一行；返回值九列含 **`asset_images_upserted`** 等）。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
+填充 `import_user_map` 后，在 Supabase SQL（**service_role**）执行 `SELECT * FROM public.promote_import_snapshots();` 写入 `app_project` / `app_script` / `app_storyboard` / **`app_novel`** / **`app_asset`** / **`app_script_asset`** / **`app_art_style`** / **`app_user_prompt`** / **`app_asset_image`**（**`o_image`**；**`owner_user_id`** 取映射表中 **`import_user_id` 最小** 的一行；返回值九列含 **`asset_images_upserted`** 等）。详见 [`docs/migration/legacy-sqlite-to-supabase.md`](../docs/migration/legacy-sqlite-to-supabase.md)。
 
-新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`legacy_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`** 分配，避免并发撞号。
+新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`numeric_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(numeric_id)+1`** 分配，避免并发撞号。
 
 项目删除：**`DELETE /api/v1/projects/{project_id}`**（Bearer；**`project_id`** 为项目 UUID）— 删除当前用户名下该项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
@@ -45,15 +45,15 @@ cargo run
 
 项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
-画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`**（Bearer）— **`app_art_style`**（RLS）；**`legacy_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(legacy_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**；空数组或全空白项 **400**（先于 LLM 校验）；合法请求需 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
+画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`**（Bearer）— **`app_art_style`**（RLS）；**`numeric_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(numeric_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**；空数组或全空白项 **400**（先于 LLM 校验）；合法请求需 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
 
-新建剧本：**`POST /api/v1/projects/{project_id}/scripts`**（Bearer；**`project_id`** 为项目 UUID；JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`legacy_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
+新建剧本：**`POST /api/v1/projects/{project_id}/scripts`**（Bearer；**`project_id`** 为项目 UUID；JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`numeric_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(numeric_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
 
-剧本删除：**`DELETE /api/v1/projects/{project_id}/scripts/{script_legacy_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
+剧本删除：**`DELETE /api/v1/projects/{project_id}/scripts/{script_numeric_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户项目的 **`app_script`**；其下 **`app_storyboard`** 随 FK 级联删除。
 
-新建分镜：**`POST /api/v1/projects/{project_id}/scripts/{script_legacy_id}/storyboards`**（Bearer；**`project_id`** UUID；JSON 体字段均可选）— 写入 **`app_storyboard`**；**`legacy_id`** 为事务内 **`pg_advisory_xact_lock(884_422_003)`** + 全表 **`MAX(legacy_id)+1`**；默认填充 **`legacy_script_id`**、**`legacy_project_id`**。旧 **`o_videoTrack`** 前置插入未实现。
+新建分镜：**`POST /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards`**（Bearer；**`project_id`** UUID；JSON 体字段均可选）— 写入 **`app_storyboard`**；**`numeric_id`** 为事务内 **`pg_advisory_xact_lock(884_422_003)`** + 全表 **`MAX(numeric_id)+1`**；默认填充 **`numeric_script_id`**、**`numeric_project_id`**。旧 **`o_videoTrack`** 前置插入未实现。
 
-分镜删除：**`DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_legacy_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户剧本树下的 **`app_storyboard`** 单行（`script → project` 所有权校验）。
+分镜删除：**`DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户剧本树下的 **`app_storyboard`** 单行（`script → project` 所有权校验）。
 
 ### LLM（WebSocket `agent.chat.send`）
 
@@ -75,7 +75,7 @@ cargo run
 - 静态模型目录（编译时嵌入 **`data/models_catalog.json`**；Bearer；对齐旧 **`modelSelect`** 的 **`type`** 过滤语义，无 Postgres **`o_vendorConfig`**）：
   - `GET /api/v1/models?type=text|image|video|all` — `all` 不含 `video`
   - `GET /api/v1/models/detail?model_id={vendor_id}:{model_name}` — 如 `1:gpt-4o-mini`
-- Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；需用户拥有对应 **`app_project.legacy_id`**）：
+- Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；需用户拥有对应 **`app_project.numeric_id`**）：
   - `POST /api/v1/agents/memory/query` — 列出 message 行（camelCase body，对齐旧 **`/api/agents/getMemory`**）
   - `POST /api/v1/agents/memory/clear` — 清除语义对齐旧 **`/api/agents/clearMemory`**（`type` 或 `clearType`：`all` / `message` / `summary`）
   - `POST /api/v1/agents/memory/append` — 追加一条 message（不做 Node 侧自动摘要压缩）

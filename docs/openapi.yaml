@@ -42,19 +42,19 @@ info:
 
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`**, overlaid with per-user model selection from **`app_user_profile.agent_deploy_config`** when Postgres is configured. **`POST …/deploy-model`** persists model / vendor choice for one of the four rows. **`POST …/set-key`** is a safe **200** no-op: keys are still server-side only.
 
-    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.legacy_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
+    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.numeric_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
     **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors legacy cancel semantics by marking caller-owned **`app_asset_image`** row (**`numeric_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`legacy_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
+    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`numeric_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
 
     **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
-    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`legacy_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
+    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** stable **`numeric_id`** values). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`numeric_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
 
-        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.legacy_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
+        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.numeric_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
 
     **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
@@ -673,7 +673,7 @@ paths:
       summary: Clear all agent memory for a project (legacy delAllMemory scope)
       operationId: postSettingsClearAgentMemoriesV1
       description: |
-        Bearer JWT. Deletes all **`app_agent_memory`** rows for **`owner_user_id = JWT sub`**, **`legacy_project_id`**, **`agent_type`**, and optional **`episodes_id`** — identical to **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
+        Bearer JWT. Deletes all **`app_agent_memory`** rows for **`owner_user_id = JWT sub`**, **`numeric_project_id`**, **`agent_type`**, and optional **`episodes_id`** — identical to **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
         Legacy **`POST /api/setting/memoryConfig/delAllMemory`** wiped the entire SQLite **`memories`** table with no body; the Rust API requires **`projectId`** and **`agentType`** for multi-tenant safety.
       security:
         - bearerAuth: []
@@ -1675,7 +1675,7 @@ paths:
       description: |
         Returns **`message`** rows for **`owner_user_id` + `projectId` + `agentType` + `episodesId`** (omit or null `episodesId` for the non-episode scope).
         Response shape matches legacy **`/api/agents/getMemory`** `data` array (camelCase, markdown content blocks).
-        Requires an **`app_project`** row owned by the user with **`legacy_id = projectId`**.
+        Requires an **`app_project`** row owned by the user with **`numeric_id = projectId`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -2122,10 +2122,10 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
     post:
       tags: [projects]
-      summary: Create project (allocates global legacy_id)
+      summary: Create project (allocates global numeric_id)
       operationId: createProjectV1
       description: |
-        Inserts **`app_project`** for the JWT subject. **`legacy_id`** is **`MAX(legacy_id)+1`** table-wide under a transaction-scoped advisory lock (avoids races with concurrent creates).
+        Inserts **`app_project`** for the JWT subject. **`numeric_id`** is **`MAX(numeric_id)+1`** table-wide under a transaction-scoped advisory lock (avoids races with concurrent creates).
         All body fields optional; omit or use empty string for unset text. **`create_time_ms`** is set server-side.
       security:
         - bearerAuth: []
@@ -2301,7 +2301,7 @@ paths:
       summary: Delete project by UUID
       operationId: deleteProjectByProjectIdV1
       description: |
-        Deletes **`app_project`** by UUID; cascades scripts/storyboards/novels; clears **`app_agent_memory`** for that project’s **`legacy_project_id`**.
+        Deletes **`app_project`** by UUID; cascades scripts/storyboards/novels; clears **`app_agent_memory`** for that project’s **`numeric_project_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -2339,7 +2339,7 @@ paths:
       summary: Create a manual asset under a project (by project UUID)
       operationId: createProjectAssetByProjectIdV1
       description: |
-        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Allocates the next global **`app_asset.legacy_id`** (advisory lock). **`name`** must be unique per project.
+        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Allocates the next global **`app_asset.numeric_id`** (advisory lock). **`name`** must be unique per project.
         Body field **`type`** is **`role`**, **`tool`**, or **`scene`** (JSON key **`type`**).
       security:
         - bearerAuth: []
@@ -2398,7 +2398,7 @@ paths:
       summary: List assets for a project (by project UUID)
       operationId: listProjectAssetsByProjectIdV1
       description: |
-        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the project, ordered by **`legacy_id`**.
+        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the project, ordered by **`numeric_id`**.
         Optional query **`script_numeric_id`** restricts to assets linked via **`app_script_asset`** to that script (must belong to the same project).
         Optional **`asset_type`** (**`role`** | **`tool`** | **`scene`**) and substring **`name`** (**`ILIKE`**) filter like legacy **`getAssetsApi`**.
         Optional **`limit`** (1–200) with **`page`** (1-based, default 1) paginate; without **`limit`**, all matches are returned and **`total`** equals **`items`** length.
@@ -2483,7 +2483,7 @@ paths:
       operationId: listCornerScapeAssetsByProjectIdV1
       description: |
         Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the owned project that are **top-level** in legacy terms:
-        promoted snapshot has **no** JSON **`assetsId`** property, or **`assetsId`** is JSON **`null`**. Ordered **role → scene → tool**, then **`legacy_id`**.
+        promoted snapshot has **no** JSON **`assetsId`** property, or **`assetsId`** is JSON **`null`**. Ordered **role → scene → tool**, then **`numeric_id`**.
         Optional body **`types`** filters **`asset_type`**. **`history_images`** lists **`app_asset_image`** rows with **`state = '已完成'`**, ordered by **`sort_index`** then **`created_at`**.
       security:
         - bearerAuth: []
@@ -2539,7 +2539,7 @@ paths:
       operationId: postAssetsGetImageV1
       description: |
         Parity with old **`POST /api/assets/getImage`**, scoped to caller-owned **`project_id`** (**`app_project.id`**, UUID).
-        Body **`assetsId`** is **`app_asset.legacy_id`** (must belong to that project). Response returns:
+        Body **`assetsId`** is **`app_asset.numeric_id`** (must belong to that project). Response returns:
         - **`id`**: same legacy asset id
         - **`imageId`**: **`app_asset.metadata.imageId`** when set
         - **`tempAssets`**: image history rows from **`app_asset_image`** with legacy selection flag.
@@ -3140,7 +3140,7 @@ paths:
       operationId: postAssetsPollingImageAssetsV1
       description: |
         Parity with old **`POST /api/assets/pollingImageAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). For each id, the server reads the selected
+        Body **`ids`** are legacy asset ids (**`app_asset.numeric_id`**). For each id, the server reads the selected
         cover image from **`app_asset.metadata.imageId`** and joins to **`app_asset_image.numeric_image_id`**.
         Only rows whose selected image state is **not** **`生成中`** are returned.
       security:
@@ -3199,7 +3199,7 @@ paths:
       operationId: postAssetsPollingPromptAssetsV1
       description: |
         Parity with old **`POST /api/assets/pollingPromptAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Body **`ids`** are legacy asset ids (**`app_asset.legacy_id`**). The server derives each asset's
+        Body **`ids`** are legacy asset ids (**`app_asset.numeric_id`**). The server derives each asset's
         **`promptState`** from latest related polish jobs (`asset.polish.prompt` / `asset.polish.batch`);
         rows still **`生成中`** are filtered out.
       security:
@@ -3883,11 +3883,11 @@ paths:
   /api/v1/projects/{project_id}/scripts:
     post:
       tags: [scripts]
-      summary: Create script under a project (by project UUID; allocates global script legacy_id)
+      summary: Create script under a project (by project UUID; allocates global script numeric_id)
       operationId: createScriptUnderProjectByProjectIdV1
       description: |
         Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Inserts **`app_script`** for the owned project.
-        **`legacy_id`** is **`MAX(legacy_id)+1`** over **`app_script`** under a transaction advisory lock (separate from project lock).
+        **`numeric_id`** is **`MAX(numeric_id)+1`** over **`app_script`** under a transaction advisory lock (separate from project lock).
         Optional body **`name`**, **`content`**, **`extract_state`**; **`create_time_ms`** set server-side.
       security:
         - bearerAuth: []
@@ -3942,7 +3942,7 @@ paths:
       summary: Batch add scripts under project (by project UUID)
       operationId: postScriptsBatchAddByProjectIdV1
       description: |
-        Inserts rows in **`data`** with sequential **`global app_script.legacy_id`** under transaction advisory lock.
+        Inserts rows in **`data`** with sequential **`global app_script.numeric_id`** under transaction advisory lock.
         Project is **`app_project.id`** (UUID path). Body is only **`data`**.
       security:
         - bearerAuth: []
@@ -4211,7 +4211,7 @@ paths:
       summary: Create novel chapter under a project (by project UUID)
       operationId: createProjectNovelByProjectIdV1
       description: |
-        Creates a chapter row; allocates next global **`app_novel.legacy_id`** (advisory lock).
+        Creates a chapter row; allocates next global **`app_novel.numeric_id`** (advisory lock).
       security:
         - bearerAuth: []
       parameters:
@@ -4265,7 +4265,7 @@ paths:
       summary: Get one novel chapter (by project UUID + novel legacy id)
       operationId: getProjectNovelByProjectIdV1
       description: |
-        Returns one **`app_novel`** row for the authenticated user, scoped by project UUID (**`app_project.id`**) and **`novel_numeric_id`** (**`app_novel.legacy_id`**).
+        Returns one **`app_novel`** row for the authenticated user, scoped by project UUID (**`app_project.id`**) and **`novel_numeric_id`** (**`app_novel.numeric_id`**).
       security:
         - bearerAuth: []
       parameters:
@@ -4367,7 +4367,7 @@ paths:
       summary: Delete a novel chapter (by project UUID)
       operationId: deleteProjectNovelByProjectIdV1
       description: |
-        Deletes the novel row for the given project UUID and **`novel_numeric_id`** (**`app_novel.legacy_id`**).
+        Deletes the novel row for the given project UUID and **`novel_numeric_id`** (**`app_novel.numeric_id`**).
       security:
         - bearerAuth: []
       parameters:
@@ -4411,7 +4411,7 @@ paths:
       summary: List art styles for the current user
       operationId: listArtStylesV1
       description: |
-        Returns up to **500** rows ordered by **`legacy_id`** ascending. **`total`** is the full count (may exceed returned **`items`**).
+        Returns up to **500** rows ordered by **`numeric_id`** ascending. **`total`** is the full count (may exceed returned **`items`**).
       security:
         - bearerAuth: []
       responses:
@@ -4438,15 +4438,15 @@ paths:
       summary: Create an art style preset
       operationId: createArtStyleV1
       description: |
-        Allocates a new global **`legacy_id`** (advisory lock **`884_422_008`** + **`MAX(legacy_id)+1`**).
+        Allocates a new global **`numeric_id`** (advisory lock **`884_422_008`** + **`MAX(numeric_id)+1`**).
         **`file_url`** accepts one of:
         - public **`http(s)`** URL
         - existing API path (for already-persisted cover)
         - **`data:image/png|jpeg|webp;base64,...`**
         - raw base64 image string (legacy fallback; stored as **jpeg** bytes)
         When **`file_url`** is base64-like, the server requires **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`** and persists
-        the decoded bytes under **`{dir}/{user_id}/{legacy_id}.{ext}`**, then stores **`/api/v1/art-styles/numeric/{numeric_id}/cover`**
-        in the row (where **`numeric_id`** is the row's **`app_art_style.legacy_id`**).
+        the decoded bytes under **`{dir}/{user_id}/{numeric_id}.{ext}`**, then stores **`/api/v1/art-styles/numeric/{numeric_id}/cover`**
+        in the row (where **`numeric_id`** is the row's **`app_art_style.numeric_id`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -4764,7 +4764,7 @@ paths:
       summary: Save script agent plan and sync scripts (legacy `setPlanData` parity)
       operationId: postScriptAgentSetPlanDataV1
       description: |
-        Bearer JWT. Upserts **`app_script_agent_plan`** (**`storySkeleton`/`adaptationStrategy`** only in JSON); for each **`data.script`** row with non-empty **`name`**, updates matching **`app_script`** by **`project_id`** + **`name`** or inserts a new row (new **`legacy_id`** under advisory lock).
+        Bearer JWT. Upserts **`app_script_agent_plan`** (**`storySkeleton`/`adaptationStrategy`** only in JSON); for each **`data.script`** row with non-empty **`name`**, updates matching **`app_script`** by **`project_id`** + **`name`** or inserts a new row (new **`numeric_id`** under advisory lock).
       security:
         - bearerAuth: []
       requestBody:
@@ -4800,7 +4800,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "409":
-          description: Conflict (e.g. concurrent script **`legacy_id`** allocation)
+          description: Conflict (e.g. concurrent script **`numeric_id`** allocation)
           content:
             application/json:
               schema:
@@ -6661,7 +6661,7 @@ paths:
       summary: Export scripts as a ZIP of text files (legacy `exportScript` parity)
       operationId: exportScriptsZipV1
       description: |
-        Returns **`application/zip`** with one **`.txt`** per script (**`{legacy_id}_{sanitized_name}.txt`**).
+        Returns **`application/zip`** with one **`.txt`** per script (**`{numeric_id}_{sanitized_name}.txt`**).
         Only scripts **owned** by the caller (via `app_project.owner_user_id`) are included; unknown legacy ids are **omitted** (legacy SQLite behavior).
         Request body **`numeric_ids`** must be **non-empty** positive integers, at most **500** per call.
       security:
@@ -6716,7 +6716,7 @@ paths:
       summary: Poll script asset-extract state (legacy `pollScriptAssets` parity)
       operationId: pollScriptExtractStateV1
       description: |
-        Returns **`legacy_id`**, **`extract_state`**, **`error_reason`** for owned scripts whose **`extract_state` is not `0`**.
+        Returns **`numeric_id`**, **`extract_state`**, **`error_reason`** for owned scripts whose **`extract_state` is not `0`**.
         **`0`** means *extracting in progress* (legacy batch flow); those rows are **excluded** so clients poll until completion/failure.
         At most **2000** ids per request.
       security:
@@ -6855,7 +6855,7 @@ paths:
       summary: Create storyboard under a script (by project UUID + script legacy id)
       operationId: createStoryboardUnderProjectAndScriptLegacyV1
       description: |
-        Inserts **`app_storyboard`** for the script under **`project_id`** (**`app_project.id`** UUID). **`legacy_id`** is allocated with advisory lock **`884_422_003`** + **`MAX(legacy_id)+1`** over **`app_storyboard`**.
+        Inserts **`app_storyboard`** for the script under **`project_id`** (**`app_project.id`** UUID). **`numeric_id`** is allocated with advisory lock **`884_422_003`** + **`MAX(numeric_id)+1`** over **`app_storyboard`**.
       security:
         - bearerAuth: []
       parameters:
@@ -8072,7 +8072,7 @@ paths:
       summary: List novel events with chapter associations (by project UUID)
       operationId: listProjectNovelEventsByProjectIdV1
       description: |
-        Paginated novel events for **`app_project.id`** = **`project_id`**, with chapter associations (**`chapterIndexes`** = novel **`legacy_id`** values).
+        Paginated novel events for **`app_project.id`** = **`project_id`**, with chapter associations (**`chapterIndexes`** = novel **`numeric_id`** values).
       security:
         - bearerAuth: []
       parameters:
@@ -8134,7 +8134,7 @@ paths:
       summary: Create a novel event with chapter associations (by project UUID)
       operationId: createProjectNovelEventByProjectIdV1
       description: |
-        Creates **`app_novel_event`** under **`app_project.id`** = **`project_id`**; optional **`chapterIds`** are **`app_novel.legacy_id`** values in the same project.
+        Creates **`app_novel_event`** under **`app_project.id`** = **`project_id`**; optional **`chapterIds`** are **`app_novel.numeric_id`** values in the same project.
       security:
         - bearerAuth: []
       parameters:
@@ -8182,7 +8182,7 @@ paths:
       summary: Batch delete novel events (by project UUID)
       operationId: batchDeleteProjectNovelEventsByProjectIdV1
       description: |
-        Deletes **`app_novel_event`** rows whose **`legacy_id`** is in **`ids`**, scoped to **`app_project.id`** = **`project_id`** and the authenticated owner.
+        Deletes **`app_novel_event`** rows whose **`numeric_id`** is in **`ids`**, scoped to **`app_project.id`** = **`project_id`** and the authenticated owner.
       security:
         - bearerAuth: []
       parameters:
@@ -8231,7 +8231,7 @@ paths:
       operationId: postProjectNovelEventsGenerateEventsV1
       description: |
         Resets selected **`app_novel`** rows (**`event`** cleared, **`event_state = 0`**) and runs background LLM extraction.
-        **`novelIds`** are **`app_novel.legacy_id`** values in the given project. Returns **`{ "message": "生成事件成功" }`** immediately.
+        **`novelIds`** are **`app_novel.numeric_id`** values in the given project. Returns **`{ "message": "生成事件成功" }`** immediately.
       security:
         - bearerAuth: []
       parameters:
@@ -8285,7 +8285,7 @@ paths:
       summary: Update a novel event (by project UUID)
       operationId: updateProjectNovelEventByProjectIdV1
       description: |
-        Updates the event identified by **`event_numeric_id`** (**`app_novel_event.legacy_id`**) under **`app_project.id`** = **`project_id`**.
+        Updates the event identified by **`event_numeric_id`** (**`app_novel_event.numeric_id`**) under **`app_project.id`** = **`project_id`**.
       security:
         - bearerAuth: []
       parameters:
@@ -9309,12 +9309,12 @@ components:
         id:
           type: integer
           format: int32
-          description: Legacy storyboard id (`app_storyboard.legacy_id`)
+          description: Legacy storyboard id (`app_storyboard.numeric_id`)
         scriptId:
           type: integer
           format: int32
           nullable: true
-          description: Legacy script id (`app_storyboard.legacy_script_id`)
+          description: Legacy script id (`app_storyboard.numeric_script_id`)
         prompt:
           type: string
           nullable: true
@@ -10546,7 +10546,7 @@ components:
         id:
           type: integer
           format: int32
-          description: Stable legacy slot **1–3** (maps to `app_user_prompt.legacy_id`)
+          description: Stable legacy slot **1–3** (maps to `app_user_prompt.numeric_id`)
         name:
           type: string
         type:
@@ -10607,7 +10607,7 @@ components:
         projectId:
           type: integer
           format: int32
-          description: Legacy integer project id (`app_project.legacy_id`)
+          description: Legacy integer project id (`app_project.numeric_id`)
         agentType:
           type: string
           enum: [scriptAgent, productionAgent]
@@ -10727,7 +10727,7 @@ components:
 
     ProjectRow:
       type: object
-      required: [id, legacy_id]
+      required: [id, numeric_id]
       properties:
         id:
           type: string
@@ -10875,7 +10875,7 @@ components:
 
     AssetRow:
       type: object
-      required: [id, legacy_id, name, asset_type]
+      required: [id, numeric_id, name, asset_type]
       description: One **`app_asset`** row (`asset_type` is **`role`**, **`tool`**, or **`scene`**).
       properties:
         id:
@@ -11008,7 +11008,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         projectId:
           type: integer
           format: int32
@@ -11112,7 +11112,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         imageId:
           type: integer
           format: int32
@@ -11262,7 +11262,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id (0 for built-in ending clip row)
+          description: app_asset.numeric_id (0 for built-in ending clip row)
         name:
           type: string
         filePath:
@@ -11279,7 +11279,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_video.legacy_id
+          description: app_video.numeric_id
         filePath:
           type: string
         videoTrackId:
@@ -11327,7 +11327,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         name:
           type: string
         type:
@@ -11370,7 +11370,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         state:
           type: string
           nullable: true
@@ -11398,7 +11398,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         name:
           type: string
         type:
@@ -11464,7 +11464,7 @@ components:
 
     CornerScapeAssetItem:
       type: object
-      required: [id, legacy_id, name, asset_type, metadata, history_images]
+      required: [id, numeric_id, name, asset_type, metadata, history_images]
       properties:
         id:
           type: string
@@ -11505,7 +11505,7 @@ components:
 
     ArtStyleRow:
       type: object
-      required: [id, legacy_id, name]
+      required: [id, numeric_id, name]
       description: One **`app_art_style`** row (legacy **`o_artStyle`** subset).
       properties:
         id:
@@ -11598,7 +11598,7 @@ components:
     NovelRow:
       type: object
       required:
-        [id, legacy_id, chapter_index, chapter, chapter_data, event_state]
+        [id, numeric_id, chapter_index, chapter, chapter_data, event_state]
       description: One **`app_novel`** row (legacy **`o_novel`** subset).
       properties:
         id:
@@ -11689,7 +11689,7 @@ components:
 
     ScriptBrief:
       type: object
-      required: [legacy_id]
+      required: [numeric_id]
       properties:
         numeric_id:
           type: integer
@@ -11780,7 +11780,7 @@ components:
 
     ScriptRow:
       type: object
-      required: [id, project_id, legacy_id]
+      required: [id, project_id, numeric_id]
       properties:
         id:
           type: string
@@ -11900,7 +11900,7 @@ components:
 
     ScriptExtractStatePollRow:
       type: object
-      required: [legacy_id]
+      required: [numeric_id]
       properties:
         numeric_id:
           type: integer
@@ -11950,7 +11950,7 @@ components:
 
     StoryboardRow:
       type: object
-      required: [id, script_id, legacy_id]
+      required: [id, script_id, numeric_id]
       properties:
         id:
           type: string
@@ -11961,7 +11961,7 @@ components:
         numeric_id:
           type: integer
           format: int32
-        legacy_script_id:
+        numeric_script_id:
           type: integer
           format: int32
           nullable: true
@@ -11994,7 +11994,7 @@ components:
           type: integer
           format: int32
           nullable: true
-        legacy_project_id:
+        numeric_project_id:
           type: integer
           format: int32
           nullable: true
@@ -12016,7 +12016,7 @@ components:
       additionalProperties: false
       description: |
         All optional. Text fields: whitespace-only strings are omitted (`NULL`).
-        Omit **`legacy_script_id`** / **`legacy_project_id`** to use path script and parent project legacy ids.
+        Omit **`numeric_script_id`** / **`numeric_project_id`** to use path script and parent project legacy ids.
       properties:
         prompt:
           type: string
@@ -12038,10 +12038,10 @@ components:
         should_generate_image:
           type: integer
           format: int32
-        legacy_script_id:
+        numeric_script_id:
           type: integer
           format: int32
-        legacy_project_id:
+        numeric_project_id:
           type: integer
           format: int32
         flow_id:
@@ -12077,7 +12077,7 @@ components:
         video_desc:
           type: string
           nullable: true
-        legacy_script_id:
+        numeric_script_id:
           type: integer
           format: int32
           nullable: true
@@ -12089,7 +12089,7 @@ components:
           type: integer
           format: int32
           nullable: true
-        legacy_project_id:
+        numeric_project_id:
           type: integer
           format: int32
           nullable: true
@@ -12280,7 +12280,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_project.legacy_id (SQLite o_project.id)
+          description: app_project.numeric_id (SQLite o_project.id)
 
     LegacyProjectDeleteProjectResponse:
       type: object
@@ -12357,7 +12357,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_project.legacy_id
+          description: app_project.numeric_id
         name:
           type: string
         intro:
@@ -12548,7 +12548,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_asset.legacy_id
+          description: app_asset.numeric_id
         name:
           type: string
 
@@ -12559,7 +12559,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_script.legacy_id
+          description: app_script.numeric_id
         name:
           type: string
           nullable: true
@@ -12616,7 +12616,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_novel.legacy_id
+          description: app_novel.numeric_id
         index:
           type: integer
           format: int32
@@ -12651,7 +12651,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_novel.legacy_id
+          description: app_novel.numeric_id
         event:
           type: string
           nullable: true
@@ -12756,7 +12756,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_novel.legacy_id
+          description: app_novel.numeric_id
         index:
           type: integer
           format: int32
@@ -12827,7 +12827,7 @@ components:
         id:
           type: integer
           format: int32
-          description: app_novel.legacy_id
+          description: app_novel.numeric_id
 
     LegacyNovelUpdateNovelBody:
       type: object
@@ -12953,7 +12953,7 @@ components:
 
     NovelEventWithChapters:
       type: object
-      required: [id, project_id, legacy_id, name, detail, chapter_indexes]
+      required: [id, project_id, numeric_id, name, detail, chapter_indexes]
       properties:
         id:
           type: string

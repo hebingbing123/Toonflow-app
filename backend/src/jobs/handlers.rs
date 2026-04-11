@@ -179,7 +179,7 @@ async fn list_jobs(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
           AND ($2::text IS NULL OR kind = $2)
@@ -210,16 +210,16 @@ fn compute_task_page_offset(page: i32, limit: i32) -> i64 {
     i64::from(page - 1) * i64::from(limit)
 }
 
-async fn fetch_job_by_legacy_task_id(
+async fn fetch_job_by_numeric_task_id(
     pool: &sqlx::PgPool,
     uid: Uuid,
     numeric_task_id: i64,
 ) -> Result<JobRow, ApiError> {
     sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
-        WHERE owner_user_id = $1 AND legacy_task_id = $2
+        WHERE owner_user_id = $1 AND numeric_task_id = $2
         "#,
     )
     .bind(uid)
@@ -276,7 +276,7 @@ async fn list_jobs_page(
     let offset = compute_task_page_offset(page, limit);
     let rows = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE owner_user_id = $1
           AND ($2::text IS NULL OR kind = $2)
@@ -321,7 +321,7 @@ async fn get_job_task_detail_compat(
             .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
         let row = sqlx::query_as::<_, JobRow>(
             r#"
-            SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
             WHERE id = $1 AND owner_user_id = $2
             "#,
@@ -345,7 +345,7 @@ async fn get_job_task_detail_compat(
             .pool
             .as_ref()
             .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-        let row = fetch_job_by_legacy_task_id(pool, uid, legacy).await?;
+        let row = fetch_job_by_numeric_task_id(pool, uid, legacy).await?;
         return Ok(Json(row));
     }
 
@@ -373,7 +373,7 @@ async fn create_job(
     if let Some(ref key) = idem {
         if let Some(row) = sqlx::query_as::<_, JobRow>(
             r#"
-            SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+            SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
             FROM app_generation_job
             WHERE owner_user_id = $1 AND idempotency_key = $2
             "#,
@@ -394,7 +394,7 @@ async fn create_job(
         r#"
         INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
         VALUES ($1, $2, $3, 'queued', $4)
-        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(uid)
@@ -412,7 +412,7 @@ async fn create_job(
             };
             sqlx::query_as::<_, JobRow>(
                 r#"
-                SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+                SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
                 FROM app_generation_job
                 WHERE owner_user_id = $1 AND idempotency_key = $2
                 "#,
@@ -452,7 +452,7 @@ async fn get_job(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     let row = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
         WHERE id = $1 AND owner_user_id = $2
         "#,
@@ -482,7 +482,7 @@ async fn cancel_job(
         UPDATE app_generation_job
         SET status = 'cancelled', updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status IN ('queued', 'running')
-        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
@@ -531,7 +531,7 @@ async fn retry_job(
         UPDATE app_generation_job
         SET status = 'queued', error_message = NULL, result = NULL, claimed_by = NULL, updated_at = NOW()
         WHERE id = $1 AND owner_user_id = $2 AND status = 'failed'
-        RETURNING legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)

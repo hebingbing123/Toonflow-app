@@ -54,8 +54,8 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND s.legacy_id = $3
+          AND p.numeric_id = $2
+          AND s.numeric_id = $3
         "#,
     )
     .bind(uid)
@@ -121,8 +121,8 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     let generated_videos = sqlx::query_as::<_, VideoItem>(
         r#"
         SELECT
-          sb.legacy_id AS id,
-          sc.legacy_id AS script_id,
+          sb.numeric_id AS id,
+          sc.numeric_id AS script_id,
           sb.prompt,
           sb.file_path AS video_url,
           sb.duration,
@@ -133,8 +133,8 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
         WHERE p.owner_user_id = $1
-          AND p.legacy_id = $2
-          AND sc.legacy_id = $3
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
         ORDER BY sb.created_at DESC
@@ -149,7 +149,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
 
     let generating_jobs = sqlx::query_as::<_, JobRow>(
         r#"
-        SELECT 0 AS legacy_task_id, id, owner_user_id, kind, status, payload, result, NULL AS error_message, NULL AS idempotency_key, NULL AS claimed_by, created_at, updated_at
+        SELECT 0 AS numeric_task_id, id, owner_user_id, kind, status, payload, result, NULL AS error_message, NULL AS idempotency_key, NULL AS claimed_by, created_at, updated_at
         FROM app_job
         WHERE owner_user_id = $1
           AND kind = $2

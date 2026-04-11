@@ -53,7 +53,7 @@ const DEFAULT_SLOTS: [DefaultSlot; 3] = [
 
 #[derive(Debug, FromRow)]
 struct UserPromptRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     name: Option<String>,
     kind: String,
@@ -117,10 +117,10 @@ async fn list_prompts(
 
     let rows: Vec<UserPromptRow> = sqlx::query_as(
         r#"
-        SELECT legacy_id, name, kind, body
+        SELECT numeric_id, name, kind, body
         FROM app_user_prompt
         WHERE owner_user_id = $1
-        ORDER BY legacy_id
+        ORDER BY numeric_id
         "#,
     )
     .bind(uid)
@@ -151,9 +151,9 @@ async fn get_prompt(
 
     let row: Option<UserPromptRow> = sqlx::query_as(
         r#"
-        SELECT legacy_id, name, kind, body
+        SELECT numeric_id, name, kind, body
         FROM app_user_prompt
-        WHERE owner_user_id = $1 AND legacy_id = $2
+        WHERE owner_user_id = $1 AND numeric_id = $2
         "#,
     )
     .bind(uid)
@@ -180,9 +180,9 @@ async fn patch_prompt(
 
     sqlx::query(
         r#"
-        INSERT INTO app_user_prompt (owner_user_id, legacy_id, name, kind, body, updated_at)
+        INSERT INTO app_user_prompt (owner_user_id, numeric_id, name, kind, body, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW())
-        ON CONFLICT (owner_user_id, legacy_id) DO UPDATE SET
+        ON CONFLICT (owner_user_id, numeric_id) DO UPDATE SET
           body = EXCLUDED.body,
           updated_at = NOW()
         "#,
@@ -221,7 +221,7 @@ mod tests {
     }
 
     #[test]
-    fn default_slots_have_unique_legacy_ids() {
+    fn default_slots_have_unique_numeric_ids() {
         let mut ids: Vec<i32> = DEFAULT_SLOTS.iter().map(|s| s.numeric_id).collect();
         ids.sort();
         ids.dedup();
@@ -229,14 +229,14 @@ mod tests {
     }
 
     #[test]
-    fn slot_by_legacy_id_finds_existing() {
+    fn slot_by_numeric_id_finds_existing() {
         assert!(slot_by_numeric_id(1).is_some());
         assert!(slot_by_numeric_id(2).is_some());
         assert!(slot_by_numeric_id(3).is_some());
     }
 
     #[test]
-    fn slot_by_legacy_id_returns_none_for_invalid() {
+    fn slot_by_numeric_id_returns_none_for_invalid() {
         assert!(slot_by_numeric_id(999).is_none());
     }
 

@@ -33,12 +33,12 @@ pub(crate) async fn get_project_asset_for_project(
 
     let row = sqlx::query_as::<_, AssetRow>(
         r#"
-        SELECT a.id, a.legacy_id, a.name, a.asset_type, a.description, a.create_time_ms
+        SELECT a.id, a.numeric_id, a.name, a.asset_type, a.description, a.create_time_ms
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
         "#,
     )
     .bind(project_id)

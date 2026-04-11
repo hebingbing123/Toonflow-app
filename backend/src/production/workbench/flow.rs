@@ -97,7 +97,7 @@ pub(crate) async fn post_save_flow_data(
                     UPDATE app_storyboard
                     SET sb_index = $3, updated_at = NOW()
                     WHERE script_id = $1
-                      AND legacy_id = $2
+                      AND numeric_id = $2
                     "#,
                 )
                 .bind(script_id)

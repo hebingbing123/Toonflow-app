@@ -28,7 +28,7 @@ pub struct ScriptRow {
     pub id: Uuid,
     pub project_id: Uuid,
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     pub name: Option<String>,
     pub content: Option<String>,
@@ -80,8 +80,8 @@ struct BatchAddScriptResponse {
     scripts: Vec<ScriptRow>,
 }
 
-/// Advisory lock key for allocating globally unique `app_script.legacy_id`.
-const ADV_LOCK_SCRIPT_LEGACY_ID: i64 = 884_422_002;
+/// Advisory lock key for allocating globally unique `app_script.numeric_id`.
+const ADV_LOCK_SCRIPT_NUMERIC_ID: i64 = 884_422_002;
 
 /// Legacy `exportScript` accepted an array of ids; cap to bound work per request.
 const MAX_SCRIPT_EXPORT: usize = 500;
@@ -103,7 +103,7 @@ struct ScriptExtractPollBody {
 #[derive(Debug, Serialize, FromRow)]
 struct ScriptExtractPollRow {
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     extract_state: Option<i32>,
     error_reason: Option<String>,
@@ -126,14 +126,14 @@ async fn create_script_locked(
     body: CreateScriptBody,
 ) -> Result<ScriptRow, ApiError> {
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
+        .bind(ADV_LOCK_SCRIPT_NUMERIC_ID)
         .execute(&mut **tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_script
         "#,
     )
@@ -146,10 +146,10 @@ async fn create_script_locked(
     sqlx::query_as::<_, ScriptRow>(
         r#"
         INSERT INTO app_script (
-          project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
+          project_id, numeric_id, name, content, extract_state, create_time_ms, metadata
         )
         VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb)
-        RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
+        RETURNING id, project_id, numeric_id, name, content, extract_state, create_time_ms
         "#,
     )
     .bind(project_uuid)
@@ -175,7 +175,7 @@ struct GetScriptApiNameBody {
 #[derive(Debug, FromRow)]
 struct GetScriptApiScriptRow {
     id: Uuid,
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     name: Option<String>,
     content: Option<String>,
@@ -224,12 +224,12 @@ async fn get_script_api_for_project_uuid(
     let scripts: Vec<GetScriptApiScriptRow> = if let Some(ref sub) = name_sub {
         sqlx::query_as::<_, GetScriptApiScriptRow>(
             r#"
-            SELECT s.id, s.legacy_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
+            SELECT s.id, s.numeric_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
             FROM app_script s
             WHERE s.project_id = $1
               AND s.name IS NOT NULL
               AND POSITION($2 IN LOWER(s.name)) > 0
-            ORDER BY s.legacy_id ASC
+            ORDER BY s.numeric_id ASC
             "#,
         )
         .bind(project_uuid)
@@ -239,10 +239,10 @@ async fn get_script_api_for_project_uuid(
     } else {
         sqlx::query_as::<_, GetScriptApiScriptRow>(
             r#"
-            SELECT s.id, s.legacy_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
+            SELECT s.id, s.numeric_id, s.name, s.content, s.extract_state, s.error_reason, s.create_time_ms
             FROM app_script s
             WHERE s.project_id = $1
-            ORDER BY s.legacy_id ASC
+            ORDER BY s.numeric_id ASC
             "#,
         )
         .bind(project_uuid)
@@ -260,18 +260,18 @@ async fn get_script_api_for_project_uuid(
     #[derive(Debug, FromRow)]
     struct GetScriptApiAssetLinkRow {
         script_id: Uuid,
-        #[sqlx(rename = "legacy_id")]
+        #[sqlx(rename = "numeric_id")]
         numeric_id: i32,
         name: String,
     }
 
     let links: Vec<GetScriptApiAssetLinkRow> = sqlx::query_as::<_, GetScriptApiAssetLinkRow>(
         r#"
-        SELECT sa.script_id, a.legacy_id, a.name
+        SELECT sa.script_id, a.numeric_id, a.name
         FROM app_script_asset sa
         INNER JOIN app_asset a ON a.id = sa.asset_id
         WHERE sa.script_id = ANY($1)
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         "#,
     )
     .bind(&ids)
@@ -426,24 +426,24 @@ async fn export_scripts_zip(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXPORT)?;
+    let numeric_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXPORT)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
-        SELECT s.legacy_id, s.name, s.content
+        SELECT s.numeric_id, s.name, s.content
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = "#,
     );
     qb.push_bind(uid);
-    qb.push(" AND s.legacy_id IN (");
+    qb.push(" AND s.numeric_id IN (");
     {
         let mut separated = qb.separated(", ");
-        for id in &legacy_ids {
+        for id in &numeric_ids {
             separated.push_bind(*id);
         }
     }
-    qb.push(") ORDER BY s.legacy_id");
+    qb.push(") ORDER BY s.numeric_id");
 
     let rows: Vec<(i32, Option<String>, Option<String>)> = qb
         .build_query_as()
@@ -487,24 +487,24 @@ async fn poll_script_extract_state(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let legacy_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXTRACT_POLL)?;
+    let numeric_ids = normalize_numeric_id_list(body.numeric_ids, MAX_SCRIPT_EXTRACT_POLL)?;
 
     let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
         r#"
-        SELECT s.legacy_id, s.extract_state, s.error_reason
+        SELECT s.numeric_id, s.extract_state, s.error_reason
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
         WHERE p.owner_user_id = "#,
     );
     qb.push_bind(uid);
-    qb.push(" AND s.legacy_id IN (");
+    qb.push(" AND s.numeric_id IN (");
     {
         let mut separated = qb.separated(", ");
-        for id in &legacy_ids {
+        for id in &numeric_ids {
             separated.push_bind(*id);
         }
     }
-    qb.push(") AND (s.extract_state IS DISTINCT FROM 0) ORDER BY s.legacy_id");
+    qb.push(") AND (s.extract_state IS DISTINCT FROM 0) ORDER BY s.numeric_id");
 
     let rows: Vec<ScriptExtractPollRow> = qb
         .build_query_as()
@@ -557,14 +557,14 @@ async fn batch_add_scripts_locked(
     }
 
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
+        .bind(ADV_LOCK_SCRIPT_NUMERIC_ID)
         .execute(&mut **tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let mut next_legacy: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_script
         "#,
     )
@@ -578,10 +578,10 @@ async fn batch_add_scripts_locked(
         let row = sqlx::query_as::<_, ScriptRow>(
             r#"
             INSERT INTO app_script (
-              project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
+              project_id, numeric_id, name, content, extract_state, create_time_ms, metadata
             )
             VALUES ($1, $2, $3, $4, NULL, $5, '{}'::jsonb)
-            RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
+            RETURNING id, project_id, numeric_id, name, content, extract_state, create_time_ms
             "#,
         )
         .bind(project_uuid)
@@ -647,10 +647,10 @@ async fn get_script_for_project(
 
     let row = sqlx::query_as::<_, ScriptRow>(
         r#"
-        SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
+        SELECT s.id, s.project_id, s.numeric_id, s.name, s.content, s.extract_state, s.create_time_ms
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        WHERE s.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
     .bind(script_numeric_id)
@@ -702,10 +702,10 @@ async fn patch_script_inner(
 
     let current = sqlx::query_as::<_, ScriptRow>(
         r#"
-        SELECT s.id, s.project_id, s.legacy_id, s.name, s.content, s.extract_state, s.create_time_ms
+        SELECT s.id, s.project_id, s.numeric_id, s.name, s.content, s.extract_state, s.create_time_ms
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        WHERE s.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
     .bind(numeric_id)
@@ -734,7 +734,7 @@ async fn patch_script_inner(
         UPDATE app_script
         SET name = $1, content = $2, extract_state = $3, updated_at = NOW()
         WHERE id = $4 AND project_id = $5
-        RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
+        RETURNING id, project_id, numeric_id, name, content, extract_state, create_time_ms
         "#,
     )
     .bind(&new_name)
@@ -767,7 +767,7 @@ async fn delete_script_for_project(
         DELETE FROM app_script s
         USING app_project p
         WHERE s.project_id = p.id
-          AND s.legacy_id = $1
+          AND s.numeric_id = $1
           AND p.owner_user_id = $2
           AND p.id = $3
         "#,

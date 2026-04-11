@@ -19,7 +19,7 @@ use crate::http_kit::json_patch::{
 use crate::state::AppState;
 
 use super::dto::{CreateStoryboardBody, PatchStoryboardBody, StoryboardRow};
-use super::ADV_LOCK_STORYBOARD_LEGACY_ID;
+use super::ADV_LOCK_STORYBOARD_NUMERIC_ID;
 
 fn trim_opt_sb(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
@@ -40,14 +40,14 @@ async fn create_storyboard_locked(
     body: CreateStoryboardBody,
 ) -> Result<StoryboardRow, ApiError> {
     sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_STORYBOARD_LEGACY_ID)
+        .bind(ADV_LOCK_STORYBOARD_NUMERIC_ID)
         .execute(&mut **tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_storyboard
         "#,
     )
@@ -62,8 +62,8 @@ async fn create_storyboard_locked(
     sqlx::query_as::<_, StoryboardRow>(
         r#"
         INSERT INTO app_storyboard (
-          script_id, legacy_id,
-          legacy_script_id, legacy_project_id,
+          script_id, numeric_id,
+          numeric_script_id, numeric_project_id,
           prompt, file_path, duration, state, track_id, reason, track, video_desc,
           should_generate_image, flow_id, sb_index, create_time_ms, metadata
         )
@@ -71,9 +71,9 @@ async fn create_storyboard_locked(
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, '{}'::jsonb
         )
         RETURNING
-          id, script_id, legacy_id, legacy_script_id, prompt, file_path,
+          id, script_id, numeric_id, numeric_script_id, prompt, file_path,
           duration, state, track_id, reason, track, video_desc,
-          should_generate_image, legacy_project_id, flow_id, sb_index, create_time_ms
+          should_generate_image, numeric_project_id, flow_id, sb_index, create_time_ms
         "#,
     )
     .bind(script_uuid)
@@ -113,14 +113,14 @@ pub(super) async fn list_by_script_for_project(
     let rows = sqlx::query_as::<_, StoryboardRow>(
         r#"
         SELECT
-          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
+          sb.id, sb.script_id, sb.numeric_id, sb.numeric_script_id, sb.prompt, sb.file_path,
           sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
+          sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.id = $1 AND sc.legacy_id = $2 AND p.owner_user_id = $3
-        ORDER BY sb.sb_index ASC NULLS LAST, sb.legacy_id ASC
+        WHERE p.id = $1 AND sc.numeric_id = $2 AND p.owner_user_id = $3
+        ORDER BY sb.sb_index ASC NULLS LAST, sb.numeric_id ASC
         "#,
     )
     .bind(project_id)
@@ -154,10 +154,10 @@ pub(super) async fn create_under_script_for_project(
 
     let (script_uuid, project_numeric_id): (Uuid, i32) = sqlx::query_as(
         r#"
-        SELECT s.id, p.legacy_id
+        SELECT s.id, p.numeric_id
         FROM app_script s
         INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.id = $1 AND s.legacy_id = $2 AND p.owner_user_id = $3
+        WHERE p.id = $1 AND s.numeric_id = $2 AND p.owner_user_id = $3
         "#,
     )
     .bind(project_id)
@@ -200,13 +200,13 @@ pub(super) async fn get_by_numeric_id_for_project(
     let row = sqlx::query_as::<_, StoryboardRow>(
         r#"
         SELECT
-          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
+          sb.id, sb.script_id, sb.numeric_id, sb.numeric_script_id, sb.prompt, sb.file_path,
           sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
+          sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        WHERE sb.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
     .bind(storyboard_numeric_id)
@@ -263,13 +263,13 @@ async fn patch_storyboard_row(
     let current = sqlx::query_as::<_, StoryboardRow>(
         r#"
         SELECT
-          sb.id, sb.script_id, sb.legacy_id, sb.legacy_script_id, sb.prompt, sb.file_path,
+          sb.id, sb.script_id, sb.numeric_id, sb.numeric_script_id, sb.prompt, sb.file_path,
           sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.legacy_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
+          sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
         INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sb.legacy_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        WHERE sb.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
         "#,
     )
     .bind(numeric_id)
@@ -318,18 +318,18 @@ async fn patch_storyboard_row(
           reason = $5,
           track = $6,
           video_desc = $7,
-          legacy_script_id = $8,
+          numeric_script_id = $8,
           track_id = $9,
           should_generate_image = $10,
-          legacy_project_id = $11,
+          numeric_project_id = $11,
           flow_id = $12,
           sb_index = $13,
           updated_at = NOW()
         WHERE id = $14
         RETURNING
-          id, script_id, legacy_id, legacy_script_id, prompt, file_path,
+          id, script_id, numeric_id, numeric_script_id, prompt, file_path,
           duration, state, track_id, reason, track, video_desc,
-          should_generate_image, legacy_project_id, flow_id, sb_index, create_time_ms
+          should_generate_image, numeric_project_id, flow_id, sb_index, create_time_ms
         "#,
     )
     .bind(&new_prompt)
@@ -381,7 +381,7 @@ async fn delete_storyboard_row(
             USING app_script sc, app_project p
             WHERE sb.script_id = sc.id
               AND sc.project_id = p.id
-              AND sb.legacy_id = $1
+              AND sb.numeric_id = $1
               AND p.owner_user_id = $2
               AND p.id = $3
             "#,

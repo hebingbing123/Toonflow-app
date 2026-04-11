@@ -85,7 +85,7 @@ async fn create_novel_event_core(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let next_legacy: i32 =
-        sqlx::query_scalar("SELECT COALESCE(MAX(legacy_id), 0) + 1 FROM app_novel_event")
+        sqlx::query_scalar("SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_novel_event")
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -95,7 +95,7 @@ async fn create_novel_event_core(
 
     let event_id: Uuid = sqlx::query_scalar(
         r#"
-        INSERT INTO app_novel_event (project_id, legacy_id, name, detail, create_time_ms, metadata)
+        INSERT INTO app_novel_event (project_id, numeric_id, name, detail, create_time_ms, metadata)
         VALUES ($1, $2, $3, $4, $5, '{}'::jsonb)
         RETURNING id
         "#,
@@ -111,7 +111,7 @@ async fn create_novel_event_core(
 
     if !body.chapter_ids.is_empty() {
         let valid_novels: Vec<(Uuid, i32)> = sqlx::query_as(
-            "SELECT id, legacy_id FROM app_novel WHERE project_id = $1 AND legacy_id = ANY($2)",
+            "SELECT id, numeric_id FROM app_novel WHERE project_id = $1 AND numeric_id = ANY($2)",
         )
         .bind(project_uuid)
         .bind(&body.chapter_ids)
@@ -125,7 +125,7 @@ async fn create_novel_event_core(
             ));
         }
 
-        for (novel_uuid, _legacy_id) in valid_novels {
+        for (novel_uuid, _numeric_id) in valid_novels {
             sqlx::query(
                 "INSERT INTO app_novel_event_chapter (event_id, novel_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
             )
@@ -184,7 +184,7 @@ async fn update_novel_event_core(
         SELECT e.id, p.id
         FROM app_novel_event e
         INNER JOIN app_project p ON p.id = e.project_id
-        WHERE p.id = $1 AND e.legacy_id = $2
+        WHERE p.id = $1 AND e.numeric_id = $2
         "#,
     )
     .bind(project_uuid)
@@ -238,7 +238,7 @@ async fn update_novel_event_core(
 
         if !chapter_ids.is_empty() {
             let valid_novels: Vec<(Uuid, i32)> = sqlx::query_as(
-                "SELECT id, legacy_id FROM app_novel WHERE project_id = $1 AND legacy_id = ANY($2)",
+                "SELECT id, numeric_id FROM app_novel WHERE project_id = $1 AND numeric_id = ANY($2)",
             )
             .bind(project_uuid)
             .bind(chapter_ids)
@@ -252,7 +252,7 @@ async fn update_novel_event_core(
                 ));
             }
 
-            for (novel_uuid, _legacy_id) in valid_novels {
+            for (novel_uuid, _numeric_id) in valid_novels {
                 sqlx::query(
                     "INSERT INTO app_novel_event_chapter (event_id, novel_id) VALUES ($1, $2)",
                 )
@@ -306,7 +306,7 @@ async fn delete_novel_event_core(
         WHERE e.project_id = p.id
           AND p.id = $1
           AND p.owner_user_id = $2
-          AND e.legacy_id = $3
+          AND e.numeric_id = $3
         "#,
     )
     .bind(project_uuid)
@@ -366,7 +366,7 @@ async fn batch_delete_novel_events_core(
         WHERE e.project_id = p.id
           AND p.id = $1
           AND p.owner_user_id = $2
-          AND e.legacy_id = ANY($3)
+          AND e.numeric_id = ANY($3)
         "#,
     )
     .bind(project_uuid)
@@ -437,8 +437,8 @@ pub(super) async fn post_generate_novel_events_for_project(
         INNER JOIN app_project p ON p.id = n.project_id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = ANY($3)
-        ORDER BY n.chapter_index ASC, n.legacy_id ASC
+          AND n.numeric_id = ANY($3)
+        ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
     )
     .bind(project_uuid)

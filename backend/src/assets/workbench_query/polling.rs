@@ -27,14 +27,14 @@ async fn run_polling_image_assets(
     let rows: Vec<LegacyPollingImageAssetsItem> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           ai.state AS state,
           ai.file_path AS file_path
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_asset_image ai
           ON ai.asset_id = a.id
-         AND ai.legacy_image_id = (
+         AND ai.numeric_image_id = (
            CASE
              WHEN jsonb_typeof(a.metadata->'imageId') = 'number'
                THEN (a.metadata->>'imageId')::integer
@@ -43,9 +43,9 @@ async fn run_polling_image_assets(
          )
         WHERE p.owner_user_id = $1
           AND p.id = $2
-          AND a.legacy_id = ANY($3)
+          AND a.numeric_id = ANY($3)
           AND ai.state <> '生成中'
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         "#,
     )
     .bind(uid)
@@ -97,7 +97,7 @@ async fn run_polling_prompt_assets(
     let rows: Vec<LegacyPollingPromptAssetsItem> = sqlx::query_as(
         r#"
         SELECT
-          a.legacy_id AS id,
+          a.numeric_id AS id,
           a.name AS name,
           a.asset_type AS asset_type,
           COALESCE(
@@ -121,14 +121,14 @@ async fn run_polling_prompt_assets(
             AND (
               (
                 j.kind = 'asset.polish.prompt'
-                AND NULLIF(j.payload->>'asset_numeric_id', '')::integer = a.legacy_id
+                AND NULLIF(j.payload->>'asset_numeric_id', '')::integer = a.numeric_id
               )
               OR (
                 j.kind = 'asset.polish.batch'
                 AND EXISTS (
                   SELECT 1
                   FROM jsonb_array_elements(COALESCE(j.payload->'items', '[]'::jsonb)) it
-                  WHERE NULLIF(it->>'asset_numeric_id', '')::integer = a.legacy_id
+                  WHERE NULLIF(it->>'asset_numeric_id', '')::integer = a.numeric_id
                 )
               )
             )
@@ -137,7 +137,7 @@ async fn run_polling_prompt_assets(
         ) pj ON TRUE
         WHERE p.owner_user_id = $1
           AND p.id = $2
-          AND a.legacy_id = ANY($3)
+          AND a.numeric_id = ANY($3)
           AND COALESCE(
             CASE pj.status
               WHEN 'queued' THEN '生成中'
@@ -149,7 +149,7 @@ async fn run_polling_prompt_assets(
             END,
             '已完成'
           ) <> '生成中'
-        ORDER BY a.legacy_id ASC
+        ORDER BY a.numeric_id ASC
         "#,
     )
     .bind(uid)

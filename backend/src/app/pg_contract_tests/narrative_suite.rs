@@ -38,7 +38,7 @@ async fn task_center_jobs_rest_roundtrip() {
         .unwrap();
     let (status, created_project) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "project={created_project}");
-    let legacy_project_id = created_project["numeric_id"]
+    let numeric_project_id = created_project["numeric_id"]
         .as_i64()
         .expect("numeric project id") as i32;
 
@@ -53,7 +53,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header("Idempotency-Key", idem_key.as_str())
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"idem"}}}}"#
+                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{numeric_project_id}","scope":"task-center","marker":"idem"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -80,7 +80,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header("Idempotency-Key", idem_key.as_str())
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"idem-retry"}}}}"#
+                    r#"{{"kind":"flutter.probe","payload":{{"project_numeric_id":"{numeric_project_id}","scope":"task-center","marker":"idem-retry"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -101,7 +101,7 @@ async fn task_center_jobs_rest_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"kind":"{JOB_KIND_ASSET_GENERATE_IMAGE}","payload":{{"project_numeric_id":"{legacy_project_id}","scope":"task-center","marker":"failed"}}}}"#
+                    r#"{{"kind":"{JOB_KIND_ASSET_GENERATE_IMAGE}","payload":{{"project_numeric_id":"{numeric_project_id}","scope":"task-center","marker":"failed"}}}}"#
                 )))
                 .unwrap(),
         )
@@ -139,7 +139,7 @@ async fn task_center_jobs_rest_roundtrip() {
     let task_projects = task_projects.as_array().expect("task project rows");
     assert!(
         task_projects.iter().any(|row| {
-            row["numeric_id"].as_i64() == Some(i64::from(legacy_project_id))
+            row["numeric_id"].as_i64() == Some(i64::from(numeric_project_id))
                 && row["name"].as_str() == Some(project_name.as_str())
         }),
         "task center project list should include created project: {task_projects:?}"
@@ -180,7 +180,7 @@ async fn task_center_jobs_rest_roundtrip() {
             Request::builder()
                 .method(Method::GET)
                 .uri(format!(
-                    "/api/v1/jobs/page?page=1&limit=10&project_id={legacy_project_id}&task_class=flutter.probe&state=queued"
+                    "/api/v1/jobs/page?page=1&limit=10&project_id={numeric_project_id}&task_class=flutter.probe&state=queued"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -231,7 +231,7 @@ async fn task_center_jobs_rest_roundtrip() {
             Request::builder()
                 .method(Method::GET)
                 .uri(format!(
-                    "/api/v1/jobs/page?page=1&limit=10&project_id={legacy_project_id}&state=failed"
+                    "/api/v1/jobs/page?page=1&limit=10&project_id={numeric_project_id}&state=failed"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -268,10 +268,10 @@ async fn task_center_jobs_rest_roundtrip() {
         task_detail["numeric_task_id"],
         created_job["numeric_task_id"]
     );
-    let legacy_project_id_text = legacy_project_id.to_string();
+    let numeric_project_id_text = numeric_project_id.to_string();
     assert_eq!(
         task_detail["payload"]["project_numeric_id"].as_str(),
-        Some(legacy_project_id_text.as_str())
+        Some(numeric_project_id_text.as_str())
     );
 
     let res = app
@@ -331,8 +331,8 @@ async fn task_center_jobs_rest_roundtrip() {
     assert_eq!(task_detail_by_numeric_string["id"], created_job["id"]);
 
     cleanup_jobs(&pool, &created_job_ids).await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
-        .bind(legacy_project_id)
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
+        .bind(numeric_project_id)
         .execute(&pool)
         .await;
 }
@@ -515,11 +515,11 @@ async fn novel_events_crud_roundtrip() {
     assert_eq!(empty_list["total"].as_i64(), Some(0));
 
     // Cleanup
-    let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+    let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1)")
         .bind(project_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;
@@ -590,12 +590,12 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
 
     let novel_rows: Vec<(i32,)> = sqlx::query_as(
         r#"
-        SELECT n.legacy_id
+        SELECT n.numeric_id
         FROM public.app_novel n
         INNER JOIN public.app_project p ON p.id = n.project_id
-        WHERE p.legacy_id = $1
+        WHERE p.numeric_id = $1
           AND p.owner_user_id = $2
-        ORDER BY n.chapter_index ASC, n.legacy_id ASC
+        ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
     )
     .bind(project_numeric_id)
@@ -603,8 +603,8 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     .fetch_all(&pool)
     .await
     .expect("list novel legacy ids");
-    let novel_legacy_ids: Vec<i32> = novel_rows.into_iter().map(|(id,)| id).collect();
-    assert_eq!(novel_legacy_ids.len(), 2, "expected two novels");
+    let novel_numeric_ids: Vec<i32> = novel_rows.into_iter().map(|(id,)| id).collect();
+    assert_eq!(novel_numeric_ids.len(), 2, "expected two novels");
 
     sqlx::query(
         r#"
@@ -612,20 +612,20 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         SET event = '历史事件', event_state = 1, error_reason = NULL
         FROM public.app_project p
         WHERE n.project_id = p.id
-          AND p.legacy_id = $1
+          AND p.numeric_id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = ANY($3)
+          AND n.numeric_id = ANY($3)
         "#,
     )
     .bind(project_numeric_id)
     .bind(sub)
-    .bind(&novel_legacy_ids)
+    .bind(&novel_numeric_ids)
     .execute(&pool)
     .await
     .expect("seed existing events");
 
     let payload = serde_json::json!({
-        "novelIds": novel_legacy_ids,
+        "novelIds": novel_numeric_ids,
         "concurrentCount": 2
     });
     let res = app
@@ -653,15 +653,15 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         SELECT n.event, n.event_state, n.error_reason
         FROM public.app_novel n
         INNER JOIN public.app_project p ON p.id = n.project_id
-        WHERE p.legacy_id = $1
+        WHERE p.numeric_id = $1
           AND p.owner_user_id = $2
-          AND n.legacy_id = ANY($3)
-        ORDER BY n.chapter_index ASC, n.legacy_id ASC
+          AND n.numeric_id = ANY($3)
+        ORDER BY n.chapter_index ASC, n.numeric_id ASC
         "#,
     )
     .bind(project_numeric_id)
     .bind(sub)
-    .bind(&novel_legacy_ids)
+    .bind(&novel_numeric_ids)
     .fetch_all(&pool)
     .await
     .expect("rows immediately after enqueue");
@@ -676,18 +676,18 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     for _ in 0..40 {
         final_rows = sqlx::query_as(
             r#"
-            SELECT n.legacy_id, n.event, n.event_state, n.error_reason
+            SELECT n.numeric_id, n.event, n.event_state, n.error_reason
             FROM public.app_novel n
             INNER JOIN public.app_project p ON p.id = n.project_id
-            WHERE p.legacy_id = $1
+            WHERE p.numeric_id = $1
               AND p.owner_user_id = $2
-              AND n.legacy_id = ANY($3)
-            ORDER BY n.chapter_index ASC, n.legacy_id ASC
+              AND n.numeric_id = ANY($3)
+            ORDER BY n.chapter_index ASC, n.numeric_id ASC
             "#,
         )
         .bind(project_numeric_id)
         .bind(sub)
-        .bind(&novel_legacy_ids)
+        .bind(&novel_numeric_ids)
         .fetch_all(&pool)
         .await
         .expect("poll extraction rows");
@@ -731,7 +731,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
                 return false;
             };
             let lid = lid as i32;
-            novel_legacy_ids.contains(&lid) && row["event_state"].as_i64().unwrap_or(0) != 0
+            novel_numeric_ids.contains(&lid) && row["event_state"].as_i64().unwrap_or(0) != 0
         })
         .collect();
     assert_eq!(
@@ -746,11 +746,11 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
         "event_state should expose fallback failures: {novel_json:?}"
     );
 
-    let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)")
+    let _ = sqlx::query("DELETE FROM public.app_novel WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1)")
         .bind(project_numeric_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_numeric_id)
         .execute(&pool)
         .await;
@@ -988,7 +988,7 @@ async fn script_agent_plan_roundtrip() {
         FROM public.app_script_agent_plan
         WHERE owner_user_id = $1
           AND project_id IN (
-            SELECT id FROM public.app_project WHERE legacy_id = $2
+            SELECT id FROM public.app_project WHERE numeric_id = $2
           )
           AND agent_key = 'scriptAgent'
         "#,
@@ -1011,12 +1011,12 @@ async fn script_agent_plan_roundtrip() {
     );
 
     let _ = sqlx::query(
-        "DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE legacy_id = $1)",
+        "DELETE FROM public.app_script WHERE project_id IN (SELECT id FROM public.app_project WHERE numeric_id = $1)",
     )
     .bind(project_id)
     .execute(&pool)
     .await;
-    let _ = sqlx::query("DELETE FROM public.app_project WHERE legacy_id = $1")
+    let _ = sqlx::query("DELETE FROM public.app_project WHERE numeric_id = $1")
         .bind(project_id)
         .execute(&pool)
         .await;

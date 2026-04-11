@@ -20,7 +20,7 @@ struct ParentAssetRow {
 
 #[derive(sqlx::FromRow)]
 struct StoryboardGenerateRow {
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     numeric_id: i32,
     prompt: Option<String>,
 }
@@ -80,7 +80,7 @@ pub(super) async fn invoke_add_derive_asset(
         .and_then(Value::as_str)
         .map(str::trim)
         .ok_or_else(|| InvokeError::InvalidArgs("desc must be a string".into()))?;
-    let maybe_legacy_id = arguments
+    let maybe_numeric_id = arguments
         .get("id")
         .and_then(Value::as_i64)
         .and_then(|v| i32::try_from(v).ok())
@@ -91,7 +91,7 @@ pub(super) async fn invoke_add_derive_asset(
         SELECT a.asset_type
         FROM app_asset a
         WHERE a.project_id = $1
-          AND a.legacy_id = $2
+          AND a.numeric_id = $2
         "#,
     )
     .bind(scope.project_id)
@@ -101,7 +101,7 @@ pub(super) async fn invoke_add_derive_asset(
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
     .ok_or_else(|| InvokeError::MissingContext("parent asset not found".into()))?;
 
-    if let Some(numeric_id) = maybe_legacy_id {
+    if let Some(numeric_id) = maybe_numeric_id {
         let updated = sqlx::query(
             r#"
             UPDATE app_asset
@@ -109,7 +109,7 @@ pub(super) async fn invoke_add_derive_asset(
                 description = $5,
                 updated_at = NOW()
             WHERE project_id = $1
-              AND legacy_id = $2
+              AND numeric_id = $2
               AND COALESCE((metadata ->> 'assetsId')::int, 0) = $3
             "#,
         )
@@ -139,7 +139,7 @@ pub(super) async fn invoke_add_derive_asset(
         }));
     }
 
-    // Wrap SELECT MAX + INSERT in a transaction to prevent duplicate legacy_id
+    // Wrap SELECT MAX + INSERT in a transaction to prevent duplicate numeric_id
     // under concurrent add_deriveAsset calls for the same user.
     let mut tx = pool
         .begin()
@@ -148,7 +148,7 @@ pub(super) async fn invoke_add_derive_asset(
 
     let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(a.legacy_id), 0) + 1
+        SELECT COALESCE(MAX(a.numeric_id), 0) + 1
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE p.owner_user_id = $1
@@ -163,7 +163,7 @@ pub(super) async fn invoke_add_derive_asset(
     sqlx::query(
         r#"
         INSERT INTO app_asset (
-            id, project_id, legacy_id, name, asset_type, description, metadata
+            id, project_id, numeric_id, name, asset_type, description, metadata
         )
         VALUES (
             $1, $2, $3, $4, $5, $6,
@@ -228,7 +228,7 @@ pub(super) async fn invoke_del_derive_asset(
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id
         WHERE a.project_id = $1
           AND sa.script_id = $2
-          AND a.legacy_id = $3
+          AND a.numeric_id = $3
           AND COALESCE((a.metadata ->> 'assetsId')::int, 0) = $4
         "#,
     )
@@ -282,14 +282,14 @@ pub(super) async fn invoke_generate_derive_asset(
 
     let valid_ids: Vec<i32> = sqlx::query_scalar(
         r#"
-        SELECT a.legacy_id
+        SELECT a.numeric_id
         FROM app_asset a
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id
         WHERE a.project_id = $1
           AND sa.script_id = $2
-          AND a.legacy_id = ANY($3::int4[])
+          AND a.numeric_id = ANY($3::int4[])
           AND a.metadata ? 'assetsId'
-        ORDER BY a.legacy_id
+        ORDER BY a.numeric_id
         "#,
     )
     .bind(scope.project_id)
@@ -349,11 +349,11 @@ pub(super) async fn invoke_generate_storyboard(
 
     let rows: Vec<StoryboardGenerateRow> = sqlx::query_as(
         r#"
-        SELECT sb.legacy_id, sb.prompt
+        SELECT sb.numeric_id, sb.prompt
         FROM app_storyboard sb
         WHERE sb.script_id = $1
-          AND sb.legacy_id = ANY($2::int4[])
-        ORDER BY sb.legacy_id
+          AND sb.numeric_id = ANY($2::int4[])
+        ORDER BY sb.numeric_id
         "#,
     )
     .bind(scope.script_id)

@@ -45,10 +45,8 @@ struct WorkbenchGenerateVideoBody {
 #[serde(rename_all = "camelCase")]
 struct VideoItem {
     id: i32,
-    #[sqlx(rename = "legacy_script_id")]
     script_id: Option<i32>,
     prompt: Option<String>,
-    #[sqlx(rename = "file_path")]
     video_url: Option<String>,
     duration: Option<String>,
     state: Option<String>,

@@ -33,8 +33,8 @@ async fn resolve_script_and_asset_for_project(
         INNER JOIN app_asset a ON a.project_id = p.id
         WHERE p.id = $1
           AND p.owner_user_id = $2
-          AND s.legacy_id = $3
-          AND a.legacy_id = $4
+          AND s.numeric_id = $3
+          AND a.numeric_id = $4
         "#,
     )
     .bind(project_id)

@@ -15,9 +15,9 @@ use uuid::Uuid;
 pub struct AssetRow {
     /// 内部 UUID 主键 (`app_asset.id`)。
     pub id: Uuid,
-    /// 向客户端暴露的稳定整数 ID（`app_asset.legacy_id` 列；JSON 键 **`numeric_id`**）。
+    /// 向客户端暴露的稳定整数 ID（`app_asset.numeric_id` 列；JSON 键 **`numeric_id`**）。
     #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     /// 资产显示名称。
     pub name: String,
@@ -35,7 +35,7 @@ pub struct AssetRow {
 /// 分页使用从 1 开始的页码，可选每页大小限制。
 #[derive(Debug, Deserialize)]
 pub struct ListAssetsQuery {
-    /// 设置时，仅返回项目中关联到此脚本 (`app_script.legacy_id`) 的资产。
+    /// 设置时，仅返回项目中关联到此脚本 (`app_script.numeric_id`) 的资产。
     #[serde(default, rename = "script_numeric_id")]
     pub script_numeric_id: Option<i32>,
     /// role、tool 或 scene（遗留 getAssetsApi 的 type）。
@@ -113,7 +113,7 @@ pub(super) struct CornerScapeDbRow {
     /// 内部 UUID 主键。
     pub id: Uuid,
     /// 遗留整数 ID。
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     /// 显示名称。
     pub name: String,
@@ -180,9 +180,9 @@ pub struct AssetImageRow {
     pub file_path: Option<String>,
     /// 生成状态：如 pending、completed、failed。
     pub state: Option<String>,
-    /// 图片的稳定整数 ID（`legacy_image_id` 列；JSON **`numeric_image_id`**）。
+    /// 图片的稳定整数 ID（`numeric_image_id` 列；JSON **`numeric_image_id`**）。
     #[serde(rename = "numeric_image_id")]
-    #[sqlx(rename = "legacy_image_id")]
+    #[sqlx(rename = "numeric_image_id")]
     pub numeric_image_id: Option<i32>,
 }
 
@@ -471,7 +471,7 @@ pub(super) struct LegacyGetImageAssetRow {
     /// 内部 UUID。
     pub id: Uuid,
     /// 遗留整数 ID。
-    #[sqlx(rename = "legacy_id")]
+    #[sqlx(rename = "numeric_id")]
     pub numeric_id: i32,
     /// 资产类型分类。
     pub asset_type: String,

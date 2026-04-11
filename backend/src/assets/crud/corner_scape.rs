@@ -29,7 +29,7 @@ async fn list_corner_scape_assets_inner(
         r#"
         SELECT
           a.id,
-          a.legacy_id,
+          a.numeric_id,
           a.name,
           a.asset_type,
           a.description,
@@ -43,7 +43,7 @@ async fn list_corner_scape_assets_inner(
                   'file_path', i.file_path,
                   'state', i.state,
                   'sort_index', i.sort_index,
-                  'legacy_image_id', i.legacy_image_id
+                  'numeric_image_id', i.numeric_image_id
                 )
                 ORDER BY i.sort_index ASC, i.created_at ASC
               )
@@ -84,7 +84,7 @@ async fn list_corner_scape_assets_inner(
           WHEN 'tool' THEN 3
           ELSE 4
         END,
-        a.legacy_id ASC
+        a.numeric_id ASC
         "#,
     );
 

@@ -20,7 +20,7 @@ pub(super) async fn resolve_event_extraction_prompt(
         r#"
         SELECT body
         FROM app_user_prompt
-        WHERE owner_user_id = $1 AND legacy_id = 1
+        WHERE owner_user_id = $1 AND numeric_id = 1
         "#,
     )
     .bind(uid)
