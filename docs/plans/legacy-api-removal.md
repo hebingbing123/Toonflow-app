@@ -250,7 +250,7 @@
 | **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与旧路径一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID。**已删除** `POST …/projects/legacy/.../scripts`；**仍保留**：`…/scripts/legacy/{id}`（`GET`/`PATCH`/`DELETE`） |
 | **B·竖切 7：`get-script-api`（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/get-script-api`（`ensure_owned_project_pk` + body 可选 `name`）。Flutter `postScriptsGetScriptApiByProjectId`；剧本/项目脚本工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/get-script-api` **已删除** |
 | **B·竖切 8：`batch-add` 剧本（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/batch-add`（body 仅 **`data`**，与 legacy 插入/锁一致）。Flutter `postScriptsBatchAddByProjectId`；项目剧本批量工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/batch-add` **已删除** |
-| **B·其余域** | 未做 | 例如：`POST /api/v1/assets/*` 旧形、production、`harness`/jobs payload、仍注册的各 `…/legacy/…` 与 `narrative::legacy` 等 |
+| **B·其余域** | 部分 | **`POST /api/v1/assets/*`** 等旧形 body、**`production_legacy`**、**`narrative::legacy`**、**`harness`/jobs 整型 payload** 仍待竖切；**文档**：`backend/README.md`、`docs/plans/harness-rust-flutter.md`、`electron-node-parity.md` 已与当前 **UUID 项目段**主路径对齐（避免仍写已删的 **`…/projects/legacy/...`** 项目删改统计等） |
 | **C–D** | 未做 | 大块删 `*legacy*` 模块与删 PG `legacy_id` 列 |
 
 ### 阶段 A：盘点与契约标记（低风险）

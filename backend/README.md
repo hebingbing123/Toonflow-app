@@ -39,11 +39,11 @@ cargo run
 
 新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`legacy_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(legacy_id)+1`** 分配，避免并发撞号。
 
-项目删除：**`DELETE /api/v1/projects/legacy/{legacy_id}`**（Bearer）— 删除当前用户名下该 legacy 项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
+项目删除：**`DELETE /api/v1/projects/{project_id}`**（Bearer；**`project_id`** 为项目 UUID）— 删除当前用户名下该项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
 
 全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 单次查询当前用户的 **`app_project`**、**`app_script`**、**`app_storyboard`**、**`app_novel`**、**`role_count`**（**`app_asset`** 且 **`asset_type = 'role'`**，与 **`…/stats`** 一致）、**`app_art_style`**、**`asset_count`**（全部 **`app_asset`**）、**`video_count`**（当前恒 **0**，与 **`…/stats`** 占位一致，待 PG 视频表）。
 
-项目统计：**`GET /api/v1/projects/legacy/{legacy_id}/stats`**（Bearer）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
+项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
 画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{legacy_id}`**（Bearer）— **`app_art_style`**（RLS）；**`legacy_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(legacy_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**；空数组或全空白项 **400**（先于 LLM 校验）；合法请求需 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
 
