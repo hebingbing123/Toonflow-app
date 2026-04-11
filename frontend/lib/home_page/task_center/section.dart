@@ -122,14 +122,10 @@ class TaskCenterSection extends StatelessWidget {
           onProbeTaskDetailLegacy: onProbeTaskDetailLegacy,
           onProbeTaskDetailUuid: onProbeTaskDetailUuid,
         ),
-        if (taskDetailLegacyLine != null) ...[
-          const SizedBox(height: 8),
-          SelectableText('Legacy 详情：$taskDetailLegacyLine'),
-        ],
-        if (taskDetailUuidLine != null) ...[
-          const SizedBox(height: 8),
-          SelectableText('UUID 详情：$taskDetailUuidLine'),
-        ],
+        TaskCenterDetailsPreview(
+          taskDetailLegacyLine: taskDetailLegacyLine,
+          taskDetailUuidLine: taskDetailUuidLine,
+        ),
         if (taskApiJobs != null) ...[
           TaskCenterJobsPreview(
             jobs: taskApiJobs!,

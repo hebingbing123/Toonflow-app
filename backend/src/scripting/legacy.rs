@@ -1,4 +1,4 @@
-//! Legacy **`POST /api/script/getScrptApi`** — list scripts under a project with linked asset briefs.
+//! 遗留 `POST /api/script/getScrptApi` — 列出项目下的脚本及其关联资产摘要。
 
 use axum::{
     extract::{Json, State},

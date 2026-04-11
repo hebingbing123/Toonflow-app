@@ -1,5 +1,6 @@
-//! Agent per-project memory (`app_agent_memory`). Parity with legacy SQLite `memories` + HTTP
-//! `/api/agents/getMemory` / `/api/agents/clearMemory` (camelCase JSON bodies).
+//! 代理每项目记忆（`app_agent_memory`）。
+//!
+//! 与遗留 SQLite `memories` + HTTP `/api/agents/getMemory` / `/api/agents/clearMemory` 兼容（驼峰式 JSON 请求体）。
 
 use axum::{extract::State, http::HeaderMap, routing::post, Json, Router};
 use chrono::{TimeZone, Utc};

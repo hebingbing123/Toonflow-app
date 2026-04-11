@@ -191,3 +191,32 @@ class TaskCenterSummaryPreview extends StatelessWidget {
     );
   }
 }
+
+/// Displays the latest legacy and UUID detail snapshots returned by task probes.
+class TaskCenterDetailsPreview extends StatelessWidget {
+  const TaskCenterDetailsPreview({
+    super.key,
+    this.taskDetailLegacyLine,
+    this.taskDetailUuidLine,
+  });
+
+  final String? taskDetailLegacyLine;
+  final String? taskDetailUuidLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (taskDetailLegacyLine != null) ...[
+          const SizedBox(height: 8),
+          SelectableText('Legacy 详情：$taskDetailLegacyLine'),
+        ],
+        if (taskDetailUuidLine != null) ...[
+          const SizedBox(height: 8),
+          SelectableText('UUID 详情：$taskDetailUuidLine'),
+        ],
+      ],
+    );
+  }
+}
