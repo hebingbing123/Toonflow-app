@@ -1,8 +1,11 @@
-//! Legacy **`/api/setting/memoryConfig/getMemory`** / **`sureMemory`**: SQLite **`o_setting`** keys for RAG / summary limits and ONNX paths.
-//! Rust persists per-user config in **`app_user_profile.memory_config`** (JSONB) with server defaults as fallback.
+//! 内存配置模块：遗留 `/api/setting/memoryConfig/getMemory` / `sureMemory`。
 //!
-//! **`POST …/clear-agent-memories`**: SaaS mapping for legacy **`delAllMemory`** (SQLite wiped the whole **`memories`** table). Rust clears **`app_agent_memory`**
-//! for **`JWT sub` + `projectId` + `agentType` + optional `episodesId`** only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
+//! SQLite `o_setting` 键，用于 RAG / 摘要限制和 ONNX 路径。
+//! Rust 将每个用户配置持久化到 `app_user_profile.memory_config`（JSONB），服务器默认值作为回退。
+//!
+//! `POST …/clear-agent-memories`：遗留 `delAllMemory` 的 SaaS 映射（SQLite 擦除整个 `memories` 表）。
+//! Rust 仅清除 `JWT sub` + `projectId` + `agentType` + 可选 `episodesId` 的 `app_agent_memory` — 
+//! 与 `POST /api/v1/agents/memory/clear` 且 `clearType: all` 的相同行。
 
 use axum::{
     extract::{Json, State},

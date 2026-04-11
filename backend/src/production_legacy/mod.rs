@@ -1,7 +1,8 @@
-//! Legacy **`/api/production/*`**: SQLite **`o_video`**, **`o_videoConfig`**, **`o_agentWorkData`**
-//! (production flow), OSS paths.
-//! SaaS parity now covers the production workbench routes in this module; no generic **501** JSON
-//! stub fallback remains registered here.
+//! 遗留 `/api/production/*` 生产模块。
+//!
+//! 处理 SQLite `o_video`、`o_videoConfig`、`o_agentWorkData`（制作流程）和 OSS 路径。
+//! 子模块：
+//! - `workbench` — 制作工作台（流程、分镜、视频、轨道、图片编辑、资产）
 
 use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};
