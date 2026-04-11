@@ -63,6 +63,14 @@ struct BatchAddScriptBody {
     data: Vec<BatchAddScriptItem>,
 }
 
+/// Same items as [`BatchAddScriptBody`], for **`POST …/projects/{project_id}/scripts/batch-add`**
+/// (project keyed by UUID path).
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BatchAddScriptDataBody {
+    data: Vec<BatchAddScriptItem>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchAddScriptItem {
@@ -170,6 +178,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/scripts",
             post(create_script_under_project_for_project),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/scripts/batch-add",
+            post(post_scripts_batch_add_for_project),
         )
         .route(
             "/api/v1/projects/{project_id}/scripts/{script_legacy_id}",
@@ -416,6 +428,67 @@ async fn create_script_under_project(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
+async fn batch_add_scripts_locked(
+    tx: &mut Transaction<'_, Postgres>,
+    project_uuid: Uuid,
+    data: Vec<BatchAddScriptItem>,
+) -> Result<BatchAddScriptResponse, ApiError> {
+    if data.is_empty() {
+        return Ok(BatchAddScriptResponse {
+            message: "添加剧本成功".into(),
+            inserted: 0,
+            scripts: Vec::new(),
+        });
+    }
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
+        .execute(&mut **tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut next_legacy: i32 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(MAX(legacy_id), 0) + 1
+        FROM app_script
+        "#,
+    )
+    .fetch_one(&mut **tx)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let now_ms = chrono::Utc::now().timestamp_millis();
+    let mut inserted = Vec::with_capacity(data.len());
+    for item in data {
+        let row = sqlx::query_as::<_, ScriptRow>(
+            r#"
+            INSERT INTO app_script (
+              project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
+            )
+            VALUES ($1, $2, $3, $4, NULL, $5, '{}'::jsonb)
+            RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
+            "#,
+        )
+        .bind(project_uuid)
+        .bind(next_legacy)
+        .bind(item.script_name)
+        .bind(item.script_data)
+        .bind(now_ms)
+        .fetch_one(&mut **tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        inserted.push(row);
+        next_legacy += 1;
+    }
+
+    Ok(BatchAddScriptResponse {
+        message: "添加剧本成功".into(),
+        inserted: i32::try_from(inserted.len()).unwrap_or(i32::MAX),
+        scripts: inserted,
+    })
+}
+
 async fn post_scripts_batch_add(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -449,67 +522,41 @@ async fn post_scripts_batch_add(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    if body.data.is_empty() {
-        tx.commit()
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-        return Ok(Json(BatchAddScriptResponse {
-            message: "添加剧本成功".into(),
-            inserted: 0,
-            scripts: Vec::new(),
-        }));
-    }
-
-    sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_SCRIPT_LEGACY_ID)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let mut next_legacy: i32 = sqlx::query_scalar(
-        r#"
-        SELECT COALESCE(MAX(legacy_id), 0) + 1
-        FROM app_script
-        "#,
-    )
-    .fetch_one(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let now_ms = chrono::Utc::now().timestamp_millis();
-    let mut inserted = Vec::with_capacity(body.data.len());
-    for item in body.data {
-        let row = sqlx::query_as::<_, ScriptRow>(
-            r#"
-            INSERT INTO app_script (
-              project_id, legacy_id, name, content, extract_state, create_time_ms, metadata
-            )
-            VALUES ($1, $2, $3, $4, NULL, $5, '{}'::jsonb)
-            RETURNING id, project_id, legacy_id, name, content, extract_state, create_time_ms
-            "#,
-        )
-        .bind(project_uuid)
-        .bind(next_legacy)
-        .bind(item.script_name)
-        .bind(item.script_data)
-        .bind(now_ms)
-        .fetch_one(&mut *tx)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-        inserted.push(row);
-        next_legacy += 1;
-    }
+    let response = batch_add_scripts_locked(&mut tx, project_uuid, body.data).await?;
 
     tx.commit()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(BatchAddScriptResponse {
-        message: "添加剧本成功".into(),
-        inserted: i32::try_from(inserted.len()).unwrap_or(i32::MAX),
-        scripts: inserted,
-    }))
+    Ok(Json(response))
+}
+
+async fn post_scripts_batch_add_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<BatchAddScriptDataBody>,
+) -> Result<Json<BatchAddScriptResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let response = batch_add_scripts_locked(&mut tx, project_id, body.data).await?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(response))
 }
 
 async fn get_script_for_project(
@@ -794,6 +841,17 @@ mod tests {
         let err =
             serde_json::from_str::<BatchAddScriptBody>(r#"{"projectId":1,"data":[],"extra":1}"#)
                 .unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field")
+                || err.to_string().contains("unknown variant"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn batch_add_script_data_body_rejects_unknown_fields() {
+        let err =
+            serde_json::from_str::<BatchAddScriptDataBody>(r#"{"data":[],"extra":1}"#).unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),

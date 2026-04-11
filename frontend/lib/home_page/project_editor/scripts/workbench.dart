@@ -565,9 +565,9 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                     prefix: prefix,
                                     scriptData: addBodyCtrl.text,
                                   );
-                                  final created = await postScriptsBatchAdd(
+                                  final created = await postScriptsBatchAddByProjectId(
                                     token,
-                                    projectId: p.legacyId,
+                                    projectId: p.id,
                                     data: rows,
                                   );
                                   scriptList.addAll(

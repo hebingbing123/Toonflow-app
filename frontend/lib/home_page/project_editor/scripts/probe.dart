@@ -18,9 +18,9 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
                   final stamp = DateTime.now().millisecondsSinceEpoch;
-                  final created = await postScriptsBatchAdd(
+                  final created = await postScriptsBatchAddByProjectId(
                     token,
-                    projectId: p.legacyId,
+                    projectId: p.id,
                     data: [
                       BatchAddScriptItemV1(
                         scriptName: '[flutter batch probe]$stamp',
@@ -35,7 +35,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/scripts/batch-add：inserted=${created.inserted}',
+                        'POST …/projects/{id}/scripts/batch-add：inserted=${created.inserted}',
                       ),
                     ),
                   );
@@ -51,7 +51,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST scripts/batch-add'),
+        child: const Text('POST projects/…/scripts/batch-add'),
       ),
       TextButton(
         onPressed: scriptProbeBusy[0] || saving[0]

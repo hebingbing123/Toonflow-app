@@ -5003,6 +5003,61 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/scripts/batch-add:
+    post:
+      tags: [scripts]
+      summary: Batch add scripts under project (by project UUID)
+      operationId: postScriptsBatchAddByProjectIdV1
+      description: |
+        Same behavior as **`POST /api/v1/scripts/batch-add`**, but the project is **`app_project.id`** (UUID path).
+        Body is only **`data`** (no **`projectId`** in JSON).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchAddScriptDataBody"
+      responses:
+        "200":
+          description: Insert completed (may be zero rows if **`data`** is empty)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchAddScriptResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project not found or not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/{project_id}/scripts/{script_legacy_id}:
     get:
       tags: [scripts]
@@ -9802,9 +9857,11 @@ paths:
       tags: [scripts]
       summary: Legacy batch add scripts under project (`batchAddScript`)
       operationId: postScriptsBatchAddV1
+      deprecated: true
       description: |
         Parity with **`POST /api/script/batchAddScript`**. Validates **`projectId`** ownership and inserts all
         rows in **`data`** with sequential **`legacy_id`** allocation under transaction advisory lock.
+        Prefer **`POST /api/v1/projects/{project_id}/scripts/batch-add`** (project UUID in path; body without **`projectId`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -14412,6 +14469,16 @@ components:
           type: integer
           format: int32
           minimum: 1
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchAddScriptItem"
+
+    BatchAddScriptDataBody:
+      type: object
+      required: [data]
+      additionalProperties: false
+      properties:
         data:
           type: array
           items:

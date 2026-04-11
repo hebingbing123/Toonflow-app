@@ -83,9 +83,9 @@ extension _HomePageProjectEditorScripts on _HomePageState {
       );
 
       setDialogState(() => saving[0] = true);
-      final created = await postScriptsBatchAdd(
+      final created = await postScriptsBatchAddByProjectId(
         token,
-        projectId: p.legacyId,
+        projectId: p.id,
         data: rows,
       );
       if (!ctx.mounted) return;
