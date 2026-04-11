@@ -1,4 +1,6 @@
-//! Well-known `app_generation_job.kind` values used by HTTP surfaces and the worker.
+//! HTTP 接口和 Worker 使用的标准 `app_generation_job.kind` 值。
+//!
+//! 定义资产生成和提示词优化的任务类型常量。
 
 /// Single-image asset generate (legacy **`POST …/assets-generate/generate`**); worker uses
 /// **`images/edits`** when payload has `image_base64`, otherwise **`images/generations`**,

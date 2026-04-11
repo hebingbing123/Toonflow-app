@@ -58,6 +58,7 @@
 | 文件 | 说明 |
 |------|------|
 | `backend/src/harness/invoke/domain_production.rs` | `crate::production_legacy::load_owned_production_flow_json` |
+| `backend/src/harness/invoke/domain_script.rs`（及同目录其它域） | 工具入参/上下文普遍假设 **项目/剧本/小说 `legacy_id`**；HTTP 改 UUID 时须同步 **WS attach / `agent.context.update` 契约与实现**（见 `docs/websocket-events.md`） |
 
 ### 5. 契约与集成测试
 
@@ -74,6 +75,40 @@
 | 文件 | 说明 |
 |------|------|
 | `backend/src/bin/legacy_import.rs` | SQLite → PG 导入工具；名称含 legacy，**不等于**在线 API |
+
+### 7. 非 `*legacy*` 目录名、但 URL 或 body 仍绑整型 `legacy_id`（易漏）
+
+| 路径 | 说明 |
+|------|------|
+| `backend/src/projects/routes.rs` | `GET`/`PATCH`/`DELETE /api/v1/projects/legacy/{legacy_id}`、`GET …/stats`（与 `projects::legacy` 旧 POST 并存，删路由时要一起盘点） |
+| `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{id}`、`GET …/cover`（封面落盘路径也按 `legacy_id` 命名，见 `AppState` 注释） |
+| `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{legacy_id}`（对齐旧 `o_prompt.id` 1–3） |
+| `backend/src/scripting/scripts.rs` | `…/projects/legacy/{id}/scripts`、`GET`/`PATCH`/`DELETE …/scripts/legacy/{id}` |
+| `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_legacy_id`** + **`script_legacy_ids[]`**（无 `/legacy/` 段但语义同旧栈） |
+| `backend/src/assets/generate.rs` | `assets-generate` 各 handler：`project_id`/`project_legacy_id`、`asset_legacy_id`、`legacy_image_id` 入队 payload；`cancel-generate` 按 **`legacy_image_id`** 协同取消 |
+| `backend/src/settings/agent_memory.rs` | `project_id: i32`（**项目 legacy id**）+ `episodes_id` 等驼峰体；与 Harness/工作台「按 legacy 项目」一致 |
+| `backend/src/jobs/worker/*.rs`（如 `asset_image.rs`） | 生成结果回写、`/file` URL 模板中含 `project_legacy_id` / `asset_legacy_id` |
+
+### 8. `app/router.rs` 全量 `merge` 与 legacy 的隐性耦合
+
+下列模块**不一定**在路径里写 `legacy`，但常与上表或队列 payload 联动；收敛 HTTP 时勿只盯 `*legacy*` 子模块：
+
+| `merge` 项 | 与 legacy 的关系 |
+|------------|-------------------|
+| `harness::http::router()` | `HarnessContext` 含 **`project_legacy_id` / `script_legacy_id`**；`harness/invoke/domain_*.rs` 大量 `p.legacy_id` SQL |
+| `jobs::router()` | 任务行含 **`legacy_task_id`**；payload 常含 asset/script 整型 id |
+| `settings::agent_memory::router()` | 见 §7 **`agent_memory.rs`** |
+| `projects::routes::router()` | 见 §7 **`projects/routes.rs`** |
+| `manuals::{director, art_styles, visual}` | 画风域显式 **`/art-styles/legacy/...`**；手册域需单独 grep `legacy` |
+| `scripting::{scripts, agent, asset_extract}` | scripts 路径见 §7；**`asset_extract`** 体字段 |
+| `metering::usage`、`billing::router()` | 自行检索是否仍传 **`projectId`（整型）** 或仅 UUID |
+
+### 9. Staging / 提升（非 HTTP，但与 `legacy_id` 列同源）
+
+| 路径 | 说明 |
+|------|------|
+| `supabase/migrations/*` + `legacy_staging` / `promote_legacy_from_staging()` | PG 契约与 **`pg_contract_tests`** 大量依赖；**删列 `legacy_id`** 前必须与此链路一起设计 |
+| `backend/src/app/pg_contract_tests/mod.rs` 等 | 显式使用隔离用 **`legacy_id` 区间**、清理 `legacy_staging` |
 
 ---
 
