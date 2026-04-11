@@ -3,9 +3,7 @@
 use crate::agent_memory;
 use crate::art_styles;
 use crate::assets;
-use crate::assets_generate;
 use crate::billing;
-use crate::general_legacy;
 use crate::harness;
 use crate::jobs;
 use crate::manuals;
@@ -13,17 +11,16 @@ use crate::models_catalog;
 use crate::narrative;
 use crate::production_legacy;
 use crate::projects;
-use crate::prompts;
-use crate::quality_review;
+use crate::prompting;
 use crate::rate_limit::{
     governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
 };
 use crate::request_id_mw::inject_request_id_into_json_errors;
+use crate::rest_legacy;
 use crate::scripting;
 use crate::settings;
 use crate::skills;
 use crate::state::AppState;
-use crate::tasks_legacy;
 use crate::usage;
 
 use axum::{
@@ -69,25 +66,24 @@ pub fn build_router(state: AppState) -> Router {
         .merge(projects::routes::router())
         .merge(projects::legacy::router())
         .merge(manuals::director::router())
-        .merge(general_legacy::router())
+        .merge(rest_legacy::general::router())
         .merge(art_styles::router())
         .merge(narrative::novels::router())
         .merge(narrative::events::router())
         .merge(narrative::legacy::router())
         .merge(production_legacy::router())
         .merge(assets::router())
-        .merge(assets_generate::router())
         .merge(scripting::scripts::router())
         .merge(scripting::legacy::router())
         .merge(scripting::agent::router())
         .merge(scripting::asset_extract::router())
         .merge(narrative::storyboards::router())
-        .merge(tasks_legacy::router())
+        .merge(rest_legacy::tasks::router())
         .merge(skills::router())
         .merge(manuals::visual::router())
         .merge(usage::router())
-        .merge(prompts::router())
-        .merge(quality_review::routes())
+        .merge(prompting::prompts::router())
+        .merge(prompting::quality::routes())
         .merge(settings::about::router())
         .merge(settings::agent_deploy::router())
         .merge(settings::danger::router())

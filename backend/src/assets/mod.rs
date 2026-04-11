@@ -6,9 +6,11 @@
 //! - [`legacy_query`] – legacy POST read/query operations (get-image/upload-clip/material/polling)
 //! - [`crud`]         – REST CRUD for assets, corner-scape, script-asset links
 //! - [`crud_images`]  – REST CRUD for asset images
+//! - [`generate`]     – legacy **`/api/assetsGenerate/*`** enqueue + cancel
 
 mod crud;
 mod crud_images;
+mod generate;
 mod legacy;
 mod legacy_query;
 pub mod models;
@@ -311,6 +313,7 @@ pub fn router() -> Router<AppState> {
             "/api/v1/projects/legacy/{project_legacy_id}/scripts/{script_legacy_id}/assets/{asset_legacy_id}",
             put(link_script_to_asset).delete(unlink_script_from_asset),
         )
+        .merge(generate::router())
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
