@@ -1,13 +1,13 @@
-// Extracted panel widgets for AgentWorkspaceProductionCard.
-// Keeps agent_workspaces/production_card.dart ≤800 lines.
+// Extracted panel widgets for AgentWorkspaceScriptCard.
+// Keeps agent_workspaces/script_card.dart ≤800 lines.
 
 import 'package:flutter/material.dart';
 
-import 'production_workspace_support.dart';
+import 'support.dart';
 
-/// Renders the "执行阶段" stage board.
-class ProductionWorkspaceStagesPanel extends StatelessWidget {
-  const ProductionWorkspaceStagesPanel({
+/// Renders the "执行阶段" stage board for the script workspace.
+class ScriptWorkspaceStagesPanel extends StatelessWidget {
+  const ScriptWorkspaceStagesPanel({
     super.key,
     required this.stages,
     required this.busy,
@@ -16,11 +16,11 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
     required this.onRunStageSubAgent,
   });
 
-  final List<ProductionWorkspaceStage> stages;
+  final List<ScriptWorkspaceStage> stages;
   final bool busy;
-  final ValueChanged<ProductionWorkspaceStage> onApplyStage;
-  final ValueChanged<ProductionWorkspaceStage> onRunStageDomainTool;
-  final ValueChanged<ProductionWorkspaceStage> onRunStageSubAgent;
+  final ValueChanged<ScriptWorkspaceStage> onApplyStage;
+  final ValueChanged<ScriptWorkspaceStage> onRunStageDomainTool;
+  final ValueChanged<ScriptWorkspaceStage> onRunStageSubAgent;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
         Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 6),
         ...stages.map(
-          (ProductionWorkspaceStage stage) => Card(
+          (ScriptWorkspaceStage stage) => Card(
             margin: const EdgeInsets.only(bottom: 8),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
@@ -60,7 +60,6 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(label: Text('flow=${stage.flowKey}')),
                       OutlinedButton(
                         onPressed:
                             busy ? null : () => onApplyStage(stage),
@@ -71,7 +70,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
-                          child: const Text('读取 flow'),
+                          child: const Text('读取上下文'),
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
@@ -92,9 +91,9 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   }
 }
 
-/// Renders the "下一步建议" recipe diagnosis panel.
-class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
-  const ProductionWorkspaceDiagnosisPanel({
+/// Renders the "下一步建议" recipe diagnosis panel for the script workspace.
+class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
+  const ScriptWorkspaceDiagnosisPanel({
     super.key,
     required this.recipes,
     required this.busy,
@@ -103,11 +102,11 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
     required this.onRunRecipeSubAgent,
   });
 
-  final List<ProductionWorkspaceRecipe> recipes;
+  final List<ScriptWorkspaceRecipe> recipes;
   final bool busy;
-  final ValueChanged<ProductionWorkspaceRecipe> onApplyRecipe;
-  final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeDomainTool;
-  final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeSubAgent;
+  final ValueChanged<ScriptWorkspaceRecipe> onApplyRecipe;
+  final ValueChanged<ScriptWorkspaceRecipe> onRunRecipeDomainTool;
+  final ValueChanged<ScriptWorkspaceRecipe> onRunRecipeSubAgent;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +118,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
         Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 6),
         ...recipes.map(
-          (ProductionWorkspaceRecipe recipe) => Card(
+          (ScriptWorkspaceRecipe recipe) => Card(
             margin: const EdgeInsets.only(bottom: 8),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
@@ -141,7 +140,6 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(label: Text('flow=${recipe.flowKey}')),
                       if (recipe.domainTool != null)
                         Chip(label: Text('tool=${recipe.domainTool}')),
                       if (recipe.subAgentTool != null)
@@ -156,7 +154,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
-                          child: const Text('读取 flow'),
+                          child: const Text('读取上下文'),
                         ),
                       if (recipe.subAgentTool != null)
                         FilledButton(
@@ -171,64 +169,6 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Renders the "引导任务" quick-action buttons.
-class ProductionWorkspaceGuidedTasksPanel extends StatelessWidget {
-  const ProductionWorkspaceGuidedTasksPanel({
-    super.key,
-    required this.busy,
-    required this.hasLastResult,
-    required this.onPullAssetsFlow,
-    required this.onRunAssetsSubAgent,
-    required this.onPullStoryboardFlow,
-    required this.onWriteBackFlow,
-    required this.onRunStoryboardSubAgent,
-    required this.onRunDirectorPlanSubAgent,
-  });
-
-  final bool busy;
-  final bool hasLastResult;
-  final VoidCallback onPullAssetsFlow;
-  final VoidCallback onRunAssetsSubAgent;
-  final VoidCallback onPullStoryboardFlow;
-  final VoidCallback onWriteBackFlow;
-  final VoidCallback onRunStoryboardSubAgent;
-  final VoidCallback onRunDirectorPlanSubAgent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: <Widget>[
-        FilledButton.tonal(
-          onPressed: busy ? null : onPullAssetsFlow,
-          child: const Text('1) 拉取资产 flow'),
-        ),
-        FilledButton.tonal(
-          onPressed: busy ? null : onRunAssetsSubAgent,
-          child: const Text('2) 运行资产子代理'),
-        ),
-        FilledButton.tonal(
-          onPressed: busy ? null : onPullStoryboardFlow,
-          child: const Text('3) 拉取分镜 flow'),
-        ),
-        OutlinedButton(
-          onPressed: busy || !hasLastResult ? null : onWriteBackFlow,
-          child: const Text('4) 写回 flow'),
-        ),
-        FilledButton.tonal(
-          onPressed: busy ? null : onRunStoryboardSubAgent,
-          child: const Text('5) 运行分镜子代理'),
-        ),
-        FilledButton.tonal(
-          onPressed: busy ? null : onRunDirectorPlanSubAgent,
-          child: const Text('6) 运行导演计划子代理'),
         ),
       ],
     );

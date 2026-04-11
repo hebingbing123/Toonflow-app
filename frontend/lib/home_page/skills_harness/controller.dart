@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../home_page.dart';
+part of '../../home_page.dart';
 
 extension _HomePageSkillsHarnessController on _HomePageState {
   Future<void> _loadHarnessTools() async {

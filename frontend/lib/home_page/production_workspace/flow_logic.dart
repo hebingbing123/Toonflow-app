@@ -2,7 +2,7 @@
 // production workspace. Extracted from production_workspace_support.dart to
 // keep individual files ≤800 lines.
 
-import 'production_workspace_support.dart';
+import 'support.dart';
 
 List<String> summarizeProductionResultSnapshot(
   String? toolName,

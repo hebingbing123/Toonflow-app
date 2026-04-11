@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/projects_section.dart';
+import 'package:toonflow_app/home_page/projects/section.dart';
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {

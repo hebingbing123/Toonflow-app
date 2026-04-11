@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../rust_api.dart';
+import '../../rust_api.dart';
 
 enum _CreativeManualKind { director, visual }
 
