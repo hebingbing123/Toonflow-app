@@ -1,4 +1,6 @@
-//! JSON **`payload`** shapes for WebSocket envelopes (`schema_version` **1**): Harness tools, agent loop, and session attach.
+//! WebSocket 信封的 JSON payload 结构（`schema_version` 1）。
+//!
+//! 包含 Harness 工具、代理循环和会话附加的数据结构。
 
 use serde::Deserialize;
 use serde_json::Value;

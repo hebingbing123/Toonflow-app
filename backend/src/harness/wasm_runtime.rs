@@ -1,4 +1,7 @@
-//! Minimal WASM tool path: embed tiny `probe.wasm` and execute via **wasmi** (no native wasm engine).
+//! 最小 WASM 工具路径。
+//!
+//! 嵌入微型 `probe.wasm` 并通过 wasmi 执行（无原生 WASM 引擎）。
+//! 用于验证 WASM 堆栈路径。
 
 use serde_json::{json, Value};
 use wasmi::{Engine, Linker, Module, Store};
