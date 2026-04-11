@@ -142,6 +142,54 @@ class ProjectsSummaryPreview extends StatelessWidget {
   }
 }
 
+/// Composes the project summaries and preview lists into one display-only block.
+class ProjectsOverviewPreview extends StatelessWidget {
+  const ProjectsOverviewPreview({
+    super.key,
+    this.projectsSummaryLine,
+    this.artStylesLine,
+    this.artStyles,
+    this.projects,
+    this.agentMemoryBody,
+    required this.onManageArtStyles,
+    required this.onOpenProjectDetail,
+  });
+
+  final String? projectsSummaryLine;
+  final String? artStylesLine;
+  final List<ArtStyleRow>? artStyles;
+  final List<ProjectRow>? projects;
+  final String? agentMemoryBody;
+  final VoidCallback onManageArtStyles;
+  final ValueChanged<ProjectRow> onOpenProjectDetail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ProjectsSummaryPreview(
+          projectsSummaryLine: projectsSummaryLine,
+          artStylesLine: artStylesLine,
+        ),
+        if (artStyles != null) ...[
+          ProjectsArtStylesPreview(
+            artStyles: artStyles!,
+            onManage: onManageArtStyles,
+          ),
+        ],
+        if (projects != null) ...[
+          ProjectsListPreview(
+            projects: projects!,
+            onOpenProjectDetail: onOpenProjectDetail,
+            agentMemoryBody: agentMemoryBody,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 /// Shows a short list of available art styles with a quick path to management.
 class ProjectsArtStylesPreview extends StatelessWidget {
   const ProjectsArtStylesPreview({

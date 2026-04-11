@@ -133,23 +133,15 @@ class ProjectsSection extends StatelessWidget {
           loadingAgentMemory: loadingAgentMemory,
           onProbeAgentMemory: onProbeAgentMemory,
         ),
-        ProjectsSummaryPreview(
+        ProjectsOverviewPreview(
           projectsSummaryLine: projectsSummaryLine,
           artStylesLine: artStylesLine,
+          artStyles: artStyles,
+          projects: projects,
+          agentMemoryBody: agentMemoryBody,
+          onManageArtStyles: () => _openArtStylesWorkbench(context),
+          onOpenProjectDetail: onOpenProjectDetail,
         ),
-        if (artStyles != null) ...[
-          ProjectsArtStylesPreview(
-            artStyles: artStyles!,
-            onManage: () => _openArtStylesWorkbench(context),
-          ),
-        ],
-        if (projects != null) ...[
-          ProjectsListPreview(
-            projects: projects!,
-            onOpenProjectDetail: onOpenProjectDetail,
-            agentMemoryBody: agentMemoryBody,
-          ),
-        ],
       ],
     );
   }
