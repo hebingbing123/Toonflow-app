@@ -138,6 +138,13 @@ pub(super) async fn invoke_add_derive_asset(
         }));
     }
 
+    // Wrap SELECT MAX + INSERT in a transaction to prevent duplicate legacy_id
+    // under concurrent add_deriveAsset calls for the same user.
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
     let next_legacy_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(a.legacy_id), 0) + 1
@@ -147,7 +154,7 @@ pub(super) async fn invoke_add_derive_asset(
         "#,
     )
     .bind(ctx.user_id)
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
@@ -170,7 +177,7 @@ pub(super) async fn invoke_add_derive_asset(
     .bind(parent.asset_type)
     .bind(desc)
     .bind(assets_id)
-    .execute(pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
@@ -183,9 +190,13 @@ pub(super) async fn invoke_add_derive_asset(
     )
     .bind(scope.script_id)
     .bind(new_id)
-    .execute(pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
     Ok(json!({
         "id": next_legacy_id,
