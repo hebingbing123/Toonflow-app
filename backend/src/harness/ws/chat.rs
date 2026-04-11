@@ -1,4 +1,4 @@
-//! WebSocket branch for **`agent.chat.send`** (streaming LLM turn).
+//! WebSocket 分支（`agent.chat.send`）：流式 LLM 轮次。
 
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;

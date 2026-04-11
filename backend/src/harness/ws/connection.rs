@@ -1,4 +1,4 @@
-//! Single WebSocket connection after Axum upgrade: outbound notify fan-in + inbound JSON dispatch.
+//! Axum 升级后的单个 WebSocket 连接：出站通知扇入 + 入站 JSON 调度。
 
 use axum::extract::ws::{Message, WebSocket};
 use futures_util::{SinkExt, StreamExt};

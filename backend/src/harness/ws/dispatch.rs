@@ -1,4 +1,4 @@
-//! Authenticated WebSocket JSON envelope parse + route to harness handlers.
+//! 认证的 WebSocket JSON 信封解析 + 路由到 Harness 处理器。
 
 use axum::extract::ws::WebSocket;
 use serde::Deserialize;
