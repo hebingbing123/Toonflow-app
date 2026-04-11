@@ -2332,8 +2332,181 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
+  /api/v1/projects/{project_id}/stats:
+    get:
+      tags: [projects]
+      summary: Project overview counts by UUID
+      operationId: getProjectStatsByProjectIdV1
+      description: |
+        Same response as **`GET /api/v1/projects/legacy/{legacy_id}/stats`**, keyed by **`app_project.id`** (UUID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStatsResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
+  /api/v1/projects/{project_id}:
+    get:
+      tags: [projects]
+      summary: Project detail by UUID
+      operationId: getProjectByProjectIdV1
+      description: |
+        Same response as **`GET /api/v1/projects/legacy/{legacy_id}`**, keyed by **`app_project.id`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetailResponse"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      tags: [projects]
+      summary: Partially update project by UUID
+      operationId: patchProjectByProjectIdV1
+      description: |
+        Same semantics as **`PATCH /api/v1/projects/legacy/{legacy_id}`**.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchProjectBody"
+      responses:
+        "200":
+          description: Updated project row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectRow"
+        "400":
+          description: Invalid body, no fields to apply, unknown properties, or malformed JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      tags: [projects]
+      summary: Delete project by UUID
+      operationId: deleteProjectByProjectIdV1
+      description: |
+        Same semantics as **`DELETE /api/v1/projects/legacy/{legacy_id}`** (including **`app_agent_memory`** cleanup by **`legacy_project_id`**).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No project with that id for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "503":
+          description: Auth not configured, database error, or `DATABASE_URL` unset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/v1/projects/legacy/{legacy_id}:
     get:
+      deprecated: true
       tags: [projects]
       summary: Project detail by legacy integer id
       operationId: getProjectByLegacyIdV1
@@ -2374,6 +2547,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     patch:
+      deprecated: true
       tags: [projects]
       summary: Partially update project by legacy id
       operationId: patchProjectByLegacyIdV1
@@ -2427,6 +2601,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
     delete:
+      deprecated: true
       tags: [projects]
       summary: Delete project by legacy id
       operationId: deleteProjectByLegacyIdV1
@@ -2466,6 +2641,7 @@ paths:
 
   /api/v1/projects/legacy/{legacy_id}/stats:
     get:
+      deprecated: true
       tags: [projects]
       summary: Project overview counts by legacy id
       operationId: getProjectStatsByLegacyIdV1

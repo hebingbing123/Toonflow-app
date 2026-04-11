@@ -80,7 +80,7 @@
 
 | 路径 | 说明 |
 |------|------|
-| `backend/src/projects/routes.rs` | `GET`/`PATCH`/`DELETE /api/v1/projects/legacy/{legacy_id}`、`GET …/stats`（与 `projects::legacy` 旧 POST 并存，删路由时要一起盘点） |
+| `backend/src/projects/routes.rs` | **并行**：`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`、`GET …/stats`（UUID）；仍保留 `…/projects/legacy/{legacy_id}` 等同行为（与 `projects::legacy` 旧 POST 并存，删 legacy 段时要一起盘点） |
 | `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/legacy/{id}`、`GET …/cover`（封面落盘路径也按 `legacy_id` 命名，见 `AppState` 注释） |
 | `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{legacy_id}`（对齐旧 `o_prompt.id` 1–3） |
 | `backend/src/scripting/scripts.rs` | `…/projects/legacy/{id}/scripts`、`GET`/`PATCH`/`DELETE …/scripts/legacy/{id}` |
@@ -233,6 +233,16 @@
 ---
 
 ## 四、推荐实施方案与步骤（可勾选）
+
+### 实施进度（滚动更新）
+
+| 阶段/项 | 状态 | 备注 |
+|--------|------|------|
+| **E（§八）** | 已完成 | 根 `data/` 收敛、`scripts/` 清理、多语言 `docs/README.*` 截断等见 §8 表格 |
+| **A** | 部分 | OpenAPI 已对「按 legacy 项目 id」的 get/patch/delete/stats 标 `deprecated`；全量 `merge` 列表与「API→屏幕」表可由本文件 §一/§二 继续维护 |
+| **B·竖切 1：项目 UUID** | 已落地（主路径） | 后端：`GET\|PATCH\|DELETE /api/v1/projects/{project_id}`、`GET /api/v1/projects/{project_id}/stats`。Flutter：`fetchProjectByProjectId` / `fetchProjectStatsByProjectId`；项目编辑器与剧本工作台/统计刷新已改用 UUID。**未迁**：资产/小说/事件等仍调用 `projects/legacy/...` 封装；legacy 路由仍注册 |
+| **B·其余域** | 未做 | assets、novels、scripts 全路径、production、`harness`/jobs payload 等 |
+| **C–D** | 未做 | 大块删 `*legacy*` 模块与删 PG `legacy_id` 列 |
 
 ### 阶段 A：盘点与契约标记（低风险）
 

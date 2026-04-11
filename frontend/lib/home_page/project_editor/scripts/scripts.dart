@@ -99,7 +99,7 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         ),
       );
       try {
-        statsRef[0] = await fetchProjectStatsByLegacyId(token, p.legacyId);
+        statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
       } catch (_) {}
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
@@ -481,9 +481,9 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                         ),
                       );
                       try {
-                        statsRef[0] = await fetchProjectStatsByLegacyId(
+                        statsRef[0] = await fetchProjectStatsByProjectId(
                           token,
-                          p.legacyId,
+                          p.id,
                         );
                       } catch (_) {}
                       final nextDiagnosis = diagnoseScriptBatchWorkbench(
@@ -569,15 +569,15 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                     s.legacyId,
                     projectLegacyId: p.legacyId,
                     onScriptTreeMutated: () async {
-                      final d = await fetchProjectByLegacyId(token, p.legacyId);
+                      final d = await fetchProjectByProjectId(token, p.id);
                       if (!ctx.mounted) return;
                       scriptList
                         ..clear()
                         ..addAll(d.scripts);
                       try {
-                        statsRef[0] = await fetchProjectStatsByLegacyId(
+                        statsRef[0] = await fetchProjectStatsByProjectId(
                           token,
-                          p.legacyId,
+                          p.id,
                         );
                       } catch (_) {}
                       setDialogState(() {});

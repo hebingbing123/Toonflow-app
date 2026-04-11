@@ -7,14 +7,14 @@ extension _HomePageProjectEditor on _HomePageState {
     final nameCtrl = TextEditingController(text: p.name ?? '');
     final introCtrl = TextEditingController(text: p.intro ?? '');
     try {
-      final detail = await fetchProjectByLegacyId(token, p.legacyId);
+      final detail = await fetchProjectByProjectId(token, p.id);
       if (!mounted) return;
       nameCtrl.text = detail.project.name ?? '';
       introCtrl.text = detail.project.intro ?? '';
       final scriptList = List<ScriptBrief>.from(detail.scripts);
       ProjectStats? statsSnap;
       try {
-        statsSnap = await fetchProjectStatsByLegacyId(token, p.legacyId);
+        statsSnap = await fetchProjectStatsByProjectId(token, p.id);
       } catch (_) {
         statsSnap = null;
       }

@@ -32,7 +32,11 @@ class _ProjectEditorDialogState {
   final List<bool> tasksLegacyBusy = <bool>[false];
   final List<bool> projectLegacyBusy = <bool>[false];
 
-  Future<void> reloadAssetsAndStats(String token, int projectLegacyId) async {
+  Future<void> reloadAssetsAndStats(
+    String token,
+    String projectId,
+    int projectLegacyId,
+  ) async {
     try {
       assetsRef[0] = await fetchProjectAssetsByLegacyId(token, projectLegacyId);
     } catch (_) {
@@ -53,7 +57,7 @@ class _ProjectEditorDialogState {
     }
 
     try {
-      statsRef[0] = await fetchProjectStatsByLegacyId(token, projectLegacyId);
+      statsRef[0] = await fetchProjectStatsByProjectId(token, projectId);
     } catch (_) {}
 
     try {

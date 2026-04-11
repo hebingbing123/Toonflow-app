@@ -30,12 +30,12 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
     var previewRows = <LegacyScriptsGetScriptApiItem>[];
 
     Future<void> reloadScriptsAndStats(StateSetter setLocalState) async {
-      final detail = await fetchProjectByLegacyId(token, p.legacyId);
+      final detail = await fetchProjectByProjectId(token, p.id);
       scriptList
         ..clear()
         ..addAll(detail.scripts);
       try {
-        statsRef[0] = await fetchProjectStatsByLegacyId(token, p.legacyId);
+        statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
       } catch (_) {}
       setLocalState(() {
         infoLine = scriptList.isEmpty
@@ -581,9 +581,9 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                   );
                                   try {
                                     statsRef[0] =
-                                        await fetchProjectStatsByLegacyId(
+                                        await fetchProjectStatsByProjectId(
                                           token,
-                                          p.legacyId,
+                                          p.id,
                                         );
                                   } catch (_) {}
                                   setLocalState(() {
