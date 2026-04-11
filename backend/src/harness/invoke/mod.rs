@@ -1,8 +1,8 @@
-//! Harness tool execution. WebSocket and agent loop call into here.
+//! Harness 工具执行。WebSocket 和代理循环调用此处。
 //!
-//! Submodules:
-//! - [`domain_script`]     – script-domain tools (get_planData, get_script_content, get_novel_*)
-//! - [`domain_production`] – production-domain tools (get_flowData, derive-asset, storyboard)
+//! 子模块：
+//! - `domain_script` — 脚本域工具（get_planData、get_script_content、get_novel_*）
+//! - `domain_production` — 制作域工具（get_flowData、derive-asset、storyboard）
 
 mod domain_production;
 mod domain_script;
