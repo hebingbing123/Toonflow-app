@@ -1,3 +1,7 @@
+//! 小说 HTTP 处理器。
+//!
+//! 小说 CRUD 和分页列表查询。
+
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},

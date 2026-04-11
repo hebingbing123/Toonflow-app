@@ -1,3 +1,7 @@
+//! 小说事件 HTTP 处理器。
+//!
+//! 事件 CRUD 和章节关联管理。
+
 use axum::{
     extract::{Json, Path, Query, State},
     http::HeaderMap,
