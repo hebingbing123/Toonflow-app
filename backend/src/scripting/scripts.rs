@@ -56,15 +56,7 @@ struct CreateScriptBody {
     extract_state: Option<i32>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BatchAddScriptBody {
-    project_id: i32,
-    data: Vec<BatchAddScriptItem>,
-}
-
-/// Same items as [`BatchAddScriptBody`], for **`POST …/projects/{project_id}/scripts/batch-add`**
-/// (project keyed by UUID path).
+/// Body for **`POST …/projects/{project_id}/scripts/batch-add`** (project UUID in path).
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct BatchAddScriptDataBody {
@@ -169,7 +161,6 @@ async fn create_script_locked(
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/api/v1/scripts/batch-add", post(post_scripts_batch_add))
         .route("/api/v1/scripts/export", post(export_scripts_zip))
         .route(
             "/api/v1/scripts/extract-state/poll",
@@ -489,48 +480,6 @@ async fn batch_add_scripts_locked(
     })
 }
 
-async fn post_scripts_batch_add(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<BatchAddScriptBody>,
-) -> Result<Json<BatchAddScriptResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be > 0".into()));
-    }
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(body.project_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    let response = batch_add_scripts_locked(&mut tx, project_uuid, body.data).await?;
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(Json(response))
-}
-
 async fn post_scripts_batch_add_for_project(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
@@ -829,18 +778,6 @@ mod tests {
     #[test]
     fn create_script_body_rejects_unknown_fields() {
         let err = serde_json::from_str::<CreateScriptBody>(r#"{"name":"a","x":1}"#).unwrap_err();
-        assert!(
-            err.to_string().contains("unknown field")
-                || err.to_string().contains("unknown variant"),
-            "{err}"
-        );
-    }
-
-    #[test]
-    fn batch_add_script_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<BatchAddScriptBody>(r#"{"projectId":1,"data":[],"extra":1}"#)
-                .unwrap_err();
         assert!(
             err.to_string().contains("unknown field")
                 || err.to_string().contains("unknown variant"),

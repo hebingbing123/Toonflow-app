@@ -259,6 +259,7 @@ async fn scripts_crud_roundtrip() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "created={created}");
     let project_id = created["legacy_id"].as_i64().expect("legacy_id") as i32;
+    let project_uuid = created["id"].as_str().expect("project uuid");
 
     // Create script
     let res = app
@@ -282,19 +283,19 @@ async fn scripts_crud_roundtrip() {
     let script_id = script["legacy_id"].as_i64().expect("script legacy_id") as i32;
     assert_eq!(script["name"].as_str(), Some("test_script"));
 
-    // Batch add scripts (legacy `batchAddScript` parity)
+    // Batch add scripts (UUID project path)
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/scripts/batch-add")
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts/batch-add"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"data":[{{"scriptName":"batch_1","scriptData":"content_1"}},{{"scriptName":"batch_2","scriptData":"content_2"}}]}}"#
-                )))
+                .body(Body::from(
+                    r#"{"data":[{"scriptName":"batch_1","scriptData":"content_1"},{"scriptName":"batch_2","scriptData":"content_2"}]}"#,
+                ))
                 .unwrap(),
         )
         .await
@@ -307,34 +308,6 @@ async fn scripts_crud_roundtrip() {
     assert_eq!(scripts.len(), 2);
     assert_eq!(scripts[0]["name"].as_str(), Some("batch_1"));
     assert_eq!(scripts[1]["name"].as_str(), Some("batch_2"));
-
-    let project_uuid = created["id"].as_str().expect("project uuid");
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri(format!("/api/v1/projects/{project_uuid}/scripts/batch-add"))
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    r#"{"data":[{"scriptName":"batch_uuid_1","scriptData":"u1"}]}"#,
-                ))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, batch_by_uuid) = read_json_response(res).await;
-    assert_eq!(
-        status,
-        StatusCode::OK,
-        "batch add by project uuid={batch_by_uuid}"
-    );
-    assert_eq!(batch_by_uuid["inserted"].as_i64(), Some(1));
-    let scripts_u = batch_by_uuid["scripts"].as_array().expect("scripts array");
-    assert_eq!(scripts_u.len(), 1);
-    assert_eq!(scripts_u[0]["name"].as_str(), Some("batch_uuid_1"));
 
     // Get script
     let res = app

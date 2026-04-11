@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — same as legacy list + **`relatedAssets`**.
+/// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — script list + **`relatedAssets`**.
 Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApiByProjectId(
   String accessToken,
   String projectId, {
@@ -39,44 +39,7 @@ Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApiByProjectId(
       .toList();
 }
 
-/// `POST /api/v1/scripts/get-script-api` — legacy **`getScrptApi`** list + **`relatedAssets`**.
-Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApi(
-  String accessToken,
-  int projectId, {
-  String? name,
-}) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/get-script-api');
-  final body = <String, dynamic>{'projectId': projectId};
-  if (name != null && name.isNotEmpty) {
-    body['name'] = name;
-  }
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
-      .timeout(const Duration(seconds: 30));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final data = map['data'] as List<dynamic>;
-  return data
-      .map(
-        (e) =>
-            LegacyScriptsGetScriptApiItem.fromJson(e as Map<String, dynamic>),
-      )
-      .toList();
-}
-
-/// `POST /api/v1/projects/{project_id}/scripts/batch-add` — same as legacy batch add, project in path.
+/// `POST /api/v1/projects/{project_id}/scripts/batch-add` — batch add scripts under project (UUID path).
 Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
   String accessToken, {
   required String projectId,
@@ -93,36 +56,6 @@ Future<BatchAddScriptResponseV1> postScriptsBatchAddByProjectId(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'data': data.map((e) => e.toJson()).toList(),
-        }),
-      )
-      .timeout(const Duration(seconds: 30));
-  if (res.statusCode == 400 || res.statusCode == 404) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return BatchAddScriptResponseV1.fromJson(map);
-}
-
-/// `POST /api/v1/scripts/batch-add` — legacy **`batchAddScript`** parity.
-Future<BatchAddScriptResponseV1> postScriptsBatchAdd(
-  String accessToken, {
-  required int projectId,
-  required List<BatchAddScriptItemV1> data,
-}) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/scripts/batch-add');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'projectId': projectId,
           'data': data.map((e) => e.toJson()).toList(),
         }),
       )

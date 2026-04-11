@@ -73,7 +73,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/scripts/get-script-api：${rows.length} 条 · $sample',
+                        'POST …/projects/{id}/scripts/get-script-api：${rows.length} 条 · $sample',
                       ),
                     ),
                   );

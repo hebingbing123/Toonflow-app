@@ -36,7 +36,7 @@ class ScriptRow {
   }
 }
 
-/// Linked asset brief on **`POST /api/v1/scripts/get-script-api`** — JSON **`id`** = **`app_asset.legacy_id`**.
+/// Linked asset brief on **`POST …/projects/{project_id}/scripts/get-script-api`** — JSON **`id`** = **`app_asset.legacy_id`**.
 class LegacyScriptRelatedAssetBrief {
   const LegacyScriptRelatedAssetBrief({
     required this.legacyId,
@@ -54,7 +54,7 @@ class LegacyScriptRelatedAssetBrief {
   }
 }
 
-/// One script row from **`POST /api/v1/scripts/get-script-api`** (camelCase **`extractState`**, **`relatedAssets`**, …).
+/// One script row from **`POST …/projects/{project_id}/scripts/get-script-api`** (camelCase **`extractState`**, **`relatedAssets`**, …).
 class LegacyScriptsGetScriptApiItem {
   const LegacyScriptsGetScriptApiItem({
     required this.legacyId,

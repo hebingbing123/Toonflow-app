@@ -251,7 +251,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                           decoration: const InputDecoration(
                             labelText: '剧本名称筛选',
                             helperText:
-                                '读取 POST /scripts/get-script-api 时按名称过滤，可留空读取全量上下文。',
+                                '读取 POST …/projects/{id}/scripts/get-script-api 时按名称过滤，可留空读取全量上下文。',
                           ),
                         ),
                         const SizedBox(height: 8),

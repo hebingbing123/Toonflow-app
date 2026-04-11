@@ -1,4 +1,4 @@
-//! 遗留 `POST /api/script/getScrptApi` — 列出项目下的脚本及其关联资产摘要。
+//! `POST /api/v1/projects/{project_id}/scripts/get-script-api` — 列出项目下的脚本及其关联资产摘要。
 
 use axum::{
     extract::{Json, Path, State},
@@ -14,14 +14,6 @@ use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct GetScriptApiBody {
-    project_id: i32,
-    #[serde(default)]
-    name: Option<String>,
-}
 
 #[derive(Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
@@ -184,39 +176,9 @@ async fn post_get_script_api_for_project(
     Ok(JsonResponse(response))
 }
 
-async fn post_get_script_api(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<GetScriptApiBody>,
-) -> Result<JsonResponse<GetScriptApiResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(body.project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    let response = get_script_api_for_project_uuid(pool, project_uuid, body.name).await?;
-    Ok(JsonResponse(response))
-}
-
 pub fn router() -> Router<AppState> {
-    Router::new()
-        .route(
-            "/api/v1/projects/{project_id}/scripts/get-script-api",
-            post(post_get_script_api_for_project),
-        )
-        .route("/api/v1/scripts/get-script-api", post(post_get_script_api))
+    Router::new().route(
+        "/api/v1/projects/{project_id}/scripts/get-script-api",
+        post(post_get_script_api_for_project),
+    )
 }

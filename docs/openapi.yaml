@@ -52,7 +52,7 @@ info:
 
     **Legacy project CRUD posts (`/api/project/*`):** **`POST …/project/get-project`** (**`{}`**) → **`{ "data": [ProjectRow] }`**; **`POST …/delete-project`** / **`add-project`** / **`edit-project`** (PG **`app_project`**). **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
-    **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST /api/v1/scripts/get-script-api`** lists scripts for **`projectId`** with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
+    **Legacy general + script list:** **`POST /api/v1/general/get-single-project`** (**`{ "id": legacy_project_id }`**) returns **`{ "data": [ProjectRow] }`** (0 or 1 row). **`POST …/general/update-project`** updates **`intro`**, SQLite-shaped **`type`** (maps to **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`** on **`app_project`** by legacy id (at least one field besides **`id`**). **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** legacy ids).
 
         **Legacy novels + events (read/CRUD):** **`POST …/novels/get-novel-data`** / **`…/get-novel-index`** take **`{ "projectId" }`** (**`app_project.legacy_id`**). **`POST …/get-novel`** paginates with **`page`/`limit`** (cap **200**) and optional **`search`** (**`chapter` ILIKE**); response **`{ data, total }`** (**`id`** = **`legacy_id`**). **`POST …/add-novel`** batch-inserts (**`data`** ≤ **200**); empty **`data`** → **200** without DB. **`POST …/delete-novel`** / **`…/update-novel`** use **`id`** = **`app_novel.legacy_id`**. **`POST …/batch-delete`** deletes by **`ids`**. **`GET/POST/PATCH/DELETE …/projects/{project_id}/novel-events*`** (UUID 项目段) 为主路径；**`…/projects/legacy/{id}/novel-events*`** 已 **`deprecated`**。legacy **`POST …/novels/events/{get-events,batch-delete,generate-events}`** 仍覆盖旧形，含异步事件生成触发。
 
@@ -5009,8 +5009,8 @@ paths:
       summary: Batch add scripts under project (by project UUID)
       operationId: postScriptsBatchAddByProjectIdV1
       description: |
-        Same behavior as **`POST /api/v1/scripts/batch-add`**, but the project is **`app_project.id`** (UUID path).
-        Body is only **`data`** (no **`projectId`** in JSON).
+        Inserts rows in **`data`** with sequential **`global app_script.legacy_id`** under transaction advisory lock.
+        Project is **`app_project.id`** (UUID path). Body is only **`data`**.
       security:
         - bearerAuth: []
       parameters:
@@ -9765,8 +9765,7 @@ paths:
       summary: Script list under project (by project UUID, with related assets)
       operationId: postScriptsGetScriptApiByProjectIdV1
       description: |
-        Same response as **`POST /api/v1/scripts/get-script-api`**, but the project is **`app_project.id`** (UUID).
-        Optional **`name`** in the body filters scripts by case-insensitive substring.
+        Lists scripts for **`app_project.id`** (UUID path) with optional substring **`name`** filter and **`relatedAssets`**.
       security:
         - bearerAuth: []
       parameters:
@@ -9797,100 +9796,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Project not found or not owned
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/scripts/get-script-api:
-    post:
-      deprecated: true
-      tags: [scripts]
-      summary: Legacy script list under project (with related assets)
-      operationId: postScriptsGetScriptApiV1
-      description: |
-        Parity with **`POST /api/script/getScrptApi`**. **`projectId`** is **`app_project.legacy_id`**.
-        Optional **`name`** filters scripts by case-insensitive substring (SQL **`POSITION`** on lowercased strings).
-        Each row uses **`id` = `app_script.legacy_id`** and **`relatedAssets`** lists linked **`app_asset.legacy_id`** and names.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyScriptsGetScriptApiBody"
-      responses:
-        "200":
-          description: OK (may be an empty data array)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyScriptsGetScriptApiResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project legacy id not found for caller
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/scripts/batch-add:
-    post:
-      tags: [scripts]
-      summary: Legacy batch add scripts under project (`batchAddScript`)
-      operationId: postScriptsBatchAddV1
-      deprecated: true
-      description: |
-        Parity with **`POST /api/script/batchAddScript`**. Validates **`projectId`** ownership and inserts all
-        rows in **`data`** with sequential **`legacy_id`** allocation under transaction advisory lock.
-        Prefer **`POST /api/v1/projects/{project_id}/scripts/batch-add`** (project UUID in path; body without **`projectId`**).
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BatchAddScriptBody"
-      responses:
-        "200":
-          description: Insert completed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BatchAddScriptResponse"
-        "400":
-          description: Invalid request body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project legacy id not found for caller
           content:
             application/json:
               schema:
@@ -14460,20 +14365,6 @@ components:
         scriptData:
           type: string
 
-    BatchAddScriptBody:
-      type: object
-      required: [projectId, data]
-      additionalProperties: false
-      properties:
-        projectId:
-          type: integer
-          format: int32
-          minimum: 1
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/BatchAddScriptItem"
-
     BatchAddScriptDataBody:
       type: object
       required: [data]
@@ -15309,18 +15200,6 @@ components:
         message:
           type: string
           example: 修改成功
-
-    LegacyScriptsGetScriptApiBody:
-      type: object
-      required: [projectId]
-      additionalProperties: false
-      properties:
-        projectId:
-          type: integer
-          format: int32
-        name:
-          type: string
-          description: Optional substring filter (case-insensitive)
 
     ScriptsGetScriptApiNameBody:
       type: object
