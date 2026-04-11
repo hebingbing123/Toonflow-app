@@ -488,14 +488,56 @@ extension _HomePageProjectEditorAssets on _HomePageState {
     required Future<void> Function() reloadAssetsAndStats,
   }) {
     final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
+    final assetsForScript = assetsForScriptRef[0]?.items;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (assetsRef[0] != null)
-          Text(
-            summarizeProjectAssetRows(visibleAssets),
-            style: Theme.of(ctx).textTheme.bodySmall,
+          _ProjectAssetsOverviewPanel(
+            scriptList: scriptList,
+            visibleAssets: visibleAssets,
+            assetsForScript: assetsForScript,
+            filterScriptLegacyId: assetsFilterScriptLegacyId[0],
+            assetsLoading: assetsLoading[0],
+            assetsScriptFilterLoading: assetsScriptFilterLoading[0],
+            assetsBusy: assetsBusy[0],
+            onFilterChanged: (value) async {
+              setDialogState(() => assetsScriptFilterLoading[0] = true);
+              assetsFilterScriptLegacyId[0] = value;
+              if (value == null) {
+                assetsForScriptRef[0] = null;
+              }
+              try {
+                await reloadAssetsAndStats();
+              } finally {
+                if (ctx.mounted) {
+                  setDialogState(() => assetsScriptFilterLoading[0] = false);
+                }
+              }
+            },
+            onRefresh: () async {
+              setDialogState(() => assetsLoading[0] = true);
+              try {
+                await reloadAssetsAndStats();
+              } finally {
+                if (ctx.mounted) {
+                  setDialogState(() => assetsLoading[0] = false);
+                }
+              }
+            },
+            onOpenWorkbench: () => _openAssetWorkbenchDialog(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              scriptList: scriptList,
+              assetsRef: assetsRef,
+              assetsForScriptRef: assetsForScriptRef,
+              assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
+            ),
           )
         else
           Text(
@@ -504,140 +546,6 @@ extension _HomePageProjectEditorAssets on _HomePageState {
               color: Theme.of(ctx).colorScheme.outline,
             ),
           ),
-        if (assetsFilterScriptLegacyId[0] != null) ...[
-          const SizedBox(height: 6),
-          if (assetsScriptFilterLoading[0])
-            Text(
-              '正在按剧本筛选资产…',
-              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                color: Theme.of(ctx).colorScheme.outline,
-              ),
-            )
-          else if (assetsForScriptRef[0] != null)
-            Text(
-              summarizeScriptScopedAssets(
-                assetsFilterScriptLegacyId[0],
-                assetsForScriptRef[0]!.items,
-              ),
-              style: Theme.of(ctx).textTheme.bodySmall,
-            )
-          else
-            Text(
-              '当前剧本资产尚未加载',
-              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                color: Theme.of(ctx).colorScheme.outline,
-              ),
-            ),
-        ],
-        if (scriptList.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: DropdownButton<int?>(
-              value: assetsFilterScriptLegacyId[0],
-              isExpanded: true,
-              hint: const Text('按剧本筛选资产列表'),
-              items: [
-                const DropdownMenuItem<int?>(
-                  value: null,
-                  child: Text('（全部，不按剧本筛选）'),
-                ),
-                ...scriptList.map(
-                  (s) => DropdownMenuItem<int?>(
-                    value: s.legacyId,
-                    child: Text(
-                      '#${s.legacyId} ${s.name ?? ""}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ],
-              onChanged:
-                  assetsBusy[0] ||
-                      assetsLoading[0] ||
-                      assetsScriptFilterLoading[0]
-                  ? null
-                  : (v) async {
-                      setDialogState(() => assetsScriptFilterLoading[0] = true);
-                      assetsFilterScriptLegacyId[0] = v;
-                      if (v == null) {
-                        assetsForScriptRef[0] = null;
-                      }
-                      try {
-                        await reloadAssetsAndStats();
-                      } finally {
-                        if (ctx.mounted) {
-                          setDialogState(
-                            () => assetsScriptFilterLoading[0] = false,
-                          );
-                        }
-                      }
-                    },
-            ),
-          ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: assetsLoading[0] || assetsScriptFilterLoading[0]
-                ? null
-                : () async {
-                    setDialogState(() => assetsLoading[0] = true);
-                    try {
-                      await reloadAssetsAndStats();
-                    } finally {
-                      if (ctx.mounted) {
-                        setDialogState(() => assetsLoading[0] = false);
-                      }
-                    }
-                  },
-            child: Text(assetsLoading[0] ? '刷新资产…' : '刷新资产'),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(
-              ctx,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('资产主工作台', style: Theme.of(ctx).textTheme.titleSmall),
-              const SizedBox(height: 4),
-              Text(
-                '把资产 CRUD、剧本关联、筛选与上传动作收口到一个正式入口，主区不再堆叠一排零散按钮。',
-                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed:
-                    assetsBusy[0] ||
-                        assetsLoading[0] ||
-                        assetsScriptFilterLoading[0]
-                    ? null
-                    : () => _openAssetWorkbenchDialog(
-                        ctx: ctx,
-                        setDialogState: setDialogState,
-                        token: token,
-                        p: p,
-                        scriptList: scriptList,
-                        assetsRef: assetsRef,
-                        assetsForScriptRef: assetsForScriptRef,
-                        assetsFilterScriptLegacyId: assetsFilterScriptLegacyId,
-                        assetsBusy: assetsBusy,
-                        reloadAssetsAndStats: reloadAssetsAndStats,
-                      ),
-                child: const Text('打开资产主工作台'),
-              ),
-            ],
-          ),
-        ),
         const SizedBox(height: 8),
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
