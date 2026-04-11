@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/projects_creative_manuals_workbench.dart';
+import 'package:toonflow_app/home_page/projects/workbenches/creative_manuals.dart';
 
 void main() {
   testWidgets('creative manuals workbench renders seeded defaults', (

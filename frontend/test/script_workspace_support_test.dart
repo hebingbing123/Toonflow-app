@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/script_workspace_support.dart';
+import 'package:toonflow_app/home_page/agent_workspaces/contexts/script/support.dart';
 
 void main() {
   test('extractScriptWorkspaceNovelIds reads legacy ids from items', () {

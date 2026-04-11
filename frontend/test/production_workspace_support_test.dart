@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/production_workspace_flow_logic.dart';
-import 'package:toonflow_app/home_page/production_workspace_support.dart';
+import 'package:toonflow_app/home_page/agent_workspaces/contexts/production/flow_logic.dart';
+import 'package:toonflow_app/home_page/agent_workspaces/contexts/production/support.dart';
 
 void main() {
   test('summarizeProductionFlowValue counts prompt and media rows', () {

@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'activity_panel.dart';
-import 'production_card.dart';
-import 'script_card.dart';
+import 'panels/activity.dart';
+import 'panels/production.dart';
+import 'panels/script.dart';
 
 class AgentWorkspacesSection extends StatefulWidget {
   const AgentWorkspacesSection({

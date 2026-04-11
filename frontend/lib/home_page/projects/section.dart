@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import 'agent_memory_workbench.dart';
-import 'creative_manuals_workbench.dart';
+import 'workbenches/agent_memory.dart';
+import 'workbenches/creative_manuals.dart';
 import '../../rust_api.dart';
 
 class ProjectsSection extends StatelessWidget {

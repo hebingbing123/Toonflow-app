@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'script_card.dart';
-import '../production_workspace/card_panels.dart';
-import '../production_workspace/context_snapshot.dart';
-import '../production_workspace/flow_logic.dart';
-import '../production_workspace/support.dart';
+import '../contexts/production/card_panels.dart';
+import '../contexts/production/context_snapshot.dart';
+import '../contexts/production/flow_logic.dart';
+import '../contexts/production/support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
