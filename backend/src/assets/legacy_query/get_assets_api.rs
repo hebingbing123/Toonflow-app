@@ -1,4 +1,6 @@
-//! Legacy **`POST …/get-assets-api`** — parent/child asset tree.
+//! 遗留 `POST …/get-assets-api`。
+//!
+//! 返回父子资产树结构。
 
 use std::collections::HashMap;
 

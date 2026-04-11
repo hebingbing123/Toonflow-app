@@ -1,4 +1,6 @@
-//! Legacy **`POST …/batch-generation-data`**.
+//! 遗留 `POST …/batch-generation-data`。
+//!
+//! 批量生成数据查询端点。
 
 use axum::{extract::State, http::HeaderMap, Json};
 

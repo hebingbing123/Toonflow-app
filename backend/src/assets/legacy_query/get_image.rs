@@ -1,4 +1,6 @@
-//! Legacy **`POST …/get-image`**.
+//! 遗留 `POST …/get-image`。
+//!
+//! 获取资产图片端点。
 
 use axum::{extract::State, http::HeaderMap, Json};
 
