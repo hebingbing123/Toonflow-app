@@ -371,68 +371,134 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     await callback();
   }
 
-  Widget _buildStoryboardPreviewCard() {
-    final outline = Theme.of(context).colorScheme.outline;
-    final imageUrl = _productionRow?.url?.trim();
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: outline.withValues(alpha: 0.45)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('当前画面', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 4),
-          Text(
-            _storyboardProductionMetaLine(_productionRow),
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          const SizedBox(height: 12),
-          if (_loadingProduction)
-            const Center(child: CircularProgressIndicator())
-          else if (imageUrl == null || imageUrl.isEmpty)
-            Text(
-              '当前分镜还没有选中的画面。可以先填写图片 URL，或先读取当前预览再继续生成视频。',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: outline),
-            )
-          else
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                imageUrl,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  height: 180,
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '图片预览失败\n$imageUrl',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ),
-            ),
-          if ((_productionRow?.prompt ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              _productionRow!.prompt!.trim(),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ],
-      ),
+  Future<void> _readCurrentPreview() async {
+    final preview = await postStoryboardPreviewImageV1(
+      widget.token,
+      storyboardId: widget.storyNumericId,
     );
+    _imageUrlCtrl.text = preview.imageUrl ?? '';
+    await _refreshProductionData();
+    if (!mounted) return;
+    setState(() {
+      _setWorkbenchFollowUp(
+        preview.imageUrl == null ? '当前分镜还没有可读取的预览图。' : '已读取当前分镜预览。',
+      );
+    });
+  }
+
+  Future<void> _saveImageUrl() async {
+    final imageUrl = _imageUrlCtrl.text.trim();
+    if (imageUrl.isEmpty) {
+      throw const FormatException('图片 URL 不能为空');
+    }
+    final response = await postStoryboardUpdateUrlV1(
+      widget.token,
+      storyboardId: widget.storyNumericId,
+      imageUrl: imageUrl,
+    );
+    _imageUrlCtrl.text = response.imageUrl;
+    await _refreshProductionData();
+    if (!mounted) return;
+    setState(() {
+      _setWorkbenchFollowUp('已保存当前图片 URL。');
+    });
+    await _notifyStoryboardMutated();
+  }
+
+  Future<void> _clearCurrentFrame() async {
+    await postStoryboardRemoveFrameV1(
+      widget.token,
+      storyboardId: widget.storyNumericId,
+    );
+    _imageUrlCtrl.clear();
+    await _refreshProductionData();
+    if (!mounted) return;
+    setState(() {
+      _setWorkbenchFollowUp('已清空当前分镜画面。');
+    });
+    await _notifyStoryboardMutated();
+  }
+
+  Future<void> _addTrack() async {
+    final name = _trackNameCtrl.text.trim();
+    if (name.isEmpty) throw const FormatException('轨道名称不能为空');
+    final response = await postWorkbenchAddTrackV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      trackName: name,
+    );
+    _trackIdCtrl.text = response.trackId.toString();
+    _trackNameCtrl.clear();
+    await _refreshAll(syncTrackId: true);
+    if (!mounted) return;
+    setState(() => _setWorkbenchFollowUp('已新增轨道 #${response.trackId}。'));
+    await _notifyStoryboardMutated();
+  }
+
+  Future<void> _deleteTrack() async {
+    final trackId = int.tryParse(_trackIdCtrl.text.trim());
+    if (trackId == null || trackId <= 0) {
+      throw const FormatException('请填写有效轨道 ID');
+    }
+    await postWorkbenchDeleteTrackV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      trackId: trackId,
+    );
+    if (_productionRow?.trackId == trackId) _trackIdCtrl.clear();
+    await _refreshAll(syncTrackId: true);
+    if (!mounted) return;
+    setState(() => _setWorkbenchFollowUp('已删除轨道 #$trackId。'));
+    await _notifyStoryboardMutated();
+  }
+
+  Future<void> _generateVideoPrompt() async {
+    final generated = await postWorkbenchGenerateVideoPromptV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      imageUrl: resolveStoryboardSourceImageUrl(
+        productionStoryboard: _productionRow,
+        draftImageUrl: _imageUrlCtrl.text,
+      ),
+      description: widget.readVideoDescriptionText().trim().isEmpty
+          ? widget.readPromptText().trim()
+          : widget.readVideoDescriptionText().trim(),
+    );
+    _videoPromptCtrl.text = generated.prompt;
+    _videoDurationCtrl.text = generated.duration.toString();
+    if (!mounted) return;
+    setState(() => _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。'));
+  }
+
+  Future<void> _selectVideo(VideoItem video) async {
+    await postWorkbenchSelectVideoV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      storyboardId: widget.storyNumericId,
+      videoUrl: video.videoUrl!.trim(),
+    );
+    await _refreshProductionData(syncTrackId: true);
+    if (!mounted) return;
+    setState(() => _setWorkbenchFollowUp('已将当前候选视频设为分镜视频。'));
+    await _notifyStoryboardMutated();
+  }
+
+  Future<void> _deleteCurrentVideo() async {
+    await postWorkbenchDeleteVideoV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      storyboardId: widget.storyNumericId,
+    );
+    await _refreshProductionData(syncTrackId: true);
+    await _refreshWorkbenchData();
+    if (!mounted) return;
+    setState(() => _setWorkbenchFollowUp('已删除当前分镜已选视频。'));
+    await _notifyStoryboardMutated();
   }
 
   @override
@@ -555,35 +621,16 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildStoryboardPreviewCard(),
+        _StoryboardPreviewCard(
+          loadingProduction: _loadingProduction,
+          productionRow: _productionRow,
+          metaLine: _storyboardProductionMetaLine(_productionRow),
+        ),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.secondaryContainer.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                diagnosis.summary,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                diagnosis.detail,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: recommendedAction,
-                child: Text(recommendedActionLabel),
-              ),
-            ],
-          ),
+        _StoryboardDiagnosisCard(
+          diagnosis: diagnosis,
+          recommendedAction: recommendedAction,
+          recommendedActionLabel: recommendedActionLabel,
         ),
         if (_productionError != null) ...[
           const SizedBox(height: 8),
@@ -595,95 +642,17 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           ),
         ],
         const SizedBox(height: 16),
-        Text('图片工作台', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _imageUrlCtrl,
-          minLines: 2,
-          maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '当前图片 URL / data URI',
-            helperText: '支持 HTTP URL 或 data:image/...;base64。',
-            alignLabelWithHint: true,
+        _StoryboardImageSection(
+          saving: _saving,
+          loadingProduction: _loadingProduction,
+          imageUrlCtrl: _imageUrlCtrl,
+          onReadCurrentPreview: () => _runDialogAction(_readCurrentPreview),
+          onSaveImageUrl: () => _runDialogAction(_saveImageUrl),
+          onClearFrame: () => _runDialogAction(_clearCurrentFrame),
+          onRefreshProductionData: () => _refreshProductionData(
+            syncImageUrl: true,
+            syncTrackId: true,
           ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            FilledButton.tonal(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      final preview = await postStoryboardPreviewImageV1(
-                        widget.token,
-                        storyboardId: widget.storyNumericId,
-                      );
-                      _imageUrlCtrl.text = preview.imageUrl ?? '';
-                      await _refreshProductionData();
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp(
-                          preview.imageUrl == null
-                              ? '当前分镜还没有可读取的预览图。'
-                              : '已读取当前分镜预览。',
-                        );
-                      });
-                    }),
-              child: Text(_saving ? '处理中…' : '读取当前预览'),
-            ),
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      final imageUrl = _imageUrlCtrl.text.trim();
-                      if (imageUrl.isEmpty) {
-                        throw const FormatException('图片 URL 不能为空');
-                      }
-                      final response = await postStoryboardUpdateUrlV1(
-                        widget.token,
-                        storyboardId: widget.storyNumericId,
-                        imageUrl: imageUrl,
-                      );
-                      _imageUrlCtrl.text = response.imageUrl;
-                      await _refreshProductionData();
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp('已保存当前图片 URL。');
-                      });
-                      await _notifyStoryboardMutated();
-                    }),
-              child: const Text('保存图片 URL'),
-            ),
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () => _runDialogAction(() async {
-                      await postStoryboardRemoveFrameV1(
-                        widget.token,
-                        storyboardId: widget.storyNumericId,
-                      );
-                      _imageUrlCtrl.clear();
-                      await _refreshProductionData();
-                      if (!mounted) return;
-                      setState(() {
-                        _setWorkbenchFollowUp('已清空当前分镜画面。');
-                      });
-                      await _notifyStoryboardMutated();
-                    }),
-              child: const Text('清空画面'),
-            ),
-            TextButton(
-              onPressed: _saving || _loadingProduction
-                  ? null
-                  : () => _refreshProductionData(
-                      syncImageUrl: true,
-                      syncTrackId: true,
-                    ),
-              child: Text(_loadingProduction ? '刷新中…' : '刷新制作数据'),
-            ),
-          ],
         ),
         const SizedBox(height: 16),
         _StoryboardVideoSection(
@@ -705,86 +674,14 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onResolutionChanged: (v) => setState(() => _resolution = v),
           onModeChanged: (v) => setState(() => _mode = v),
           onAudioChanged: (v) => setState(() => _audio = v),
-          onAddTrack: () => _runDialogAction(() async {
-            final name = _trackNameCtrl.text.trim();
-            if (name.isEmpty) throw const FormatException('轨道名称不能为空');
-            final response = await postWorkbenchAddTrackV1(
-              widget.token,
-              projectId: widget.projectNumericId,
-              scriptId: widget.scriptNumericId,
-              trackName: name,
-            );
-            _trackIdCtrl.text = response.trackId.toString();
-            _trackNameCtrl.clear();
-            await _refreshAll(syncTrackId: true);
-            if (!mounted) return;
-            setState(() => _setWorkbenchFollowUp('已新增轨道 #${response.trackId}。'));
-            await _notifyStoryboardMutated();
-          }),
-          onDeleteTrack: () => _runDialogAction(() async {
-            final trackId = int.tryParse(_trackIdCtrl.text.trim());
-            if (trackId == null || trackId <= 0) {
-              throw const FormatException('请填写有效轨道 ID');
-            }
-            await postWorkbenchDeleteTrackV1(
-              widget.token,
-              projectId: widget.projectNumericId,
-              scriptId: widget.scriptNumericId,
-              trackId: trackId,
-            );
-            if (_productionRow?.trackId == trackId) _trackIdCtrl.clear();
-            await _refreshAll(syncTrackId: true);
-            if (!mounted) return;
-            setState(() => _setWorkbenchFollowUp('已删除轨道 #$trackId。'));
-            await _notifyStoryboardMutated();
-          }),
-          onGenerateVideoPrompt: () => _runDialogAction(() async {
-            final generated = await postWorkbenchGenerateVideoPromptV1(
-              widget.token,
-              projectId: widget.projectNumericId,
-              scriptId: widget.scriptNumericId,
-              imageUrl: resolveStoryboardSourceImageUrl(
-                productionStoryboard: _productionRow,
-                draftImageUrl: _imageUrlCtrl.text,
-              ),
-              description: widget.readVideoDescriptionText().trim().isEmpty
-                  ? widget.readPromptText().trim()
-                  : widget.readVideoDescriptionText().trim(),
-            );
-            _videoPromptCtrl.text = generated.prompt;
-            _videoDurationCtrl.text = generated.duration.toString();
-            if (!mounted) return;
-            setState(() => _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。'));
-          }),
+          onAddTrack: () => _runDialogAction(_addTrack),
+          onDeleteTrack: () => _runDialogAction(_deleteTrack),
+          onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),
           onRefreshVideoData: _refreshWorkbenchData,
           onSubmitVideoGeneration: () =>
               _runDialogAction(_submitVideoGeneration),
-          onSelectVideo: (video) => _runDialogAction(() async {
-            await postWorkbenchSelectVideoV1(
-              widget.token,
-              projectId: widget.projectNumericId,
-              scriptId: widget.scriptNumericId,
-              storyboardId: widget.storyNumericId,
-              videoUrl: video.videoUrl!.trim(),
-            );
-            await _refreshProductionData(syncTrackId: true);
-            if (!mounted) return;
-            setState(() => _setWorkbenchFollowUp('已将当前候选视频设为分镜视频。'));
-            await _notifyStoryboardMutated();
-          }),
-          onDeleteCurrentVideo: () => _runDialogAction(() async {
-            await postWorkbenchDeleteVideoV1(
-              widget.token,
-              projectId: widget.projectNumericId,
-              scriptId: widget.scriptNumericId,
-              storyboardId: widget.storyNumericId,
-            );
-            await _refreshProductionData(syncTrackId: true);
-            await _refreshWorkbenchData();
-            if (!mounted) return;
-            setState(() => _setWorkbenchFollowUp('已删除当前分镜已选视频。'));
-            await _notifyStoryboardMutated();
-          }),
+          onSelectVideo: (video) => _runDialogAction(() => _selectVideo(video)),
+          onDeleteCurrentVideo: () => _runDialogAction(_deleteCurrentVideo),
         ),
       ],
     );
