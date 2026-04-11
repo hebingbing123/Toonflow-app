@@ -1,5 +1,5 @@
-//! Legacy **`POST /api/project/*`** project CRUD helpers under **`/api/v1/project/*`**
-//! (**`getProject`**, **`delProject`**, **`addProject`**, **`editProject`**).
+//! 遗留 `POST /api/project/*` 项目 CRUD 辅助函数（位于 `/api/v1/project/*` 下）
+//! （`getProject`、`delProject`、`addProject`、`editProject`）。
 
 use axum::{
     extract::{Json, State},

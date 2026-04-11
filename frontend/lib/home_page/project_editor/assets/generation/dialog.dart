@@ -232,19 +232,47 @@ class _AssetGenerationWorkbenchDialogState
                 ),
               ),
               const SizedBox(height: 12),
-              _buildFilterRow(visible, typeSelections),
-              const SizedBox(height: 8),
-              _buildModelResolutionRow(),
-              const SizedBox(height: 8),
-              _buildBatchCandidateRow(),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _imageUrlCtrl,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  labelText: '更新封面 URL（单选时可用）',
-                  helperText: '用于 production/assets/update-assets-url',
-                ),
+              _AssetGenerationControlsPanel(
+                busy: _busyMutation,
+                scriptList: widget.scriptList,
+                visibleAssets: visible,
+                typeSelections: typeSelections,
+                selectedScriptLegacyId: _selectedScriptLegacyId,
+                selectedType: _selectedType,
+                modelCtrl: _modelCtrl,
+                resolutionCtrl: _resolutionCtrl,
+                imageUrlCtrl: _imageUrlCtrl,
+                batchNameCtrl: _batchNameCtrl,
+                batchLimitCtrl: _batchLimitCtrl,
+                onScriptChanged: (value) {
+                  setState(() => _selectedScriptLegacyId = value);
+                },
+                onImageUrlChanged: (_) => setState(() {}),
+                onTypeChanged: (nextType) async {
+                  final nextVisibleAssets = nextType.isEmpty
+                      ? visible
+                      : visible
+                            .where((a) => a.assetType.trim() == nextType)
+                            .toList(growable: false);
+                  final nextSelection = chooseVisibleAssetSelection(
+                    nextVisibleAssets,
+                    preferredIds: _selectedIds,
+                    preferredLegacyId: _focusedAssetLegacyId,
+                  );
+                  setState(() {
+                    _selectedType = nextType;
+                    _selectedIds
+                      ..clear()
+                      ..addAll(nextSelection);
+                    _focusedAssetLegacyId = _selectedIds.isEmpty
+                        ? null
+                        : _selectedIds.first;
+                    _statusLine = nextType.isEmpty
+                        ? '正在切换到全部类型并同步工作台摘要…'
+                        : '正在切换到 $nextType 并同步工作台摘要…';
+                  });
+                  await _syncWorkbenchSnapshot(includeProductionSummary: true);
+                },
               ),
               const SizedBox(height: 12),
               _buildQueryActions(visible, scopedAssets, typeSelections),
@@ -347,131 +375,6 @@ class _AssetGenerationWorkbenchDialogState
         TextButton(
           onPressed: _busyMutation ? null : () => Navigator.of(context).pop(),
           child: const Text('关闭'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterRow(
-    List<AssetRow> visible,
-    Map<String, List<int>> typeSelections,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<int>(
-            initialValue: _selectedScriptLegacyId,
-            decoration: const InputDecoration(
-              labelText: '生成使用的剧本',
-              helperText: '批量出图会把所选资产投给这个剧本上下文',
-            ),
-            items: widget.scriptList
-                .map(
-                  (script) => DropdownMenuItem<int>(
-                    value: script.legacyId,
-                    child: Text(
-                      '#${script.legacyId} ${script.name ?? ""}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                )
-                .toList(growable: false),
-            onChanged: _busyMutation
-                ? null
-                : (value) {
-                    if (value == null) return;
-                    setState(() => _selectedScriptLegacyId = value);
-                  },
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedType,
-            decoration: const InputDecoration(
-              labelText: '资产类型筛选',
-              helperText: '同时影响 production 摘要读取和可见选择集',
-            ),
-            items: <DropdownMenuItem<String>>[
-              const DropdownMenuItem<String>(value: '', child: Text('（全部类型）')),
-              ...typeSelections.keys.map(
-                (type) =>
-                    DropdownMenuItem<String>(value: type, child: Text(type)),
-              ),
-            ],
-            onChanged: _busyMutation
-                ? null
-                : (value) async {
-                    final nextType = value ?? '';
-                    final nextVisibleAssets = nextType.isEmpty
-                        ? visible
-                        : visible
-                              .where((a) => a.assetType.trim() == nextType)
-                              .toList(growable: false);
-                    final nextSelection = chooseVisibleAssetSelection(
-                      nextVisibleAssets,
-                      preferredIds: _selectedIds,
-                      preferredLegacyId: _focusedAssetLegacyId,
-                    );
-                    setState(() {
-                      _selectedType = nextType;
-                      _selectedIds
-                        ..clear()
-                        ..addAll(nextSelection);
-                      _focusedAssetLegacyId = _selectedIds.isEmpty
-                          ? null
-                          : _selectedIds.first;
-                      _statusLine = nextType.isEmpty
-                          ? '正在切换到全部类型并同步工作台摘要…'
-                          : '正在切换到 $nextType 并同步工作台摘要…';
-                    });
-                    await _syncWorkbenchSnapshot(
-                      includeProductionSummary: true,
-                    );
-                  },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModelResolutionRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _modelCtrl,
-            decoration: const InputDecoration(labelText: '模型（可选）'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: TextField(
-            controller: _resolutionCtrl,
-            decoration: const InputDecoration(labelText: '分辨率（可选）'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBatchCandidateRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _batchNameCtrl,
-            decoration: const InputDecoration(labelText: '批量候选名称过滤（可选）'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 140,
-          child: TextField(
-            controller: _batchLimitCtrl,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '候选 limit'),
-          ),
         ),
       ],
     );
