@@ -1,4 +1,6 @@
-//! REST routes under `/api/v1/harness/*` (tool catalog; future policy or admin endpoints stay here).
+//! Harness HTTP 端点。
+//!
+//! `/api/v1/harness/*` 下的 REST 路由（工具目录；未来的策略或管理端点保留在此处）。
 
 use axum::extract::State;
 use axum::http::HeaderMap;

@@ -1,4 +1,7 @@
-//! Static catalog of tools the Harness loop may dispatch (execution wiring still WIP).
+//! Harness 工具静态目录。
+//!
+//! Harness 循环可能调度的工具目录（执行连接仍在开发中）。
+//! 提供 `GET /api/v1/harness/tools` 端点返回的工具列表。
 
 use serde::Serialize;
 

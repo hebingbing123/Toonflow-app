@@ -1,3 +1,7 @@
+//! Harness 权限管理。
+//!
+//! 处理 WebSocket 频道的允许列表和权限验证。
+
 use std::collections::HashSet;
 
 use uuid::Uuid;
