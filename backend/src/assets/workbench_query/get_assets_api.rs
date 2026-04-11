@@ -22,7 +22,7 @@ async fn run_get_assets_api(
     uid: uuid::Uuid,
     project_numeric_id: i32,
     body: &WorkbenchNestedAssetsBody,
-) -> Result<LegacyGetAssetsApiResponse, ApiError> {
+) -> Result<WorkbenchGetAssetsApiResponse, ApiError> {
     let asset_type = body.asset_type.trim().to_lowercase();
     let page = body.page.unwrap_or(1);
     let limit = body.limit.unwrap_or(10);
@@ -62,7 +62,7 @@ async fn run_get_assets_api(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let parents: Vec<LegacyGetAssetsApiDbRow> = sqlx::query_as(
+    let parents: Vec<WorkbenchGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -120,7 +120,7 @@ async fn run_get_assets_api(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let children: Vec<LegacyGetAssetsApiDbRow> = sqlx::query_as(
+    let children: Vec<WorkbenchGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -175,9 +175,9 @@ async fn run_get_assets_api(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let mut child_map: HashMap<i32, Vec<LegacyGetAssetsApiChildItem>> = HashMap::new();
+    let mut child_map: HashMap<i32, Vec<WorkbenchGetAssetsApiChildItem>> = HashMap::new();
     for row in children {
-        let child = LegacyGetAssetsApiChildItem {
+        let child = WorkbenchGetAssetsApiChildItem {
             id: row.id,
             project_id: row.project_id.unwrap_or(project_numeric_id),
             asset_type: row.asset_type,
@@ -196,7 +196,7 @@ async fn run_get_assets_api(
 
     let data = parents
         .into_iter()
-        .map(|row| LegacyGetAssetsApiParentItem {
+        .map(|row| WorkbenchGetAssetsApiParentItem {
             id: row.id,
             project_id: row.project_id.unwrap_or(project_numeric_id),
             asset_type: row.asset_type,
@@ -211,7 +211,7 @@ async fn run_get_assets_api(
         })
         .collect();
 
-    Ok(LegacyGetAssetsApiResponse { data, total })
+    Ok(WorkbenchGetAssetsApiResponse { data, total })
 }
 
 pub(crate) async fn post_project_workbench_nested_assets(
@@ -219,7 +219,7 @@ pub(crate) async fn post_project_workbench_nested_assets(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchNestedAssetsBody>,
-) -> Result<Json<LegacyGetAssetsApiResponse>, ApiError> {
+) -> Result<Json<WorkbenchGetAssetsApiResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let asset_type = body.asset_type.trim().to_lowercase();
     if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {

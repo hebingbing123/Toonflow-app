@@ -335,8 +335,8 @@ async fn get_job_task_detail_compat(
         return Ok(Json(row));
     }
 
-    if let Ok(legacy) = s.parse::<i64>() {
-        if legacy <= 0 {
+    if let Ok(parsed_task) = s.parse::<i64>() {
+        if parsed_task <= 0 {
             return Err(ApiError::BadRequest(
                 "task_id must be a UUID or a positive integer".into(),
             ));
@@ -345,7 +345,7 @@ async fn get_job_task_detail_compat(
             .pool
             .as_ref()
             .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-        let row = fetch_job_by_numeric_task_id(pool, uid, legacy).await?;
+        let row = fetch_job_by_numeric_task_id(pool, uid, parsed_task).await?;
         return Ok(Json(row));
     }
 

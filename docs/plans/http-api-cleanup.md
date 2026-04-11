@@ -104,8 +104,8 @@
 
 | 路径 | 说明 |
 |------|------|
-| `supabase/migrations/*` + `legacy_staging` / `promote_legacy_from_staging()` | PG 契约与 **`pg_contract_tests`** 大量依赖；**删列 `legacy_id`** 前必须与此链路一起设计 |
-| `backend/src/app/pg_contract_tests/mod.rs` 等 | 显式使用隔离用 **`legacy_id` 区间**、清理 `legacy_staging` |
+| `supabase/migrations/*` + `import_staging` / `promote_import_snapshots()` | PG 契约与 **`pg_contract_tests`** 大量依赖；**删列 `legacy_id`** 前必须与此链路一起设计 |
+| `backend/src/app/pg_contract_tests/mod.rs` 等 | 显式使用隔离用 **`legacy_id` 区间**、清理 `import_staging` |
 
 ---
 
@@ -320,7 +320,7 @@
 | **制作 HTTP 面过早删除** | **`production::router()`** 仍为产品工作台真源；流程合并逻辑在 **`production_flow`**，删路由前须完整迁移 Flutter/契约。 |
 | **OpenAPI / smoke / pg_contract 不同步** | 仅删 `router()` 会导致 CI 仍测旧路径或反之；每域保持 **契约三件套** 同 PR。 |
 | **画风 / Prompts** | 画风 URL 已用 **`/art-styles/numeric/...`**；**`prompts/{numeric_id}`** 对应旧 **`o_prompt.id`** 槽位 1–3，不在已删的 **`narrative::legacy`** 树内。 |
-| **Staging 与删列** | `legacy_staging`、`promote_legacy_from_staging` 与 **`legacy_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |
+| **Staging 与删列** | `import_staging`、`promote_import_snapshots` 与 **`import_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |
 | **双源 `data/`** | 仓库根 **`data/`** 与 **`backend/data/`** 均跟踪大量 **`skills/`**、**`models/`**；Rust 运行时与 `include_str!` 均指向 **`backend/data/`**（如 `prompting/skills.rs`、`vendor/catalog.rs`）。根目录树易与 **`backend/data/`** 漂移、误改无效副本。 |
 
 ---

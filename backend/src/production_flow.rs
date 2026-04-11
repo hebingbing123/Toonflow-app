@@ -41,7 +41,7 @@ struct ProductionStoryboardFlowRow {
     sb_index: Option<i32>,
 }
 
-/// Resolve caller-owned project + script UUIDs from legacy integer ids (Electron-era keys).
+/// Resolve caller-owned project + script UUIDs from stable integer ids (Electron-era keys).
 pub(crate) async fn resolve_owned_production_scope(
     pool: &sqlx::PgPool,
     uid: Uuid,

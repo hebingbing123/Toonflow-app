@@ -26,7 +26,7 @@ pub(crate) async fn get_project_asset_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     ensure_owned_project_pk(pool, uid, project_id).await?;

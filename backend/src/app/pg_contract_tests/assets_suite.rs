@@ -322,7 +322,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     .bind(sub)
     .fetch_one(&pool)
     .await
-    .expect("project uuid by legacy");
+    .expect("project uuid by numeric id");
 
     let asset_id = Uuid::new_v4();
     let asset_numeric_id = 7_000_001_i32;
@@ -452,7 +452,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
     assert_eq!(metadata["cancelled"].as_bool(), Some(true));
     assert_eq!(
         metadata["cancel_source"].as_str(),
-        Some("legacy.assets-generate.cancel-generate")
+        Some("workbench.assets-generate.cancel-generate")
     );
 
     let single_after: Option<(String, Option<serde_json::Value>)> = sqlx::query_as(
@@ -469,7 +469,7 @@ async fn assets_generate_cancel_generate_roundtrip() {
             .as_ref()
             .and_then(|v| v.get("cancel_source"))
             .and_then(serde_json::Value::as_str),
-        Some("legacy.assets-generate.cancel-generate")
+        Some("workbench.assets-generate.cancel-generate")
     );
 
     let batch_after: Option<(String, Option<serde_json::Value>)> = sqlx::query_as(
@@ -601,7 +601,7 @@ async fn assets_upload_clip_roundtrip() {
         Some("data:application/octet-stream;base64,QUJDRA==")
     );
 
-    let clip_numeric_id = row["id"].as_i64().expect("clip legacy id") as i32;
+    let clip_numeric_id = row["id"].as_i64().expect("clip numeric id") as i32;
     let res = app
         .oneshot(
             Request::builder()
@@ -631,7 +631,7 @@ async fn assets_upload_clip_roundtrip() {
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
-async fn assets_legacy_mutation_endpoints_roundtrip() {
+async fn assets_workbench_mutation_endpoints_roundtrip() {
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")
@@ -669,7 +669,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     );
     let project_uuid = created_project["id"].as_str().expect("project uuid");
 
-    let base_name = format!("pg_legacy_asset_{}", Uuid::new_v4().simple());
+    let base_name = format!("pg_import_asset_{}", Uuid::new_v4().simple());
     let asset_a_name = format!("{base_name}_a");
     let asset_b_name = format!("{base_name}_b");
     let asset_c_name = format!("{base_name}_c");
@@ -717,7 +717,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     assert_eq!(list_a["total"].as_i64(), Some(1));
     let asset_a_numeric_id = list_a["items"][0]["numeric_id"]
         .as_i64()
-        .expect("asset_a legacy id") as i32;
+        .expect("asset_a numeric id") as i32;
     assert_eq!(
         list_a["items"][0]["metadata"]["prompt"].as_str(),
         Some("p0"),
@@ -932,7 +932,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     assert_eq!(status, StatusCode::OK, "list_b={list_b}");
     let asset_b_numeric_id = list_b["items"][0]["numeric_id"]
         .as_i64()
-        .expect("asset_b legacy id") as i32;
+        .expect("asset_b numeric id") as i32;
 
     let res = app
         .clone()
@@ -973,7 +973,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     assert_eq!(list_c["total"].as_i64(), Some(1), "list_c={list_c}");
     let asset_c_numeric_id = list_c["items"][0]["numeric_id"]
         .as_i64()
-        .expect("asset_c legacy id") as i32;
+        .expect("asset_c numeric id") as i32;
 
     let res = app
         .clone()
@@ -994,7 +994,7 @@ async fn assets_legacy_mutation_endpoints_roundtrip() {
     assert_eq!(list_d["total"].as_i64(), Some(1), "list_d={list_d}");
     let asset_d_numeric_id = list_d["items"][0]["numeric_id"]
         .as_i64()
-        .expect("asset_d legacy id") as i32;
+        .expect("asset_d numeric id") as i32;
 
     let batch_delete_body = format!(r#"{{"id":[{asset_c_numeric_id},{asset_d_numeric_id}]}}"#);
     let res = app
@@ -1430,7 +1430,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     assert_eq!(status, StatusCode::CREATED, "ready_asset={ready_asset}");
     let ready_asset_numeric_id = ready_asset["numeric_id"]
         .as_i64()
-        .expect("ready asset legacy id") as i32;
+        .expect("ready asset numeric id") as i32;
 
     let (status, running_asset) = read_json_response(
         app.clone()
@@ -1453,7 +1453,7 @@ async fn assets_polling_image_and_prompt_filters_roundtrip() {
     assert_eq!(status, StatusCode::CREATED, "running_asset={running_asset}");
     let running_asset_numeric_id = running_asset["numeric_id"]
         .as_i64()
-        .expect("running asset legacy id") as i32;
+        .expect("running asset numeric id") as i32;
 
     let ready_asset_uuid: Uuid = sqlx::query_scalar(
         r#"SELECT id

@@ -20,8 +20,8 @@ async fn run_get_image(
     uid: uuid::Uuid,
     project_numeric_id: i32,
     assets_id: i32,
-) -> Result<LegacyGetImageResponse, ApiError> {
-    let asset = sqlx::query_as::<_, LegacyGetImageAssetRow>(
+) -> Result<WorkbenchGetImageResponse, ApiError> {
+    let asset = sqlx::query_as::<_, WorkbenchGetImageAssetRow>(
         r#"
         SELECT a.id, a.numeric_id, a.asset_type, a.metadata
         FROM app_asset a
@@ -58,7 +58,7 @@ async fn run_get_image(
 
     let temp_assets = rows
         .into_iter()
-        .map(|row| LegacyGetImageTempAssetItem {
+        .map(|row| WorkbenchGetImageTempAssetItem {
             id: row.numeric_image_id,
             image_uuid: row.id,
             file_path: row.file_path.unwrap_or_default(),
@@ -69,7 +69,7 @@ async fn run_get_image(
         })
         .collect();
 
-    Ok(LegacyGetImageResponse {
+    Ok(WorkbenchGetImageResponse {
         id: asset.numeric_id,
         image_id,
         temp_assets,
@@ -80,8 +80,8 @@ pub(crate) async fn post_project_workbench_image_bundle(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyGetImageBody>,
-) -> Result<Json<LegacyGetImageResponse>, ApiError> {
+    Json(body): Json<WorkbenchGetImageBody>,
+) -> Result<Json<WorkbenchGetImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.assets_id <= 0 {
         return Err(ApiError::BadRequest("assetsId must be positive".into()));

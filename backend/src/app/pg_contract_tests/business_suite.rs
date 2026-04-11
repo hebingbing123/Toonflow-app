@@ -638,7 +638,7 @@ async fn promote_staging_populates_assets_and_links() {
            VALUES ($1, $2)
            ON CONFLICT (import_user_id) DO UPDATE SET supabase_user_id = EXCLUDED.supabase_user_id"#,
     )
-    .bind(PROMO_LEGACY_USER)
+    .bind(PROMO_IMPORT_USER)
     .bind(sub)
     .execute(&pool)
     .await
@@ -646,11 +646,11 @@ async fn promote_staging_populates_assets_and_links() {
 
     let project = serde_json::json!({
         "id": PROMO_PROJECT_LEG,
-        "userId": PROMO_LEGACY_USER,
+        "userId": PROMO_IMPORT_USER,
         "name": "pg_promote_project",
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_project', 'pg_promote_proj', $1)"#,
     )
     .bind(Json(project))
@@ -664,7 +664,7 @@ async fn promote_staging_populates_assets_and_links() {
         "name": "pg_promote_script",
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_script', 'pg_promote_script', $1)"#,
     )
     .bind(Json(script))
@@ -681,7 +681,7 @@ async fn promote_staging_populates_assets_and_links() {
         "imageId": PROMO_IMAGE_LEG,
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_assets', 'pg_promote_asset', $1)"#,
     )
     .bind(Json(asset))
@@ -694,7 +694,7 @@ async fn promote_staging_populates_assets_and_links() {
         "assetId": PROMO_ASSET_LEG,
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_scriptAssets', 'pg_promote_script_asset', $1)"#,
     )
     .bind(Json(link))
@@ -710,7 +710,7 @@ async fn promote_staging_populates_assets_and_links() {
         "prompt": "pg_prompt",
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_artStyle', 'pg_promote_art_style', $1)"#,
     )
     .bind(Json(art_style))
@@ -725,7 +725,7 @@ async fn promote_staging_populates_assets_and_links() {
         "data": "pg_promoted_prompt_body_evt",
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_prompt', 'pg_promote_prompt', $1)"#,
     )
     .bind(Json(o_prompt_row))
@@ -740,7 +740,7 @@ async fn promote_staging_populates_assets_and_links() {
         "state": "已完成",
     });
     sqlx::query(
-        r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+        r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
            VALUES ('o_image', 'pg_promote_image', $1)"#,
     )
     .bind(Json(o_image_row))
@@ -1044,7 +1044,7 @@ async fn promote_staging_populates_assets_and_links() {
     let p1 = parr
         .iter()
         .find(|row| row["id"].as_i64() == Some(1))
-        .expect("prompt legacy id 1");
+        .expect("prompt numeric id 1");
     assert_eq!(
         p1["data"].as_str(),
         Some("pg_promoted_prompt_body_evt"),

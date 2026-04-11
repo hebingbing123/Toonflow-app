@@ -29,9 +29,9 @@ cargo run
 
 **请求关联：** 所有响应带 **`X-Request-Id`**（可客户端传入同名请求头，否则服务端生成 UUID）。`Content-Type: application/json` 的 **4xx/5xx** 若体为 OpenAPI 式 `code` + `message`，中间件会补上 **`request_id`**（与响应头一致），便于与日志对照。
 
-### 旧库导入（SQLite → `legacy_staging`）
+### 旧库导入（SQLite → `import_staging`）
 
-1. 确保 Supabase 迁移已应用（含 `legacy_staging.snapshot`）。
+1. 确保 Supabase 迁移已应用（含 `import_staging.snapshot`）。
 2. 设置 `SQLITE_PATH`（旧 `db2.sqlite`）与 `DATABASE_URL`（直连 Postgres）。
 3. `cargo run --bin toonflow-sqlite-import --release`；可选 `LEGACY_IMPORT_TRUNCATE=1`。
 

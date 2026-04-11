@@ -58,7 +58,7 @@ struct CheckUpdateResponse {
     pub need_update: bool,
     pub latest_version: String,
     pub reinstall: bool,
-    /// RFC3339 timestamp; stub uses **now** (legacy used remote manifest **`time`**).
+    /// RFC3339 timestamp; stub uses **now** (Electron client used remote manifest **`time`**).
     pub time: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,

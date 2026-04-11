@@ -18,8 +18,8 @@ async fn run_get_material_data(
     pool: &sqlx::PgPool,
     uid: uuid::Uuid,
     project_numeric_id: i32,
-) -> Result<LegacyGetMaterialDataResponse, ApiError> {
-    let mut data: Vec<LegacyMaterialAssetItem> = sqlx::query_as(
+) -> Result<WorkbenchGetMaterialDataResponse, ApiError> {
+    let mut data: Vec<WorkbenchMaterialAssetItem> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -60,14 +60,14 @@ async fn run_get_material_data(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    data.push(LegacyMaterialAssetItem {
+    data.push(WorkbenchMaterialAssetItem {
         id: 0,
         name: "Toonflow片尾".into(),
         file_path: String::new(),
         asset_type: "clip".into(),
     });
 
-    let video: Vec<LegacyMaterialVideoItem> = sqlx::query_as(
+    let video: Vec<WorkbenchMaterialVideoItem> = sqlx::query_as(
         r#"
         SELECT
           v.numeric_id AS id,
@@ -94,7 +94,7 @@ async fn run_get_material_data(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(LegacyGetMaterialDataResponse { data, video })
+    Ok(WorkbenchGetMaterialDataResponse { data, video })
 }
 
 pub(crate) async fn post_project_workbench_material_data(
@@ -102,7 +102,7 @@ pub(crate) async fn post_project_workbench_material_data(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(_body): Json<WorkbenchEmptyBody>,
-) -> Result<Json<LegacyGetMaterialDataResponse>, ApiError> {
+) -> Result<Json<WorkbenchGetMaterialDataResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state
         .pool

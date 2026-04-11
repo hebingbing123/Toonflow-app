@@ -45,7 +45,7 @@ async fn create_storyboard_locked(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 = sqlx::query_scalar(
+    let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_storyboard
@@ -77,7 +77,7 @@ async fn create_storyboard_locked(
         "#,
     )
     .bind(script_uuid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(lsid)
     .bind(lpid)
     .bind(trim_opt_sb(body.prompt))

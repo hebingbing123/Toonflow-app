@@ -51,7 +51,7 @@ static CATALOG: LazyLock<CatalogFile> = LazyLock::new(|| {
 
 #[derive(Debug, Serialize)]
 struct ModelListEntry {
-    /// Vendor id (legacy `o_vendorConfig.id` analogue).
+    /// Vendor id (Electron-era `o_vendorConfig.id` analogue).
     id: i32,
     label: String,
     value: String,
@@ -74,7 +74,7 @@ struct ModelDetailResponse {
 #[derive(Debug, Deserialize)]
 struct ListQuery {
     /// One of `text`, `image`, `video`, `all`. When omitted, treated as `all`.
-    /// `all` excludes `video` entries (legacy `getModelList` behaviour).
+    /// `all` excludes `video` entries (Electron-era `getModelList` behaviour).
     #[serde(default, rename = "type")]
     filter: Option<String>,
 }

@@ -54,7 +54,7 @@ pub struct CreateNovelEventBody {
     #[serde(default)]
     pub detail: Option<String>,
     #[serde(default)]
-    pub chapter_ids: Vec<i32>, // legacy novel ids to associate
+    pub chapter_ids: Vec<i32>, // numeric novel ids to associate
 }
 
 fn deserialize_some_or_null<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>

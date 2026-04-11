@@ -23,7 +23,7 @@ async fn resolve_script_and_asset_for_project(
     asset_numeric_id: i32,
 ) -> Result<(Uuid, Uuid), ApiError> {
     if script_numeric_id <= 0 || asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
     let row: Option<(Uuid, Uuid)> = sqlx::query_as(
         r#"

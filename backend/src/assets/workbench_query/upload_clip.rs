@@ -22,7 +22,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchUploadClipBody>,
-) -> Result<Json<LegacyUploadClipResponse>, ApiError> {
+) -> Result<Json<WorkbenchUploadClipResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
     let name = body.name.trim();
@@ -66,13 +66,13 @@ pub(crate) async fn post_project_workbench_upload_clip(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_asset_legacy: i32 =
+    let next_asset_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_image_legacy: i32 =
+    let next_image_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_image_id), 0) + 1 FROM app_asset_image"#)
             .fetch_one(&mut *tx)
             .await
@@ -91,10 +91,10 @@ pub(crate) async fn post_project_workbench_upload_clip(
         "#,
     )
     .bind(project_id)
-    .bind(next_asset_legacy)
+    .bind(next_asset_numeric_id)
     .bind(name)
     .bind(now_ms)
-    .bind(next_image_legacy)
+    .bind(next_image_numeric_id)
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -109,7 +109,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
     )
     .bind(asset_id)
     .bind(file_path)
-    .bind(next_image_legacy)
+    .bind(next_image_numeric_id)
     .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -118,7 +118,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyUploadClipResponse {
+    Ok(Json(WorkbenchUploadClipResponse {
         message: "上传成功".into(),
     }))
 }

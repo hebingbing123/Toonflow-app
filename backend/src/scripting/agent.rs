@@ -84,7 +84,7 @@ struct UpdateScriptAgentDataBody {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct LegacyApiSuccess<T: Serialize> {
+struct CodeDataEnvelope<T: Serialize> {
     code: i32,
     data: T,
     message: &'static str,
@@ -211,7 +211,7 @@ async fn post_get_plan_data(
         } else {
             plan_data = json!({ "script": scripts });
         }
-        let wrapped = LegacyApiSuccess {
+        let wrapped = CodeDataEnvelope {
             code: 200,
             data: PlanDataWithId {
                 data: plan_data,
@@ -255,7 +255,7 @@ async fn post_get_plan_data(
         ));
     }
 
-    let flat = LegacyApiSuccess {
+    let flat = CodeDataEnvelope {
         code: 200,
         data: PlanFlatData {
             story_skeleton: String::new(),
@@ -357,7 +357,7 @@ async fn post_set_plan_data(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?
         .rows_affected();
         if n_updated == 0 {
-            let next_legacy: i32 = sqlx::query_scalar(
+            let next_numeric_id: i32 = sqlx::query_scalar(
                 r#"
                 SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_script
                 "#,
@@ -375,7 +375,7 @@ async fn post_set_plan_data(
                 "#,
             )
             .bind(project_uuid)
-            .bind(next_legacy)
+            .bind(next_numeric_id)
             .bind(&name)
             .bind(row.content.trim())
             .bind(now_ms)
@@ -397,7 +397,7 @@ async fn post_set_plan_data(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let ok = LegacyApiSuccess {
+    let ok = CodeDataEnvelope {
         code: 200,
         data: Value::Null,
         message: "成功",
@@ -448,7 +448,7 @@ async fn post_update_data(
         return Err(ApiError::NotFound);
     }
 
-    let ok = LegacyApiSuccess {
+    let ok = CodeDataEnvelope {
         code: 200,
         data: Value::String("更新成功".to_owned()),
         message: "成功",

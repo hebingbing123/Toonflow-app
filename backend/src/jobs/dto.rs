@@ -35,7 +35,7 @@ pub(super) struct ListJobsQuery {
     pub(super) offset: Option<i64>,
 }
 
-/// Task-center style pagination (1-based `page`, replaces legacy `POST /api/v1/tasks/get-task-api`).
+/// Task-center style pagination (1-based `page`, replaces Electron-era `POST /api/v1/tasks/get-task-api`).
 #[derive(Debug, Deserialize, Default)]
 pub(super) struct ListJobsPageQuery {
     #[serde(default)]

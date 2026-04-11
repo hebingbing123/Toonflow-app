@@ -24,7 +24,7 @@ use crate::state::{AppState, MemoryConfig};
 
 #[derive(Debug, Serialize)]
 struct MemoryConfigSavedResponse {
-    /// Legacy **`sureMemory`** success message string.
+    /// Electron-era **`sureMemory`** success message string.
     message: &'static str,
 }
 
@@ -105,7 +105,7 @@ struct ClearAgentMemoriesSettingsBody {
     episodes_id: Option<i32>,
 }
 
-async fn post_clear_agent_memories_legacy(
+async fn post_clear_agent_memories_type_field_alias(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<ClearAgentMemoriesSettingsBody>,
@@ -144,7 +144,7 @@ pub fn router() -> Router<AppState> {
         )
         .route(
             "/api/v1/settings/memory-config/clear-agent-memories",
-            axum::routing::post(post_clear_agent_memories_legacy),
+            axum::routing::post(post_clear_agent_memories_type_field_alias),
         )
 }
 

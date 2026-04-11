@@ -21,7 +21,7 @@ pub(super) struct HealthResponse {
     pub service: &'static str,
 }
 
-/// Minimal JSON probe; replaces legacy **`GET /api/test/test`** (`"ok"` plain text).
+/// Minimal JSON probe; replaces Electron-era **`GET /api/test/test`** (`"ok"` plain text).
 #[derive(Serialize)]
 pub(super) struct PingResponse {
     pub ok: bool,

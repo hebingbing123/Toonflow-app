@@ -60,7 +60,7 @@ struct UserPromptRow {
     body: String,
 }
 
-/// JSON shape aligned with legacy **`getPrompt`** rows (`id`, `name`, `type`, `data`).
+/// JSON shape aligned with Electron-era **`getPrompt`** rows (`id`, `name`, `type`, `data`).
 #[derive(Debug, Serialize)]
 pub struct PromptTemplateJson {
     pub id: i32,

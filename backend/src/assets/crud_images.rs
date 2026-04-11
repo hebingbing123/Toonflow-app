@@ -33,7 +33,7 @@ pub(super) async fn list_project_asset_images_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state
@@ -81,7 +81,7 @@ pub(super) async fn get_project_asset_image_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state
@@ -117,7 +117,7 @@ pub(super) async fn get_project_asset_image_file_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state
@@ -187,7 +187,7 @@ pub(super) async fn create_project_asset_image_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state
@@ -241,7 +241,7 @@ pub(super) async fn patch_project_asset_image_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state
@@ -331,7 +331,7 @@ pub(super) async fn delete_project_asset_image_for_project(
     let uid = require_user_uuid(&state, &headers)?;
 
     if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let pool = state

@@ -91,7 +91,7 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         llm,
         http_client,
         notify: WsNotifyHub::new(),
-        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
         switch_ai_dev_tool: Arc::new(RwLock::new(switch_ai_dev_tool_from_env())),
         local_asset_image_dir,
         local_art_style_cover_dir,

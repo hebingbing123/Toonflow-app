@@ -31,7 +31,7 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::state::AppState;
-use models::LegacyOwnedAssetMetaRow;
+use models::WorkbenchOwnedAssetMetaRow;
 
 // ── Module-level constants ───────────────────────────────────────────────────
 
@@ -42,11 +42,11 @@ const MAX_UPLOAD_CLIP_BASE64_LEN: usize = 24_000_000;
 
 // ── Shared utility functions ─────────────────────────────────────────────────
 
-pub(super) fn normalize_optional_legacy_text(raw: Option<String>) -> Option<String> {
+pub(super) fn normalize_optional_trimmed_text(raw: Option<String>) -> Option<String> {
     raw.map(|s| s.trim().to_string()).filter(|s| !s.is_empty())
 }
 
-pub(super) fn merge_legacy_asset_metadata(
+pub(super) fn merge_workbench_asset_metadata(
     mut metadata: Value,
     prompt_patch: Option<Option<String>>,
     remark_patch: Option<Option<String>>,
@@ -220,8 +220,8 @@ pub(super) async fn resolve_owned_asset_metadata(
     pool: &PgPool,
     uid: Uuid,
     asset_numeric_id: i32,
-) -> Result<LegacyOwnedAssetMetaRow, ApiError> {
-    let row: Option<LegacyOwnedAssetMetaRow> = sqlx::query_as(
+) -> Result<WorkbenchOwnedAssetMetaRow, ApiError> {
+    let row: Option<WorkbenchOwnedAssetMetaRow> = sqlx::query_as(
         r#"
         SELECT a.id, a.metadata
         FROM app_asset a
@@ -430,7 +430,7 @@ mod tests {
     }
 
     #[test]
-    fn upload_clip_body_accepts_legacy_type_key() {
+    fn upload_clip_body_accepts_type_alias_key() {
         let body: WorkbenchUploadClipBody =
             serde_json::from_str(r#"{"base64Data":"AA==","type":"clip","name":"demo"}"#).unwrap();
         assert_eq!(body.asset_type.as_deref(), Some("clip"));
@@ -475,8 +475,8 @@ mod tests {
     }
 
     #[test]
-    fn legacy_batch_delete_assets_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<LegacyBatchDeleteAssetsBody>(r#"{"id":[1],"extra":1}"#)
+    fn workbench_batch_delete_assets_body_rejects_unknown_fields() {
+        let err = serde_json::from_str::<WorkbenchBatchDeleteAssetsBody>(r#"{"id":[1],"extra":1}"#)
             .unwrap_err();
         assert!(err.to_string().contains("unknown field"), "{err}");
     }

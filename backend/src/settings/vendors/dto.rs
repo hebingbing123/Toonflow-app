@@ -26,7 +26,7 @@ pub(super) struct VendorsSummaryResponse {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct VendorModelTestBody {
     pub(super) model_name: String,
-    /// Legacy field **`type`**: **`text`** | **`image`** | **`video`**.
+    /// Compat field **`type`**: **`text`** | **`image`** | **`video`**.
     #[serde(rename = "type")]
     pub(super) kind: String,
     pub(super) id: String,

@@ -244,7 +244,7 @@ async fn models_list_ok_with_supabase_style_jwt() {
     let arr = v.as_array().expect("models list is array");
     assert!(!arr.is_empty(), "embedded catalog must expose models");
     assert!(arr[0].get("id").is_some());
-    assert!(arr[0].get("model_name").is_none()); // list entry uses legacy shape: value, type, …
+    assert!(arr[0].get("model_name").is_none()); // list entry uses compact shape: value, type, …
     assert!(arr[0].get("value").is_some());
 }
 

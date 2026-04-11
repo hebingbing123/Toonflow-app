@@ -1,11 +1,11 @@
-//! 将遗留 `db2.sqlite` 表导入 `legacy_staging.snapshot`（JSONB 行）。
+//! 将SQLite `db2.sqlite` 表导入 `import_staging.snapshot`（JSONB 行）。
 //!
 //! 用法：
 //! ```text
 //! SQLITE_PATH=/path/to/db2.sqlite DATABASE_URL=postgresql://... \
 //!   cargo run --bin toonflow-sqlite-import --release
 //! ```
-//! 可选：`LEGACY_IMPORT_TRUNCATE=1` 首先执行 `TRUNCATE legacy_staging.snapshot`。
+//! 可选：`IMPORT_STAGING_TRUNCATE=1` 首先执行 `TRUNCATE import_staging.snapshot`。
 
 use std::collections::HashMap;
 
@@ -115,12 +115,12 @@ async fn main() -> Result<()> {
         .await
         .context("connect postgres")?;
 
-    if std::env::var("LEGACY_IMPORT_TRUNCATE").ok().as_deref() == Some("1") {
-        sqlx::query("TRUNCATE legacy_staging.snapshot RESTART IDENTITY")
+    if std::env::var("IMPORT_STAGING_TRUNCATE").ok().as_deref() == Some("1") {
+        sqlx::query("TRUNCATE import_staging.snapshot RESTART IDENTITY")
             .execute(&pool)
             .await
-            .context("truncate legacy_staging.snapshot")?;
-        eprintln!("truncated legacy_staging.snapshot");
+            .context("truncate import_staging.snapshot")?;
+        eprintln!("truncated import_staging.snapshot");
     }
 
     let sqlite_conn =
@@ -145,7 +145,7 @@ async fn main() -> Result<()> {
         for (rowid, map) in rows {
             let payload = Value::Object(map);
             sqlx::query(
-                r#"INSERT INTO legacy_staging.snapshot (source_table, source_row_key, payload)
+                r#"INSERT INTO import_staging.snapshot (source_table, source_row_key, payload)
                    VALUES ($1, $2, $3)"#,
             )
             .bind(table)

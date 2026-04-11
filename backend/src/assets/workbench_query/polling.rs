@@ -19,12 +19,12 @@ async fn run_polling_image_assets(
     uid: uuid::Uuid,
     project_id: Uuid,
     ids: &[i32],
-) -> Result<Vec<LegacyPollingImageAssetsItem>, ApiError> {
+) -> Result<Vec<WorkbenchPollingImageAssetsItem>, ApiError> {
     if ids.is_empty() {
         return Ok(Vec::new());
     }
 
-    let rows: Vec<LegacyPollingImageAssetsItem> = sqlx::query_as(
+    let rows: Vec<WorkbenchPollingImageAssetsItem> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -62,8 +62,8 @@ pub(crate) async fn post_project_workbench_polling_image_assets(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyPollingImageAssetsBody>,
-) -> Result<Json<Vec<LegacyPollingImageAssetsItem>>, ApiError> {
+    Json(body): Json<WorkbenchPollingImageAssetsBody>,
+) -> Result<Json<Vec<WorkbenchPollingImageAssetsItem>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if !body.ids.is_empty() {
         if body.ids.len() > 200 {
@@ -89,12 +89,12 @@ async fn run_polling_prompt_assets(
     uid: uuid::Uuid,
     project_id: Uuid,
     ids: &[i32],
-) -> Result<Vec<LegacyPollingPromptAssetsItem>, ApiError> {
+) -> Result<Vec<WorkbenchPollingPromptAssetsItem>, ApiError> {
     if ids.is_empty() {
         return Ok(Vec::new());
     }
 
-    let rows: Vec<LegacyPollingPromptAssetsItem> = sqlx::query_as(
+    let rows: Vec<WorkbenchPollingPromptAssetsItem> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -166,8 +166,8 @@ pub(crate) async fn post_project_workbench_polling_prompt_assets(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyPollingPromptAssetsBody>,
-) -> Result<Json<Vec<LegacyPollingPromptAssetsItem>>, ApiError> {
+    Json(body): Json<WorkbenchPollingPromptAssetsBody>,
+) -> Result<Json<Vec<WorkbenchPollingPromptAssetsItem>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if !body.ids.is_empty() {
         if body.ids.len() > 200 {

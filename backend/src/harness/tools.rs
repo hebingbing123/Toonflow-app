@@ -39,7 +39,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "get_script_content",
         description:
-            "Script-agent parity read: returns one script row by legacy script id (arguments.scriptId or attached script context).",
+            "Script-agent parity read: returns one script row by numeric script id (arguments.scriptId or attached script context).",
     },
     HarnessToolInfo {
         name: "get_novel_text",
@@ -69,12 +69,12 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "generate_deriveAsset",
         description:
-            "Production-agent parity action: enqueue generation jobs for derived asset legacy ids in arguments.ids.",
+            "Production-agent parity action: enqueue generation jobs for derived asset numeric ids in arguments.ids.",
     },
     HarnessToolInfo {
         name: "generate_storyboard",
         description:
-            "Production-agent parity action: enqueue storyboard image generation jobs for storyboard legacy ids in arguments.ids.",
+            "Production-agent parity action: enqueue storyboard image generation jobs for storyboard numeric ids in arguments.ids.",
     },
     HarnessToolInfo {
         name: "run_sub_agent_storySkeleton",

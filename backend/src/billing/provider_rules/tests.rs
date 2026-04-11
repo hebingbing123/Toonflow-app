@@ -557,7 +557,7 @@ fn derive_uses_event_field_when_type_missing() {
 }
 
 #[test]
-fn derive_alipay_notify_time_accepts_legacy_datetime_format() {
+fn derive_alipay_notify_time_accepts_sqlite_datetime_format() {
     let v = json!({
         "billing_provider": "alipay",
         "notify_time": "2026-04-08 12:13:14"

@@ -198,7 +198,7 @@ async fn production_endpoints_minimal_roundtrip() {
     assert_eq!(status, StatusCode::OK, "get-video-list should return 200");
     assert_eq!(body["total"].as_i64(), Some(0));
 
-    // Test edit-image/upload-image (legacy parity): validates ownership + returns normalized data URI
+    // Test edit-image/upload-image (workbench parity): validates ownership + returns normalized data URI
     let res = app
         .clone()
         .oneshot(

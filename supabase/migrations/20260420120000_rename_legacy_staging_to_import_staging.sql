@@ -1,98 +1,8 @@
--- Rename integer id columns from legacy_* to numeric_* / import_* (SQLite-era names).
--- Replaces promote_legacy_from_staging with promote_import_snapshots using new column names.
--- Next migration renames **`legacy_staging`** → **`import_staging`** and refreshes **`promote_import_snapshots`** to match.
+-- Rename SQLite import staging schema; refresh promote_import_snapshots to use import_staging.snapshot.
 
-DROP FUNCTION IF EXISTS public.promote_legacy_from_staging ();
+ALTER SCHEMA legacy_staging RENAME TO import_staging;
 
--- Map SQLite o_user.id -> auth.users
-ALTER TABLE IF EXISTS public.legacy_user_map RENAME TO import_user_map;
-ALTER TABLE public.import_user_map RENAME COLUMN legacy_user_id TO import_user_id;
-
-DROP POLICY IF EXISTS legacy_user_map_self ON public.import_user_map;
-CREATE POLICY import_user_map_self ON public.import_user_map FOR ALL TO authenticated USING (supabase_user_id = (SELECT auth.uid ()))
-WITH
-  CHECK (supabase_user_id = (SELECT auth.uid ()));
-
-COMMENT ON TABLE public.import_user_map IS 'Maps SQLite o_user.id (int) to auth.users.id; used when promoting snapshots into app_* tables';
-
-ALTER TABLE public.app_project RENAME COLUMN legacy_id TO numeric_id;
-ALTER TABLE public.app_project RENAME COLUMN legacy_user_id TO import_user_id;
-
-ALTER TABLE public.app_script RENAME COLUMN legacy_id TO numeric_id;
-ALTER TABLE public.app_script RENAME COLUMN legacy_project_id TO numeric_project_id;
-
-ALTER TABLE public.app_storyboard RENAME COLUMN legacy_id TO numeric_id;
-ALTER TABLE public.app_storyboard RENAME COLUMN legacy_script_id TO numeric_script_id;
-ALTER TABLE public.app_storyboard RENAME COLUMN legacy_project_id TO numeric_project_id;
-
-ALTER TABLE public.app_asset RENAME COLUMN legacy_id TO numeric_id;
-
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'app_asset'
-      AND column_name = 'cover_legacy_image_id'
-  ) THEN
-    ALTER TABLE public.app_asset RENAME COLUMN cover_legacy_image_id TO cover_numeric_image_id;
-  END IF;
-END;
-$$;
-
-ALTER TABLE public.app_novel RENAME COLUMN legacy_id TO numeric_id;
-
-ALTER TABLE public.app_novel_event RENAME COLUMN legacy_id TO numeric_id;
-
-ALTER TABLE public.app_novel_event_chapter RENAME COLUMN legacy_id TO numeric_row_id;
-
-ALTER TABLE public.app_art_style RENAME COLUMN legacy_id TO numeric_id;
-
-ALTER TABLE public.app_user_prompt DROP CONSTRAINT IF EXISTS app_user_prompt_legacy_chk;
-ALTER TABLE public.app_user_prompt RENAME COLUMN legacy_id TO numeric_id;
-ALTER TABLE public.app_user_prompt ADD CONSTRAINT app_user_prompt_numeric_chk CHECK (
-  numeric_id >= 1
-  AND numeric_id <= 32767
-);
-
-ALTER TABLE public.app_agent_memory RENAME COLUMN legacy_project_id TO numeric_project_id;
-
-ALTER TABLE public.app_video RENAME COLUMN legacy_id TO numeric_id;
-ALTER TABLE public.app_video_track RENAME COLUMN legacy_id TO numeric_id;
-
-ALTER TABLE public.app_asset_image RENAME COLUMN legacy_image_id TO numeric_image_id;
-
-DO $$
-BEGIN
-  IF to_regclass ('public.app_asset_image_legacy_image_id_key') IS NOT NULL THEN
-    ALTER INDEX public.app_asset_image_legacy_image_id_key RENAME TO app_asset_image_numeric_image_id_key;
-  END IF;
-END;
-$$;
-
-ALTER TABLE public.app_generation_job RENAME COLUMN legacy_task_id TO numeric_task_id;
-
-DO $$
-BEGIN
-  IF to_regclass ('public.idx_app_generation_job_legacy_task_id') IS NOT NULL THEN
-    ALTER INDEX public.idx_app_generation_job_legacy_task_id RENAME TO idx_app_generation_job_numeric_task_id;
-  END IF;
-END;
-$$;
-
-DO $$
-BEGIN
-  IF to_regclass ('public.app_generation_job_legacy_task_id_seq') IS NOT NULL THEN
-    ALTER SEQUENCE public.app_generation_job_legacy_task_id_seq RENAME TO app_generation_job_numeric_task_id_seq;
-  END IF;
-END;
-$$;
-
-ALTER SEQUENCE public.app_generation_job_numeric_task_id_seq OWNED BY public.app_generation_job.numeric_task_id;
-
-ALTER TABLE public.app_generation_job
-ALTER COLUMN numeric_task_id SET DEFAULT nextval ('public.app_generation_job_numeric_task_id_seq');
+DROP FUNCTION IF EXISTS public.promote_import_snapshots ();
 
 CREATE OR REPLACE FUNCTION public.promote_import_snapshots ()
 RETURNS TABLE (
@@ -155,7 +65,7 @@ BEGIN
     NULLIF (s.payload ->> 'createTime', '')::bigint,
     m.supabase_user_id,
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   LEFT JOIN public.import_user_map m ON m.import_user_id = NULLIF (s.payload ->> 'userId', '')::integer
   WHERE
     s.source_table = 'o_project'
@@ -201,7 +111,7 @@ BEGIN
     s.payload ->> 'errorReason',
     NULLIF (s.payload ->> 'projectId', '')::integer,
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN public.app_project p ON p.numeric_id = NULLIF (s.payload ->> 'projectId', '')::integer
   WHERE
     s.source_table = 'o_script'
@@ -257,7 +167,7 @@ BEGIN
     NULLIF (s.payload ->> 'index', '')::integer,
     NULLIF (s.payload ->> 'createTime', '')::bigint,
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN public.app_script sc ON sc.numeric_id = NULLIF (s.payload ->> 'scriptId', '')::integer
   WHERE
     s.source_table = 'o_storyboard'
@@ -309,7 +219,7 @@ BEGIN
     s.payload ->> 'errorReason',
     NULLIF (s.payload ->> 'createTime', '')::bigint,
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN public.app_project p ON p.numeric_id = NULLIF (s.payload ->> 'projectId', '')::integer
   WHERE
     s.source_table = 'o_novel'
@@ -366,7 +276,7 @@ BEGIN
     ),
     NULLIF (s.payload ->> 'startTime', '')::bigint,
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN public.app_project p ON p.numeric_id = NULLIF (s.payload ->> 'projectId', '')::integer
   WHERE
     s.source_table = 'o_assets'
@@ -385,7 +295,7 @@ BEGIN
 
   INSERT INTO public.app_script_asset (script_id, asset_id)
   SELECT sc.id, a.id
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN public.app_script sc
     ON sc.numeric_id = NULLIF (s.payload ->> 'scriptId', '')::integer
   INNER JOIN public.app_asset a
@@ -419,7 +329,7 @@ BEGIN
     NULLIF (trim(COALESCE(s.payload ->> 'label', '')), ''),
     NULLIF (trim(COALESCE(s.payload ->> 'prompt', '')), ''),
     COALESCE(s.payload, '{}'::jsonb)
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN (
     SELECT m.supabase_user_id
     FROM public.import_user_map m
@@ -454,7 +364,7 @@ BEGIN
     NULLIF (trim(COALESCE(s.payload ->> 'name', '')), ''),
     trim(COALESCE(s.payload ->> 'type', '')),
     COALESCE(s.payload ->> 'data', '')
-  FROM legacy_staging.snapshot s
+  FROM import_staging.snapshot s
   INNER JOIN (
     SELECT m.supabase_user_id
     FROM public.import_user_map m
@@ -517,7 +427,7 @@ BEGIN
         '{}'::jsonb
       ) AS metadata,
       (s.payload ->> 'id')::integer AS numeric_image_id
-    FROM legacy_staging.snapshot s
+    FROM import_staging.snapshot s
     INNER JOIN public.app_asset a
       ON a.numeric_id = NULLIF (s.payload ->> 'assetsId', '')::integer
     WHERE
@@ -545,4 +455,4 @@ $$;
 REVOKE ALL ON FUNCTION public.promote_import_snapshots () FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.promote_import_snapshots () TO service_role;
 
-COMMENT ON FUNCTION public.promote_import_snapshots IS 'Idempotent upsert from legacy_staging.snapshot into app_* tables; service_role only';
+COMMENT ON FUNCTION public.promote_import_snapshots IS 'Idempotent upsert from import_staging.snapshot into app_* tables; service_role only';

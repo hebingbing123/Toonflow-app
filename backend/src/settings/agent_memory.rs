@@ -29,7 +29,7 @@ pub struct ClearMemoryBody {
     pub agent_type: String,
     #[serde(default)]
     pub episodes_id: Option<i32>,
-    /// `all` | `message` | `summary` — same semantics as legacy `clearMemory` (`type` in old API).
+    /// `all` | `message` | `summary` — same semantics as Electron-era `clearMemory` (`type` in old API).
     #[serde(default = "default_clear_kind", alias = "type")]
     pub clear_type: String,
 }
@@ -610,7 +610,7 @@ mod tests {
     }
 
     #[test]
-    fn clear_accepts_legacy_type_field() {
+    fn clear_accepts_type_field_alias() {
         let b: ClearMemoryBody =
             serde_json::from_str(r#"{"projectId":1,"agentType":"scriptAgent","type":"message"}"#)
                 .unwrap();

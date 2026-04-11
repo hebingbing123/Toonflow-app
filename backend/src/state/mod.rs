@@ -24,9 +24,9 @@ pub struct AppState {
     pub llm: Option<LlmConfig>,
     pub http_client: reqwest::Client,
     pub notify: WsNotifyHub,
-    /// Legacy **`o_setting`** memory/RAG limits; in-process until a user settings table exists.
+    /// SQLite **`o_setting`** memory/RAG limits; in-process until a user settings table exists.
     pub memory_config: Arc<RwLock<MemoryConfig>>,
-    /// Legacy **`o_setting.switchAiDevTool`**; process-local override with env bootstrap.
+    /// SQLite-era **`o_setting.switchAiDevTool`**; process-local override with env bootstrap.
     pub switch_ai_dev_tool: Arc<RwLock<String>>,
     /// When set, **`asset.generate.*`** workers persist PNGs under **`{dir}/{user_id}/{image_row_id}.png`**
     /// and set **`app_asset_image.file_path`** to this API’s **`…/images/{id}/file`** path.

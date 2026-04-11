@@ -165,7 +165,7 @@ const MAX_PROMPT_LEN: usize = 48_000;
 const MAX_BASE64_HINT_LEN: usize = 24_000_000;
 const MAX_ASSET_TYPE_LEN: usize = 64;
 const MAX_DESCRIBE_LEN: usize = 48_000;
-/// Legacy batch calls can send many rows; cap payload size.
+/// Large batch calls can send many rows; cap payload size.
 const MAX_BATCH_ITEMS: usize = 50;
 const MAX_CONCURRENT_COUNT: i32 = 20;
 
@@ -202,7 +202,7 @@ async fn post_generate_assets(
     }
     if body.id <= 0 {
         return Err(ApiError::BadRequest(
-            "id (asset legacy id) must be positive".into(),
+            "id (asset numeric id) must be positive".into(),
         ));
     }
     let model = trim_non_empty(body.model, "model")?;
@@ -502,7 +502,7 @@ async fn post_cancel_generate(
         UPDATE app_asset_image ai
         SET state = '生成失败',
             metadata = COALESCE(ai.metadata, '{}'::jsonb)
-              || jsonb_build_object('cancelled', true, 'cancel_source', 'legacy.assets-generate.cancel-generate')
+              || jsonb_build_object('cancelled', true, 'cancel_source', 'workbench.assets-generate.cancel-generate')
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         WHERE ai.asset_id = a.id
@@ -532,7 +532,7 @@ async fn post_cancel_generate(
                 result = COALESCE(j.result, '{}'::jsonb)
                   || jsonb_build_object(
                     'cancelled', true,
-                    'cancel_source', 'legacy.assets-generate.cancel-generate',
+                    'cancel_source', 'workbench.assets-generate.cancel-generate',
                     'cancel_numeric_image_id', $2
                   ),
                 updated_at = NOW()

@@ -17,7 +17,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Serialize)]
 pub struct SwitchAiDevToolResponse {
-    /// **`"0"`** off, **`"1"`** on — same string legacy stored in **`o_setting.value`**.
+    /// **`"0"`** off, **`"1"`** on — same string SQLite stored in **`o_setting.value`**.
     pub value: String,
 }
 

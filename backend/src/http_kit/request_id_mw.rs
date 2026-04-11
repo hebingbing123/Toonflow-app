@@ -84,7 +84,7 @@ mod tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
-            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
             switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
             local_art_style_cover_dir: None,

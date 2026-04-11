@@ -30,7 +30,7 @@ fn tool_parameters_schema(name: &str) -> Value {
             "properties": {
                 "scriptId": {
                     "type": "integer",
-                    "description": "Legacy script id under the attached project; optional when attached production context already contains script_id."
+                    "description": "Numeric script id under the attached project; optional when attached production context already contains script_id."
                 }
             },
             "additionalProperties": false
@@ -45,7 +45,7 @@ fn tool_parameters_schema(name: &str) -> Value {
             "properties": {
                 "novelId": {
                     "type": "integer",
-                    "description": "Optional legacy novel id to narrow results within the attached project."
+                    "description": "Optional numeric novel id to narrow results within the attached project."
                 }
             },
             "additionalProperties": false
@@ -57,11 +57,11 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "key": {
                     "type": "string",
                     "enum": ["script", "scriptPlan", "assets", "storyboardTable", "storyboard", "stoaryTable"],
-                    "description": "Production workbench flow data key (`stoaryTable` is accepted as legacy typo alias)."
+                    "description": "Production workbench flow data key (`stoaryTable` is accepted as historical typo alias)."
                 },
                 "scriptId": {
                     "type": "integer",
-                    "description": "Optional legacy script id; defaults to attached script context."
+                    "description": "Optional numeric script id; defaults to attached script context."
                 }
             },
             "additionalProperties": false
@@ -70,11 +70,11 @@ fn tool_parameters_schema(name: &str) -> Value {
             "type": "object",
             "required": ["assetsId", "name", "desc"],
             "properties": {
-                "assetsId": { "type": "integer", "description": "Parent asset legacy id." },
-                "id": { "type": ["integer", "null"], "description": "Derived asset legacy id; null means create new." },
+                "assetsId": { "type": "integer", "description": "Parent asset numeric id." },
+                "id": { "type": ["integer", "null"], "description": "Derived asset numeric id; null means create new." },
                 "name": { "type": "string" },
                 "desc": { "type": "string" },
-                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+                "scriptId": { "type": "integer", "description": "Optional numeric script id; defaults to attached script context." }
             },
             "additionalProperties": false
         }),
@@ -82,9 +82,9 @@ fn tool_parameters_schema(name: &str) -> Value {
             "type": "object",
             "required": ["assetsId", "id"],
             "properties": {
-                "assetsId": { "type": "integer", "description": "Parent asset legacy id." },
-                "id": { "type": "integer", "description": "Derived asset legacy id to delete." },
-                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+                "assetsId": { "type": "integer", "description": "Parent asset numeric id." },
+                "id": { "type": "integer", "description": "Derived asset numeric id to delete." },
+                "scriptId": { "type": "integer", "description": "Optional numeric script id; defaults to attached script context." }
             },
             "additionalProperties": false
         }),
@@ -96,11 +96,11 @@ fn tool_parameters_schema(name: &str) -> Value {
                     "type": "array",
                     "items": { "type": "integer" },
                     "minItems": 1,
-                    "description": "Derived asset legacy ids."
+                    "description": "Derived asset numeric ids."
                 },
                 "model": { "type": "string" },
                 "resolution": { "type": "string" },
-                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+                "scriptId": { "type": "integer", "description": "Optional numeric script id; defaults to attached script context." }
             },
             "additionalProperties": false
         }),
@@ -112,11 +112,11 @@ fn tool_parameters_schema(name: &str) -> Value {
                     "type": "array",
                     "items": { "type": "integer" },
                     "minItems": 1,
-                    "description": "Storyboard legacy ids."
+                    "description": "Storyboard numeric ids."
                 },
                 "model": { "type": "string" },
                 "resolution": { "type": "string" },
-                "scriptId": { "type": "integer", "description": "Optional legacy script id; defaults to attached script context." }
+                "scriptId": { "type": "integer", "description": "Optional numeric script id; defaults to attached script context." }
             },
             "additionalProperties": false
         }),

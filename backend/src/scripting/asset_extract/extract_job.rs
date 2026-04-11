@@ -62,10 +62,10 @@ pub(crate) async fn run_extract_job(
     .await
     .map_err(|e| e.to_string())?;
 
-    let mut map_by_legacy: std::collections::HashMap<i32, (Option<String>, Option<String>)> =
+    let mut rows_by_numeric_id: std::collections::HashMap<i32, (Option<String>, Option<String>)> =
         std::collections::HashMap::new();
     for (lid, name, content) in script_map {
-        map_by_legacy.insert(lid, (name, content));
+        rows_by_numeric_id.insert(lid, (name, content));
     }
 
     for chunk in script_numeric_ids.chunks(group_size) {
@@ -77,7 +77,7 @@ pub(crate) async fn run_extract_job(
             project_uuid,
             uid,
             chunk,
-            &map_by_legacy,
+            &rows_by_numeric_id,
         )
         .await?;
     }

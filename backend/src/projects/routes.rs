@@ -52,7 +52,7 @@ struct ProjectDetailResponse {
     scripts: Vec<ScriptBrief>,
 }
 
-/// Per-project counts for dashboards; aligns with legacy **`generalStatistics`** shape.
+/// Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
 /// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
 #[derive(Serialize)]
 struct ProjectStatsResponse {
@@ -191,7 +191,7 @@ async fn create_project(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 = sqlx::query_scalar(
+    let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_project
@@ -217,7 +217,7 @@ async fn create_project(
         "#,
     )
     .bind(uid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(trim_opt(body.name))
     .bind(trim_opt(body.intro))
     .bind(trim_opt(body.project_type))

@@ -71,7 +71,7 @@ pub fn harness_tools_catalog_http(user_id: Uuid) {
     tracing::debug!(%user_id, "harness.http.tools_catalog");
 }
 
-/// REST **`/api/v1/agents/memory/*`** (parity with legacy agent memory).
+/// REST **`/api/v1/agents/memory/*`** (parity with Electron agent memory).
 pub fn memory_http(user_id: Uuid, numeric_project_id: i32, op: &'static str) {
     tracing::debug!(%user_id, numeric_project_id, %op, "harness.memory.http");
 }

@@ -28,12 +28,12 @@ pub(crate) async fn persist_group(
     .await
     .map_err(|e| e.to_string())?;
 
-    let legacy_to_script: std::collections::HashMap<i32, Uuid> =
+    let numeric_id_to_script: std::collections::HashMap<i32, Uuid> =
         script_rows.into_iter().map(|(id, lid)| (lid, id)).collect();
 
     let script_uuids: Vec<Uuid> = batch_numeric_ids
         .iter()
-        .filter_map(|lid| legacy_to_script.get(lid).copied())
+        .filter_map(|lid| numeric_id_to_script.get(lid).copied())
         .collect();
 
     if !script_uuids.is_empty() {
@@ -55,7 +55,7 @@ pub(crate) async fn persist_group(
         existing.into_iter().map(|(id, n)| (n, id)).collect();
 
     let now_ms = chrono::Utc::now().timestamp_millis();
-    let mut next_legacy: i32 =
+    let mut next_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) FROM app_asset"#)
             .fetch_one(&mut **tx)
             .await
@@ -65,7 +65,7 @@ pub(crate) async fn persist_group(
         if name_to_id.contains_key(&na.name) {
             continue;
         }
-        next_legacy += 1;
+        next_numeric_id += 1;
         let id: Uuid = sqlx::query_scalar(
             r#"
             INSERT INTO app_asset (
@@ -76,7 +76,7 @@ pub(crate) async fn persist_group(
             "#,
         )
         .bind(project_uuid)
-        .bind(next_legacy)
+        .bind(next_numeric_id)
         .bind(&na.name)
         .bind(&na.asset_type)
         .bind(trim_empty_opt(&na.desc))
@@ -93,7 +93,7 @@ pub(crate) async fn persist_group(
             continue;
         };
         for lid in &na.script_numeric_ids {
-            if let Some(sid) = legacy_to_script.get(lid) {
+            if let Some(sid) = numeric_id_to_script.get(lid) {
                 pairs.push((*sid, aid));
             }
         }
@@ -103,7 +103,7 @@ pub(crate) async fn persist_group(
             continue;
         };
         for lid in &er.script_numeric_ids {
-            if let Some(sid) = legacy_to_script.get(lid) {
+            if let Some(sid) = numeric_id_to_script.get(lid) {
                 pairs.push((*sid, aid));
             }
         }

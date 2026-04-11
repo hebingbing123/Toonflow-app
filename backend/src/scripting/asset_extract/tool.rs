@@ -20,24 +20,14 @@ pub(crate) struct NewAssetItem {
     pub(crate) desc: String,
     #[serde(rename = "type")]
     pub(crate) asset_type: String,
-    #[serde(
-        default,
-        alias = "scriptIds",
-        alias = "scriptLegacyIds",
-        alias = "script_numeric_ids"
-    )]
+    #[serde(default, alias = "scriptIds", alias = "script_numeric_ids")]
     pub(crate) script_numeric_ids: Vec<i32>,
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct ExistingRefItem {
     pub(crate) name: String,
-    #[serde(
-        default,
-        alias = "scriptIds",
-        alias = "scriptLegacyIds",
-        alias = "script_numeric_ids"
-    )]
+    #[serde(default, alias = "scriptIds", alias = "script_numeric_ids")]
     pub(crate) script_numeric_ids: Vec<i32>,
 }
 

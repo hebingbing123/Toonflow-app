@@ -63,7 +63,7 @@ async fn create_project_asset_inner(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 =
+    let next_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
@@ -81,7 +81,7 @@ async fn create_project_asset_inner(
         "#,
     )
     .bind(project_uuid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(&name)
     .bind(&t)
     .bind(desc)

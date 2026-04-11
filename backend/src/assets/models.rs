@@ -253,19 +253,19 @@ pub(super) struct AssetImageFileSource {
     pub metadata: SqlxJson<Value>,
 }
 
-// ── Legacy request/response types ───────────────────────────────────────────
+// ── Workbench-compat request/response types ───────────────────────────────────────────
 
 /// 遗留 get-image 端点的请求体。
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyGetImageBody {
+pub(super) struct WorkbenchGetImageBody {
     /// 要获取图片的遗留资产 ID。
     pub assets_id: i32,
 }
 
 /// 遗留 upload-clip 端点的响应。
 #[derive(Debug, Serialize)]
-pub(super) struct LegacyUploadClipResponse {
+pub(super) struct WorkbenchUploadClipResponse {
     /// 人类可读的状态消息。
     pub message: String,
 }
@@ -275,7 +275,7 @@ pub(super) struct LegacyUploadClipResponse {
 /// 通过遗留 ID 更新现有资产的元数据。
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct LegacyUpdateAssetsBody {
+pub(super) struct WorkbenchUpdateAssetsBody {
     /// 要更新的遗留资产 ID。
     pub id: i32,
     /// 新的显示名称。
@@ -293,7 +293,7 @@ pub(super) struct LegacyUpdateAssetsBody {
 /// 遗留 delete-assets 端点的请求体。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct LegacyDeleteAssetsBody {
+pub(super) struct WorkbenchDeleteAssetsBody {
     /// 要删除的遗留资产 ID。
     pub id: i32,
 }
@@ -301,7 +301,7 @@ pub(super) struct LegacyDeleteAssetsBody {
 /// 遗留 batch-delete 端点的请求体。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct LegacyBatchDeleteAssetsBody {
+pub(super) struct WorkbenchBatchDeleteAssetsBody {
     /// 要删除的遗留资产 ID 列表。
     pub id: Vec<i32>,
 }
@@ -309,14 +309,14 @@ pub(super) struct LegacyBatchDeleteAssetsBody {
 /// 遗留 delete-image 端点的请求体。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct LegacyDelImageBody {
+pub(super) struct WorkbenchDelImageBody {
     /// 要删除的遗留图片 ID。
     pub id: i32,
 }
 
 /// 遗留资产变更的通用成功响应。
 #[derive(Debug, Serialize)]
-pub(super) struct LegacyAssetMutationResponse {
+pub(super) struct WorkbenchAssetMutationResponse {
     /// 成功消息字符串。
     pub message: &'static str,
 }
@@ -326,7 +326,7 @@ pub(super) struct LegacyAssetMutationResponse {
 /// 通过 ID 轮询多个图片资产的状态。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct LegacyPollingImageAssetsBody {
+pub(super) struct WorkbenchPollingImageAssetsBody {
     /// 要轮询的资产 ID 列表。
     pub ids: Vec<i32>,
 }
@@ -334,7 +334,7 @@ pub(super) struct LegacyPollingImageAssetsBody {
 /// polling-image-assets 响应中的单项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyPollingImageAssetsItem {
+pub(super) struct WorkbenchPollingImageAssetsItem {
     /// 遗留资产 ID。
     pub id: i32,
     /// 当前生成状态。
@@ -348,7 +348,7 @@ pub(super) struct LegacyPollingImageAssetsItem {
 /// 轮询多个资产的提示词优化状态。
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct LegacyPollingPromptAssetsBody {
+pub(super) struct WorkbenchPollingPromptAssetsBody {
     /// 要轮询提示词状态的资产 ID 列表。
     pub ids: Vec<i32>,
 }
@@ -356,7 +356,7 @@ pub(super) struct LegacyPollingPromptAssetsBody {
 /// 素材数据响应中的资产项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyMaterialAssetItem {
+pub(super) struct WorkbenchMaterialAssetItem {
     /// 遗留资产 ID。
     pub id: i32,
     /// 显示名称。
@@ -371,7 +371,7 @@ pub(super) struct LegacyMaterialAssetItem {
 /// 素材数据响应中的视频项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyMaterialVideoItem {
+pub(super) struct WorkbenchMaterialVideoItem {
     /// 视频遗留 ID。
     pub id: i32,
     /// 视频文件 URL 或路径。
@@ -383,17 +383,17 @@ pub(super) struct LegacyMaterialVideoItem {
 /// 遗留 get-material-data 端点的响应。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetMaterialDataResponse {
+pub(super) struct WorkbenchGetMaterialDataResponse {
     /// 素材资源列表。
-    pub data: Vec<LegacyMaterialAssetItem>,
+    pub data: Vec<WorkbenchMaterialAssetItem>,
     /// 视频素材列表。
-    pub video: Vec<LegacyMaterialVideoItem>,
+    pub video: Vec<WorkbenchMaterialVideoItem>,
 }
 
 /// batch-generation-data 响应中的资产项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyBatchGenerationAssetItem {
+pub(super) struct WorkbenchBatchGenerationAssetItem {
     /// 遗留资产 ID。
     pub id: i32,
     /// 显示名称。
@@ -410,9 +410,9 @@ pub(super) struct LegacyBatchGenerationAssetItem {
 /// 遗留 batch-generation-data 端点的响应。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyBatchGenerationDataResponse {
+pub(super) struct WorkbenchBatchGenerationDataResponse {
     /// 匹配的资产列表。
-    pub data: Vec<LegacyBatchGenerationAssetItem>,
+    pub data: Vec<WorkbenchBatchGenerationAssetItem>,
     /// 分页总数量。
     pub total: i64,
 }
@@ -420,7 +420,7 @@ pub(super) struct LegacyBatchGenerationDataResponse {
 /// polling-prompt-assets 响应中的单项。
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyPollingPromptAssetsItem {
+pub(super) struct WorkbenchPollingPromptAssetsItem {
     /// 遗留资产 ID。
     pub id: i32,
     /// 显示名称。
@@ -435,7 +435,7 @@ pub(super) struct LegacyPollingPromptAssetsItem {
 /// get-image 响应中的临时/生成资产项。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetImageTempAssetItem {
+pub(super) struct WorkbenchGetImageTempAssetItem {
     /// 可选的遗留图片 ID。
     pub id: Option<i32>,
     /// 此图片实例的 UUID。
@@ -456,18 +456,18 @@ pub(super) struct LegacyGetImageTempAssetItem {
 /// 遗留 get-image 端点的响应。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetImageResponse {
+pub(super) struct WorkbenchGetImageResponse {
     /// 遗留资产 ID。
     pub id: i32,
     /// 当前选中的封面图片 ID。
     pub image_id: Option<i32>,
     /// 该资产的生成/临时图片列表。
-    pub temp_assets: Vec<LegacyGetImageTempAssetItem>,
+    pub temp_assets: Vec<WorkbenchGetImageTempAssetItem>,
 }
 
 /// 遗留 get-image 查询的数据库行类型。
 #[derive(Debug, FromRow)]
-pub(super) struct LegacyGetImageAssetRow {
+pub(super) struct WorkbenchGetImageAssetRow {
     /// 内部 UUID。
     pub id: Uuid,
     /// 遗留整数 ID。
@@ -554,7 +554,7 @@ pub(super) struct WorkbenchSaveAssetsBody {
 /// 表示附加到父资产的生成图片或子资产。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetAssetsApiChildItem {
+pub(super) struct WorkbenchGetAssetsApiChildItem {
     /// 此子项的遗留 ID。
     pub id: i32,
     /// 遗留项目 ID。
@@ -583,7 +583,7 @@ pub(super) struct LegacyGetAssetsApiChildItem {
 /// 包含主资产数据及嵌套的子资产（生成的图片）。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetAssetsApiParentItem {
+pub(super) struct WorkbenchGetAssetsApiParentItem {
     /// 遗留资产 ID。
     pub id: i32,
     /// 遗留项目 ID。
@@ -606,15 +606,15 @@ pub(super) struct LegacyGetAssetsApiParentItem {
     /// 选中图片的源 URL。
     pub src: Option<String>,
     /// 嵌套的子资产列表（生成的图片）。
-    pub son_assets: Vec<LegacyGetAssetsApiChildItem>,
+    pub son_assets: Vec<WorkbenchGetAssetsApiChildItem>,
 }
 
 /// 遗留 get-assets-api 端点的响应。
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct LegacyGetAssetsApiResponse {
+pub(super) struct WorkbenchGetAssetsApiResponse {
     /// 带嵌套子项的父级资产列表。
-    pub data: Vec<LegacyGetAssetsApiParentItem>,
+    pub data: Vec<WorkbenchGetAssetsApiParentItem>,
     /// 分页总数量。
     pub total: i64,
 }
@@ -623,7 +623,7 @@ pub(super) struct LegacyGetAssetsApiResponse {
 ///
 /// 同时表示父级和子级资产；逻辑根据数据区分。
 #[derive(Debug, FromRow)]
-pub(super) struct LegacyGetAssetsApiDbRow {
+pub(super) struct WorkbenchGetAssetsApiDbRow {
     /// 遗留 ID。
     pub id: i32,
     /// 遗留项目 ID（子项为 null）。
@@ -650,7 +650,7 @@ pub(super) struct LegacyGetAssetsApiDbRow {
 ///
 /// 用于验证用户所有权和提取变更时的元数据。
 #[derive(Debug, FromRow)]
-pub(crate) struct LegacyOwnedAssetMetaRow {
+pub(crate) struct WorkbenchOwnedAssetMetaRow {
     /// 内部 UUID。
     pub id: Uuid,
     /// 元数据 JSON。

@@ -125,7 +125,7 @@ fn clip_prompt_chars(s: &str, max_chars: usize) -> String {
     s.chars().take(max_chars).collect()
 }
 
-/// Picks an OpenAI **`images/generations`** model id from the legacy catalog string (e.g. **`1:dall-e-3`**) or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
+/// Picks an OpenAI **`images/generations`** model id from the vendor catalog string (e.g. **`1:dall-e-3`**) or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
 pub fn resolve_openai_image_model(request_model: &str) -> String {
     let lower = request_model.to_lowercase();
     if lower.contains("dall-e-2") || lower.contains("dalle-2") {
@@ -141,7 +141,7 @@ pub fn resolve_openai_image_model(request_model: &str) -> String {
         .unwrap_or_else(|| "dall-e-3".into())
 }
 
-/// Maps legacy **`resolution`** (e.g. **`1024x1024`**) to an OpenAI **`size`** for the chosen model.
+/// Maps Electron-era **`resolution`** (e.g. **`1024x1024`**) to an OpenAI **`size`** for the chosen model.
 pub fn resolve_openai_image_size(model: &str, resolution: &str) -> &'static str {
     let m = model.to_lowercase();
     let r = resolution.to_lowercase().replace('×', "x").replace(' ', "");

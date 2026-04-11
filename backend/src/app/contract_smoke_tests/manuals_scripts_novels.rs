@@ -505,7 +505,7 @@ async fn prompts_patch_requires_database_with_jwt() {
 }
 
 #[tokio::test]
-async fn prompts_patch_unknown_legacy_returns_404_without_database() {
+async fn prompts_patch_unknown_numeric_returns_404_without_database() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = patch_json_bearer("/api/v1/prompts/99", &token, r#"{"data":"x"}"#).await;
     assert_eq!(status, StatusCode::NOT_FOUND);
@@ -513,7 +513,7 @@ async fn prompts_patch_unknown_legacy_returns_404_without_database() {
 }
 
 #[tokio::test]
-async fn prompts_get_unknown_legacy_returns_404_without_database() {
+async fn prompts_get_unknown_numeric_returns_404_without_database() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = get_json_bearer("/api/v1/prompts/99", &token).await;
     assert_eq!(status, StatusCode::NOT_FOUND);

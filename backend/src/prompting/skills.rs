@@ -62,7 +62,7 @@ impl SkillReadError {
 pub(crate) enum SkillWriteError {
     BadPath(String),
     SkillsDirMissing,
-    /// Legacy **`saveSkillContent`** returned **400** when the file did not exist.
+    /// Electron-era **`saveSkillContent`** returned **400** when the file did not exist.
     FileMissing,
     TooLarge,
     Io(String),

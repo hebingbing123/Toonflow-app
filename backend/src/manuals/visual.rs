@@ -108,13 +108,13 @@ pub struct VisualManualEntry {
 
 #[derive(Debug, Serialize)]
 pub struct VisualManualStyle {
-    /// First line of **`README.md`** (legacy strips **`--`**).
+    /// First line of **`README.md`** (Electron client strips **`--`**).
     pub name: String,
     /// Relative paths under **`data/skills`**, e.g. **`art_skills/{style}/images/a.png`**.
     pub image: Vec<String>,
     #[serde(rename = "stylePath")]
     pub style_path: String,
-    /// Same shape as legacy **`data`** array.
+    /// Same shape as Electron-era **`data`** array.
     pub data: Vec<VisualManualEntry>,
 }
 
@@ -212,7 +212,7 @@ struct DeleteVisualManualBody {
 }
 
 #[derive(Debug, Serialize)]
-struct LegacyOkEmptyObject {}
+struct EmptyOkObject {}
 
 #[derive(Debug, Serialize)]
 struct DeleteVisualManualResponse {
@@ -351,7 +351,7 @@ async fn post_add_visual_manual(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddVisualManualBody>,
-) -> Result<JsonResponse<LegacyOkEmptyObject>, ApiError> {
+) -> Result<JsonResponse<EmptyOkObject>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     validate_manual_folder_name(&body.name)?;
     validate_manual_folder_name(&body.style_path)?;
@@ -377,14 +377,14 @@ async fn post_add_visual_manual(
         return Err(e);
     }
 
-    Ok(JsonResponse(LegacyOkEmptyObject {}))
+    Ok(JsonResponse(EmptyOkObject {}))
 }
 
 async fn post_edit_visual_manual(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EditVisualManualBody>,
-) -> Result<JsonResponse<LegacyOkEmptyObject>, ApiError> {
+) -> Result<JsonResponse<EmptyOkObject>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     validate_manual_folder_name(&body.name)?;
     validate_manual_folder_name(&body.style_path)?;
@@ -397,7 +397,7 @@ async fn post_edit_visual_manual(
     write_visual_slots(&main_path, &body.name, &body.data, true)?;
     sync_visual_images(&main_path, &body.images)?;
 
-    Ok(JsonResponse(LegacyOkEmptyObject {}))
+    Ok(JsonResponse(EmptyOkObject {}))
 }
 
 async fn post_delete_visual_manual(
@@ -560,7 +560,7 @@ async fn get_visual_manual(
     Ok(JsonResponse(load_visual_manual()?))
 }
 
-/// Same payload as [`get_visual_manual`]; **POST** matches legacy **`POST /api/project/getVisualManual`** (body ignored).
+/// Same payload as [`get_visual_manual`]; **POST** matches Electron-era **`POST /api/project/getVisualManual`** (body ignored).
 async fn post_visual_manual(
     State(state): State<AppState>,
     headers: HeaderMap,

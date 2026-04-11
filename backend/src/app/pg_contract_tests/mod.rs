@@ -36,8 +36,8 @@ const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
 /// JWT `sub` and `app_project.owner_user_id` for this run.
 const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
-/// Isolated legacy ids for **`promote_staging_populates_assets_and_links`** (avoid API allocator range).
-const PROMO_LEGACY_USER: i32 = 5_010_000;
+/// Isolated numeric ids for **`promote_staging_populates_assets_and_links`** (avoid API allocator range).
+const PROMO_IMPORT_USER: i32 = 5_010_000;
 const PROMO_PROJECT_LEG: i32 = 5_010_001;
 const PROMO_SCRIPT_LEG: i32 = 5_010_002;
 const PROMO_ASSET_LEG: i32 = 5_010_003;
@@ -59,11 +59,11 @@ async fn cleanup_promote_staging_fixtures(pool: &PgPool) {
         .execute(pool)
         .await;
     let _ = sqlx::query("DELETE FROM public.import_user_map WHERE import_user_id = $1")
-        .bind(PROMO_LEGACY_USER)
+        .bind(PROMO_IMPORT_USER)
         .execute(pool)
         .await;
     let _ = sqlx::query(
-        r#"DELETE FROM legacy_staging.snapshot
+        r#"DELETE FROM import_staging.snapshot
            WHERE source_row_key IN ('pg_promote_proj','pg_promote_script','pg_promote_asset','pg_promote_script_asset','pg_promote_art_style','pg_promote_prompt','pg_promote_image')"#,
     )
     .execute(pool)
@@ -144,7 +144,7 @@ fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState {
         llm: None,
         http_client: reqwest::Client::new(),
         notify: WsNotifyHub::new(),
-        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
@@ -158,7 +158,7 @@ fn smoke_state() -> AppState {
         llm: None,
         http_client: reqwest::Client::new(),
         notify: WsNotifyHub::new(),
-        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
@@ -232,7 +232,7 @@ fn contract_state_with_local_dir(pool: sqlx::PgPool, jwt_secret: String, dir: Pa
         llm: None,
         http_client: reqwest::Client::new(),
         notify: WsNotifyHub::new(),
-        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: Some(dir),
         local_art_style_cover_dir: None,
@@ -250,7 +250,7 @@ fn contract_state_with_local_art_style_dir(
         llm: None,
         http_client: reqwest::Client::new(),
         notify: WsNotifyHub::new(),
-        memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+        memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: Some(dir),
@@ -513,23 +513,26 @@ async fn projects_create_stats_delete_roundtrip() {
         )
         .await
         .unwrap();
-    let (status, legacy_get_image) = read_json_response(res).await;
+    let (status, workbench_get_image) = read_json_response(res).await;
     assert_eq!(
         status,
         StatusCode::OK,
-        "legacy_get_image={legacy_get_image}"
+        "workbench_get_image={workbench_get_image}"
     );
-    assert_eq!(legacy_get_image["id"].as_i64(), Some(i64::from(asset_leg)));
-    assert!(legacy_get_image["imageId"].is_null());
-    let legacy_temp = legacy_get_image["tempAssets"]
-        .as_array()
-        .expect("legacy get-image tempAssets");
-    assert_eq!(legacy_temp.len(), 1);
     assert_eq!(
-        legacy_temp[0]["assetsId"].as_i64(),
+        workbench_get_image["id"].as_i64(),
         Some(i64::from(asset_leg))
     );
-    assert_eq!(legacy_temp[0]["selected"], false);
+    assert!(workbench_get_image["imageId"].is_null());
+    let workbench_temp_assets = workbench_get_image["tempAssets"]
+        .as_array()
+        .expect("workbench get-image tempAssets");
+    assert_eq!(workbench_temp_assets.len(), 1);
+    assert_eq!(
+        workbench_temp_assets[0]["assetsId"].as_i64(),
+        Some(i64::from(asset_leg))
+    );
+    assert_eq!(workbench_temp_assets[0]["selected"], false);
 
     let res = app
         .clone()
@@ -1193,7 +1196,7 @@ async fn projects_create_stats_delete_roundtrip() {
                 && r["chapter_index"].is_number()
                 && r["chapter"].is_string()
         }),
-        "expected index/chapter fields (legacy get-novel-index shape): {list_all}"
+        "expected index/chapter fields (get-novel-index shape): {list_all}"
     );
 
     let non_zero: Vec<&serde_json::Value> = rows
@@ -1241,7 +1244,7 @@ async fn projects_create_stats_delete_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"chapter_index":99,"reel":"lr","chapter":"pg_legacy_add_chapter","chapter_data":"d0"}"#,
+                    r#"{"chapter_index":99,"reel":"lr","chapter":"pg_novel_add_chapter","chapter_data":"d0"}"#,
                 ))
                 .unwrap(),
         )
@@ -1271,10 +1274,10 @@ async fn projects_create_stats_delete_roundtrip() {
         .as_array()
         .expect("items")
         .iter()
-        .find(|r| r["chapter"].as_str() == Some("pg_legacy_add_chapter"))
+        .find(|r| r["chapter"].as_str() == Some("pg_novel_add_chapter"))
         .expect("added chapter row")["numeric_id"]
         .as_i64()
-        .expect("added legacy id") as i32;
+        .expect("added numeric id") as i32;
 
     let res = app
         .clone()
@@ -1288,7 +1291,7 @@ async fn projects_create_stats_delete_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"chapter":"pg_legacy_patched","chapter_data":"d1","reel":"","event":""}"#,
+                    r#"{"chapter":"pg_novel_patched","chapter_data":"d1","reel":"","event":""}"#,
                 ))
                 .unwrap(),
         )
@@ -1302,7 +1305,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/{project_uuid}/novels?search=pg_legacy_pat&page=1&limit=10"
+                    "/api/v1/projects/{project_uuid}/novels?search=pg_novel_pat&page=1&limit=10"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1476,7 +1479,7 @@ async fn projects_create_stats_delete_roundtrip() {
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
-async fn legacy_project_crud_roundtrip() {
+async fn project_numeric_crud_roundtrip() {
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")
@@ -1493,12 +1496,12 @@ async fn legacy_project_crud_roundtrip() {
     let app = build_router(contract_state(pool.clone(), secret));
 
     let unique_suffix = Uuid::new_v4().simple().to_string();
-    let initial_name = format!("pg_legacy_project_{unique_suffix}");
+    let initial_name = format!("pg_numeric_project_{unique_suffix}");
     let updated_name = format!("{initial_name}_updated");
 
     let create_body = json!({
         "name": initial_name,
-        "intro": "legacy intro",
+        "intro": "seed intro",
         "project_type": "short-drama",
         "art_style": "ink",
         "director_manual": "story-manual",
@@ -1554,7 +1557,7 @@ async fn legacy_project_crud_roundtrip() {
         created_row["numeric_id"].as_i64(),
         Some(i64::from(numeric_id))
     );
-    assert_eq!(created_row["intro"].as_str(), Some("legacy intro"));
+    assert_eq!(created_row["intro"].as_str(), Some("seed intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
     assert_eq!(created_row["mode"].as_str(), Some("novel"));
     assert_eq!(created_row["art_style"].as_str(), Some("ink"));
@@ -1808,7 +1811,7 @@ async fn projects_patch_partial_fields_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"intro":"after update","mode":"legacy-mode","art_style":null,"video_ratio":"1:1","project_type":"series"}"#,
+                    r#"{"intro":"after update","mode":"compat-mode","art_style":null,"video_ratio":"1:1","project_type":"series"}"#,
                 ))
                 .unwrap(),
         )
@@ -1817,7 +1820,7 @@ async fn projects_patch_partial_fields_roundtrip() {
     let (status, patched) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "patched={patched}");
     assert_eq!(patched["intro"].as_str(), Some("after update"));
-    assert_eq!(patched["mode"].as_str(), Some("legacy-mode"));
+    assert_eq!(patched["mode"].as_str(), Some("compat-mode"));
     assert!(patched["art_style"].is_null());
     assert_eq!(patched["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(patched["project_type"].as_str(), Some("series"));
@@ -1844,7 +1847,7 @@ async fn projects_patch_partial_fields_roundtrip() {
         "PATCH must preserve untouched fields"
     );
     assert_eq!(row["intro"].as_str(), Some("after update"));
-    assert_eq!(row["mode"].as_str(), Some("legacy-mode"));
+    assert_eq!(row["mode"].as_str(), Some("compat-mode"));
     assert!(row["art_style"].is_null());
     assert_eq!(row["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(row["project_type"].as_str(), Some("series"));
@@ -1858,7 +1861,7 @@ async fn projects_patch_partial_fields_roundtrip() {
     .await
     .expect("select updated project");
     assert_eq!(stored.0.as_deref(), Some("after update"));
-    assert_eq!(stored.1.as_deref(), Some("legacy-mode"));
+    assert_eq!(stored.1.as_deref(), Some("compat-mode"));
     assert_eq!(stored.2, None);
     assert_eq!(stored.3.as_deref(), Some("series"));
 

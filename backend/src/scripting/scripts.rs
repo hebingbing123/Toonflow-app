@@ -83,9 +83,9 @@ struct BatchAddScriptResponse {
 /// Advisory lock key for allocating globally unique `app_script.numeric_id`.
 const ADV_LOCK_SCRIPT_NUMERIC_ID: i64 = 884_422_002;
 
-/// Legacy `exportScript` accepted an array of ids; cap to bound work per request.
+/// Electron `exportScript` accepted an array of ids; cap to bound work per request.
 const MAX_SCRIPT_EXPORT: usize = 500;
-/// Legacy `pollScriptAssets` polled many rows; cap list size.
+/// Electron `pollScriptAssets` polled many rows; cap list size.
 const MAX_SCRIPT_EXTRACT_POLL: usize = 2_000;
 
 #[derive(Debug, Deserialize)]
@@ -131,7 +131,7 @@ async fn create_script_locked(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 = sqlx::query_scalar(
+    let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_script
@@ -153,7 +153,7 @@ async fn create_script_locked(
         "#,
     )
     .bind(project_uuid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(trim_opt(body.name))
     .bind(trim_opt(body.content))
     .bind(body.extract_state)
@@ -562,7 +562,7 @@ async fn batch_add_scripts_locked(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let mut next_legacy: i32 = sqlx::query_scalar(
+    let mut next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_script
@@ -585,7 +585,7 @@ async fn batch_add_scripts_locked(
             "#,
         )
         .bind(project_uuid)
-        .bind(next_legacy)
+        .bind(next_numeric_id)
         .bind(item.script_name)
         .bind(item.script_data)
         .bind(now_ms)
@@ -594,7 +594,7 @@ async fn batch_add_scripts_locked(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
         inserted.push(row);
-        next_legacy += 1;
+        next_numeric_id += 1;
     }
 
     Ok(BatchAddScriptResponse {

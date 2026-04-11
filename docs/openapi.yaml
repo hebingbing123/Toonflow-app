@@ -25,38 +25,38 @@ info:
 
     **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, historical **`o_prompt`** parity); **`GET /api/v1/prompts/{numeric_id}`** returns one merged row (**`numeric_id`** must be **1**, **2**, or **3**); **`PATCH /api/v1/prompts/{numeric_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
 
-    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches legacy **`POST /api/project/getVisualManual`**; body ignored). **`POST /api/v1/project/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** mirror **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`** (same 12 Markdown slots as **`GET`**). **`image`** paths stay relative under **`data/skills`** (no OSS signing).
+    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches Electron-era **`POST /api/project/getVisualManual`**; body ignored). **`POST /api/v1/project/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** mirror **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`** (same 12 Markdown slots as **`GET`**). **`image`** paths stay relative under **`data/skills`** (no OSS signing).
 
-    **Text model default:** **`GET /api/v1/models/text-default`** replaces legacy **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`**. Priority: per-user preference (set via **`PATCH /api/v1/models/text-default`** → `app_user_profile.preferred_text_model_id`) → **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env → first catalog text model.
+    **Text model default:** **`GET /api/v1/models/text-default`** replaces Electron-era **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`**. Priority: per-user preference (set via **`PATCH /api/v1/models/text-default`** → `app_user_profile.preferred_text_model_id`) → **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env → first catalog text model.
 
-    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** returns the process-local effective value for legacy **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** (**`"0"`** / **`"1"`**) and updates the in-process override; startup bootstraps from **`TOONFLOW_SWITCH_AI_DEV_TOOL`**, and restart resets to env/default.
+    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** returns the process-local effective value for Electron-era **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** (**`"0"`** / **`"1"`**) and updates the in-process override; startup bootstraps from **`TOONFLOW_SWITCH_AI_DEV_TOOL`**, and restart resets to env/default.
 
-    **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror legacy **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values persist per user in **`app_user_profile.memory_config`** with server defaults as fallback; when **`DATABASE_URL`** is unset these endpoints return **503** **`database_error`** instead of using process-local storage.
-    **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps legacy **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
+    **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror Electron-era **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values persist per user in **`app_user_profile.memory_config`** with server defaults as fallback; when **`DATABASE_URL`** is unset these endpoints return **503** **`database_error`** instead of using process-local storage.
+    **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps Electron-era **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
 
-    **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of legacy **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
-    **`POST /api/v1/settings/vendors/model-test`** validates legacy **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); the worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway/Pika/Kling** and submits a minimal provider request (fallback provider env vars).
+    **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of Electron-era **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
+    **`POST /api/v1/settings/vendors/model-test`** validates Electron-era **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); the worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway/Pika/Kling** and submits a minimal provider request (fallback provider env vars).
     **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** now persist non-sensitive vendor metadata into **`app_user_profile.vendor_config`**. The Rust API stores **`tsCode`** / **`code_link`** references only; it does **not** execute TS, evaluate vm2, or fetch remote code server-side.
 
     **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS keeps **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** as **501** **`not_implemented`** placeholders — no bulk wipe endpoint on the hosted API. The supported operational replacement is the guarded CLI: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
 
     **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`**, overlaid with per-user model selection from **`app_user_profile.agent_deploy_config`** when Postgres is configured. **`POST …/deploy-model`** persists model / vendor choice for one of the four rows. **`POST …/set-key`** is a safe **200** no-op: keys are still server-side only.
 
-    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as legacy **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.numeric_id`**). Responses use the legacy **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
+    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as Electron-era **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.numeric_id`**). Responses use the Electron-era **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
 
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate legacy bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors legacy cancel semantics by marking caller-owned **`app_asset_image`** row (**`numeric_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
+    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate Electron-era bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors Electron-era cancel semantics by marking caller-owned **`app_asset_image`** row (**`numeric_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`numeric_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
+    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`numeric_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as Electron-era **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
 
     **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
-    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** stable **`numeric_id`** values). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`numeric_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from legacy camelCase), not **`/api/v1/general/*`**.
+    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** stable **`numeric_id`** values). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`numeric_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from Electron-era camelCase), not **`/api/v1/general/*`**.
 
-        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.numeric_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postLegacy*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/legacy/{id}/novel-events*`**。
+        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.numeric_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postCompat*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/compat/{id}/novel-events*`**。
 
-    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as legacy **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
+    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as Electron-era **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
 
 servers:
   - url: http://127.0.0.1:8666
@@ -64,13 +64,13 @@ servers:
 
 tags:
   - name: system
-    description: Health, readiness, and lightweight probes (incl. legacy test-route parity)
+    description: Health, readiness, and lightweight probes (incl. Electron-era test-route parity)
   - name: session
     description: Auth probe (Supabase JWT)
   - name: projects
     description: User-owned projects (Postgres + RLS)
   - name: assets
-    description: Script-linked assets per project (`app_asset`, `app_script_asset`; Postgres + RLS); corner-scape listing for legacy UI parity
+    description: Script-linked assets per project (`app_asset`, `app_script_asset`; Postgres + RLS); corner-scape listing for Electron-era UI parity
   - name: scripts
     description: Scripts under owned projects (Postgres + RLS)
   - name: storyboards
@@ -80,7 +80,7 @@ tags:
   - name: novels
     description: Novel source chapters per project (`app_novel`; Postgres + RLS)
   - name: art_styles
-    description: Per-user art style presets (`app_art_style`; Postgres + RLS); legacy `o_artStyle` subset with local base64 cover persistence instead of OSS upload
+    description: Per-user art style presets (`app_art_style`; Postgres + RLS); Electron `o_artStyle` subset with local base64 cover persistence instead of OSS upload
   - name: skills
     description: Markdown skills under `backend/data/skills` (read; PUT overwrite; POST create; DELETE remove one file); visual manual (`GET`/`POST /api/v1/visual-manual`) from bundled `art_skills`
   - name: harness
@@ -90,11 +90,11 @@ tags:
   - name: usage
     description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
   - name: prompts
-    description: Per-user prompt templates (`app_user_prompt`; Postgres + RLS); legacy `/api/setting/promptManage/getPrompt` / `updatePrompt`
+    description: Per-user prompt templates (`app_user_prompt`; Postgres + RLS); Electron `/api/setting/promptManage/getPrompt` / `updatePrompt`
   - name: models
-    description: Static vendor/model catalog (`backend/data/models_catalog.json`); legacy `modelSelect` parity without `o_vendorConfig`
+    description: Static vendor/model catalog (`backend/data/models_catalog.json`); Electron `modelSelect` parity without `o_vendorConfig`
   - name: agents
-    description: Per-user agent memory (`app_agent_memory`; Postgres + RLS); legacy `/api/agents/getMemory` / `clearMemory` parity
+    description: Per-user agent memory (`app_agent_memory`; Postgres + RLS); Electron `/api/agents/getMemory` / `clearMemory` parity
   - name: webhooks
     description: Server-to-server billing webhooks (HMAC); not browser CORS flows
   - name: settings
@@ -130,10 +130,10 @@ paths:
   /api/v1/ping:
     get:
       tags: [system]
-      summary: Minimal connectivity probe (legacy `/api/test/test` parity)
+      summary: Minimal connectivity probe (Electron `/api/test/test` parity)
       operationId: pingV1
       description: |
-        Public, no auth, no database. Replaces legacy **`GET /api/test/test`** which returned plain text **`ok`**; this route returns JSON **`{"ok":true}`** for versioned API clients.
+        Public, no auth, no database. Replaces Electron-era **`GET /api/test/test`** which returned plain text **`ok`**; this route returns JSON **`{"ok":true}`** for versioned API clients.
       responses:
         "200":
           description: OK
@@ -148,7 +148,7 @@ paths:
       summary: Server semantic version (from Cargo package)
       operationId: versionV1
       description: |
-        Public, no auth. Aligns with legacy **`/api/other/getVersion`** use cases for client compatibility checks.
+        Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.
         When the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).
       responses:
         "200":
@@ -224,7 +224,7 @@ paths:
         are treated as informational only (no status transition).
         For Alipay payloads, server supports baseline mapping from:
         `trade_status` / (`type` or fallback `event_type` / `event` / `name` / `notify_type`) / `notify_time`.
-        Alipay time values accept RFC3339, unix timestamp (seconds or milliseconds), and legacy datetime format `YYYY-MM-DD HH:MM:SS`.
+        Alipay time values accept RFC3339, unix timestamp (seconds or milliseconds), and Electron-era datetime format `YYYY-MM-DD HH:MM:SS`.
         Non-state Alipay events in the informational whitelist (currently `trade.finished`)
         are treated as informational only.
         For Paddle payloads, server supports baseline mapping from:
@@ -273,13 +273,13 @@ paths:
                   description: Compatibility dedupe id fallback (camelCase).
                 notify_id:
                   type: string
-                  description: Compatibility dedupe id fallback (legacy provider naming).
+                  description: Compatibility dedupe id fallback (third-party provider naming).
                 notifyId:
                   oneOf:
                     - type: string
                     - type: integer
                       format: int64
-                  description: Compatibility dedupe id fallback (camelCase legacy provider naming).
+                  description: Compatibility dedupe id fallback (camelCase third-party provider naming).
                 event_type:
                   type: string
                   description: Optional event type fallback key (same role as `type`).
@@ -291,7 +291,7 @@ paths:
                   description: Optional event type fallback key (provider-compatible alias).
                 notify_type:
                   type: string
-                  description: Optional event type fallback key (legacy provider naming).
+                  description: Optional event type fallback key (third-party provider naming).
                 event_created_at:
                   description: Optional canonical event timestamp fallback (Unix seconds/milliseconds, RFC3339, or `YYYY-MM-DD HH:MM:SS`).
                   oneOf:
@@ -601,11 +601,11 @@ paths:
   /api/v1/settings/memory-config:
     get:
       tags: [settings]
-      summary: Memory / RAG configuration (legacy getMemory)
+      summary: Memory / RAG configuration (Electron-era getMemory)
       operationId: getMemoryConfigV1
       description: |
-        Bearer JWT. Returns the current memory configuration (**camelCase** keys), same fields as legacy **`GET /api/setting/memoryConfig/getMemory`** **`data`**.
-        Defaults match legacy SQLite **`initDB`** **`o_setting`** seeds. Persisted per user in **`app_user_profile.memory_config`**; when **`DATABASE_URL`** is unset, this endpoint returns **503** **`database_error`**.
+        Bearer JWT. Returns the current memory configuration (**camelCase** keys), same fields as Electron-era **`GET /api/setting/memoryConfig/getMemory`** **`data`**.
+        Defaults match SQLite **`initDB`** **`o_setting`** seeds. Persisted per user in **`app_user_profile.memory_config`**; when **`DATABASE_URL`** is unset, this endpoint returns **503** **`database_error`**.
       security:
         - bearerAuth: []
       responses:
@@ -629,10 +629,10 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
     post:
       tags: [settings]
-      summary: Save memory / RAG configuration (legacy sureMemory)
+      summary: Save memory / RAG configuration (Electron-era sureMemory)
       operationId: postMemoryConfigV1
       description: |
-        Bearer JWT. Replaces the in-memory configuration (**full body**, **`deny_unknown_fields`** on the server). Response **`message`** matches legacy **`sureMemory`** success string.
+        Bearer JWT. Replaces the in-memory configuration (**full body**, **`deny_unknown_fields`** on the server). Response **`message`** matches Electron-era **`sureMemory`** success string.
       security:
         - bearerAuth: []
       requestBody:
@@ -670,7 +670,7 @@ paths:
   /api/v1/settings/memory-config/clear-agent-memories:
     post:
       tags: [settings]
-      summary: Clear all agent memory for a project (legacy delAllMemory scope)
+      summary: Clear all agent memory for a project (Electron-era delAllMemory scope)
       operationId: postSettingsClearAgentMemoriesV1
       description: |
         Bearer JWT. Deletes all **`app_agent_memory`** rows for **`owner_user_id = JWT sub`**, **`numeric_project_id`**, **`agent_type`**, and optional **`episodes_id`** — identical to **`POST /api/v1/agents/memory/clear`** with **`clearType: all`**.
@@ -721,8 +721,8 @@ paths:
       summary: Desktop update check (SaaS policy response)
       operationId: postAboutCheckUpdateV1
       description: |
-        Bearer JWT. Body **`source`** matches legacy **`POST /api/setting/about/checkUpdate`** (**`toonflow`**, **`github`**, **`gitee`**, **`atomgit`**).
-        Does not call the legacy OSS manifest. Instead it compares the server **`CARGO_PKG_VERSION`** with an optional env-driven release manifest:
+        Bearer JWT. Body **`source`** matches Electron-era **`POST /api/setting/about/checkUpdate`** (**`toonflow`**, **`github`**, **`gitee`**, **`atomgit`**).
+        Does not call the original OSS manifest. Instead it compares the server **`CARGO_PKG_VERSION`** with an optional env-driven release manifest:
         **`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, and
         **`TOONFLOW_UPDATE_TOONFLOW_URL`** / **`TOONFLOW_UPDATE_GITHUB_URL`** / **`TOONFLOW_UPDATE_GITEE_URL`** / **`TOONFLOW_UPDATE_ATOMGIT_URL`**.
         When the manifest is unset or invalid it safely falls back to **`needUpdate: false`**, **`reinstall: false`**, current version, and no **`url`**.
@@ -766,7 +766,7 @@ paths:
       summary: Download and run installer (policy response only)
       operationId: postAboutDownloadAppV1
       description: |
-        Bearer JWT. Validates **`url`** (**http** or **https**) and **`reinstall`**, then returns **200** with a policy message: the Rust API does not download binaries or mutate local **`serve`** / **`web`** / **`skills`** / **`models`** trees (legacy Electron **`downloadApp`**). Flutter builds should use platform stores, a browser, or an external distribution page.
+        Bearer JWT. Validates **`url`** (**http** or **https**) and **`reinstall`**, then returns **200** with a policy message: the Rust API does not download binaries or mutate local **`serve`** / **`web`** / **`skills`** / **`models`** trees (Electron-era Electron **`downloadApp`**). Flutter builds should use platform stores, a browser, or an external distribution page.
       security:
         - bearerAuth: []
       requestBody:
@@ -808,7 +808,7 @@ paths:
       operationId: getSettingsVendorsSummaryV1
       description: |
         Bearer JWT. Returns **`vendors`** derived from the embedded **`models_catalog.json`** (same source as **`GET /api/v1/models`**): **`id`**, **`name`**, **`modelCount`**, sorted unique **`modelKinds`**.
-        **`source`** is always **`static_catalog`**. Does **not** expose legacy **`o_vendorConfig.inputValues`** or other API keys (SaaS: env / billing).
+        **`source`** is always **`static_catalog`**. Does **not** expose Electron-era **`o_vendorConfig.inputValues`** or other API keys (SaaS: env / billing).
       security:
         - bearerAuth: []
       responses:
@@ -837,7 +837,7 @@ paths:
       summary: Live vendor model smoke test (queued job)
       operationId: postSettingsVendorModelTestV1
       description: |
-        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (legacy vendor id string), checks daily job quota, inserts **`app_generation_job`** kind **`settings.vendor.model_test`**. Worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway** / **Pika** / **Kling** and submits a minimal provider request (fallback provider env vars). Probe outcome is written into **`result`** or **`error_message`**.
+        Bearer JWT. Validates **`modelName`**, **`type`** (**`text`** | **`image`** | **`video`**), **`id`** (Electron-era vendor id string), checks daily job quota, inserts **`app_generation_job`** kind **`settings.vendor.model_test`**. Worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway** / **Pika** / **Kling** and submits a minimal provider request (fallback provider env vars). Probe outcome is written into **`result`** or **`error_message`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -884,7 +884,7 @@ paths:
       summary: Add custom vendor metadata
       operationId: postSettingsVendorsAddV1
       description: |
-        Bearer JWT. Validates non-empty **`tsCode`** (legacy **`addVendor`**), creates a **`custom-*`** vendor entry inside **`app_user_profile.vendor_config`**, and stores the source text as metadata only. The Rust API does **not** execute the TS provider script.
+        Bearer JWT. Validates non-empty **`tsCode`** (Electron-era **`addVendor`**), creates a **`custom-*`** vendor entry inside **`app_user_profile.vendor_config`**, and stores the source text as metadata only. The Rust API does **not** execute the TS provider script.
       security:
         - bearerAuth: []
       requestBody:
@@ -1013,7 +1013,7 @@ paths:
       summary: Enable or disable vendor
       operationId: postSettingsVendorsEnableV1
       description: |
-        Bearer JWT. Validates non-empty **`id`** and legacy numeric **`enable`** (**0** / non-zero), then stores the enabled state in **`app_user_profile.vendor_config`**.
+        Bearer JWT. Validates non-empty **`id`** and compat numeric **`enable`** (**0** / non-zero), then stores the enabled state in **`app_user_profile.vendor_config`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -1136,7 +1136,7 @@ paths:
       summary: Legacy wipe all local tables (not supported)
       operationId: postSettingsDangerDeleteAllDataV1
       description: |
-        Bearer JWT. Body must be **`{}`** (no extra keys). Replaces legacy **`POST /api/other/deleteAllData`** intent; returns **501** **`not_implemented`** — no SQLite **`initDB(..., true)`** equivalent on the hosted API.
+        Bearer JWT. Body must be **`{}`** (no extra keys). Replaces Electron-era **`POST /api/other/deleteAllData`** intent; returns **501** **`not_implemented`** — no SQLite **`initDB(..., true)`** equivalent on the hosted API.
         For operational cleanup use the guarded CLI instead: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
       security:
         - bearerAuth: []
@@ -1178,7 +1178,7 @@ paths:
       summary: Legacy drop all SQLite tables and re-init (not supported)
       operationId: postSettingsDangerClearDatabaseV1
       description: |
-        Bearer JWT. Body must be **`{}`**. Replaces legacy **`GET /api/setting/dbConfig/clearData`** (verb changed to **POST** for SaaS); returns **501** **`not_implemented`**.
+        Bearer JWT. Body must be **`{}`**. Replaces Electron-era **`GET /api/setting/dbConfig/clearData`** (verb changed to **POST** for SaaS); returns **501** **`not_implemented`**.
         For operational cleanup use the guarded CLI instead: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
       security:
         - bearerAuth: []
@@ -1263,7 +1263,7 @@ paths:
       summary: Update agent deploy row
       operationId: postSettingsAgentDeployModelV1
       description: |
-        Bearer JWT. Validates legacy **`deployAgentModel`** body, maps **`id`** to one of the four built-in agent rows, and persists **`model`** / **`modelName`** / **`vendorId`** into **`app_user_profile.agent_deploy_config`**.
+        Bearer JWT. Validates Electron-era **`deployAgentModel`** body, maps **`id`** to one of the four built-in agent rows, and persists **`model`** / **`modelName`** / **`vendorId`** into **`app_user_profile.agent_deploy_config`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -1304,7 +1304,7 @@ paths:
       summary: Ignore vendor API key body and confirm server-side policy
       operationId: postSettingsAgentDeploySetKeyV1
       description: |
-        Bearer JWT. Optional **`key`** in body (legacy **`agentSetKey`**). Always **200** with a message explaining that API keys are not accepted over HTTP and must stay in server-side env or secret management.
+        Bearer JWT. Optional **`key`** in body (Electron-era **`agentSetKey`**). Always **200** with a message explaining that API keys are not accepted over HTTP and must stay in server-side env or secret management.
       security:
         - bearerAuth: []
       requestBody:
@@ -1376,8 +1376,8 @@ paths:
       summary: List prompt templates for the current user
       operationId: listPromptsV1
       description: |
-        Returns **three** rows with stable integer **`id`** (**`1`**, **`2`**, **`3`**) matching legacy SQLite **`o_prompt.id`**.
-        When the user has no **`app_user_prompt`** rows yet, **`name`**, **`type`**, and **`data`** come from server defaults (same content as legacy **`initDB`** seeds).
+        Returns **three** rows with stable integer **`id`** (**`1`**, **`2`**, **`3`**) matching SQLite **`o_prompt.id`**.
+        When the user has no **`app_user_prompt`** rows yet, **`name`**, **`type`**, and **`data`** come from server defaults (same content as Electron-era **`initDB`** seeds).
         **`GET /api/v1/prompts/{numeric_id}`** returns one row (same merge rules as list). **`PATCH /api/v1/prompts/{numeric_id}`** upserts **`data`** into **`app_user_prompt`**.
       security:
         - bearerAuth: []
@@ -1506,7 +1506,7 @@ paths:
       operationId: listModelsV1
       description: |
         Bearer JWT. Data is baked from **`backend/data/models_catalog.json`** at compile time (no Postgres **`o_vendorConfig`**).
-        Query **`type`**: `text` \| `image` \| `video` \| `all`. Omitted defaults to **`all`**, which **excludes** `video` rows (same rule as legacy **`modelSelect/getModelList`**).
+        Query **`type`**: `text` \| `image` \| `video` \| `all`. Omitted defaults to **`all`**, which **excludes** `video` rows (same rule as Electron-era **`modelSelect/getModelList`**).
       security:
         - bearerAuth: []
       parameters:
@@ -1625,7 +1625,7 @@ paths:
       summary: Resolve one model by composite id
       operationId: modelDetailV1
       description: |
-        Bearer JWT. **`model_id`** format **`{vendor_id}:{model_name}`** (e.g. `1:gpt-4o-mini`), aligned with legacy **`modelSelect/getModelDetail`** splitting **`modelId`**.
+        Bearer JWT. **`model_id`** format **`{vendor_id}:{model_name}`** (e.g. `1:gpt-4o-mini`), aligned with Electron-era **`modelSelect/getModelDetail`** splitting **`modelId`**.
       security:
         - bearerAuth: []
       parameters:
@@ -1670,11 +1670,11 @@ paths:
   /api/v1/agents/memory/query:
     post:
       tags: [agents]
-      summary: List agent message memories for a legacy project scope
+      summary: List agent message memories for an integer project id scope
       operationId: queryAgentMemoryV1
       description: |
         Returns **`message`** rows for **`owner_user_id` + `projectId` + `agentType` + `episodesId`** (omit or null `episodesId` for the non-episode scope).
-        Response shape matches legacy **`/api/agents/getMemory`** `data` array (camelCase, markdown content blocks).
+        Response shape matches Electron-era **`/api/agents/getMemory`** `data` array (camelCase, markdown content blocks).
         Requires an **`app_project`** row owned by the user with **`numeric_id = projectId`**.
       security:
         - bearerAuth: []
@@ -1706,7 +1706,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: No owned project with that legacy id
+          description: No owned project with that numeric id
           content:
             application/json:
               schema:
@@ -1721,11 +1721,11 @@ paths:
   /api/v1/agents/memory/clear:
     post:
       tags: [agents]
-      summary: Clear agent memories for a legacy project scope
+      summary: Clear agent memories for an integer project id scope
       operationId: clearAgentMemoryV1
       description: |
-        Same semantics as legacy **`/api/agents/clearMemory`**: `all` deletes all rows; `message` deletes messages and summaries; `summary` clears summary rows and resets `summarized` on messages.
-        Send **`type`** (legacy) or **`clearType`** with values **`all`**, **`message`**, or **`summary`** (default **`all`**).
+        Same semantics as Electron-era **`/api/agents/clearMemory`**: `all` deletes all rows; `message` deletes messages and summaries; `summary` clears summary rows and resets `summarized` on messages.
+        Send **`type`** (Electron-era) or **`clearType`** with values **`all`**, **`message`**, or **`summary`** (default **`all`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -1754,7 +1754,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: No owned project with that legacy id
+          description: No owned project with that numeric id
           content:
             application/json:
               schema:
@@ -1772,7 +1772,7 @@ paths:
       summary: Append a single message memory (no auto-summary)
       operationId: appendAgentMemoryV1
       description: |
-        Inserts one **`message`** row (`summarized = 0`, optional `embedding` left null). Does **not** run legacy auto-summary compaction (that required LLM + embeddings in Node).
+        Inserts one **`message`** row (`summarized = 0`, optional `embedding` left null). Does **not** run Node auto-summary compaction (that required LLM + embeddings in Node).
       security:
         - bearerAuth: []
       requestBody:
@@ -1801,7 +1801,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: No owned project with that legacy id
+          description: No owned project with that numeric id
           content:
             application/json:
               schema:
@@ -2400,7 +2400,7 @@ paths:
       description: |
         Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the project, ordered by **`numeric_id`**.
         Optional query **`script_numeric_id`** restricts to assets linked via **`app_script_asset`** to that script (must belong to the same project).
-        Optional **`asset_type`** (**`role`** | **`tool`** | **`scene`**) and substring **`name`** (**`ILIKE`**) filter like legacy **`getAssetsApi`**.
+        Optional **`asset_type`** (**`role`** | **`tool`** | **`scene`**) and substring **`name`** (**`ILIKE`**) filter like Electron-era **`getAssetsApi`**.
         Optional **`limit`** (1–200) with **`page`** (1-based, default 1) paginate; without **`limit`**, all matches are returned and **`total`** equals **`items`** length.
       security:
         - bearerAuth: []
@@ -2482,7 +2482,7 @@ paths:
       summary: Corner-scape asset list (by project UUID)
       operationId: listCornerScapeAssetsByProjectIdV1
       description: |
-        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the owned project that are **top-level** in legacy terms:
+        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns **`app_asset`** rows for the owned project that are **top-level** as top-level parents:
         promoted snapshot has **no** JSON **`assetsId`** property, or **`assetsId`** is JSON **`null`**. Ordered **role → scene → tool**, then **`numeric_id`**.
         Optional body **`types`** filters **`asset_type`**. **`history_images`** lists **`app_asset_image`** rows with **`state = '已完成'`**, ordered by **`sort_index`** then **`created_at`**.
       security:
@@ -2535,14 +2535,14 @@ paths:
   /api/v1/projects/{project_id}/assets/workbench/image-bundle:
     post:
       tags: [assets]
-      summary: Workbench — load one asset image bundle by legacy asset id (project UUID)
+      summary: Workbench — load one asset image bundle by stable asset numeric id (project UUID)
       operationId: postAssetsGetImageV1
       description: |
         Parity with old **`POST /api/assets/getImage`**, scoped to caller-owned **`project_id`** (**`app_project.id`**, UUID).
         Body **`assetsId`** is **`app_asset.numeric_id`** (must belong to that project). Response returns:
-        - **`id`**: same legacy asset id
+        - **`id`**: same asset numeric id
         - **`imageId`**: **`app_asset.metadata.imageId`** when set
-        - **`tempAssets`**: image history rows from **`app_asset_image`** with legacy selection flag.
+        - **`tempAssets`**: image history rows from **`app_asset_image`** with workbench selection flag.
       security:
         - bearerAuth: []
       parameters:
@@ -2578,7 +2578,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project or asset legacy id not found for caller
+          description: Project or asset numeric id not found for caller
           content:
             application/json:
               schema:
@@ -2690,7 +2690,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project UUID or asset legacy id not found for caller
+          description: Project UUID or asset numeric id not found for caller
           content:
             application/json:
               schema:
@@ -2709,7 +2709,7 @@ paths:
       operationId: postAssetsUpdateAssetsV1
       description: |
         Parity with old **`POST /api/assets/updateAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Updates one legacy asset by **`id`**, mapping:
+        Updates one workbench asset by **`id`**, mapping:
         - `describe` -> `description`
         - optional `prompt`/`remark` -> metadata `prompt`/`remark` (empty/null clears).
       security:
@@ -2747,7 +2747,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project UUID or asset legacy id not found for caller
+          description: Project UUID or asset numeric id not found for caller
           content:
             application/json:
               schema:
@@ -2762,11 +2762,11 @@ paths:
   /api/v1/projects/{project_id}/assets/workbench/del-assets:
     post:
       tags: [assets]
-      summary: Workbench — delete one asset by legacy id (by project UUID)
+      summary: Workbench — delete one asset by numeric id (by project UUID)
       operationId: postAssetsDelAssetsV1
       description: |
         Parity with old **`POST /api/assets/delAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Deletes one asset by **`id`** (legacy id).
+        Deletes one asset by **`id`** (numeric id).
       security:
         - bearerAuth: []
       parameters:
@@ -2811,11 +2811,11 @@ paths:
   /api/v1/projects/{project_id}/assets/workbench/batch-delete:
     post:
       tags: [assets]
-      summary: Workbench — batch delete assets by legacy ids (by project UUID)
+      summary: Workbench — batch delete assets by numeric ids (by project UUID)
       operationId: postAssetsBatchDeleteV1
       description: |
         Parity with old **`POST /api/assets/batchDelete`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Deletes assets by legacy **`id[]`**.
+        Deletes assets by Electron-era **`id[]`**.
       security:
         - bearerAuth: []
       parameters:
@@ -2860,7 +2860,7 @@ paths:
   /api/v1/projects/{project_id}/assets/workbench/del-image:
     post:
       tags: [assets]
-      summary: Workbench — delete one image by legacy image id (by project UUID)
+      summary: Workbench — delete one image by numeric image id (by project UUID)
       operationId: postAssetsDelImageV1
       description: |
         Parity with old **`POST /api/assets/delImage`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
@@ -2913,9 +2913,9 @@ paths:
       operationId: postAssetsGetAssetsApiV1
       description: |
         Parity with old **`POST /api/assets/getAssetsApi`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Returns parent assets (where legacy **`assetsId`** is null) for **`type`**,
+        Returns parent assets (where Electron-era **`assetsId`** is null) for **`type`**,
         with optional **`name`** fuzzy filter and classic **`page`**/**`limit`** pagination.
-        Each parent row includes **`sonAssets`** (children whose **`assetsId`** equals the parent legacy id).
+        Each parent row includes **`sonAssets`** (children whose **`assetsId`** equals the parent numeric id).
       security:
         - bearerAuth: []
       parameters:
@@ -3140,7 +3140,7 @@ paths:
       operationId: postAssetsPollingImageAssetsV1
       description: |
         Parity with old **`POST /api/assets/pollingImageAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Body **`ids`** are legacy asset ids (**`app_asset.numeric_id`**). For each id, the server reads the selected
+        Body **`ids`** are asset numeric ids (**`app_asset.numeric_id`**). For each id, the server reads the selected
         cover image from **`app_asset.metadata.imageId`** and joins to **`app_asset_image.numeric_image_id`**.
         Only rows whose selected image state is **not** **`生成中`** are returned.
       security:
@@ -3160,7 +3160,7 @@ paths:
               $ref: "#/components/schemas/LegacyAssetsPollingImageAssetsBody"
       responses:
         "200":
-          description: Polling rows (legacy shape subset)
+          description: Polling rows (compact shape subset)
           content:
             application/json:
               schema:
@@ -3199,7 +3199,7 @@ paths:
       operationId: postAssetsPollingPromptAssetsV1
       description: |
         Parity with old **`POST /api/assets/pollingPromptAssets`**, scoped to **`project_id`** (**`app_project.id`**, UUID).
-        Body **`ids`** are legacy asset ids (**`app_asset.numeric_id`**). The server derives each asset's
+        Body **`ids`** are asset numeric ids (**`app_asset.numeric_id`**). The server derives each asset's
         **`promptState`** from latest related polish jobs (`asset.polish.prompt` / `asset.polish.batch`);
         rows still **`生成中`** are filtered out.
       security:
@@ -3219,7 +3219,7 @@ paths:
               $ref: "#/components/schemas/LegacyAssetsPollingPromptAssetsBody"
       responses:
         "200":
-          description: Polling rows (legacy shape subset)
+          description: Polling rows (compact shape subset)
           content:
             application/json:
               schema:
@@ -3254,7 +3254,7 @@ paths:
   /api/v1/projects/{project_id}/assets/{asset_numeric_id}:
     get:
       tags: [assets]
-      summary: Single asset by project UUID and asset legacy id
+      summary: Single asset by project UUID and asset numeric id
       operationId: getProjectAssetByProjectIdV1
       description: |
         Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Returns one **`app_asset`** row when **`asset_numeric_id`** belongs to that project.
@@ -3994,7 +3994,7 @@ paths:
   /api/v1/projects/{project_id}/scripts/{script_numeric_id}:
     get:
       tags: [scripts]
-      summary: Script by project UUID + script legacy id
+      summary: Script by project UUID + script numeric id
       operationId: getScriptByProjectAndLegacyV1
       description: |
         Returns **`app_script`** for **`script_numeric_id`** when that script belongs to **`project_id`** (UUID).
@@ -4262,7 +4262,7 @@ paths:
   /api/v1/projects/{project_id}/novels/{novel_numeric_id}:
     get:
       tags: [novels]
-      summary: Get one novel chapter (by project UUID + novel legacy id)
+      summary: Get one novel chapter (by project UUID + novel numeric id)
       operationId: getProjectNovelByProjectIdV1
       description: |
         Returns one **`app_novel`** row for the authenticated user, scoped by project UUID (**`app_project.id`**) and **`novel_numeric_id`** (**`app_novel.numeric_id`**).
@@ -4443,7 +4443,7 @@ paths:
         - public **`http(s)`** URL
         - existing API path (for already-persisted cover)
         - **`data:image/png|jpeg|webp;base64,...`**
-        - raw base64 image string (legacy fallback; stored as **jpeg** bytes)
+        - raw base64 image string (compat fallback; stored as **jpeg** bytes)
         When **`file_url`** is base64-like, the server requires **`TOONFLOW_LOCAL_ART_STYLE_COVER_DIR`** and persists
         the decoded bytes under **`{dir}/{user_id}/{numeric_id}.{ext}`**, then stores **`/api/v1/art-styles/numeric/{numeric_id}/cover`**
         in the row (where **`numeric_id`** is the row's **`app_art_style.numeric_id`**).
@@ -4487,7 +4487,7 @@ paths:
       summary: Extract art-style prompt from images (vision LLM)
       operationId: extractArtStylePromptV1
       description: |
-        OpenAI-compatible **`chat/completions`** (non-streaming, multimodal). Same product intent as legacy **`/api/artStyle/extractStylePrompt`**.
+        OpenAI-compatible **`chat/completions`** (non-streaming, multimodal). Same product intent as Electron-era **`/api/artStyle/extractStylePrompt`**.
         Each **`images[]`** entry is sent as **`image_url.url`** (public **`https://`** URL or **`data:image/...;base64,...`**).
         Empty **`images`** or blank entries (after trim) yield **`400`** before the LLM is consulted.
         Requires **`OPENAI_API_KEY`** or **`LLM_API_KEY`** for valid payloads; model from **`LLM_MODEL`** (default **`gpt-4o-mini`**, must support vision). Does not use Postgres.
@@ -4713,10 +4713,10 @@ paths:
   /api/v1/script-agent/get-plan-data:
     post:
       tags: [scripts]
-      summary: Load script agent plan (legacy `getPlanData` parity)
+      summary: Load script agent plan (Electron `getPlanData` parity)
       operationId: postScriptAgentGetPlanDataV1
       description: |
-        Bearer JWT. Validates legacy **`projectId`** + **`agentType: scriptAgent`**. Loads or creates **`app_script_agent_plan`** for the project; first visit may return flat **`data.storySkeleton`/`data.adaptationStrategy`** only; later responses nest **`data.data`** (JSON plan + **`script`** array from **`app_script`**) and **`data.id`** (plan row id).
+        Bearer JWT. Validates Electron-era **`projectId`** + **`agentType: scriptAgent`**. Loads or creates **`app_script_agent_plan`** for the project; first visit may return flat **`data.storySkeleton`/`data.adaptationStrategy`** only; later responses nest **`data.data`** (JSON plan + **`script`** array from **`app_script`**) and **`data.id`** (plan row id).
       security:
         - bearerAuth: []
       requestBody:
@@ -4761,7 +4761,7 @@ paths:
   /api/v1/script-agent/set-plan-data:
     post:
       tags: [scripts]
-      summary: Save script agent plan and sync scripts (legacy `setPlanData` parity)
+      summary: Save script agent plan and sync scripts (Electron `setPlanData` parity)
       operationId: postScriptAgentSetPlanDataV1
       description: |
         Bearer JWT. Upserts **`app_script_agent_plan`** (**`storySkeleton`/`adaptationStrategy`** only in JSON); for each **`data.script`** row with non-empty **`name`**, updates matching **`app_script`** by **`project_id`** + **`name`** or inserts a new row (new **`numeric_id`** under advisory lock).
@@ -4815,7 +4815,7 @@ paths:
   /api/v1/script-agent/update-data:
     post:
       tags: [scripts]
-      summary: Patch agent work row by id (legacy `updateData` parity)
+      summary: Patch agent work row by id (Electron `updateData` parity)
       operationId: postScriptAgentUpdateDataV1
       description: |
         Bearer JWT. Updates **`app_script_agent_plan.plan_data`** JSON for row **`id`** owned by the caller (**`storySkeleton`**, **`adaptationStrategy`**, **`script`** snapshot with **`id`** + **`content`**). Does not sync **`app_script`** rows.
@@ -4863,10 +4863,10 @@ paths:
   /api/v1/assets-generate/generate:
     post:
       tags: [assets]
-      summary: Generate one asset image (legacy `generateAssets` parity)
+      summary: Generate one asset image (Electron `generateAssets` parity)
       operationId: postAssetsGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), resolves **`projectId`** to the caller's **`app_project`**, checks daily job quota, inserts **`app_generation_job`** with kind **`asset.generate.image`** (**`queued`**). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker calls **`images/edits`** if normalized **`payload.image_base64`** exists (multipart reference image), otherwise **`images/generations`**, inserts **`app_asset_image`** (**`state`** **`已完成`**, **`file_path`** = provider URL), and **`succeeded`** with **`result`** including **`asset_image_id`** / **`image_url`** / optional **`revised_prompt`**.
+        Bearer JWT. Validates Electron-era **`generateAssets`** body (**`type`**: **`role`** \| **`scene`** \| **`tool`** \| **`storyboard`**), resolves **`projectId`** to the caller's **`app_project`**, checks daily job quota, inserts **`app_generation_job`** with kind **`asset.generate.image`** (**`queued`**). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker calls **`images/edits`** if normalized **`payload.image_base64`** exists (multipart reference image), otherwise **`images/generations`**, inserts **`app_asset_image`** (**`state`** **`已完成`**, **`file_path`** = provider URL), and **`succeeded`** with **`result`** including **`asset_image_id`** / **`image_url`** / optional **`revised_prompt`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -4916,10 +4916,10 @@ paths:
   /api/v1/assets-generate/polish-prompt:
     post:
       tags: [assets]
-      summary: Polish one asset prompt (legacy `polishAssetsPrompt` parity)
+      summary: Polish one asset prompt (Electron `polishAssetsPrompt` parity)
       operationId: postAssetsPolishPromptV1
       description: |
-        Bearer JWT. Validates legacy **`polishAssetsPrompt`** body, resolves **`projectId`**, enqueues **`app_generation_job`** kind **`asset.polish.prompt`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker completes the job with **`result.polished_prompt`**; otherwise the job ends **`failed`** (same env as Harness chat / **`chat_completion_assistant_text`**).
+        Bearer JWT. Validates Electron-era **`polishAssetsPrompt`** body, resolves **`projectId`**, enqueues **`app_generation_job`** kind **`asset.polish.prompt`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker completes the job with **`result.polished_prompt`**; otherwise the job ends **`failed`** (same env as Harness chat / **`chat_completion_assistant_text`**).
       security:
         - bearerAuth: []
       requestBody:
@@ -4969,10 +4969,10 @@ paths:
   /api/v1/assets-generate/batch-generate:
     post:
       tags: [assets]
-      summary: Batch-generate asset images (legacy `batchGenerateImageAssets` parity)
+      summary: Batch-generate asset images (Electron `batchGenerateImageAssets` parity)
       operationId: postAssetsBatchGenerateV1
       description: |
-        Bearer JWT. Validates legacy **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (including normalized optional **`image_base64`** per row). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is set, the worker processes **`items`** sequentially ( **`concurrentCount`** is informational only), one image call (**`images/edits`** with reference image, else **`images/generations`**) + **`app_asset_image`** per row, and **`succeeded`** with **`result.items`** mirroring single-generate outcomes.
+        Bearer JWT. Validates Electron-era **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (including normalized optional **`image_base64`** per row). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is set, the worker processes **`items`** sequentially ( **`concurrentCount`** is informational only), one image call (**`images/edits`** with reference image, else **`images/generations`**) + **`app_asset_image`** per row, and **`succeeded`** with **`result.items`** mirroring single-generate outcomes.
       security:
         - bearerAuth: []
       requestBody:
@@ -5022,10 +5022,10 @@ paths:
   /api/v1/assets-generate/batch-polish:
     post:
       tags: [assets]
-      summary: Batch-polish asset prompts (legacy `batchPolishAssetsPrompt` parity)
+      summary: Batch-polish asset prompts (Electron `batchPolishAssetsPrompt` parity)
       operationId: postAssetsBatchPolishV1
       description: |
-        Bearer JWT. Validates legacy **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker runs one chat completion per **`items[]`** and **`succeeded`** with **`result.items`** (**`asset_numeric_id`** + **`polished_prompt`** each); otherwise **`failed`**.
+        Bearer JWT. Validates Electron-era **`batchPolishAssetsPrompt`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.polish.batch`**. When **`OPENAI_API_KEY`/`LLM_API_KEY`** is configured, the worker runs one chat completion per **`items[]`** and **`succeeded`** with **`result.items`** (**`asset_numeric_id`** + **`polished_prompt`** each); otherwise **`failed`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -5075,12 +5075,12 @@ paths:
   /api/v1/assets-generate/cancel-generate:
     post:
       tags: [assets]
-      summary: Cancel one legacy generated image (legacy `cancelGenerate` parity)
+      summary: Cancel one stale generated image (Electron `cancelGenerate` parity)
       operationId: postAssetsGenerateCancelGenerateV1
       description: |
         Bearer JWT. Validates positive **`id`** and marks caller-owned **`app_asset_image`**
         row (**`numeric_image_id = id`**) to **`state = 生成失败`**. This endpoint intentionally
-        keeps legacy idempotent behavior: when no row matches, still returns **200** with success message.
+        keeps numeric idempotent behavior: when no row matches, still returns **200** with success message.
       security:
         - bearerAuth: []
       requestBody:
@@ -5118,11 +5118,11 @@ paths:
   /api/v1/production/get-production-data:
     post:
       tags: [production]
-      summary: Load production bundle for storyboard ids (legacy `getProductionData`)
+      summary: Load production bundle for storyboard ids (Electron `getProductionData`)
       operationId: postProductionGetProductionDataV1
       description: |
-        Bearer JWT. Validates **`ids`** (legacy **`o_storyboard` id** list), then returns
-        owned **`app_storyboard`** rows (subset) by legacy id order.
+        Bearer JWT. Validates **`ids`** (Electron-era **`o_storyboard` id** list), then returns
+        owned **`app_storyboard`** rows (subset) by numeric id order.
       security:
         - bearerAuth: []
       requestBody:
@@ -5160,7 +5160,7 @@ paths:
   /api/v1/production/get-flow-data:
     post:
       tags: [production]
-      summary: Load production agent flow data (legacy `getFlowData`)
+      summary: Load production agent flow data (Electron `getFlowData`)
       operationId: postProductionGetFlowDataV1
       description: |
         Bearer JWT. Validates **`projectId`** + **`episodesId`**, then returns the production-agent flow JSON:
@@ -5210,7 +5210,7 @@ paths:
   /api/v1/production/save-flow-data:
     post:
       tags: [production]
-      summary: Save production flow JSON (legacy `saveFlowData`)
+      summary: Save production flow JSON (Electron `saveFlowData`)
       operationId: postProductionSaveFlowDataV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`episodesId`**, **`data`** (must be JSON object), upserts **`app_production_flow`** for the owned project+script, and if **`data.storyboard`** is a full ordered list of numeric ids it also rewrites **`app_storyboard.sb_index`** to match the saved order. Returns:
@@ -5256,10 +5256,10 @@ paths:
   /api/v1/production/workbench/generate-video:
     post:
       tags: [production]
-      summary: Enqueue video generation (legacy `generateVideo`)
+      summary: Enqueue video generation (Electron `generateVideo`)
       operationId: postProductionWorkbenchGenerateVideoV1
       description: |
-        Bearer JWT. Validates legacy **`generateVideo`** body, then:
+        Bearer JWT. Validates Electron-era **`generateVideo`** body, then:
         - **200** when project+script belong to this user
         - **404** when not owned / not found
         - **503** when auth/DB is not configured
@@ -5302,7 +5302,7 @@ paths:
   /api/v1/production/storyboard/polling-image:
     post:
       tags: [production]
-      summary: Poll storyboard image generation state (legacy `pollingImage`)
+      summary: Poll storyboard image generation state (Electron `pollingImage`)
       operationId: postProductionStoryboardPollingImageV1
       description: |
         Bearer JWT. Validates **`ids`** (non-empty, positive), then returns:
@@ -5348,7 +5348,7 @@ paths:
   /api/v1/production/export-image:
     post:
       tags: [production]
-      summary: ZIP storyboard frames for export (legacy `exportImage`)
+      summary: ZIP storyboard frames for export (Electron `exportImage`)
       operationId: postProductionExportImageV1
       description: |
         Bearer JWT. Validates **`shotId`** array, fetches each storyboard **`file_path`**,
@@ -5408,7 +5408,7 @@ paths:
   /api/v1/production/assets/batch-generate-assets-image:
     post:
       tags: [production]
-      summary: Batch enqueue asset image generation (legacy `batchGenerateAssetsImage`)
+      summary: Batch enqueue asset image generation (Electron `batchGenerateAssetsImage`)
       operationId: postProductionAssetsBatchGenerateImageV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`assetIds`**,
@@ -5456,7 +5456,7 @@ paths:
   /api/v1/production/assets/delete-assets-derivative:
     post:
       tags: [production]
-      summary: Delete derivative asset images (legacy `deleteAssetsDireve`)
+      summary: Delete derivative asset images (Electron `deleteAssetsDireve`)
       operationId: postProductionAssetsDeleteDerivativeV1
       description: |
         Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then deletes owned
@@ -5498,7 +5498,7 @@ paths:
   /api/v1/production/assets/get-assets-data:
     post:
       tags: [production]
-      summary: List project assets for production workbench (legacy `getAssetsData`)
+      summary: List project assets for production workbench (Electron `getAssetsData`)
       operationId: postProductionAssetsGetAssetsDataV1
       description: |
         Bearer JWT. Validates **`projectId`**, optional **`assetType`**, and pagination fields,
@@ -5540,7 +5540,7 @@ paths:
   /api/v1/production/assets/polling-image:
     post:
       tags: [production]
-      summary: Poll derivative asset image status (legacy `assets/pollingImage`)
+      summary: Poll derivative asset image status (Electron `assets/pollingImage`)
       operationId: postProductionAssetsPollingImageV1
       description: |
         Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then returns current
@@ -5582,7 +5582,7 @@ paths:
   /api/v1/production/assets/update-assets-url:
     post:
       tags: [production]
-      summary: Append a generated asset image URL (legacy `updateAssetsUrl`)
+      summary: Append a generated asset image URL (Electron `updateAssetsUrl`)
       operationId: postProductionAssetsUpdateUrlV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`assetId`**, and non-empty **`imageUrl`**, then
@@ -5630,7 +5630,7 @@ paths:
   /api/v1/production/edit-image/generate-flow-image:
     post:
       tags: [production]
-      summary: Enqueue edit-image generation job (legacy `generateFlowImage`)
+      summary: Enqueue edit-image generation job (Electron `generateFlowImage`)
       operationId: postProductionEditImageGenerateFlowImageV1
       description: |
         Bearer JWT. Validates **`flowId`**, non-empty **`prompt`**, and optional **`model`**,
@@ -5672,7 +5672,7 @@ paths:
   /api/v1/production/edit-image/upload-image:
     post:
       tags: [production]
-      summary: Upload edit-image source image (legacy `uploadImage`)
+      summary: Upload edit-image source image (Electron `uploadImage`)
       operationId: postProductionEditImageUploadImageV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`base64Data`** (JPEG/JPG/PNG data URI),
@@ -5720,7 +5720,7 @@ paths:
   /api/v1/production/edit-image/get-image-default-model:
     post:
       tags: [production]
-      summary: Get default model for edit-image flow (legacy `getImageDefaultModle`)
+      summary: Get default model for edit-image flow (Electron `getImageDefaultModle`)
       operationId: postProductionEditImageGetDefaultModelV1
       description: |
         Bearer JWT. Returns the built-in default image model metadata for edit-image.
@@ -5743,7 +5743,7 @@ paths:
   /api/v1/production/edit-image/get-image-flow:
     post:
       tags: [production]
-      summary: Load edit-image flow template (legacy `getImageFlow`)
+      summary: Load edit-image flow template (Electron `getImageFlow`)
       operationId: postProductionEditImageGetFlowV1
       description: |
         Bearer JWT. Returns the built-in edit-image flow template with step metadata and default model.
@@ -5766,7 +5766,7 @@ paths:
   /api/v1/production/edit-image/save-image-flow:
     post:
       tags: [production]
-      summary: Save edit-image flow state (legacy `saveImageFlow`)
+      summary: Save edit-image flow state (Electron `saveImageFlow`)
       operationId: postProductionEditImageSaveFlowV1
       description: |
         Bearer JWT. Validates **`flowId`** and **`steps`**, then echoes a saved confirmation.
@@ -5801,7 +5801,7 @@ paths:
   /api/v1/production/edit-image/update-image-flow:
     post:
       tags: [production]
-      summary: Update one edit-image flow step (legacy `updateImageFlow`)
+      summary: Update one edit-image flow step (Electron `updateImageFlow`)
       operationId: postProductionEditImageUpdateFlowV1
       description: |
         Bearer JWT. Validates **`flowId`**, **`stepId`**, and JSON-object **`updates`**, then
@@ -5837,7 +5837,7 @@ paths:
   /api/v1/production/get-storyboard-data:
     post:
       tags: [production]
-      summary: List storyboards under a project/script (legacy `getStoryboardData`)
+      summary: List storyboards under a project/script (Electron `getStoryboardData`)
       operationId: postProductionGetStoryboardDataV1
       description: |
         Bearer JWT. Validates **`projectId`** and **`scriptId`**, then returns owned storyboard rows
@@ -5879,7 +5879,7 @@ paths:
   /api/v1/production/storyboard/add:
     post:
       tags: [production]
-      summary: Add one storyboard row (legacy `addStoryboard`)
+      summary: Add one storyboard row (Electron `addStoryboard`)
       operationId: postProductionStoryboardAddV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`prompt`**,
@@ -5927,7 +5927,7 @@ paths:
   /api/v1/production/storyboard/batch-add-info:
     post:
       tags: [production]
-      summary: Batch insert storyboard rows (legacy `batchAddStoryboardInfo`)
+      summary: Batch insert storyboard rows (Electron `batchAddStoryboardInfo`)
       operationId: postProductionStoryboardBatchAddInfoV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`storyboards`**,
@@ -5975,7 +5975,7 @@ paths:
   /api/v1/production/storyboard/batch-generate-image:
     post:
       tags: [production]
-      summary: Batch enqueue storyboard image generation (legacy `batchGenerateImage`)
+      summary: Batch enqueue storyboard image generation (Electron `batchGenerateImage`)
       operationId: postProductionStoryboardBatchGenerateImageV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`items`**, verifies
@@ -6023,7 +6023,7 @@ paths:
   /api/v1/production/storyboard/down-preview-image:
     post:
       tags: [production]
-      summary: Get preview/download URL for a storyboard image (legacy `downPreviewImage`)
+      summary: Get preview/download URL for a storyboard image (Electron `downPreviewImage`)
       operationId: postProductionStoryboardDownPreviewImageV1
       description: |
         Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
@@ -6071,7 +6071,7 @@ paths:
   /api/v1/production/storyboard/edit-info:
     post:
       tags: [production]
-      summary: Update storyboard prompt/duration (legacy `editStoryboardInfo`)
+      summary: Update storyboard prompt/duration (Electron `editStoryboardInfo`)
       operationId: postProductionStoryboardEditInfoV1
       description: |
         Bearer JWT. Validates **`storyboardId`** and non-empty **`prompt`**, then updates
@@ -6119,7 +6119,7 @@ paths:
   /api/v1/production/storyboard/get-data:
     post:
       tags: [production]
-      summary: Load one storyboard row (legacy `storyboard/getStoryboardData`)
+      summary: Load one storyboard row (Electron `storyboard/getStoryboardData`)
       operationId: postProductionStoryboardGetDataV1
       description: |
         Bearer JWT. Validates **`storyboardId`**, then returns that owned storyboard row.
@@ -6166,7 +6166,7 @@ paths:
   /api/v1/production/storyboard/preview-image:
     post:
       tags: [production]
-      summary: Preview current storyboard image (legacy `previewImage`)
+      summary: Preview current storyboard image (Electron `previewImage`)
       operationId: postProductionStoryboardPreviewImageV1
       description: |
         Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
@@ -6214,7 +6214,7 @@ paths:
   /api/v1/production/storyboard/remove-frame:
     post:
       tags: [production]
-      summary: Clear storyboard image selection (legacy `removeFrame`)
+      summary: Clear storyboard image selection (Electron `removeFrame`)
       operationId: postProductionStoryboardRemoveFrameV1
       description: |
         Bearer JWT. Validates **`storyboardId`**, then clears the owned storyboard's current image URL/state.
@@ -6261,7 +6261,7 @@ paths:
   /api/v1/production/storyboard/update-url:
     post:
       tags: [production]
-      summary: Set storyboard image URL (legacy `updateStoryboardUrl`)
+      summary: Set storyboard image URL (Electron `updateStoryboardUrl`)
       operationId: postProductionStoryboardUpdateUrlV1
       description: |
         Bearer JWT. Validates **`storyboardId`** and non-empty **`imageUrl`**, then stores it on the owned storyboard.
@@ -6308,7 +6308,7 @@ paths:
   /api/v1/production/workbench/add-track:
     post:
       tags: [production]
-      summary: Add a persisted video track (legacy `addTrack`)
+      summary: Add a persisted video track (Electron `addTrack`)
       operationId: postProductionWorkbenchAddTrackV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`trackName`**,
@@ -6357,7 +6357,7 @@ paths:
   /api/v1/production/workbench/delete-track:
     post:
       tags: [production]
-      summary: Delete a persisted video track (legacy `deleteTrack`)
+      summary: Delete a persisted video track (Electron `deleteTrack`)
       operationId: postProductionWorkbenchDeleteTrackV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`trackId`**, then clears that
@@ -6406,7 +6406,7 @@ paths:
   /api/v1/production/workbench/delete-video:
     post:
       tags: [production]
-      summary: Delete a selected storyboard video (legacy `delVideo`)
+      summary: Delete a selected storyboard video (Electron `delVideo`)
       operationId: postProductionWorkbenchDeleteVideoV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, and **`storyboardId`**, then clears
@@ -6454,7 +6454,7 @@ paths:
   /api/v1/production/workbench/generate-video-prompt:
     post:
       tags: [production]
-      summary: Generate a default video prompt (legacy `generateVideoPrompt`)
+      summary: Generate a default video prompt (Electron `generateVideoPrompt`)
       operationId: postProductionWorkbenchGenerateVideoPromptV1
       description: |
         Bearer JWT. Validates **`projectId`** and **`scriptId`**, checks ownership, then returns
@@ -6502,7 +6502,7 @@ paths:
   /api/v1/production/workbench/get-generate-data:
     post:
       tags: [production]
-      summary: Load generated videos and active jobs (legacy `getGenerateData`)
+      summary: Load generated videos and active jobs (Electron `getGenerateData`)
       operationId: postProductionWorkbenchGetGenerateDataV1
       description: |
         Bearer JWT. Validates **`projectId`** and **`scriptId`**, then returns completed
@@ -6544,7 +6544,7 @@ paths:
   /api/v1/production/workbench/get-video-list:
     post:
       tags: [production]
-      summary: List generated storyboard videos (legacy `getVideoList`)
+      summary: List generated storyboard videos (Electron `getVideoList`)
       operationId: postProductionWorkbenchGetVideoListV1
       description: |
         Bearer JWT. Validates **`projectId`**, optional **`trackId`**, and pagination fields,
@@ -6586,7 +6586,7 @@ paths:
   /api/v1/production/workbench/get-video-model-detail:
     post:
       tags: [production]
-      summary: Get default video model details (legacy `getVideoModelDetail`)
+      summary: Get default video model details (Electron `getVideoModelDetail`)
       operationId: postProductionWorkbenchGetVideoModelDetailV1
       description: |
         Bearer JWT. Returns the current built-in default video model metadata for the workbench.
@@ -6609,7 +6609,7 @@ paths:
   /api/v1/production/workbench/select-video:
     post:
       tags: [production]
-      summary: Select a generated video for a storyboard (legacy `selectVideo`)
+      summary: Select a generated video for a storyboard (Electron `selectVideo`)
       operationId: postProductionWorkbenchSelectVideoV1
       description: |
         Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, and non-empty **`videoUrl`**,
@@ -6658,11 +6658,11 @@ paths:
   /api/v1/scripts/export:
     post:
       tags: [scripts]
-      summary: Export scripts as a ZIP of text files (legacy `exportScript` parity)
+      summary: Export scripts as a ZIP of text files (Electron `exportScript` parity)
       operationId: exportScriptsZipV1
       description: |
         Returns **`application/zip`** with one **`.txt`** per script (**`{numeric_id}_{sanitized_name}.txt`**).
-        Only scripts **owned** by the caller (via `app_project.owner_user_id`) are included; unknown legacy ids are **omitted** (legacy SQLite behavior).
+        Only scripts **owned** by the caller (via `app_project.owner_user_id`) are included; unknown numeric ids are **omitted** (SQLite behavior).
         Request body **`numeric_ids`** must be **non-empty** positive integers, at most **500** per call.
       security:
         - bearerAuth: []
@@ -6713,11 +6713,11 @@ paths:
   /api/v1/scripts/extract-state/poll:
     post:
       tags: [scripts]
-      summary: Poll script asset-extract state (legacy `pollScriptAssets` parity)
+      summary: Poll script asset-extract state (Electron `pollScriptAssets` parity)
       operationId: pollScriptExtractStateV1
       description: |
         Returns **`numeric_id`**, **`extract_state`**, **`error_reason`** for owned scripts whose **`extract_state` is not `0`**.
-        **`0`** means *extracting in progress* (legacy batch flow); those rows are **excluded** so clients poll until completion/failure.
+        **`0`** means *extracting in progress* (Electron-era batch flow); those rows are **excluded** so clients poll until completion/failure.
         At most **2000** ids per request.
       security:
         - bearerAuth: []
@@ -6758,11 +6758,11 @@ paths:
   /api/v1/scripts/extract-assets:
     post:
       tags: [scripts]
-      summary: Start async script asset extraction (legacy `extractAssets` parity)
+      summary: Start async script asset extraction (Electron `extractAssets` parity)
       operationId: startScriptAssetExtractV1
       description: |
-        Marks selected scripts **`extract_state = 2`** then **`0`** while processing, then **`1`** on success or **`-1`** on failure (same integers as legacy SQLite).
-        Work runs in a **background task** after **`200`** — response body is only **`{ "status": "accepted", "message": "…" }`** (legacy returned success text then continued in-process).
+        Marks selected scripts **`extract_state = 2`** then **`0`** while processing, then **`1`** on success or **`-1`** on failure (same integers as SQLite).
+        Work runs in a **background task** after **`200`** — response body is only **`{ "status": "accepted", "message": "…" }`** (Electron-era returned success text then continued in-process).
 
         **Requires** **`DATABASE_URL`**, **`OPENAI_API_KEY`** / **`LLM_API_KEY`**, and migrated tables **`app_asset`** / **`app_script_asset`**.
 
@@ -6804,7 +6804,7 @@ paths:
   /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards:
     get:
       tags: [storyboards]
-      summary: List storyboards for a script (by project UUID + script legacy id)
+      summary: List storyboards for a script (by project UUID + script numeric id)
       operationId: listStoryboardsByProjectAndScriptLegacyV1
       description: |
         Lists **`app_storyboard`** rows for the script **`script_numeric_id`** under **`project_id`** (**`app_project.id`** UUID).
@@ -6852,7 +6852,7 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
     post:
       tags: [storyboards]
-      summary: Create storyboard under a script (by project UUID + script legacy id)
+      summary: Create storyboard under a script (by project UUID + script numeric id)
       operationId: createStoryboardUnderProjectAndScriptLegacyV1
       description: |
         Inserts **`app_storyboard`** for the script under **`project_id`** (**`app_project.id`** UUID). **`numeric_id`** is allocated with advisory lock **`884_422_003`** + **`MAX(numeric_id)+1`** over **`app_storyboard`**.
@@ -6912,7 +6912,7 @@ paths:
   /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}:
     get:
       tags: [storyboards]
-      summary: Storyboard by legacy id (scoped to project UUID)
+      summary: Storyboard by numeric id (scoped to project UUID)
       operationId: getStoryboardByProjectAndLegacyV1
       description: |
         Returns **`app_storyboard`** for **`storyboard_numeric_id`** when that row belongs to **`project_id`** (UUID).
@@ -7061,8 +7061,8 @@ paths:
       summary: List bundled art style visual manuals (Markdown slots + image paths)
       operationId: getVisualManualV1
       description: |
-        Reads each subdirectory of **`data/skills/art_skills/`** (sorted by name). For every style: first line of **`README.md`** as **`name`** (legacy strips `--`), optional **`images/*.png`** etc. as relative paths, and fixed Markdown slots (**`README`**, **`prefix`**, **`art_prompt/*`**, **`driector_skills/*`**) matching legacy **`DATA_MAP`**.
-        Does not require Postgres. Prefer **GET** for new clients; **`POST /api/v1/visual-manual`** returns the same JSON for legacy **`POST /api/project/getVisualManual`** callers.
+        Reads each subdirectory of **`data/skills/art_skills/`** (sorted by name). For every style: first line of **`README.md`** as **`name`** (Electron-era strips `--`), optional **`images/*.png`** etc. as relative paths, and fixed Markdown slots (**`README`**, **`prefix`**, **`art_prompt/*`**, **`driector_skills/*`**) matching Electron-era **`DATA_MAP`**.
+        Does not require Postgres. Prefer **GET** for new clients; **`POST /api/v1/visual-manual`** returns the same JSON for Electron-era **`POST /api/project/getVisualManual`** callers.
       security:
         - bearerAuth: []
       responses:
@@ -7086,11 +7086,11 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
     post:
       tags: [skills]
-      summary: Same as GET — legacy POST verb for getVisualManual
+      summary: Same as GET — Electron-era POST verb for getVisualManual
       operationId: postVisualManualV1
       description: |
         Identical JSON to **`GET /api/v1/visual-manual`**. Accepts any JSON body (including **`{}`**); body is **ignored**.
-        Use when migrating clients that called legacy **`POST /api/project/getVisualManual`**.
+        Use when migrating clients that called Electron-era **`POST /api/project/getVisualManual`**.
       security:
         - bearerAuth: []
       requestBody:
@@ -7186,7 +7186,7 @@ paths:
       description: |
         Same **`path`** query rules and `..` rejection as **`GET /api/v1/skills/content`**, but returns raw bytes with an image **`Content-Type`**.
         Allowed extensions: **png**, **jpg**, **jpeg**, **gif**, **webp**, **svg**. Other extensions (including **`.md`**) → **400**. Max file size **25_000_000** bytes.
-        Use with **`GET /api/v1/visual-manual`** item **`image`** paths (relative under **`data/skills`**) when clients need a fetchable URL instead of legacy OSS-signed links.
+        Use with **`GET /api/v1/visual-manual`** item **`image`** paths (relative under **`data/skills`**) when clients need a fetchable URL instead of original OSS-signed links.
       security:
         - bearerAuth: []
       parameters:
@@ -7322,7 +7322,7 @@ paths:
       summary: Overwrite an existing skill file (UTF-8 text)
       operationId: putSkillContentV1
       description: |
-        Same path rules as **`GET /api/v1/skills/content`**. The target file **must already exist** (legacy **`saveSkillContent`** returned **400** otherwise). Body size is capped at **2_000_000** bytes (UTF-8).
+        Same path rules as **`GET /api/v1/skills/content`**. The target file **must already exist** (Electron-era **`saveSkillContent`** returned **400** otherwise). Body size is capped at **2_000_000** bytes (UTF-8).
       security:
         - bearerAuth: []
       requestBody:
@@ -7809,7 +7809,7 @@ paths:
           schema:
             type: integer
             format: int32
-          description: Only applied when `> 0` (legacy truthy `projectId`)
+          description: Only applied when `> 0` (Electron-era truthy `projectId`)
       responses:
         "200":
           description: OK
@@ -8984,7 +8984,7 @@ components:
       properties:
         link:
           type: string
-          description: URL to fetch (legacy **`getCodeByLink`**; may be any non-empty string)
+          description: URL to fetch (Electron-era **`getCodeByLink`**; may be any non-empty string)
 
     AgentDeployListBody:
       type: object
@@ -9043,7 +9043,7 @@ components:
       properties:
         key:
           type: string
-          description: Optional legacy field; accepted for compatibility but ignored
+          description: Optional Electron-era field; accepted for compatibility but ignored
 
     AgentDeploySavedResponse:
       type: object
@@ -9185,7 +9185,7 @@ components:
           type: string
           nullable: true
           maxLength: 24000000
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
+          description: Optional reference image (Electron-era). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
 
     PolishAssetsPromptBody:
       type: object
@@ -9224,7 +9224,7 @@ components:
           type: string
           nullable: true
           maxLength: 24000000
-          description: Optional reference image (legacy). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
+          description: Optional reference image (Electron-era). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters.
 
     BatchGenerateImageAssetsBody:
       type: object
@@ -9242,7 +9242,7 @@ components:
           type: integer
           format: int32
           minimum: 1
-          description: Optional; default **1** in legacy
+          description: Optional; default **1** in Electron-era
         items:
           type: array
           items:
@@ -9309,12 +9309,12 @@ components:
         id:
           type: integer
           format: int32
-          description: Legacy storyboard id (`app_storyboard.numeric_id`)
+          description: Storyboard numeric id (`app_storyboard.numeric_id`)
         scriptId:
           type: integer
           format: int32
           nullable: true
-          description: Legacy script id (`app_storyboard.numeric_script_id`)
+          description: Script numeric id (`app_storyboard.numeric_script_id`)
         prompt:
           type: string
           nullable: true
@@ -10546,7 +10546,7 @@ components:
         id:
           type: integer
           format: int32
-          description: Stable legacy slot **1–3** (maps to `app_user_prompt.numeric_id`)
+          description: Stable prompt slot **1–3** (maps to `app_user_prompt.numeric_id`)
         name:
           type: string
         type:
@@ -10607,7 +10607,7 @@ components:
         projectId:
           type: integer
           format: int32
-          description: Legacy integer project id (`app_project.numeric_id`)
+          description: Integer project id (`app_project.numeric_id`)
         agentType:
           type: string
           enum: [scriptAgent, productionAgent]
@@ -10621,7 +10621,7 @@ components:
       required: [projectId, agentType]
       additionalProperties: false
       description: |
-        Optional **`type`** (legacy) or **`clearType`**: `all` (default), `message`, or `summary`.
+        Optional **`type`** (Electron-era) or **`clearType`**: `all` (default), `message`, or `summary`.
       properties:
         projectId:
           type: integer
@@ -10819,7 +10819,7 @@ components:
       required:
         [script_count, storyboard_count, role_count, novel_count, video_count]
       description: |
-        Field names align with legacy **`generalStatistics`** (`roleCount`, etc.) via snake_case JSON.
+        Field names align with Electron-era **`generalStatistics`** (`roleCount`, etc.) via snake_case JSON.
       properties:
         script_count:
           type: integer
@@ -10856,7 +10856,7 @@ components:
     PatchAssetBody:
       type: object
       additionalProperties: false
-      description: "At least one property required; unknown properties rejected (400). cover_numeric_image_id maps to app_asset.metadata.imageId (legacy o_assets.imageId); when a number, must match app_asset_image.numeric_image_id for this asset."
+      description: "At least one property required; unknown properties rejected (400). cover_numeric_image_id maps to app_asset.metadata.imageId (Electron-era o_assets.imageId); when a number, must match app_asset_image.numeric_image_id for this asset."
       properties:
         name:
           type: string
@@ -11043,7 +11043,7 @@ components:
         src:
           type: string
           nullable: true
-          description: Same value as filePath (legacy compatibility field).
+          description: Same value as filePath (Electron-era compatibility field).
 
     LegacyAssetsGetAssetsApiParentItem:
       allOf:
@@ -11086,7 +11086,7 @@ components:
           type: integer
           format: int32
           nullable: true
-          description: app_asset_image.numeric_image_id (null for API-created rows without legacy id)
+          description: app_asset_image.numeric_image_id (null for API-created rows without numeric id)
         imageUuid:
           type: string
           format: uuid
@@ -11243,7 +11243,7 @@ components:
           type: string
           enum: [clip]
           default: clip
-          description: Optional legacy field; only `clip` is accepted when provided.
+          description: Optional Electron-era field; only `clip` is accepted when provided.
         name:
           type: string
           minLength: 1
@@ -11506,7 +11506,7 @@ components:
     ArtStyleRow:
       type: object
       required: [id, numeric_id, name]
-      description: One **`app_art_style`** row (legacy **`o_artStyle`** subset).
+      description: One **`app_art_style`** row (Electron-era **`o_artStyle`** subset).
       properties:
         id:
           type: string
@@ -11575,7 +11575,7 @@ components:
       properties:
         text:
           type: string
-          description: Model output (legacy Node wrapped this in **`{ code, data, message }`**; v1 returns JSON only)
+          description: Model output (Electron-era Node wrapped this in **`{ code, data, message }`**; v1 returns JSON only)
 
     PatchArtStyleBody:
       type: object
@@ -11599,7 +11599,7 @@ components:
       type: object
       required:
         [id, numeric_id, chapter_index, chapter, chapter_data, event_state]
-      description: One **`app_novel`** row (legacy **`o_novel`** subset).
+      description: One **`app_novel`** row (Electron-era **`o_novel`** subset).
       properties:
         id:
           type: string
@@ -11717,7 +11717,7 @@ components:
       type: object
       additionalProperties: false
       description: |
-        All optional. Whitespace-only strings are stored as omitted (`NULL`). Aligns with legacy **`/api/project/addProject`** field set (without SQLite-only `userId`).
+        All optional. Whitespace-only strings are stored as omitted (`NULL`). Aligns with Electron-era **`/api/project/addProject`** field set (without SQLite-only `userId`).
       properties:
         name:
           type: string
@@ -12016,7 +12016,7 @@ components:
       additionalProperties: false
       description: |
         All optional. Text fields: whitespace-only strings are omitted (`NULL`).
-        Omit **`numeric_script_id`** / **`numeric_project_id`** to use path script and parent project legacy ids.
+        Omit **`numeric_script_id`** / **`numeric_project_id`** to use path script and parent project numeric ids.
       properties:
         prompt:
           type: string
@@ -12257,7 +12257,7 @@ components:
     LegacyTasksEmptyBody:
       type: object
       additionalProperties: false
-      description: Empty JSON object **`{}`** still used by some legacy-shaped **`POST /api/v1/project/*`** manual routes.
+      description: Empty JSON object **`{}`** still used by some Electron-era-shaped **`POST /api/v1/project/*`** manual routes.
 
     JobsPageResponse:
       type: object
@@ -12866,7 +12866,7 @@ components:
         numeric_task_id:
           type: integer
           format: int64
-          description: Monotonic bigint compatibility id for legacy task-center integer lookups.
+          description: Monotonic bigint compatibility id for Electron-era task-center integer lookups.
         id:
           type: string
           format: uuid

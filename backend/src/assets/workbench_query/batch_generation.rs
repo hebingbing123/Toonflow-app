@@ -20,7 +20,7 @@ async fn run_batch_generation_data(
     uid: uuid::Uuid,
     project_numeric_id: i32,
     body: &WorkbenchBatchGenerationDataBody,
-) -> Result<LegacyBatchGenerationDataResponse, ApiError> {
+) -> Result<WorkbenchBatchGenerationDataResponse, ApiError> {
     let asset_type = body.asset_type.trim().to_lowercase();
     let name = normalize_name_ilike(body.name.clone());
 
@@ -44,7 +44,7 @@ async fn run_batch_generation_data(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let offset = (body.page - 1) as i64 * body.limit as i64;
-    let data: Vec<LegacyBatchGenerationAssetItem> = sqlx::query_as(
+    let data: Vec<WorkbenchBatchGenerationAssetItem> = sqlx::query_as(
         r#"
         SELECT
           a.numeric_id AS id,
@@ -73,7 +73,7 @@ async fn run_batch_generation_data(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(LegacyBatchGenerationDataResponse { data, total })
+    Ok(WorkbenchBatchGenerationDataResponse { data, total })
 }
 
 pub(crate) async fn post_project_workbench_batch_generation_data(
@@ -81,7 +81,7 @@ pub(crate) async fn post_project_workbench_batch_generation_data(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchBatchGenerationDataBody>,
-) -> Result<Json<LegacyBatchGenerationDataResponse>, ApiError> {
+) -> Result<Json<WorkbenchBatchGenerationDataResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let asset_type = body.asset_type.trim().to_lowercase();
     if asset_type.is_empty() {

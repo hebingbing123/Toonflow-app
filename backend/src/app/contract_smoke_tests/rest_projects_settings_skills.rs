@@ -606,7 +606,7 @@ async fn project_novels_create_unauthorized_without_bearer() {
 }
 
 #[tokio::test]
-async fn project_novel_by_legacy_unauthorized_without_bearer() {
+async fn project_novel_by_numeric_id_unauthorized_without_bearer() {
     let (status, v) =
         get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/novels/1").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -658,7 +658,7 @@ async fn create_script_under_project_requires_database_with_jwt() {
 }
 
 #[tokio::test]
-async fn script_by_legacy_unauthorized_without_bearer() {
+async fn script_by_numeric_id_unauthorized_without_bearer() {
     let (status, v) =
         get_json("/api/v1/projects/00000000-0000-0000-0000-000000000001/scripts/1").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);

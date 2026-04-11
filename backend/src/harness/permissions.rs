@@ -9,7 +9,7 @@ use uuid::Uuid;
 use super::tools::ToolRegistry;
 
 /// Optional comma-separated allowlist from **`HARNESS_WS_CHANNELS`** (e.g. `script` or `script,production`).
-/// When unset or empty after parsing, both **`script`** and **`production`** attach are allowed (legacy default).
+/// When unset or empty after parsing, both **`script`** and **`production`** attach are allowed (permissive default).
 fn ws_channel_allowlist_from_env() -> Option<HashSet<String>> {
     let raw = std::env::var("HARNESS_WS_CHANNELS").ok()?;
     let set: HashSet<String> = raw

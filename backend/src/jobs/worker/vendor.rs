@@ -278,7 +278,7 @@ mod tests {
             llm: None,
             http_client: reqwest::Client::new(),
             notify: WsNotifyHub::new(),
-            memory_config: Arc::new(RwLock::new(MemoryConfig::default_legacy())),
+            memory_config: Arc::new(RwLock::new(MemoryConfig::default_seeded())),
             switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
             local_asset_image_dir: None,
             local_art_style_cover_dir: None,
@@ -296,7 +296,7 @@ mod tests {
         let (vendor, resolved_vendor_id, candidates) = resolve_vendor_probe_targets("1");
         assert!(
             vendor.is_some(),
-            "legacy id should resolve into vendor catalog"
+            "numeric id should resolve into vendor catalog"
         );
         assert_eq!(resolved_vendor_id, "openai");
         assert_eq!(candidates, vec!["1", "openai"]);

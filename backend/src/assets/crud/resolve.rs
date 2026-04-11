@@ -76,7 +76,7 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
     id.ok_or(ApiError::NotFound)
 }
 
-/// Background worker: resolve **`app_asset.id`** by legacy ids and project owner.
+/// Background worker: resolve **`app_asset.id`** by numeric ids and project owner.
 pub async fn resolve_asset_id_for_job(
     pool: &PgPool,
     owner_user_id: Uuid,

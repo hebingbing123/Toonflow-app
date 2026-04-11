@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Same shape as legacy **`getMemory`** **`data`** object.
+/// Same shape as Electron-era **`getMemory`** **`data`** object.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MemoryConfig {
@@ -19,7 +19,7 @@ pub struct MemoryConfig {
 }
 
 impl MemoryConfig {
-    pub fn default_legacy() -> Self {
+    pub fn default_seeded() -> Self {
         Self {
             messages_per_summary: 10,
             short_term_limit: 5,

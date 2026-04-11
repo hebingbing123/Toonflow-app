@@ -37,7 +37,7 @@ pub enum ApiError {
     Internal,
     /// `OPENAI_API_KEY` / `LLM_API_KEY` not set — script extract and WS agent flows need it.
     LlmNotConfigured,
-    /// HTTP **501** — capability not implemented (e.g. legacy write path without Postgres backing yet).
+    /// HTTP **501** — capability not implemented (e.g. deprecated write path without Postgres backing yet).
     NotImplemented(String),
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
     /// Automatically adds `Retry-After` header (seconds) and `retry_after_ms` in body.

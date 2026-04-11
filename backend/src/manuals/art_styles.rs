@@ -26,12 +26,12 @@ use crate::state::AppState;
 const ADV_LOCK_ART_STYLE_NUMERIC: i64 = 884_422_008;
 const MAX_ART_STYLE_LIST: i64 = 500;
 const MAX_EXTRACT_IMAGES: usize = 16;
-/// Per-image cap for **`data:`** / URL strings (legacy **`extractStylePrompt`** had no limit).
+/// Per-image cap for **`data:`** / URL strings (Electron-era **`extractStylePrompt`** had no limit).
 const MAX_IMAGE_ENTRY_BYTES: usize = 20 * 1024 * 1024;
 const MAX_ART_STYLE_COVER_INPUT_CHARS: usize = 20 * 1024 * 1024;
 const MAX_ART_STYLE_COVER_BYTES: usize = 15 * 1024 * 1024;
 
-/// System prompt aligned with legacy **`src/routes/artStyle/extractStylePrompt.ts`**.
+/// System prompt aligned with Electron-era **`src/routes/artStyle/extractStylePrompt.ts`**.
 const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提取出图片的画风提示词，用于生成图片时指定风格，要求简洁且具有艺术性,只需要画风提示词，不需要其他内容："比如：`(画风：2D动漫风格,2d animation style)`,`(画风：照片级真人超写实,photorealistic, lifelike, ultra detailed)`，`(画风：3D国创,Chinese 3D animation style)`等,如果图片风格无法描述，可以返回`无法描述`,多张图片时，只输出一个综合的画风提示词，要求包含所有图片的共同风格特征，输出格式必须严格按照示例中的格式，必须包含`画风`二字，且必须使用括号括起来，括号内必须包含中文和英文的画风描述，并用逗号分隔，英文部分需要翻译成地道的英文提示词"#;
 
 #[derive(Debug, FromRow, Serialize)]
@@ -358,7 +358,7 @@ async fn create_art_style(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 =
+    let next_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_art_style"#)
             .fetch_one(&mut *tx)
             .await
@@ -374,10 +374,10 @@ async fn create_art_style(
         "#,
     )
     .bind(uid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(&name)
     .bind(if uploaded_cover.is_some() {
-        Some(art_style_cover_api_path(next_legacy))
+        Some(art_style_cover_api_path(next_numeric_id))
     } else {
         file_url.clone()
     })
@@ -395,7 +395,7 @@ async fn create_art_style(
         state.local_art_style_cover_dir.as_deref(),
         uploaded_cover.as_ref(),
     ) {
-        persist_local_art_style_cover(root, uid, next_legacy, cover).await?;
+        persist_local_art_style_cover(root, uid, next_numeric_id, cover).await?;
     }
 
     Ok((StatusCode::CREATED, Json(row)))

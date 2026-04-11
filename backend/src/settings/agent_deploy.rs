@@ -34,7 +34,7 @@ struct AgentDeployListItem {
     desc: String,
     name: String,
     disabled: bool,
-    /// Legacy join **`o_vendorConfig.icon`**; stub empty.
+    /// SQLite join **`o_vendorConfig.icon`**; stub empty.
     icon: String,
 }
 

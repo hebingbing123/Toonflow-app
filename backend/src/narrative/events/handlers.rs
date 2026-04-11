@@ -84,7 +84,7 @@ async fn create_novel_event_core(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 =
+    let next_numeric_id: i32 =
         sqlx::query_scalar("SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_novel_event")
             .fetch_one(&mut *tx)
             .await
@@ -101,7 +101,7 @@ async fn create_novel_event_core(
         "#,
     )
     .bind(project_uuid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(name)
     .bind(detail)
     .bind(now_ms)
@@ -142,7 +142,7 @@ async fn create_novel_event_core(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(JsonResponse(serde_json::json!({
-        "id": next_legacy,
+        "id": next_numeric_id,
         "name": name,
         "detail": detail,
         "message": "创建事件成功"

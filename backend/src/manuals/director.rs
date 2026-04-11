@@ -27,7 +27,7 @@ struct DirectorSlotDef {
     sub_dir: Option<&'static str>,
 }
 
-/// Same three slots as legacy **`addDirectorManual`** / **`queryDirectorManual`** (**`driector_skills`** spelling preserved).
+/// Same three slots as Electron-era **`addDirectorManual`** / **`queryDirectorManual`** (**`driector_skills`** spelling preserved).
 const DIRECTOR_SLOTS: [DirectorSlotDef; 3] = [
     DirectorSlotDef {
         label: "README",
@@ -57,7 +57,7 @@ pub struct DirectorManualSlotRow {
 pub struct DirectorManualStyleRow {
     pub name: String,
     pub image: Vec<String>,
-    /// Folder name under **`story_skills/`** (legacy field **`directorManual`**).
+    /// Folder name under **`story_skills/`** (SQLite field **`directorManual`**).
     #[serde(rename = "directorManual")]
     pub director_manual_key: String,
     pub data: Vec<DirectorManualSlotRow>,
@@ -80,7 +80,7 @@ struct DirectorManualDataItem {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct AddDirectorManualBody {
-    /// Display title used when writing **`README`** on **add** (legacy does not prefix on add).
+    /// Display title used when writing **`README`** on **add** (Electron client did not prefix on add).
     name: String,
     images: Vec<String>,
     /// Target subdirectory under **`story_skills/`**.
@@ -100,12 +100,12 @@ struct EditDirectorManualBody {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct DeleteDirectorManualBody {
-    /// Folder name under **`story_skills/`** (legacy **`name`**).
+    /// Folder name under **`story_skills/`** (Electron-era **`name`**).
     name: String,
 }
 
 #[derive(Debug, Serialize)]
-struct LegacyOkEmptyResponse {}
+struct EmptyOkResponse {}
 
 #[derive(Debug, Serialize)]
 struct DeleteDirectorManualResponse {
@@ -420,7 +420,7 @@ async fn post_add_director_manual(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddDirectorManualBody>,
-) -> Result<Json<LegacyOkEmptyResponse>, ApiError> {
+) -> Result<Json<EmptyOkResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     validate_style_key("名称不能包含路径分隔符或为纯数字", &body.name)?;
     validate_style_key("名称不能包含路径分隔符或为纯数字", &body.director_manual)?;
@@ -446,14 +446,14 @@ async fn post_add_director_manual(
         return Err(e);
     }
 
-    Ok(Json(LegacyOkEmptyResponse {}))
+    Ok(Json(EmptyOkResponse {}))
 }
 
 async fn post_edit_director_manual(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EditDirectorManualBody>,
-) -> Result<Json<LegacyOkEmptyResponse>, ApiError> {
+) -> Result<Json<EmptyOkResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     validate_style_key("名称不能包含路径分隔符或为纯数字", &body.name)?;
     validate_style_key("名称不能包含路径分隔符或为纯数字", &body.director_manual)?;
@@ -466,7 +466,7 @@ async fn post_edit_director_manual(
     write_slots(&main_path, &body.name, &body.data, true)?;
     sync_images(&main_path, &body.images)?;
 
-    Ok(Json(LegacyOkEmptyResponse {}))
+    Ok(Json(EmptyOkResponse {}))
 }
 
 async fn post_delete_director_manual(

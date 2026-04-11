@@ -16,7 +16,7 @@ use crate::state::AppState;
 use super::crud::ensure_owned_project_pk;
 use super::models::*;
 use super::{
-    merge_legacy_asset_metadata, normalize_upload_clip_data_uri, resolve_owned_asset_metadata,
+    merge_workbench_asset_metadata, normalize_upload_clip_data_uri, resolve_owned_asset_metadata,
     ADV_LOCK_ASSET_IMAGE_NUMERIC, ADV_LOCK_ASSET_NUMERIC,
 };
 
@@ -25,7 +25,7 @@ pub(super) async fn post_project_workbench_add_assets(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchAddAssetsBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let name = body.name.trim();
     if name.is_empty() {
@@ -60,17 +60,17 @@ pub(super) async fn post_project_workbench_add_assets(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 =
+    let next_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
             .fetch_one(&mut *tx)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let now_ms = chrono::Utc::now().timestamp_millis();
-    let metadata = merge_legacy_asset_metadata(
+    let metadata = merge_workbench_asset_metadata(
         Value::Object(Default::default()),
-        Some(super::normalize_optional_legacy_text(body.prompt)),
-        Some(super::normalize_optional_legacy_text(body.remark)),
+        Some(super::normalize_optional_trimmed_text(body.prompt)),
+        Some(super::normalize_optional_trimmed_text(body.remark)),
         None,
     );
 
@@ -83,7 +83,7 @@ pub(super) async fn post_project_workbench_add_assets(
         "#,
     )
     .bind(project_id)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(name)
     .bind(asset_type)
     .bind(describe)
@@ -97,7 +97,7 @@ pub(super) async fn post_project_workbench_add_assets(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "新增资产成功",
     }))
 }
@@ -106,8 +106,8 @@ pub(super) async fn post_project_workbench_update_assets(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyUpdateAssetsBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    Json(body): Json<WorkbenchUpdateAssetsBody>,
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
@@ -129,10 +129,10 @@ pub(super) async fn post_project_workbench_update_assets(
     ensure_owned_project_pk(pool, uid, project_id).await?;
 
     let current = resolve_owned_asset_metadata(pool, uid, body.id).await?;
-    let metadata = merge_legacy_asset_metadata(
+    let metadata = merge_workbench_asset_metadata(
         current.metadata.0,
-        Some(super::normalize_optional_legacy_text(body.prompt)),
-        Some(super::normalize_optional_legacy_text(body.remark)),
+        Some(super::normalize_optional_trimmed_text(body.prompt)),
+        Some(super::normalize_optional_trimmed_text(body.remark)),
         None,
     );
 
@@ -160,7 +160,7 @@ pub(super) async fn post_project_workbench_update_assets(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "更新资产成功",
     }))
 }
@@ -170,7 +170,7 @@ pub(super) async fn post_project_workbench_save_assets(
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<WorkbenchSaveAssetsBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
@@ -199,7 +199,7 @@ pub(super) async fn post_project_workbench_save_assets(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let current: LegacyOwnedAssetMetaRow = sqlx::query_as(
+    let current: WorkbenchOwnedAssetMetaRow = sqlx::query_as(
         r#"
         SELECT a.id, a.metadata
         FROM app_asset a
@@ -231,7 +231,7 @@ pub(super) async fn post_project_workbench_save_assets(
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-        let next_image_legacy: i32 = sqlx::query_scalar(
+        let next_image_numeric_id: i32 = sqlx::query_scalar(
             r#"SELECT COALESCE(MAX(numeric_image_id), 0) + 1 FROM app_asset_image"#,
         )
         .fetch_one(&mut *tx)
@@ -259,17 +259,17 @@ pub(super) async fn post_project_workbench_save_assets(
         .bind(current.id)
         .bind(next_sort)
         .bind(file_path)
-        .bind(next_image_legacy)
+        .bind(next_image_numeric_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-        image_patch = Some(next_image_legacy);
+        image_patch = Some(next_image_numeric_id);
     }
 
-    let metadata = merge_legacy_asset_metadata(
+    let metadata = merge_workbench_asset_metadata(
         current.metadata.0,
-        Some(super::normalize_optional_legacy_text(body.prompt)),
+        Some(super::normalize_optional_trimmed_text(body.prompt)),
         None,
         Some(image_patch),
     );
@@ -298,7 +298,7 @@ pub(super) async fn post_project_workbench_save_assets(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "保存资产图片成功",
     }))
 }
@@ -307,8 +307,8 @@ pub(super) async fn post_project_workbench_del_assets(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyDeleteAssetsBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    Json(body): Json<WorkbenchDeleteAssetsBody>,
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
@@ -338,7 +338,7 @@ pub(super) async fn post_project_workbench_del_assets(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "删除资产成功",
     }))
 }
@@ -347,8 +347,8 @@ pub(super) async fn post_project_workbench_batch_delete_assets(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyBatchDeleteAssetsBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    Json(body): Json<WorkbenchBatchDeleteAssetsBody>,
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id.is_empty() {
         return Err(ApiError::BadRequest("id must not be empty".into()));
@@ -381,7 +381,7 @@ pub(super) async fn post_project_workbench_batch_delete_assets(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "删除资产成功",
     }))
 }
@@ -390,8 +390,8 @@ pub(super) async fn post_project_workbench_del_image(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
-    Json(body): Json<LegacyDelImageBody>,
-) -> Result<Json<LegacyAssetMutationResponse>, ApiError> {
+    Json(body): Json<WorkbenchDelImageBody>,
+) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
@@ -442,7 +442,7 @@ pub(super) async fn post_project_workbench_del_image(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(Json(LegacyAssetMutationResponse {
+    Ok(Json(WorkbenchAssetMutationResponse {
         message: "资产图片删除成功",
     }))
 }

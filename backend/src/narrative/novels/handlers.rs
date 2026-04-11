@@ -194,7 +194,7 @@ async fn create_novel_inner(
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let next_legacy: i32 = sqlx::query_scalar(
+    let next_numeric_id: i32 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(MAX(numeric_id), 0) + 1
         FROM app_novel
@@ -218,7 +218,7 @@ async fn create_novel_inner(
         "#,
     )
     .bind(project_uuid)
-    .bind(next_legacy)
+    .bind(next_numeric_id)
     .bind(chapter_index)
     .bind(reel.as_ref())
     .bind(&chapter)
@@ -259,7 +259,7 @@ async fn patch_novel_inner(
     body: PatchNovelBody,
 ) -> Result<Json<NovelRow>, ApiError> {
     if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let idx_patch = parse_optional_i32_field(body.chapter_index, "chapter_index")?;
@@ -403,7 +403,7 @@ async fn delete_novel_inner(
     novel_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
     if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let res = sqlx::query(
@@ -452,7 +452,7 @@ async fn fetch_owned_novel_row(
     novel_numeric_id: i32,
 ) -> Result<NovelRow, ApiError> {
     if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
+        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
 
     let row = sqlx::query_as::<_, NovelRow>(

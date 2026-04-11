@@ -283,7 +283,7 @@ async fn task_center_jobs_rest_roundtrip() {
                     "/api/v1/jobs/task-detail/{}",
                     created_job["numeric_task_id"]
                         .as_i64()
-                        .expect("legacy task id")
+                        .expect("numeric task id")
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -313,7 +313,7 @@ async fn task_center_jobs_rest_roundtrip() {
                     "/api/v1/jobs/task-detail/{}",
                     created_job["numeric_task_id"]
                         .as_i64()
-                        .expect("legacy task id")
+                        .expect("numeric task id")
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -602,7 +602,7 @@ async fn novel_events_generate_events_async_fallback_roundtrip() {
     .bind(sub)
     .fetch_all(&pool)
     .await
-    .expect("list novel legacy ids");
+    .expect("list novel numeric ids");
     let novel_numeric_ids: Vec<i32> = novel_rows.into_iter().map(|(id,)| id).collect();
     assert_eq!(novel_numeric_ids.len(), 2, "expected two novels");
 
