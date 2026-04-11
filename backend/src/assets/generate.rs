@@ -1,8 +1,14 @@
-//! Legacy **`/api/assetsGenerate/*`**: request bodies match old **`validateFields`** shapes.
-//! **`POST …/generate`** / **`polish-prompt`** / **`batch-generate`** / **`batch-polish`** enqueue **`app_generation_job`** (per-route **`kind`**).
-//! **`POST …/cancel-generate`** marks one legacy image row as cancelled (**`state = 生成失败`**) for caller-owned assets
-//! and cancels matching queued/running **`asset.generate.*`** / **`asset.polish.*`** jobs for the same asset.
-//! **`asset.polish.*`**: **`chat_completion_assistant_text`** when LLM env is set. **`asset.generate.*`**: OpenAI-compatible image generation (model from body or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**) then **`app_asset_image`**. Without **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`**, **`file_path`** is the provider URL; with it, worker persists PNG and **`file_path`** points at **`GET …/images/{id}/file`** (**`metadata.storage`** = **`local`**). Legacy **`base64`** is normalized into queue payload (`image_base64`) and used as the reference image for provider **`images/edits`** (fallback to **`images/generations`** when absent).
+//! 遗留 `/api/assetsGenerate/*` 资产生成端点。
+//!
+//! 处理单图生成、提示词优化、批量生成和批量优化请求，
+//! 将任务加入 `app_generation_job` 队列由后台 Worker 执行。
+//!
+//! 端点：
+//! - `POST …/generate` — 单图生成
+//! - `POST …/polish-prompt` — 单条提示词优化
+//! - `POST …/batch-generate` — 批量图片生成
+//! - `POST …/batch-polish` — 批量提示词优化
+//! - `POST …/cancel-generate` — 取消生成任务
 
 use axum::{
     extract::{Json, State},

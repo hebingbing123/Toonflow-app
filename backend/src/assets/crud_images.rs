@@ -1,4 +1,7 @@
-//! REST CRUD for **`app_asset_image`** rows (list, get, file, create, patch, delete).
+//! 资产图片 REST CRUD 操作。
+//!
+//! 处理 `app_asset_image` 行的列表、获取、文件、创建、更新和删除操作。
+//! 端点路径：`/api/v1/projects/legacy/{project_legacy_id}/assets/{asset_legacy_id}/images`
 
 use axum::{
     body::Body,

@@ -1,4 +1,7 @@
-//! Core HTTP handlers mounted from [`super::router::build_router`] (health, version, ready, me).
+//! 核心 HTTP 处理器。
+//!
+//! 由 [`super::router::build_router`] 挂载，提供健康检查、版本信息、
+//! 就绪状态和用户信息服务。
 
 use crate::auth::require_claims;
 use crate::error::ApiError;

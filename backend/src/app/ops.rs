@@ -1,4 +1,7 @@
-//! Guarded operational commands for one-off maintenance outside the HTTP API surface.
+//! 受保护的操作命令，用于 HTTP API 之外的维护任务。
+//!
+//! 提供命令行工具执行一次性维护操作，如清除用户数据。
+//! 默认以 --dry-run 模式运行，执行需要显式确认。
 
 use anyhow::{anyhow, bail, Context, Result};
 use sqlx::postgres::PgPoolOptions;
