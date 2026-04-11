@@ -227,6 +227,7 @@
 | `docs/plans/harness-rust-flutter.md` | 总路线；收敛完成后可更新「parity/兼容区」描述 |
 | `docs/plans/electron-node-parity.md` | 旧 `src/router.ts` 前缀 ↔ Rust 路径对照；**删 legacy HTTP 前**应用其表核对是否仍有仅整型路径的客户端 |
 | `docs/plans/master-detailed-parity-audit.md` | 对照 `master:src/routes/**`、`socket`、`agents` 的审计方法；防「HTTP 删了但 Harness/工作流仍依赖旧语义」 |
+| 根目录 **`data/`**、**`scripts/`**、**`docs/`** 中的旧布局与脚本 | 非 OpenAPI 字面 legacy，但与 **master 双源数据 / Electron 脚本** 相关；见 **§八** |
 | `supabase/migrations/*.sql` | 多表含 `legacy_id` 列；属 **Schema 波次**，见下文 |
 
 ---
@@ -268,6 +269,10 @@
 1. 确认是否仍需要 **整型**对外暴露；若否，仅 HTTP 收敛即可先不动列。
 2. 若需删 `legacy_id` 列：新迁移、`UPDATE` 回填、双写期、再删列 —— **备份与回滚预案** 必备。
 
+### 阶段 E：根目录 `data/` / `scripts/` / `docs/` 卫生（可与 API 并行）
+
+按 **§八** 勾选：去掉 **`data/` 与 `backend/data/` 双源**、清理无引用的 **Electron/NSIS** 脚本、刷新 **README** 中仍指向旧 `data/serve` 的说明。
+
 ---
 
 ## 五、门禁（每波合并前）
@@ -287,6 +292,7 @@
 2. **旧实时面**：`git ls-tree -r master -- src/socket` — 与 `docs/websocket-events.md` + `backend/src/harness` 对照（见 **`master-detailed-parity-audit.md`** §2.3）。
 3. **旧 Agent 工具**：`git ls-tree -r master -- src/agents` — 与 `backend/src/harness/invoke` 工具注册表对照，避免删 HTTP 后 Harness 仍引用已删加载函数。
 4. **当前权威**：仍以 **`docs/openapi.yaml`** + **`backend/src/app/router.rs` 全量 `merge`** + Flutter `rust_api` 调用为准；上列仅防漏项。
+5. **旧数据与打包脚本**：`git ls-tree -r master -- data scripts docs` 与当前分支 diff（见 **§八**），识别「双源目录」与「已无引用」的脚本/资源。
 
 ---
 
@@ -300,7 +306,44 @@
 | **OpenAPI / smoke / pg_contract 不同步** | 仅删 `router()` 会导致 CI 仍测旧路径或反之；每域保持 **契约三件套** 同 PR。 |
 | **画风 / Prompts 漏网** | `art-styles/legacy`、`prompts/{legacy_id}` 不在 `narrative::legacy` 树内；易被「按目录删 legacy」误伤或遗漏。 |
 | **Staging 与删列** | `legacy_staging`、`promote_legacy_from_staging` 与 **`legacy_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |
+| **双源 `data/`** | 仓库根 **`data/`** 与 **`backend/data/`** 均跟踪大量 **`skills/`**、**`models/`**；Rust 运行时与 `include_str!` 均指向 **`backend/data/`**（如 `prompting/skills.rs`、`vendor/catalog.rs`）。根目录树易与 **`backend/data/`** 漂移、误改无效副本。 |
 
 ---
 
-*文档版本：含全量文件清单 + router/harness/jobs 补漏 + master 对照步骤；实施时按阶段 B 逐域勾选并更新本文「进度」小节（可自行追加）。*
+## 八、根目录 `data/`、`scripts/`、`docs/`（master 遗留面）
+
+与 **HTTP `legacy` 模块**不同：这里多是 **旧 Electron/Node 时代的目录布局与脚本**，或 **与当前真源重复的静态资源**。建议在「decommission-electron」或仓库瘦身里程碑中**单独勾选**，避免与 API 竖切混在同一 PR。
+
+### 8.1 `data/`（仓库根）
+
+| 现状 | 说明 |
+|------|------|
+| **与 `master` 同源** | `master` 上即存在 **`data/skills/**`**、**`data/models/**`**、**`data/assets/ending.mp4`** 等；当前分支仍 **git 跟踪**（约 **200+** 文件量级，与 **`backend/data/`** 条目数接近）。 |
+| **真源** | [`docs/plans/harness-rust-flutter.md`](harness-rust-flutter.md) **§v1** 已约定：技能与打包数据 **统一在 `backend/data/`**（`CARGO_MANIFEST_DIR`），**不应**在仓库根长期保留第二套 `data/skills`。 |
+| **运行时** | 服务端读 **`backend/data/skills`**、**`backend/data/models_catalog.json`**、**`backend/data/prompt_defaults`** 等；未发现 Rust 以仓库根 **`data/`** 为读取根路径。 |
+| **建议步骤** | 1）`diff -rq data/skills backend/data/skills`（及 models 若有）确认差异；2）以 **`backend/data/`** 为准合并后 **从 Git 删除根 `data/` 下与之一致的树**（保留若确有外部脚本仍引用根路径则先改脚本）；3）大文件删除走 **git filter** 或 LFS 策略若需缩历史体积。 |
+
+### 8.2 `scripts/`
+
+| 文件 | 说明 |
+|------|------|
+| **`refactor-check.sh`** | 现行 CI/门禁，**保留**。 |
+| **`license.ts`** | Node/Bun + **`license-checker`** 思路；`package.json` 仍有 **`"license": "bun run scripts/license.ts"`**，但根 **`package.json` 依赖已极简化**，脚本是否仍能跑通需单独验证；属 **旧 Node 工具链遗留**，可改为 Rust/cargo-deny 或删除脚本并下掉 npm script。 |
+| **`installer.nsh`** | NSIS **Electron 安装器**宏（VC++ 运行库等）；当前仓库若已无 **electron-builder** 引用，则多为 **死文件**，可删或移入 `archive/`。 |
+| **`logo.ico` / `logo.png`** | 未见与 Flutter `windows/`、`macos/` 或 CI 的明确引用（宜 **`rg scripts/logo`** 后再定）；可能是旧桌面安装包素材。 |
+
+### 8.3 `docs/`
+
+| 类别 | 说明 |
+|------|------|
+| **契约与路线** | **`openapi.yaml`**、**`websocket-events.md`**、**`plans/*.md`**、**`migration/*.md`** — **保留**；其中 migration 文档描述 SQLite→PG，与 **在线 legacy API** 是两件事，但同属「旧栈退场」叙事。 |
+| **多语言 README** | **`docs/README.*.md`**（及根 **`README.md`**）中仍可能出现旧 **`data/serve/app.js`**、Electron 启动描述等；需在 **产品对外文档** 刷新为 Flutter + Rust 真源，或标注「历史」避免新贡献者误跟。 |
+| **静态图** | **`docs/*.png`**、`sponsored/`、`atomgitLogo.svg` 等 — 营销/展示用，非 API legacy；仅在做 **文档归档** 时评估是否迁出仓库。 |
+
+### 8.4 `.gitignore` 中与旧栈相关的条目（提示）
+
+根 **`.gitignore`** 仍忽略 **`data/serve/`**、**`data/oss/*`**、**`data/test.sqlite`**、**`router.ts`** 等，对应旧 Node 本地运行习惯；全栈迁 Rust/Flutter 后可在清理旧文档时 **同步收紧或注释说明**，避免误以为仍需这些目录。
+
+---
+
+*文档版本：含 §8 根目录 data/scripts/docs 与 master 对照；实施时按阶段 B 逐域勾选并更新「进度」小节（可自行追加）。*
