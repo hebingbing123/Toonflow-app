@@ -1,4 +1,6 @@
-//! Legacy **`POST …/get-material-data`**.
+//! 遗留 `POST …/get-material-data`。
+//!
+//! 获取素材数据端点。
 
 use axum::{extract::State, http::HeaderMap, Json};
 

@@ -1,4 +1,6 @@
-//! Legacy polling endpoints for image / prompt asset state.
+//! 遗留轮询端点。
+//!
+//! 图片/提示词资产状态的轮询检查端点。
 
 use axum::{extract::State, http::HeaderMap, Json};
 

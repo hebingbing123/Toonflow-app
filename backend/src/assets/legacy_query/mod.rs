@@ -1,4 +1,12 @@
-//! Legacy POST asset read/query operations (get-assets-api, get-image, upload-clip, material, polling).
+//! 遗留 POST 资产读取/查询操作。
+//!
+//! 子模块：
+//! - `get_assets_api` — 获取资产树
+//! - `get_image` — 获取资产图片
+//! - `upload_clip` — 上传片段
+//! - `material` — 素材数据
+//! - `polling` — 轮询状态
+//! - `batch_generation` — 批量生成数据
 
 mod batch_generation;
 mod get_assets_api;
