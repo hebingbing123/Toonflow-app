@@ -1,4 +1,4 @@
-//! WebSocket agent channel discriminator (script vs production planning).
+//! WebSocket 代理频道鉴别器（脚本 vs 制作规划）。
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WsAgentChannel {

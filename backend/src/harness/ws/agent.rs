@@ -1,4 +1,4 @@
-//! WebSocket branch for **`harness.agent.run`** (multi-round tool loop + chat envelopes).
+//! WebSocket 分支（`harness.agent.run`）：多轮工具循环 + 聊天信封。
 
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
