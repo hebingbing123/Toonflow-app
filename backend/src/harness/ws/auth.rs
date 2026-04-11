@@ -1,4 +1,4 @@
-//! WebSocket session bootstrap: **`?access_token=`** (silent if invalid) and **`session.auth`** → **`session.ready`**.
+//! WebSocket 会话引导：`?access_token=`（无效时静默）和 `session.auth` → `session.ready`。
 
 use axum::extract::ws::WebSocket;
 use serde_json::{json, Value};
