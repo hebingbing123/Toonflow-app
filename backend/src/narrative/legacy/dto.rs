@@ -1,4 +1,4 @@
-//! Request/response types for legacy novel HTTP routes.
+//! 遗留小说 HTTP 路由的请求/响应类型。
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
