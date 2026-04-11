@@ -1,7 +1,7 @@
 use futures_util::stream::{self, StreamExt};
 use sqlx::PgPool;
 
-use super::NovelEventExtractionRow;
+use super::dto::NovelEventExtractionRow;
 use crate::error::ApiError;
 use crate::llm::{chat_completion_assistant_text, LlmConfig};
 
