@@ -1,4 +1,4 @@
-//! Usage metering (`app_usage_event`, §12.3): record server-side outcomes and expose per-user counts.
+//! 使用计量（`app_usage_event`，§12.3）：记录服务器端结果并公开每个用户的计数。
 
 use std::collections::HashMap;
 
