@@ -96,7 +96,7 @@ WebSocket（JSON 信封见 `docs/websocket-events.md`）：
 
 ## 技能资产
 
-Harness 用 Markdown 技能位于 **`data/skills/`**（由仓库根目录 `data/skills` 复制而来；过渡期 Node 栈仍可使用根目录副本）。
+Harness 与 REST 技能接口只读 **`backend/data/skills/`**（相对 crate 为 `data/skills/`）；仓库根 **不再**保留第二套 `data/skills`。
 
 ## 路线图
 

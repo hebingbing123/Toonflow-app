@@ -322,6 +322,7 @@
 | **真源** | [`docs/plans/harness-rust-flutter.md`](harness-rust-flutter.md) **§v1** 已约定：技能与打包数据 **统一在 `backend/data/`**（`CARGO_MANIFEST_DIR`），**不应**在仓库根长期保留第二套 `data/skills`。 |
 | **运行时** | 服务端读 **`backend/data/skills`**、**`backend/data/models_catalog.json`**、**`backend/data/prompt_defaults`** 等；未发现 Rust 以仓库根 **`data/`** 为读取根路径。 |
 | **建议步骤** | 1）`diff -rq data/skills backend/data/skills`（及 models 若有）确认差异；2）以 **`backend/data/`** 为准合并后 **从 Git 删除根 `data/` 下与之一致的树**（保留若确有外部脚本仍引用根路径则先改脚本）；3）大文件删除走 **git filter** 或 LFS 策略若需缩历史体积。 |
+| **进度（已做）** | 已删除根目录 **`data/skills/`**（与 `backend/data/skills` 一致）；**`data/models/all-MiniLM-L6-v2`** 迁至 **`backend/data/models/`**（此前仅根目录有跟踪，避免误删唯一 ONNX 副本）；**`data/assets/ending.mp4`**、**`data/update.json`** 迁至 **`backend/data/archive/`**；**`backend/README.md`** 已去掉「根目录副本」表述。 |
 
 ### 8.2 `scripts/`
 
