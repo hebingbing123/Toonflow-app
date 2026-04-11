@@ -6,6 +6,7 @@ use crate::billing;
 use crate::harness;
 use crate::jobs;
 use crate::manuals;
+use crate::metering;
 use crate::narrative;
 use crate::production_legacy;
 use crate::projects;
@@ -17,9 +18,7 @@ use crate::request_id_mw::inject_request_id_into_json_errors;
 use crate::rest_legacy;
 use crate::scripting;
 use crate::settings;
-use crate::skills;
 use crate::state::AppState;
-use crate::usage;
 use crate::vendor;
 
 use axum::{
@@ -78,9 +77,9 @@ pub fn build_router(state: AppState) -> Router {
         .merge(scripting::asset_extract::router())
         .merge(narrative::storyboards::router())
         .merge(rest_legacy::tasks::router())
-        .merge(skills::router())
+        .merge(prompting::skills::router())
         .merge(manuals::visual::router())
-        .merge(usage::router())
+        .merge(metering::usage::router())
         .merge(prompting::prompts::router())
         .merge(prompting::quality::routes())
         .merge(settings::about::router())

@@ -12,7 +12,7 @@ use std::collections::BTreeSet;
 use serde_json::Value;
 
 use super::HarnessContext;
-use crate::skills::SkillReadError;
+use crate::prompting::skills::SkillReadError;
 
 // ── InvokeError ──────────────────────────────────────────────────────────────
 
@@ -207,7 +207,8 @@ fn dispatch_in_process(
                         "skills.read requires arguments.path (non-empty string)".into(),
                     )
                 })?;
-            let doc = crate::skills::read_skill_markdown(path).map_err(InvokeError::from)?;
+            let doc =
+                crate::prompting::skills::read_skill_markdown(path).map_err(InvokeError::from)?;
             serde_json::to_value(&doc).map_err(|_| {
                 InvokeError::SkillBadRequest("failed to serialize skill content".into())
             })

@@ -16,8 +16,8 @@ use crate::llm::{
     chat_completion_assistant_text, images_generation_or_edit_url, images_generation_url,
     resolve_openai_image_model, resolve_openai_image_size, LlmConfig,
 };
+use crate::metering::usage;
 use crate::state::AppState;
-use crate::usage;
 use crate::vendor::catalog::lookup_vendor_catalog;
 use crate::vendor::credential::decrypt;
 use crate::vendor::video::{

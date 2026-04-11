@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 
 use crate::harness::HarnessContext;
 use crate::llm::chat_completion_assistant_text;
-use crate::skills::read_skill_markdown;
+use crate::prompting::skills::read_skill_markdown;
 
 use super::invoke::InvokeError;
 

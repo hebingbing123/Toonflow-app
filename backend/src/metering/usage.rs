@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::quota;
+use crate::metering::quota;
 use crate::state::AppState;
 
 /// Called when a generation job reaches `succeeded` (best-effort; failures are logged only).

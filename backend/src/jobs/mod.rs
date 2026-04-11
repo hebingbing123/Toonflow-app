@@ -16,7 +16,8 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::quota;
+use crate::metering::quota;
+use crate::metering::usage;
 use crate::state::AppState;
 
 #[derive(Debug, FromRow, Serialize)]
@@ -119,7 +120,7 @@ pub async fn enqueue_generation_job(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if let Err(e) =
-        crate::usage::record_generation_job_created(pool, owner_user_id, row.id, &row.kind).await
+        usage::record_generation_job_created(pool, owner_user_id, row.id, &row.kind).await
     {
         tracing::warn!(
             error = %e,
@@ -406,8 +407,7 @@ async fn create_job(
     };
 
     // Best-effort usage event — log on failure, never fail the request.
-    if let Err(e) = crate::usage::record_generation_job_created(pool, uid, row.id, &row.kind).await
-    {
+    if let Err(e) = usage::record_generation_job_created(pool, uid, row.id, &row.kind).await {
         tracing::warn!(
             error = %e,
             job_id = %row.id,

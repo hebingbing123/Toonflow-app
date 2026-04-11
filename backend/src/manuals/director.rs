@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::skills::skills_root;
+use crate::prompting::skills::skills_root;
 use crate::state::AppState;
 
 const MAX_SLOT_BYTES: u64 = 2_000_000;
