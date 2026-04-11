@@ -1,5 +1,5 @@
 // Extracted panel widgets for AgentWorkspaceProductionCard.
-// Keeps agent_workspaces_section_production.dart ≤800 lines.
+// Keeps agent_workspaces/production_card.dart ≤800 lines.
 
 import 'package:flutter/material.dart';
 

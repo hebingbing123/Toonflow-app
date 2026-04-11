@@ -1,0 +1,265 @@
+part of '../../home_page.dart';
+
+/// Video workbench section extracted from [_StoryboardWorkbenchPanel] to keep
+/// individual part files ≤800 lines.
+class _StoryboardVideoSection extends StatelessWidget {
+  const _StoryboardVideoSection({
+    required this.saving,
+    required this.loadingWorkbench,
+    required this.trackIdCtrl,
+    required this.trackNameCtrl,
+    required this.videoPromptCtrl,
+    required this.videoDurationCtrl,
+    required this.resolution,
+    required this.mode,
+    required this.audio,
+    required this.modelDetail,
+    required this.generateData,
+    required this.productionRow,
+    required this.workbenchLine,
+    required this.knownTrackIds,
+    required this.storyboardVideos,
+    required this.onResolutionChanged,
+    required this.onModeChanged,
+    required this.onAudioChanged,
+    required this.onAddTrack,
+    required this.onDeleteTrack,
+    required this.onGenerateVideoPrompt,
+    required this.onRefreshVideoData,
+    required this.onSubmitVideoGeneration,
+    required this.onSelectVideo,
+    required this.onDeleteCurrentVideo,
+  });
+
+  final bool saving;
+  final bool loadingWorkbench;
+  final TextEditingController trackIdCtrl;
+  final TextEditingController trackNameCtrl;
+  final TextEditingController videoPromptCtrl;
+  final TextEditingController videoDurationCtrl;
+  final String resolution;
+  final String mode;
+  final bool audio;
+  final VideoModelDetail? modelDetail;
+  final GetGenerateDataResponse? generateData;
+  final ProductionStoryboardItemV1? productionRow;
+  final String? workbenchLine;
+  final List<int> knownTrackIds;
+  final List<VideoItem> storyboardVideos;
+  final ValueChanged<String> onResolutionChanged;
+  final ValueChanged<String> onModeChanged;
+  final ValueChanged<bool> onAudioChanged;
+  final VoidCallback onAddTrack;
+  final VoidCallback onDeleteTrack;
+  final VoidCallback onGenerateVideoPrompt;
+  final VoidCallback onRefreshVideoData;
+  final VoidCallback onSubmitVideoGeneration;
+  final ValueChanged<VideoItem> onSelectVideo;
+  final VoidCallback onDeleteCurrentVideo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('视频工作台', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        TextField(
+          controller: trackIdCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: '轨道 ID',
+            helperText: knownTrackIds.isEmpty
+                ? '当前还没有已知轨道，可先新建。'
+                : '已发现轨道：${knownTrackIds.join(", ")}',
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: trackNameCtrl,
+          decoration: const InputDecoration(
+            labelText: '新轨道名称',
+            helperText: '新增后会自动回填轨道 ID。',
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.tonal(
+              onPressed: saving ? null : onAddTrack,
+              child: const Text('新增轨道'),
+            ),
+            TextButton(
+              onPressed: saving ? null : onDeleteTrack,
+              child: const Text('删除轨道'),
+            ),
+            TextButton(
+              onPressed: saving ? null : onGenerateVideoPrompt,
+              child: const Text('生成默认视频提示词'),
+            ),
+            TextButton(
+              onPressed: saving || loadingWorkbench ? null : onRefreshVideoData,
+              child: Text(loadingWorkbench ? '刷新中…' : '刷新视频数据'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: videoPromptCtrl,
+          minLines: 3,
+          maxLines: 6,
+          decoration: const InputDecoration(
+            labelText: '视频生成提示词',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: videoDurationCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: '时长（秒）'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: resolution,
+                decoration: const InputDecoration(labelText: '分辨率'),
+                items: (modelDetail?.resolutions.isNotEmpty ?? false)
+                    ? modelDetail!.resolutions
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(growable: false)
+                    : const [
+                        DropdownMenuItem(value: '1080p', child: Text('1080p')),
+                        DropdownMenuItem(value: '720p', child: Text('720p')),
+                      ],
+                onChanged: saving
+                    ? null
+                    : (value) {
+                        if (value == null) return;
+                        onResolutionChanged(value);
+                      },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                initialValue: mode,
+                decoration: const InputDecoration(labelText: '生成模式'),
+                items: const [
+                  DropdownMenuItem(value: 'standard', child: Text('standard')),
+                  DropdownMenuItem(value: 'fast', child: Text('fast')),
+                ],
+                onChanged: saving
+                    ? null
+                    : (value) {
+                        if (value == null) return;
+                        onModeChanged(value);
+                      },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: InputDecorator(
+                decoration: const InputDecoration(labelText: '模型'),
+                child: Text(modelDetail?.modelId ?? '等待加载模型信息'),
+              ),
+            ),
+          ],
+        ),
+        CheckboxListTile(
+          value: audio,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('生成视频时携带音频'),
+          controlAffinity: ListTileControlAffinity.leading,
+          onChanged: saving ? null : (value) => onAudioChanged(value ?? false),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton(
+            onPressed: saving ? null : onSubmitVideoGeneration,
+            child: Text(saving ? '提交中…' : '提交视频生成'),
+          ),
+        ),
+        if (workbenchLine != null) ...[
+          const SizedBox(height: 8),
+          Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
+        ],
+        const SizedBox(height: 12),
+        Text('当前分镜的视频候选', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 4),
+        Text(
+          storyboardVideos.isEmpty
+              ? '还没有与当前 storyboard 关联的已生成视频。'
+              : '优先展示当前 storyboard 的视频结果，可一键设为当前选中视频。',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...storyboardVideos.take(3).map(
+          (video) {
+            final state = video.state ?? '';
+            final duration = video.duration ?? '';
+            return ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                video.videoUrl ?? '视频 URL 缺失',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                [
+                  if (state.trim().isNotEmpty) '状态 $state',
+                  if (video.trackId != null) '轨道 ${video.trackId}',
+                  if (duration.trim().isNotEmpty) '时长 $duration',
+                ].join(' · '),
+              ),
+              trailing: TextButton(
+                onPressed: saving || (video.videoUrl ?? '').trim().isEmpty
+                    ? null
+                    : () => onSelectVideo(video),
+                child: const Text('设为当前视频'),
+              ),
+            );
+          },
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: saving ? null : onDeleteCurrentVideo,
+            child: const Text('删除当前已选视频'),
+          ),
+        ),
+        if ((generateData?.generatingJobs.isNotEmpty ?? false)) ...[
+          const SizedBox(height: 8),
+          Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 4),
+          ...generateData!.generatingJobs.take(3).map(
+            (job) => ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(job.kind),
+              subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}

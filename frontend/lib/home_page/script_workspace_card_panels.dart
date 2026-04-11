@@ -1,5 +1,5 @@
 // Extracted panel widgets for AgentWorkspaceScriptCard.
-// Keeps agent_workspaces_section_script.dart ≤800 lines.
+// Keeps agent_workspaces/script_card.dart ≤800 lines.
 
 import 'package:flutter/material.dart';
 
