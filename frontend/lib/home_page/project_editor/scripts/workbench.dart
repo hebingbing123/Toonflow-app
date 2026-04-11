@@ -95,9 +95,9 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
               switch (diagnosis.recommendedAction) {
                 case ScriptBatchWorkbenchRecommendedAction.syncContext:
                   recommendedAction = () async {
-                    final rows = await postScriptsGetScriptApi(
+                    final rows = await postScriptsGetScriptApiByProjectId(
                       token,
-                      p.legacyId,
+                      p.id,
                       name: filterCtrl.text.trim(),
                     );
                     setLocalState(() {
@@ -264,9 +264,9 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                                   ? null
                                   : () => runAction(() async {
                                       final rows =
-                                          await postScriptsGetScriptApi(
+                                          await postScriptsGetScriptApiByProjectId(
                                             token,
-                                            p.legacyId,
+                                            p.id,
                                             name: filterCtrl.text.trim(),
                                           );
                                       setLocalState(() {

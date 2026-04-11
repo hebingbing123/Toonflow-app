@@ -38,6 +38,7 @@ extension _HomePageScriptEditor on _HomePageState {
                       children: [
                         _ScriptWorkbenchPanel(
                           token: token,
+                          projectId: projectId,
                           projectLegacyId: projectLegacyId,
                           scriptLegacyId: scriptLegacyId,
                           onExtractStateSynced: (extractState) {

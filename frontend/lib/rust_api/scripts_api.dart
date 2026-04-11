@@ -1,5 +1,44 @@
 part of 'index.dart';
 
+/// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — same as legacy list + **`relatedAssets`**.
+Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApiByProjectId(
+  String accessToken,
+  String projectId, {
+  String? name,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/scripts/get-script-api',
+  );
+  final body = <String, dynamic>{};
+  if (name != null && name.isNotEmpty) {
+    body['name'] = name;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  final data = map['data'] as List<dynamic>;
+  return data
+      .map(
+        (e) =>
+            LegacyScriptsGetScriptApiItem.fromJson(e as Map<String, dynamic>),
+      )
+      .toList();
+}
+
 /// `POST /api/v1/scripts/get-script-api` — legacy **`getScrptApi`** list + **`relatedAssets`**.
 Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApi(
   String accessToken,

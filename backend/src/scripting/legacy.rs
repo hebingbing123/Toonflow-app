@@ -1,15 +1,16 @@
 //! 遗留 `POST /api/script/getScrptApi` — 列出项目下的脚本及其关联资产摘要。
 
 use axum::{
-    extract::{Json, State},
+    extract::{Json, Path, State},
     http::HeaderMap,
     routing::post,
     Json as JsonResponse, Router,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
+use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -18,6 +19,13 @@ use crate::state::AppState;
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct GetScriptApiBody {
     project_id: i32,
+    #[serde(default)]
+    name: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+struct GetScriptApiNameBody {
     #[serde(default)]
     name: Option<String>,
 }
@@ -59,32 +67,12 @@ struct GetScriptApiResponse {
     data: Vec<LegacyScriptListItem>,
 }
 
-async fn post_get_script_api(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<GetScriptApiBody>,
-) -> Result<JsonResponse<GetScriptApiResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(body.project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    let name_sub = body
-        .name
+async fn get_script_api_for_project_uuid(
+    pool: &PgPool,
+    project_uuid: Uuid,
+    name: Option<String>,
+) -> Result<GetScriptApiResponse, ApiError> {
+    let name_sub = name
         .as_ref()
         .map(|s| s.trim())
         .filter(|s| !s.is_empty())
@@ -121,7 +109,7 @@ async fn post_get_script_api(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if scripts.is_empty() {
-        return Ok(JsonResponse(GetScriptApiResponse { data: vec![] }));
+        return Ok(GetScriptApiResponse { data: vec![] });
     }
 
     let ids: Vec<Uuid> = scripts.iter().map(|s| s.id).collect();
@@ -175,9 +163,60 @@ async fn post_get_script_api(
         })
         .collect();
 
-    Ok(JsonResponse(GetScriptApiResponse { data }))
+    Ok(GetScriptApiResponse { data })
+}
+
+async fn post_get_script_api_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    headers: HeaderMap,
+    Json(body): Json<GetScriptApiNameBody>,
+) -> Result<JsonResponse<GetScriptApiResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+
+    let response = get_script_api_for_project_uuid(pool, project_id, body.name).await?;
+    Ok(JsonResponse(response))
+}
+
+async fn post_get_script_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<GetScriptApiBody>,
+) -> Result<JsonResponse<GetScriptApiResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let project_uuid: Uuid = sqlx::query_scalar(
+        r#"
+        SELECT id FROM app_project
+        WHERE legacy_id = $1 AND owner_user_id = $2
+        "#,
+    )
+    .bind(body.project_id)
+    .bind(uid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let response = get_script_api_for_project_uuid(pool, project_uuid, body.name).await?;
+    Ok(JsonResponse(response))
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/api/v1/scripts/get-script-api", post(post_get_script_api))
+    Router::new()
+        .route(
+            "/api/v1/projects/{project_id}/scripts/get-script-api",
+            post(post_get_script_api_for_project),
+        )
+        .route("/api/v1/scripts/get-script-api", post(post_get_script_api))
 }

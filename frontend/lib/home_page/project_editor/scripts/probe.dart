@@ -59,7 +59,8 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
             : () async {
                 setDialogState(() => scriptProbeBusy[0] = true);
                 try {
-                  final rows = await postScriptsGetScriptApi(token, p.legacyId);
+                  final rows =
+                      await postScriptsGetScriptApiByProjectId(token, p.id);
                   if (!ctx.mounted) return;
                   final sample = rows.isEmpty
                       ? '0 条'

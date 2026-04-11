@@ -38,7 +38,7 @@
 | `backend/src/rest_legacy/mod.rs` | 未收拢域入口 |
 | `backend/src/rest_legacy/general.rs` | general 旧 POST |
 | `backend/src/rest_legacy/tasks.rs` | tasks 旧形 |
-| `backend/src/scripting/legacy.rs` | 脚本相关旧路由 |
+| `backend/src/scripting/legacy.rs` | 脚本相关旧路由；**并行**：`POST …/projects/{project_id}/scripts/get-script-api`（body 仅可选 `name`）；旧 `POST …/scripts/get-script-api`（body 含 `projectId`）仍注册并已标 **`deprecated`** |
 | `backend/src/scripting/mod.rs` | `pub mod legacy` |
 | `backend/src/assets/legacy.rs` | 资产 legacy 聚合 |
 | `backend/src/assets/legacy_query/mod.rs` | 旧查询面入口 |
@@ -246,6 +246,7 @@
 | **B·竖切 4：项目小说事件 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。`POST …/novels/events/get-events` 仍按 body **`projectId`（legacy）** 解析为 UUID 后查询。Flutter `novels_events` 与项目编辑器事件列表/工作台主路径已切 UUID；legacy `…/projects/legacy/.../novel-events*` 仍保留并已标 **`deprecated`** |
 | **B·竖切 5：叙事分镜 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST …/projects/{project_id}/scripts/{script_legacy_id}/storyboards`，`GET\|PATCH\|DELETE …/projects/{project_id}/storyboards/{storyboard_legacy_id}`（分镜仍为 **`storyboard_legacy_id`**）。Flutter `storyboards_api` 与剧本编辑器分镜列表/单条编辑主路径已切 UUID；`scripts/legacy/.../storyboards` 与 `storyboards/legacy/{id}` 仍保留并已标 **`deprecated`** |
 | **B·竖切 6：剧本 CRUD（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts`，`GET\|PATCH\|DELETE …/projects/{project_id}/scripts/{script_legacy_id}`；创建逻辑与 advisory lock 与 legacy 一致。Flutter `scripts_api` 与剧本编辑器/项目「新建空剧本」主路径已切 UUID；`…/projects/legacy/.../scripts`、`…/scripts/legacy/{id}` 仍保留并已标 **`deprecated`** |
+| **B·竖切 7：`get-script-api`（UUID 项目段）** | 已落地（主路径） | 后端：`POST …/projects/{project_id}/scripts/get-script-api`（`ensure_owned_project_pk` + body 可选 `name`）。Flutter `postScriptsGetScriptApiByProjectId`；剧本/项目脚本工作台与 probe 主路径已切 UUID。旧 `POST …/scripts/get-script-api` 仍注册并已标 **`deprecated`** |
 | **B·其余域** | 未做 | 例如：`POST /api/v1/assets/*` 旧形、production、`harness`/jobs payload、仍注册的各 `…/legacy/…` 与 `narrative::legacy` 等 |
 | **C–D** | 未做 | 大块删 `*legacy*` 模块与删 PG `legacy_id` 列 |
 

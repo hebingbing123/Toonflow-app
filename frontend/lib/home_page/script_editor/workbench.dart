@@ -3,6 +3,7 @@ part of '../../home_page.dart';
 class _ScriptWorkbenchPanel extends StatefulWidget {
   const _ScriptWorkbenchPanel({
     required this.token,
+    required this.projectId,
     required this.projectLegacyId,
     required this.scriptLegacyId,
     required this.onExtractStateSynced,
@@ -10,6 +11,7 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
   });
 
   final String token;
+  final String projectId;
   final int projectLegacyId;
   final int scriptLegacyId;
   final void Function(int? extractState) onExtractStateSynced;
@@ -41,9 +43,9 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       _contextLine = null;
     });
     try {
-      final rows = await postScriptsGetScriptApi(
+      final rows = await postScriptsGetScriptApiByProjectId(
         widget.token,
-        widget.projectLegacyId,
+        widget.projectId,
       );
       final current = findScriptContextByLegacyId(rows, widget.scriptLegacyId);
       if (!mounted) return;
