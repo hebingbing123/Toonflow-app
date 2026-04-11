@@ -53,7 +53,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| `backend/src/harness/invoke/domain_production.rs` | `crate::production_legacy::load_owned_production_flow_json` |
+| `backend/src/production_flow.rs` | 制作流程 JSON 加载、**`resolve_owned_production_scope`**（Harness + **`get-flow-data` / `save-flow-data`** / edit-image 上传归属校验） |
+| `backend/src/harness/invoke/domain_production.rs` | **`crate::production_flow::load_owned_production_flow_json`**（与 **`/api/v1/production/get-flow-data`** 同源实现） |
 | `backend/src/harness/invoke/domain_script.rs`（及同目录其它域） | 工具入参/上下文普遍假设 **项目/剧本/小说 `legacy_id`**；HTTP 改 UUID 时须同步 **WS attach / `agent.context.update` 契约与实现**（见 `docs/websocket-events.md`） |
 
 ### 5. 契约与集成测试
@@ -270,7 +271,7 @@
 3. ~~`rest_legacy::{general,tasks}`~~ **已删除**。
 4. ~~`scripting::legacy`~~ **已并入 `scripting::scripts`**（路由不变）。
 5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
-6. `production_legacy` — **最后**：依赖多、`harness` 有引用，需单独迁移 `load_owned_production_flow_json` 或等价能力。
+6. `production_legacy` — **最后**：HTTP 树仍在此 crate；**`load_owned_production_flow_json` / `resolve_owned_production_scope`** 已迁至 **`production_flow`**，Harness **不再**依赖 `production_legacy` 取流程 JSON。
 
 **顺序补充（与 §7–§8 对齐）**：
 
@@ -315,7 +316,7 @@
 |------|------|
 | **只改 URL 不改队列** | `app_generation_job` payload、`worker` 反查仍用 **`legacy_id`/`legacy_image_id`**；删路由前确认无在途任务或做好 payload 版本迁移。 |
 | **只改 REST 不改 Harness** | `HarnessContext`、各 `domain_*` 工具仍以整型项目/剧本 id 查库；需 **同一里程碑** 内定义新上下文字段并改 Flutter WS 客户端。 |
-| **`production_legacy` 过早删除** | `domain_production` 等仍 `load_owned_production_flow_json`；须先抽 **独立模块** 或迁到 `projects`/`narrative` 等非 legacy 包。 |
+| **`production_legacy` 过早删除** | HTTP 路由仍集中在该模块；流程加载已抽至 **`production_flow`**，删 crate 前须把 **`router()`** 迁出或改名。 |
 | **OpenAPI / smoke / pg_contract 不同步** | 仅删 `router()` 会导致 CI 仍测旧路径或反之；每域保持 **契约三件套** 同 PR。 |
 | **画风 / Prompts 漏网** | `art-styles/legacy`、`prompts/{legacy_id}` 不在 `narrative::legacy` 树内；易被「按目录删 legacy」误伤或遗漏。 |
 | **Staging 与删列** | `legacy_staging`、`promote_legacy_from_staging` 与 **`legacy_user_map`** 等；删 `legacy_id` 列前须完成数据迁移与回归。 |

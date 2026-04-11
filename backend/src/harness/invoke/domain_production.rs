@@ -45,7 +45,7 @@ pub(super) async fn invoke_get_flow_data(
     let project_legacy_id = project_legacy_from_ctx(ctx)?;
     let script_legacy_id = script_legacy_id_from_args_or_ctx(ctx, arguments)?;
 
-    let flow = crate::production_legacy::load_owned_production_flow_json(
+    let flow = crate::production_flow::load_owned_production_flow_json(
         pool,
         ctx.user_id,
         project_legacy_id,

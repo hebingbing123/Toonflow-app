@@ -14,6 +14,7 @@ mod llm;
 mod manuals;
 mod metering;
 mod narrative;
+mod production_flow;
 mod production_legacy;
 mod projects;
 mod prompting;

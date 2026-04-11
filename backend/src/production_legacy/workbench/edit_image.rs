@@ -215,7 +215,13 @@ pub(in crate::production_legacy) async fn post_edit_image_upload_image(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    super::flow::resolve_owned_production_scope(pool, uid, body.project_id, body.script_id).await?;
+    crate::production_flow::resolve_owned_production_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+    )
+    .await?;
 
     Ok(JsonResponse(EditImageUploadImageResponse {
         url: normalized,

@@ -12,8 +12,6 @@ use crate::state::AppState;
 
 mod workbench;
 
-pub(crate) use workbench::flow::load_owned_production_flow_json;
-
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
