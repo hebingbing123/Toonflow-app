@@ -3936,7 +3936,9 @@ paths:
       summary: Create script under a project (by project UUID; allocates global script legacy_id)
       operationId: createScriptUnderProjectByProjectIdV1
       description: |
-        Same as **`POST /api/v1/projects/legacy/{project_legacy_id}/scripts`**, keyed by **`app_project.id`** (UUID).
+        Bearer JWT. **`project_id`** is **`app_project.id`** (UUID). Inserts **`app_script`** for the owned project.
+        **`legacy_id`** is **`MAX(legacy_id)+1`** over **`app_script`** under a transaction advisory lock (separate from project lock).
+        Optional body **`name`**, **`content`**, **`extract_state`**; **`create_time_ms`** set server-side.
       security:
         - bearerAuth: []
       parameters:
@@ -4174,63 +4176,6 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
           description: Script not found or not in project
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured, database error, or `DATABASE_URL` unset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/projects/legacy/{project_legacy_id}/scripts:
-    post:
-      deprecated: true
-      tags: [scripts]
-      summary: Create script under a project (allocates global script legacy_id)
-      operationId: createScriptUnderProjectLegacyV1
-      description: |
-        Inserts **`app_script`** linked to **`app_project`** resolved by **`project_legacy_id`** and JWT owner.
-        **`legacy_id`** is **`MAX(legacy_id)+1`** over **`app_script`** under a transaction advisory lock (separate from project lock).
-        Optional body fields; **`create_time_ms`** set server-side. Script–asset links use **`PUT …/scripts/{script_legacy_id}/assets/{asset_legacy_id}`** or **`extract-assets`**.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: project_legacy_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateScriptBody"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ScriptRow"
-        "400":
-          description: Unknown JSON properties
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "404":
-          description: Project not found or not owned
           content:
             application/json:
               schema:

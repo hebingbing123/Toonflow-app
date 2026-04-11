@@ -181,10 +181,6 @@ pub fn router() -> Router<AppState> {
                 .delete(delete_script_for_project),
         )
         .route(
-            "/api/v1/projects/legacy/{project_legacy_id}/scripts",
-            post(create_script_under_project),
-        )
-        .route(
             "/api/v1/scripts/legacy/{legacy_id}",
             get(get_script_by_legacy)
                 .patch(patch_script_by_legacy)
@@ -372,45 +368,6 @@ async fn create_script_under_project_for_project(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let row = create_script_locked(&mut tx, project_id, body).await?;
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok((StatusCode::CREATED, Json(row)))
-}
-
-async fn create_script_under_project(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CreateScriptBody>,
-) -> Result<(StatusCode, Json<ScriptRow>), ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    let row = create_script_locked(&mut tx, project_uuid, body).await?;
 
     tx.commit()
         .await

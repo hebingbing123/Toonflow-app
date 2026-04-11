@@ -11,7 +11,7 @@
 | 鉴权 | JWT，`o_setting.tokenKey` | Supabase **`Authorization: Bearer`**（`SUPABASE_JWT_SECRET` 校验） |
 | 主库 | SQLite（Knex 等） | **Supabase Postgres** + RLS（见 `supabase/migrations/`） |
 | 实时 | Socket.IO（`src/socket/`） | **`GET /api/v1/ws`** + Harness 协议（`docs/websocket-events.md`） |
-| 静态文件 | `/oss`、旧 **`/assets`** 静态路由、`/skills` 图片 URL | **Rust**：**`GET /api/v1/skills/binary?path=`**（`data/skills` 下受控文件）；**素材历史图** **`GET …/projects/legacy/…/images/{id}/file`**（**`https?`** 跳转或 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** 下 PNG）；**不再复刻**旧栈 **`/oss`** 等 bulk 静态挂载（CDN/对象存储或独立服务，产品决定） |
+| 静态文件 | `/oss`、旧 **`/assets`** 静态路由、`/skills` 图片 URL | **Rust**：**`GET /api/v1/skills/binary?path=`**（`data/skills` 下受控文件）；**素材历史图** **`GET …/projects/{project_id}/assets/…/images/{id}/file`**（**`project_id`** UUID；**`https?`** 跳转或 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** 下 PNG）；**不再复刻**旧栈 **`/oss`** 等 bulk 静态挂载（CDN/对象存储或独立服务，产品决定） |
 
 ## 2. 状态图例
 

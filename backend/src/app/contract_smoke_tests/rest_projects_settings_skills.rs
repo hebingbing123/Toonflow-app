@@ -632,7 +632,11 @@ async fn project_novel_delete_unauthorized_without_bearer() {
 
 #[tokio::test]
 async fn create_script_under_project_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/projects/legacy/1/scripts", "{}").await;
+    let (status, v) = post_json(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/scripts",
+        "{}",
+    )
+    .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
@@ -640,7 +644,12 @@ async fn create_script_under_project_unauthorized_without_bearer() {
 #[tokio::test]
 async fn create_script_under_project_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/projects/legacy/1/scripts", &token, "{}").await;
+    let (status, v) = post_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/scripts",
+        &token,
+        "{}",
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
