@@ -1,4 +1,11 @@
-//! HTTP router composition and core JSON routes (`/health`, `/api/v1/me`, …).
+//! HTTP 路由组合和核心 JSON 路由。
+//!
+//! 负责组合所有子模块的路由，包括健康检查 (`/health`)、用户信息 (`/api/v1/me`) 等。
+//!
+//! 子模块：
+//! - `handlers` — 请求处理器
+//! - `ops` — 运维端点
+//! - `router` — 路由构建器
 
 mod handlers;
 pub mod ops;

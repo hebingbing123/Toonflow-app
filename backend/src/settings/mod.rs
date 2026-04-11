@@ -1,5 +1,16 @@
-//! Settings / legacy **`/api/setting/*`** HTTP surface (about, vendors, dev switch, danger, memory, agent deploy).
-//! Also includes **`/api/v1/agents/memory/*`** (Postgres **`app_agent_memory`**).
+//! 设置模块：遗留 `/api/setting/*` HTTP 接口。
+//!
+//! 包括：关于、提供商、开发开关、危险操作、内存配置、代理部署。
+//! 还包括 `/api/v1/agents/memory/*`（Postgres `app_agent_memory`）。
+//!
+//! 子模块：
+//! - `about` — 关于（检查更新、下载应用）
+//! - `vendors` — 提供商配置
+//! - `dev` — 开发设置
+//! - `danger` — 危险操作
+//! - `memory_config` — 内存配置
+//! - `agent_deploy` — 代理部署
+//! - `agent_memory` — 代理记忆
 
 pub mod about;
 pub mod agent_deploy;
