@@ -16,7 +16,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-/// Same advisory lock family as [`crate::scripts`] for allocating **`app_script.legacy_id`**.
+/// Same advisory lock family as [`crate::scripting::scripts`] for allocating **`app_script.legacy_id`**.
 const ADV_LOCK_SCRIPT_LEGACY_ID: i64 = 884_422_002;
 const MAX_PLAN_SCRIPT_ROWS: usize = 200;
 

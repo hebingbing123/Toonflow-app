@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::novels::NovelRow;
+use crate::narrative::novels::NovelRow;
 use crate::state::AppState;
 use extraction::{resolve_event_extraction_prompt, run_novel_event_extraction_task};
 

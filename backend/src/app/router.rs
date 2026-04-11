@@ -10,9 +10,7 @@ use crate::harness;
 use crate::jobs;
 use crate::manuals;
 use crate::models_catalog;
-use crate::novel_events;
-use crate::novels;
-use crate::novels_legacy;
+use crate::narrative;
 use crate::production_legacy;
 use crate::project_legacy;
 use crate::projects;
@@ -22,14 +20,10 @@ use crate::rate_limit::{
     governor_layer_from_env, strict_endpoint_governor_layer, user_governor_layer,
 };
 use crate::request_id_mw::inject_request_id_into_json_errors;
-use crate::script_agent;
-use crate::script_asset_extract;
-use crate::scripts;
-use crate::scripts_legacy;
+use crate::scripting;
 use crate::settings;
 use crate::skills;
 use crate::state::AppState;
-use crate::storyboards;
 use crate::tasks_legacy;
 use crate::usage;
 
@@ -78,17 +72,17 @@ pub fn build_router(state: AppState) -> Router {
         .merge(manuals::director::router())
         .merge(general_legacy::router())
         .merge(art_styles::router())
-        .merge(novels::router())
-        .merge(novel_events::router())
-        .merge(novels_legacy::router())
+        .merge(narrative::novels::router())
+        .merge(narrative::events::router())
+        .merge(narrative::legacy::router())
         .merge(production_legacy::router())
         .merge(assets::router())
         .merge(assets_generate::router())
-        .merge(scripts::router())
-        .merge(scripts_legacy::router())
-        .merge(script_agent::router())
-        .merge(script_asset_extract::router())
-        .merge(storyboards::router())
+        .merge(scripting::scripts::router())
+        .merge(scripting::legacy::router())
+        .merge(scripting::agent::router())
+        .merge(scripting::asset_extract::router())
+        .merge(narrative::storyboards::router())
         .merge(tasks_legacy::router())
         .merge(skills::router())
         .merge(manuals::visual::router())
