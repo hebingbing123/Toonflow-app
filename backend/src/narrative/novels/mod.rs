@@ -1,4 +1,4 @@
-//! Project-scoped **`app_novel`** REST (legacy **`o_novel`** index/list/get/update/delete subset).
+//! 项目范围的 `app_novel` REST（遗留 `o_novel` 索引/列表/获取/更新/删除子集）。
 
 mod dto;
 mod handlers;
