@@ -1,3 +1,7 @@
+//! 分镜 HTTP 处理器。
+//!
+//! 分镜 CRUD 和脚本关联管理。
+
 use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode},

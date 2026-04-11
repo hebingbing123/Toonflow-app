@@ -1,3 +1,7 @@
+//! 提供商设置 HTTP 处理器。
+//!
+//! 提供商列表、配置和模型测试端点。
+
 use axum::{
     extract::{Path, State},
     http::HeaderMap,
