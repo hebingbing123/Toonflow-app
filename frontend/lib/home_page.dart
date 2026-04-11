@@ -74,10 +74,10 @@ part 'home_page/script_editor/editor.dart';
 part 'home_page/script_editor/edit_image_workbench.dart';
 part 'home_page/script_editor/workbench.dart';
 part 'home_page/storyboard_editor/editor.dart';
-part 'home_page/script_editor/storyboards_workbench.dart';
-part 'home_page/script_editor/storyboards_workbench_dialog.dart';
+part 'home_page/script_editor/batch_workbench.dart';
+part 'home_page/script_editor/batch_dialog.dart';
 part 'home_page/storyboard_editor/workbench.dart';
-part 'home_page/storyboard_editor/workbench_video.dart';
+part 'home_page/storyboard_editor/video_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

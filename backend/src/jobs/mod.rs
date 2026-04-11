@@ -1,4 +1,4 @@
-//! REST routes under `/api/v1/jobs` and the in-process poller in [`worker`].
+//! REST routes under `/api/v1/jobs` and the in-process poller in [`worker`]（`worker/mod.rs` + `worker/*` 子模块）。
 
 pub mod queue;
 pub mod worker;

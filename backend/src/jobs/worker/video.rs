@@ -1,3 +1,4 @@
+use super::common::generation_job_is_cancelled;
 use super::*;
 
 pub(super) async fn run_video_generate(
