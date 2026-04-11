@@ -1,7 +1,7 @@
 part of '../../../../home_page.dart';
 
-extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
-  List<Widget> _buildProjectLegacyNovelsProbeActions({
+extension _HomePageProjectEditorNovelsActions on _HomePageState {
+  List<Widget> _buildProjectNovelsProbeActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
@@ -25,7 +25,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final pg = await postLegacyNovelsGetNovel(
+                  final pg = await fetchNovelWorkbenchPaged(
                     token,
                     p.numericId,
                     page: 1,
@@ -67,7 +67,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final rows = await postLegacyNovelsGetNovelData(
+                  final rows = await fetchNovelWorkbenchFullRows(
                     token,
                     p.numericId,
                   );
@@ -104,7 +104,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final idx = await postLegacyNovelsGetNovelIndex(
+                  final idx = await fetchNovelWorkbenchIndex(
                     token,
                     p.numericId,
                   );
@@ -143,7 +143,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
-                  final rows = await postLegacyNovelsGetNovelEventState(
+                  final rows = await fetchNovelWorkbenchEventStates(
                     token,
                     p.id,
                     ids,
@@ -184,7 +184,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
-                  final msg = await postLegacyNovelEventsGenerateEvents(
+                  final msg = await postNovelEventsGenerateEvents(
                     token,
                     projectNumericId: p.numericId,
                     novelIds: ids.take(3).toList(),
@@ -222,7 +222,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final msg = await postLegacyNovelsAddNovel(
+                  final msg = await appendNovelsUnderProject(
                     token,
                     p.numericId,
                     const [],
@@ -258,7 +258,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  await postLegacyNovelsBatchDelete(token, p.id, const []);
+                  await batchDeleteNovelsUnderProject(token, p.id, const []);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
@@ -301,7 +301,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  await postLegacyNovelsDeleteNovel(token, 0);
+                  await deleteNovelByNumericIdScanningProjects(token, 0);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
@@ -347,7 +347,7 @@ extension _HomePageProjectEditorNovelsLegacyActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 final n = novelsRef[0]!.items.first;
                 try {
-                  final msg = await postLegacyNovelsUpdateNovel(
+                  final msg = await updateNovelScanningProjects(
                     token,
                     id: n.numericId,
                     index: n.chapterIndex,

@@ -11,20 +11,20 @@ class TaskCenterSection extends StatelessWidget {
     required this.loadingTaskProjects,
     required this.loadingTaskCategories,
     required this.loadingTaskApi,
-    required this.loadingTaskDetailsLegacy,
+    required this.loadingTaskDetailsByNumericId,
     required this.loadingTaskDetailsUuid,
     required this.taskDetailJobIdController,
     required this.taskProjects,
     required this.taskCategoriesLine,
     required this.taskApiSummaryLine,
-    required this.taskDetailLegacyLine,
+    required this.taskDetailNumericIdLine,
     required this.taskDetailUuidLine,
     required this.taskApiJobs,
     required this.onTaskDetailJobIdChanged,
     required this.onLoadTaskProjects,
     required this.onLoadTaskCategories,
     required this.onLoadTaskApi,
-    required this.onProbeTaskDetailLegacy,
+    required this.onProbeTaskDetailByNumericId,
     required this.onProbeTaskDetailUuid,
     required this.onSelectTaskJob,
   });
@@ -33,20 +33,20 @@ class TaskCenterSection extends StatelessWidget {
   final bool loadingTaskProjects;
   final bool loadingTaskCategories;
   final bool loadingTaskApi;
-  final bool loadingTaskDetailsLegacy;
+  final bool loadingTaskDetailsByNumericId;
   final bool loadingTaskDetailsUuid;
   final TextEditingController taskDetailJobIdController;
-  final List<LegacyTasksProjectItem>? taskProjects;
+  final List<TaskCenterProjectItem>? taskProjects;
   final String? taskCategoriesLine;
   final String? taskApiSummaryLine;
-  final String? taskDetailLegacyLine;
+  final String? taskDetailNumericIdLine;
   final String? taskDetailUuidLine;
   final List<JobRow>? taskApiJobs;
   final ValueChanged<String> onTaskDetailJobIdChanged;
   final VoidCallback onLoadTaskProjects;
   final VoidCallback onLoadTaskCategories;
   final VoidCallback onLoadTaskApi;
-  final VoidCallback onProbeTaskDetailLegacy;
+  final VoidCallback onProbeTaskDetailByNumericId;
   final VoidCallback onProbeTaskDetailUuid;
   final ValueChanged<JobRow> onSelectTaskJob;
 
@@ -62,10 +62,10 @@ class TaskCenterSection extends StatelessWidget {
       context: context,
       builder: (dialogCtx) => _TaskCenterWorkbenchDialog(
         accessToken: token,
-        initialProjects: taskProjects ?? const <LegacyTasksProjectItem>[],
+        initialProjects: taskProjects ?? const <TaskCenterProjectItem>[],
         initialTaskSummary: taskApiSummaryLine,
         initialCategoriesSummary: taskCategoriesLine,
-        initialLegacyDetails: taskDetailLegacyLine,
+        initialNumericIdTaskDetail: taskDetailNumericIdLine,
         initialUuidDetails: taskDetailUuidLine,
         initialJobs: taskApiJobs ?? const <JobRow>[],
       ),
@@ -112,18 +112,18 @@ class TaskCenterSection extends StatelessWidget {
           loadingTaskProjects: loadingTaskProjects,
           loadingTaskCategories: loadingTaskCategories,
           loadingTaskApi: loadingTaskApi,
-          loadingTaskDetailsLegacy: loadingTaskDetailsLegacy,
+          loadingTaskDetailsByNumericId: loadingTaskDetailsByNumericId,
           loadingTaskDetailsUuid: loadingTaskDetailsUuid,
           taskDetailJobIdController: taskDetailJobIdController,
           onTaskDetailJobIdChanged: onTaskDetailJobIdChanged,
           onLoadTaskProjects: onLoadTaskProjects,
           onLoadTaskCategories: onLoadTaskCategories,
           onLoadTaskApi: onLoadTaskApi,
-          onProbeTaskDetailLegacy: onProbeTaskDetailLegacy,
+          onProbeTaskDetailByNumericId: onProbeTaskDetailByNumericId,
           onProbeTaskDetailUuid: onProbeTaskDetailUuid,
         ),
         TaskCenterDetailsPreview(
-          taskDetailLegacyLine: taskDetailLegacyLine,
+          taskDetailNumericIdLine: taskDetailNumericIdLine,
           taskDetailUuidLine: taskDetailUuidLine,
         ),
         if (taskApiJobs != null) ...[
@@ -143,16 +143,16 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
     required this.initialProjects,
     required this.initialTaskSummary,
     required this.initialCategoriesSummary,
-    required this.initialLegacyDetails,
+    required this.initialNumericIdTaskDetail,
     required this.initialUuidDetails,
     required this.initialJobs,
   });
 
   final String accessToken;
-  final List<LegacyTasksProjectItem> initialProjects;
+  final List<TaskCenterProjectItem> initialProjects;
   final String? initialTaskSummary;
   final String? initialCategoriesSummary;
-  final String? initialLegacyDetails;
+  final String? initialNumericIdTaskDetail;
   final String? initialUuidDetails;
   final List<JobRow> initialJobs;
 
@@ -168,21 +168,21 @@ class _TaskCenterWorkbenchDialogState
   late final TextEditingController _stateCtrl;
   late final TextEditingController _taskClassCtrl;
   late final TextEditingController _projectIdCtrl;
-  late final TextEditingController _legacyTaskIdCtrl;
+  late final TextEditingController _numericTaskIdCtrl;
   late final TextEditingController _uuidCtrl;
 
-  List<LegacyTasksProjectItem> _projects = const <LegacyTasksProjectItem>[];
-  List<LegacyTasksTaskClassRow> _categories = const <LegacyTasksTaskClassRow>[];
+  List<TaskCenterProjectItem> _projects = const <TaskCenterProjectItem>[];
+  List<TaskCenterTaskClassRow> _categories = const <TaskCenterTaskClassRow>[];
   List<JobRow> _jobs = const <JobRow>[];
   String? _taskSummary;
   String? _categoriesSummary;
-  String? _legacyDetails;
+  String? _numericIdTaskDetailText;
   String? _uuidDetails;
   String? _statusLine;
   bool _loadingProjects = false;
   bool _loadingCategories = false;
   bool _loadingTasks = false;
-  bool _loadingLegacyDetails = false;
+  bool _loadingNumericIdTaskDetail = false;
   bool _loadingUuidDetails = false;
 
   @override
@@ -197,7 +197,7 @@ class _TaskCenterWorkbenchDialogState
           ? ''
           : widget.initialProjects.first.numericId.toString(),
     );
-    _legacyTaskIdCtrl = TextEditingController(
+    _numericTaskIdCtrl = TextEditingController(
       text: widget.initialJobs.isEmpty
           ? ''
           : widget.initialJobs.first.numericTaskId.toString(),
@@ -209,7 +209,7 @@ class _TaskCenterWorkbenchDialogState
     _jobs = widget.initialJobs;
     _taskSummary = widget.initialTaskSummary;
     _categoriesSummary = widget.initialCategoriesSummary;
-    _legacyDetails = widget.initialLegacyDetails;
+    _numericIdTaskDetailText = widget.initialNumericIdTaskDetail;
     _uuidDetails = widget.initialUuidDetails;
   }
 
@@ -220,7 +220,7 @@ class _TaskCenterWorkbenchDialogState
     _stateCtrl.dispose();
     _taskClassCtrl.dispose();
     _projectIdCtrl.dispose();
-    _legacyTaskIdCtrl.dispose();
+    _numericTaskIdCtrl.dispose();
     _uuidCtrl.dispose();
     super.dispose();
   }
@@ -315,7 +315,7 @@ class _TaskCenterWorkbenchDialogState
             '${taskClass.isEmpty ? '' : ' taskClass=$taskClass'}'
             ' · total=${rows.total} · page_rows=${jobs.length}';
         if (jobs.isNotEmpty) {
-          _legacyTaskIdCtrl.text = jobs.first.numericTaskId.toString();
+          _numericTaskIdCtrl.text = jobs.first.numericTaskId.toString();
           _uuidCtrl.text = jobs.first.id;
         }
         _statusLine = '已刷新 ${jobs.length} 条任务。';
@@ -336,35 +336,35 @@ class _TaskCenterWorkbenchDialogState
     }
   }
 
-  Future<void> _loadLegacyDetails() async {
-    final taskId = int.tryParse(_legacyTaskIdCtrl.text.trim());
+  Future<void> _loadNumericIdTaskDetail() async {
+    final taskId = int.tryParse(_numericTaskIdCtrl.text.trim());
     if (taskId == null) {
-      setState(() => _statusLine = '请填写合法的 legacy task id。');
+      setState(() => _statusLine = '请填写合法的任务 numeric ID。');
       return;
     }
     setState(() {
-      _loadingLegacyDetails = true;
+      _loadingNumericIdTaskDetail = true;
       _statusLine = null;
     });
     try {
       final row = await postTasksTaskDetails(widget.accessToken, taskId);
       if (!mounted) return;
       setState(() {
-        _legacyDetails = formatTaskJobDetails(row);
+        _numericIdTaskDetailText = formatTaskJobDetails(row);
         _uuidCtrl.text = row.id;
-        _loadingLegacyDetails = false;
+        _loadingNumericIdTaskDetail = false;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _statusLine = e.toString();
-        _loadingLegacyDetails = false;
+        _loadingNumericIdTaskDetail = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _statusLine = e.toString();
-        _loadingLegacyDetails = false;
+        _loadingNumericIdTaskDetail = false;
       });
     }
   }
@@ -384,7 +384,7 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _uuidDetails = formatTaskJobDetails(row);
-        _legacyTaskIdCtrl.text = row.numericTaskId.toString();
+        _numericTaskIdCtrl.text = row.numericTaskId.toString();
         _loadingUuidDetails = false;
       });
     } on RustApiException catch (e) {
@@ -419,7 +419,7 @@ class _TaskCenterWorkbenchDialogState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 legacy id 或 UUID 查看详情。',
+                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。',
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -493,7 +493,7 @@ class _TaskCenterWorkbenchDialogState
                     child: TextField(
                       controller: _projectIdCtrl,
                       decoration: const InputDecoration(
-                        labelText: '项目 legacy id（可空）',
+                        labelText: '项目 numeric ID（可空）',
                       ),
                     ),
                   ),
@@ -546,7 +546,7 @@ class _TaskCenterWorkbenchDialogState
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           setState(() {
-                            _legacyTaskIdCtrl.text = job.numericTaskId
+                            _numericTaskIdCtrl.text = job.numericTaskId
                                 .toString();
                             _uuidCtrl.text = job.id;
                           });
@@ -561,18 +561,18 @@ class _TaskCenterWorkbenchDialogState
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _legacyTaskIdCtrl,
+                      controller: _numericTaskIdCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'legacy task id',
+                        labelText: 'numeric task id',
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
-                    onPressed: _loadingLegacyDetails
+                    onPressed: _loadingNumericIdTaskDetail
                         ? null
-                        : _loadLegacyDetails,
-                    child: Text(_loadingLegacyDetails ? '…' : '读取 legacy 详情'),
+                        : _loadNumericIdTaskDetail,
+                    child: Text(_loadingNumericIdTaskDetail ? '…' : '读取任务详情（numeric ID）'),
                   ),
                 ],
               ),
@@ -592,9 +592,9 @@ class _TaskCenterWorkbenchDialogState
                   ),
                 ],
               ),
-              if (_legacyDetails != null) ...[
+              if (_numericIdTaskDetailText != null) ...[
                 const SizedBox(height: 8),
-                SelectableText('Legacy 详情：$_legacyDetails'),
+                SelectableText('任务详情（numeric ID）：$_numericIdTaskDetailText'),
               ],
               if (_uuidDetails != null) ...[
                 const SizedBox(height: 8),

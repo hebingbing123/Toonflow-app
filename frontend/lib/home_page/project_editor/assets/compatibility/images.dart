@@ -17,7 +17,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '资产图片 / legacy 轮询检查',
+          '资产图片 / workbench 轮询检查',
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),
@@ -229,7 +229,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       setDialogState(() => assetsBusy[0] = true);
                       final first = assetsRef[0]!.items.first;
                       try {
-                        final r = await postLegacyAssetsGetImage(
+                        final r = await postWorkbenchAssetsGetImage(
                           token,
                           p.id,
                           first.numericId,
@@ -267,7 +267,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       setDialogState(() => assetsBusy[0] = true);
                       try {
                         final ts = DateTime.now().millisecondsSinceEpoch;
-                        final r = await postLegacyAssetsUploadClip(
+                        final r = await postWorkbenchAssetsUploadClip(
                           token,
                           projectId: p.id,
                           base64Data: 'data:image/png;base64,AA==',
@@ -306,7 +306,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                   : () async {
                       setDialogState(() => assetsBusy[0] = true);
                       try {
-                        final r = await postLegacyAssetsGetMaterialData(
+                        final r = await postWorkbenchAssetsGetMaterialData(
                           token,
                           p.id,
                         );
@@ -344,7 +344,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                   : () async {
                       setDialogState(() => assetsBusy[0] = true);
                       try {
-                        final r = await postLegacyAssetsBatchGenerationData(
+                        final r = await postWorkbenchAssetsBatchGenerationData(
                           token,
                           projectId: p.id,
                           assetType: 'role',
@@ -385,7 +385,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                   : () async {
                       setDialogState(() => assetsBusy[0] = true);
                       try {
-                        final r = await postLegacyAssetsGetAssetsApi(
+                        final r = await postWorkbenchAssetsGetAssetsApi(
                           token,
                           projectId: p.id,
                           assetType: 'role',
@@ -429,7 +429,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       setDialogState(() => assetsBusy[0] = true);
                       final first = assetsRef[0]!.items.first;
                       try {
-                        final rows = await postLegacyAssetsPollingImageAssets(
+                        final rows = await postWorkbenchAssetsPollingImageAssets(
                           token,
                           p.id,
                           <int>[first.numericId],
@@ -473,7 +473,7 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
                       setDialogState(() => assetsBusy[0] = true);
                       final first = assetsRef[0]!.items.first;
                       try {
-                        final rows = await postLegacyAssetsPollingPromptAssets(
+                        final rows = await postWorkbenchAssetsPollingPromptAssets(
                           token,
                           p.id,
                           <int>[first.numericId],

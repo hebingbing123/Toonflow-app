@@ -224,19 +224,19 @@ class VendorsSummaryResponseV1 {
   }
 }
 
-/// OpenAPI **`TextModelDefaultResponse`** — legacy **`getTextModel`** stub + default composite id.
+/// OpenAPI **`TextModelDefaultResponse`** — prior **`getTextModel`** stub + default composite id.
 class TextModelDefaultV1 {
   const TextModelDefaultV1({
-    required this.legacyPlaceholder,
+    required this.stubPlaceholder,
     required this.defaultModelId,
   });
 
-  final String legacyPlaceholder;
+  final String stubPlaceholder;
   final String defaultModelId;
 
   factory TextModelDefaultV1.fromJson(Map<String, dynamic> json) {
     return TextModelDefaultV1(
-      legacyPlaceholder: json['legacy_placeholder'] as String,
+      stubPlaceholder: json['legacy_placeholder'] as String,
       defaultModelId: json['default_model_id'] as String,
     );
   }

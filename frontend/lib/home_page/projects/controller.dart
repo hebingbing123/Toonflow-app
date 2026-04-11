@@ -34,7 +34,7 @@ extension _HomePageProjectsController on _HomePageState {
     if (projects == null || projects.isEmpty) {
       setState(
         () => _error =
-            'Load projects first (agent memory needs a legacy project id).',
+            'Load projects first (agent memory needs a project numeric ID).',
       );
       return;
     }

@@ -27,7 +27,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
     var infoLine = scriptList.isEmpty
         ? '当前项目还没有剧本。'
         : '当前已载入 ${scriptList.length} 条剧本，可筛选后批量执行。';
-    var previewRows = <LegacyScriptsGetScriptApiItem>[];
+    var previewRows = <ScriptWorkbenchDetailRow>[];
 
     Future<void> reloadScriptsAndStats(StateSetter setLocalState) async {
       final detail = await fetchProjectByProjectId(token, p.id);
@@ -315,7 +315,7 @@ extension _HomePageProjectEditorScriptsWorkbench on _HomePageState {
                           minLines: 2,
                           maxLines: 4,
                           decoration: const InputDecoration(
-                            labelText: '目标剧本 legacy id',
+                            labelText: '目标剧本 numeric ID',
                             helperText: '支持逗号、空格或换行分隔；批量导出、轮询和素材抽取都使用这里的列表。',
                           ),
                         ),

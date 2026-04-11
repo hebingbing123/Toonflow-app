@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// OpenAPI **`MemoryConfig`** — legacy **`getMemory`** / **`sureMemory`** (**camelCase**).
+/// OpenAPI **`MemoryConfig`** — prior **`getMemory`** / **`sureMemory`** (**camelCase**).
 class MemoryConfigV1 {
   const MemoryConfigV1({
     required this.messagesPerSummary,
@@ -77,7 +77,7 @@ Future<MemoryConfigV1> fetchMemoryConfigV1(String accessToken) async {
   return MemoryConfigV1.fromJson(map);
 }
 
-/// `POST /api/v1/settings/memory-config` — OpenAPI `postMemoryConfigV1`; returns **`message`** (legacy success text).
+/// `POST /api/v1/settings/memory-config` — OpenAPI `postMemoryConfigV1`; returns **`message`** (human-readable success text).
 Future<String> postMemoryConfigV1(
   String accessToken,
   MemoryConfigV1 body,

@@ -15,7 +15,7 @@ Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
       .toList();
 }
 
-/// `GET /api/v1/prompts/{legacy_id}` — OpenAPI `getPromptByLegacyIdV1`.
+/// `GET /api/v1/prompts/{id}` — OpenAPI `getPromptByNumericIdV1`.
 Future<PromptTemplateRowV1> fetchPromptByNumericIdV1(
   String accessToken,
   int numericId,
@@ -34,9 +34,9 @@ Future<PromptTemplateRowV1> fetchPromptByNumericIdV1(
   return PromptTemplateRowV1.fromJson(map);
 }
 
-/// `PATCH /api/v1/prompts/{legacy_id}` — OpenAPI `patchPromptByNumericIdV1` (**`data`** only).
+/// `PATCH /api/v1/prompts/{id}` — OpenAPI `patchPromptByNumericIdV1` (**`data`** only).
 ///
-/// **`legacy_id`** must be **1**, **2**, or **3**. Returns the updated row (same shape as GET).
+/// **`id`** must be **1**, **2**, or **3** (built-in template slots). Returns the updated row (same shape as GET).
 Future<PromptTemplateRowV1> patchPromptByNumericIdV1(
   String accessToken,
   int numericId,

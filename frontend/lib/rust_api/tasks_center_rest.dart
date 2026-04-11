@@ -1,40 +1,40 @@
 part of 'index.dart';
 
-class LegacyTasksProjectItem {
-  const LegacyTasksProjectItem({required this.numericId, required this.name});
+class TaskCenterProjectItem {
+  const TaskCenterProjectItem({required this.numericId, required this.name});
 
-  /// `app_project.legacy_id` (compat JSON key **`id`**).
+  /// `app_project` numeric id column (compat JSON key **`id`**).
   final int numericId;
   final String name;
 
-  factory LegacyTasksProjectItem.fromJson(Map<String, dynamic> json) {
-    return LegacyTasksProjectItem(
+  factory TaskCenterProjectItem.fromJson(Map<String, dynamic> json) {
+    return TaskCenterProjectItem(
       numericId: (json['id'] as num).toInt(),
       name: json['name'] as String,
     );
   }
 }
 
-class LegacyTasksTaskClassRow {
-  const LegacyTasksTaskClassRow({required this.taskClass});
+class TaskCenterTaskClassRow {
+  const TaskCenterTaskClassRow({required this.taskClass});
 
   /// Same as `app_generation_job.kind`.
   final String taskClass;
 
-  factory LegacyTasksTaskClassRow.fromJson(Map<String, dynamic> json) {
-    return LegacyTasksTaskClassRow(taskClass: json['taskClass'] as String);
+  factory TaskCenterTaskClassRow.fromJson(Map<String, dynamic> json) {
+    return TaskCenterTaskClassRow(taskClass: json['taskClass'] as String);
   }
 }
 
-class LegacyTasksGetTaskApiResult {
-  const LegacyTasksGetTaskApiResult({required this.data, required this.total});
+class TaskCenterGetTaskApiResult {
+  const TaskCenterGetTaskApiResult({required this.data, required this.total});
 
   final List<JobRow> data;
   final int total;
 
-  factory LegacyTasksGetTaskApiResult.fromJson(Map<String, dynamic> json) {
+  factory TaskCenterGetTaskApiResult.fromJson(Map<String, dynamic> json) {
     final list = json['data'] as List<dynamic>;
-    return LegacyTasksGetTaskApiResult(
+    return TaskCenterGetTaskApiResult(
       data: list
           .map((e) => JobRow.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -43,32 +43,32 @@ class LegacyTasksGetTaskApiResult {
   }
 }
 
-/// Compat **`POST /api/task/getProject`**: **`GET /api/v1/projects`** (paged), non-empty names only; **`id`** = **`legacy_id`**.
-Future<List<LegacyTasksProjectItem>> postTasksGetProject(
+/// Compat **`POST /api/task/getProject`**: **`GET /api/v1/projects`** (paged), non-empty names only; **`id`** = **`numeric_id`**.
+Future<List<TaskCenterProjectItem>> postTasksGetProject(
   String accessToken,
 ) async {
   final rows = await _fetchAllProjectsPaged(accessToken);
-  final out = <LegacyTasksProjectItem>[];
+  final out = <TaskCenterProjectItem>[];
   for (final r in rows) {
     final n = r.name?.trim() ?? '';
     if (n.isEmpty) {
       continue;
     }
-    out.add(LegacyTasksProjectItem(numericId: r.numericId, name: n));
+    out.add(TaskCenterProjectItem(numericId: r.numericId, name: n));
   }
   return out;
 }
 
 /// Compat **`getTaskCategories`**: **`GET /api/v1/jobs/kinds`** → **`{ taskClass }`** rows.
-Future<List<LegacyTasksTaskClassRow>> postTasksGetTaskCategories(
+Future<List<TaskCenterTaskClassRow>> postTasksGetTaskCategories(
   String accessToken,
 ) async {
   final kinds = await fetchJobKinds(accessToken);
-  return kinds.map((k) => LegacyTasksTaskClassRow(taskClass: k)).toList();
+  return kinds.map((k) => TaskCenterTaskClassRow(taskClass: k)).toList();
 }
 
 /// Compat **`getTaskApi`**: **`GET /api/v1/jobs/page`** (query: **`page`**, **`limit`**, **`state`**, **`task_class`**, **`project_id`**).
-Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
+Future<TaskCenterGetTaskApiResult> postTasksGetTaskApi(
   String accessToken, {
   required int page,
   required int limit,
@@ -102,10 +102,10 @@ Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyTasksGetTaskApiResult.fromJson(map);
+  return TaskCenterGetTaskApiResult.fromJson(map);
 }
 
-/// Compat **`taskDetails`** with numeric **`legacy_task_id`**: **`GET /api/v1/jobs/task-detail/{id}`**.
+/// Compat **`taskDetails`** with numeric **`numeric_task_id`**: **`GET /api/v1/jobs/task-detail/{id}`**.
 Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/jobs/task-detail/${Uri.encodeComponent('$taskId')}',

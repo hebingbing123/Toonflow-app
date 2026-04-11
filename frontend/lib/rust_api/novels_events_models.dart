@@ -56,8 +56,8 @@ class ListNovelEventsResponse {
 }
 
 /// Compat event row (**`get-events`** shape); mapped from **`GET …/novel-events`**.
-class LegacyNovelEventRow {
-  const LegacyNovelEventRow({
+class NovelEventPageRow {
+  const NovelEventPageRow({
     required this.numericId,
     required this.eventName,
     this.detail,
@@ -71,9 +71,9 @@ class LegacyNovelEventRow {
   final int createTime;
   final List<int> chapters;
 
-  factory LegacyNovelEventRow.fromJson(Map<String, dynamic> json) {
+  factory NovelEventPageRow.fromJson(Map<String, dynamic> json) {
     final rawChapters = json['chapters'] as List<dynamic>? ?? const [];
-    return LegacyNovelEventRow(
+    return NovelEventPageRow(
       numericId: (json['id'] as num).toInt(),
       eventName: json['eventName'] as String? ?? '',
       detail: json['detail'] as String?,
@@ -84,20 +84,20 @@ class LegacyNovelEventRow {
 }
 
 /// Compat **`{ list, total }`**; built from **`GET …/novel-events`**.
-class LegacyNovelEventsPagedResponse {
-  const LegacyNovelEventsPagedResponse({
+class NovelEventsPageResponse {
+  const NovelEventsPageResponse({
     required this.list,
     required this.total,
   });
 
-  final List<LegacyNovelEventRow> list;
+  final List<NovelEventPageRow> list;
   final int total;
 
-  factory LegacyNovelEventsPagedResponse.fromJson(Map<String, dynamic> json) {
+  factory NovelEventsPageResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['list'] as List<dynamic>;
-    return LegacyNovelEventsPagedResponse(
+    return NovelEventsPageResponse(
       list: raw
-          .map((e) => LegacyNovelEventRow.fromJson(e as Map<String, dynamic>))
+          .map((e) => NovelEventPageRow.fromJson(e as Map<String, dynamic>))
           .toList(),
       total: (json['total'] as num).toInt(),
     );

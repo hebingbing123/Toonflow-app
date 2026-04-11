@@ -220,13 +220,13 @@ class _HomePageState extends State<HomePage> {
   bool _loadingTaskProjects = false;
   bool _loadingTaskCategories = false;
   bool _loadingTaskApi = false;
-  bool _loadingTaskDetailsLegacy = false;
+  bool _loadingTaskDetailsByNumericId = false;
   bool _loadingTaskDetailsUuid = false;
-  List<LegacyTasksProjectItem>? _taskProjects;
+  List<TaskCenterProjectItem>? _taskProjects;
   List<JobRow>? _taskApiJobs;
   String? _taskCategoriesLine;
   String? _taskApiSummaryLine;
-  String? _taskDetailLegacyLine;
+  String? _taskDetailNumericIdLine;
   String? _taskDetailUuidLine;
   final _taskDetailJobIdCtrl = TextEditingController();
 

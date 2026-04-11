@@ -1,7 +1,7 @@
 import '../../rust_api.dart';
 
 String summarizeTaskProjects(
-  Iterable<LegacyTasksProjectItem> rows, {
+  Iterable<TaskCenterProjectItem> rows, {
   int maxItems = 4,
 }) {
   final items = rows.toList(growable: false);
@@ -17,7 +17,7 @@ String summarizeTaskProjects(
 }
 
 String summarizeTaskCategories(
-  Iterable<LegacyTasksTaskClassRow> rows, {
+  Iterable<TaskCenterTaskClassRow> rows, {
   int maxItems = 4,
 }) {
   final items = rows.toList(growable: false);

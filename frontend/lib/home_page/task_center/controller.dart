@@ -113,13 +113,13 @@ extension _HomePageTaskCenterController on _HomePageState {
     }
   }
 
-  Future<void> _probeTaskDetailLegacy() async {
+  Future<void> _probeTaskDetailByNumericId() async {
     final token = _session?.accessToken;
     if (token == null) return;
     setState(() {
-      _loadingTaskDetailsLegacy = true;
+      _loadingTaskDetailsByNumericId = true;
       _error = null;
-      _taskDetailLegacyLine = null;
+      _taskDetailNumericIdLine = null;
     });
     try {
       final jobs = _taskApiJobs ?? (await postTasksGetTaskApi(token, page: 1, limit: 10)).data;
@@ -131,21 +131,21 @@ extension _HomePageTaskCenterController on _HomePageState {
       if (!mounted) return;
       setState(() {
         _taskApiJobs = jobs;
-        _taskDetailLegacyLine =
+        _taskDetailNumericIdLine =
             'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
-        _loadingTaskDetailsLegacy = false;
+        _loadingTaskDetailsByNumericId = false;
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _error = e.toString();
-        _loadingTaskDetailsLegacy = false;
+        _loadingTaskDetailsByNumericId = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _error = e.toString();
-        _loadingTaskDetailsLegacy = false;
+        _loadingTaskDetailsByNumericId = false;
       });
     }
   }

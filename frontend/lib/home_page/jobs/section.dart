@@ -120,7 +120,7 @@ class JobsSection extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Legacy probe filters',
+                'HTTP probe filters',
                 style: Theme.of(
                   context,
                 ).textTheme.labelSmall?.copyWith(color: outline),

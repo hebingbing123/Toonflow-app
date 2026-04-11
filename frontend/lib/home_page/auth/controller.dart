@@ -47,7 +47,7 @@ extension _HomePageAuthSessionController on _HomePageState {
       _taskApiJobs = null;
       _taskCategoriesLine = null;
       _taskApiSummaryLine = null;
-      _taskDetailLegacyLine = null;
+      _taskDetailNumericIdLine = null;
       _taskDetailUuidLine = null;
       _usageSummaryBody = null;
       _agentMemoryBody = null;

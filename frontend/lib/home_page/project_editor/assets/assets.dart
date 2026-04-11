@@ -552,7 +552,7 @@ extension _HomePageProjectEditorAssets on _HomePageState {
           childrenPadding: EdgeInsets.zero,
           title: const Text('兼容性检查'),
           subtitle: Text(
-            '保留旧资产轮询、历史图片和 legacy 形检查入口，默认折叠',
+            '保留旧资产轮询、历史图片和 workbench 形检查入口，默认折叠',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),

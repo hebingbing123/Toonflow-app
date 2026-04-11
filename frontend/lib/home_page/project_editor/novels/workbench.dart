@@ -102,7 +102,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                               .map((e) => e.numericId)
                               .toList();
                           final message =
-                              await postLegacyNovelEventsGenerateEvents(
+                              await postNovelEventsGenerateEvents(
                                 token,
                                 projectNumericId: p.numericId,
                                 novelIds: ids,
@@ -382,7 +382,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           controller: selectedNovelIdCtrl,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            labelText: '章节 legacy id',
+                            labelText: '章节 numeric ID',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -466,7 +466,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           controller: deleteNovelIdCtrl,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            labelText: '待删除章节 legacy id',
+                            labelText: '待删除章节 numeric ID',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -509,7 +509,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                     throw const FormatException('至少提供一个章节 ID');
                                   }
                                   final message =
-                                      await postLegacyNovelEventsGenerateEvents(
+                                      await postNovelEventsGenerateEvents(
                                         token,
                                         projectNumericId: p.numericId,
                                         novelIds: ids,
@@ -523,14 +523,14 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Legacy 快照 / 批量动作',
+                          '快照 / 批量动作',
                           style: Theme.of(dialogCtx).textTheme.labelLarge,
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: numericIdsCtrl,
                           decoration: const InputDecoration(
-                            labelText: 'Legacy 查询章节 IDs',
+                            labelText: '查询章节 ID（numeric）',
                             helperText:
                                 '用于 get-novel-event-state；用逗号分隔，如 1,2,3',
                           ),
@@ -545,7 +545,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   ? null
                                   : () => runAction(() async {
                                       final rows =
-                                          await postLegacyNovelsGetNovelData(
+                                          await fetchNovelWorkbenchFullRows(
                                             token,
                                             p.numericId,
                                           );
@@ -560,7 +560,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .join(' · ');
                                       setLocalState(() {
                                         infoLine =
-                                            'legacy get-novel-data 返回 ${rows.length} 条：$sample';
+                                            'workbench get-novel-data 返回 ${rows.length} 条：$sample';
                                       });
                                     }),
                               child: const Text('读取 get-novel-data'),
@@ -570,7 +570,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                   ? null
                                   : () => runAction(() async {
                                       final rows =
-                                          await postLegacyNovelsGetNovelIndex(
+                                          await fetchNovelWorkbenchIndex(
                                             token,
                                             p.numericId,
                                           );
@@ -585,7 +585,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .join(' · ');
                                       setLocalState(() {
                                         infoLine =
-                                            'legacy get-novel-index 返回 ${rows.length} 条：$sample';
+                                            'workbench get-novel-index 返回 ${rows.length} 条：$sample';
                                       });
                                     }),
                               child: const Text('读取 get-novel-index'),
@@ -603,7 +603,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                         );
                                       }
                                       final rows =
-                                          await postLegacyNovelsGetNovelEventState(
+                                          await fetchNovelWorkbenchEventStates(
                                             token,
                                             p.id,
                                             ids,
@@ -619,7 +619,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                                 .join(' · ');
                                       setLocalState(() {
                                         infoLine =
-                                            'legacy get-novel-event-state 返回 ${rows.length} 条：$sample';
+                                            'workbench get-novel-event-state 返回 ${rows.length} 条：$sample';
                                       });
                                     }),
                               child: const Text('读取 event-state'),
@@ -632,7 +632,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           decoration: const InputDecoration(
                             labelText: '批量删除章节 IDs',
                             helperText:
-                                '调用 legacy batch-delete；用逗号分隔，删除后会回刷工作台。',
+                                '调用 workbench batch-delete；用逗号分隔，删除后会回刷工作台。',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -647,7 +647,7 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                                     throw const FormatException('至少提供一个章节 ID');
                                   }
                                   final message =
-                                      await postLegacyNovelsBatchDelete(
+                                      await batchDeleteNovelsUnderProject(
                                         token,
                                         p.id,
                                         ids,

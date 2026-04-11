@@ -322,7 +322,7 @@ void main() {
     );
 
     expect(line, contains('已加载 2 张图片'));
-    expect(line, contains('封面 legacy image #8'));
+    expect(line, contains('封面 numeric image #8'));
     expect(line, contains('sort=2'));
     expect(line, contains('done'));
   });

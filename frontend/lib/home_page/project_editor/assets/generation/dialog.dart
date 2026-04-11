@@ -48,9 +48,9 @@ class _AssetGenerationWorkbenchDialogState
   bool _busyMutation = false;
   AssetsDataResponseV1? _productionData;
   AssetsPollingImageResponseV1? _pollingData;
-  LegacyAssetMaterialDataResponse? _materialData;
-  LegacyAssetBatchGenerationDataResponse? _batchData;
-  List<LegacyAssetPollingPromptAssetsItem>? _promptPollingData;
+  WorkbenchAssetMaterialDataResponse? _materialData;
+  WorkbenchAssetBatchGenerationResponse? _batchData;
+  List<WorkbenchAssetPollingPromptItem>? _promptPollingData;
   String? _statusLine;
 
   @override
@@ -138,14 +138,14 @@ class _AssetGenerationWorkbenchDialogState
         );
       }
       AssetsPollingImageResponseV1? nextPollingData;
-      List<LegacyAssetPollingPromptAssetsItem>? nextPromptPollingData;
+      List<WorkbenchAssetPollingPromptItem>? nextPromptPollingData;
       if (selected.isNotEmpty) {
         nextPollingData = await postProductionAssetsPollingImageV1(
           widget.token,
           projectId: widget.project.numericId,
           assetIds: selected,
         );
-        nextPromptPollingData = await postLegacyAssetsPollingPromptAssets(
+        nextPromptPollingData = await postWorkbenchAssetsPollingPromptAssets(
           widget.token,
           widget.project.id,
           selected,
@@ -307,14 +307,14 @@ class _AssetGenerationWorkbenchDialogState
                 onSyncWorkbenchSnapshot: () =>
                     _syncWorkbenchSnapshot(includeProductionSummary: true),
                 onLoadMaterialContext: () => _runMutation(() async {
-                  final response = await postLegacyAssetsGetMaterialData(
+                  final response = await postWorkbenchAssetsGetMaterialData(
                     widget.token,
                     widget.project.id,
                   );
                   if (mounted) {
                     setState(() {
                       _materialData = response;
-                      _statusLine = summarizeLegacyAssetMaterialData(response);
+                      _statusLine = summarizeWorkbenchAssetMaterialData(response);
                     });
                   }
                 }),
@@ -329,7 +329,7 @@ class _AssetGenerationWorkbenchDialogState
                   if (limit <= 0) {
                     throw const FormatException('候选 limit 需要大于 0');
                   }
-                  final response = await postLegacyAssetsBatchGenerationData(
+                  final response = await postWorkbenchAssetsBatchGenerationData(
                     widget.token,
                     projectId: widget.project.id,
                     assetType: effectiveType,
@@ -340,7 +340,7 @@ class _AssetGenerationWorkbenchDialogState
                     setState(() {
                       _batchData = response;
                       _statusLine =
-                          '${summarizeLegacyBatchGenerationData(response)} · type=$effectiveType';
+                          '${summarizeWorkbenchBatchGenerationData(response)} · type=$effectiveType';
                     });
                   }
                 }),
@@ -397,7 +397,7 @@ class _AssetGenerationWorkbenchDialogState
                   }
                 }),
                 onPollPromptStatuses: () => _runMutation(() async {
-                  final response = await postLegacyAssetsPollingPromptAssets(
+                  final response = await postWorkbenchAssetsPollingPromptAssets(
                     widget.token,
                     widget.project.id,
                     selected,

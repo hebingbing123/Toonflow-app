@@ -34,7 +34,7 @@ class TaskCenterActionsBar extends StatelessWidget {
   }
 }
 
-/// Encapsulates legacy task probes so the main task center keeps only domain flow.
+/// Encapsulates numeric-id task probes so the main task center keeps only domain flow.
 class TaskCenterCompatibilityPanel extends StatelessWidget {
   const TaskCenterCompatibilityPanel({
     super.key,
@@ -42,14 +42,14 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
     required this.loadingTaskProjects,
     required this.loadingTaskCategories,
     required this.loadingTaskApi,
-    required this.loadingTaskDetailsLegacy,
+    required this.loadingTaskDetailsByNumericId,
     required this.loadingTaskDetailsUuid,
     required this.taskDetailJobIdController,
     required this.onTaskDetailJobIdChanged,
     required this.onLoadTaskProjects,
     required this.onLoadTaskCategories,
     required this.onLoadTaskApi,
-    required this.onProbeTaskDetailLegacy,
+    required this.onProbeTaskDetailByNumericId,
     required this.onProbeTaskDetailUuid,
   });
 
@@ -57,14 +57,14 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
   final bool loadingTaskProjects;
   final bool loadingTaskCategories;
   final bool loadingTaskApi;
-  final bool loadingTaskDetailsLegacy;
+  final bool loadingTaskDetailsByNumericId;
   final bool loadingTaskDetailsUuid;
   final TextEditingController taskDetailJobIdController;
   final ValueChanged<String> onTaskDetailJobIdChanged;
   final VoidCallback onLoadTaskProjects;
   final VoidCallback onLoadTaskCategories;
   final VoidCallback onLoadTaskApi;
-  final VoidCallback onProbeTaskDetailLegacy;
+  final VoidCallback onProbeTaskDetailByNumericId;
   final VoidCallback onProbeTaskDetailUuid;
 
   @override
@@ -97,8 +97,8 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
               child: Text(loadingTaskApi ? '…' : '加载任务列表'),
             ),
             FilledButton.tonal(
-              onPressed: loadingTaskDetailsLegacy ? null : onProbeTaskDetailLegacy,
-              child: Text(loadingTaskDetailsLegacy ? '…' : '查看首条任务详情'),
+              onPressed: loadingTaskDetailsByNumericId ? null : onProbeTaskDetailByNumericId,
+              child: Text(loadingTaskDetailsByNumericId ? '…' : '查看首条任务详情'),
             ),
           ],
         ),
@@ -192,15 +192,15 @@ class TaskCenterSummaryPreview extends StatelessWidget {
   }
 }
 
-/// Displays the latest legacy and UUID detail snapshots returned by task probes.
+/// Displays the latest numeric-id and UUID detail snapshots returned by task probes.
 class TaskCenterDetailsPreview extends StatelessWidget {
   const TaskCenterDetailsPreview({
     super.key,
-    this.taskDetailLegacyLine,
+    this.taskDetailNumericIdLine,
     this.taskDetailUuidLine,
   });
 
-  final String? taskDetailLegacyLine;
+  final String? taskDetailNumericIdLine;
   final String? taskDetailUuidLine;
 
   @override
@@ -208,9 +208,9 @@ class TaskCenterDetailsPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (taskDetailLegacyLine != null) ...[
+        if (taskDetailNumericIdLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('Legacy 详情：$taskDetailLegacyLine'),
+          SelectableText('任务详情（numeric ID）：$taskDetailNumericIdLine'),
         ],
         if (taskDetailUuidLine != null) ...[
           const SizedBox(height: 8),

@@ -1,7 +1,7 @@
 part of 'index.dart';
 
-/// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (legacy **`getNovelData`**).
-Future<List<NovelRow>> postLegacyNovelsGetNovelData(
+/// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (workbench **`getNovelData`**).
+Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
   String accessToken,
   int projectNumericId,
 ) async {
@@ -11,7 +11,7 @@ Future<List<NovelRow>> postLegacyNovelsGetNovelData(
 }
 
 /// Compat: index list via **`GET …/novels`** (**`getNovelIndex`** shape).
-Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
+Future<List<NovelWorkbenchIndexItem>> fetchNovelWorkbenchIndex(
   String accessToken,
   int projectNumericId,
 ) async {
@@ -19,7 +19,7 @@ Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items
       .map(
-        (n) => LegacyNovelIndexItem(
+        (n) => NovelWorkbenchIndexItem(
           numericId: n.numericId,
           chapterIndex: n.chapterIndex,
           chapter: n.chapter,
@@ -29,7 +29,7 @@ Future<List<LegacyNovelIndexItem>> postLegacyNovelsGetNovelIndex(
 }
 
 /// Compat: non-zero **`event_state`** among **`numericIds`** (same project UUID).
-Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
+Future<List<NovelWorkbenchEventStateItem>> fetchNovelWorkbenchEventStates(
   String accessToken,
   String projectUuid,
   List<int> numericIds,
@@ -38,7 +38,7 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
     return [];
   }
   final want = numericIds.toSet();
-  final out = <LegacyNovelEventStateItem>[];
+  final out = <NovelWorkbenchEventStateItem>[];
   var page = 1;
   const limit = 200;
   while (true) {
@@ -51,7 +51,7 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
     for (final row in batch.items) {
       if (want.contains(row.numericId) && row.eventState != 0) {
         out.add(
-          LegacyNovelEventStateItem(
+          NovelWorkbenchEventStateItem(
             numericId: row.numericId,
             event: row.event,
             eventState: row.eventState,
@@ -70,7 +70,7 @@ Future<List<LegacyNovelEventStateItem>> postLegacyNovelsGetNovelEventState(
 }
 
 /// Compat: async event extraction — **`POST …/novel-events/generate-events`** (project UUID in path).
-Future<String> postLegacyNovelEventsGenerateEvents(
+Future<String> postNovelEventsGenerateEvents(
   String accessToken, {
   required int projectNumericId,
   required List<int> novelIds,
@@ -104,7 +104,7 @@ Future<String> postLegacyNovelEventsGenerateEvents(
 }
 
 /// Compat: paginated list (**`getNovel`**: **`{ data, total }`**).
-Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
+Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
   String accessToken,
   int projectNumericId, {
   required int page,
@@ -121,7 +121,7 @@ Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
   );
   final data = res.items
       .map(
-        (n) => LegacyNovelPageRow(
+        (n) => NovelWorkbenchPageRow(
           numericId: n.numericId,
           chapterIndex: n.chapterIndex,
           reel: n.reel,
@@ -133,14 +133,14 @@ Future<LegacyNovelPagedResponse> postLegacyNovelsGetNovel(
         ),
       )
       .toList();
-  return LegacyNovelPagedResponse(data: data, total: res.total);
+  return NovelWorkbenchPagedResponse(data: data, total: res.total);
 }
 
 /// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → success message, no HTTP).
-Future<String> postLegacyNovelsAddNovel(
+Future<String> appendNovelsUnderProject(
   String accessToken,
   int projectNumericId,
-  List<LegacyNovelAddItem> data,
+  List<NovelWorkbenchAppendItem> data,
 ) async {
   if (data.isEmpty) {
     return '新增原文成功';
@@ -181,8 +181,8 @@ Future<String> _deleteNovelByNumericIdScanningProjects(
   throw RustApiException('not found', statusCode: 404);
 }
 
-/// Compat: delete by **`app_novel.legacy_id`** (scans owned projects).
-Future<String> postLegacyNovelsDeleteNovel(
+/// Compat: delete by **`app_novel`** numeric id (scans owned projects).
+Future<String> deleteNovelByNumericIdScanningProjects(
   String accessToken,
   int novelNumericId,
 ) async {
@@ -232,8 +232,8 @@ Future<String> _patchNovelByNumericIdScanningProjects(
   throw RustApiException('not found', statusCode: 404);
 }
 
-/// Compat: update by legacy id (**`index`** may be int or numeric string).
-Future<String> postLegacyNovelsUpdateNovel(
+/// Compat: update by numeric id (**`index`** may be int or numeric string).
+Future<String> updateNovelScanningProjects(
   String accessToken, {
   required int id,
   required Object index,
@@ -253,8 +253,8 @@ Future<String> postLegacyNovelsUpdateNovel(
   );
 }
 
-/// Compat: batch delete — **`DELETE …/novels/{legacy_id}`** per id under **`projectUuid`**.
-Future<String> postLegacyNovelsBatchDelete(
+/// Compat: batch delete — **`DELETE …/novels/{numeric_id}`** per id under **`projectUuid`**.
+Future<String> batchDeleteNovelsUnderProject(
   String accessToken,
   String projectUuid,
   List<int> numericIds,

@@ -109,19 +109,19 @@ void main() {
 
     expect(
       collectAssetIdsByPromptState(const [
-        LegacyAssetPollingPromptAssetsItem(
+        WorkbenchAssetPollingPromptItem(
           id: 7,
           name: 'Hero',
           assetType: 'role',
           promptState: '生成中',
         ),
-        LegacyAssetPollingPromptAssetsItem(
+        WorkbenchAssetPollingPromptItem(
           id: 3,
           name: 'Sword',
           assetType: 'props',
           promptState: '生成中',
         ),
-        LegacyAssetPollingPromptAssetsItem(
+        WorkbenchAssetPollingPromptItem(
           id: 9,
           name: 'Mage',
           assetType: 'role',
@@ -135,30 +135,30 @@ void main() {
     );
   });
 
-  test('legacy asset summaries describe material, batch and prompt states', () {
+  test('workbench asset summaries describe material, batch and prompt states', () {
     expect(
-      summarizeLegacyAssetMaterialData(
-        const LegacyAssetMaterialDataResponse(
+      summarizeWorkbenchAssetMaterialData(
+        const WorkbenchAssetMaterialDataResponse(
           data: [
-            LegacyAssetMaterialDataItem(
+            WorkbenchAssetMaterialDataItem(
               id: 1,
               name: 'Clip A',
               filePath: 'a.png',
               assetType: 'clip',
             ),
           ],
-          video: [LegacyAssetMaterialVideoItem(id: 2, filePath: 'b.mp4')],
+          video: [WorkbenchAssetMaterialVideoItem(id: 2, filePath: 'b.mp4')],
         ),
       ),
       contains('1 条图片素材 · 1 条视频素材'),
     );
 
     expect(
-      summarizeLegacyBatchGenerationData(
-        const LegacyAssetBatchGenerationDataResponse(
+      summarizeWorkbenchBatchGenerationData(
+        const WorkbenchAssetBatchGenerationResponse(
           total: 2,
           data: [
-            LegacyAssetBatchGenerationDataItem(
+            WorkbenchAssetBatchGenerationItem(
               id: 7,
               name: 'Hero',
               assetType: 'role',
@@ -170,14 +170,14 @@ void main() {
     );
 
     expect(
-      summarizeLegacyPromptPolling(const [
-        LegacyAssetPollingPromptAssetsItem(
+      summarizeWorkbenchPromptPolling(const [
+        WorkbenchAssetPollingPromptItem(
           id: 3,
           name: 'Hero',
           assetType: 'role',
           promptState: '生成中',
         ),
-        LegacyAssetPollingPromptAssetsItem(
+        WorkbenchAssetPollingPromptItem(
           id: 4,
           name: 'Sword',
           assetType: 'props',
@@ -215,7 +215,7 @@ void main() {
           ],
         ),
         promptPollingData: const [
-          LegacyAssetPollingPromptAssetsItem(
+          WorkbenchAssetPollingPromptItem(
             id: 11,
             name: 'Hero',
             assetType: 'role',

@@ -223,7 +223,7 @@ extension _HomePageSystemProbesContent on _HomePageState {
       }
       setState(() {
         _textModelDefaultBody =
-            'legacy=${before.legacyPlaceholder} · GET=${before.defaultModelId}'
+            'stub=${before.stubPlaceholder} · GET=${before.defaultModelId}'
             '${patched == null ? ' · PATCH skipped (single text model)' : ' · PATCH=$alternative'}'
             ' · reset=${reset.defaultModelId}';
         _loadingTextModelDefault = false;

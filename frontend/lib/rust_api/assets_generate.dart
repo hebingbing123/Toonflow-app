@@ -131,8 +131,8 @@ Future<int> postAssetsGenerateBatchPolishV1(
 
 /// `POST /api/v1/assets-generate/cancel-generate` — OpenAPI
 /// `postAssetsGenerateCancelGenerateV1`.
-/// Legacy-compatible cancel acknowledgement: **200** for accepted cancel (idempotent when
-/// legacy image id is not found), **400** invalid id, **503** no DB.
+/// Workbench-compatible cancel acknowledgement: **200** for accepted cancel (idempotent when
+/// numeric image id is not found), **400** invalid id, **503** no DB.
 Future<int> postAssetsGenerateCancelGenerateV1(
   String accessToken, {
   required int numericImageId,

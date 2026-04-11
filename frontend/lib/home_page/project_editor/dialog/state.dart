@@ -28,9 +28,9 @@ class _ProjectEditorDialogState {
   final List<bool> scriptTaskBusy = <bool>[false];
   final List<String?> scriptTaskLine = <String?>[null];
   final List<bool> saving = <bool>[false];
-  final List<bool> generalLegacyBusy = <bool>[false];
-  final List<bool> tasksLegacyBusy = <bool>[false];
-  final List<bool> projectLegacyBusy = <bool>[false];
+  final List<bool> generalProbeBusy = <bool>[false];
+  final List<bool> tasksProbeBusy = <bool>[false];
+  final List<bool> projectProbeBusy = <bool>[false];
 
   Future<void> reloadAssetsAndStats(
     String token,

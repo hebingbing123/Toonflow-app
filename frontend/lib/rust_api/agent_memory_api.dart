@@ -31,7 +31,7 @@ Future<List<dynamic>> queryAgentMemory(
 
 /// `POST /api/v1/agents/memory/clear` — OpenAPI `clearAgentMemoryV1` (**`clearType`**: `all` | `message` | `summary`).
 ///
-/// Legacy **`type`** is also accepted by the server as an alias for **`clearType`**.
+/// Alternate field **`type`** is also accepted by the server as an alias for **`clearType`**.
 Future<bool> clearAgentMemory(
   String accessToken, {
   required int projectId,

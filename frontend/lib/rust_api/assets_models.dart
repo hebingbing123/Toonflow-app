@@ -51,8 +51,8 @@ class ListAssetsResponse {
 }
 
 /// One row from workbench **`POST …/projects/{project_id}/assets/workbench/nested`** (including nested children via **`sonAssets`**).
-class LegacyAssetGetAssetsApiItem {
-  const LegacyAssetGetAssetsApiItem({
+class WorkbenchAssetTreeItem {
+  const WorkbenchAssetTreeItem({
     required this.id,
     required this.projectId,
     required this.assetType,
@@ -76,11 +76,11 @@ class LegacyAssetGetAssetsApiItem {
   final String? state;
   final String? errorReason;
   final String? src;
-  final List<LegacyAssetGetAssetsApiItem> sonAssets;
+  final List<WorkbenchAssetTreeItem> sonAssets;
 
-  factory LegacyAssetGetAssetsApiItem.fromJson(Map<String, dynamic> json) {
+  factory WorkbenchAssetTreeItem.fromJson(Map<String, dynamic> json) {
     final rawChildren = json['sonAssets'] as List<dynamic>? ?? const [];
-    return LegacyAssetGetAssetsApiItem(
+    return WorkbenchAssetTreeItem(
       id: (json['id'] as num).toInt(),
       projectId: (json['projectId'] as num?)?.toInt() ?? 0,
       assetType: json['type'] as String? ?? '',
@@ -94,7 +94,7 @@ class LegacyAssetGetAssetsApiItem {
       sonAssets: rawChildren
           .map(
             (e) =>
-                LegacyAssetGetAssetsApiItem.fromJson(e as Map<String, dynamic>),
+                WorkbenchAssetTreeItem.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
     );
@@ -102,22 +102,22 @@ class LegacyAssetGetAssetsApiItem {
 }
 
 /// Body from workbench **`POST …/projects/{project_id}/assets/workbench/nested`**.
-class LegacyAssetGetAssetsApiResponse {
-  const LegacyAssetGetAssetsApiResponse({
+class WorkbenchAssetTreeResponse {
+  const WorkbenchAssetTreeResponse({
     required this.data,
     required this.total,
   });
 
-  final List<LegacyAssetGetAssetsApiItem> data;
+  final List<WorkbenchAssetTreeItem> data;
   final int total;
 
-  factory LegacyAssetGetAssetsApiResponse.fromJson(Map<String, dynamic> json) {
+  factory WorkbenchAssetTreeResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['data'] as List<dynamic>? ?? const [];
-    return LegacyAssetGetAssetsApiResponse(
+    return WorkbenchAssetTreeResponse(
       data: raw
           .map(
             (e) =>
-                LegacyAssetGetAssetsApiItem.fromJson(e as Map<String, dynamic>),
+                WorkbenchAssetTreeItem.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
       total: (json['total'] as num?)?.toInt() ?? 0,
@@ -247,8 +247,8 @@ class ListAssetImagesResponse {
 }
 
 /// One item in workbench **`POST …/projects/{project_id}/assets/workbench/image-bundle`** response **`tempAssets`**.
-class LegacyAssetGetImageTempAsset {
-  const LegacyAssetGetImageTempAsset({
+class WorkbenchImageBundleTempAsset {
+  const WorkbenchImageBundleTempAsset({
     this.numericImageId,
     required this.imageUuid,
     required this.filePath,
@@ -266,8 +266,8 @@ class LegacyAssetGetImageTempAsset {
   final String? state;
   final bool selected;
 
-  factory LegacyAssetGetImageTempAsset.fromJson(Map<String, dynamic> json) {
-    return LegacyAssetGetImageTempAsset(
+  factory WorkbenchImageBundleTempAsset.fromJson(Map<String, dynamic> json) {
+    return WorkbenchImageBundleTempAsset(
       numericImageId: (json['id'] as num?)?.toInt(),
       imageUuid: json['imageUuid'] as String? ?? '',
       filePath: json['filePath'] as String? ?? '',
@@ -280,8 +280,8 @@ class LegacyAssetGetImageTempAsset {
 }
 
 /// Body of workbench **`POST …/projects/{project_id}/assets/workbench/image-bundle`**.
-class LegacyAssetGetImageResponse {
-  const LegacyAssetGetImageResponse({
+class WorkbenchImageBundleResponse {
+  const WorkbenchImageBundleResponse({
     required this.id,
     this.imageId,
     required this.tempAssets,
@@ -289,16 +289,16 @@ class LegacyAssetGetImageResponse {
 
   final int id;
   final int? imageId;
-  final List<LegacyAssetGetImageTempAsset> tempAssets;
+  final List<WorkbenchImageBundleTempAsset> tempAssets;
 
-  factory LegacyAssetGetImageResponse.fromJson(Map<String, dynamic> json) {
+  factory WorkbenchImageBundleResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['tempAssets'] as List<dynamic>? ?? const [];
-    return LegacyAssetGetImageResponse(
+    return WorkbenchImageBundleResponse(
       id: (json['id'] as num).toInt(),
       imageId: (json['imageId'] as num?)?.toInt(),
       tempAssets: raw
           .map(
-            (e) => LegacyAssetGetImageTempAsset.fromJson(
+            (e) => WorkbenchImageBundleTempAsset.fromJson(
               e as Map<String, dynamic>,
             ),
           )
@@ -308,21 +308,21 @@ class LegacyAssetGetImageResponse {
 }
 
 /// Body of workbench **`POST …/projects/{project_id}/assets/workbench/upload-clip`**.
-class LegacyAssetUploadClipResponse {
-  const LegacyAssetUploadClipResponse({required this.message});
+class WorkbenchAssetUploadClipResponse {
+  const WorkbenchAssetUploadClipResponse({required this.message});
 
   final String message;
 
-  factory LegacyAssetUploadClipResponse.fromJson(Map<String, dynamic> json) {
-    return LegacyAssetUploadClipResponse(
+  factory WorkbenchAssetUploadClipResponse.fromJson(Map<String, dynamic> json) {
+    return WorkbenchAssetUploadClipResponse(
       message: json['message'] as String? ?? '',
     );
   }
 }
 
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** response **`data`**.
-class LegacyAssetMaterialDataItem {
-  const LegacyAssetMaterialDataItem({
+class WorkbenchAssetMaterialDataItem {
+  const WorkbenchAssetMaterialDataItem({
     required this.id,
     required this.name,
     required this.filePath,
@@ -334,8 +334,8 @@ class LegacyAssetMaterialDataItem {
   final String filePath;
   final String assetType;
 
-  factory LegacyAssetMaterialDataItem.fromJson(Map<String, dynamic> json) {
-    return LegacyAssetMaterialDataItem(
+  factory WorkbenchAssetMaterialDataItem.fromJson(Map<String, dynamic> json) {
+    return WorkbenchAssetMaterialDataItem(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
       filePath: json['filePath'] as String? ?? '',
@@ -345,8 +345,8 @@ class LegacyAssetMaterialDataItem {
 }
 
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** response **`video`**.
-class LegacyAssetMaterialVideoItem {
-  const LegacyAssetMaterialVideoItem({
+class WorkbenchAssetMaterialVideoItem {
+  const WorkbenchAssetMaterialVideoItem({
     required this.id,
     required this.filePath,
     this.videoTrackId,
@@ -356,8 +356,8 @@ class LegacyAssetMaterialVideoItem {
   final String filePath;
   final int? videoTrackId;
 
-  factory LegacyAssetMaterialVideoItem.fromJson(Map<String, dynamic> json) {
-    return LegacyAssetMaterialVideoItem(
+  factory WorkbenchAssetMaterialVideoItem.fromJson(Map<String, dynamic> json) {
+    return WorkbenchAssetMaterialVideoItem(
       id: (json['id'] as num).toInt(),
       filePath: json['filePath'] as String? ?? '',
       videoTrackId: (json['videoTrackId'] as num?)?.toInt(),
@@ -366,28 +366,28 @@ class LegacyAssetMaterialVideoItem {
 }
 
 /// Body of workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** (empty **`{}`**).
-class LegacyAssetMaterialDataResponse {
-  const LegacyAssetMaterialDataResponse({
+class WorkbenchAssetMaterialDataResponse {
+  const WorkbenchAssetMaterialDataResponse({
     required this.data,
     required this.video,
   });
 
-  final List<LegacyAssetMaterialDataItem> data;
-  final List<LegacyAssetMaterialVideoItem> video;
+  final List<WorkbenchAssetMaterialDataItem> data;
+  final List<WorkbenchAssetMaterialVideoItem> video;
 
-  factory LegacyAssetMaterialDataResponse.fromJson(Map<String, dynamic> json) {
+  factory WorkbenchAssetMaterialDataResponse.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'] as List<dynamic>? ?? const [];
     final rawVideo = json['video'] as List<dynamic>? ?? const [];
-    return LegacyAssetMaterialDataResponse(
+    return WorkbenchAssetMaterialDataResponse(
       data: rawData
           .map(
             (e) =>
-                LegacyAssetMaterialDataItem.fromJson(e as Map<String, dynamic>),
+                WorkbenchAssetMaterialDataItem.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
       video: rawVideo
           .map(
-            (e) => LegacyAssetMaterialVideoItem.fromJson(
+            (e) => WorkbenchAssetMaterialVideoItem.fromJson(
               e as Map<String, dynamic>,
             ),
           )
@@ -397,8 +397,8 @@ class LegacyAssetMaterialDataResponse {
 }
 
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/batch-generation-data`** response **`data`**.
-class LegacyAssetBatchGenerationDataItem {
-  const LegacyAssetBatchGenerationDataItem({
+class WorkbenchAssetBatchGenerationItem {
+  const WorkbenchAssetBatchGenerationItem({
     required this.id,
     required this.name,
     required this.assetType,
@@ -412,10 +412,10 @@ class LegacyAssetBatchGenerationDataItem {
   final String? description;
   final int? createTimeMs;
 
-  factory LegacyAssetBatchGenerationDataItem.fromJson(
+  factory WorkbenchAssetBatchGenerationItem.fromJson(
     Map<String, dynamic> json,
   ) {
-    return LegacyAssetBatchGenerationDataItem(
+    return WorkbenchAssetBatchGenerationItem(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
       assetType: json['type'] as String? ?? '',
@@ -426,23 +426,23 @@ class LegacyAssetBatchGenerationDataItem {
 }
 
 /// Body of workbench **`POST …/projects/{project_id}/assets/workbench/batch-generation-data`**.
-class LegacyAssetBatchGenerationDataResponse {
-  const LegacyAssetBatchGenerationDataResponse({
+class WorkbenchAssetBatchGenerationResponse {
+  const WorkbenchAssetBatchGenerationResponse({
     required this.data,
     required this.total,
   });
 
-  final List<LegacyAssetBatchGenerationDataItem> data;
+  final List<WorkbenchAssetBatchGenerationItem> data;
   final int total;
 
-  factory LegacyAssetBatchGenerationDataResponse.fromJson(
+  factory WorkbenchAssetBatchGenerationResponse.fromJson(
     Map<String, dynamic> json,
   ) {
     final rawData = json['data'] as List<dynamic>? ?? const [];
-    return LegacyAssetBatchGenerationDataResponse(
+    return WorkbenchAssetBatchGenerationResponse(
       data: rawData
           .map(
-            (e) => LegacyAssetBatchGenerationDataItem.fromJson(
+            (e) => WorkbenchAssetBatchGenerationItem.fromJson(
               e as Map<String, dynamic>,
             ),
           )
@@ -453,8 +453,8 @@ class LegacyAssetBatchGenerationDataResponse {
 }
 
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/polling-image-assets`** response.
-class LegacyAssetPollingImageAssetsItem {
-  const LegacyAssetPollingImageAssetsItem({
+class WorkbenchAssetPollingImageItem {
+  const WorkbenchAssetPollingImageItem({
     required this.id,
     this.state,
     this.filePath,
@@ -464,10 +464,10 @@ class LegacyAssetPollingImageAssetsItem {
   final String? state;
   final String? filePath;
 
-  factory LegacyAssetPollingImageAssetsItem.fromJson(
+  factory WorkbenchAssetPollingImageItem.fromJson(
     Map<String, dynamic> json,
   ) {
-    return LegacyAssetPollingImageAssetsItem(
+    return WorkbenchAssetPollingImageItem(
       id: (json['id'] as num).toInt(),
       state: json['state'] as String?,
       filePath: json['filePath'] as String?,
@@ -476,8 +476,8 @@ class LegacyAssetPollingImageAssetsItem {
 }
 
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/polling-prompt-assets`** response.
-class LegacyAssetPollingPromptAssetsItem {
-  const LegacyAssetPollingPromptAssetsItem({
+class WorkbenchAssetPollingPromptItem {
+  const WorkbenchAssetPollingPromptItem({
     required this.id,
     required this.name,
     required this.assetType,
@@ -489,10 +489,10 @@ class LegacyAssetPollingPromptAssetsItem {
   final String assetType;
   final String promptState;
 
-  factory LegacyAssetPollingPromptAssetsItem.fromJson(
+  factory WorkbenchAssetPollingPromptItem.fromJson(
     Map<String, dynamic> json,
   ) {
-    return LegacyAssetPollingPromptAssetsItem(
+    return WorkbenchAssetPollingPromptItem(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
       assetType: json['type'] as String? ?? '',

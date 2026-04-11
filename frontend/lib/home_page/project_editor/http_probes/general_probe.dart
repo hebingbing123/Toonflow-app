@@ -1,26 +1,26 @@
 part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
-  List<Widget> _buildProjectLegacyGeneralProbeActions({
+  List<Widget> _buildProjectGeneralProbeActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
     required ProjectRow p,
     required ProjectDetail detail,
     required TextEditingController introCtrl,
-    required List<bool> generalLegacyBusy,
-    required List<bool> tasksLegacyBusy,
-    required List<bool> projectLegacyBusy,
+    required List<bool> generalProbeBusy,
+    required List<bool> tasksProbeBusy,
+    required List<bool> projectProbeBusy,
   }) {
     return [
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => generalLegacyBusy[0] = true);
+                setDialogState(() => generalProbeBusy[0] = true);
                 try {
                   final rows = await postGeneralGetSingleProject(
                     token,
@@ -32,7 +32,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                       : rows.map((r) => '#${r.numericId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('compat getSingleProject（GET projects 过滤 legacy_id）：$line'),
+                      content: Text('compat getSingleProject（GET projects 过滤 numeric_id）：$line'),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -43,22 +43,22 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => generalLegacyBusy[0] = false);
+                    setDialogState(() => generalProbeBusy[0] = false);
                   }
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'compat getSingleProject',
+          generalProbeBusy[0] ? 'general…' : 'compat getSingleProject',
         ),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => generalLegacyBusy[0] = true);
+                setDialogState(() => generalProbeBusy[0] = true);
                 try {
                   final origIntro = introCtrl.text;
                   final probeIntro = origIntro.isEmpty
@@ -95,22 +95,22 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => generalLegacyBusy[0] = false);
+                    setDialogState(() => generalProbeBusy[0] = false);
                   }
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'compat updateProject',
+          generalProbeBusy[0] ? 'general…' : 'compat updateProject',
         ),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => generalLegacyBusy[0] = true);
+                setDialogState(() => generalProbeBusy[0] = true);
                 final pr = detail.project;
                 try {
                   final updated = await updateProjectByProjectId(
@@ -134,12 +134,12 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => generalLegacyBusy[0] = false);
+                    setDialogState(() => generalProbeBusy[0] = false);
                   }
                 }
               },
         child: Text(
-          generalLegacyBusy[0] ? 'general…' : 'PATCH projects/{id} (name noop)',
+          generalProbeBusy[0] ? 'general…' : 'PATCH projects/{id} (name noop)',
         ),
       ),
     ];

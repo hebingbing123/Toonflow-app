@@ -497,12 +497,12 @@ extension _HomePageProjectEditorScripts on _HomePageState {
                       setDialogState(() {
                         saving[0] = false;
                         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-                          actionSummary: '已创建剧本 legacy #${s.numericId}。',
+                          actionSummary: '已创建剧本 #${s.numericId}。',
                           diagnosis: nextDiagnosis,
                         );
                       });
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('已创建剧本 legacy #${s.numericId}')),
+                        SnackBar(content: Text('已创建剧本 #${s.numericId}')),
                       );
                     } on RustApiException catch (e) {
                       if (ctx.mounted) {

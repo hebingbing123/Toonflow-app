@@ -15,14 +15,14 @@ void main() {
             loadingTaskProjects: false,
             loadingTaskCategories: false,
             loadingTaskApi: false,
-            loadingTaskDetailsLegacy: false,
+            loadingTaskDetailsByNumericId: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: TextEditingController(),
-            taskProjects: const [LegacyTasksProjectItem(numericId: 9, name: '古风短剧')],
+            taskProjects: const [TaskCenterProjectItem(numericId: 9, name: '古风短剧')],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
-            taskDetailLegacyLine: null,
+            taskDetailNumericIdLine: null,
             taskDetailUuidLine: null,
             taskApiJobs: const [
               JobRow(
@@ -40,7 +40,7 @@ void main() {
             onLoadTaskProjects: () {},
             onLoadTaskCategories: () {},
             onLoadTaskApi: () {},
-            onProbeTaskDetailLegacy: () {},
+            onProbeTaskDetailByNumericId: () {},
             onProbeTaskDetailUuid: () {},
             onSelectTaskJob: (_) {},
           ),
@@ -70,14 +70,14 @@ void main() {
             loadingTaskProjects: false,
             loadingTaskCategories: false,
             loadingTaskApi: false,
-            loadingTaskDetailsLegacy: false,
+            loadingTaskDetailsByNumericId: false,
             loadingTaskDetailsUuid: false,
             taskDetailJobIdController: detailController,
-            taskProjects: const [LegacyTasksProjectItem(numericId: 9, name: '古风短剧')],
+            taskProjects: const [TaskCenterProjectItem(numericId: 9, name: '古风短剧')],
             taskCategoriesLine:
                 '分类 2 个 · asset.generate.image, script.export.zip',
             taskApiSummaryLine: 'page=1 limit=10 · total=1 · page_rows=1',
-            taskDetailLegacyLine:
+            taskDetailNumericIdLine:
                 '#101 · asset.generate.image · queued · uuid=job-101',
             taskDetailUuidLine:
                 '#101 · asset.generate.image · queued · uuid=job-101',
@@ -97,7 +97,7 @@ void main() {
             onLoadTaskProjects: () {},
             onLoadTaskCategories: () {},
             onLoadTaskApi: () {},
-            onProbeTaskDetailLegacy: () {},
+            onProbeTaskDetailByNumericId: () {},
             onProbeTaskDetailUuid: () {},
             onSelectTaskJob: (_) {},
           ),
@@ -113,12 +113,12 @@ void main() {
     expect(find.text('任务详情'), findsOneWidget);
     expect(find.text('刷新任务项目'), findsOneWidget);
     expect(find.text('按筛选加载任务'), findsOneWidget);
-    expect(find.text('读取 legacy 详情'), findsOneWidget);
+    expect(find.text('读取任务详情（numeric ID）'), findsOneWidget);
     expect(find.text('读取 UUID 详情'), findsOneWidget);
     expect(find.widgetWithText(TextField, '1'), findsWidgets);
     expect(
       find.textContaining(
-        'Legacy 详情：#101 · asset.generate.image · queued · uuid=job-101',
+        '任务详情（numeric ID）：#101 · asset.generate.image · queued · uuid=job-101',
       ),
       findsNWidgets(2),
     );

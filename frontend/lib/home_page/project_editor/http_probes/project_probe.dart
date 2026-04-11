@@ -1,24 +1,24 @@
 part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
-  List<Widget> _buildProjectLegacyProjectProbeActions({
+  List<Widget> _buildProjectProjectProbeActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
     required ProjectDetail detail,
-    required List<bool> generalLegacyBusy,
-    required List<bool> tasksLegacyBusy,
-    required List<bool> projectLegacyBusy,
+    required List<bool> generalProbeBusy,
+    required List<bool> tasksProbeBusy,
+    required List<bool> projectProbeBusy,
   }) {
     return [
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => projectLegacyBusy[0] = true);
+                setDialogState(() => projectProbeBusy[0] = true);
                 try {
                   final rows = await postProjectGetProject(token);
                   if (!ctx.mounted) return;
@@ -36,22 +36,22 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => projectLegacyBusy[0] = false);
+                    setDialogState(() => projectProbeBusy[0] = false);
                   }
                 }
               },
         child: Text(
-          projectLegacyBusy[0] ? 'project…' : 'POST project get-project',
+          projectProbeBusy[0] ? 'project…' : 'POST project get-project',
         ),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => projectLegacyBusy[0] = true);
+                setDialogState(() => projectProbeBusy[0] = true);
                 final pr = detail.project;
                 try {
                   final msg = await postProjectEditProject(
@@ -85,20 +85,20 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => projectLegacyBusy[0] = false);
+                    setDialogState(() => projectProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(projectLegacyBusy[0] ? 'project…' : 'POST project edit (noop)'),
+        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project edit (noop)'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => projectLegacyBusy[0] = true);
+                setDialogState(() => projectProbeBusy[0] = true);
                 try {
                   await postProjectDeleteProject(token, 0);
                   if (!ctx.mounted) return;
@@ -124,20 +124,20 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => projectLegacyBusy[0] = false);
+                    setDialogState(() => projectProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(projectLegacyBusy[0] ? 'project…' : 'POST project delete id=0'),
+        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project delete id=0'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => projectLegacyBusy[0] = true);
+                setDialogState(() => projectProbeBusy[0] = true);
                 try {
                   await postProjectEditProject(
                     token,
@@ -177,22 +177,22 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => projectLegacyBusy[0] = false);
+                    setDialogState(() => projectProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(projectLegacyBusy[0] ? 'project…' : 'POST project edit id=0'),
+        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project edit id=0'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] ||
-                tasksLegacyBusy[0] ||
-                projectLegacyBusy[0]
+            generalProbeBusy[0] ||
+                tasksProbeBusy[0] ||
+                projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => projectLegacyBusy[0] = true);
+                setDialogState(() => projectProbeBusy[0] = true);
                 final probeName =
-                    '[flutter legacy add-probe] ${DateTime.now().toIso8601String()}';
+                    '[flutter workbench add-probe] ${DateTime.now().toIso8601String()}';
                 try {
                   await postProjectAddProject(
                     token,
@@ -232,7 +232,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST add-project → delete legacy#${match.numericId} ok',
+                        'POST add-project → delete project#${match.numericId} ok',
                       ),
                     ),
                   );
@@ -244,11 +244,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => projectLegacyBusy[0] = false);
+                    setDialogState(() => projectProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(projectLegacyBusy[0] ? 'project…' : 'POST project add→del'),
+        child: Text(projectProbeBusy[0] ? 'project…' : 'POST project add→del'),
       ),
     ];
   }

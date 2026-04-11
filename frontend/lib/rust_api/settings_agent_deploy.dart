@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// OpenAPI **`AgentDeployListItem`** — legacy **`o_agentDeploy`** row shape (**camelCase**).
+/// OpenAPI **`AgentDeployListItem`** — prior **`o_agentDeploy`** row shape (**camelCase**).
 class AgentDeployListItemV1 {
   const AgentDeployListItemV1({
     required this.id,

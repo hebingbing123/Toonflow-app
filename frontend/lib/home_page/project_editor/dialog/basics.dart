@@ -33,9 +33,9 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           p: p,
           detail: detail,
           introCtrl: introCtrl,
-          generalLegacyBusy: dialogState.generalLegacyBusy,
-          tasksLegacyBusy: dialogState.tasksLegacyBusy,
-          projectLegacyBusy: dialogState.projectLegacyBusy,
+          generalProbeBusy: dialogState.generalProbeBusy,
+          tasksProbeBusy: dialogState.tasksProbeBusy,
+          projectProbeBusy: dialogState.projectProbeBusy,
         ),
         const SizedBox(height: 12),
         if (dialogState.statsRef[0] != null)

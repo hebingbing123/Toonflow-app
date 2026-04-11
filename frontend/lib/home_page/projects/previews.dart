@@ -75,7 +75,7 @@ class ProjectsActionsBar extends StatelessWidget {
   }
 }
 
-/// Wraps the legacy agent-memory probe used as a regression checkpoint.
+/// Wraps the agent-memory regression probe used as a regression checkpoint.
 class ProjectsCompatibilityPanel extends StatelessWidget {
   const ProjectsCompatibilityPanel({
     super.key,

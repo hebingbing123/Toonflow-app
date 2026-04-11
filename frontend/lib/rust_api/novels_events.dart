@@ -80,7 +80,7 @@ Future<Map<String, dynamic>> createProjectNovelEventUnderProject(
   return jsonDecode(res.body) as Map<String, dynamic>;
 }
 
-/// `PATCH /api/v1/projects/{project_id}/novel-events/{event_legacy_id}`.
+/// `PATCH /api/v1/projects/{project_id}/novel-events/{event_numeric_id}`.
 Future<String> patchProjectNovelEventByProjectIds(
   String accessToken,
   String projectId,
@@ -113,7 +113,7 @@ Future<String> patchProjectNovelEventByProjectIds(
   return map['message'] as String? ?? '';
 }
 
-/// `DELETE /api/v1/projects/{project_id}/novel-events/{event_legacy_id}`.
+/// `DELETE /api/v1/projects/{project_id}/novel-events/{event_numeric_id}`.
 Future<String> deleteProjectNovelEventByProjectIds(
   String accessToken,
   String projectId,
@@ -138,7 +138,7 @@ Future<String> deleteProjectNovelEventByProjectIds(
   return map['message'] as String? ?? '';
 }
 
-/// `POST /api/v1/projects/{project_id}/novel-events/batch-delete` — scoped batch delete by event legacy ids.
+/// `POST /api/v1/projects/{project_id}/novel-events/batch-delete` — scoped batch delete by event numeric ids.
 Future<String> postProjectNovelEventsBatchDeleteByProjectId(
   String accessToken,
   String projectId,
@@ -170,8 +170,8 @@ Future<String> postProjectNovelEventsBatchDeleteByProjectId(
   return map['message'] as String? ?? '';
 }
 
-/// Compat: maps **`GET …/projects/{uuid}/novel-events`** to legacy **`{ list, total }`**.
-Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
+/// Compat: maps **`GET …/projects/{uuid}/novel-events`** to workbench **`{ list, total }`**.
+Future<NovelEventsPageResponse> fetchNovelEventsPaged(
   String accessToken,
   int projectNumericId, {
   required int page,
@@ -189,7 +189,7 @@ Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
   );
   final list = rows.items
       .map(
-        (e) => LegacyNovelEventRow(
+        (e) => NovelEventPageRow(
           numericId: e.numericId,
           eventName: e.name,
           detail: e.detail.isEmpty ? null : e.detail,
@@ -198,11 +198,11 @@ Future<LegacyNovelEventsPagedResponse> postLegacyNovelEventsGetEvents(
         ),
       )
       .toList();
-  return LegacyNovelEventsPagedResponse(list: list, total: rows.total);
+  return NovelEventsPageResponse(list: list, total: rows.total);
 }
 
-/// Compat: **`POST …/projects/{uuid}/novel-events/batch-delete`** by event legacy ids.
-Future<String> postLegacyNovelEventsBatchDelete(
+/// Compat: **`POST …/projects/{uuid}/novel-events/batch-delete`** by event numeric ids.
+Future<String> batchDeleteNovelEvents(
   String accessToken,
   int projectNumericId,
   List<int> numericIds,

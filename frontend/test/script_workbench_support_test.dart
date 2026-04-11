@@ -5,8 +5,8 @@ import 'package:toonflow_app/rust_api.dart';
 void main() {
   test('findScriptContextByNumericId returns matching row', () {
     final row = findScriptContextByNumericId(const [
-      LegacyScriptsGetScriptApiItem(numericId: 1, relatedAssets: []),
-      LegacyScriptsGetScriptApiItem(
+      ScriptWorkbenchDetailRow(numericId: 1, relatedAssets: []),
+      ScriptWorkbenchDetailRow(
         numericId: 7,
         name: 'target',
         relatedAssets: [],
@@ -43,11 +43,11 @@ void main() {
 
   test('summarizeRelatedScriptAssets compacts long asset list', () {
     final summary = summarizeRelatedScriptAssets(const [
-      LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
-      LegacyScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
-      LegacyScriptRelatedAssetBrief(numericId: 3, name: '道具 C'),
-      LegacyScriptRelatedAssetBrief(numericId: 4, name: '镜头 D'),
-      LegacyScriptRelatedAssetBrief(numericId: 5, name: '音乐 E'),
+      ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+      ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
+      ScriptRelatedAssetBrief(numericId: 3, name: '道具 C'),
+      ScriptRelatedAssetBrief(numericId: 4, name: '镜头 D'),
+      ScriptRelatedAssetBrief(numericId: 5, name: '音乐 E'),
     ]);
 
     expect(summary, '角色 A、场景 B、道具 C、镜头 D 等 5 项');
@@ -65,7 +65,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests retry when extract failed', () {
     final diagnosis = diagnoseScriptWorkbench(
-      scriptContext: const LegacyScriptsGetScriptApiItem(
+      scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         relatedAssets: [],
       ),
@@ -86,7 +86,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests polling while extract runs', () {
     final diagnosis = diagnoseScriptWorkbench(
-      scriptContext: const LegacyScriptsGetScriptApiItem(
+      scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         relatedAssets: [],
       ),
@@ -105,7 +105,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests extract when no assets exist', () {
     final diagnosis = diagnoseScriptWorkbench(
-      scriptContext: const LegacyScriptsGetScriptApiItem(
+      scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         extractState: 0,
         relatedAssets: [],
@@ -123,11 +123,11 @@ void main() {
     'diagnoseScriptWorkbench suggests image workbench when assets exist',
     () {
       final diagnosis = diagnoseScriptWorkbench(
-        scriptContext: const LegacyScriptsGetScriptApiItem(
+        scriptContext: const ScriptWorkbenchDetailRow(
           numericId: 7,
           extractState: 0,
           relatedAssets: [
-            LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+            ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
           ],
         ),
       );
@@ -142,7 +142,7 @@ void main() {
 
   test('buildScriptWorkbenchFollowUp appends next step guidance', () {
     final diagnosis = diagnoseScriptWorkbench(
-      scriptContext: const LegacyScriptsGetScriptApiItem(
+      scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         extractState: 0,
         relatedAssets: [],
@@ -239,16 +239,16 @@ void main() {
           ScriptBrief(numericId: 8, extractState: 0),
         ],
         previewRows: const [
-          LegacyScriptsGetScriptApiItem(
+          ScriptWorkbenchDetailRow(
             numericId: 7,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+              ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
             ],
           ),
-          LegacyScriptsGetScriptApiItem(
+          ScriptWorkbenchDetailRow(
             numericId: 8,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
+              ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
             ],
           ),
         ],
@@ -272,10 +272,10 @@ void main() {
           ScriptBrief(numericId: 8, extractState: 0),
         ],
         previewRows: const [
-          LegacyScriptsGetScriptApiItem(
+          ScriptWorkbenchDetailRow(
             numericId: 7,
             relatedAssets: [
-              LegacyScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+              ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
             ],
           ),
         ],
@@ -338,12 +338,12 @@ void main() {
   test('syncScriptPreviewExtractStates updates preview rows only', () {
     final synced = syncScriptPreviewExtractStates(
       const [
-        LegacyScriptsGetScriptApiItem(
+        ScriptWorkbenchDetailRow(
           numericId: 1,
           extractState: 0,
           relatedAssets: [],
         ),
-        LegacyScriptsGetScriptApiItem(
+        ScriptWorkbenchDetailRow(
           numericId: 2,
           extractState: 0,
           relatedAssets: [],

@@ -185,7 +185,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/scripts/export：${zip.length} bytes · ${ids.length} legacy id(s)',
+                        'POST …/scripts/export：${zip.length} bytes · ${ids.length} numeric id(s)',
                       ),
                     ),
                   );

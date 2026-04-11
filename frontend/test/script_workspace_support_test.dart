@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:toonflow_app/home_page/agent_workspaces/contexts/script/support.dart';
 
 void main() {
-  test('extractScriptWorkspaceNovelIds reads legacy ids from items', () {
+  test('extractScriptWorkspaceNovelIds reads numeric ids from items', () {
     final ids = extractScriptWorkspaceNovelIds(<String, dynamic>{
       'items': <Map<String, dynamic>>[
         <String, dynamic>{'numeric_id': 11},

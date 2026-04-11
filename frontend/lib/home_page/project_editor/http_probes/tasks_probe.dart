@@ -1,22 +1,22 @@
 part of '../../../home_page.dart';
 
 extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
-  List<Widget> _buildProjectLegacyTasksProbeActions({
+  List<Widget> _buildProjectTasksProbeActions({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required String token,
     required ProjectRow p,
-    required List<bool> generalLegacyBusy,
-    required List<bool> tasksLegacyBusy,
-    required List<bool> projectLegacyBusy,
+    required List<bool> generalProbeBusy,
+    required List<bool> tasksProbeBusy,
+    required List<bool> projectProbeBusy,
   }) {
     return [
       TextButton(
         onPressed:
-            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
+            generalProbeBusy[0] || tasksProbeBusy[0] || projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => tasksLegacyBusy[0] = true);
+                setDialogState(() => tasksProbeBusy[0] = true);
                 try {
                   final items = await postTasksGetProject(token);
                   if (!ctx.mounted) return;
@@ -36,18 +36,18 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => tasksLegacyBusy[0] = false);
+                    setDialogState(() => tasksProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks get-project'),
+        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks get-project'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
+            generalProbeBusy[0] || tasksProbeBusy[0] || projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => tasksLegacyBusy[0] = true);
+                setDialogState(() => tasksProbeBusy[0] = true);
                 try {
                   final rows = await postTasksGetTaskCategories(token);
                   if (!ctx.mounted) return;
@@ -67,18 +67,18 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => tasksLegacyBusy[0] = false);
+                    setDialogState(() => tasksProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks categories'),
+        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks categories'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
+            generalProbeBusy[0] || tasksProbeBusy[0] || projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => tasksLegacyBusy[0] = true);
+                setDialogState(() => tasksProbeBusy[0] = true);
                 try {
                   final r = await postTasksGetTaskApi(
                     token,
@@ -102,18 +102,18 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => tasksLegacyBusy[0] = false);
+                    setDialogState(() => tasksProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks list'),
+        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat tasks list'),
       ),
       TextButton(
         onPressed:
-            generalLegacyBusy[0] || tasksLegacyBusy[0] || projectLegacyBusy[0]
+            generalProbeBusy[0] || tasksProbeBusy[0] || projectProbeBusy[0]
             ? null
             : () async {
-                setDialogState(() => tasksLegacyBusy[0] = true);
+                setDialogState(() => tasksProbeBusy[0] = true);
                 try {
                   final r = await postTasksGetTaskApi(
                     token,
@@ -144,11 +144,11 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                   }
                 } finally {
                   if (ctx.mounted) {
-                    setDialogState(() => tasksLegacyBusy[0] = false);
+                    setDialogState(() => tasksProbeBusy[0] = false);
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat task-details int'),
+        child: Text(tasksProbeBusy[0] ? 'tasks…' : 'compat task-details int'),
       ),
     ];
   }

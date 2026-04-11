@@ -28,7 +28,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final pg = await postLegacyNovelEventsGetEvents(
+                  final pg = await fetchNovelEventsPaged(
                     token,
                     p.numericId,
                     page: 1,
@@ -71,7 +71,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
             : () async {
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final pg = await postLegacyNovelEventsGetEvents(
+                  final pg = await fetchNovelEventsPaged(
                     token,
                     p.numericId,
                     page: 1,

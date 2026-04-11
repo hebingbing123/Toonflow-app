@@ -32,7 +32,7 @@ Future<int> postSettingsDangerClearDatabaseV1(String accessToken) async {
   return res.statusCode;
 }
 
-/// OpenAPI **`AboutCheckUpdateResponse`** — legacy desktop **`checkUpdate`** shape (**camelCase**).
+/// OpenAPI **`AboutCheckUpdateResponse`** — desktop **`checkUpdate`** shape (**camelCase**).
 class AboutCheckUpdateResponseV1 {
   const AboutCheckUpdateResponseV1({
     required this.needUpdate,

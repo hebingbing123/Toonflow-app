@@ -81,7 +81,7 @@ extension _HomePageProjectEditorAssetsClipUploadWorkbench on _HomePageState {
       }
 
       setDialogState(() => assetsBusy[0] = true);
-      final response = await postLegacyAssetsUploadClip(
+      final response = await postWorkbenchAssetsUploadClip(
         token,
         projectId: p.id,
         base64Data: base64Data,

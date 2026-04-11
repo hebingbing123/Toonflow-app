@@ -24,7 +24,7 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
 class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   bool _loadingContext = false;
   bool _runningAction = false;
-  LegacyScriptsGetScriptApiItem? _scriptContext;
+  ScriptWorkbenchDetailRow? _scriptContext;
   ScriptExtractStatePollRow? _extractStateRow;
   String? _contextLine;
   String? _exportLine;

@@ -285,7 +285,7 @@ extension _HomePageProjectEditorAssetsCrudProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/assets?script_legacy_id=$sid&page=1&limit=2：total=${pg.total}，本页 ${pg.items.length} 条'
+                        'GET …/assets?script_numeric_id=$sid&page=1&limit=2：total=${pg.total}，本页 ${pg.items.length} 条'
                         '${ids.isEmpty ? '' : ' · $ids'}',
                       ),
                     ),

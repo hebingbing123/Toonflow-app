@@ -22,9 +22,9 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
   final String? statusLine;
   final AssetsDataResponseV1? productionData;
   final AssetsPollingImageResponseV1? pollingData;
-  final LegacyAssetMaterialDataResponse? materialData;
-  final LegacyAssetBatchGenerationDataResponse? batchData;
-  final List<LegacyAssetPollingPromptAssetsItem>? promptPollingData;
+  final WorkbenchAssetMaterialDataResponse? materialData;
+  final WorkbenchAssetBatchGenerationResponse? batchData;
+  final List<WorkbenchAssetPollingPromptItem>? promptPollingData;
   final Map<String, List<int>> pollingSelections;
   final Map<String, List<int>> promptSelections;
   final void Function(String label, List<int> ids) onApplyPollingSelection;
@@ -75,7 +75,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (materialData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeLegacyAssetMaterialData(materialData!),
+            summarizeWorkbenchAssetMaterialData(materialData!),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -93,7 +93,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (batchData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeLegacyBatchGenerationData(batchData!),
+            summarizeWorkbenchBatchGenerationData(batchData!),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -111,7 +111,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (promptPollingData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeLegacyPromptPolling(promptPollingData!),
+            summarizeWorkbenchPromptPolling(promptPollingData!),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),

@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 /// `POST /api/v1/projects/{project_id}/assets/workbench/nested` — parent assets with nested `sonAssets` by **`type/name/page/limit`** (**`project_id`** = project UUID).
-Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
+Future<WorkbenchAssetTreeResponse> postWorkbenchAssetsGetAssetsApi(
   String accessToken, {
   required String projectId,
   required String assetType,
@@ -37,11 +37,11 @@ Future<LegacyAssetGetAssetsApiResponse> postLegacyAssetsGetAssetsApi(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyAssetGetAssetsApiResponse.fromJson(map);
+  return WorkbenchAssetTreeResponse.fromJson(map);
 }
 
 /// `POST …/assets/workbench/image-bundle` — asset image bundle by **`assetsId`** (scoped to **`project_id`** UUID).
-Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
+Future<WorkbenchImageBundleResponse> postWorkbenchAssetsGetImage(
   String accessToken,
   String projectId,
   int assetNumericId,
@@ -69,11 +69,11 @@ Future<LegacyAssetGetImageResponse> postLegacyAssetsGetImage(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyAssetGetImageResponse.fromJson(map);
+  return WorkbenchImageBundleResponse.fromJson(map);
 }
 
 /// `POST …/assets/workbench/upload-clip` — upload clip asset (**`base64Data`**, **`name`**, optional **`type`** = clip).
-Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
+Future<WorkbenchAssetUploadClipResponse> postWorkbenchAssetsUploadClip(
   String accessToken, {
   required String projectId,
   required String base64Data,
@@ -107,11 +107,11 @@ Future<LegacyAssetUploadClipResponse> postLegacyAssetsUploadClip(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyAssetUploadClipResponse.fromJson(map);
+  return WorkbenchAssetUploadClipResponse.fromJson(map);
 }
 
 /// `POST …/assets/workbench/material-data` — clip assets and generated videos for the project (**empty `{}`** body).
-Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
+Future<WorkbenchAssetMaterialDataResponse> postWorkbenchAssetsGetMaterialData(
   String accessToken,
   String projectId,
 ) async {
@@ -135,12 +135,12 @@ Future<LegacyAssetMaterialDataResponse> postLegacyAssetsGetMaterialData(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyAssetMaterialDataResponse.fromJson(map);
+  return WorkbenchAssetMaterialDataResponse.fromJson(map);
 }
 
 /// `POST …/assets/workbench/batch-generation-data` — paged listing by **`type/name/page/limit`**.
-Future<LegacyAssetBatchGenerationDataResponse>
-postLegacyAssetsBatchGenerationData(
+Future<WorkbenchAssetBatchGenerationResponse>
+postWorkbenchAssetsBatchGenerationData(
   String accessToken, {
   required String projectId,
   required String assetType,
@@ -176,12 +176,12 @@ postLegacyAssetsBatchGenerationData(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyAssetBatchGenerationDataResponse.fromJson(map);
+  return WorkbenchAssetBatchGenerationResponse.fromJson(map);
 }
 
 /// `POST …/assets/workbench/polling-image-assets` — selected-image polling by **`ids`**.
-Future<List<LegacyAssetPollingImageAssetsItem>>
-postLegacyAssetsPollingImageAssets(
+Future<List<WorkbenchAssetPollingImageItem>>
+postWorkbenchAssetsPollingImageAssets(
   String accessToken,
   String projectId,
   List<int> assetNumericIds,
@@ -208,7 +208,7 @@ postLegacyAssetsPollingImageAssets(
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map(
-        (e) => LegacyAssetPollingImageAssetsItem.fromJson(
+        (e) => WorkbenchAssetPollingImageItem.fromJson(
           e as Map<String, dynamic>,
         ),
       )
@@ -216,8 +216,8 @@ postLegacyAssetsPollingImageAssets(
 }
 
 /// `POST …/assets/workbench/polling-prompt-assets` — prompt polling by **`ids`**.
-Future<List<LegacyAssetPollingPromptAssetsItem>>
-postLegacyAssetsPollingPromptAssets(
+Future<List<WorkbenchAssetPollingPromptItem>>
+postWorkbenchAssetsPollingPromptAssets(
   String accessToken,
   String projectId,
   List<int> assetNumericIds,
@@ -244,7 +244,7 @@ postLegacyAssetsPollingPromptAssets(
   final raw = jsonDecode(res.body) as List<dynamic>;
   return raw
       .map(
-        (e) => LegacyAssetPollingPromptAssetsItem.fromJson(
+        (e) => WorkbenchAssetPollingPromptItem.fromJson(
           e as Map<String, dynamic>,
         ),
       )

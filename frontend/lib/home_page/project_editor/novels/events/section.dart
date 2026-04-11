@@ -35,7 +35,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
           const SizedBox(height: 4),
           Text(
             first == null
-                ? '用显式表单管理事件搜索、创建、更新、删除和批量删除，减少对 legacy probe 按钮的依赖。'
+                ? '用显式表单管理事件搜索、创建、更新、删除和批量删除，减少对 HTTP probe 按钮的依赖。'
                 : '$summaryLine；首条 #${first.numericId} ${first.name}。',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
@@ -272,7 +272,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           controller: searchCtrl,
                           decoration: const InputDecoration(
                             labelText: '搜索事件关键字',
-                            helperText: '同时调用 REST 和 legacy get-events 搜索',
+                            helperText: '同时调用 REST 与 workbench get-events 搜索',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -292,8 +292,8 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                             page: 1,
                                             limit: 10,
                                           );
-                                      final legacy =
-                                          await postLegacyNovelEventsGetEvents(
+                                      final workbenchPage =
+                                          await fetchNovelEventsPaged(
                                             token,
                                             p.numericId,
                                             page: 1,
@@ -305,7 +305,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                                           rows.items,
                                         );
                                         infoLine =
-                                            'REST 命中 ${rows.total} 条，legacy 命中 ${legacy.total} 条。';
+                                            'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
                                       });
                                     }),
                               child: const Text('搜索事件'),
@@ -342,7 +342,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           controller: createChapterIdsCtrl,
                           decoration: const InputDecoration(
                             labelText: '关联章节 IDs',
-                            helperText: '用逗号分隔，按章节 legacy id 填写',
+                            helperText: '用逗号分隔，按章节 numeric ID 填写',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -391,7 +391,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           controller: selectedEventIdCtrl,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            labelText: '事件 legacy id',
+                            labelText: '事件 numeric ID',
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -415,7 +415,7 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
                           controller: patchChapterIdsCtrl,
                           decoration: const InputDecoration(
                             labelText: '更新后的章节 IDs',
-                            helperText: '按章节 legacy id 填写；内部会映射为 chapterIds',
+                            helperText: '按章节 numeric ID 填写；内部会映射为 chapterIds',
                           ),
                         ),
                         const SizedBox(height: 8),

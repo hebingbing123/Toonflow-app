@@ -86,7 +86,7 @@ extension _HomePageSystemProbesAccountSettings on _HomePageState {
           numericIdForClear = plist.first.numericId;
         }
       } on RustApiException catch (_) {
-        // Keep default **1** (often **404** when DB up but empty / no such legacy).
+        // Keep default **1** (often **404** when DB up but empty / no such project).
       }
       final clr = await postSettingsClearAgentMemoriesV1(
         token,
@@ -98,7 +98,7 @@ extension _HomePageSystemProbesAccountSettings on _HomePageState {
       if (!okClear) {
         setState(() {
           _error =
-              'POST clear-agent-memories expected 503/200/404, got $clr (legacy #$numericIdForClear)';
+              'POST clear-agent-memories expected 503/200/404, got $clr (numeric id #$numericIdForClear)';
           _loadingMemoryConfigProbe = false;
         });
         return;
@@ -106,7 +106,7 @@ extension _HomePageSystemProbesAccountSettings on _HomePageState {
       final clearNote = switch (clr) {
         503 => '503 no DB',
         200 => '200 ok',
-        404 => '404 no project legacy#$numericIdForClear',
+        404 => '404 no project numeric#$numericIdForClear',
         _ => '$clr',
       };
       setState(() {

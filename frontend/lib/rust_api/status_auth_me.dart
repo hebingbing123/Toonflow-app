@@ -39,7 +39,7 @@ Future<MeResponse> fetchMeV1(String accessToken) async {
   return MeResponse.fromJson(map);
 }
 
-/// OpenAPI **`SwitchAiDevToolResponse`** — legacy **`getSwitchAiDevTool`**.
+/// OpenAPI **`SwitchAiDevToolResponse`** — prior **`getSwitchAiDevTool`**.
 class SwitchAiDevToolV1 {
   const SwitchAiDevToolV1({required this.value});
 

@@ -80,7 +80,7 @@ class QualityReviewsSummaryPreview extends StatelessWidget {
   }
 }
 
-/// Keeps the legacy quality review regression entry isolated from the main flow.
+/// Keeps the quality review regression entry isolated from the main flow.
 class QualityReviewsCompatibilityPanel extends StatelessWidget {
   const QualityReviewsCompatibilityPanel({
     super.key,
@@ -109,7 +109,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Legacy review probe',
+            'Quality review probe',
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: outlineColor),

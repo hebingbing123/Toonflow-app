@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-/// Compat **`getSingleProject`**: lists owned projects and filters by **`legacy_id`** (no HTTP **`/general/*`**).
+/// Compat **`getSingleProject`**: lists owned projects and filters by **`numeric_id`** (no HTTP **`/general/*`**).
 Future<List<ProjectRow>> postGeneralGetSingleProject(
   String accessToken,
   int numericId,
@@ -11,7 +11,7 @@ Future<List<ProjectRow>> postGeneralGetSingleProject(
 
 /// Compat **`updateProject`**: maps camelCase fields to **`PATCH /api/v1/projects/{uuid}`**.
 ///
-/// [body] must include **`id`** (legacy project id) and at least one of **`intro`**,
+/// [body] must include **`id`** (numeric project id) and at least one of **`intro`**,
 /// **`type`** (→ **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`**
 /// (use **`null`** in the map to clear).
 Future<String> postGeneralUpdateProject(
@@ -56,13 +56,13 @@ Future<String> postGeneralUpdateProject(
   return '修改成功';
 }
 
-/// Mirrors legacy **`type` vs `mode`** merge: prefer non-empty **`mode`**, else **`type`**.
-String _effectiveProjectMode(String legacySqliteType, String mode) {
+/// Mirrors prior **`type` vs `mode`** merge: prefer non-empty **`mode`**, else **`type`**.
+String _effectiveProjectMode(String sqliteTypeHint, String mode) {
   final m = mode.trim();
   if (m.isNotEmpty) {
     return m;
   }
-  return legacySqliteType.trim();
+  return sqliteTypeHint.trim();
 }
 
 Future<List<ProjectRow>> _fetchAllProjectsPaged(String accessToken) async {
@@ -113,7 +113,7 @@ Future<List<ProjectRow>> postProjectGetProject(String accessToken) async {
   return _fetchAllProjectsPaged(accessToken);
 }
 
-/// [numericId] is `app_project.legacy_id`. Uses **`DELETE /api/v1/projects/{project_id}`**.
+/// [numericId] is `app_project` numeric id column. Uses **`DELETE /api/v1/projects/{project_id}`**.
 Future<String> postProjectDeleteProject(
   String accessToken,
   int numericId,
@@ -157,7 +157,7 @@ Future<String> postProjectAddProject(
   return '新增项目成功';
 }
 
-/// [id] is `app_project.legacy_id`. Uses **`PATCH /api/v1/projects/{project_id}`**.
+/// [id] is `app_project` numeric id column. Uses **`PATCH /api/v1/projects/{project_id}`**.
 Future<String> postProjectEditProject(
   String accessToken, {
   required int id,

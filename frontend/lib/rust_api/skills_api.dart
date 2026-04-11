@@ -95,7 +95,7 @@ Future<SkillContentResponse> fetchSkillContent(
   return SkillContentResponse.fromJson(map);
 }
 
-/// `PUT /api/v1/skills/content` — overwrites an **existing** file only (legacy `saveSkillContent`).
+/// `PUT /api/v1/skills/content` — overwrites an **existing** file only (prior `saveSkillContent`).
 /// See `putSkillContentV1`.
 Future<SkillContentResponse> saveSkillContent(
   String accessToken,

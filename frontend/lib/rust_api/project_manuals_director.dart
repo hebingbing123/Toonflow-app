@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 /// `POST /api/v1/project/query-director-manual` — body `{}`; bundled **`story_skills`** rows.
-Future<LegacyDirectorManualListResponse> postProjectQueryDirectorManual(
+Future<DirectorManualListResponse> postProjectQueryDirectorManual(
   String accessToken,
 ) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/project/query-director-manual');
@@ -22,7 +22,7 @@ Future<LegacyDirectorManualListResponse> postProjectQueryDirectorManual(
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return LegacyDirectorManualListResponse.fromJson(map);
+  return DirectorManualListResponse.fromJson(map);
 }
 
 /// `POST /api/v1/project/add-director-manual`.
@@ -31,7 +31,7 @@ Future<void> postProjectAddDirectorManual(
   required String name,
   required String directorManual,
   List<String> images = const [],
-  required List<LegacyDirectorManualDataSlot> data,
+  required List<DirectorManualDataSlot> data,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/project/add-director-manual');
   final body = <String, dynamic>{
@@ -53,7 +53,7 @@ Future<void> postProjectAddDirectorManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectLegacyEmptyObjectResponse(res);
+  _expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/edit-director-manual`.
@@ -62,7 +62,7 @@ Future<void> postProjectEditDirectorManual(
   required String name,
   required String directorManual,
   List<String> images = const [],
-  required List<LegacyDirectorManualDataSlot> data,
+  required List<DirectorManualDataSlot> data,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/project/edit-director-manual');
   final body = <String, dynamic>{
@@ -84,7 +84,7 @@ Future<void> postProjectEditDirectorManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectLegacyEmptyObjectResponse(res);
+  _expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/delete-director-manual` — [folderName] is folder under **`story_skills`**.

@@ -24,7 +24,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   builder: (c) => AlertDialog(
                     title: const Text('删除项目？'),
                     content: Text(
-                      '将删除 legacy #${p.numericId} 及关联剧本/分镜（数据库级联），且清除该项目的 agent 记忆。',
+                      '将删除项目 #${p.numericId} 及关联剧本/分镜（数据库级联），且清除该项目的 agent 记忆。',
                     ),
                     actions: [
                       TextButton(

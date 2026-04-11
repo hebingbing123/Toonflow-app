@@ -100,7 +100,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
     if (projectId == null || agentType.isEmpty) {
-      setState(() => _statusLine = '请填写合法的项目 legacy id 和 agent type。');
+      setState(() => _statusLine = '请填写合法的项目 numeric ID 和 agent type。');
       return;
     }
     setState(() {
@@ -272,7 +272,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
                     child: TextField(
                       controller: _projectIdCtrl,
                       decoration: const InputDecoration(
-                        labelText: '项目 legacy id',
+                        labelText: '项目 numeric ID',
                       ),
                     ),
                   ),

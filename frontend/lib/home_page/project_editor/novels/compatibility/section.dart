@@ -1,6 +1,6 @@
 part of '../../../../home_page.dart';
 
-extension _HomePageProjectEditorNovelsLegacyProbe on _HomePageState {
+extension _HomePageProjectEditorNovelsProbe on _HomePageState {
   Widget _buildProjectNovelsCompatibilitySection({
     required BuildContext ctx,
     required StateSetter setDialogState,
@@ -29,7 +29,7 @@ extension _HomePageProjectEditorNovelsLegacyProbe on _HomePageState {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Legacy novels POST checks',
+            'Novels HTTP probe checks',
             style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
@@ -39,7 +39,7 @@ extension _HomePageProjectEditorNovelsLegacyProbe on _HomePageState {
           spacing: 4,
           runSpacing: 0,
           children: [
-            ..._buildProjectLegacyNovelsProbeActions(
+            ..._buildProjectNovelsProbeActions(
               ctx: ctx,
               setDialogState: setDialogState,
               token: token,

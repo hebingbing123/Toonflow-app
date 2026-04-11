@@ -320,7 +320,7 @@ String summarizeAssetImageSelection(
   }
   selectedImage ??= response.items.first;
   final coverLine = response.coverNumericImageId == null
-      ? '当前未记录封面 legacy image'
-      : '封面 legacy image #${response.coverNumericImageId}';
+      ? '当前未记录封面 numeric image'
+      : '封面 numeric image #${response.coverNumericImageId}';
   return '已加载 ${response.items.length} 张图片；$coverLine；当前图片 sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "未知状态"}。';
 }

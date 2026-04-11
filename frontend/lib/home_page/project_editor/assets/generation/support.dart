@@ -49,7 +49,7 @@ Map<String, List<int>> collectAssetIdsByImageState(
 }
 
 Map<String, List<int>> collectAssetIdsByPromptState(
-  Iterable<LegacyAssetPollingPromptAssetsItem> rows,
+  Iterable<WorkbenchAssetPollingPromptItem> rows,
 ) {
   final grouped = SplayTreeMap<String, List<int>>();
   for (final row in rows) {
@@ -126,12 +126,12 @@ String summarizeAssetPollingStatuses(Iterable<AssetImageStatusV1> statuses) {
   return '已轮询 ${rows.length} 条资产 · $stateLine · 示例：$sampleLine';
 }
 
-String summarizeLegacyAssetMaterialData(LegacyAssetMaterialDataResponse data) {
+String summarizeWorkbenchAssetMaterialData(WorkbenchAssetMaterialDataResponse data) {
   return '素材上下文 ${data.data.length} 条图片素材 · ${data.video.length} 条视频素材';
 }
 
-String summarizeLegacyBatchGenerationData(
-  LegacyAssetBatchGenerationDataResponse data,
+String summarizeWorkbenchBatchGenerationData(
+  WorkbenchAssetBatchGenerationResponse data,
 ) {
   if (data.data.isEmpty) {
     return '批量候选为空';
@@ -143,8 +143,8 @@ String summarizeLegacyBatchGenerationData(
   return '批量候选 ${data.data.length}/${data.total} 条 · 示例：$sampleLine';
 }
 
-String summarizeLegacyPromptPolling(
-  Iterable<LegacyAssetPollingPromptAssetsItem> rows,
+String summarizeWorkbenchPromptPolling(
+  Iterable<WorkbenchAssetPollingPromptItem> rows,
 ) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
@@ -166,7 +166,7 @@ String summarizeAssetWorkbenchSnapshot({
   required Iterable<int> selectedIds,
   AssetsDataResponseV1? productionData,
   AssetsPollingImageResponseV1? pollingData,
-  Iterable<LegacyAssetPollingPromptAssetsItem>? promptPollingData,
+  Iterable<WorkbenchAssetPollingPromptItem>? promptPollingData,
   String? lead,
 }) {
   final visibleById = <int, AssetRow>{
@@ -190,7 +190,7 @@ String summarizeAssetWorkbenchSnapshot({
     if (pollingData != null)
       summarizeAssetPollingStatuses(pollingData.statuses),
     if (promptPollingData != null)
-      summarizeLegacyPromptPolling(promptPollingData),
+      summarizeWorkbenchPromptPolling(promptPollingData),
   ];
   return parts.join('；');
 }

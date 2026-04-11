@@ -1,8 +1,8 @@
 part of 'index.dart';
 
-/// OpenAPI **`LegacyDirectorManualDataSlot`** (also used for visual manual POST bodies).
-class LegacyDirectorManualDataSlot {
-  const LegacyDirectorManualDataSlot({
+/// OpenAPI **`DirectorManualDataSlot`** (also used for visual manual POST bodies).
+class DirectorManualDataSlot {
+  const DirectorManualDataSlot({
     required this.label,
     required this.value,
     required this.data,
@@ -18,8 +18,8 @@ class LegacyDirectorManualDataSlot {
     'data': data,
   };
 
-  factory LegacyDirectorManualDataSlot.fromJson(Map<String, dynamic> json) {
-    return LegacyDirectorManualDataSlot(
+  factory DirectorManualDataSlot.fromJson(Map<String, dynamic> json) {
+    return DirectorManualDataSlot(
       label: json['label'] as String,
       value: json['value'] as String,
       data: json['data'] as String,
@@ -27,9 +27,9 @@ class LegacyDirectorManualDataSlot {
   }
 }
 
-/// OpenAPI **`LegacyDirectorManualStyleRow`** (`directorManual` = folder under `story_skills`).
-class LegacyDirectorManualStyleRow {
-  const LegacyDirectorManualStyleRow({
+/// OpenAPI **`DirectorManualStyleRow`** (`directorManual` = folder under `story_skills`).
+class DirectorManualStyleRow {
+  const DirectorManualStyleRow({
     required this.name,
     required this.image,
     required this.directorManual,
@@ -39,18 +39,18 @@ class LegacyDirectorManualStyleRow {
   final String name;
   final List<String> image;
   final String directorManual;
-  final List<LegacyDirectorManualDataSlot> data;
+  final List<DirectorManualDataSlot> data;
 
-  factory LegacyDirectorManualStyleRow.fromJson(Map<String, dynamic> json) {
+  factory DirectorManualStyleRow.fromJson(Map<String, dynamic> json) {
     final imgs = json['image'] as List<dynamic>? ?? const [];
     final slots = json['data'] as List<dynamic>? ?? const [];
-    return LegacyDirectorManualStyleRow(
+    return DirectorManualStyleRow(
       name: json['name'] as String,
       image: imgs.map((e) => e as String).toList(),
       directorManual: json['directorManual'] as String,
       data: slots
           .map(
-            (e) => LegacyDirectorManualDataSlot.fromJson(
+            (e) => DirectorManualDataSlot.fromJson(
               e as Map<String, dynamic>,
             ),
           )
@@ -59,18 +59,18 @@ class LegacyDirectorManualStyleRow {
   }
 }
 
-/// OpenAPI **`LegacyDirectorManualListResponse`**.
-class LegacyDirectorManualListResponse {
-  const LegacyDirectorManualListResponse({required this.data});
+/// OpenAPI **`DirectorManualListResponse`**.
+class DirectorManualListResponse {
+  const DirectorManualListResponse({required this.data});
 
-  final List<LegacyDirectorManualStyleRow> data;
+  final List<DirectorManualStyleRow> data;
 
-  factory LegacyDirectorManualListResponse.fromJson(Map<String, dynamic> json) {
+  factory DirectorManualListResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['data'] as List<dynamic>? ?? const [];
-    return LegacyDirectorManualListResponse(
+    return DirectorManualListResponse(
       data: raw
           .map(
-            (e) => LegacyDirectorManualStyleRow.fromJson(
+            (e) => DirectorManualStyleRow.fromJson(
               e as Map<String, dynamic>,
             ),
           )
@@ -79,7 +79,7 @@ class LegacyDirectorManualListResponse {
   }
 }
 
-void _expectLegacyEmptyObjectResponse(http.Response res) {
+void _expectEmptyObjectResponse(http.Response res) {
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }

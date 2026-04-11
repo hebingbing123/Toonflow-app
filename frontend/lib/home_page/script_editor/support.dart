@@ -91,8 +91,8 @@ String buildScriptBatchWorkbenchFollowUp({
   return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
 }
 
-LegacyScriptsGetScriptApiItem? findScriptContextByNumericId(
-  Iterable<LegacyScriptsGetScriptApiItem> rows,
+ScriptWorkbenchDetailRow? findScriptContextByNumericId(
+  Iterable<ScriptWorkbenchDetailRow> rows,
   int numericId,
 ) {
   for (final row in rows) {
@@ -129,7 +129,7 @@ String describeScriptExtractState({
 }
 
 ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
-  LegacyScriptsGetScriptApiItem? scriptContext,
+  ScriptWorkbenchDetailRow? scriptContext,
   ScriptExtractStatePollRow? extractStateRow,
 }) {
   if (scriptContext == null && extractStateRow == null) {
@@ -145,7 +145,7 @@ ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
   final trimmedError =
       (extractStateRow?.errorReason ?? scriptContext?.errorReason ?? '').trim();
   final relatedAssets =
-      scriptContext?.relatedAssets ?? const <LegacyScriptRelatedAssetBrief>[];
+      scriptContext?.relatedAssets ?? const <ScriptRelatedAssetBrief>[];
 
   if (extractState != null && extractState < 0) {
     return ScriptWorkbenchDiagnosis(
@@ -183,7 +183,7 @@ ScriptWorkbenchDiagnosis diagnoseScriptWorkbench({
 ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
   required Iterable<int> selectedIds,
   required Iterable<ScriptBrief> scripts,
-  required Iterable<LegacyScriptsGetScriptApiItem> previewRows,
+  required Iterable<ScriptWorkbenchDetailRow> previewRows,
 }) {
   final selected = selectedIds.toList(growable: false);
   if (selected.isEmpty) {
@@ -194,7 +194,7 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
     );
   }
 
-  final previewById = <int, LegacyScriptsGetScriptApiItem>{
+  final previewById = <int, ScriptWorkbenchDetailRow>{
     for (final row in previewRows) row.numericId: row,
   };
   final scriptById = <int, ScriptBrief>{
@@ -261,7 +261,7 @@ ScriptBatchWorkbenchDiagnosis diagnoseScriptBatchWorkbench({
 }
 
 String summarizeRelatedScriptAssets(
-  Iterable<LegacyScriptRelatedAssetBrief> assets, {
+  Iterable<ScriptRelatedAssetBrief> assets, {
   int maxItems = 4,
 }) {
   final trimmed = assets
@@ -333,8 +333,8 @@ List<ScriptBrief> syncScriptExtractStates(
       .toList(growable: false);
 }
 
-List<LegacyScriptsGetScriptApiItem> syncScriptPreviewExtractStates(
-  Iterable<LegacyScriptsGetScriptApiItem> rows,
+List<ScriptWorkbenchDetailRow> syncScriptPreviewExtractStates(
+  Iterable<ScriptWorkbenchDetailRow> rows,
   Iterable<ScriptExtractStatePollRow> updates,
 ) {
   final byNumericId = <int, ScriptExtractStatePollRow>{
@@ -346,7 +346,7 @@ List<LegacyScriptsGetScriptApiItem> syncScriptPreviewExtractStates(
         if (next == null) {
           return row;
         }
-        return LegacyScriptsGetScriptApiItem(
+        return ScriptWorkbenchDetailRow(
           numericId: row.numericId,
           name: row.name,
           content: row.content,

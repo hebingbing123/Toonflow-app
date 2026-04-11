@@ -36,9 +36,9 @@ class ScriptRow {
   }
 }
 
-/// Linked asset brief on **`POST …/projects/{project_id}/scripts/get-script-api`** — JSON **`id`** = **`app_asset.legacy_id`**.
-class LegacyScriptRelatedAssetBrief {
-  const LegacyScriptRelatedAssetBrief({
+/// Linked asset brief on **`POST …/projects/{project_id}/scripts/get-script-api`** — JSON **`id`** = **`app_asset`** numeric id.
+class ScriptRelatedAssetBrief {
+  const ScriptRelatedAssetBrief({
     required this.numericId,
     required this.name,
   });
@@ -46,8 +46,8 @@ class LegacyScriptRelatedAssetBrief {
   final int numericId;
   final String name;
 
-  factory LegacyScriptRelatedAssetBrief.fromJson(Map<String, dynamic> json) {
-    return LegacyScriptRelatedAssetBrief(
+  factory ScriptRelatedAssetBrief.fromJson(Map<String, dynamic> json) {
+    return ScriptRelatedAssetBrief(
       numericId: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
     );
@@ -55,8 +55,8 @@ class LegacyScriptRelatedAssetBrief {
 }
 
 /// One script row from **`POST …/projects/{project_id}/scripts/get-script-api`** (camelCase **`extractState`**, **`relatedAssets`**, …).
-class LegacyScriptsGetScriptApiItem {
-  const LegacyScriptsGetScriptApiItem({
+class ScriptWorkbenchDetailRow {
+  const ScriptWorkbenchDetailRow({
     required this.numericId,
     this.name,
     this.content,
@@ -72,11 +72,11 @@ class LegacyScriptsGetScriptApiItem {
   final int? extractState;
   final String? errorReason;
   final int? createTime;
-  final List<LegacyScriptRelatedAssetBrief> relatedAssets;
+  final List<ScriptRelatedAssetBrief> relatedAssets;
 
-  factory LegacyScriptsGetScriptApiItem.fromJson(Map<String, dynamic> json) {
+  factory ScriptWorkbenchDetailRow.fromJson(Map<String, dynamic> json) {
     final raw = json['relatedAssets'] as List<dynamic>? ?? [];
-    return LegacyScriptsGetScriptApiItem(
+    return ScriptWorkbenchDetailRow(
       numericId: (json['id'] as num).toInt(),
       name: json['name'] as String?,
       content: json['content'] as String?,
@@ -89,7 +89,7 @@ class LegacyScriptsGetScriptApiItem {
           : (json['createTime'] as num).toInt(),
       relatedAssets: raw
           .map(
-            (e) => LegacyScriptRelatedAssetBrief.fromJson(
+            (e) => ScriptRelatedAssetBrief.fromJson(
               e as Map<String, dynamic>,
             ),
           )

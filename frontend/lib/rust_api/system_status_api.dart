@@ -37,7 +37,7 @@ Future<HealthResponse> fetchHealthRoot() async {
   return HealthResponse.fromJson(map);
 }
 
-/// OpenAPI `PingResponse` — legacy **`GET /api/test/test`** (`ok` text) as JSON.
+/// OpenAPI `PingResponse` — prior **`GET /api/test/test`** (`ok` text) as JSON.
 class PingResponse {
   const PingResponse({required this.ok});
 

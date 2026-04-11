@@ -163,19 +163,19 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       .where((value) => value.isNotEmpty)
       .toList(growable: false);
 
-  List<LegacyDirectorManualDataSlot> _parseSlots() {
+  List<DirectorManualDataSlot> _parseSlots() {
     final lines = _slotsCtrl.text
         .split('\n')
         .map((line) => line.trim())
         .where((line) => line.isNotEmpty);
-    final slots = <LegacyDirectorManualDataSlot>[];
+    final slots = <DirectorManualDataSlot>[];
     for (final line in lines) {
       final parts = line.split('|');
       if (parts.length < 3) {
         throw FormatException('槽位格式必须为 label|value|data：$line');
       }
       slots.add(
-        LegacyDirectorManualDataSlot(
+        DirectorManualDataSlot(
           label: parts[0].trim(),
           value: parts[1].trim(),
           data: parts.sublist(2).join('|').trim(),
@@ -185,7 +185,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     return slots;
   }
 
-  String _encodeSlots(List<LegacyDirectorManualDataSlot> slots) {
+  String _encodeSlots(List<DirectorManualDataSlot> slots) {
     if (slots.isEmpty) {
       return '场景|scene|\n角色|role|';
     }
@@ -517,9 +517,9 @@ class _CreativeManualRow {
   final String name;
   final String path;
   final List<String> images;
-  final List<LegacyDirectorManualDataSlot> slots;
+  final List<DirectorManualDataSlot> slots;
 
-  factory _CreativeManualRow.fromDirector(LegacyDirectorManualStyleRow row) {
+  factory _CreativeManualRow.fromDirector(DirectorManualStyleRow row) {
     return _CreativeManualRow(
       name: row.name,
       path: row.directorManual,
@@ -535,7 +535,7 @@ class _CreativeManualRow {
       images: row.image,
       slots: row.data
           .map(
-            (slot) => LegacyDirectorManualDataSlot(
+            (slot) => DirectorManualDataSlot(
               label: slot.label,
               value: slot.value,
               data: slot.data,

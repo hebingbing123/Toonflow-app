@@ -35,7 +35,7 @@ Future<ListNovelsResponse> fetchProjectNovelsByProjectId(
   return ListNovelsResponse.fromJson(map);
 }
 
-/// `GET /api/v1/projects/{project_id}/novels/{novel_legacy_id}` — see `getProjectNovelByProjectIdV1`.
+/// `GET /api/v1/projects/{project_id}/novels/{novel_numeric_id}` — see `getProjectNovelByProjectIdV1`.
 Future<NovelRow> fetchProjectNovelByProjectIds(
   String accessToken,
   String projectId,
@@ -103,7 +103,7 @@ Future<NovelRow> createProjectNovelUnderProject(
   return NovelRow.fromJson(map);
 }
 
-/// `PATCH /api/v1/projects/{project_id}/novels/{novel_legacy_id}` — see `patchProjectNovelByProjectIdV1`.
+/// `PATCH /api/v1/projects/{project_id}/novels/{novel_numeric_id}` — see `patchProjectNovelByProjectIdV1`.
 Future<NovelRow> patchProjectNovelByProjectIds(
   String accessToken,
   String projectId,
@@ -136,7 +136,7 @@ Future<NovelRow> patchProjectNovelByProjectIds(
   return NovelRow.fromJson(map);
 }
 
-/// `DELETE /api/v1/projects/{project_id}/novels/{novel_legacy_id}` — see `deleteProjectNovelByProjectIdV1`.
+/// `DELETE /api/v1/projects/{project_id}/novels/{novel_numeric_id}` — see `deleteProjectNovelByProjectIdV1`.
 Future<void> deleteProjectNovelByProjectIds(
   String accessToken,
   String projectId,

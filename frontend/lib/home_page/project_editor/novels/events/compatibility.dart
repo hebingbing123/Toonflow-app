@@ -20,7 +20,7 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Legacy / event regression checks',
+          'Novel events regression checks',
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),

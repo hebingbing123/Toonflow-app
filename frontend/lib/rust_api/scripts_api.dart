@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 /// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — script list + **`relatedAssets`**.
-Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApiByProjectId(
+Future<List<ScriptWorkbenchDetailRow>> postScriptsGetScriptApiByProjectId(
   String accessToken,
   String projectId, {
   String? name,
@@ -34,7 +34,7 @@ Future<List<LegacyScriptsGetScriptApiItem>> postScriptsGetScriptApiByProjectId(
   return data
       .map(
         (e) =>
-            LegacyScriptsGetScriptApiItem.fromJson(e as Map<String, dynamic>),
+            ScriptWorkbenchDetailRow.fromJson(e as Map<String, dynamic>),
       )
       .toList();
 }
