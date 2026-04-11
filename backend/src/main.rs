@@ -17,7 +17,6 @@ mod narrative;
 mod production_legacy;
 mod projects;
 mod prompting;
-mod rest_legacy;
 mod scripting;
 mod settings;
 mod state;

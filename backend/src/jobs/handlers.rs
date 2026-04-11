@@ -16,7 +16,10 @@ use crate::metering::quota;
 use crate::metering::usage;
 use crate::state::AppState;
 
-use super::dto::{CreateJobBody, JobKindSummaryRow, JobRow, JobStatusSummaryRow, ListJobsQuery};
+use super::dto::{
+    CreateJobBody, JobKindSummaryRow, JobRow, JobStatusSummaryRow, ListJobsPageQuery,
+    ListJobsPageResponse, ListJobsQuery,
+};
 use super::enqueue::envelope_generation_job_updated;
 
 pub(crate) fn idempotency_key_header(headers: &HeaderMap) -> Option<String> {
@@ -48,7 +51,7 @@ async fn list_job_kinds(
         r#"
         SELECT DISTINCT kind
         FROM app_generation_job
-        WHERE owner_user_id = $1
+        WHERE owner_user_id = $1 AND kind <> ''
         ORDER BY kind ASC
         "#,
     )
@@ -194,6 +197,161 @@ async fn list_jobs(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(Json(rows))
+}
+
+fn normalize_task_page_project_filter(project_id: Option<i32>) -> Option<String> {
+    project_id
+        .filter(|id| *id > 0)
+        .map(|id| id.to_string())
+        .filter(|s| !s.is_empty())
+}
+
+fn compute_task_page_offset(page: i32, limit: i32) -> i64 {
+    i64::from(page - 1) * i64::from(limit)
+}
+
+async fn fetch_job_by_legacy_task_id(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    legacy_task_id: i64,
+) -> Result<JobRow, ApiError> {
+    sqlx::query_as::<_, JobRow>(
+        r#"
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        FROM app_generation_job
+        WHERE owner_user_id = $1 AND legacy_task_id = $2
+        "#,
+    )
+    .bind(uid)
+    .bind(legacy_task_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
+
+async fn list_jobs_page(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(q): Query<ListJobsPageQuery>,
+) -> Result<Json<ListJobsPageResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let page = q.page.unwrap_or(1);
+    let limit = q.limit.unwrap_or(20);
+    if page < 1 {
+        return Err(ApiError::BadRequest("page must be >= 1".into()));
+    }
+    if !(1..=100).contains(&limit) {
+        return Err(ApiError::BadRequest(
+            "limit must be between 1 and 100".into(),
+        ));
+    }
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let kind = trim_query_opt(q.task_class);
+    let status = trim_query_opt(q.state);
+    let project_key = normalize_task_page_project_filter(q.project_id);
+
+    let total: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+          AND ($2::text IS NULL OR kind = $2)
+          AND ($3::text IS NULL OR status = $3)
+          AND ($4::text IS NULL OR payload->>'project_legacy_id' = $4)
+        "#,
+    )
+    .bind(uid)
+    .bind(kind.as_deref())
+    .bind(status.as_deref())
+    .bind(project_key.as_deref())
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let offset = compute_task_page_offset(page, limit);
+    let rows = sqlx::query_as::<_, JobRow>(
+        r#"
+        SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+        FROM app_generation_job
+        WHERE owner_user_id = $1
+          AND ($2::text IS NULL OR kind = $2)
+          AND ($3::text IS NULL OR status = $3)
+          AND ($4::text IS NULL OR payload->>'project_legacy_id' = $4)
+        ORDER BY created_at DESC
+        OFFSET $5
+        LIMIT $6
+        "#,
+    )
+    .bind(uid)
+    .bind(kind.as_deref())
+    .bind(status.as_deref())
+    .bind(project_key.as_deref())
+    .bind(offset)
+    .bind(i64::from(limit))
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(ListJobsPageResponse { data: rows, total }))
+}
+
+async fn get_job_task_detail_compat(
+    State(state): State<AppState>,
+    Path(task_id): Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<JobRow>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+
+    let s = task_id.trim();
+    if s.is_empty() {
+        return Err(ApiError::BadRequest(
+            "task_id path segment must not be empty".into(),
+        ));
+    }
+
+    if let Ok(id) = Uuid::parse_str(s) {
+        let pool = state
+            .pool
+            .as_ref()
+            .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+        let row = sqlx::query_as::<_, JobRow>(
+            r#"
+            SELECT legacy_task_id, id, owner_user_id, kind, status, payload, result, error_message, idempotency_key, claimed_by, created_at, updated_at
+            FROM app_generation_job
+            WHERE id = $1 AND owner_user_id = $2
+            "#,
+        )
+        .bind(id)
+        .bind(uid)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .ok_or(ApiError::NotFound)?;
+        return Ok(Json(row));
+    }
+
+    if let Ok(legacy) = s.parse::<i64>() {
+        if legacy <= 0 {
+            return Err(ApiError::BadRequest(
+                "task_id must be a UUID or a positive integer".into(),
+            ));
+        }
+        let pool = state
+            .pool
+            .as_ref()
+            .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+        let row = fetch_job_by_legacy_task_id(pool, uid, legacy).await?;
+        return Ok(Json(row));
+    }
+
+    Err(ApiError::BadRequest(
+        "task_id must be a UUID or a positive integer".into(),
+    ))
 }
 
 async fn create_job(
@@ -408,6 +566,11 @@ async fn retry_job(
 
 pub(crate) fn router() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/jobs/page", get(list_jobs_page))
+        .route(
+            "/api/v1/jobs/task-detail/{task_id}",
+            get(get_job_task_detail_compat),
+        )
         .route("/api/v1/jobs/kinds/summary", get(list_job_kind_summaries))
         .route("/api/v1/jobs/kinds", get(list_job_kinds))
         .route(

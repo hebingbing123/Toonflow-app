@@ -48,7 +48,7 @@ info:
 
     **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
 
-    **Legacy task center (`/api/task/*`):** **`POST /api/v1/tasks/get-project`** and **`POST …/get-task-categories`** accept body **`{}`** and return **`{ "data": [...] }`** (projects with non-empty names; distinct job **`kind`** as **`taskClass`**). **`POST …/get-task-api`** paginates **`app_generation_job`** with legacy **`page`/`limit`** and optional **`taskClass`/`state`/`projectId`** (`projectId` only filters when **`> 0`**, matching legacy truthy semantics; otherwise ignored). **`POST …/task-details`** accepts either **UUID** **`id`** or numeric **`legacy_task_id`** and returns the same **`JobRow`**.
+    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`legacy_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as legacy **`projectId`** vs **`payload.project_legacy_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`legacy_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
 
     **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
 
@@ -87,8 +87,6 @@ tags:
     description: Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see `externalDocs`)
   - name: jobs
     description: Long-running generation jobs (`app_generation_job`; Postgres + RLS)
-  - name: tasks
-    description: Legacy Electron task center (`POST` for old `/api/task/*`); maps to projects and generation jobs where applicable
   - name: usage
     description: Per-user usage counts (`app_usage_event`; Postgres + RLS)
   - name: prompts
@@ -7481,7 +7479,7 @@ paths:
       summary: Distinct job kinds for the current user
       operationId: listJobKindsV1
       description: |
-        Returns sorted distinct **`kind`** strings from **`app_generation_job`** for **`owner_user_id = JWT sub`**.
+        Returns sorted distinct **`kind`** strings from **`app_generation_job`** for **`owner_user_id = JWT sub`**, excluding empty **`kind`**.
         Empty array when the user has no jobs. (Legacy Node **`getTaskCategories`** grouped **`o_tasks.taskClass`**; MVP uses the job table as source of truth.)
       security:
         - bearerAuth: []
@@ -7643,104 +7641,63 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/tasks/get-project:
-    post:
-      tags: [tasks]
-      summary: Legacy task center — list projects (non-empty names)
-      operationId: postTasksGetProjectV1
+  /api/v1/jobs/page:
+    get:
+      tags: [jobs]
+      summary: Paginated jobs with task-center filters (total + data)
+      operationId: listJobsPageV1
       description: |
-        Parity with legacy **`POST /api/task/getProject`**. Returns **`{ "data": [ { "id", "name" } ] }`**
-        where **`id`** is **`app_project.legacy_id`** (integer project key used across v1 APIs).
+        Same filter semantics as removed **`POST /api/v1/tasks/get-task-api`**: optional **`task_class`** (exact **`kind`**),
+        **`state`** (exact **`status`**), optional **`project_id`** (only when **`> 0`**; matches **`payload.project_legacy_id`** as string).
+        **`page`** defaults to **1**; **`limit`** defaults to **20**, max **100**. **`page`** must be **>= 1**.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyTasksEmptyBody"
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact `status` filter when non-empty after trim
+        - name: task_class
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Exact `kind` filter when non-empty after trim
+        - name: project_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          description: Only applied when `> 0` (legacy truthy `projectId`)
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LegacyTasksGetProjectResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/tasks/get-task-categories:
-    post:
-      tags: [tasks]
-      summary: Legacy task center — distinct job kinds (as taskClass)
-      operationId: postTasksGetTaskCategoriesV1
-      description: |
-        Parity with legacy **`POST /api/task/getTaskCategories`**. Returns **`{ "data": [ { "taskClass" } ] }`**
-        for each distinct non-empty **`kind`** on **`app_generation_job`** for the caller.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyTasksEmptyBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyTasksGetTaskCategoriesResponse"
-        "401":
-          description: Missing or invalid Bearer token
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-        "503":
-          description: Auth not configured or database error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
-
-  /api/v1/tasks/get-task-api:
-    post:
-      tags: [tasks]
-      summary: Legacy task center — paginated job list
-      operationId: postTasksGetTaskApiV1
-      description: |
-        Parity with legacy **`POST /api/task/getTaskApi`**. Filters **`app_generation_job`** by optional **`taskClass`** (kind),
-        **`state`** (status), and optional **`projectId`** (only when **`> 0`**, matching legacy truthy behavior; then matches **`payload.project_legacy_id`** as a string).
-        **`page`** is 1-based; **`limit`** is 1–100.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyTasksGetTaskApiBody"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyTasksGetTaskApiResponse"
+                $ref: "#/components/schemas/JobsPageResponse"
         "400":
-          description: Invalid pagination
+          description: Invalid `page` or `limit`
           content:
             application/json:
               schema:
@@ -7758,30 +7715,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
 
-  /api/v1/tasks/task-details:
-    post:
-      tags: [tasks]
-      summary: Legacy task center — task details (UUID or numeric legacy task id)
-      operationId: postTasksTaskDetailsV1
+  /api/v1/jobs/task-detail/{task_id}:
+    get:
+      tags: [jobs]
+      summary: Job row by UUID or legacy_task_id (path segment)
+      operationId: getJobTaskDetailCompatV1
       description: |
-        **`taskId`** as **UUID string**: load **`app_generation_job.id`** for the caller (same columns as **`GET /api/v1/jobs/{id}`**). **`taskId`** as **positive integer** or a digit-only string like **`"42"`**: load **`app_generation_job.legacy_task_id`** for the caller.
+        **`task_id`** path segment: **UUID** → **`app_generation_job.id`**; positive integer (or digits-only, e.g. **`42`**) → **`legacy_task_id`**.
+        Other strings → **400**. Same **`JobRow`** as **`GET /api/v1/jobs/{id}`** when **`task_id`** is a UUID.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LegacyTasksTaskDetailsBody"
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
-          description: Job row (**`taskId`** was a UUID or numeric legacy task id)
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/JobRow"
         "400":
-          description: Invalid **`taskId`** type or non-UUID string
+          description: Path is not a UUID or positive integer
           content:
             application/json:
               schema:
@@ -7793,7 +7751,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Unknown job id for this user
+          description: Unknown job for this user
           content:
             application/json:
               schema:
@@ -12601,74 +12559,9 @@ components:
     LegacyTasksEmptyBody:
       type: object
       additionalProperties: false
-      description: Legacy **`POST /api/task/getProject`** and **`getTaskCategories`** used an empty object body.
+      description: Empty JSON object **`{}`** still used by some legacy-shaped **`POST /api/v1/project/*`** manual routes.
 
-    LegacyTasksGetProjectItem:
-      type: object
-      required: [id, name]
-      properties:
-        id:
-          type: integer
-          format: int32
-          description: app_project.legacy_id (integer project key)
-        name:
-          type: string
-
-    LegacyTasksGetProjectResponse:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/LegacyTasksGetProjectItem"
-
-    LegacyTasksTaskClassRow:
-      type: object
-      required: [taskClass]
-      properties:
-        taskClass:
-          type: string
-          description: Same as `app_generation_job.kind`
-
-    LegacyTasksGetTaskCategoriesResponse:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/LegacyTasksTaskClassRow"
-
-    LegacyTasksGetTaskApiBody:
-      type: object
-      required: [page, limit]
-      additionalProperties: false
-      properties:
-        state:
-          type: string
-          nullable: true
-          description: Filters `status` when set (non-empty after trim)
-        taskClass:
-          type: string
-          nullable: true
-          description: Filters `kind` when set (non-empty after trim)
-        projectId:
-          type: integer
-          format: int32
-          nullable: true
-          description: Filters only when `projectId > 0` (legacy truthy semantics); then requires `payload.project_legacy_id` string-equal to the number.
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-        limit:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 100
-
-    LegacyTasksGetTaskApiResponse:
+    JobsPageResponse:
       type: object
       required: [data, total]
       properties:
@@ -12680,22 +12573,6 @@ components:
           type: integer
           format: int64
           description: Total rows matching filters (not just this page)
-
-    LegacyTasksTaskDetailsBody:
-      type: object
-      required: [taskId]
-      additionalProperties: false
-      properties:
-        taskId:
-          description: UUID string (**`app_generation_job.id`**) or positive integer / numeric string (**`app_generation_job.legacy_task_id`**)
-          oneOf:
-            - type: string
-              format: uuid
-            - type: string
-              pattern: '^[1-9][0-9]*$'
-            - type: integer
-              format: int32
-              minimum: 1
 
     LegacyProjectDeleteProjectBody:
       type: object

@@ -43,57 +43,31 @@ class LegacyTasksGetTaskApiResult {
   }
 }
 
-/// `POST /api/v1/tasks/get-project` — body `{}`, projects with non-empty names.
+/// Compat **`POST /api/task/getProject`**: **`GET /api/v1/projects`** (paged), non-empty names only; **`id`** = **`legacy_id`**.
 Future<List<LegacyTasksProjectItem>> postTasksGetProject(
   String accessToken,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/get-project');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
+  final rows = await _fetchAllProjectsPaged(accessToken);
+  final out = <LegacyTasksProjectItem>[];
+  for (final r in rows) {
+    final n = r.name?.trim() ?? '';
+    if (n.isEmpty) {
+      continue;
+    }
+    out.add(LegacyTasksProjectItem(id: r.legacyId, name: n));
   }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final data = map['data'] as List<dynamic>;
-  return data
-      .map((e) => LegacyTasksProjectItem.fromJson(e as Map<String, dynamic>))
-      .toList();
+  return out;
 }
 
-/// `POST /api/v1/tasks/get-task-categories` — distinct job kinds as `taskClass`.
+/// Compat **`getTaskCategories`**: **`GET /api/v1/jobs/kinds`** → **`{ taskClass }`** rows.
 Future<List<LegacyTasksTaskClassRow>> postTasksGetTaskCategories(
   String accessToken,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/get-task-categories');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  final data = map['data'] as List<dynamic>;
-  return data
-      .map((e) => LegacyTasksTaskClassRow.fromJson(e as Map<String, dynamic>))
-      .toList();
+  final kinds = await fetchJobKinds(accessToken);
+  return kinds.map((k) => LegacyTasksTaskClassRow(taskClass: k)).toList();
 }
 
-/// `POST /api/v1/tasks/get-task-api` — paginated `app_generation_job` with legacy filters.
+/// Compat **`getTaskApi`**: **`GET /api/v1/jobs/page`** (query: **`page`**, **`limit`**, **`state`**, **`task_class`**, **`project_id`**).
 Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
   String accessToken, {
   required int page,
@@ -102,21 +76,28 @@ Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
   String? taskClass,
   int? projectId,
 }) async {
-  final body = <String, dynamic>{'page': page, 'limit': limit};
-  if (state != null) body['state'] = state;
-  if (taskClass != null) body['taskClass'] = taskClass;
-  if (projectId != null) body['projectId'] = projectId;
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/get-task-api');
+  final qp = <String, String>{
+    'page': '$page',
+    'limit': '$limit',
+  };
+  if (state != null && state.trim().isNotEmpty) {
+    qp['state'] = state.trim();
+  }
+  if (taskClass != null && taskClass.trim().isNotEmpty) {
+    qp['task_class'] = taskClass.trim();
+  }
+  if (projectId != null) {
+    qp['project_id'] = '$projectId';
+  }
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/jobs/page',
+  ).replace(queryParameters: qp);
   final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 20));
+  if (res.statusCode == 400) {
+    throw RustApiException(res.body, statusCode: 400);
+  }
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }
@@ -124,20 +105,13 @@ Future<LegacyTasksGetTaskApiResult> postTasksGetTaskApi(
   return LegacyTasksGetTaskApiResult.fromJson(map);
 }
 
-/// `POST /api/v1/tasks/task-details` with numeric [taskId] — resolves the same job row using
-/// `app_generation_job.legacy_task_id`. For a UUID, call [fetchJob] or POST the same path with
-/// `{"taskId":"<uuid>"}`.
+/// Compat **`taskDetails`** with numeric **`legacy_task_id`**: **`GET /api/v1/jobs/task-detail/{id}`**.
 Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/task-details');
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/jobs/task-detail/${Uri.encodeComponent('$taskId')}',
+  );
   final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'taskId': taskId}),
-      )
+      .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 404) {
     throw RustApiException('not found', statusCode: 404);
@@ -149,28 +123,10 @@ Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
   return JobRow.fromJson(map);
 }
 
-/// `POST /api/v1/tasks/task-details` with a UUID [taskId] — same job payload as `GET /api/v1/jobs/{id}`.
+/// Same payload as **`GET /api/v1/jobs/{id}`** (UUID).
 Future<JobRow> postTasksTaskDetailsByJobId(
   String accessToken,
   String taskId,
 ) async {
-  final uri = Uri.parse('$kApiBaseUrl/api/v1/tasks/task-details');
-  final res = await http
-      .post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'taskId': taskId}),
-      )
-      .timeout(const Duration(seconds: 15));
-  if (res.statusCode == 404) {
-    throw RustApiException('not found', statusCode: 404);
-  }
-  if (res.statusCode != 200) {
-    throw RustApiException(res.body, statusCode: res.statusCode);
-  }
-  final map = jsonDecode(res.body) as Map<String, dynamic>;
-  return JobRow.fromJson(map);
+  return fetchJob(accessToken, taskId);
 }

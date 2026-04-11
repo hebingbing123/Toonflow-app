@@ -14,7 +14,6 @@ use crate::narrative;
 use crate::production_legacy;
 use crate::projects;
 use crate::prompting;
-use crate::rest_legacy;
 use crate::scripting;
 use crate::settings;
 use crate::state::AppState;
@@ -73,7 +72,6 @@ pub fn build_router(state: AppState) -> Router {
         .merge(scripting::agent::router())
         .merge(scripting::asset_extract::router())
         .merge(narrative::storyboards::router())
-        .merge(rest_legacy::tasks::router())
         .merge(prompting::skills::router())
         .merge(manuals::visual::router())
         .merge(metering::usage::router())

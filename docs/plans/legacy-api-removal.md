@@ -20,8 +20,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| `backend/src/app/router.rs` | `rest_legacy::*`、`narrative::legacy`、`production_legacy`、`scripting::legacy` 等 |
-| `backend/src/main.rs` | 顶层 `mod production_legacy`、`mod rest_legacy`（与 `lib` 式入口二选一场景以实际 crate 根为准） |
+| `backend/src/app/router.rs` | ~~`rest_legacy::*`~~ **已移除**；仍含 **`narrative::legacy`**、**`production_legacy`**、**`scripting::legacy`** 等 |
+| `backend/src/main.rs` | 顶层 **`mod production_legacy`** 等（与 `lib` 式入口二选一场景以实际 crate 根为准） |
 
 ### 2. 独立 legacy 路由模块（整棵可随「该域下线」删除）
 
@@ -37,9 +37,7 @@
 | `backend/src/narrative/mod.rs` | `pub mod legacy` |
 | `backend/src/production_legacy/mod.rs` | 生产工作台旧路径 `/api/production/*`、等 |
 | `backend/src/production_legacy/workbench/*.rs` | flow、storyboard、assets、video、edit_image… |
-| `backend/src/rest_legacy/mod.rs` | 未收拢域入口（现仅 **`tasks`**） |
-| ~~`backend/src/rest_legacy/general.rs`~~ | **已删除**（原 **`POST /api/v1/general/get-single-project`**、**`update-project`**）；Flutter compat 走 **`GET`/`PATCH /api/v1/projects*`** |
-| `backend/src/rest_legacy/tasks.rs` | tasks 旧形 |
+| ~~`backend/src/rest_legacy/*`~~ | **已删除**（原 **`POST /api/v1/general/*`**、**`POST /api/v1/tasks/*`**）；任务中心改 **`GET /api/v1/jobs/page`**、**`GET …/jobs/task-detail/{task_id}`** 等 |
 | `backend/src/scripting/legacy.rs` | 仅保留 **`POST …/projects/{project_id}/scripts/get-script-api`**（body 仅可选 `name`）；旧 `POST …/scripts/get-script-api` 已移除 |
 | `backend/src/scripting/mod.rs` | `pub mod legacy` |
 | `backend/src/assets/legacy.rs` | 资产 legacy 聚合 |
@@ -273,7 +271,7 @@
 
 1. ~~`projects::legacy`（旧 `POST /api/v1/project/get-project` 等）~~ **已删除**；Flutter `projects_legacy_compat` 仍保留同名封装，内部走 **`GET`/`POST`/`PATCH`/`DELETE /api/v1/projects*`**。
 2. `narrative::legacy`（`/api/v1/novels/*`）— 与 `novels_legacy_api` 绑定。
-3. ~~`rest_legacy::general`~~ **已删除**；`rest_legacy::tasks`。
+3. ~~`rest_legacy::{general,tasks}`~~ **已删除**。
 4. `scripting::legacy`。
 5. `assets/legacy*`（与 `assets_crud` / legacy_query 全部迁移后）。
 6. `production_legacy` — **最后**：依赖多、`harness` 有引用，需单独迁移 `load_owned_production_flow_json` 或等价能力。

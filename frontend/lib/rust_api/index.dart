@@ -55,7 +55,7 @@ part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 
-// --- Legacy `POST /api/v1/tasks/*` (Electron task center) ---
+// --- Task center compat (`tasks_legacy.dart` → `GET /api/v1/projects`, `GET /api/v1/jobs/*`) ---
 
 // --- Compat names for project list/CRUD (`projects_legacy_compat.dart` → `/api/v1/projects`) ---
 

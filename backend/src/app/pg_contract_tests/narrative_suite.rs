@@ -2,7 +2,7 @@ use super::*;
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
-async fn tasks_legacy_roundtrip() {
+async fn task_center_jobs_rest_roundtrip() {
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")
@@ -125,22 +125,21 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/get-project")
+                .method(Method::GET)
+                .uri("/api/v1/projects?limit=100&offset=0")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, task_projects) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "task_projects={task_projects}");
-    let task_projects = task_projects["data"].as_array().expect("task project rows");
+    let task_projects = task_projects.as_array().expect("task project rows");
     assert!(
         task_projects.iter().any(|row| {
-            row["id"].as_i64() == Some(i64::from(legacy_project_id))
+            row["legacy_id"].as_i64() == Some(i64::from(legacy_project_id))
                 && row["name"].as_str() == Some(project_name.as_str())
         }),
         "task center project list should include created project: {task_projects:?}"
@@ -150,31 +149,28 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/get-task-categories")
+                .method(Method::GET)
+                .uri("/api/v1/jobs/kinds")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, task_categories) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "task_categories={task_categories}");
-    let task_categories = task_categories["data"]
-        .as_array()
-        .expect("task category rows");
+    let task_categories = task_categories.as_array().expect("task category rows");
     assert!(
         task_categories
             .iter()
-            .any(|row| row["taskClass"].as_str() == Some("flutter.probe")),
+            .any(|row| row.as_str() == Some("flutter.probe")),
         "task categories should include flutter.probe: {task_categories:?}"
     );
     assert!(
         task_categories
             .iter()
-            .any(|row| row["taskClass"].as_str() == Some(JOB_KIND_ASSET_GENERATE_IMAGE)),
+            .any(|row| row.as_str() == Some(JOB_KIND_ASSET_GENERATE_IMAGE)),
         "task categories should include asset generate: {task_categories:?}"
     );
 
@@ -182,14 +178,13 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/get-task-api")
+                .method(Method::GET)
+                .uri(format!(
+                    "/api/v1/jobs/page?page=1&limit=10&project_id={legacy_project_id}&task_class=flutter.probe&state=queued"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"page":1,"limit":10,"projectId":{legacy_project_id},"taskClass":"flutter.probe","state":"queued"}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -208,14 +203,11 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/get-task-api")
+                .method(Method::GET)
+                .uri("/api/v1/jobs/page?page=1&limit=10&task_class=flutter.probe&state=queued")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    r#"{"page":1,"limit":10,"projectId":0,"taskClass":"flutter.probe","state":"queued"}"#,
-                ))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -237,14 +229,13 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/get-task-api")
+                .method(Method::GET)
+                .uri(format!(
+                    "/api/v1/jobs/page?page=1&limit=10&project_id={legacy_project_id}&state=failed"
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"page":1,"limit":10,"projectId":{legacy_project_id},"state":"failed"}}"#
-                )))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -261,12 +252,11 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/task-details")
+                .method(Method::GET)
+                .uri(format!("/api/v1/jobs/task-detail/{created_job_id}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"taskId":"{created_job_id}"}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -285,17 +275,16 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/task-details")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"taskId":{}}}"#,
+                .method(Method::GET)
+                .uri(format!(
+                    "/api/v1/jobs/task-detail/{}",
                     created_job["legacy_task_id"]
                         .as_i64()
                         .expect("legacy task id")
-                )))
+                ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -316,17 +305,16 @@ async fn tasks_legacy_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/tasks/task-details")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(
-                    r#"{{"taskId":"{}"}}"#,
+                .method(Method::GET)
+                .uri(format!(
+                    "/api/v1/jobs/task-detail/{}",
                     created_job["legacy_task_id"]
                         .as_i64()
                         .expect("legacy task id")
-                )))
+                ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await

@@ -33,6 +33,27 @@ pub(super) struct ListJobsQuery {
     pub(super) offset: Option<i64>,
 }
 
+/// Task-center style pagination (1-based `page`, replaces legacy `POST /api/v1/tasks/get-task-api`).
+#[derive(Debug, Deserialize, Default)]
+pub(super) struct ListJobsPageQuery {
+    #[serde(default)]
+    pub(super) page: Option<i32>,
+    #[serde(default)]
+    pub(super) limit: Option<i32>,
+    #[serde(default)]
+    pub(super) state: Option<String>,
+    #[serde(default)]
+    pub(super) task_class: Option<String>,
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListJobsPageResponse {
+    pub data: Vec<JobRow>,
+    pub total: i64,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreateJobBody {

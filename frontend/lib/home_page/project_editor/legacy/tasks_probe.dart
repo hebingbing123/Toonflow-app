@@ -24,7 +24,9 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                       ? '0 项'
                       : items.map((e) => '#${e.id} ${e.name}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('POST …/tasks/get-project：$line')),
+                    SnackBar(
+                      content: Text('compat getProject（GET projects）：$line'),
+                    ),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -38,7 +40,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks get-project'),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks get-project'),
       ),
       TextButton(
         onPressed:
@@ -54,7 +56,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                       : rows.map((e) => e.taskClass).join(', ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('POST …/tasks/get-task-categories：$line'),
+                      content: Text('compat categories（GET jobs/kinds）：$line'),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -69,7 +71,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks categories'),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks categories'),
       ),
       TextButton(
         onPressed:
@@ -88,7 +90,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/tasks/get-task-api：total=${r.total} · ${r.data.length} 条本页',
+                        'compat get-task-api（GET jobs/page）：total=${r.total} · ${r.data.length} 条本页',
                       ),
                     ),
                   );
@@ -104,7 +106,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST tasks list'),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat tasks list'),
       ),
       TextButton(
         onPressed:
@@ -130,7 +132,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/tasks/task-details：#${row.legacyTaskId} -> ${row.kind}/${row.status}',
+                        'compat task-details（GET jobs/task-detail）：#${row.legacyTaskId} -> ${row.kind}/${row.status}',
                       ),
                     ),
                   );
@@ -146,7 +148,7 @@ extension _HomePageProjectEditorLegacyTasksProbe on _HomePageState {
                   }
                 }
               },
-        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'POST task-details int'),
+        child: Text(tasksLegacyBusy[0] ? 'tasks…' : 'compat task-details int'),
       ),
     ];
   }
