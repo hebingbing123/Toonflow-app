@@ -1,6 +1,8 @@
-//! Parity with legacy **`/api/project/getVisualManual`** and **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`**:
-//! read/write bundled **`art_skills`** (Markdown + images). **`GET`** / **`POST /api/v1/visual-manual`** list styles; mutation **`POST /api/v1/project/*-visual-manual`**.
-//! **`image`** entries are **relative paths** under **`data/skills`** (no OSS signing). Clients load bytes via **`GET /api/v1/skills/binary?path=`** (JWT required).
+//! 视觉手册模块。
+//!
+//! 与遗留 `/api/project/getVisualManual` 和 `addVisualManual` / `editVisualManual` / `deleteVisualManual` 兼容：
+//! 读/写打包的 `art_skills`（Markdown + 图片）。`GET` / `POST /api/v1/visual-manual` 列出样式；变更 `POST /api/v1/project/*-visual-manual`。
+//! `image` 条目是相对于 `data/skills` 的路径（无 OSS 签名）。客户端通过 `GET /api/v1/skills/binary?path=` 加载字节（需要 JWT）。
 
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};

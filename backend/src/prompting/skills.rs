@@ -1,8 +1,9 @@
-//! HTTP surface for Markdown skills under `backend/data/skills/`.
-//! Paths are relative to that directory; `..` segments are rejected.
-//! **`PUT /api/v1/skills/content`** overwrites an **existing** file only (parity with legacy **`saveSkillContent`**).
-//! **`POST /api/v1/skills/content`** creates a **new** file (parent directories are created under `data/skills`); existing files → **409**.
-//! **`DELETE /api/v1/skills/content?path=`** removes one **file** (not directories).
+//! Markdown 技能的 HTTP 接口（位于 `backend/data/skills/` 下）。
+//!
+//! 路径相对于该目录；拒绝 `..` 段。
+//! `PUT /api/v1/skills/content` 仅覆盖**现有**文件（与遗留 `saveSkillContent` 兼容）。
+//! `POST /api/v1/skills/content` 创建**新**文件（在 `data/skills` 下创建父目录）；现有文件 → **409**。
+//! `DELETE /api/v1/skills/content?path=` 删除一个**文件**（不删除目录）。
 
 use std::path::{Path, PathBuf};
 
