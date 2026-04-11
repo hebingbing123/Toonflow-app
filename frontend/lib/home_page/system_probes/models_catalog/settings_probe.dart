@@ -1,4 +1,4 @@
-part of '../../home_page.dart';
+part of '../../../home_page.dart';
 
 extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
   Future<Map<String, int>> _runModelsCatalogSettingsAndAssetsProbes(
