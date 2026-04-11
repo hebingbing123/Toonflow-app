@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
-import 'workbench_support.dart';
+import 'support.dart';
 
 class TaskCenterSection extends StatelessWidget {
   const TaskCenterSection({

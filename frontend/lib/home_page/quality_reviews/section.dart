@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'workbench_support.dart';
+import 'support.dart';
 import '../../rust_api.dart';
 
 class QualityReviewsSection extends StatelessWidget {
