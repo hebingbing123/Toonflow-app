@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/project_assets_generation_workbench_support.dart';
+import 'package:toonflow_app/home_page/project_editor_assets/project_assets_generation_workbench_support.dart';
 import 'package:toonflow_app/rust_api.dart';
 
 void main() {
@@ -19,11 +19,14 @@ void main() {
   });
 
   test('collectScopedAssetLegacyIds keeps only currently visible ids', () {
-    final scoped = collectScopedAssetLegacyIds(const [5, 99, 3], const [
-      AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
-      AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
-      AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
-    ]);
+    final scoped = collectScopedAssetLegacyIds(
+      const [5, 99, 3],
+      const [
+        AssetRow(id: 'a', legacyId: 7, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', legacyId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', legacyId: 5, name: 'Villain', assetType: 'role'),
+      ],
+    );
 
     expect(scoped, [3, 5]);
   });
