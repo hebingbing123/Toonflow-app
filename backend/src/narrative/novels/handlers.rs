@@ -10,7 +10,7 @@ use axum::{
 use sqlx::{PgPool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
-use crate::assets::{ensure_owned_project_pk, resolve_owned_project_pk_by_legacy};
+use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{
@@ -173,22 +173,6 @@ pub(super) async fn list_novels_for_project(
     list_novels_inner(pool, uid, project_id, query).await
 }
 
-pub(super) async fn list_novels(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    Query(query): Query<ListNovelsQuery>,
-    headers: HeaderMap,
-) -> Result<Json<ListNovelsResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    list_novels_inner(pool, uid, project_id, query).await
-}
-
 async fn create_novel_inner(
     pool: &PgPool,
     project_uuid: Uuid,
@@ -265,49 +249,6 @@ pub(super) async fn create_novel_for_project(
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
     create_novel_inner(pool, project_id, body).await
-}
-
-pub(super) async fn create_novel(
-    State(state): State<AppState>,
-    Path(project_legacy_id): Path<i32>,
-    headers: HeaderMap,
-    Json(body): Json<CreateNovelBody>,
-) -> Result<(StatusCode, Json<NovelRow>), ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "project_legacy_id must be positive".into(),
-        ));
-    }
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let project_uuid: Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE legacy_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_legacy_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    create_novel_inner(pool, project_uuid, body).await
 }
 
 async fn patch_novel_inner(
@@ -455,26 +396,6 @@ pub(super) async fn patch_novel_for_project(
     patch_novel_inner(pool, uid, project_id, novel_legacy_id, body).await
 }
 
-pub(super) async fn patch_novel_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, novel_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-    Json(body): Json<PatchNovelBody>,
-) -> Result<Json<NovelRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 || novel_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
-    }
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    patch_novel_inner(pool, uid, project_id, novel_legacy_id, body).await
-}
-
 async fn delete_novel_inner(
     pool: &PgPool,
     uid: Uuid,
@@ -524,25 +445,6 @@ pub(super) async fn delete_novel_for_project(
     delete_novel_inner(pool, uid, project_id, novel_legacy_id).await
 }
 
-pub(super) async fn delete_novel_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, novel_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 || novel_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
-    }
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
-    delete_novel_inner(pool, uid, project_id, novel_legacy_id).await
-}
-
 async fn fetch_owned_novel_row(
     pool: &PgPool,
     uid: Uuid,
@@ -587,26 +489,6 @@ pub(super) async fn get_novel_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
-    let row = fetch_owned_novel_row(pool, uid, project_id, novel_legacy_id).await?;
-    Ok(Json(row))
-}
-
-pub(super) async fn get_novel_by_legacy(
-    State(state): State<AppState>,
-    Path((project_legacy_id, novel_legacy_id)): Path<(i32, i32)>,
-    headers: HeaderMap,
-) -> Result<Json<NovelRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    if project_legacy_id <= 0 || novel_legacy_id <= 0 {
-        return Err(ApiError::BadRequest("legacy ids must be positive".into()));
-    }
-
-    let project_id = resolve_owned_project_pk_by_legacy(pool, uid, project_legacy_id).await?;
     let row = fetch_owned_novel_row(pool, uid, project_id, novel_legacy_id).await?;
     Ok(Json(row))
 }

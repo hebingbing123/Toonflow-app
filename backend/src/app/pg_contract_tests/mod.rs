@@ -1108,7 +1108,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri(format!("/api/v1/projects/legacy/{legacy_id}/novels"))
+                .uri(format!("/api/v1/projects/{project_uuid}/novels"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -1147,7 +1147,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/novels?search=pg_contract&page=1&limit=10"
+                    "/api/v1/projects/{project_uuid}/novels?search=pg_contract&page=1&limit=10"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1391,7 +1391,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    "/api/v1/projects/{project_uuid}/novels/{novel_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1410,7 +1410,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::PATCH)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    "/api/v1/projects/{project_uuid}/novels/{novel_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -1433,7 +1433,7 @@ async fn projects_create_stats_delete_roundtrip() {
             Request::builder()
                 .method(Method::DELETE)
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    "/api/v1/projects/{project_uuid}/novels/{novel_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
@@ -1467,7 +1467,7 @@ async fn projects_create_stats_delete_roundtrip() {
         .oneshot(
             Request::builder()
                 .uri(format!(
-                    "/api/v1/projects/legacy/{legacy_id}/novels/{novel_leg}"
+                    "/api/v1/projects/{project_uuid}/novels/{novel_leg}"
                 ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))

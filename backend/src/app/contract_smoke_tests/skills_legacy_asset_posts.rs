@@ -551,7 +551,11 @@ async fn project_asset_delete_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_novels_list_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/novels", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -559,8 +563,11 @@ async fn project_novels_list_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_novels_list_pagination_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) =
-        get_json_bearer("/api/v1/projects/legacy/1/novels?page=1&limit=5", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels?page=1&limit=5",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -569,7 +576,7 @@ async fn project_novels_list_pagination_requires_database_with_jwt() {
 async fn project_novels_create_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = post_json_bearer(
-        "/api/v1/projects/legacy/1/novels",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels",
         &token,
         r#"{"chapter":"smoke"}"#,
     )
@@ -581,7 +588,11 @@ async fn project_novels_create_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_novel_get_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = get_json_bearer("/api/v1/projects/legacy/1/novels/1", &token).await;
+    let (status, v) = get_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
@@ -590,7 +601,7 @@ async fn project_novel_get_requires_database_with_jwt() {
 async fn project_novel_patch_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
     let (status, v) = patch_json_bearer(
-        "/api/v1/projects/legacy/1/novels/1",
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels/1",
         &token,
         r#"{"chapter":"x"}"#,
     )
@@ -602,7 +613,11 @@ async fn project_novel_patch_requires_database_with_jwt() {
 #[tokio::test]
 async fn project_novel_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = delete_empty_bearer("/api/v1/projects/legacy/1/novels/1", &token).await;
+    let (status, v) = delete_empty_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001/novels/1",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
