@@ -13,7 +13,7 @@ use axum::extract::ConnectInfo;
 use axum::http::header;
 use axum::http::{Method, Request, StatusCode};
 use axum::response::Response;
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::types::Json;
 use sqlx::PgPool;
@@ -1532,56 +1532,53 @@ async fn legacy_project_crud_roundtrip() {
     let initial_name = format!("pg_legacy_project_{unique_suffix}");
     let updated_name = format!("{initial_name}_updated");
 
-    let add_body = format!(
-        r#"{{
-            "projectType":" short-drama ",
-            "name":"  {initial_name}  ",
-            "intro":"  legacy intro  ",
-            "type":" novel ",
-            "artStyle":"  ink  ",
-            "directorManual":"  story-manual  ",
-            "videoRatio":" 9:16 ",
-            "imageModel":" dalle-3 ",
-            "videoModel":" runway ",
-            "imageQuality":" hd ",
-            "mode":"   "
-        }}"#
-    );
+    let create_body = json!({
+        "name": initial_name,
+        "intro": "legacy intro",
+        "project_type": "short-drama",
+        "art_style": "ink",
+        "director_manual": "story-manual",
+        "video_ratio": "9:16",
+        "image_model": "dalle-3",
+        "video_model": "runway",
+        "image_quality": "hd",
+        "mode": "novel",
+    });
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/project/add-project")
+                .uri("/api/v1/projects")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(add_body))
+                .body(Body::from(create_body.to_string()))
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, added) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "added={added}");
-    assert_eq!(added["message"].as_str(), Some("新增项目成功"));
+    assert_eq!(status, StatusCode::CREATED, "added={added}");
+    let project_uuid = added["id"].as_str().expect("project id").to_owned();
+    let legacy_id = added["legacy_id"].as_i64().expect("legacy_id") as i32;
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/get-project")
+                .method(Method::GET)
+                .uri("/api/v1/projects?limit=100&offset=0")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, listed) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "listed={listed}");
-    let created_row = listed["data"]
+    let created_row = listed
         .as_array()
         .and_then(|rows| {
             rows.iter()
@@ -1589,7 +1586,10 @@ async fn legacy_project_crud_roundtrip() {
         })
         .cloned()
         .expect("created project row");
-    let legacy_id = created_row["legacy_id"].as_i64().expect("legacy_id") as i32;
+    assert_eq!(
+        created_row["legacy_id"].as_i64(),
+        Some(i64::from(legacy_id))
+    );
     assert_eq!(created_row["intro"].as_str(), Some("legacy intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
     assert_eq!(created_row["mode"].as_str(), Some("novel"));
@@ -1613,57 +1613,51 @@ async fn legacy_project_crud_roundtrip() {
     .expect("select initial mode");
     assert_eq!(stored_mode.as_deref(), Some("novel"));
 
-    let edit_body = format!(
-        r#"{{
-            "id":{legacy_id},
-            "name":"  {updated_name}  ",
-            "intro":"   ",
-            "type":"  fallback-mode  ",
-            "artStyle":"   ",
-            "directorManual":"  revised-manual  ",
-            "videoRatio":" 16:9 ",
-            "imageModel":" flux ",
-            "videoModel":" kling ",
-            "imageQuality":" standard ",
-            "projectType":" feature ",
-            "mode":" professional "
-        }}"#
-    );
+    let patch_body = json!({
+        "name": updated_name,
+        "intro": Value::Null,
+        "project_type": "feature",
+        "art_style": Value::Null,
+        "director_manual": "revised-manual",
+        "video_ratio": "16:9",
+        "image_model": "flux",
+        "video_model": "kling",
+        "image_quality": "standard",
+        "mode": "professional",
+    });
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/edit-project")
+                .method(Method::PATCH)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(edit_body))
+                .body(Body::from(patch_body.to_string()))
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, edited) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "edited={edited}");
-    assert_eq!(edited["message"].as_str(), Some("编辑项目成功"));
+    let (status, _patched) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "patched={_patched}");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/get-project")
+                .method(Method::GET)
+                .uri("/api/v1/projects?limit=100&offset=0")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, relisted) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "relisted={relisted}");
-    let edited_row = relisted["data"]
+    let edited_row = relisted
         .as_array()
         .and_then(|rows| {
             rows.iter()
@@ -1699,37 +1693,34 @@ async fn legacy_project_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/delete-project")
+                .method(Method::DELETE)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
-    let (status, deleted) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "deleted={deleted}");
-    assert_eq!(deleted["message"].as_str(), Some("删除项目成功"));
+    let status = res.status();
+    assert_eq!(status, StatusCode::NO_CONTENT, "delete status");
 
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/get-project")
+                .method(Method::GET)
+                .uri("/api/v1/projects?limit=100&offset=0")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, after_delete) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "after_delete={after_delete}");
-    let still_present = after_delete["data"].as_array().is_some_and(|rows| {
+    let still_present = after_delete.as_array().is_some_and(|rows| {
         rows.iter()
             .any(|row| row["legacy_id"].as_i64() == Some(i64::from(legacy_id)))
     });
@@ -1742,12 +1733,11 @@ async fn legacy_project_crud_roundtrip() {
         .clone()
         .oneshot(
             Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/project/delete-project")
+                .method(Method::DELETE)
+                .uri(format!("/api/v1/projects/{project_uuid}"))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"id":{legacy_id}}}"#)))
+                .body(Body::empty())
                 .unwrap(),
         )
         .await
@@ -1758,13 +1748,6 @@ async fn legacy_project_crud_roundtrip() {
         StatusCode::NOT_FOUND,
         "missing_delete={missing_delete}"
     );
-
-    let _ =
-        sqlx::query("DELETE FROM public.app_project WHERE owner_user_id = $1 AND legacy_id = $2")
-            .bind(sub)
-            .bind(legacy_id)
-            .execute(&pool)
-            .await;
 }
 
 #[tokio::test]

@@ -57,6 +57,6 @@ part 'visual_manual_api.dart';
 
 // --- Legacy `POST /api/v1/tasks/*` (Electron task center) ---
 
-// --- Legacy `POST /api/v1/project/*` (Electron project CRUD helpers) ---
+// --- Compat names for project list/CRUD (`projects_legacy_compat.dart` → `/api/v1/projects`) ---
 
 /// One **`app_novel`** row — OpenAPI **`NovelRow`**.

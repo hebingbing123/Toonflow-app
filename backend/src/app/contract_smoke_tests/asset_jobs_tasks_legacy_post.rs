@@ -665,66 +665,75 @@ async fn general_update_project_requires_database_with_jwt() {
 }
 
 #[tokio::test]
-async fn project_get_project_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/project/get-project", "{}").await;
+async fn asset_smoke_projects_list_unauthorized_without_bearer() {
+    let (status, v) = get_json("/api/v1/projects").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn project_get_project_requires_database_with_jwt() {
+async fn asset_smoke_projects_list_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let (status, v) = post_json_bearer("/api/v1/project/get-project", &token, "{}").await;
+    let (status, v) = get_json_bearer("/api/v1/projects", &token).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
-async fn project_delete_project_unauthorized_without_bearer() {
-    let (status, v) = post_json("/api/v1/project/delete-project", r#"{"id":1}"#).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn project_delete_project_requires_database_with_jwt() {
-    let token = test_jwt(Uuid::nil());
+async fn asset_smoke_projects_delete_unauthorized_without_bearer() {
     let (status, v) =
-        post_json_bearer("/api/v1/project/delete-project", &token, r#"{"id":1}"#).await;
-    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
-    assert_eq!(v["code"], "database_error");
-}
-
-#[tokio::test]
-async fn project_add_project_unauthorized_without_bearer() {
-    let body = r#"{"projectType":"","name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","mode":""}"#;
-    let (status, v) = post_json("/api/v1/project/add-project", body).await;
+        delete_empty_no_bearer("/api/v1/projects/00000000-0000-0000-0000-000000000001").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn project_add_project_requires_database_with_jwt() {
+async fn asset_smoke_projects_delete_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let body = r#"{"projectType":"","name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","mode":""}"#;
-    let (status, v) = post_json_bearer("/api/v1/project/add-project", &token, body).await;
+    let (status, v) = delete_empty_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
+        &token,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
 
 #[tokio::test]
-async fn project_edit_project_unauthorized_without_bearer() {
-    let body = r#"{"id":1,"name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","projectType":"","mode":""}"#;
-    let (status, v) = post_json("/api/v1/project/edit-project", body).await;
+async fn asset_smoke_projects_post_create_unauthorized_without_bearer() {
+    let (status, v) = post_json("/api/v1/projects", "{}").await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 }
 
 #[tokio::test]
-async fn project_edit_project_requires_database_with_jwt() {
+async fn asset_smoke_projects_post_create_requires_database_with_jwt() {
     let token = test_jwt(Uuid::nil());
-    let body = r#"{"id":1,"name":"","intro":"","type":"","artStyle":"","directorManual":"","videoRatio":"","imageModel":"","videoModel":"","imageQuality":"","projectType":"","mode":""}"#;
-    let (status, v) = post_json_bearer("/api/v1/project/edit-project", &token, body).await;
+    let (status, v) = post_json_bearer("/api/v1/projects", &token, "{}").await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn asset_smoke_projects_patch_unauthorized_without_bearer() {
+    let (status, v) = patch_json_no_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
+        r#"{"name":"x"}"#,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn asset_smoke_projects_patch_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = patch_json_bearer(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000001",
+        &token,
+        r#"{"name":"x"}"#,
+    )
+    .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }

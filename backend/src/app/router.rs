@@ -61,7 +61,6 @@ pub fn build_router(state: AppState) -> Router {
         .merge(settings::agent_memory::router())
         .merge(vendor::catalog::router())
         .merge(projects::routes::router())
-        .merge(projects::legacy::router())
         .merge(manuals::director::router())
         .merge(rest_legacy::general::router())
         .merge(manuals::art_styles::router())

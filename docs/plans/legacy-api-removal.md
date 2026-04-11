@@ -20,14 +20,14 @@
 
 | 文件 | 说明 |
 |------|------|
-| `backend/src/app/router.rs` | `merge(projects::legacy)`、`rest_legacy::*`、`narrative::legacy`、`production_legacy`、`scripting::legacy` 等 |
+| `backend/src/app/router.rs` | `rest_legacy::*`、`narrative::legacy`、`production_legacy`、`scripting::legacy` 等 |
 | `backend/src/main.rs` | 顶层 `mod production_legacy`、`mod rest_legacy`（与 `lib` 式入口二选一场景以实际 crate 根为准） |
 
 ### 2. 独立 legacy 路由模块（整棵可随「该域下线」删除）
 
 | 路径 | 职责摘要 |
 |------|----------|
-| `backend/src/projects/legacy.rs` | `POST /api/v1/project/*`（getProject、addProject、editProject…） |
+| ~~`backend/src/projects/legacy.rs`~~ | **已删除**（原 **`POST /api/v1/project/get-project`** 等）；项目 CRUD 仅 **`projects/routes.rs`**（**`/api/v1/projects`**） |
 | `backend/src/projects/mod.rs` | `pub mod legacy` |
 | `backend/src/narrative/legacy/mod.rs` | 小说旧形：`/api/v1/novels/*` |
 | `backend/src/narrative/legacy/dto.rs` | DTO |
@@ -242,7 +242,7 @@
 |--------|------|------|
 | **E（§八）** | 已完成 | 根 `data/` 收敛、`scripts/` 清理、多语言 `docs/README.*` 截断等见 §8 表格 |
 | **A** | 部分 | OpenAPI 已对「按 legacy 项目 id」的 get/patch/delete/stats 标 `deprecated`；全量 `merge` 列表与「API→屏幕」表可由本文件 §一/§二 继续维护 |
-| **B·竖切 1：项目 UUID** | 已落地（主路径） | 后端：`GET\|PATCH\|DELETE /api/v1/projects/{project_id}`、`GET …/stats`。Flutter `updateProjectByProjectId` / `deleteProjectByProjectId`；**已删除** `…/projects/legacy/{id}` 项目详情与 stats 旧路径 |
+| **B·竖切 1：项目 UUID** | 已落地（主路径） | 后端：`GET\|PATCH\|DELETE /api/v1/projects/{project_id}`、`GET …/stats`。Flutter `updateProjectByProjectId` / `deleteProjectByProjectId`；**已删除** `…/projects/legacy/{id}` 项目详情与 stats 旧路径；**已删除** **`POST /api/v1/project/get-project`** / **`add-project`** / **`edit-project`** / **`delete-project`**（`projects::legacy`），`postProject*` compat 走 **`/api/v1/projects`** |
 | **B·竖切 2：项目资产 REST（UUID 项目段）** | 已落地（主路径） | 后端：`/api/v1/projects/{project_id}/assets` 全树（含 corner-scape、图片 CRUD、`scripts/{sid}/assets/{aid}` 关联）。资产仍用 **`asset_legacy_id`** 路径段。Flutter `rust_api` 主路径为 `fetchProjectAssetsByProjectId`、`createProjectAssetUnderProject` 等；项目编辑器资产 UI 已切 UUID。**已删除** HTTP **`…/projects/legacy/.../assets*`** 与 **`…/projects/legacy/.../scripts/.../assets/...` 的 PUT/DELETE**；OpenAPI 与 `pg_contract` 已对齐 |
 | **B·竖切 3：项目小说 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novels`，`GET\|PATCH\|DELETE …/novels/{novel_legacy_id}`。Flutter `novels_rest_api` 与项目编辑器小说列表/工作台已切 UUID。**已删除** `…/projects/legacy/{id}/novels*`。**仍保留**：`/api/v1/novels/*` 旧 POST（Electron 形） |
 | **B·竖切 4：项目小说事件 REST（UUID 项目段）** | 已落地（主路径） | 后端：`GET\|POST /api/v1/projects/{project_id}/novel-events`，`PATCH\|DELETE …/novel-events/{event_legacy_id}`，`POST …/batch-delete`。`POST …/novels/events/get-events` / **`batch-delete`** 仍按旧形 body。Flutter `novels_events` 仅 UUID 路径封装。**已删除** `…/projects/legacy/.../novel-events*` |
@@ -271,7 +271,7 @@
 
 ### 阶段 C：大块 legacy 模块删除顺序（建议）
 
-1. `projects::legacy`（旧 `POST /api/v1/project/*`）— 与 `projects_legacy` / compat 封装绑定。
+1. ~~`projects::legacy`（旧 `POST /api/v1/project/get-project` 等）~~ **已删除**；Flutter `projects_legacy_compat` 仍保留同名封装，内部走 **`GET`/`POST`/`PATCH`/`DELETE /api/v1/projects*`**。
 2. `narrative::legacy`（`/api/v1/novels/*`）— 与 `novels_legacy_api` 绑定。
 3. `rest_legacy::{general,tasks}`。
 4. `scripting::legacy`。

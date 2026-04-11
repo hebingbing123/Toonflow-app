@@ -26,7 +26,7 @@ extension _HomePageProjectEditorLegacyProjectProbe on _HomePageState {
                       ? '0 项'
                       : rows.map((r) => '#${r.legacyId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('POST …/project/get-project：$line')),
+                    SnackBar(content: Text('GET …/projects（compat 列表）：$line')),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
