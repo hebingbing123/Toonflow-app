@@ -64,7 +64,7 @@
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
 | **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
-| **`docs/websocket-events.md`** | WebSocket `/api/v1/ws` 事件 |
+| **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文在 **`docs/openapi.yaml`** → **`paths` → `/api/v1/ws`**） |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 
 > **重构完成**：旧 Electron + Node 栈已下线（`decommission-electron`）。当前主产品为 `backend/` + `frontend/` 新栈。  
