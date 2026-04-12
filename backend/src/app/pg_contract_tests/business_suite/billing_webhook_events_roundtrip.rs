@@ -4,6 +4,7 @@ use tower::ServiceExt;
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
 async fn billing_webhook_events_roundtrip() {
+    let _list_gate = BillingWebhookEventsListEnvGuard::enable();
     let _ = dotenvy::dotenv();
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")

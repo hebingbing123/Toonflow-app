@@ -42,6 +42,8 @@ pub enum ApiError {
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
     /// Automatically adds `Retry-After` header (seconds) and `retry_after_ms` in body.
     QuotaExceeded(String),
+    /// HTTP **403** — authenticated but not allowed (e.g. ops-only endpoint with env gate off).
+    Forbidden(String),
 }
 
 /// Seconds remaining until the next UTC midnight (quota reset point).
@@ -110,6 +112,7 @@ impl IntoResponse for ApiError {
                 "quota_exceeded",
                 msg.as_str(),
             ),
+            ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.as_str()),
         };
 
         let is_quota = matches!(self, ApiError::QuotaExceeded(_));

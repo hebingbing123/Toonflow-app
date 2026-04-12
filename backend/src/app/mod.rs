@@ -54,6 +54,9 @@ pub(crate) async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'st
 }
 
 #[cfg(test)]
+mod billing_webhook_events_list_env;
+
+#[cfg(test)]
 mod contract_smoke_tests;
 
 /// Postgres-backed contract checks (opt-in: **`#[ignore]`** so default **`cargo test`** stays DB-free).

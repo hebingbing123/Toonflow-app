@@ -359,7 +359,12 @@ paths:
       summary: List ingested billing webhook events (audit)
       operationId: listBillingWebhookEventsV1
       description: |
-        Bearer JWT required. Returns recent rows from `app_billing_webhook_event` for audit/debug.
+        Bearer JWT required. **Disabled by default:** the handler returns **403** unless the server sets
+        environment variable **`BILLING_WEBHOOK_EVENTS_LIST_ENABLED=1`** (ops/staging audit only).
+        The table is a **global** webhook log, not scoped per user; do not enable in production
+        multi-tenant deployments without additional controls.
+
+        When enabled, returns recent rows from `app_billing_webhook_event` for audit/debug.
         Supports optional filters by `informational_event`, `provider`, created-at window
         (`created_from` / `created_to`, RFC3339), `raw_event_id` / `raw_event_id_prefix`,
         `event_type`, `provider_event_id_prefix`, `event_created_from` / `event_created_to`,
@@ -486,6 +491,12 @@ paths:
                 $ref: "#/components/schemas/BillingWebhookEventsResponse"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Listing disabled (`BILLING_WEBHOOK_EVENTS_LIST_ENABLED` is not `1`)
           content:
             application/json:
               schema:

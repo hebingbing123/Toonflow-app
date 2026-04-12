@@ -185,6 +185,18 @@ async fn list_billing_webhook_events(
     // Require a valid user JWT first (same gate as other read APIs).
     let _ = require_user_uuid(&state, &headers)?;
 
+    // Global webhook audit log — not tenant-scoped; off by default (ops/staging only).
+    if std::env::var("BILLING_WEBHOOK_EVENTS_LIST_ENABLED")
+        .ok()
+        .as_deref()
+        != Some("1")
+    {
+        return Err(ApiError::Forbidden(
+            "billing webhook event listing is disabled; set BILLING_WEBHOOK_EVENTS_LIST_ENABLED=1 to enable (ops/audit only)."
+                .into(),
+        ));
+    }
+
     let limit = q.limit.unwrap_or(50).clamp(1, 200);
     let offset = q.offset.unwrap_or(0).max(0);
     let provider = parse_provider_filter(q.provider.as_deref())?;

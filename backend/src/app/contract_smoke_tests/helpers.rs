@@ -11,6 +11,8 @@ use tokio::sync::RwLock;
 use tower::ServiceExt;
 use uuid::Uuid;
 
+pub(super) use crate::app::billing_webhook_events_list_env::BillingWebhookEventsListEnvGuard;
+
 use crate::app::build_router;
 use crate::app::jwt_fixture;
 use crate::state::WsNotifyHub;

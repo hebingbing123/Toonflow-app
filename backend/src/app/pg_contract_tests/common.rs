@@ -15,6 +15,7 @@ use tokio::sync::RwLock;
 pub(crate) use tower::ServiceExt;
 pub(crate) use uuid::Uuid;
 
+pub(crate) use crate::app::billing_webhook_events_list_env::BillingWebhookEventsListEnvGuard;
 pub(crate) use crate::app::build_router;
 pub(crate) use crate::app::jwt_fixture;
 pub(crate) use crate::app::vendor_credential_test_lock;
