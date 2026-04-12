@@ -1,8 +1,8 @@
 //! Merge OpenAPI fragments into the document base.
 //!
-//! The base is built from **[`super::shell::openapi_shell`]** (metadata + security) plus
-//! **`embedded/legacy_component_schemas.json`** (transitional component schemas until everything is `ToSchema`),
-//! with **empty `paths`** before merges.
+//! The base is built from **[`super::shell::openapi_shell`]** (metadata + security) with **empty `paths`**
+//! before merges. Component schemas come from **[`super::combined_openapi`]** (utoipa), including
+//! [`super::legacy_components::merged_legacy_components_openapi`].
 //!
 //! Merge order:
 //! 1. **`openapi_paths_index.yaml`** — canonical path items (request bodies, responses, parameters,
@@ -28,37 +28,8 @@ const FALLBACK_MINIMAL_YAML: &str =
 fn document_base() -> anyhow::Result<Json> {
     let shell = super::shell::openapi_shell();
     let mut base = serde_json::to_value(&shell).context("serialize openapi shell")?;
-    inject_legacy_schemas(&mut base)?;
     ensure_paths_object(&mut base)?;
     Ok(base)
-}
-
-fn inject_legacy_schemas(base: &mut Json) -> anyhow::Result<()> {
-    const LEGACY: &str = include_str!("embedded/legacy_component_schemas.json");
-    let legacy: Json =
-        serde_json::from_str(LEGACY).context("parse embedded legacy_component_schemas.json")?;
-    let legacy_obj = legacy
-        .as_object()
-        .context("legacy_component_schemas.json must be a JSON object")?;
-    let root = base
-        .as_object_mut()
-        .context("OpenAPI root must be a JSON object")?;
-    let components = root
-        .entry("components")
-        .or_insert_with(|| Json::Object(Default::default()));
-    let co = components
-        .as_object_mut()
-        .context("components must be a JSON object")?;
-    let schemas = co
-        .entry("schemas")
-        .or_insert_with(|| Json::Object(Default::default()));
-    let sm = schemas
-        .as_object_mut()
-        .context("components.schemas must be a JSON object")?;
-    for (k, v) in legacy_obj {
-        sm.insert(k.clone(), v.clone());
-    }
-    Ok(())
 }
 
 fn ensure_paths_object(base: &mut Json) -> anyhow::Result<()> {

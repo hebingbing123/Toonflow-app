@@ -1,7 +1,7 @@
 //! OpenAPI document shell: `info`, `servers`, `tags`, and `components.securitySchemes` only.
 //!
-//! Reusable JSON Schemas live in [`super::merge`] via `embedded/legacy_component_schemas.json` until
-//! they are fully expressed as Rust `ToSchema` types.
+//! Reusable HTTP schemas are registered via [`super::legacy_components`] and domain `OpenApi` merges
+//! (see [`super::combined_openapi`]); `embedded/legacy_component_schemas.json` is the generator input only.
 
 use utoipa::openapi::{
     security::{HttpAuthScheme, HttpBuilder, SecurityScheme},

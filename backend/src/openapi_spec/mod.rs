@@ -1,6 +1,7 @@
-//! OpenAPI: Rust shell (`shell`), embedded legacy schemas, `openapi_paths_index.yaml` paths, and utoipa merge (see [`merge`]).
+//! OpenAPI: Rust shell (`shell`), legacy `ToSchema` registry, `openapi_paths_index.yaml` paths, and utoipa merge (see [`merge`]).
 
 mod generated;
+mod legacy_components;
 mod merge;
 mod shell;
 mod system;
@@ -37,9 +38,10 @@ use utoipa::OpenApi;
 )]
 pub struct CoreHandlersApi;
 
-/// Full utoipa document: core handlers plus all operations from `scripts/gen_openapi_utoipa_stubs.py`.
+/// Full utoipa document: core handlers, legacy component registry, domain APIs, and YAML-index stubs.
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
+    doc.merge(legacy_components::merged_legacy_components_openapi());
     doc.merge(crate::billing::BillingApi::openapi());
     doc.merge(crate::settings::SettingsOpenApi::openapi());
     doc.merge(crate::vendor::VendorCatalogOpenApi::openapi());
