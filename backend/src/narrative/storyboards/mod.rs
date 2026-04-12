@@ -7,7 +7,7 @@ mod handlers;
 #[allow(unused_imports)]
 pub use dto::StoryboardRow;
 
-pub(super) const ADV_LOCK_STORYBOARD_NUMERIC_ID: i64 = 884_422_003;
+pub(crate) const ADV_LOCK_STORYBOARD_NUMERIC_ID: i64 = 884_422_003;
 
 use axum::routing::get;
 use axum::Router;

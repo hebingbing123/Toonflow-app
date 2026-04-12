@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::narrative::storyboards::ADV_LOCK_STORYBOARD_NUMERIC_ID;
 use crate::scope;
 use crate::state::AppState;
 
@@ -65,20 +66,27 @@ pub(in crate::production) async fn post_storyboard_add(
         .await
         .map_err(|e| e.into_api_error())?;
 
-    // Get next numeric_id
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_STORYBOARD_NUMERIC_ID)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
     let next_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(sb.numeric_id), 0) + 1
-        FROM app_storyboard sb
-        WHERE sb.script_id = $1
+        SELECT COALESCE(MAX(numeric_id), 0) + 1
+        FROM app_storyboard
         "#,
     )
-    .bind(scope_row.script_id)
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    // Insert storyboard
     sqlx::query(
         r#"
         INSERT INTO app_storyboard (
@@ -93,10 +101,14 @@ pub(in crate::production) async fn post_storyboard_add(
     .bind(body.script_id)
     .bind(body.prompt.trim())
     .bind(body.duration.unwrap_or(5))
-    .bind(next_id) // sb_index = numeric_id for now
-    .execute(pool)
+    .bind(next_id)
+    .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(JsonResponse(AddStoryboardResponse {
         storyboard_id: next_id,
@@ -160,18 +172,22 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         .await
         .map_err(|e| e.into_api_error())?;
 
-    // Get base numeric_id
-    let base_id: i32 = sqlx::query_scalar(
-        r#"
-        SELECT COALESCE(MAX(sb.numeric_id), 0)
-        FROM app_storyboard sb
-        WHERE sb.script_id = $1
-        "#,
-    )
-    .bind(scope_row.script_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_STORYBOARD_NUMERIC_ID)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let base_id: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) FROM app_storyboard"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let mut storyboard_ids = Vec::with_capacity(body.storyboards.len());
 
@@ -192,12 +208,16 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         .bind(sb.prompt.trim())
         .bind(sb.duration.unwrap_or(5))
         .bind(next_id)
-        .execute(pool)
+        .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
         storyboard_ids.push(next_id);
     }
+
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(JsonResponse(BatchAddInfoResponse {
         added: storyboard_ids.len(),

@@ -23,7 +23,10 @@ use super::dto::{
 };
 use super::extraction::{resolve_event_extraction_prompt, run_novel_event_extraction_task};
 use super::query::{count_novel_events, list_event_rows, search_ilike};
-use super::{MAX_EVENT_BATCH_DELETE, MAX_EVENT_LIST_LIMIT, MAX_GENERATE_EVENTS_CONCURRENCY};
+use super::{
+    ADV_LOCK_NOVEL_EVENT_NUMERIC, MAX_EVENT_BATCH_DELETE, MAX_EVENT_LIST_LIMIT,
+    MAX_GENERATE_EVENTS_CONCURRENCY,
+};
 
 async fn list_novel_events_core(
     pool: &PgPool,
@@ -81,6 +84,12 @@ async fn create_novel_event_core(
 
     let mut tx = pool
         .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_NOVEL_EVENT_NUMERIC)
+        .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 

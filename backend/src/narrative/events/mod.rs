@@ -10,6 +10,9 @@ pub(crate) const MAX_GENERATE_EVENTS_CONCURRENCY: usize = 20;
 pub(crate) const MAX_EVENT_BATCH_DELETE: usize = 500;
 pub(crate) const MAX_EVENT_LIST_LIMIT: i64 = 200;
 
+/// `pg_advisory_xact_lock` key for allocating globally unique `app_novel_event.numeric_id`.
+pub(crate) const ADV_LOCK_NOVEL_EVENT_NUMERIC: i64 = 884_422_007;
+
 use axum::routing::{delete, get, post};
 use axum::Router;
 

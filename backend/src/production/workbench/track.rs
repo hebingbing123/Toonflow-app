@@ -10,6 +10,9 @@ use crate::error::ApiError;
 use crate::scope;
 use crate::state::AppState;
 
+/// Serializes `GREATEST(MAX storyboard.track_id, MAX app_video_track.numeric_id)+1` allocation for a script/project pair.
+const ADV_LOCK_WORKBENCH_TRACK_SLOT: i64 = 884_422_009;
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AddTrackBody {
@@ -57,6 +60,12 @@ pub(in crate::production) async fn post_workbench_add_track(
 
     let mut tx = pool
         .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_WORKBENCH_TRACK_SLOT)
+        .execute(&mut *tx)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
