@@ -10,6 +10,8 @@ import '../../contexts/script/context_snapshot.dart';
 import '../../contexts/script/status_panels.dart';
 import '../../contexts/script/support.dart';
 
+part 'card_support.dart';
+
 class AgentWorkspaceScriptCard extends StatefulWidget {
   const AgentWorkspaceScriptCard({
     super.key,
@@ -251,56 +253,6 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     _setTaskStatus('已填充参数模板：$label');
   }
 
-  List<String> _buildResultSummaryLines() {
-    final lines = <String>[
-      'tool=${widget.selectedScriptDomainTool}',
-      if (_scriptWritebackSourceLine != null)
-        'writebackSource=${_scriptWritebackSourceLine!}',
-      if (widget.workspaceScriptWritebackCandidate?.trim().isNotEmpty == true)
-        'scriptCandidate.chars=${widget.workspaceScriptWritebackCandidate!.trim().length}',
-      if (widget.workspaceAssistantText.trim().isNotEmpty)
-        'assistant.chars=${widget.workspaceAssistantText.trim().length}',
-    ];
-    final planCandidate = widget.workspaceScriptPlanWritebackCandidate;
-    if (planCandidate != null) {
-      final pid = widget.workspaceScriptPlanRowId;
-      if (pid != null) {
-        lines.add('planRowId=$pid');
-      }
-      final data = planCandidate['data'];
-      if (data is Map<String, dynamic>) {
-        final scriptRows = data['script'];
-        if (scriptRows is List) {
-          lines.add('plan.scriptRows=${scriptRows.length}');
-        }
-        if ((data['storySkeleton'] as String?)?.trim().isNotEmpty == true) {
-          lines.add('plan.storySkeleton=ready');
-        }
-        if ((data['adaptationStrategy'] as String?)?.trim().isNotEmpty ==
-            true) {
-          lines.add('plan.adaptationStrategy=ready');
-        }
-      }
-    }
-    lines.addAll(
-      summarizeScriptResultSnapshot(
-        widget.workspaceLastToolName,
-        widget.workspaceLastToolResultData,
-      ),
-    );
-    return lines.take(6).toList(growable: false);
-  }
-
-  List<Widget> _buildContextSnapshot(BuildContext context) {
-    final snapshot = ScriptContextSnapshotView(
-      workspaceScriptPlanWritebackCandidate:
-          widget.workspaceScriptPlanWritebackCandidate,
-      workspaceLastToolName: widget.workspaceLastToolName,
-      workspaceLastToolResultData: widget.workspaceLastToolResultData,
-    );
-    return <Widget>[snapshot];
-  }
-
   void _runScriptWorkspace() {
     if (!_validatePrompt('运行剧本工作流')) return;
     widget.onRunScriptWorkspace();
@@ -369,9 +321,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         _probeScriptDomainTool();
       },
       onGenerateDraft: () {
-        _applyScriptPromptIfEmpty(
-          '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
-        );
+        _applyScriptPromptIfEmpty('请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。');
         widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();
       },
@@ -406,22 +356,6 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     );
   }
 
-  List<ScriptWorkspaceRecipe> _buildWorkspaceRecipes() {
-    return buildScriptWorkspaceRecipes(
-      toolName: widget.workspaceLastToolName,
-      result: widget.workspaceLastToolResultData,
-      scopeScriptId: _scopeScriptId,
-    );
-  }
-
-  List<ScriptWorkspaceStage> _buildWorkspaceStages() {
-    return buildScriptWorkspaceStages(
-      toolName: widget.workspaceLastToolName,
-      result: widget.workspaceLastToolResultData,
-      scopeScriptId: _scopeScriptId,
-    );
-  }
-
   void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
@@ -447,7 +381,8 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceRecipeSubAgent(ScriptWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) return;
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty)
+      return;
     _runScriptSubAgentTool();
   }
 
@@ -476,28 +411,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceStageSubAgent(ScriptWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) return;
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty)
+      return;
     _runScriptSubAgentTool();
-  }
-
-  Widget _buildWorkspaceStagesPanel(BuildContext context) {
-    return ScriptWorkspaceStagesPanel(
-      stages: _buildWorkspaceStages(),
-      busy: widget.busy,
-      onApplyStage: _applyWorkspaceStage,
-      onRunStageDomainTool: _runWorkspaceStageDomainTool,
-      onRunStageSubAgent: _runWorkspaceStageSubAgent,
-    );
-  }
-
-  Widget _buildWorkspaceDiagnosis(BuildContext context) {
-    return ScriptWorkspaceDiagnosisPanel(
-      recipes: _buildWorkspaceRecipes(),
-      busy: widget.busy,
-      onApplyRecipe: _applyWorkspaceRecipe,
-      onRunRecipeDomainTool: _runWorkspaceRecipeDomainTool,
-      onRunRecipeSubAgent: _runWorkspaceRecipeSubAgent,
-    );
   }
 
   @override
