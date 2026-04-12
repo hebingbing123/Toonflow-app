@@ -217,7 +217,8 @@ rg -n "FROM app_script|owner_user_id|numeric_id" backend/src --glob '!**/pg_cont
 
 ## 7. 文档维护
 
-- **P0 / A1（进行中）**：已新增顶层 **`backend/src/scope/mod.rs`**（`owned_script_scope`）；**Harness** `harness/invoke/domain_script.rs::require_owned_script_scope` 已改为委托该模块。**REST 与其它重复 SQL 收敛** 仍待 A2。
+- **P0 / A1**：已新增顶层 **`backend/src/scope/mod.rs`**（`owned_script_scope`）；**Harness** `require_owned_script_scope` 委托该模块。
+- **P0 / A2（部分）**：**`production_flow::resolve_owned_production_scope`** 已先 `owned_script_scope` 再读 `app_script.content`；**`invoke_get_script_content`** 同样先 scope 再按 `script_id` 读剧本列。其余竖切（`scripting/`、`narrative/` 等）重复 JOIN 仍可按需继续收敛。
 - 实施 P0/P1 后，可在本文档 **§2** 对应条目标记 **「已收敛到 `<路径>`」**，避免以后重复审查。
 
 若你希望下一步 **自动产出「重复 SQL 对照表」**（脚本 + 输出清单），可以单独开任务做 **rg + 人工标注** 半自动报告。

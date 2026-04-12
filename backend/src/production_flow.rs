@@ -1,17 +1,18 @@
 //! 制作流程 JSON 加载与项目/剧本归属解析。
 //!
 //! 供 **`/api/v1/production/get-flow-data`** 与 Harness 工具共用，与 **`production`** 路由模块解耦（共享领域逻辑而非 HTTP 树）。
+//!
+//! **归属**：剧本级 UUID 解析使用 [`crate::scope::owned_script_scope`]；本模块再读取 `app_script.content` 等制作流所需字段。
 
 use serde_json::{json, Map, Value};
 use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::scope::ScopeError;
 
 #[derive(Debug, FromRow)]
-struct OwnedProductionScope {
-    project_id: Uuid,
-    script_id: Uuid,
+struct ScriptContentRow {
     script_content: Option<String>,
 }
 
@@ -48,27 +49,26 @@ pub(crate) async fn resolve_owned_production_scope(
     project_numeric_id: i32,
     script_numeric_id: i32,
 ) -> Result<(Uuid, Uuid, Option<String>), ApiError> {
-    let scope = sqlx::query_as::<_, OwnedProductionScope>(
+    let scope = crate::scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
+        .await
+        .map_err(|e| match e {
+            ScopeError::NotFound => ApiError::NotFound,
+            ScopeError::Database(msg) => ApiError::DatabaseError(msg),
+        })?;
+
+    let row: ScriptContentRow = sqlx::query_as(
         r#"
-        SELECT
-          p.id AS project_id,
-          s.id AS script_id,
-          s.content AS script_content
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
+        SELECT content AS script_content
+        FROM app_script
+        WHERE id = $1
         "#,
     )
-    .bind(uid)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .fetch_optional(pool)
+    .bind(scope.script_id)
+    .fetch_one(pool)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-    Ok((scope.project_id, scope.script_id, scope.script_content))
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok((scope.project_id, scope.script_id, row.script_content))
 }
 
 fn json_string(obj: &Map<String, Value>, key: &str) -> Option<String> {

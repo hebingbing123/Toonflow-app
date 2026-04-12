@@ -139,23 +139,27 @@ pub(super) async fn invoke_get_script_content(
     let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
     let project_numeric_id = project_numeric_from_ctx(ctx)?;
 
+    let scope =
+        crate::scope::owned_script_scope(pool, ctx.user_id, project_numeric_id, script_numeric_id)
+            .await
+            .map_err(|e| match e {
+                ScopeError::NotFound => {
+                    InvokeError::MissingContext("script not found in attached project".into())
+                }
+                ScopeError::Database(msg) => InvokeError::DatabaseError(msg),
+            })?;
+
     let row: HarnessScriptRow = sqlx::query_as(
         r#"
-        SELECT s.numeric_id, s.name, s.content, s.extract_state
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
+        SELECT numeric_id, name, content, extract_state
+        FROM app_script
+        WHERE id = $1
         "#,
     )
-    .bind(ctx.user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .fetch_optional(pool)
+    .bind(scope.script_id)
+    .fetch_one(pool)
     .await
-    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| InvokeError::MissingContext("script not found in attached project".into()))?;
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
     serde_json::to_value(row)
         .map_err(|_| InvokeError::DatabaseError("failed to serialize script".into()))
