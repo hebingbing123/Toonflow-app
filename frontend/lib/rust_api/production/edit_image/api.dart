@@ -1,4 +1,4 @@
-part of '../production.dart';
+part of '../../production.dart';
 
 /// `POST /api/v1/production/edit-image/get-image-flow` — OpenAPI `postEditImageGetImageFlowV1`.
 Future<ImageFlowResponseV1> postProductionEditImageGetImageFlowV1(

@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import 'core.dart';
-part 'production/assets_api.dart';
-part 'production/assets_models.dart';
-part 'production/edit_image_api.dart';
-part 'production/edit_image_models.dart';
+part 'production/assets/api.dart';
+part 'production/assets/models.dart';
+part 'production/edit_image/api.dart';
+part 'production/edit_image/models.dart';
 part 'production/routes.dart';
 part 'production/storyboard_batch.dart';
 part 'production/storyboard_data_models.dart';
