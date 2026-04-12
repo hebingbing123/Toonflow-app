@@ -41,6 +41,7 @@ part 'home_page/project_editor/novels/events/actions.dart';
 part 'home_page/project_editor/novels/events/compatibility.dart';
 part 'home_page/project_editor/novels/events/section.dart';
 part 'home_page/project_editor/novels/actions.dart';
+part 'home_page/project_editor/novels/sections.dart';
 part 'home_page/project_editor/novels/workbench.dart';
 part 'home_page/project_editor/novels/novels.dart';
 part 'home_page/project_editor/assets/assets.dart';

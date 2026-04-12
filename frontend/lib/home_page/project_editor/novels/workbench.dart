@@ -232,95 +232,29 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           style: Theme.of(dialogCtx).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 8),
-                        if (previewRows.isNotEmpty)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Theme.of(
-                                  dialogCtx,
-                                ).colorScheme.outlineVariant,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '当前章节预览',
-                                  style: Theme.of(
-                                    dialogCtx,
-                                  ).textTheme.labelLarge,
-                                ),
-                                const SizedBox(height: 8),
-                                ...previewRows.map(
-                                  (row) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 6),
-                                    child: Text(
-                                      '#${row.numericId} · ${row.chapter} · 事件状态 ${row.eventState}',
-                                      style: Theme.of(
-                                        dialogCtx,
-                                      ).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: searchCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '搜索章节关键字',
-                            helperText:
-                                '调用 GET /projects/{project_uuid}/novels?search=',
-                          ),
+                        _buildNovelWorkbenchPreviewSection(
+                          context: dialogCtx,
+                          previewRows: previewRows,
                         ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            FilledButton.tonal(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action: () => _searchNovelWorkbenchRows(
-                                        token: token,
-                                        project: p,
-                                        searchCtrl: searchCtrl,
-                                        applyResult: (rows, message) {
-                                          setLocalState(() {
-                                            previewRows = rows;
-                                            infoLine = message;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                              child: const Text('搜索'),
-                            ),
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action: () => refreshWorkbench(
-                                        setLocalState,
-                                      ),
-                                    ),
-                              child: const Text('刷新列表'),
-                            ),
-                          ],
+                        const SizedBox(height: 12),
+                        _buildNovelWorkbenchSearchSection(
+                          ctx: ctx,
+                          dialogCtx: dialogCtx,
+                          setDialogState: setDialogState,
+                          setLocalState: setLocalState,
+                          token: token,
+                          project: p,
+                          novelsBusy: novelsBusy,
+                          searchCtrl: searchCtrl,
+                          localBusy: localBusy,
+                          setLocalBusy: setLocalBusy,
+                          refreshWorkbench: refreshWorkbench,
+                          applyResult: (rows, message) {
+                            setLocalState(() {
+                              previewRows = rows;
+                              infoLine = message;
+                            });
+                          },
                         ),
                         const SizedBox(height: 16),
                         Text(
