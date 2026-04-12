@@ -6,6 +6,7 @@ use super::{
     map_api_error, parse_i32_required, parse_ids_required, project_numeric_from_ctx, require_pool,
     script_numeric_id_from_args_or_ctx, InvokeError,
 };
+use crate::assets::ADV_LOCK_ASSET_NUMERIC;
 use crate::harness::HarnessContext;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
 
@@ -156,18 +157,17 @@ pub(super) async fn invoke_add_derive_asset(
         .await
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
-    let next_numeric_id: i32 = sqlx::query_scalar(
-        r#"
-        SELECT COALESCE(MAX(a.numeric_id), 0) + 1
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.owner_user_id = $1
-        "#,
-    )
-    .bind(ctx.user_id)
-    .fetch_one(&mut *tx)
-    .await
-    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+    sqlx::query("SELECT pg_advisory_xact_lock($1)")
+        .bind(ADV_LOCK_ASSET_NUMERIC)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    let next_numeric_id: i32 =
+        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_asset"#)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
     let new_id = uuid::Uuid::new_v4();
     sqlx::query(

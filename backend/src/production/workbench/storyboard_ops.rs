@@ -510,9 +510,37 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
         .await
         .map_err(|e| e.into_api_error())?;
+
+    if body.items.iter().any(|i| i.storyboard_id <= 0) {
+        return Err(ApiError::BadRequest(
+            "each item.storyboardId must be a positive integer".into(),
+        ));
+    }
+
+    let mut uniq: Vec<i32> = body.items.iter().map(|i| i.storyboard_id).collect();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let owned_count = sqlx::query_scalar::<_, i64>(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_storyboard sb
+        WHERE sb.script_id = $1
+          AND sb.numeric_id = ANY($2::int4[])
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if owned_count != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
     let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
