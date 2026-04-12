@@ -8,6 +8,7 @@
 //! - `router` — 路由构建器
 
 mod handlers;
+mod openapi;
 pub mod ops;
 mod router;
 

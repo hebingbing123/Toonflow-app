@@ -29,6 +29,7 @@ use axum::{
 use crate::harness::ws::upgrade::ws_upgrade;
 
 use super::handlers;
+use super::openapi;
 
 pub fn build_router(state: AppState) -> Router {
     let cors = tower_http::cors::CorsLayer::new()
@@ -89,6 +90,8 @@ pub fn build_router(state: AppState) -> Router {
         .layer(user_governor_layer());
 
     Router::new()
+        .route("/api/v1/openapi.yaml", get(openapi::openapi_yaml))
+        .route("/api/v1/docs", get(openapi::swagger_ui))
         .merge(user_limited)
         .merge(billing::router())
         .route("/health", get(handlers::health))

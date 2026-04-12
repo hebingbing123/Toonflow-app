@@ -21,6 +21,52 @@ async fn health_routes_ok_without_database() {
 }
 
 #[tokio::test]
+async fn openapi_yaml_and_swagger_ui_served_without_database() {
+    use axum::body::Body;
+    use axum::extract::ConnectInfo;
+    use axum::http::Request;
+    use tower::ServiceExt;
+
+    let app = crate::app::build_router(smoke_state());
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/openapi.yaml")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(res.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(res.into_body(), 6 * 1024 * 1024)
+        .await
+        .unwrap();
+    let s = std::str::from_utf8(&body).expect("utf8");
+    assert!(s.starts_with("openapi:"));
+    assert!(s.contains("Toonflow API"));
+
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/docs")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(res.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(res.into_body(), 64 * 1024)
+        .await
+        .unwrap();
+    let html = String::from_utf8(body.to_vec()).unwrap();
+    assert!(html.contains("swagger-ui"));
+    assert!(html.contains("/api/v1/openapi.yaml"));
+}
+
+#[tokio::test]
 async fn ping_ok_without_database() {
     let (status, v) = get_json("/api/v1/ping").await;
     assert_eq!(status, StatusCode::OK);
