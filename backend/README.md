@@ -71,6 +71,8 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 
 **HTTP 接口文档（浏览器）**：`GET http://127.0.0.1:8666/api/v1/docs` — Swagger UI **Standalone**；默认折叠 tag、带 **Filter**；`info.description` 仅一行摘要，细节见各 operation 与仓库 **`docs/plans/electron-node-parity.md`**。改 `docs/openapi.yaml` 后需重新 `cargo run` 嵌入 spec。
 
+**WebSocket 协议 Markdown（浏览器 / Swagger 外链）**：`GET http://127.0.0.1:8666/api/v1/websocket-events` — 与仓库 **`docs/websocket-events.md`** 同源（编译期嵌入）；OpenAPI `externalDocs` 指向该路径，避免再请求不存在的 `/websocket-events.md`。
+
 健康检查：
 
 - `GET http://127.0.0.1:8666/health`

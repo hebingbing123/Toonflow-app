@@ -48,6 +48,7 @@ async fn openapi_yaml_and_swagger_ui_served_without_database() {
     assert!(s.contains("Toonflow API"));
 
     let res = app
+        .clone()
         .oneshot(
             Request::builder()
                 .uri("/api/v1/docs")
@@ -66,6 +67,32 @@ async fn openapi_yaml_and_swagger_ui_served_without_database() {
     assert!(html.contains("swagger-ui-standalone-preset"));
     assert!(html.contains("StandaloneLayout"));
     assert!(html.contains("/api/v1/openapi.yaml"));
+
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/websocket-events")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(res.status(), StatusCode::OK);
+    let ct = res
+        .headers()
+        .get(axum::http::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    assert!(
+        ct.contains("text/markdown"),
+        "unexpected content-type: {ct}"
+    );
+    let body = axum::body::to_bytes(res.into_body(), 256 * 1024)
+        .await
+        .unwrap();
+    let md = std::str::from_utf8(&body).expect("utf8");
+    assert!(md.starts_with("# WebSocket events"));
 }
 
 #[tokio::test]

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 externalDocs:
   description: WebSocket `/api/v1/ws` (JSON protocol)
-  url: ./websocket-events.md
+  url: /api/v1/websocket-events
 info:
   title: Toonflow API
   version: 1.0.0

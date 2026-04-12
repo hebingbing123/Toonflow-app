@@ -5,6 +5,8 @@ use axum::response::{Html, IntoResponse};
 
 static OPENAPI_YAML: &str = include_str!("../../../docs/openapi.yaml");
 
+static WEBSOCKET_EVENTS_MD: &str = include_str!("../../../docs/websocket-events.md");
+
 const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,6 +48,17 @@ pub(crate) async fn openapi_yaml() -> impl IntoResponse {
             HeaderValue::from_static("application/yaml; charset=utf-8"),
         )],
         OPENAPI_YAML,
+    )
+}
+
+/// Markdown for `GET /api/v1/ws` wire protocol; linked from OpenAPI `externalDocs` (Swagger UI).
+pub(crate) async fn websocket_events_md() -> impl IntoResponse {
+    (
+        [(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("text/markdown; charset=utf-8"),
+        )],
+        WEBSOCKET_EVENTS_MD,
     )
 }
 

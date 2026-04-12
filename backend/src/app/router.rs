@@ -91,6 +91,10 @@ pub fn build_router(state: AppState) -> Router {
 
     Router::new()
         .route("/api/v1/openapi.yaml", get(openapi::openapi_yaml))
+        .route(
+            "/api/v1/websocket-events",
+            get(openapi::websocket_events_md),
+        )
         .route("/api/v1/docs", get(openapi::swagger_ui))
         .merge(user_limited)
         .merge(billing::router())
