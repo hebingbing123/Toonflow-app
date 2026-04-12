@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'controls.dart';
 import 'panels/activity.dart';
 import 'panels/production.dart';
 import 'panels/script.dart';
@@ -105,8 +106,6 @@ class AgentWorkspacesSection extends StatefulWidget {
   @override
   State<AgentWorkspacesSection> createState() => _AgentWorkspacesSectionState();
 }
-
-enum AgentWorkspacePane { script, production, activity }
 
 class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   static const List<String> _flowKeyPresets = <String>[
@@ -303,62 +302,25 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         const SizedBox(height: 4),
         Text(description, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 12),
-        _buildScopeInputs(),
+        AgentWorkspaceScopeInputs(
+          projectIdController: widget.projectIdController,
+          scriptIdController: widget.scriptIdController,
+        ),
         if (widget.showPaneSelector) ...<Widget>[
           const SizedBox(height: 12),
-          _buildPaneSelector(),
+          AgentWorkspacePaneSelector(
+            selectedPane: _pane,
+            onSelected: (AgentWorkspacePane nextPane) {
+              if (_pane == nextPane) {
+                return;
+              }
+              setState(() => _pane = nextPane);
+            },
+          ),
         ],
         const SizedBox(height: 12),
         _buildPaneBody(context),
       ],
-    );
-  }
-
-  Widget _buildScopeInputs() {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: TextField(
-            controller: widget.projectIdController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '项目 ID'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextField(
-            controller: widget.scriptIdController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '剧本 ID'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaneSelector() {
-    final tabs = <(AgentWorkspacePane, String)>[
-      (AgentWorkspacePane.script, '剧本工作区'),
-      (AgentWorkspacePane.production, '制作工作区'),
-      (AgentWorkspacePane.activity, '执行动态'),
-    ];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: tabs
-          .map(
-            (entry) => ChoiceChip(
-              label: Text(entry.$2),
-              selected: _pane == entry.$1,
-              onSelected: (bool selected) {
-                if (!selected || _pane == entry.$1) {
-                  return;
-                }
-                setState(() => _pane = entry.$1);
-              },
-            ),
-          )
-          .toList(growable: false),
     );
   }
 
