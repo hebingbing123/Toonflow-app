@@ -257,11 +257,16 @@ class _StoryboardBatchWorkbenchDialogState
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildBoardsList(context, productionMap),
+                    child: _buildBatchWorkbenchBoardsList(
+                      productionMap: productionMap,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildPreviewPanel(context, singleSelectedId),
+                    child: _buildBatchWorkbenchPreviewPanel(
+                      context: context,
+                      singleSelectedId: singleSelectedId,
+                    ),
                   ),
                 ],
               ),
@@ -305,115 +310,6 @@ class _StoryboardBatchWorkbenchDialogState
           FilledButton.tonal(
             onPressed: recommendedAction,
             child: Text(recommendedActionLabel),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBoardsList(
-    BuildContext context,
-    Map<int, ProductionStoryboardItemV1> productionMap,
-  ) {
-    return ListView.builder(
-      itemCount: widget.boardsList.length,
-      itemBuilder: (context, index) {
-        final row = widget.boardsList[index];
-        final productionRow = productionMap[row.numericId];
-        final prompt = resolveStoryboardGenerationPrompt(
-          scriptStoryboard: row,
-          productionStoryboard: productionRow,
-        );
-        final checked = _selectedIds.contains(row.numericId);
-        return CheckboxListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          value: checked,
-          onChanged: _busyMutation
-              ? null
-              : (value) {
-                  setState(() {
-                    final previousSingleSelectedId =
-                        _selectedIds.length == 1 ? _selectedIds.first : null;
-                    if (value == true) {
-                      _selectedIds.add(row.numericId);
-                    } else {
-                      _selectedIds.remove(row.numericId);
-                    }
-                    final nextSingleSelectedId =
-                        _selectedIds.length == 1 ? _selectedIds.first : null;
-                    if (previousSingleSelectedId != nextSingleSelectedId) {
-                      _clearSelectionScopedOutputs();
-                    }
-                  });
-                },
-          title: Text('#${row.numericId}'),
-          subtitle: Text(
-            [
-              _storyboardMetaLine(row, productionRow),
-              prompt ?? '无可用提示词',
-            ].join('\n'),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          controlAffinity: ListTileControlAffinity.leading,
-        );
-      },
-    );
-  }
-
-  Widget _buildPreviewPanel(BuildContext context, int? singleSelectedId) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('预览与导出信息', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Text(
-            singleSelectedId == null
-                ? '选中 1 条分镜后可读取当前预览与下载链接。'
-                : '当前查看分镜 #$singleSelectedId',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          if (_downloadUrl != null) ...[
-            const SizedBox(height: 8),
-            SelectableText(
-              '下载链接：$_downloadUrl',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-          const SizedBox(height: 12),
-          Expanded(
-            child: _previewUrl == null
-                ? Center(
-                    child: Text(
-                      '这里会显示当前分镜预览图。',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      _previewUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (_, _, _) => Center(
-                        child: SelectableText(
-                          _previewUrl!,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ),
-                  ),
           ),
         ],
       ),
