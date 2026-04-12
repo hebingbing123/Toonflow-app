@@ -87,6 +87,7 @@ part 'home_page/script_editor/batch/actions.dart';
 part 'home_page/script_editor/batch/sections.dart';
 part 'home_page/storyboard_editor/workbench.dart';
 part 'home_page/storyboard_editor/actions.dart';
+part 'home_page/storyboard_editor/data.dart';
 part 'home_page/storyboard_editor/status_panels.dart';
 part 'home_page/storyboard_editor/image_section.dart';
 part 'home_page/storyboard_editor/video_section.dart';
