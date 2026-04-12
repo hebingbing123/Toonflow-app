@@ -63,7 +63,7 @@
 | **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
-| **`backend/src/openapi_spec/`** | OpenAPI：`openapi_base.yaml`（元数据、WebSocket、`components`）+ `openapi_paths_index.yaml`（路径索引）；合并结果由 Rust/utoipa 生成 |
+| **`backend/src/openapi_spec/`** | OpenAPI：`shell.rs`（元数据、tags、security）+ `embedded/legacy_component_schemas.json` + `openapi_paths_index.yaml`；合并结果由 Rust/utoipa 生成 |
 | **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文见合并后的 OpenAPI **`/api/v1/ws`**） |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 
@@ -257,7 +257,8 @@ yarn lint             # 根目录 TypeScript 配置体检（可选）
 backend/                 # Rust API、任务 worker、Harness
 frontend/                # Flutter 应用
 backend/data/skills/     # 打包技能 Markdown（运行时真源）
-backend/src/openapi_spec/openapi_base.yaml
+backend/src/openapi_spec/shell.rs
+backend/src/openapi_spec/embedded/legacy_component_schemas.json
 docs/plans/
 supabase/migrations/
 scripts/refactor-check.sh

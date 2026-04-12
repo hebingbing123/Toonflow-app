@@ -2,7 +2,7 @@
 """Generate utoipa path stubs from `openapi_paths_index.yaml` (batch OpenApi structs + merge helper).
 
 Each stub mirrors the indexed operation's request/response shapes in utoipa using:
-- `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (defined in `openapi_base.yaml`)
+- `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (from `embedded/legacy_component_schemas.json` merged at runtime)
 - `serde_json::Value` for inline JSON schemas without a component ref
 
 Run from repo root:

@@ -1,0 +1,7211 @@
+{
+  "HealthResponse": {
+    "type": "object",
+    "required": [
+      "status",
+      "service"
+    ],
+    "properties": {
+      "status": {
+        "type": "string",
+        "example": "ok"
+      },
+      "service": {
+        "type": "string",
+        "example": "toonflow-server"
+      }
+    }
+  },
+  "PingResponse": {
+    "type": "object",
+    "required": [
+      "ok"
+    ],
+    "properties": {
+      "ok": {
+        "type": "boolean",
+        "example": true
+      }
+    }
+  },
+  "VersionResponse": {
+    "type": "object",
+    "required": [
+      "service",
+      "version"
+    ],
+    "properties": {
+      "service": {
+        "type": "string",
+        "example": "toonflow-server"
+      },
+      "version": {
+        "type": "string",
+        "description": "Rust crate / binary version (`CARGO_PKG_VERSION`)"
+      },
+      "git_sha": {
+        "type": "string",
+        "description": "Optional. Embedded at **compile time** when `TOONFLOW_GIT_SHA` was set for `cargo build` / `cargo test` (not read from runtime `.env`).\n"
+      }
+    }
+  },
+  "ModelListEntry": {
+    "type": "object",
+    "required": [
+      "id",
+      "label",
+      "value",
+      "type",
+      "name"
+    ],
+    "description": "Legacy-shaped row; `id` is vendor id, `name` is vendor name, `value` is API model id string",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "label": {
+        "type": "string",
+        "description": "Human-readable model label"
+      },
+      "value": {
+        "type": "string",
+        "description": "Provider model id (e.g. `gpt-4o-mini`)"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      "name": {
+        "type": "string",
+        "description": "Vendor display name"
+      }
+    }
+  },
+  "ModelDetailResponse": {
+    "type": "object",
+    "required": [
+      "vendor_id",
+      "vendor_name",
+      "name",
+      "model_name",
+      "type"
+    ],
+    "properties": {
+      "vendor_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "vendor_name": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string",
+        "description": "Human-readable model label"
+      },
+      "model_name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "image",
+          "video"
+        ]
+      }
+    }
+  },
+  "TextModelDefaultResponse": {
+    "type": "object",
+    "required": [
+      "stub_placeholder",
+      "default_model_id"
+    ],
+    "properties": {
+      "stub_placeholder": {
+        "type": "string",
+        "description": "Same as historical **`getTextModel`** **`data`** field (stub).",
+        "example": "123"
+      },
+      "default_model_id": {
+        "type": "string",
+        "description": "Composite id for **`GET /api/v1/models/detail?model_id=`**",
+        "example": "1:gpt-4o-mini"
+      }
+    }
+  },
+  "PatchTextModelDefaultBody": {
+    "type": "object",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "nullable": true,
+        "description": "Composite id `{vendor_id}:{model_name}` (e.g. `1:gpt-4o-mini`).\nMust exist in **`GET /api/v1/models/detail`** catalog.\nPass `null` to reset to server default.\n",
+        "example": "1:gpt-4o-mini"
+      }
+    }
+  },
+  "SwitchAiDevToolResponse": {
+    "type": "object",
+    "required": [
+      "value"
+    ],
+    "properties": {
+      "value": {
+        "type": "string",
+        "enum": [
+          "0",
+          "1"
+        ],
+        "description": "Legacy `o_setting.switchAiDevTool` string flag"
+      }
+    }
+  },
+  "SwitchAiDevToolPutRequest": {
+    "type": "object",
+    "required": [
+      "value"
+    ],
+    "properties": {
+      "value": {
+        "type": "string",
+        "enum": [
+          "0",
+          "1"
+        ]
+      }
+    }
+  },
+  "MemoryConfig": {
+    "type": "object",
+    "description": "Legacy `o_setting` keys for memory / RAG UI (camelCase JSON); also embedded in `GET /api/v1/me` as `memory_config`.",
+    "required": [
+      "messagesPerSummary",
+      "shortTermLimit",
+      "summaryMaxLength",
+      "summaryLimit",
+      "ragLimit",
+      "deepRetrieveSummaryLimit",
+      "modelOnnxFile",
+      "modelDtype"
+    ],
+    "properties": {
+      "messagesPerSummary": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Number of messages before triggering a summary"
+      },
+      "shortTermLimit": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Short-term memory window size"
+      },
+      "summaryMaxLength": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Maximum tokens per summary"
+      },
+      "summaryLimit": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Maximum number of summaries to retain"
+      },
+      "ragLimit": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Top-K retrieved chunks for RAG context"
+      },
+      "deepRetrieveSummaryLimit": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Top-K summaries for deep retrieval"
+      },
+      "modelOnnxFile": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Path segments to ONNX embedding model"
+      },
+      "modelDtype": {
+        "type": "string",
+        "description": "ONNX model data type (fp16/fp32)"
+      }
+    }
+  },
+  "MemoryConfigSavedResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "Legacy sureMemory success text",
+        "example": "保存设置成功"
+      }
+    }
+  },
+  "SettingsClearAgentMemoriesBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType"
+    ],
+    "additionalProperties": false,
+    "description": "Legacy **`delAllMemory`** had no body and cleared all SQLite **`memories`**; Rust requires project + agent scope (see **`postSettingsClearAgentMemoriesV1`**).\n",
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "agentType": {
+        "type": "string",
+        "enum": [
+          "scriptAgent",
+          "productionAgent"
+        ]
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "VendorCatalogSummary": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "modelCount",
+      "modelKinds"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "modelCount": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 0
+      },
+      "modelKinds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Sorted unique model `type` values from the embedded catalog"
+      }
+    }
+  },
+  "VendorsSummaryResponse": {
+    "type": "object",
+    "required": [
+      "vendors",
+      "source"
+    ],
+    "properties": {
+      "vendors": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VendorSummaryItem"
+        }
+      },
+      "source": {
+        "type": "string",
+        "enum": [
+          "static_catalog_with_user_config"
+        ],
+        "description": "Static catalog merged with per-user vendor_config from app_user_profile"
+      }
+    }
+  },
+  "VendorSummaryItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "modelCount",
+      "modelKinds"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Vendor ID from static catalog"
+      },
+      "name": {
+        "type": "string"
+      },
+      "modelCount": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "modelKinds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "userConfig": {
+        "$ref": "#/components/schemas/VendorConfigEntry",
+        "description": "User configuration for this vendor (if any)"
+      }
+    }
+  },
+  "VendorConfigEntry": {
+    "type": "object",
+    "required": [
+      "vendorId"
+    ],
+    "properties": {
+      "vendorId": {
+        "type": "string",
+        "description": "Vendor ID from the static catalog"
+      },
+      "displayName": {
+        "type": "string",
+        "nullable": true,
+        "description": "User-defined display name override"
+      },
+      "enabled": {
+        "type": "boolean",
+        "description": "Whether this vendor is enabled for this user"
+      },
+      "selectedModels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Selected model IDs from this vendor"
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Additional non-sensitive config (API keys excluded)"
+      }
+    }
+  },
+  "VendorConfig": {
+    "type": "object",
+    "properties": {
+      "vendors": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/VendorConfigEntry"
+        },
+        "description": "Per-vendor configurations keyed by vendor_id"
+      },
+      "defaultTextVendorId": {
+        "type": "string",
+        "nullable": true
+      },
+      "defaultImageVendorId": {
+        "type": "string",
+        "nullable": true
+      },
+      "defaultVideoVendorId": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "VendorModelTestBody": {
+    "type": "object",
+    "required": [
+      "modelName",
+      "type",
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "modelName": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      "id": {
+        "type": "string",
+        "description": "Legacy vendor id string (e.g. OpenAI vendor row key)"
+      }
+    }
+  },
+  "VendorAddBody": {
+    "type": "object",
+    "required": [
+      "tsCode"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "tsCode": {
+        "type": "string",
+        "description": "Legacy TS provider script (evaluated with vm2 in Electron)"
+      }
+    }
+  },
+  "VendorUpdateBody": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Vendor ID from static catalog"
+      },
+      "displayName": {
+        "type": "string",
+        "description": "User-defined display name (optional)"
+      },
+      "selectedModels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Selected model IDs from this vendor"
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Non-sensitive settings only (API keys excluded for security)"
+      }
+    }
+  },
+  "VendorUpdateResponse": {
+    "type": "object",
+    "required": [
+      "vendorId",
+      "message"
+    ],
+    "properties": {
+      "vendorId": {
+        "type": "string",
+        "description": "Vendor ID that was updated"
+      },
+      "message": {
+        "type": "string",
+        "description": "Confirmation message"
+      }
+    }
+  },
+  "VendorMutationResponse": {
+    "type": "object",
+    "required": [
+      "vendorId",
+      "message"
+    ],
+    "properties": {
+      "vendorId": {
+        "type": "string",
+        "description": "Vendor ID that was created, updated, or deleted"
+      },
+      "message": {
+        "type": "string",
+        "description": "Confirmation message"
+      }
+    }
+  },
+  "VendorEnableResponse": {
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/VendorMutationResponse"
+      },
+      {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Persisted enabled state"
+          }
+        }
+      }
+    ]
+  },
+  "VendorLinkResponse": {
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/VendorMutationResponse"
+      },
+      {
+        "type": "object",
+        "required": [
+          "link"
+        ],
+        "properties": {
+          "link": {
+            "type": "string",
+            "description": "Stored external code link"
+          }
+        }
+      }
+    ]
+  },
+  "VendorIdBody": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  "VendorEnableBody": {
+    "type": "object",
+    "required": [
+      "id",
+      "enable"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "enable": {
+        "type": "number",
+        "description": "Legacy SQLite `enable` flag (**0** / **1**)"
+      }
+    }
+  },
+  "VendorUpdateCodeBody": {
+    "type": "object",
+    "required": [
+      "id",
+      "tsCode"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "tsCode": {
+        "type": "string"
+      }
+    }
+  },
+  "VendorCodeFromLinkBody": {
+    "type": "object",
+    "required": [
+      "link"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "link": {
+        "type": "string",
+        "description": "URL to fetch (Electron-era **`getCodeByLink`**; may be any non-empty string)"
+      }
+    }
+  },
+  "AgentDeployListBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Empty object `{}` only"
+  },
+  "AgentDeployListItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "model",
+      "key",
+      "modelName",
+      "vendorId",
+      "desc",
+      "name",
+      "disabled",
+      "icon"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "model": {
+        "type": "string"
+      },
+      "key": {
+        "type": "string"
+      },
+      "modelName": {
+        "type": "string"
+      },
+      "vendorId": {
+        "type": "string",
+        "nullable": true
+      },
+      "desc": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "disabled": {
+        "type": "boolean"
+      },
+      "icon": {
+        "type": "string"
+      }
+    }
+  },
+  "DeployAgentModelBody": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "model",
+      "modelName",
+      "desc"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "model": {
+        "type": "string"
+      },
+      "modelName": {
+        "type": "string"
+      },
+      "vendorId": {
+        "type": "string",
+        "nullable": true
+      },
+      "desc": {
+        "type": "string"
+      }
+    }
+  },
+  "AgentSetKeyBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "key": {
+        "type": "string",
+        "description": "Optional Electron-era field; accepted for compatibility but ignored"
+      }
+    }
+  },
+  "AgentDeploySavedResponse": {
+    "type": "object",
+    "required": [
+      "key",
+      "message"
+    ],
+    "properties": {
+      "key": {
+        "type": "string",
+        "description": "Built-in agent key that was updated"
+      },
+      "message": {
+        "type": "string",
+        "description": "Confirmation message"
+      }
+    }
+  },
+  "AgentDeployKeyIgnoredResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "Explains that keys must remain server-side"
+      }
+    }
+  },
+  "ScriptAgentTypeV1": {
+    "type": "string",
+    "enum": [
+      "scriptAgent"
+    ],
+    "description": "Legacy **`agentType`**; only **`scriptAgent`** is accepted"
+  },
+  "GetScriptAgentPlanBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "agentType": {
+        "$ref": "#/components/schemas/ScriptAgentTypeV1"
+      }
+    }
+  },
+  "SetScriptAgentPlanScriptRow": {
+    "type": "object",
+    "required": [
+      "name",
+      "content"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      }
+    }
+  },
+  "SetScriptAgentPlanData": {
+    "type": "object",
+    "required": [
+      "storySkeleton",
+      "adaptationStrategy"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "storySkeleton": {
+        "type": "string"
+      },
+      "adaptationStrategy": {
+        "type": "string"
+      },
+      "script": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SetScriptAgentPlanScriptRow"
+        },
+        "default": []
+      }
+    }
+  },
+  "SetScriptAgentPlanBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "agentType": {
+        "$ref": "#/components/schemas/ScriptAgentTypeV1"
+      },
+      "data": {
+        "$ref": "#/components/schemas/SetScriptAgentPlanData"
+      }
+    }
+  },
+  "UpdateScriptAgentScriptRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "content"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "content": {
+        "type": "string"
+      }
+    }
+  },
+  "UpdateScriptAgentDataPayload": {
+    "type": "object",
+    "required": [
+      "storySkeleton",
+      "adaptationStrategy",
+      "script"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "storySkeleton": {
+        "type": "string"
+      },
+      "adaptationStrategy": {
+        "type": "string"
+      },
+      "script": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UpdateScriptAgentScriptRow"
+        }
+      }
+    }
+  },
+  "UpdateScriptAgentDataBody": {
+    "type": "object",
+    "required": [
+      "id",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "data": {
+        "$ref": "#/components/schemas/UpdateScriptAgentDataPayload"
+      }
+    }
+  },
+  "AssetGenTypeV1": {
+    "type": "string",
+    "enum": [
+      "role",
+      "scene",
+      "tool",
+      "storyboard"
+    ],
+    "description": "Legacy **`generateAssets`** / batch **`items[].type`**"
+  },
+  "GenerateAssetsBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "model",
+      "resolution",
+      "id",
+      "type",
+      "name",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "model": {
+        "type": "string"
+      },
+      "resolution": {
+        "type": "string"
+      },
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Legacy asset id (`o_assets.id`)"
+      },
+      "type": {
+        "$ref": "#/components/schemas/AssetGenTypeV1"
+      },
+      "name": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "base64": {
+        "type": "string",
+        "nullable": true,
+        "maxLength": 24000000,
+        "description": "Optional reference image (Electron-era). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters."
+      }
+    }
+  },
+  "PolishAssetsPromptBody": {
+    "type": "object",
+    "required": [
+      "assetsId",
+      "projectId",
+      "type",
+      "name",
+      "describe"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "assetsId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "type": {
+        "type": "string",
+        "description": "Legacy **`role`** \\| **`scene`** \\| **`tool`**"
+      },
+      "name": {
+        "type": "string"
+      },
+      "describe": {
+        "type": "string"
+      }
+    }
+  },
+  "BatchGenerateImageItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "type",
+      "name",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "type": {
+        "$ref": "#/components/schemas/AssetGenTypeV1"
+      },
+      "name": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "base64": {
+        "type": "string",
+        "nullable": true,
+        "maxLength": 24000000,
+        "description": "Optional reference image (Electron-era). Accepts data URI or raw base64 (normalized to data URI in queued payload and used by worker as provider `images/edits` reference image). Maximum length **24,000,000** characters."
+      }
+    }
+  },
+  "BatchGenerateImageAssetsBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "model",
+      "resolution",
+      "items"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "model": {
+        "type": "string"
+      },
+      "resolution": {
+        "type": "string"
+      },
+      "concurrentCount": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "description": "Optional; default **1** in Electron-era"
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BatchGenerateImageItem"
+        }
+      }
+    }
+  },
+  "BatchPolishAssetsItem": {
+    "type": "object",
+    "required": [
+      "assetsId",
+      "type",
+      "name",
+      "describe"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "assetsId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "type": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "describe": {
+        "type": "string"
+      }
+    }
+  },
+  "BatchPolishAssetsPromptBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "items"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "concurrentCount": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BatchPolishAssetsItem"
+        }
+      }
+    }
+  },
+  "AssetsGenerateCancelBody": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "description": "Legacy image id (`app_asset_image.numeric_image_id`)"
+      }
+    }
+  },
+  "ProductionStoryboardIdsBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "ids"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "ProductionStoryboardBundleItem": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Storyboard numeric id (`app_storyboard.numeric_id`)"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "Script numeric id (`app_storyboard.numeric_script_id`)"
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "url": {
+        "type": "string",
+        "nullable": true,
+        "description": "From `app_storyboard.file_path`"
+      },
+      "duration": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "trackId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "flowId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "sbIndex": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionGetProductionDataResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionStoryboardBundleItem"
+        }
+      }
+    }
+  },
+  "ProductionGetFlowDataBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "episodesId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionSaveFlowDataBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "episodesId",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "data": {
+        "type": "object",
+        "description": "Legacy flow JSON (structure defined in TS **`flowDataSchema`**)",
+        "additionalProperties": true
+      }
+    }
+  },
+  "ProductionFlowAssetDerivativeItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "assetsId",
+      "name",
+      "type",
+      "prompt",
+      "desc"
+    ],
+    "additionalProperties": true,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetsId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "desc": {
+        "type": "string"
+      },
+      "src": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionFlowAssetItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "type",
+      "prompt",
+      "desc",
+      "derive"
+    ],
+    "additionalProperties": true,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "desc": {
+        "type": "string"
+      },
+      "src": {
+        "type": "string",
+        "nullable": true
+      },
+      "derive": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionFlowAssetDerivativeItem"
+        }
+      }
+    }
+  },
+  "ProductionFlowStoryboardItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "duration",
+      "prompt",
+      "associateAssetsIds"
+    ],
+    "additionalProperties": true,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "duration": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "associateAssetsIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "src": {
+        "type": "string",
+        "nullable": true
+      },
+      "index": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionFlowDataResponse": {
+    "type": "object",
+    "required": [
+      "script",
+      "scriptPlan",
+      "assets",
+      "storyboardTable",
+      "storyboard"
+    ],
+    "additionalProperties": true,
+    "properties": {
+      "script": {
+        "type": "string"
+      },
+      "scriptPlan": {
+        "type": "string"
+      },
+      "assets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionFlowAssetItem"
+        }
+      },
+      "storyboardTable": {
+        "type": "string"
+      },
+      "storyboard": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionFlowStoryboardItem"
+        }
+      }
+    }
+  },
+  "ProductionWorkbenchGenerateVideoUploadItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "sources"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "sources": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionWorkbenchGenerateVideoBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "uploadData",
+      "prompt",
+      "model",
+      "mode",
+      "resolution",
+      "duration",
+      "trackId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "uploadData": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionWorkbenchGenerateVideoUploadItem"
+        }
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "model": {
+        "type": "string"
+      },
+      "mode": {
+        "type": "string"
+      },
+      "resolution": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number"
+      },
+      "audio": {
+        "type": "boolean"
+      },
+      "trackId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionExportImageShotRef": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionExportImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "shotId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "shotId": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionExportImageShotRef"
+        }
+      }
+    }
+  },
+  "ProductionWorkbenchGetVideoListBody": {
+    "type": "object",
+    "required": [
+      "projectId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "trackId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Optional; server clamps to 1..100 and defaults to 50."
+      },
+      "offset": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Optional; defaults to 0."
+      }
+    }
+  },
+  "VideoItem": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "videoUrl": {
+        "type": "string",
+        "nullable": true
+      },
+      "duration": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "trackId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionWorkbenchGetVideoListResponse": {
+    "type": "object",
+    "required": [
+      "videos",
+      "total"
+    ],
+    "properties": {
+      "videos": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VideoItem"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "ProductionWorkbenchAddTrackBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "trackName"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "trackName": {
+        "type": "string"
+      },
+      "trackType": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionWorkbenchAddTrackResponse": {
+    "type": "object",
+    "required": [
+      "trackId",
+      "trackName",
+      "message"
+    ],
+    "properties": {
+      "trackId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "trackName": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionWorkbenchDeleteTrackBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "trackId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "trackId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionWorkbenchDeleteTrackResponse": {
+    "type": "object",
+    "required": [
+      "trackId",
+      "message"
+    ],
+    "properties": {
+      "trackId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionWorkbenchDeleteVideoBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboardId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionWorkbenchDeleteVideoResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionWorkbenchGenerateVideoPromptBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string",
+        "nullable": true
+      },
+      "description": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionWorkbenchGenerateVideoPromptResponse": {
+    "type": "object",
+    "required": [
+      "prompt",
+      "model",
+      "duration"
+    ],
+    "properties": {
+      "prompt": {
+        "type": "string"
+      },
+      "model": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionWorkbenchGetGenerateDataBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionWorkbenchGetGenerateDataResponse": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "generatedVideos",
+      "generatingJobs"
+    ],
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "generatedVideos": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VideoItem"
+        }
+      },
+      "generatingJobs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JobRow"
+        }
+      }
+    }
+  },
+  "ProductionWorkbenchVideoModelDetailResponse": {
+    "type": "object",
+    "required": [
+      "modelId",
+      "modelName",
+      "provider",
+      "maxDuration",
+      "resolutions",
+      "features"
+    ],
+    "properties": {
+      "modelId": {
+        "type": "string"
+      },
+      "modelName": {
+        "type": "string"
+      },
+      "provider": {
+        "type": "string"
+      },
+      "maxDuration": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "resolutions": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "features": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "ProductionWorkbenchSelectVideoBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboardId",
+      "videoUrl"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "videoUrl": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionWorkbenchSelectVideoResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "videoUrl",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "videoUrl": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionAssetsBatchGenerateImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "assetIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetIds": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "model": {
+        "type": "string",
+        "nullable": true
+      },
+      "resolution": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionAssetsBatchGenerateImageResponse": {
+    "type": "object",
+    "required": [
+      "enqueued",
+      "total"
+    ],
+    "properties": {
+      "enqueued": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JobRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionAssetsDeleteDerivativeBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "assetIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetIds": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "ProductionAssetsDeleteDerivativeResponse": {
+    "type": "object",
+    "required": [
+      "deleted",
+      "assetIds"
+    ],
+    "properties": {
+      "deleted": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "assetIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "ProductionAssetsGetDataBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetType": {
+        "type": "string",
+        "nullable": true
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      },
+      "offset": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionAssetDataItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "type"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "describe": {
+        "type": "string",
+        "nullable": true
+      },
+      "coverNumericImageId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionAssetsGetDataResponse": {
+    "type": "object",
+    "required": [
+      "assets",
+      "total"
+    ],
+    "properties": {
+      "assets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionAssetDataItem"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "ProductionAssetsPollingImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "assetIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetIds": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "ProductionAssetImageStatus": {
+    "type": "object",
+    "required": [
+      "assetId",
+      "imageCount"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageCount": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "latestState": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionAssetsPollingImageResponse": {
+    "type": "object",
+    "required": [
+      "statuses"
+    ],
+    "properties": {
+      "statuses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionAssetImageStatus"
+        }
+      }
+    }
+  },
+  "ProductionAssetsUpdateUrlBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "assetId",
+      "imageUrl"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "assetId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionAssetsUpdateUrlResponse": {
+    "type": "object",
+    "required": [
+      "assetId",
+      "imageUrl",
+      "message"
+    ],
+    "properties": {
+      "assetId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageFlowStep": {
+    "type": "object",
+    "required": [
+      "stepId",
+      "stepName",
+      "status"
+    ],
+    "properties": {
+      "stepId": {
+        "type": "string"
+      },
+      "stepName": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageGetFlowResponse": {
+    "type": "object",
+    "required": [
+      "flowId",
+      "steps",
+      "defaultModel"
+    ],
+    "properties": {
+      "flowId": {
+        "type": "string"
+      },
+      "steps": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionEditImageFlowStep"
+        }
+      },
+      "defaultModel": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageDefaultModelResponse": {
+    "type": "object",
+    "required": [
+      "model",
+      "resolution"
+    ],
+    "properties": {
+      "model": {
+        "type": "string"
+      },
+      "resolution": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageFlowStepInput": {
+    "type": "object",
+    "required": [
+      "stepId",
+      "status"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "stepId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageSaveFlowBody": {
+    "type": "object",
+    "required": [
+      "flowId",
+      "steps"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "flowId": {
+        "type": "string"
+      },
+      "steps": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProductionEditImageFlowStepInput"
+        }
+      }
+    }
+  },
+  "ProductionEditImageSaveFlowResponse": {
+    "type": "object",
+    "required": [
+      "flowId",
+      "saved"
+    ],
+    "properties": {
+      "flowId": {
+        "type": "string"
+      },
+      "saved": {
+        "type": "boolean"
+      }
+    }
+  },
+  "ProductionEditImageUpdateFlowBody": {
+    "type": "object",
+    "required": [
+      "flowId",
+      "stepId",
+      "updates"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "flowId": {
+        "type": "string"
+      },
+      "stepId": {
+        "type": "string"
+      },
+      "updates": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "ProductionEditImageUpdateFlowResponse": {
+    "type": "object",
+    "required": [
+      "flowId",
+      "stepId",
+      "updated"
+    ],
+    "properties": {
+      "flowId": {
+        "type": "string"
+      },
+      "stepId": {
+        "type": "string"
+      },
+      "updated": {
+        "type": "boolean"
+      }
+    }
+  },
+  "ProductionEditImageGenerateFlowImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "flowId",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "description": "Numeric project id; must belong to the caller and pair with scriptId."
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "description": "Numeric script id under that project; scope is verified before enqueue."
+      },
+      "flowId": {
+        "type": "string",
+        "description": "Whitespace-only values are rejected (HTTP 400)."
+      },
+      "prompt": {
+        "type": "string",
+        "description": "Whitespace-only values are rejected (HTTP 400)."
+      },
+      "model": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionEditImageGenerateFlowImageResponse": {
+    "type": "object",
+    "required": [
+      "jobId",
+      "status"
+    ],
+    "properties": {
+      "jobId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionEditImageUploadImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "base64Data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "base64Data": {
+        "type": "string",
+        "description": "JPEG/JPG/PNG data URI payload (`data:image/*;base64,...`)"
+      }
+    }
+  },
+  "ProductionEditImageUploadImageResponse": {
+    "type": "object",
+    "required": [
+      "url"
+    ],
+    "properties": {
+      "url": {
+        "type": "string",
+        "description": "Normalized image data URI."
+      }
+    }
+  },
+  "ProductionStoryboardListBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionStoryboardAddBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardAddResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionStoryboardBatchAddInfoItem": {
+    "type": "object",
+    "required": [
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "prompt": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardBatchAddInfoBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboards"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboards": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/components/schemas/ProductionStoryboardBatchAddInfoItem"
+        }
+      }
+    }
+  },
+  "ProductionStoryboardBatchAddInfoResponse": {
+    "type": "object",
+    "required": [
+      "added",
+      "storyboardIds"
+    ],
+    "properties": {
+      "added": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "ProductionStoryboardBatchGenerateImageItem": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "negativePrompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "model": {
+        "type": "string",
+        "nullable": true
+      },
+      "resolution": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardBatchGenerateImageBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "items"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/components/schemas/ProductionStoryboardBatchGenerateImageItem"
+        }
+      },
+      "model": {
+        "type": "string",
+        "nullable": true
+      },
+      "resolution": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardBatchGenerateImageResponse": {
+    "type": "object",
+    "required": [
+      "enqueued",
+      "total"
+    ],
+    "properties": {
+      "enqueued": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JobRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionStoryboardIdBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboardId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "ProductionStoryboardEditInfoBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboardId",
+      "prompt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "prompt": {
+        "type": "string",
+        "description": "Whitespace-only values are rejected (HTTP 400)."
+      },
+      "duration": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardEditInfoResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionStoryboardRemoveFrameResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionStoryboardUpdateUrlBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "scriptId",
+      "storyboardId",
+      "imageUrl"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scriptId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionStoryboardUpdateUrlResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "imageUrl",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionStoryboardPreviewImageResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "imageUrl": {
+        "type": "string",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ProductionStoryboardDownPreviewImageResponse": {
+    "type": "object",
+    "required": [
+      "storyboardId",
+      "message"
+    ],
+    "properties": {
+      "storyboardId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "previewUrl": {
+        "type": "string",
+        "nullable": true
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "ProductionLegacyJsonStubBody": {
+    "type": "object",
+    "description": "Reserved escape-hatch schema for any future fallback **`/api/production/*`** JSON-object stub:\nany JSON **object** (not `null`, array, or scalar). Current production routes above use\ndedicated typed schemas.\n",
+    "additionalProperties": true
+  },
+  "AboutCheckUpdateSource": {
+    "type": "string",
+    "enum": [
+      "toonflow",
+      "github",
+      "gitee",
+      "atomgit"
+    ],
+    "description": "Legacy checkUpdate **`source`** field"
+  },
+  "AboutCheckUpdateRequest": {
+    "type": "object",
+    "required": [
+      "source"
+    ],
+    "properties": {
+      "source": {
+        "$ref": "#/components/schemas/AboutCheckUpdateSource"
+      }
+    }
+  },
+  "AboutCheckUpdateResponse": {
+    "type": "object",
+    "required": [
+      "needUpdate",
+      "latestVersion",
+      "reinstall",
+      "time"
+    ],
+    "properties": {
+      "needUpdate": {
+        "type": "boolean"
+      },
+      "latestVersion": {
+        "type": "string",
+        "description": "Server crate version when using the SaaS stub"
+      },
+      "reinstall": {
+        "type": "boolean"
+      },
+      "time": {
+        "type": "string",
+        "format": "date-time",
+        "description": "RFC3339 timestamp (stub uses response time, not remote manifest)"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri",
+        "description": "Present only when an update would include a download URL (stub omits)"
+      }
+    }
+  },
+  "AboutDownloadAppRequest": {
+    "type": "object",
+    "required": [
+      "url",
+      "reinstall"
+    ],
+    "properties": {
+      "url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "reinstall": {
+        "type": "boolean"
+      }
+    }
+  },
+  "DownloadAppAcceptedResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "Explains that Flutter builds use stores or browser-based download flow"
+      }
+    }
+  },
+  "ReadyResponse": {
+    "type": "object",
+    "required": [
+      "status",
+      "database"
+    ],
+    "properties": {
+      "status": {
+        "type": "string",
+        "example": "ok"
+      },
+      "database": {
+        "type": "string",
+        "enum": [
+          "not_configured",
+          "connected"
+        ],
+        "description": "`not_configured` when `DATABASE_URL` is unset"
+      }
+    }
+  },
+  "MeResponse": {
+    "type": "object",
+    "required": [
+      "sub",
+      "plan_tier"
+    ],
+    "properties": {
+      "sub": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Supabase Auth user id (`JWT sub`)"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "description": "Present when included in JWT claims"
+      },
+      "plan_tier": {
+        "type": "string",
+        "description": "From `app_user_profile`; `free` when DATABASE_URL is unset or no row exists"
+      },
+      "billing_currency": {
+        "type": "string",
+        "nullable": true
+      },
+      "billing_provider": {
+        "type": "string",
+        "nullable": true
+      },
+      "subscription_status": {
+        "type": "string",
+        "nullable": true,
+        "description": "Normalized subscription status from profile (`active`, `past_due`, etc.)"
+      },
+      "subscription_current_period_end_at": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true,
+        "description": "Current paid subscription period end (when known)"
+      },
+      "daily_job_quota": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Effective daily generation-job cap for this user (UTC natural day).\n`null` = unlimited (enterprise tier or per-user override set to unlimited).\nDerived from `plan_tier` defaults or `app_user_profile.daily_job_quota` override.\nAbsent when `DATABASE_URL` is unset (falls back to free-tier default in that case).\n"
+      },
+      "jobs_today": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Number of generation jobs created today (UTC midnight to now).\nAbsent when `DATABASE_URL` is unset.\n"
+      },
+      "memory_config": {
+        "$ref": "#/components/schemas/MemoryConfig",
+        "nullable": true,
+        "description": "User memory/RAG configuration from `app_user_profile.memory_config`.\nPresent when row exists and has non-null JSON; absent when unset.\nWhen DATABASE_URL is unset, falls back to server defaults (same as `GET /api/v1/settings/memory-config`).\n"
+      }
+    }
+  },
+  "UsageSummaryResponse": {
+    "type": "object",
+    "required": [
+      "events_last_24h",
+      "events_last_7d",
+      "event_counts_last_7d",
+      "jobs_today",
+      "daily_job_quota"
+    ],
+    "properties": {
+      "events_last_24h": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Rows in `app_usage_event` in the rolling last 24 hours"
+      },
+      "events_last_7d": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Rows in `app_usage_event` in the rolling last 7 days"
+      },
+      "event_counts_last_7d": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "description": "Per `event_type` counts in the rolling last 7 days (empty object when no rows)"
+      },
+      "jobs_today": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Generation jobs created today (UTC natural day) — same counter used by quota enforcement"
+      },
+      "daily_job_quota": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Effective daily job cap for this user (`null` = unlimited, e.g. enterprise tier)"
+      },
+      "quota_remaining": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Remaining jobs allowed today (`null` = unlimited). `0` means quota is exhausted.\nAbsent when `daily_job_quota` is `null`.\n"
+      }
+    }
+  },
+  "PatchPromptBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "type",
+      "data"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Stable prompt slot **1–3** (maps to `app_user_prompt.numeric_id`)"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "description": "Discriminator (`eventExtraction`, `scriptAssetExtraction`, `videoPromptGeneration`)"
+      },
+      "data": {
+        "type": "string"
+      }
+    }
+  },
+  "VisualManualEntry": {
+    "type": "object",
+    "required": [
+      "label",
+      "value",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "label": {
+        "type": "string"
+      },
+      "value": {
+        "type": "string"
+      },
+      "data": {
+        "type": "string",
+        "description": "Markdown body (empty if file missing)"
+      }
+    }
+  },
+  "VisualManualStyle": {
+    "type": "object",
+    "required": [
+      "name",
+      "image",
+      "stylePath",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "First line of README.md (display title)"
+      },
+      "image": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Relative paths under data/skills (e.g. art_skills/style/images/a.png)"
+      },
+      "stylePath": {
+        "type": "string",
+        "description": "Directory name under art_skills"
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VisualManualEntry"
+        }
+      }
+    }
+  },
+  "VisualManualResponse": {
+    "type": "object",
+    "required": [
+      "styles"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "styles": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VisualManualStyle"
+        }
+      }
+    }
+  },
+  "QueryAgentMemoryBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Integer project id (`app_project.numeric_id`)"
+      },
+      "agentType": {
+        "type": "string",
+        "enum": [
+          "scriptAgent",
+          "productionAgent"
+        ]
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ClearAgentMemoryBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType"
+    ],
+    "additionalProperties": false,
+    "description": "Optional **`type`** (Electron-era) or **`clearType`**: `all` (default), `message`, or `summary`.\n",
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "agentType": {
+        "type": "string",
+        "enum": [
+          "scriptAgent",
+          "productionAgent"
+        ]
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "clearType": {
+        "type": "string",
+        "enum": [
+          "all",
+          "message",
+          "summary"
+        ],
+        "default": "all"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "all",
+          "message",
+          "summary"
+        ],
+        "description": "Legacy alias for `clearType` (same values)"
+      }
+    }
+  },
+  "ClearAgentMemoryResponse": {
+    "type": "object",
+    "required": [
+      "ok"
+    ],
+    "properties": {
+      "ok": {
+        "type": "boolean"
+      }
+    }
+  },
+  "AppendAgentMemoryBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "agentType",
+      "content"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "agentType": {
+        "type": "string",
+        "enum": [
+          "scriptAgent",
+          "productionAgent"
+        ]
+      },
+      "episodesId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "role": {
+        "type": "string",
+        "description": "Defaults to `user` when omitted"
+      },
+      "content": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "createTime": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Epoch milliseconds; server default is now"
+      }
+    }
+  },
+  "AppendAgentMemoryResponse": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
+  "MemoryMarkdownBlock": {
+    "type": "object",
+    "required": [
+      "type",
+      "status",
+      "data"
+    ],
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": [
+          "markdown"
+        ]
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "complete"
+        ]
+      },
+      "data": {
+        "type": "string"
+      }
+    }
+  },
+  "MemoryHistoryItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "role",
+      "status",
+      "datetime",
+      "content",
+      "createTime"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "role": {
+        "type": "string",
+        "enum": [
+          "user",
+          "assistant"
+        ]
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "complete"
+        ]
+      },
+      "datetime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "content": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MemoryMarkdownBlock"
+        }
+      },
+      "createTime": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Epoch milliseconds (stored as `create_time_ms`)"
+      }
+    }
+  },
+  "ProjectRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "numeric_id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "intro": {
+        "type": "string",
+        "nullable": true
+      },
+      "project_type": {
+        "type": "string",
+        "nullable": true
+      },
+      "image_model": {
+        "type": "string",
+        "nullable": true
+      },
+      "image_quality": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_model": {
+        "type": "string",
+        "nullable": true
+      },
+      "art_style": {
+        "type": "string",
+        "nullable": true
+      },
+      "director_manual": {
+        "type": "string",
+        "nullable": true
+      },
+      "mode": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_ratio": {
+        "type": "string",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "ProjectsSummaryResponse": {
+    "type": "object",
+    "required": [
+      "project_count",
+      "script_count",
+      "storyboard_count",
+      "novel_count",
+      "role_count",
+      "art_style_count",
+      "asset_count",
+      "video_count"
+    ],
+    "properties": {
+      "project_count": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "script_count": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "storyboard_count": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "novel_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total **`app_novel`** rows across the user's projects"
+      },
+      "role_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total **`app_asset`** rows with **`asset_type = 'role'`** across the user's projects (subset of **`asset_count`**)"
+      },
+      "art_style_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total **`app_art_style`** rows for the user (not scoped to a single project)"
+      },
+      "asset_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total **`app_asset`** rows across the user's projects"
+      },
+      "video_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Placeholder **`0`** until video rows are modeled in Postgres (aligns with **`GET …/stats`**)"
+      }
+    }
+  },
+  "ProjectStatsResponse": {
+    "type": "object",
+    "required": [
+      "script_count",
+      "storyboard_count",
+      "role_count",
+      "novel_count",
+      "video_count"
+    ],
+    "description": "Field names align with Electron-era **`generalStatistics`** (`roleCount`, etc.) via snake_case JSON.\n",
+    "properties": {
+      "script_count": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "storyboard_count": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "role_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Count of **`app_asset`** with **`asset_type = 'role'`** for the project"
+      },
+      "novel_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Count of **`app_novel`** rows for the project"
+      },
+      "video_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Placeholder **`0`** until video rows are modeled in Postgres"
+      }
+    }
+  },
+  "CreateAssetBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "type"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene",
+          "clip"
+        ]
+      },
+      "description": {
+        "type": "string"
+      }
+    }
+  },
+  "PatchAssetBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one property required; unknown properties rejected (400). cover_numeric_image_id maps to app_asset.metadata.imageId (Electron-era o_assets.imageId); when a number, must match app_asset_image.numeric_image_id for this asset.",
+    "properties": {
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "description": {
+        "type": "string",
+        "nullable": true
+      },
+      "asset_type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene"
+        ]
+      },
+      "cover_numeric_image_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "Set or clear cover selection for image list parity; null removes metadata.imageId."
+      }
+    }
+  },
+  "AssetRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "numeric_id",
+      "name",
+      "asset_type"
+    ],
+    "description": "One **`app_asset`** row (`asset_type` is **`role`**, **`tool`**, or **`scene`**).",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "asset_type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "ListAssetsResponse": {
+    "type": "object",
+    "required": [
+      "items",
+      "total"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssetRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64",
+        "description": "With **`limit`**, total matching rows (before pagination). Without **`limit`**, same as **`items`** length.\n"
+      }
+    }
+  },
+  "CornerScapeRequestBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Optional filters; **`{}`** lists all top-level assets.",
+    "properties": {
+      "types": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "role",
+            "scene",
+            "tool"
+          ]
+        },
+        "description": "When non-empty, restrict to these **`app_asset.asset_type`** values."
+      }
+    }
+  },
+  "CornerScapeHistoryImage": {
+    "type": "object",
+    "required": [
+      "id",
+      "sort_index"
+    ],
+    "description": "One **`app_asset_image`** row (subset exposed for corner UI).",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "file_path": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "sort_index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "numeric_image_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "SQLite o_image.id when promoted; omitted or null for API-only rows."
+      }
+    }
+  },
+  "CreateAssetImageBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "All fields optional; **`{}`** creates a completed-history row (**`state`** **`已完成`**, **`sort_index`** **0**).",
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "nullable": true,
+        "description": "Trimmed; empty or omitted → SQL **`NULL`**."
+      },
+      "state": {
+        "type": "string",
+        "nullable": true,
+        "description": "Omitted → **`已完成`**; empty string → SQL **`NULL`**."
+      },
+      "sort_index": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Defaults to **0** when omitted."
+      }
+    }
+  },
+  "ListAssetImagesResponse": {
+    "type": "object",
+    "required": [
+      "items"
+    ],
+    "properties": {
+      "cover_numeric_image_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "Legacy o_assets.imageId from app_asset.metadata.imageId; null if unset."
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssetImageListItem"
+        }
+      }
+    }
+  },
+  "LegacyAssetsGetAssetsApiBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "type"
+    ],
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "scene",
+          "tool"
+        ]
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "page": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "default": 1
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 10
+      }
+    }
+  },
+  "LegacyAssetsGetAssetsApiChildItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "projectId",
+      "type",
+      "name"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "projectId": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Legacy project id from app_asset.metadata.projectId (fallback to request projectId)."
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "scene",
+          "tool"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "assetsId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "Legacy parent asset id from app_asset.metadata.assetsId."
+      },
+      "imageId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "Legacy selected image id from app_asset.metadata.imageId."
+      },
+      "filePath": {
+        "type": "string",
+        "nullable": true,
+        "description": "Selected image path from app_asset_image.file_path."
+      },
+      "state": {
+        "type": "string",
+        "nullable": true,
+        "description": "Selected image state from app_asset_image.state."
+      },
+      "errorReason": {
+        "type": "string",
+        "nullable": true,
+        "description": "Selected image metadata.errorReason."
+      },
+      "src": {
+        "type": "string",
+        "nullable": true,
+        "description": "Same value as filePath (Electron-era compatibility field)."
+      }
+    }
+  },
+  "LegacyAssetsGetAssetsApiParentItem": {
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/LegacyAssetsGetAssetsApiChildItem"
+      },
+      {
+        "type": "object",
+        "required": [
+          "sonAssets"
+        ],
+        "properties": {
+          "sonAssets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegacyAssetsGetAssetsApiChildItem"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "LegacyAssetsGetAssetsApiResponse": {
+    "type": "object",
+    "required": [
+      "data",
+      "total"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyAssetsGetAssetsApiParentItem"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total parent-asset row count for current filter."
+      }
+    }
+  },
+  "LegacyAssetsGetImageBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "assetsId"
+    ],
+    "properties": {
+      "assetsId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "LegacyAssetsGetImageTempAsset": {
+    "type": "object",
+    "required": [
+      "imageUuid",
+      "filePath",
+      "assetsId",
+      "type",
+      "selected"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "app_asset_image.numeric_image_id (null for API-created rows without numeric id)"
+      },
+      "imageUuid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "filePath": {
+        "type": "string",
+        "description": "Stored app_asset_image.file_path; may be URL, API path, or empty string."
+      },
+      "assetsId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene",
+          "clip"
+        ]
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "selected": {
+        "type": "boolean"
+      }
+    }
+  },
+  "LegacyAssetsGetImageResponse": {
+    "type": "object",
+    "required": [
+      "id",
+      "tempAssets"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "imageId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "app_asset.metadata.imageId"
+      },
+      "tempAssets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyAssetsGetImageTempAsset"
+        }
+      }
+    }
+  },
+  "LegacyAssetsMutationResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyAssetsAddAssetsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "describe",
+      "type"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "describe": {
+        "type": "string",
+        "minLength": 1
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "scene",
+          "tool"
+        ]
+      },
+      "remark": {
+        "type": "string",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyAssetsUpdateAssetsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "describe"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "describe": {
+        "type": "string",
+        "minLength": 1
+      },
+      "remark": {
+        "type": "string",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyAssetsSaveAssetsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "type"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "base64": {
+        "type": "string",
+        "nullable": true,
+        "maxLength": 24000000,
+        "description": "Optional data URI or raw base64; when provided, server creates a new image history row."
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "scene",
+          "tool"
+        ]
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "imageId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "minimum": 1
+      }
+    }
+  },
+  "LegacyAssetsDeleteBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      }
+    }
+  },
+  "LegacyAssetsBatchDeleteBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "LegacyAssetsGetMaterialDataBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Empty JSON object `{}` (project is taken from path)."
+  },
+  "LegacyAssetsUploadClipBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "base64Data",
+      "name"
+    ],
+    "properties": {
+      "base64Data": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 24000000,
+        "description": "Data URI (`data:*;base64,...`) or raw base64 string. Raw base64 is normalized to\n`data:application/octet-stream;base64,...` before persistence.\n"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "clip"
+        ],
+        "default": "clip",
+        "description": "Optional Electron-era field; only `clip` is accepted when provided."
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "LegacyAssetsUploadClipResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyAssetsGetMaterialDataItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "filePath",
+      "type"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id (0 for built-in ending clip row)"
+      },
+      "name": {
+        "type": "string"
+      },
+      "filePath": {
+        "type": "string",
+        "description": "Selected clip image file path (or empty string)."
+      },
+      "type": {
+        "type": "string",
+        "description": "Legacy asset type, usually clip."
+      }
+    }
+  },
+  "LegacyAssetsGetMaterialDataVideoItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "filePath"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_video.numeric_id"
+      },
+      "filePath": {
+        "type": "string"
+      },
+      "videoTrackId": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyAssetsGetMaterialDataResponse": {
+    "type": "object",
+    "required": [
+      "data",
+      "video"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyAssetsGetMaterialDataItem"
+        }
+      },
+      "video": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyAssetsGetMaterialDataVideoItem"
+        }
+      }
+    }
+  },
+  "LegacyAssetsBatchGenerationDataBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "type",
+      "page",
+      "limit"
+    ],
+    "properties": {
+      "type": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "page": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "maximum": 200
+      }
+    }
+  },
+  "LegacyAssetsBatchGenerationDataItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "type"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string",
+        "nullable": true
+      },
+      "createTimeMs": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyAssetsBatchGenerationDataResponse": {
+    "type": "object",
+    "required": [
+      "data",
+      "total"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyAssetsBatchGenerationDataItem"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "LegacyAssetsPollingImageAssetsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "ids"
+    ],
+    "properties": {
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "LegacyAssetsPollingImageAssetsItem": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "state": {
+        "type": "string",
+        "nullable": true,
+        "description": "Selected app_asset_image.state (rows with 生成中 are filtered out)."
+      },
+      "filePath": {
+        "type": "string",
+        "nullable": true,
+        "description": "Selected app_asset_image.file_path."
+      }
+    }
+  },
+  "LegacyAssetsPollingPromptAssetsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "ids"
+    ],
+    "properties": {
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "LegacyAssetsPollingPromptAssetsItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "type",
+      "promptState"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene"
+        ]
+      },
+      "promptState": {
+        "type": "string",
+        "description": "Legacy prompt polling state (filters out 生成中 rows)."
+      }
+    }
+  },
+  "AssetImageListItem": {
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/AssetImageRow"
+      },
+      {
+        "type": "object",
+        "required": [
+          "selected"
+        ],
+        "properties": {
+          "selected": {
+            "type": "boolean",
+            "description": "True when numeric_image_id equals cover_numeric_image_id."
+          }
+        }
+      }
+    ]
+  },
+  "AssetImageRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "asset_id",
+      "sort_index"
+    ],
+    "description": "Full **`app_asset_image`** row subset after **`GET`/`POST …/images`** or **`PATCH …/images/{image_id}`**.",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "asset_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "sort_index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "file_path": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "numeric_image_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true,
+        "description": "SQLite o_image.id when promoted; null for API-created rows."
+      }
+    }
+  },
+  "PatchAssetImageBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one of file_path, state, sort_index required.",
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "nullable": true,
+        "description": "Trimmed; null or empty string clears to SQL NULL."
+      },
+      "state": {
+        "type": "string",
+        "nullable": true,
+        "description": "null or empty string clears to SQL NULL."
+      },
+      "sort_index": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Cannot be null in JSON; omit field to leave unchanged."
+      }
+    }
+  },
+  "CornerScapeAssetItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "numeric_id",
+      "name",
+      "asset_type",
+      "metadata",
+      "history_images"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "asset_type": {
+        "type": "string",
+        "enum": [
+          "role",
+          "tool",
+          "scene"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Legacy **`o_assets`** snapshot JSON (promoted into **`app_asset.metadata`**)."
+      },
+      "history_images": {
+        "type": "array",
+        "description": "Completed images (**`app_asset_image`** with **`state = '已完成'`**).",
+        "items": {
+          "$ref": "#/components/schemas/CornerScapeHistoryImage"
+        }
+      }
+    }
+  },
+  "CornerScapeResponse": {
+    "type": "object",
+    "required": [
+      "items"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CornerScapeAssetItem"
+        }
+      }
+    }
+  },
+  "ArtStyleRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "numeric_id",
+      "name"
+    ],
+    "description": "One **`app_art_style`** row (Electron-era **`o_artStyle`** subset).",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "file_url": {
+        "type": "string",
+        "nullable": true,
+        "description": "Public URL, caller-managed path, or this API's local cover path **`/api/v1/art-styles/numeric/{numeric_id}/cover`**"
+      },
+      "label": {
+        "type": "string",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ListArtStylesResponse": {
+    "type": "object",
+    "required": [
+      "items",
+      "total"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ArtStyleRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "CreateArtStyleBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "file_url": {
+        "type": "string",
+        "description": "Public URL, API path, **`data:image/png|jpeg|webp;base64,...`**, or raw base64 image string"
+      },
+      "label": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      }
+    }
+  },
+  "ExtractArtStylePromptBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "images"
+    ],
+    "properties": {
+      "images": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 16,
+        "items": {
+          "type": "string",
+          "description": "Image URL or data URI for OpenAI **`image_url.url`**"
+        },
+        "description": "Non-empty after trim per entry; each string capped at 20 MiB server-side"
+      }
+    }
+  },
+  "ExtractArtStylePromptResponse": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "text"
+    ],
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Model output (Electron-era Node wrapped this in **`{ code, data, message }`**; v1 returns JSON only)"
+      }
+    }
+  },
+  "PatchArtStyleBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "file_url": {
+        "type": "string",
+        "nullable": true,
+        "description": "Same as create; use **null** to clear the stored cover reference"
+      },
+      "label": {
+        "type": "string",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "NovelRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "numeric_id",
+      "chapter_index",
+      "chapter",
+      "chapter_data",
+      "event_state"
+    ],
+    "description": "One **`app_novel`** row (Electron-era **`o_novel`** subset).",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "chapter_index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "reel": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter": {
+        "type": "string"
+      },
+      "chapter_data": {
+        "type": "string"
+      },
+      "event": {
+        "type": "string",
+        "nullable": true
+      },
+      "event_state": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "error_reason": {
+        "type": "string",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "ListNovelsResponse": {
+    "type": "object",
+    "required": [
+      "items",
+      "total"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NovelRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "CreateNovelBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "chapter_index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "reel": {
+        "type": "string"
+      },
+      "chapter": {
+        "type": "string"
+      },
+      "chapter_data": {
+        "type": "string"
+      }
+    }
+  },
+  "PatchNovelBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one field required. String fields accept **`null`** to clear (empty string for **`chapter`** / **`chapter_data`**).\n",
+    "properties": {
+      "chapter_index": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "reel": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter_data": {
+        "type": "string",
+        "nullable": true
+      },
+      "event": {
+        "type": "string",
+        "nullable": true
+      },
+      "event_state": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "error_reason": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ScriptBrief": {
+    "type": "object",
+    "required": [
+      "numeric_id"
+    ],
+    "properties": {
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "extract_state": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ProjectDetailResponse": {
+    "type": "object",
+    "required": [
+      "project",
+      "scripts"
+    ],
+    "properties": {
+      "project": {
+        "$ref": "#/components/schemas/ProjectRow"
+      },
+      "scripts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ScriptBrief"
+        }
+      }
+    }
+  },
+  "CreateProjectBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "All optional. Whitespace-only strings are stored as omitted (`NULL`). Aligns with Electron-era **`/api/project/addProject`** field set (without SQLite-only `userId`).\n",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "intro": {
+        "type": "string"
+      },
+      "project_type": {
+        "type": "string"
+      },
+      "image_model": {
+        "type": "string"
+      },
+      "image_quality": {
+        "type": "string"
+      },
+      "video_model": {
+        "type": "string"
+      },
+      "art_style": {
+        "type": "string"
+      },
+      "director_manual": {
+        "type": "string"
+      },
+      "mode": {
+        "type": "string"
+      },
+      "video_ratio": {
+        "type": "string"
+      }
+    }
+  },
+  "PatchProjectBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one property required. Use `null` or `\"\"` to clear a column.\nOnly the listed properties are accepted; extra keys are rejected (HTTP 400).\n",
+    "properties": {
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "intro": {
+        "type": "string",
+        "nullable": true
+      },
+      "project_type": {
+        "type": "string",
+        "nullable": true
+      },
+      "image_model": {
+        "type": "string",
+        "nullable": true
+      },
+      "image_quality": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_model": {
+        "type": "string",
+        "nullable": true
+      },
+      "art_style": {
+        "type": "string",
+        "nullable": true
+      },
+      "director_manual": {
+        "type": "string",
+        "nullable": true
+      },
+      "mode": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_ratio": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ScriptRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "project_id",
+      "numeric_id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "project_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "content": {
+        "type": "string",
+        "nullable": true
+      },
+      "extract_state": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "CreateScriptBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "All optional. Whitespace-only `name` / `content` are omitted (`NULL`).\n",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      },
+      "extract_state": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "BatchAddScriptItem": {
+    "type": "object",
+    "required": [
+      "scriptName",
+      "scriptData"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "scriptName": {
+        "type": "string"
+      },
+      "scriptData": {
+        "type": "string"
+      }
+    }
+  },
+  "BatchAddScriptDataBody": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BatchAddScriptItem"
+        }
+      }
+    }
+  },
+  "BatchAddScriptResponse": {
+    "type": "object",
+    "required": [
+      "message",
+      "inserted",
+      "scripts"
+    ],
+    "properties": {
+      "message": {
+        "type": "string"
+      },
+      "inserted": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "scripts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ScriptRow"
+        }
+      }
+    }
+  },
+  "PatchScriptBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one property required; unknown properties rejected (HTTP 400).",
+    "properties": {
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "content": {
+        "type": "string",
+        "nullable": true
+      },
+      "extract_state": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "ExportScriptsBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "numeric_ids"
+    ],
+    "properties": {
+      "numeric_ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1
+        },
+        "minItems": 1,
+        "maxItems": 500
+      }
+    }
+  },
+  "ScriptExtractStatePollBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "numeric_ids"
+    ],
+    "properties": {
+      "numeric_ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1
+        },
+        "minItems": 1,
+        "maxItems": 2000
+      }
+    }
+  },
+  "ScriptExtractStatePollRow": {
+    "type": "object",
+    "required": [
+      "numeric_id"
+    ],
+    "properties": {
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "extract_state": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "error_reason": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "ExtractAssetsStartBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "project_numeric_id",
+      "script_numeric_ids"
+    ],
+    "properties": {
+      "project_numeric_id": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "script_numeric_ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1
+        },
+        "minItems": 1,
+        "maxItems": 100
+      },
+      "group_size": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "maximum": 20,
+        "default": 5
+      }
+    }
+  },
+  "ExtractAssetsAcceptedResponse": {
+    "type": "object",
+    "required": [
+      "status",
+      "message"
+    ],
+    "properties": {
+      "status": {
+        "type": "string",
+        "example": "accepted"
+      },
+      "message": {
+        "type": "string",
+        "example": "asset extraction started"
+      }
+    }
+  },
+  "StoryboardRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "script_id",
+      "numeric_id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "script_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "numeric_script_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "file_path": {
+        "type": "string",
+        "nullable": true
+      },
+      "duration": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "track_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "reason": {
+        "type": "string",
+        "nullable": true
+      },
+      "track": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_desc": {
+        "type": "string",
+        "nullable": true
+      },
+      "should_generate_image": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "numeric_project_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "flow_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "sb_index": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      }
+    }
+  },
+  "CreateStoryboardBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "All optional. Text fields: whitespace-only strings are omitted (`NULL`).\nOmit **`numeric_script_id`** / **`numeric_project_id`** to use path script and parent project numeric ids.\n",
+    "properties": {
+      "prompt": {
+        "type": "string"
+      },
+      "file_path": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string"
+      },
+      "track_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "track": {
+        "type": "string"
+      },
+      "video_desc": {
+        "type": "string"
+      },
+      "should_generate_image": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "numeric_script_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "numeric_project_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "flow_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "sb_index": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "PatchStoryboardBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "At least one property required; unknown properties rejected (HTTP 400).",
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "nullable": true
+      },
+      "file_path": {
+        "type": "string",
+        "nullable": true
+      },
+      "duration": {
+        "type": "string",
+        "nullable": true
+      },
+      "state": {
+        "type": "string",
+        "nullable": true
+      },
+      "reason": {
+        "type": "string",
+        "nullable": true
+      },
+      "track": {
+        "type": "string",
+        "nullable": true
+      },
+      "video_desc": {
+        "type": "string",
+        "nullable": true
+      },
+      "numeric_script_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "track_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "should_generate_image": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "numeric_project_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "flow_id": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "sb_index": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      }
+    }
+  },
+  "SkillFileMeta": {
+    "type": "object",
+    "required": [
+      "path",
+      "size_bytes"
+    ],
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Relative path under `data/skills`"
+      },
+      "size_bytes": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "SkillsSummaryResponse": {
+    "type": "object",
+    "required": [
+      "markdown_file_count",
+      "total_bytes"
+    ],
+    "properties": {
+      "markdown_file_count": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Number of Markdown files counted (capped)"
+      },
+      "total_bytes": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Sum of file sizes for counted files"
+      }
+    }
+  },
+  "SkillContentResponse": {
+    "type": "object",
+    "required": [
+      "path",
+      "content"
+    ],
+    "properties": {
+      "path": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      }
+    }
+  },
+  "SkillContentWriteRequest": {
+    "type": "object",
+    "required": [
+      "path",
+      "content"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Relative path under `data/skills`, e.g. `script_execution_script.md`"
+      },
+      "content": {
+        "type": "string",
+        "description": "Full file body to write (UTF-8)"
+      }
+    }
+  },
+  "HarnessToolInfo": {
+    "type": "object",
+    "required": [
+      "name",
+      "description"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      }
+    }
+  },
+  "HarnessToolsResponse": {
+    "type": "object",
+    "required": [
+      "tools"
+    ],
+    "properties": {
+      "tools": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HarnessToolInfo"
+        }
+      }
+    }
+  },
+  "BillingWebhookResponse": {
+    "type": "object",
+    "required": [
+      "received",
+      "duplicate",
+      "informational_event"
+    ],
+    "properties": {
+      "received": {
+        "type": "boolean"
+      },
+      "duplicate": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "integer",
+        "format": "int64",
+        "description": "app_billing_webhook_event row id when duplicate is false.\n"
+      },
+      "provider_event_id": {
+        "type": "string",
+        "description": "The final deduplication key stored in app_billing_webhook_event (`<provider>:<id>` or `id`).\n",
+        "nullable": true
+      },
+      "profile_updated": {
+        "type": "boolean",
+        "description": "True when user_id and plan_tier were applied to app_user_profile (first receipt only).\n"
+      },
+      "informational_event": {
+        "type": "boolean",
+        "description": "True when this webhook event type is in provider informational whitelist and does not\ndrive subscription status transitions.\n"
+      }
+    }
+  },
+  "BillingWebhookEventItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "provider_event_id",
+      "is_informational_event",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "provider_event_id": {
+        "type": "string"
+      },
+      "provider": {
+        "type": "string",
+        "nullable": true
+      },
+      "raw_event_id": {
+        "type": "string",
+        "nullable": true
+      },
+      "event_type": {
+        "type": "string",
+        "nullable": true
+      },
+      "event_created_at": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      },
+      "is_informational_event": {
+        "type": "boolean"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "BillingWebhookEventsResponse": {
+    "type": "object",
+    "required": [
+      "items",
+      "total",
+      "limit",
+      "offset",
+      "has_more"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BillingWebhookEventItem"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total rows matching current filters before pagination."
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "offset": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "has_more": {
+        "type": "boolean",
+        "description": "True when there are more rows after current page."
+      },
+      "next_offset": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true,
+        "description": "Next offset to request when `has_more` is true."
+      }
+    }
+  },
+  "LegacyTasksEmptyBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Empty JSON object **`{}`** still used by some Electron-era-shaped **`POST /api/v1/project/*`** manual routes."
+  },
+  "JobsPageResponse": {
+    "type": "object",
+    "required": [
+      "data",
+      "total"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JobRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Total rows matching filters (not just this page)"
+      }
+    }
+  },
+  "LegacyProjectDeleteProjectBody": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_project.numeric_id (SQLite o_project.id)"
+      }
+    }
+  },
+  "LegacyProjectDeleteProjectResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "example": "删除项目成功"
+      }
+    }
+  },
+  "LegacyProjectMutationMessageResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyProjectAddProjectBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "projectType",
+      "name",
+      "intro",
+      "type",
+      "artStyle",
+      "directorManual",
+      "videoRatio",
+      "imageModel",
+      "videoModel",
+      "imageQuality",
+      "mode"
+    ],
+    "properties": {
+      "projectType": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "intro": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "description": "SQLite o_project.type; with mode maps to app_project.mode (non-empty mode wins)"
+      },
+      "artStyle": {
+        "type": "string"
+      },
+      "directorManual": {
+        "type": "string"
+      },
+      "videoRatio": {
+        "type": "string"
+      },
+      "imageModel": {
+        "type": "string"
+      },
+      "videoModel": {
+        "type": "string"
+      },
+      "imageQuality": {
+        "type": "string"
+      },
+      "mode": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyProjectEditProjectBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "intro",
+      "type",
+      "artStyle",
+      "directorManual",
+      "videoRatio",
+      "imageModel",
+      "videoModel",
+      "imageQuality",
+      "projectType",
+      "mode"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_project.numeric_id"
+      },
+      "name": {
+        "type": "string"
+      },
+      "intro": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "description": "SQLite o_project.type; with mode maps to app_project.mode (non-empty mode wins)"
+      },
+      "artStyle": {
+        "type": "string"
+      },
+      "directorManual": {
+        "type": "string"
+      },
+      "videoRatio": {
+        "type": "string"
+      },
+      "imageModel": {
+        "type": "string"
+      },
+      "videoModel": {
+        "type": "string"
+      },
+      "imageQuality": {
+        "type": "string"
+      },
+      "projectType": {
+        "type": "string"
+      },
+      "mode": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyEmptyObjectResponse": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Legacy Electron **`success()`** with no payload; Rust returns **`{}`**."
+  },
+  "LegacyDirectorManualDataSlot": {
+    "type": "object",
+    "required": [
+      "label",
+      "value",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "label": {
+        "type": "string"
+      },
+      "value": {
+        "type": "string"
+      },
+      "data": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyDirectorManualAddBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "images",
+      "directorManual",
+      "data"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "directorManual": {
+        "type": "string",
+        "description": "New folder name under story_skills"
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "http(s) URL or data URI base64"
+        }
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualDataSlot"
+        }
+      }
+    }
+  },
+  "LegacyDirectorManualEditBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "directorManual",
+      "images",
+      "data"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Display title; prefixed to README body on edit"
+      },
+      "directorManual": {
+        "type": "string",
+        "description": "Existing folder name under story_skills"
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualDataSlot"
+        }
+      }
+    }
+  },
+  "LegacyDirectorManualDeleteBody": {
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Folder name under story_skills"
+      }
+    }
+  },
+  "LegacyDirectorManualDeleteResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "example": "删除成功"
+      }
+    }
+  },
+  "LegacyDirectorManualSlotRow": {
+    "type": "object",
+    "required": [
+      "label",
+      "value",
+      "data"
+    ],
+    "properties": {
+      "label": {
+        "type": "string"
+      },
+      "value": {
+        "type": "string"
+      },
+      "data": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyDirectorManualStyleRow": {
+    "type": "object",
+    "required": [
+      "name",
+      "image",
+      "directorManual",
+      "data"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "image": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "directorManual": {
+        "type": "string"
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualSlotRow"
+        }
+      }
+    }
+  },
+  "LegacyDirectorManualListResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualStyleRow"
+        }
+      }
+    }
+  },
+  "LegacyVisualManualAddBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "images",
+      "stylePath",
+      "data"
+    ],
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "stylePath": {
+        "type": "string",
+        "description": "New folder name under art_skills"
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "http(s) URL or data URI base64"
+        }
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualDataSlot"
+        }
+      }
+    }
+  },
+  "LegacyVisualManualEditBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "stylePath",
+      "images",
+      "data"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Display title; prefixed to README body on edit"
+      },
+      "stylePath": {
+        "type": "string",
+        "description": "Existing folder under art_skills"
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyDirectorManualDataSlot"
+        }
+      }
+    }
+  },
+  "ScriptsGetScriptApiNameBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Optional substring filter (case-insensitive)"
+      }
+    }
+  },
+  "LegacyScriptRelatedAssetBrief": {
+    "type": "object",
+    "required": [
+      "id",
+      "name"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_asset.numeric_id"
+      },
+      "name": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyScriptsGetScriptApiItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "relatedAssets"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_script.numeric_id"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true
+      },
+      "content": {
+        "type": "string",
+        "nullable": true
+      },
+      "extractState": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
+      },
+      "errorReason": {
+        "type": "string",
+        "nullable": true
+      },
+      "createTime": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      },
+      "relatedAssets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyScriptRelatedAssetBrief"
+        }
+      }
+    }
+  },
+  "LegacyScriptsGetScriptApiResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyScriptsGetScriptApiItem"
+        }
+      }
+    }
+  },
+  "LegacyNovelProjectIdBody": {
+    "type": "object",
+    "required": [
+      "projectId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "LegacyNovelDataResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NovelRow"
+        }
+      }
+    }
+  },
+  "LegacyNovelIndexItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "index",
+      "chapter"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_novel.numeric_id"
+      },
+      "index": {
+        "type": "integer",
+        "format": "int32",
+        "description": "chapter_index"
+      },
+      "chapter": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyNovelIndexResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyNovelIndexItem"
+        }
+      }
+    }
+  },
+  "LegacyNovelGetNovelEventStateBody": {
+    "type": "object",
+    "required": [
+      "ids"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "LegacyNovelEventStateItem": {
+    "type": "object",
+    "required": [
+      "id",
+      "eventState"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_novel.numeric_id"
+      },
+      "event": {
+        "type": "string",
+        "nullable": true
+      },
+      "eventState": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "errorReason": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyNovelEventStateResponse": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyNovelEventStateItem"
+        }
+      }
+    }
+  },
+  "LegacyNovelBatchDeleteBody": {
+    "type": "object",
+    "required": [
+      "ids"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxItems": 500
+      }
+    }
+  },
+  "LegacyNovelOkMessageResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "e.g. 新增原文成功, 删除原文成功, 更新原文成功"
+      }
+    }
+  },
+  "GenerateNovelEventsBody": {
+    "type": "object",
+    "required": [
+      "novelIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "novelIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "concurrentCount": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "default": 5,
+        "description": "Max effective value is 20"
+      }
+    }
+  },
+  "LegacyGenerateNovelEventsBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "novelIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "novelIds": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "concurrentCount": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "default": 5,
+        "description": "Max effective value is 20"
+      }
+    }
+  },
+  "LegacyNovelGetNovelBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "page",
+      "limit"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "page": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1
+      },
+      "limit": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "description": "Values above 200 are capped server-side"
+      },
+      "search": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyNovelGetNovelPageRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "index",
+      "chapter",
+      "chapterData",
+      "eventState"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_novel.numeric_id"
+      },
+      "index": {
+        "type": "integer",
+        "format": "int32",
+        "description": "chapter_index"
+      },
+      "reel": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter": {
+        "type": "string"
+      },
+      "chapterData": {
+        "type": "string"
+      },
+      "event": {
+        "type": "string",
+        "nullable": true
+      },
+      "eventState": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "errorReason": {
+        "type": "string",
+        "nullable": true
+      }
+    }
+  },
+  "LegacyNovelGetNovelResponse": {
+    "type": "object",
+    "required": [
+      "data",
+      "total"
+    ],
+    "properties": {
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyNovelGetNovelPageRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "LegacyNovelAddNovelItem": {
+    "type": "object",
+    "required": [
+      "index",
+      "reel",
+      "chapter",
+      "chapterData"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "reel": {
+        "type": "string"
+      },
+      "chapter": {
+        "type": "string"
+      },
+      "chapterData": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyNovelAddNovelBody": {
+    "type": "object",
+    "required": [
+      "projectId",
+      "data"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyNovelAddNovelItem"
+        },
+        "maxItems": 200
+      }
+    }
+  },
+  "LegacyNovelDeleteNovelBody": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32",
+        "description": "app_novel.numeric_id"
+      }
+    }
+  },
+  "LegacyNovelUpdateNovelBody": {
+    "type": "object",
+    "required": [
+      "id",
+      "index",
+      "reel",
+      "chapter",
+      "chapterData",
+      "event"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "index": {
+        "oneOf": [
+          {
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "reel": {
+        "type": "string"
+      },
+      "chapter": {
+        "type": "string"
+      },
+      "chapterData": {
+        "type": "string"
+      },
+      "event": {
+        "type": "string"
+      }
+    }
+  },
+  "JobRow": {
+    "type": "object",
+    "required": [
+      "numeric_task_id",
+      "id",
+      "owner_user_id",
+      "kind",
+      "status",
+      "payload",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "numeric_task_id": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Monotonic bigint compatibility id for Electron-era task-center integer lookups."
+      },
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "owner_user_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "kind": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "result": {
+        "type": "object",
+        "nullable": true,
+        "additionalProperties": true
+      },
+      "error_message": {
+        "type": "string",
+        "nullable": true
+      },
+      "idempotency_key": {
+        "type": "string",
+        "nullable": true,
+        "description": "Set when created with `Idempotency-Key` header; unique per owner when present."
+      },
+      "claimed_by": {
+        "type": "string",
+        "nullable": true,
+        "description": "Worker instance label when `running` (`WORKER_ID` env); cleared when re-queued after `failed`."
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "JobKindSummary": {
+    "type": "object",
+    "required": [
+      "kind",
+      "job_count"
+    ],
+    "properties": {
+      "kind": {
+        "type": "string"
+      },
+      "job_count": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "JobStatusSummary": {
+    "type": "object",
+    "required": [
+      "status",
+      "job_count"
+    ],
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "job_count": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "CreateJobBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "kind"
+    ],
+    "description": "Only `kind` and `payload` are accepted; extra properties are rejected by the server (HTTP 400).",
+    "properties": {
+      "kind": {
+        "type": "string",
+        "description": "Non-empty after trim (e.g. `storyboard.generate`)"
+      },
+      "payload": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Defaults to `{}` when omitted"
+      }
+    }
+  },
+  "NovelEventListResponse": {
+    "type": "object",
+    "required": [
+      "items",
+      "total"
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NovelEventWithChapters"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "NovelEventWithChapters": {
+    "type": "object",
+    "required": [
+      "id",
+      "project_id",
+      "numeric_id",
+      "name",
+      "detail",
+      "chapter_indexes"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "project_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "numeric_id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "detail": {
+        "type": "string"
+      },
+      "create_time_ms": {
+        "type": "integer",
+        "format": "int64",
+        "nullable": true
+      },
+      "chapter_indexes": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "CreateNovelEventBody": {
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "detail": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter_ids": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "description": "Legacy novel ids to associate with this event"
+      }
+    }
+  },
+  "NovelEventCreateResponse": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "detail",
+      "message"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "detail": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "UpdateNovelEventBody": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "detail": {
+        "type": "string",
+        "nullable": true
+      },
+      "chapter_ids": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "description": "If provided, replaces all existing associations"
+      }
+    }
+  },
+  "BatchDeleteNovelEventsBody": {
+    "type": "object",
+    "required": [
+      "ids"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "maxItems": 500
+      }
+    }
+  },
+  "NovelEventOkResponse": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyGetEventsBody": {
+    "type": "object",
+    "required": [
+      "project_id",
+      "page",
+      "limit"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "project_id": {
+        "type": "integer"
+      },
+      "page": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "search": {
+        "type": "string"
+      }
+    }
+  },
+  "LegacyNovelEventListResponse": {
+    "type": "object",
+    "required": [
+      "list",
+      "total"
+    ],
+    "properties": {
+      "list": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/LegacyNovelEventRow"
+        }
+      },
+      "total": {
+        "type": "integer",
+        "format": "int64"
+      }
+    }
+  },
+  "LegacyNovelEventRow": {
+    "type": "object",
+    "required": [
+      "id",
+      "eventName",
+      "createTime",
+      "chapters"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "eventName": {
+        "type": "string"
+      },
+      "detail": {
+        "type": "string",
+        "nullable": true
+      },
+      "createTime": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "chapters": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "ErrorBody": {
+    "type": "object",
+    "required": [
+      "code",
+      "message"
+    ],
+    "description": "Stable error envelope for `/api/v1/*`. Clients should log `request_id` for support.\n",
+    "properties": {
+      "code": {
+        "type": "string",
+        "description": "Machine-readable error code (snake_case)",
+        "example": "unauthorized"
+      },
+      "message": {
+        "type": "string",
+        "description": "Human-readable summary"
+      },
+      "request_id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Correlates with server logs / tracing"
+      },
+      "details": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Optional structured detail (validation fields, etc.)"
+      }
+    }
+  },
+  "QualityReview": {
+    "type": "object",
+    "required": [
+      "id",
+      "createdAt",
+      "updatedAt",
+      "userId",
+      "targetType",
+      "source",
+      "isBadCase"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "userId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "projectId": {
+        "type": "integer",
+        "nullable": true
+      },
+      "scriptId": {
+        "type": "integer",
+        "nullable": true
+      },
+      "jobId": {
+        "type": "string",
+        "format": "uuid",
+        "nullable": true
+      },
+      "targetType": {
+        "type": "string",
+        "enum": [
+          "storyboard",
+          "script",
+          "video",
+          "asset",
+          "output"
+        ]
+      },
+      "targetId": {
+        "type": "string",
+        "nullable": true
+      },
+      "source": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "auto"
+        ]
+      },
+      "plotCoherence": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "characterConsistency": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "dialogueNaturalness": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "pacing": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "faithfulness": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "visualQuality": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "overallScore": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "nullable": true
+      },
+      "passed": {
+        "type": "boolean",
+        "nullable": true
+      },
+      "comments": {
+        "type": "string",
+        "nullable": true
+      },
+      "skillVersion": {
+        "type": "string",
+        "nullable": true
+      },
+      "modelName": {
+        "type": "string",
+        "nullable": true
+      },
+      "modelParams": {
+        "type": "object",
+        "nullable": true,
+        "additionalProperties": true
+      },
+      "reviewerId": {
+        "type": "string",
+        "format": "uuid",
+        "nullable": true
+      },
+      "isBadCase": {
+        "type": "boolean"
+      },
+      "badCaseCategory": {
+        "type": "string",
+        "nullable": true,
+        "enum": [
+          "plot_hole",
+          "character_break",
+          "storyboard_mismatch",
+          "dialogue_issue",
+          "visual_error",
+          "pacing_issue",
+          "other"
+        ]
+      }
+    }
+  },
+  "CreateQualityReviewBody": {
+    "type": "object",
+    "required": [
+      "targetType"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "projectId": {
+        "type": "integer"
+      },
+      "scriptId": {
+        "type": "integer"
+      },
+      "jobId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "targetType": {
+        "type": "string",
+        "enum": [
+          "storyboard",
+          "script",
+          "video",
+          "asset",
+          "output"
+        ]
+      },
+      "targetId": {
+        "type": "string"
+      },
+      "source": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "auto"
+        ],
+        "description": "Defaults to `manual`."
+      },
+      "plotCoherence": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "characterConsistency": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "dialogueNaturalness": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "pacing": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "faithfulness": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "visualQuality": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "overallScore": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "passed": {
+        "type": "boolean"
+      },
+      "comments": {
+        "type": "string"
+      },
+      "skillVersion": {
+        "type": "string"
+      },
+      "modelName": {
+        "type": "string"
+      },
+      "modelParams": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "isBadCase": {
+        "type": "boolean"
+      },
+      "badCaseCategory": {
+        "type": "string",
+        "enum": [
+          "plot_hole",
+          "character_break",
+          "storyboard_mismatch",
+          "dialogue_issue",
+          "visual_error",
+          "pacing_issue",
+          "other"
+        ]
+      }
+    }
+  },
+  "QualityStatsResponse": {
+    "type": "object",
+    "required": [
+      "targetType",
+      "totalReviews",
+      "passedCount",
+      "failedCount",
+      "badCaseCount",
+      "passRatePercent",
+      "avgOverallScore"
+    ],
+    "properties": {
+      "targetType": {
+        "type": "string",
+        "enum": [
+          "storyboard",
+          "script",
+          "video",
+          "asset",
+          "output"
+        ]
+      },
+      "totalReviews": {
+        "type": "integer"
+      },
+      "passedCount": {
+        "type": "integer"
+      },
+      "failedCount": {
+        "type": "integer"
+      },
+      "badCaseCount": {
+        "type": "integer"
+      },
+      "passRatePercent": {
+        "type": "number",
+        "format": "double"
+      },
+      "avgOverallScore": {
+        "type": "number",
+        "format": "double"
+      }
+    }
+  },
+  "StagePassRateItem": {
+    "type": "object",
+    "required": [
+      "targetType",
+      "reviewDate",
+      "totalReviews",
+      "passedCount",
+      "badCaseCount"
+    ],
+    "properties": {
+      "targetType": {
+        "type": "string",
+        "enum": [
+          "storyboard",
+          "script",
+          "video",
+          "asset",
+          "output"
+        ]
+      },
+      "reviewDate": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "totalReviews": {
+        "type": "integer"
+      },
+      "passedCount": {
+        "type": "integer"
+      },
+      "badCaseCount": {
+        "type": "integer"
+      },
+      "passRatePercent": {
+        "type": "number",
+        "format": "double",
+        "nullable": true
+      },
+      "avgScore": {
+        "type": "number",
+        "format": "double",
+        "nullable": true
+      }
+    }
+  },
+  "RateLimitError": {
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/ErrorBody"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "code": {
+            "const": "rate_limited"
+          },
+          "retry_after_ms": {
+            "type": "integer",
+            "description": "Suggested backoff in milliseconds (mirror `Retry-After` when present)"
+          }
+        }
+      }
+    ]
+  },
+  "StoreVendorCredentialBody": {
+    "type": "object",
+    "required": [
+      "vendorId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "vendorId": {
+        "type": "string",
+        "description": "Vendor identifier from catalog"
+      },
+      "apiKey": {
+        "type": "string",
+        "description": "API key to encrypt and store"
+      },
+      "apiSecret": {
+        "type": "string",
+        "description": "API secret to encrypt and store"
+      },
+      "apiToken": {
+        "type": "string",
+        "description": "API token to encrypt and store"
+      }
+    }
+  },
+  "VendorCredentialResponse": {
+    "type": "object",
+    "required": [
+      "vendorId",
+      "hasSecret",
+      "hasToken",
+      "message"
+    ],
+    "properties": {
+      "vendorId": {
+        "type": "string"
+      },
+      "keyHint": {
+        "type": "string",
+        "description": "Last 4 characters of API key for identification (e.g., \"...1234\")"
+      },
+      "hasSecret": {
+        "type": "boolean"
+      },
+      "hasToken": {
+        "type": "boolean"
+      },
+      "message": {
+        "type": "string"
+      }
+    }
+  }
+}

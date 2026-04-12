@@ -1,4 +1,4 @@
-//! Emit the merged OpenAPI document (embedded `openapi_base.yaml` + utoipa overlays) to stdout.
+//! Emit the merged OpenAPI document (Rust shell + embedded legacy schemas + path index + utoipa) to stdout.
 //!
 //! ```text
 //! cargo run --bin export-openapi --manifest-path backend/Cargo.toml > openapi.export.yaml

@@ -11,7 +11,7 @@
 - `master:src/agents/**/*`
 - 当前分支 `backend/src/**/*`
 - 当前分支 `frontend/lib/**/*`
-- 合并 OpenAPI：`GET /api/v1/openapi.yaml` 或 `backend/` 下 `cargo run --bin export-openapi`（源：`backend/src/openapi_spec/openapi_base.yaml` + utoipa）
+- 合并 OpenAPI：`GET /api/v1/openapi.yaml` 或 `backend/` 下 `cargo run --bin export-openapi`（源：`shell.rs` + `embedded/legacy_component_schemas.json` + `openapi_paths_index.yaml` + utoipa）
 - [`docs/websocket-events.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/websocket-events.md)
 - [`docs/plans/electron-node-parity.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/electron-node-parity.md)
 

@@ -21,7 +21,7 @@
 
 ## 重构栈门禁（自动跑，别让用户手动点）
 
-凡改动 **`backend/`**（含 **`backend/src/openapi_spec/openapi_base.yaml`** / **`openapi_paths_index.yaml`**）、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
+凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`embedded/legacy_component_schemas.json`**、**`openapi_paths_index.yaml`**）、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
 
 ```bash
 yarn refactor:check

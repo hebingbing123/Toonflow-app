@@ -1,6 +1,8 @@
-//! Merge OpenAPI fragments into the embedded base (`openapi_base.yaml`).
+//! Merge OpenAPI fragments into the document base.
 //!
-//! The base carries **metadata**, **empty `paths`**, and **`components`** (schemas, security).
+//! The base is built from **[`super::shell::openapi_shell`]** (metadata + security) plus
+//! **`embedded/legacy_component_schemas.json`** (transitional component schemas until everything is `ToSchema`),
+//! with **empty `paths`** before merges.
 //!
 //! Merge order:
 //! 1. **`openapi_paths_index.yaml`** — canonical path items (request bodies, responses, parameters,
@@ -18,13 +20,79 @@ use std::sync::OnceLock;
 use anyhow::Context;
 use serde_json::Value as Json;
 
-const BASE_OPENAPI_YAML: &str = include_str!("openapi_base.yaml");
 const PATHS_INDEX_YAML: &str = include_str!("openapi_paths_index.yaml");
+
+const FALLBACK_MINIMAL_YAML: &str =
+    "openapi: 3.1.0\ninfo:\n  title: Toonflow API\n  version: 1.0.0\npaths: {}\n";
+
+fn document_base() -> anyhow::Result<Json> {
+    let shell = super::shell::openapi_shell();
+    let mut base = serde_json::to_value(&shell).context("serialize openapi shell")?;
+    inject_legacy_schemas(&mut base)?;
+    ensure_paths_object(&mut base)?;
+    Ok(base)
+}
+
+fn inject_legacy_schemas(base: &mut Json) -> anyhow::Result<()> {
+    const LEGACY: &str = include_str!("embedded/legacy_component_schemas.json");
+    let legacy: Json =
+        serde_json::from_str(LEGACY).context("parse embedded legacy_component_schemas.json")?;
+    let legacy_obj = legacy
+        .as_object()
+        .context("legacy_component_schemas.json must be a JSON object")?;
+    let root = base
+        .as_object_mut()
+        .context("OpenAPI root must be a JSON object")?;
+    let components = root
+        .entry("components")
+        .or_insert_with(|| Json::Object(Default::default()));
+    let co = components
+        .as_object_mut()
+        .context("components must be a JSON object")?;
+    let schemas = co
+        .entry("schemas")
+        .or_insert_with(|| Json::Object(Default::default()));
+    let sm = schemas
+        .as_object_mut()
+        .context("components.schemas must be a JSON object")?;
+    for (k, v) in legacy_obj {
+        sm.insert(k.clone(), v.clone());
+    }
+    Ok(())
+}
+
+fn ensure_paths_object(base: &mut Json) -> anyhow::Result<()> {
+    let root = base
+        .as_object_mut()
+        .context("OpenAPI root must be a JSON object")?;
+    let paths = root
+        .entry("paths")
+        .or_insert_with(|| Json::Object(Default::default()));
+    if paths.as_object().is_none() {
+        *paths = Json::Object(Default::default());
+    }
+    Ok(())
+}
+
+fn document_base_yaml_for_fallback() -> String {
+    match document_base() {
+        Ok(base) => match serde_yaml::to_string(&base) {
+            Ok(raw) => strip_optional_yaml_document_prefix(raw),
+            Err(e) => {
+                tracing::error!(%e, "OpenAPI fallback: YAML serialize of document base failed");
+                FALLBACK_MINIMAL_YAML.to_string()
+            }
+        },
+        Err(e) => {
+            tracing::error!(%e, "OpenAPI fallback: document base build failed");
+            FALLBACK_MINIMAL_YAML.to_string()
+        }
+    }
+}
 
 /// Full OpenAPI document: base + indexed paths + utoipa overlays and extra components.
 pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
-    let mut base: Json =
-        serde_yaml::from_str(BASE_OPENAPI_YAML).context("parse embedded openapi_base.yaml")?;
+    let mut base = document_base()?;
     let paths_index: Json = serde_yaml::from_str(PATHS_INDEX_YAML)
         .context("parse embedded openapi_paths_index.yaml")?;
     overlay_paths(&mut base, &paths_index).context("merge openapi_paths_index paths")?;
@@ -54,8 +122,8 @@ pub fn merged_openapi_yaml_cached() -> &'static str {
     static DOC: OnceLock<String> = OnceLock::new();
     DOC.get_or_init(|| {
         merged_openapi_yaml_string().unwrap_or_else(|err| {
-            tracing::error!(%err, "OpenAPI merge failed; serving embedded openapi_base.yaml only");
-            BASE_OPENAPI_YAML.to_string()
+            tracing::error!(%err, "OpenAPI merge failed; serving document base only (shell + legacy schemas)");
+            document_base_yaml_for_fallback()
         })
     })
     .as_str()

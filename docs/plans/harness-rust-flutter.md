@@ -370,7 +370,7 @@ Harness 的常见表述是 **Agent = Model + Harness**：Harness 负责工具、
 ### 11.2 HTTP / API（推荐默认）
 
 - **版本化 REST**：统一前缀 `**/api/v1/`**；破坏性变更用 `**v2`** 新前缀，**不** silent 改 `v1`。
-- **契约**：**OpenAPI 3.x** 为单一事实来源（Rust/utoipa 合并 `openapi_base.yaml` 与路径片段；`GET /api/v1/openapi.yaml` / `export-openapi`）；错误体 **稳定结构**（如 `code` + `message` + `request_id`）。
+- **契约**：**OpenAPI 3.x** 为单一事实来源（Rust/utoipa 合并 `shell.rs`、嵌入 legacy schemas、路径索引与 handler 注解；`GET /api/v1/openapi.yaml` / `export-openapi`）；错误体 **稳定结构**（如 `code` + `message` + `request_id`）。
 - **健康检查**：`**GET /health`**（或 **`/api/v1/health`**）；可选极简探针 **`GET /api/v1/ping`**（JSON **`ok`**），供负载均衡与 K8s probe。
 
 ### 11.3 WebSocket 与实时事件（已确认路径 + 推荐默认）

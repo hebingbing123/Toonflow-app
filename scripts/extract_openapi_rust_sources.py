@@ -6,8 +6,8 @@ Reads a **full** OpenAPI 3.1 YAML (default: `docs/openapi.yaml` if present), or 
   python3 scripts/extract_openapi_rust_sources.py path/to/full-openapi.yaml
 
 Writes:
-  backend/src/openapi_spec/openapi_base.yaml
-    — openapi, info, servers, tags, **paths: {}** (HTTP paths come from utoipa merge), full components
+  backend/src/openapi_spec/embedded/legacy_component_schemas.json
+    — `components.schemas` only (transitional; metadata/tags/security live in `backend/src/openapi_spec/shell.rs`)
   backend/src/openapi_spec/ws_protocol_description.md
     — `GET /api/v1/ws` long description (for `include_str!` on the upgrade handler)
   backend/src/openapi_spec/openapi_paths_index.yaml
@@ -19,6 +19,7 @@ Run from repo root:
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -26,7 +27,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SRC = ROOT / "docs" / "openapi.yaml"
-OUT_BASE = ROOT / "backend" / "src" / "openapi_spec" / "openapi_base.yaml"
+OUT_LEGACY_SCHEMAS = (
+    ROOT / "backend" / "src" / "openapi_spec" / "embedded" / "legacy_component_schemas.json"
+)
 OUT_PATHS = ROOT / "backend" / "src" / "openapi_spec" / "openapi_paths_index.yaml"
 OUT_WS_MD = ROOT / "backend" / "src" / "openapi_spec" / "ws_protocol_description.md"
 
@@ -53,25 +56,23 @@ def main() -> None:
         OUT_WS_MD.write_text(desc, encoding="utf-8")
         print(f"Wrote {OUT_WS_MD}")
 
-    base = {
-        "openapi": doc.get("openapi"),
-        "info": doc.get("info"),
-        "servers": doc.get("servers"),
-        "tags": doc.get("tags"),
-        "paths": {},
-        "components": doc.get("components"),
-    }
+    components = doc.get("components") or {}
+    schemas = components.get("schemas")
+    if not isinstance(schemas, dict):
+        raise SystemExit("full OpenAPI must include components.schemas (object)")
 
-    OUT_BASE.parent.mkdir(parents=True, exist_ok=True)
-    with OUT_BASE.open("w", encoding="utf-8") as f:
-        yaml.dump(base, f, sort_keys=False, allow_unicode=True, width=120)
+    OUT_LEGACY_SCHEMAS.parent.mkdir(parents=True, exist_ok=True)
+    OUT_LEGACY_SCHEMAS.write_text(
+        json.dumps(schemas, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
 
     paths_index = dict(paths)
     paths_index.pop("/api/v1/ws", None)
     with OUT_PATHS.open("w", encoding="utf-8") as f:
         yaml.dump({"paths": paths_index}, f, sort_keys=False, allow_unicode=True, width=120)
 
-    print(f"Wrote {OUT_BASE}")
+    print(f"Wrote {OUT_LEGACY_SCHEMAS}")
     print(f"Wrote {OUT_PATHS}")
 
 

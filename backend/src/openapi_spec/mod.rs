@@ -1,7 +1,8 @@
-//! OpenAPI: embedded `openapi_base.yaml` + `openapi_paths_index.yaml` paths + utoipa merge (see [`merge`]).
+//! OpenAPI: Rust shell (`shell`), embedded legacy schemas, `openapi_paths_index.yaml` paths, and utoipa merge (see [`merge`]).
 
 mod generated;
 mod merge;
+mod shell;
 mod system;
 
 pub use merge::{merged_openapi_yaml_cached, merged_openapi_yaml_string};
