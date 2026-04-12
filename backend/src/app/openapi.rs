@@ -16,13 +16,19 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <body>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" crossorigin="anonymous"></script>
   <script>
     window.onload = function () {
-      // Default layout only — StandaloneLayout requires swagger-ui-standalone-preset.js (extra script).
       window.ui = SwaggerUIBundle({
         url: "/api/v1/openapi.yaml",
         dom_id: "#swagger-ui",
-        deepLinking: true
+        deepLinking: true,
+        // StandaloneLayout 需要上文的 swagger-ui-standalone-preset.js；全局 SwaggerUIStandalonePreset。
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+        layout: "StandaloneLayout",
+        // 本地 spec 不向 swagger.io 做远程校验，避免无关报错
+        validatorUrl: null
       });
     };
   </script>

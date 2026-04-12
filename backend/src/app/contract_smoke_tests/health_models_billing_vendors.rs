@@ -63,6 +63,8 @@ async fn openapi_yaml_and_swagger_ui_served_without_database() {
         .unwrap();
     let html = String::from_utf8(body.to_vec()).unwrap();
     assert!(html.contains("swagger-ui"));
+    assert!(html.contains("swagger-ui-standalone-preset"));
+    assert!(html.contains("StandaloneLayout"));
     assert!(html.contains("/api/v1/openapi.yaml"));
 }
 
