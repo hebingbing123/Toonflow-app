@@ -14,7 +14,7 @@ mod router;
 pub use router::build_router;
 
 #[cfg(test)]
-mod jwt_fixture {
+pub(crate) mod jwt_fixture {
     use chrono::Utc;
     use jsonwebtoken::{encode, EncodingKey, Header};
     use serde::Serialize;
@@ -46,7 +46,7 @@ static VENDOR_CREDENTIAL_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>>
     std::sync::OnceLock::new();
 
 #[cfg(test)]
-async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+pub(crate) async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
     VENDOR_CREDENTIAL_TEST_MUTEX
         .get_or_init(|| tokio::sync::Mutex::new(()))
         .lock()
