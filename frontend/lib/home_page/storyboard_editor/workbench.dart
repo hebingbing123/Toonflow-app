@@ -501,21 +501,88 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     await _notifyStoryboardMutated();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final knownTrackIds = collectStoryboardTrackIds(
+  List<int> _knownTrackIds() {
+    return collectStoryboardTrackIds(
       scriptStoryboard: widget.scriptStoryboard,
       productionStoryboard: _productionRow,
       productionStoryboards: _productionRows,
       generatedVideos: _generateData?.generatedVideos ?? const [],
     );
-    final storyboardVideos = storyboardScopedVideos(
+  }
+
+  List<VideoItem> _storyboardVideos() {
+    return storyboardScopedVideos(
       _generateData?.generatedVideos ?? const [],
       widget.storyNumericId,
     );
-    final diagnosis = _currentDiagnosis();
+  }
+
+  void _prepareVideoTrack(List<int> knownTrackIds) {
+    setState(() {
+      final currentTrackId = int.tryParse(_trackIdCtrl.text.trim());
+      if (currentTrackId != null && currentTrackId > 0) {
+        _setWorkbenchFollowUp('当前轨道 ID 已可直接用于视频生成。');
+        return;
+      }
+      if (knownTrackIds.isNotEmpty) {
+        _trackIdCtrl.text = knownTrackIds.first.toString();
+        _setWorkbenchFollowUp(
+          '已回填轨道 ${knownTrackIds.first}，可继续确认视频参数。',
+        );
+        return;
+      }
+      if (_trackNameCtrl.text.trim().isEmpty) {
+        _trackNameCtrl.text = '分镜 ${widget.storyNumericId} 视频轨';
+      }
+      _setWorkbenchFollowUp('已预填新轨道名称，下一步可直接新增轨道。');
+    });
+  }
+
+  Future<void> _syncProductionDataAction() async {
+    await _refreshProductionData(
+      syncImageUrl: true,
+      syncTrackId: true,
+    );
+    if (!mounted) return;
+    setState(() {
+      _setWorkbenchFollowUp('已同步当前分镜制作数据。');
+    });
+  }
+
+  Future<void> _refreshVideoDataAction() async {
+    await _refreshWorkbenchData();
+    if (!mounted) return;
+    setState(() {
+      _setWorkbenchFollowUp('已刷新当前分镜的视频数据。');
+    });
+  }
+
+  Future<void> _refreshProductionInputsAction() async {
+    await _refreshProductionData(
+      syncImageUrl: true,
+      syncTrackId: true,
+    );
+  }
+
+  void _setResolutionValue(String value) {
+    setState(() => _resolution = value);
+  }
+
+  void _setModeValue(String value) {
+    setState(() => _mode = value);
+  }
+
+  void _setAudioValue(bool value) {
+    setState(() => _audio = value);
+  }
+
+  ({VoidCallback? recommendedAction, String recommendedActionLabel})
+  _recommendedActionState(
+    StoryboardWorkbenchDiagnosis diagnosis,
+    List<int> knownTrackIds,
+  ) {
     VoidCallback? recommendedAction;
-    String recommendedActionLabel =
+    var recommendedActionLabel =
         describeStoryboardWorkbenchRecommendedAction(
           diagnosis.recommendedAction,
         );
@@ -523,89 +590,21 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       case StoryboardWorkbenchRecommendedAction.syncProductionData:
         recommendedAction = _saving || _loadingProduction
             ? null
-            : () => _runDialogAction(() async {
-                await _refreshProductionData(
-                  syncImageUrl: true,
-                  syncTrackId: true,
-                );
-                if (!mounted) return;
-                setState(() {
-                  _setWorkbenchFollowUp('已同步当前分镜制作数据。');
-                });
-              });
+            : () => _runDialogAction(_syncProductionDataAction);
       case StoryboardWorkbenchRecommendedAction.readCurrentPreview:
         recommendedAction = _saving
             ? null
-            : () => _runDialogAction(() async {
-                final preview = await postStoryboardPreviewImageV1(
-                  widget.token,
-                  storyboardId: widget.storyNumericId,
-                );
-                _imageUrlCtrl.text = preview.imageUrl ?? '';
-                await _refreshProductionData();
-                if (!mounted) return;
-                setState(() {
-                  _setWorkbenchFollowUp(
-                    preview.imageUrl == null ? '当前分镜还没有可读取的预览图。' : '已读取当前分镜预览。',
-                  );
-                });
-              });
+            : () => _runDialogAction(_readCurrentPreview);
       case StoryboardWorkbenchRecommendedAction.prepareVideoTrack:
-        recommendedAction = _saving
-            ? null
-            : () {
-                setState(() {
-                  final currentTrackId = int.tryParse(_trackIdCtrl.text.trim());
-                  if (currentTrackId != null && currentTrackId > 0) {
-                    _setWorkbenchFollowUp('当前轨道 ID 已可直接用于视频生成。');
-                    return;
-                  }
-                  if (knownTrackIds.isNotEmpty) {
-                    _trackIdCtrl.text = knownTrackIds.first.toString();
-                    _setWorkbenchFollowUp(
-                      '已回填轨道 ${knownTrackIds.first}，可继续确认视频参数。',
-                    );
-                    return;
-                  }
-                  if (_trackNameCtrl.text.trim().isEmpty) {
-                    _trackNameCtrl.text = '分镜 ${widget.storyNumericId} 视频轨';
-                  }
-                  _setWorkbenchFollowUp('已预填新轨道名称，下一步可直接新增轨道。');
-                });
-              };
+        recommendedAction = _saving ? null : () => _prepareVideoTrack(knownTrackIds);
       case StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt:
         recommendedAction = _saving
             ? null
-            : () => _runDialogAction(() async {
-                final generated = await postWorkbenchGenerateVideoPromptV1(
-                  widget.token,
-                  projectId: widget.projectNumericId,
-                  scriptId: widget.scriptNumericId,
-                  imageUrl: resolveStoryboardSourceImageUrl(
-                    productionStoryboard: _productionRow,
-                    draftImageUrl: _imageUrlCtrl.text,
-                  ),
-                  description: widget.readVideoDescriptionText().trim().isEmpty
-                      ? widget.readPromptText().trim()
-                      : widget.readVideoDescriptionText().trim(),
-                );
-                _videoPromptCtrl.text = generated.prompt;
-                _videoDurationCtrl.text = generated.duration.toString();
-                if (!mounted) return;
-                setState(() {
-                  _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。');
-                });
-              });
+            : () => _runDialogAction(_generateVideoPrompt);
       case StoryboardWorkbenchRecommendedAction.refreshVideoData:
         recommendedAction = _saving || _loadingWorkbench
             ? null
-            : () => _runDialogAction(() async {
-                await _refreshWorkbenchData();
-                if (!mounted) return;
-                setState(() {
-                  _setWorkbenchFollowUp('已刷新当前分镜的视频数据。');
-                });
-              });
+            : () => _runDialogAction(_refreshVideoDataAction);
         if (_loadingWorkbench) {
           recommendedActionLabel = '刷新中…';
         }
@@ -617,6 +616,36 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           recommendedActionLabel = '提交中…';
         }
     }
+    return (
+      recommendedAction: recommendedAction,
+      recommendedActionLabel: recommendedActionLabel,
+    );
+  }
+
+  ({
+    List<int> knownTrackIds,
+    List<VideoItem> storyboardVideos,
+    StoryboardWorkbenchDiagnosis diagnosis,
+    VoidCallback? recommendedAction,
+    String recommendedActionLabel,
+  })
+  _buildWorkbenchViewState() {
+    final knownTrackIds = _knownTrackIds();
+    final storyboardVideos = _storyboardVideos();
+    final diagnosis = _currentDiagnosis();
+    final recommended = _recommendedActionState(diagnosis, knownTrackIds);
+    return (
+      knownTrackIds: knownTrackIds,
+      storyboardVideos: storyboardVideos,
+      diagnosis: diagnosis,
+      recommendedAction: recommended.recommendedAction,
+      recommendedActionLabel: recommended.recommendedActionLabel,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewState = _buildWorkbenchViewState();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -628,9 +657,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
         ),
         const SizedBox(height: 12),
         _StoryboardDiagnosisCard(
-          diagnosis: diagnosis,
-          recommendedAction: recommendedAction,
-          recommendedActionLabel: recommendedActionLabel,
+          diagnosis: viewState.diagnosis,
+          recommendedAction: viewState.recommendedAction,
+          recommendedActionLabel: viewState.recommendedActionLabel,
         ),
         if (_productionError != null) ...[
           const SizedBox(height: 8),
@@ -649,10 +678,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onReadCurrentPreview: () => _runDialogAction(_readCurrentPreview),
           onSaveImageUrl: () => _runDialogAction(_saveImageUrl),
           onClearFrame: () => _runDialogAction(_clearCurrentFrame),
-          onRefreshProductionData: () => _refreshProductionData(
-            syncImageUrl: true,
-            syncTrackId: true,
-          ),
+          onRefreshProductionData: _refreshProductionInputsAction,
         ),
         const SizedBox(height: 16),
         _StoryboardVideoSection(
@@ -669,11 +695,11 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           generateData: _generateData,
           productionRow: _productionRow,
           workbenchLine: _workbenchLine,
-          knownTrackIds: knownTrackIds,
-          storyboardVideos: storyboardVideos,
-          onResolutionChanged: (v) => setState(() => _resolution = v),
-          onModeChanged: (v) => setState(() => _mode = v),
-          onAudioChanged: (v) => setState(() => _audio = v),
+          knownTrackIds: viewState.knownTrackIds,
+          storyboardVideos: viewState.storyboardVideos,
+          onResolutionChanged: _setResolutionValue,
+          onModeChanged: _setModeValue,
+          onAudioChanged: _setAudioValue,
           onAddTrack: () => _runDialogAction(_addTrack),
           onDeleteTrack: () => _runDialogAction(_deleteTrack),
           onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),
