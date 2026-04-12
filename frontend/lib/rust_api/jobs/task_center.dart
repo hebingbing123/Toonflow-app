@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Task-center compatibility adapters layered over jobs and projects endpoints.
 class TaskCenterProjectItem {
   const TaskCenterProjectItem({required this.numericId, required this.name});
 

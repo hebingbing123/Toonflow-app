@@ -19,6 +19,7 @@ part 'assets/generate.dart';
 part 'catalog_memory_models.dart';
 part 'harness_api.dart';
 part 'jobs/api.dart';
+part 'jobs/task_center.dart';
 part 'models_catalog.dart';
 part 'novels/models.dart';
 part 'novels/events_models.dart';
@@ -50,7 +51,6 @@ part 'settings/vendors_mutations.dart';
 part 'system/auth.dart';
 part 'scripts/storyboards_api.dart';
 part 'system/status.dart';
-part 'tasks_center_rest.dart';
 part 'system/usage.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
