@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Primary project REST endpoints and summary payloads.
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.
 Future<List<ProjectRow>> fetchProjects(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/projects');
