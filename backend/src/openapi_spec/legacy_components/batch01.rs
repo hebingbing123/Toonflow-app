@@ -7,413 +7,224 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct ExportScriptsBody;
-impl PartialSchema for ExportScriptsBody {
+pub struct ProductionFlowAssetDerivativeItem;
+impl PartialSchema for ProductionFlowAssetDerivativeItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("ExportScriptsBody")
+        legacy_pick("ProductionFlowAssetDerivativeItem")
     }
 }
-impl ToSchema for ExportScriptsBody {}
+impl ToSchema for ProductionFlowAssetDerivativeItem {}
 
-pub struct ExtractAssetsAcceptedResponse;
-impl PartialSchema for ExtractAssetsAcceptedResponse {
+pub struct ProductionFlowAssetItem;
+impl PartialSchema for ProductionFlowAssetItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("ExtractAssetsAcceptedResponse")
+        legacy_pick("ProductionFlowAssetItem")
     }
 }
-impl ToSchema for ExtractAssetsAcceptedResponse {}
+impl ToSchema for ProductionFlowAssetItem {}
 
-pub struct ExtractAssetsStartBody;
-impl PartialSchema for ExtractAssetsStartBody {
+pub struct ProductionFlowStoryboardItem;
+impl PartialSchema for ProductionFlowStoryboardItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("ExtractAssetsStartBody")
+        legacy_pick("ProductionFlowStoryboardItem")
     }
 }
-impl ToSchema for ExtractAssetsStartBody {}
+impl ToSchema for ProductionFlowStoryboardItem {}
 
-pub struct GenerateAssetsBody;
-impl PartialSchema for GenerateAssetsBody {
+pub struct ProductionStoryboardBatchAddInfoItem;
+impl PartialSchema for ProductionStoryboardBatchAddInfoItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("GenerateAssetsBody")
+        legacy_pick("ProductionStoryboardBatchAddInfoItem")
     }
 }
-impl ToSchema for GenerateAssetsBody {}
+impl ToSchema for ProductionStoryboardBatchAddInfoItem {}
 
-pub struct GenerateNovelEventsBody;
-impl PartialSchema for GenerateNovelEventsBody {
+pub struct ProductionStoryboardBatchGenerateImageItem;
+impl PartialSchema for ProductionStoryboardBatchGenerateImageItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("GenerateNovelEventsBody")
+        legacy_pick("ProductionStoryboardBatchGenerateImageItem")
     }
 }
-impl ToSchema for GenerateNovelEventsBody {}
+impl ToSchema for ProductionStoryboardBatchGenerateImageItem {}
 
-pub struct GetScriptAgentPlanBody;
-impl PartialSchema for GetScriptAgentPlanBody {
+pub struct ProductionStoryboardBundleItem;
+impl PartialSchema for ProductionStoryboardBundleItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("GetScriptAgentPlanBody")
+        legacy_pick("ProductionStoryboardBundleItem")
     }
 }
-impl ToSchema for GetScriptAgentPlanBody {}
+impl ToSchema for ProductionStoryboardBundleItem {}
 
-pub struct HarnessToolInfo;
-impl PartialSchema for HarnessToolInfo {
+pub struct ProductionWorkbenchGenerateVideoUploadItem;
+impl PartialSchema for ProductionWorkbenchGenerateVideoUploadItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("HarnessToolInfo")
+        legacy_pick("ProductionWorkbenchGenerateVideoUploadItem")
     }
 }
-impl ToSchema for HarnessToolInfo {}
+impl ToSchema for ProductionWorkbenchGenerateVideoUploadItem {}
 
-pub struct HarnessToolsResponse;
-impl PartialSchema for HarnessToolsResponse {
+pub struct ProjectRow;
+impl PartialSchema for ProjectRow {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("HarnessToolsResponse")
+        legacy_pick("ProjectRow")
     }
 }
-impl ToSchema for HarnessToolsResponse {}
+impl ToSchema for ProjectRow {}
 
-pub struct HealthResponse;
-impl PartialSchema for HealthResponse {
+pub struct ReadyResponse;
+impl PartialSchema for ReadyResponse {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("HealthResponse")
+        legacy_pick("ReadyResponse")
     }
 }
-impl ToSchema for HealthResponse {}
+impl ToSchema for ReadyResponse {}
 
-pub struct JobKindSummary;
-impl PartialSchema for JobKindSummary {
+pub struct ScriptAgentTypeV1;
+impl PartialSchema for ScriptAgentTypeV1 {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("JobKindSummary")
+        legacy_pick("ScriptAgentTypeV1")
     }
 }
-impl ToSchema for JobKindSummary {}
+impl ToSchema for ScriptAgentTypeV1 {}
 
-pub struct JobRow;
-impl PartialSchema for JobRow {
+pub struct ScriptBrief;
+impl PartialSchema for ScriptBrief {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("JobRow")
+        legacy_pick("ScriptBrief")
     }
 }
-impl ToSchema for JobRow {}
+impl ToSchema for ScriptBrief {}
 
-pub struct JobStatusSummary;
-impl PartialSchema for JobStatusSummary {
+pub struct ScriptRow;
+impl PartialSchema for ScriptRow {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("JobStatusSummary")
+        legacy_pick("ScriptRow")
     }
 }
-impl ToSchema for JobStatusSummary {}
+impl ToSchema for ScriptRow {}
 
-pub struct JobsPageResponse;
-impl PartialSchema for JobsPageResponse {
+pub struct SetScriptAgentPlanData;
+impl PartialSchema for SetScriptAgentPlanData {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("JobsPageResponse")
+        legacy_pick("SetScriptAgentPlanData")
     }
 }
-impl ToSchema for JobsPageResponse {}
+impl ToSchema for SetScriptAgentPlanData {}
 
-pub struct LegacyAssetsAddAssetsBody;
-impl PartialSchema for LegacyAssetsAddAssetsBody {
+pub struct SetScriptAgentPlanScriptRow;
+impl PartialSchema for SetScriptAgentPlanScriptRow {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsAddAssetsBody")
+        legacy_pick("SetScriptAgentPlanScriptRow")
     }
 }
-impl ToSchema for LegacyAssetsAddAssetsBody {}
+impl ToSchema for SetScriptAgentPlanScriptRow {}
 
-pub struct LegacyAssetsBatchDeleteBody;
-impl PartialSchema for LegacyAssetsBatchDeleteBody {
+pub struct UpdateScriptAgentDataPayload;
+impl PartialSchema for UpdateScriptAgentDataPayload {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsBatchDeleteBody")
+        legacy_pick("UpdateScriptAgentDataPayload")
     }
 }
-impl ToSchema for LegacyAssetsBatchDeleteBody {}
+impl ToSchema for UpdateScriptAgentDataPayload {}
 
-pub struct LegacyAssetsBatchGenerationDataBody;
-impl PartialSchema for LegacyAssetsBatchGenerationDataBody {
+pub struct UpdateScriptAgentScriptRow;
+impl PartialSchema for UpdateScriptAgentScriptRow {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsBatchGenerationDataBody")
+        legacy_pick("UpdateScriptAgentScriptRow")
     }
 }
-impl ToSchema for LegacyAssetsBatchGenerationDataBody {}
+impl ToSchema for UpdateScriptAgentScriptRow {}
 
-pub struct LegacyAssetsBatchGenerationDataItem;
-impl PartialSchema for LegacyAssetsBatchGenerationDataItem {
+pub struct UsageSummaryResponse;
+impl PartialSchema for UsageSummaryResponse {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsBatchGenerationDataItem")
+        legacy_pick("UsageSummaryResponse")
     }
 }
-impl ToSchema for LegacyAssetsBatchGenerationDataItem {}
+impl ToSchema for UsageSummaryResponse {}
 
-pub struct LegacyAssetsBatchGenerationDataResponse;
-impl PartialSchema for LegacyAssetsBatchGenerationDataResponse {
+pub struct VendorConfigEntry;
+impl PartialSchema for VendorConfigEntry {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsBatchGenerationDataResponse")
+        legacy_pick("VendorConfigEntry")
     }
 }
-impl ToSchema for LegacyAssetsBatchGenerationDataResponse {}
+impl ToSchema for VendorConfigEntry {}
 
-pub struct LegacyAssetsDeleteBody;
-impl PartialSchema for LegacyAssetsDeleteBody {
+pub struct VendorMutationResponse;
+impl PartialSchema for VendorMutationResponse {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsDeleteBody")
+        legacy_pick("VendorMutationResponse")
     }
 }
-impl ToSchema for LegacyAssetsDeleteBody {}
+impl ToSchema for VendorMutationResponse {}
 
-pub struct LegacyAssetsGetAssetsApiBody;
-impl PartialSchema for LegacyAssetsGetAssetsApiBody {
+pub struct VendorSummaryItem;
+impl PartialSchema for VendorSummaryItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetAssetsApiBody")
+        legacy_pick("VendorSummaryItem")
     }
 }
-impl ToSchema for LegacyAssetsGetAssetsApiBody {}
+impl ToSchema for VendorSummaryItem {}
 
-pub struct LegacyAssetsGetAssetsApiChildItem;
-impl PartialSchema for LegacyAssetsGetAssetsApiChildItem {
+pub struct VersionResponse;
+impl PartialSchema for VersionResponse {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetAssetsApiChildItem")
+        legacy_pick("VersionResponse")
     }
 }
-impl ToSchema for LegacyAssetsGetAssetsApiChildItem {}
+impl ToSchema for VersionResponse {}
 
-pub struct LegacyAssetsGetAssetsApiParentItem;
-impl PartialSchema for LegacyAssetsGetAssetsApiParentItem {
+pub struct VideoItem;
+impl PartialSchema for VideoItem {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetAssetsApiParentItem")
+        legacy_pick("VideoItem")
     }
 }
-impl ToSchema for LegacyAssetsGetAssetsApiParentItem {}
+impl ToSchema for VideoItem {}
 
-pub struct LegacyAssetsGetAssetsApiResponse;
-impl PartialSchema for LegacyAssetsGetAssetsApiResponse {
+pub struct VisualManualEntry;
+impl PartialSchema for VisualManualEntry {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetAssetsApiResponse")
+        legacy_pick("VisualManualEntry")
     }
 }
-impl ToSchema for LegacyAssetsGetAssetsApiResponse {}
+impl ToSchema for VisualManualEntry {}
 
-pub struct LegacyAssetsGetImageBody;
-impl PartialSchema for LegacyAssetsGetImageBody {
+pub struct VisualManualStyle;
+impl PartialSchema for VisualManualStyle {
     fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetImageBody")
+        legacy_pick("VisualManualStyle")
     }
 }
-impl ToSchema for LegacyAssetsGetImageBody {}
-
-pub struct LegacyAssetsGetImageResponse;
-impl PartialSchema for LegacyAssetsGetImageResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetImageResponse")
-    }
-}
-impl ToSchema for LegacyAssetsGetImageResponse {}
-
-pub struct LegacyAssetsGetImageTempAsset;
-impl PartialSchema for LegacyAssetsGetImageTempAsset {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetImageTempAsset")
-    }
-}
-impl ToSchema for LegacyAssetsGetImageTempAsset {}
-
-pub struct LegacyAssetsGetMaterialDataBody;
-impl PartialSchema for LegacyAssetsGetMaterialDataBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetMaterialDataBody")
-    }
-}
-impl ToSchema for LegacyAssetsGetMaterialDataBody {}
-
-pub struct LegacyAssetsGetMaterialDataItem;
-impl PartialSchema for LegacyAssetsGetMaterialDataItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetMaterialDataItem")
-    }
-}
-impl ToSchema for LegacyAssetsGetMaterialDataItem {}
-
-pub struct LegacyAssetsGetMaterialDataResponse;
-impl PartialSchema for LegacyAssetsGetMaterialDataResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetMaterialDataResponse")
-    }
-}
-impl ToSchema for LegacyAssetsGetMaterialDataResponse {}
-
-pub struct LegacyAssetsGetMaterialDataVideoItem;
-impl PartialSchema for LegacyAssetsGetMaterialDataVideoItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsGetMaterialDataVideoItem")
-    }
-}
-impl ToSchema for LegacyAssetsGetMaterialDataVideoItem {}
-
-pub struct LegacyAssetsMutationResponse;
-impl PartialSchema for LegacyAssetsMutationResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsMutationResponse")
-    }
-}
-impl ToSchema for LegacyAssetsMutationResponse {}
-
-pub struct LegacyAssetsPollingImageAssetsBody;
-impl PartialSchema for LegacyAssetsPollingImageAssetsBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsPollingImageAssetsBody")
-    }
-}
-impl ToSchema for LegacyAssetsPollingImageAssetsBody {}
-
-pub struct LegacyAssetsPollingImageAssetsItem;
-impl PartialSchema for LegacyAssetsPollingImageAssetsItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsPollingImageAssetsItem")
-    }
-}
-impl ToSchema for LegacyAssetsPollingImageAssetsItem {}
-
-pub struct LegacyAssetsPollingPromptAssetsBody;
-impl PartialSchema for LegacyAssetsPollingPromptAssetsBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsPollingPromptAssetsBody")
-    }
-}
-impl ToSchema for LegacyAssetsPollingPromptAssetsBody {}
-
-pub struct LegacyAssetsPollingPromptAssetsItem;
-impl PartialSchema for LegacyAssetsPollingPromptAssetsItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsPollingPromptAssetsItem")
-    }
-}
-impl ToSchema for LegacyAssetsPollingPromptAssetsItem {}
-
-pub struct LegacyAssetsSaveAssetsBody;
-impl PartialSchema for LegacyAssetsSaveAssetsBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsSaveAssetsBody")
-    }
-}
-impl ToSchema for LegacyAssetsSaveAssetsBody {}
-
-pub struct LegacyAssetsUpdateAssetsBody;
-impl PartialSchema for LegacyAssetsUpdateAssetsBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsUpdateAssetsBody")
-    }
-}
-impl ToSchema for LegacyAssetsUpdateAssetsBody {}
-
-pub struct LegacyAssetsUploadClipBody;
-impl PartialSchema for LegacyAssetsUploadClipBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsUploadClipBody")
-    }
-}
-impl ToSchema for LegacyAssetsUploadClipBody {}
-
-pub struct LegacyAssetsUploadClipResponse;
-impl PartialSchema for LegacyAssetsUploadClipResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyAssetsUploadClipResponse")
-    }
-}
-impl ToSchema for LegacyAssetsUploadClipResponse {}
-
-pub struct LegacyDirectorManualAddBody;
-impl PartialSchema for LegacyDirectorManualAddBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualAddBody")
-    }
-}
-impl ToSchema for LegacyDirectorManualAddBody {}
-
-pub struct LegacyDirectorManualDataSlot;
-impl PartialSchema for LegacyDirectorManualDataSlot {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualDataSlot")
-    }
-}
-impl ToSchema for LegacyDirectorManualDataSlot {}
-
-pub struct LegacyDirectorManualDeleteBody;
-impl PartialSchema for LegacyDirectorManualDeleteBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualDeleteBody")
-    }
-}
-impl ToSchema for LegacyDirectorManualDeleteBody {}
-
-pub struct LegacyDirectorManualDeleteResponse;
-impl PartialSchema for LegacyDirectorManualDeleteResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualDeleteResponse")
-    }
-}
-impl ToSchema for LegacyDirectorManualDeleteResponse {}
-
-pub struct LegacyDirectorManualEditBody;
-impl PartialSchema for LegacyDirectorManualEditBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualEditBody")
-    }
-}
-impl ToSchema for LegacyDirectorManualEditBody {}
-
-pub struct LegacyDirectorManualListResponse;
-impl PartialSchema for LegacyDirectorManualListResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualListResponse")
-    }
-}
-impl ToSchema for LegacyDirectorManualListResponse {}
+impl ToSchema for VisualManualStyle {}
 
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<ExportScriptsBody>();
-    c = c.schema_from::<ExtractAssetsAcceptedResponse>();
-    c = c.schema_from::<ExtractAssetsStartBody>();
-    c = c.schema_from::<GenerateAssetsBody>();
-    c = c.schema_from::<GenerateNovelEventsBody>();
-    c = c.schema_from::<GetScriptAgentPlanBody>();
-    c = c.schema_from::<HarnessToolInfo>();
-    c = c.schema_from::<HarnessToolsResponse>();
-    c = c.schema_from::<HealthResponse>();
-    c = c.schema_from::<JobKindSummary>();
-    c = c.schema_from::<JobRow>();
-    c = c.schema_from::<JobStatusSummary>();
-    c = c.schema_from::<JobsPageResponse>();
-    c = c.schema_from::<LegacyAssetsAddAssetsBody>();
-    c = c.schema_from::<LegacyAssetsBatchDeleteBody>();
-    c = c.schema_from::<LegacyAssetsBatchGenerationDataBody>();
-    c = c.schema_from::<LegacyAssetsBatchGenerationDataItem>();
-    c = c.schema_from::<LegacyAssetsBatchGenerationDataResponse>();
-    c = c.schema_from::<LegacyAssetsDeleteBody>();
-    c = c.schema_from::<LegacyAssetsGetAssetsApiBody>();
-    c = c.schema_from::<LegacyAssetsGetAssetsApiChildItem>();
-    c = c.schema_from::<LegacyAssetsGetAssetsApiParentItem>();
-    c = c.schema_from::<LegacyAssetsGetAssetsApiResponse>();
-    c = c.schema_from::<LegacyAssetsGetImageBody>();
-    c = c.schema_from::<LegacyAssetsGetImageResponse>();
-    c = c.schema_from::<LegacyAssetsGetImageTempAsset>();
-    c = c.schema_from::<LegacyAssetsGetMaterialDataBody>();
-    c = c.schema_from::<LegacyAssetsGetMaterialDataItem>();
-    c = c.schema_from::<LegacyAssetsGetMaterialDataResponse>();
-    c = c.schema_from::<LegacyAssetsGetMaterialDataVideoItem>();
-    c = c.schema_from::<LegacyAssetsMutationResponse>();
-    c = c.schema_from::<LegacyAssetsPollingImageAssetsBody>();
-    c = c.schema_from::<LegacyAssetsPollingImageAssetsItem>();
-    c = c.schema_from::<LegacyAssetsPollingPromptAssetsBody>();
-    c = c.schema_from::<LegacyAssetsPollingPromptAssetsItem>();
-    c = c.schema_from::<LegacyAssetsSaveAssetsBody>();
-    c = c.schema_from::<LegacyAssetsUpdateAssetsBody>();
-    c = c.schema_from::<LegacyAssetsUploadClipBody>();
-    c = c.schema_from::<LegacyAssetsUploadClipResponse>();
-    c = c.schema_from::<LegacyDirectorManualAddBody>();
-    c = c.schema_from::<LegacyDirectorManualDataSlot>();
-    c = c.schema_from::<LegacyDirectorManualDeleteBody>();
-    c = c.schema_from::<LegacyDirectorManualDeleteResponse>();
-    c = c.schema_from::<LegacyDirectorManualEditBody>();
-    c = c.schema_from::<LegacyDirectorManualListResponse>();
+    c = c.schema_from::<ProductionFlowAssetDerivativeItem>();
+    c = c.schema_from::<ProductionFlowAssetItem>();
+    c = c.schema_from::<ProductionFlowStoryboardItem>();
+    c = c.schema_from::<ProductionStoryboardBatchAddInfoItem>();
+    c = c.schema_from::<ProductionStoryboardBatchGenerateImageItem>();
+    c = c.schema_from::<ProductionStoryboardBundleItem>();
+    c = c.schema_from::<ProductionWorkbenchGenerateVideoUploadItem>();
+    c = c.schema_from::<ProjectRow>();
+    c = c.schema_from::<ReadyResponse>();
+    c = c.schema_from::<ScriptAgentTypeV1>();
+    c = c.schema_from::<ScriptBrief>();
+    c = c.schema_from::<ScriptRow>();
+    c = c.schema_from::<SetScriptAgentPlanData>();
+    c = c.schema_from::<SetScriptAgentPlanScriptRow>();
+    c = c.schema_from::<UpdateScriptAgentDataPayload>();
+    c = c.schema_from::<UpdateScriptAgentScriptRow>();
+    c = c.schema_from::<UsageSummaryResponse>();
+    c = c.schema_from::<VendorConfigEntry>();
+    c = c.schema_from::<VendorMutationResponse>();
+    c = c.schema_from::<VendorSummaryItem>();
+    c = c.schema_from::<VersionResponse>();
+    c = c.schema_from::<VideoItem>();
+    c = c.schema_from::<VisualManualEntry>();
+    c = c.schema_from::<VisualManualStyle>();
     c
 }

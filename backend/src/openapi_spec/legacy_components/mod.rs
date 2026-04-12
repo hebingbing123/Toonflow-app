@@ -2,11 +2,6 @@
 
 mod batch00;
 mod batch01;
-mod batch02;
-mod batch03;
-mod batch04;
-mod batch05;
-mod batch06;
 mod inline;
 
 use utoipa::openapi::schema::ComponentsBuilder;
@@ -17,11 +12,6 @@ pub fn merged_legacy_components_openapi() -> OpenApi {
     let mut c = ComponentsBuilder::new();
     c = batch00::register_schemas(c);
     c = batch01::register_schemas(c);
-    c = batch02::register_schemas(c);
-    c = batch03::register_schemas(c);
-    c = batch04::register_schemas(c);
-    c = batch05::register_schemas(c);
-    c = batch06::register_schemas(c);
     OpenApiBuilder::new()
         .components(Some(c.build()))
         .paths(Paths::new())
