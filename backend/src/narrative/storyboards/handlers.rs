@@ -10,7 +10,6 @@ use axum::{
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{
@@ -21,6 +20,24 @@ use crate::state::AppState;
 
 use super::dto::{CreateStoryboardBody, PatchStoryboardBody, StoryboardRow};
 use super::ADV_LOCK_STORYBOARD_NUMERIC_ID;
+
+async fn fetch_storyboard_row(pool: &PgPool, id: Uuid) -> Result<StoryboardRow, ApiError> {
+    sqlx::query_as::<_, StoryboardRow>(
+        r#"
+        SELECT
+          id, script_id, numeric_id, numeric_script_id, prompt, file_path,
+          duration, state, track_id, reason, track, video_desc,
+          should_generate_image, numeric_project_id, flow_id, sb_index, create_time_ms
+        FROM app_storyboard
+        WHERE id = $1
+        "#,
+    )
+    .bind(id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
 
 fn trim_opt_sb(s: Option<String>) -> Option<String> {
     s.and_then(|v| {
@@ -180,27 +197,10 @@ pub(super) async fn get_by_numeric_id_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
-
-    let row = sqlx::query_as::<_, StoryboardRow>(
-        r#"
-        SELECT
-          sb.id, sb.script_id, sb.numeric_id, sb.numeric_script_id, sb.prompt, sb.file_path,
-          sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sb.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
-        "#,
-    )
-    .bind(storyboard_numeric_id)
-    .bind(project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
+    let oid = scope::owned_storyboard_in_project(pool, uid, project_id, storyboard_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+    let row = fetch_storyboard_row(pool, oid.storyboard_id).await?;
 
     Ok(Json(row))
 }
@@ -245,25 +245,10 @@ async fn patch_storyboard_row(
         ));
     }
 
-    let current = sqlx::query_as::<_, StoryboardRow>(
-        r#"
-        SELECT
-          sb.id, sb.script_id, sb.numeric_id, sb.numeric_script_id, sb.prompt, sb.file_path,
-          sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
-          sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE sb.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
-        "#,
-    )
-    .bind(numeric_id)
-    .bind(project_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
+    let oid = scope::owned_storyboard_in_project(pool, uid, project_id, numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+    let current = fetch_storyboard_row(pool, oid.storyboard_id).await?;
 
     let merge_t = |patch: &FieldPatch<String>, cur: &Option<String>| -> Option<String> {
         match patch {
@@ -350,7 +335,6 @@ pub(super) async fn patch_by_numeric_id_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
     patch_storyboard_row(pool, uid, storyboard_numeric_id, body, project_id).await
 }
 
@@ -360,23 +344,15 @@ async fn delete_storyboard_row(
     numeric_id: i32,
     project_id: Uuid,
 ) -> Result<StatusCode, ApiError> {
-    let res = sqlx::query(
-        r#"
-            DELETE FROM app_storyboard sb
-            USING app_script sc, app_project p
-            WHERE sb.script_id = sc.id
-              AND sc.project_id = p.id
-              AND sb.numeric_id = $1
-              AND p.owner_user_id = $2
-              AND p.id = $3
-            "#,
-    )
-    .bind(numeric_id)
-    .bind(uid)
-    .bind(project_id)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let oid = scope::owned_storyboard_in_project(pool, uid, project_id, numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let res = sqlx::query(r#"DELETE FROM app_storyboard WHERE id = $1"#)
+        .bind(oid.storyboard_id)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if res.rows_affected() == 0 {
         return Err(ApiError::NotFound);
@@ -396,6 +372,5 @@ pub(super) async fn delete_by_numeric_id_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
     delete_storyboard_row(pool, uid, storyboard_numeric_id, project_id).await
 }

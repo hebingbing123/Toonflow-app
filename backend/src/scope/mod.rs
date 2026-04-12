@@ -2,7 +2,8 @@
 //!
 //! 与 [`crate::production_flow::resolve_owned_production_scope`] 的关系：后者额外返回 `script_content`；
 //! 本模块解析 **UUID 级的 `project_id` / `script_id`**；REST 常见 **`project_id` = `app_project.id`** 时用
-//! [`owned_script_in_project`]，Electron 风格 **numeric project id** 时用 [`owned_script_scope`]。
+//! [`owned_script_in_project`]，Electron 风格 **numeric project id** 时用 [`owned_script_scope`]；
+//! 分镜按 **numeric_id** 落在项目下时用 [`owned_storyboard_in_project`]。
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -22,6 +23,12 @@ pub struct OwnedScriptInProject {
     pub project_id: Uuid,
     pub project_numeric_id: i32,
     pub script_id: Uuid,
+}
+
+/// 用户在项目 **`app_project.id`** 下对某条分镜（**`app_storyboard.numeric_id`**）的归属。
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct OwnedStoryboardInProject {
+    pub storyboard_id: Uuid,
 }
 
 #[derive(Debug)]
@@ -90,6 +97,33 @@ pub async fn owned_script_in_project(
     .bind(user_id)
     .bind(project_id)
     .bind(script_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ScopeError::Database(e.to_string()))?
+    .ok_or(ScopeError::NotFound)
+}
+
+/// 解析 `owner_user_id` 在 **`project_id`** 下对 **`storyboard_numeric_id`** 的分镜行（`app_storyboard.id`）。
+pub async fn owned_storyboard_in_project(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: Uuid,
+    storyboard_numeric_id: i32,
+) -> Result<OwnedStoryboardInProject, ScopeError> {
+    sqlx::query_as::<_, OwnedStoryboardInProject>(
+        r#"
+        SELECT sb.id AS storyboard_id
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.id = $2
+          AND sb.numeric_id = $3
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(storyboard_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ScopeError::Database(e.to_string()))?
