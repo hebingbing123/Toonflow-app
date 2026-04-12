@@ -4,7 +4,6 @@ use std::sync::OnceLock;
 
 use anyhow::Context;
 use serde_json::Value as Json;
-use utoipa::OpenApi;
 
 const BASE_OPENAPI_YAML: &str = include_str!("../../../docs/openapi.yaml");
 
@@ -12,7 +11,7 @@ const BASE_OPENAPI_YAML: &str = include_str!("../../../docs/openapi.yaml");
 pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
     let mut base: Json =
         serde_yaml::from_str(BASE_OPENAPI_YAML).context("parse base openapi.yaml")?;
-    let gen = crate::openapi_spec::ApiDoc::openapi();
+    let gen = crate::openapi_spec::combined_openapi();
     let gen_val: Json = serde_json::to_value(&gen).context("serialize utoipa OpenApi")?;
 
     overlay_paths(&mut base, &gen_val)?;
@@ -44,6 +43,10 @@ pub fn merged_openapi_yaml_cached() -> &'static str {
     .as_str()
 }
 
+const HTTP_METHODS: &[&str] = &[
+    "get", "post", "put", "patch", "delete", "options", "head", "trace",
+];
+
 fn overlay_paths(base: &mut Json, gen: &Json) -> anyhow::Result<()> {
     let Some(gen_paths) = gen.get("paths").and_then(|p| p.as_object()) else {
         return Ok(());
@@ -52,10 +55,79 @@ fn overlay_paths(base: &mut Json, gen: &Json) -> anyhow::Result<()> {
         .get_mut("paths")
         .and_then(|p| p.as_object_mut())
         .context("base OpenAPI missing paths")?;
-    for (k, v) in gen_paths {
-        base_paths.insert(k.clone(), v.clone());
+    for (path_key, gen_item) in gen_paths {
+        match base_paths.get_mut(path_key) {
+            None => {
+                base_paths.insert(path_key.clone(), gen_item.clone());
+            }
+            Some(base_item) => merge_path_item_in_place(base_item, gen_item),
+        }
     }
     Ok(())
+}
+
+fn merge_path_item_in_place(base_item: &mut Json, gen_item: &Json) {
+    let Some(gobj) = gen_item.as_object() else {
+        return;
+    };
+    let Some(bobj) = base_item.as_object_mut() else {
+        return;
+    };
+    for method in HTTP_METHODS {
+        let Some(gen_op) = gobj.get(*method) else {
+            continue;
+        };
+        match bobj.get_mut(*method) {
+            None => {
+                bobj.insert((*method).to_string(), gen_op.clone());
+            }
+            Some(base_op) => merge_operation_in_place(base_op, gen_op),
+        }
+    }
+}
+
+/// Prefer rich utoipa operations (real handlers). Thin generated stubs must not replace a YAML op.
+fn merge_operation_in_place(base_op: &mut Json, gen_op: &Json) {
+    if operation_has_content(gen_op) {
+        *base_op = gen_op.clone();
+        return;
+    }
+    if operation_has_content(base_op) {
+        return;
+    }
+    if base_op.as_object().map(|o| !o.is_empty()).unwrap_or(false) {
+        return;
+    }
+    *base_op = gen_op.clone();
+}
+
+fn operation_has_content(op: &Json) -> bool {
+    let Some(o) = op.as_object() else {
+        return false;
+    };
+    if let Some(rb) = o.get("requestBody") {
+        if request_body_has_content(rb) {
+            return true;
+        }
+    }
+    let Some(resps) = o.get("responses").and_then(|r| r.as_object()) else {
+        return false;
+    };
+    resps.values().any(response_has_content)
+}
+
+fn request_body_has_content(rb: &Json) -> bool {
+    rb.get("content")
+        .and_then(|c| c.as_object())
+        .map(|o| !o.is_empty())
+        .unwrap_or(false)
+}
+
+fn response_has_content(r: &Json) -> bool {
+    r.get("content")
+        .and_then(|c| c.as_object())
+        .map(|o| !o.is_empty())
+        .unwrap_or(false)
 }
 
 fn overlay_components_object(base: &mut Json, gen: &Json, key: &str) -> anyhow::Result<()> {

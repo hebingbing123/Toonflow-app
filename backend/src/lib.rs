@@ -1,5 +1,7 @@
 //! Toonflow server library crate (shared by `toonflow-server` and tooling binaries).
 
+#![recursion_limit = "1024"]
+
 pub mod app;
 pub mod assets;
 pub mod auth;
