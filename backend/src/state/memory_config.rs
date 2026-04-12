@@ -3,10 +3,12 @@
 //! 遗留 SQLite `o_setting` 键，用于内存 / RAG UI（驼峰式 JSON）。
 
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 /// Same shape as Electron-era **`getMemory`** **`data`** object.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[schema(rename_all = "camelCase")]
 pub struct MemoryConfig {
     pub messages_per_summary: i64,
     pub short_term_limit: i64,

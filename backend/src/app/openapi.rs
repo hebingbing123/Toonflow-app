@@ -1,9 +1,9 @@
-//! Browser-friendly OpenAPI：嵌入仓库根 `docs/openapi.yaml`，供 Swagger UI 加载。
+//! Browser-friendly OpenAPI：`docs/openapi.yaml` 与 utoipa 片段合并后供 Swagger UI 加载。
 
 use axum::http::{header, HeaderValue};
 use axum::response::{Html, IntoResponse};
 
-static OPENAPI_YAML: &str = include_str!("../../../docs/openapi.yaml");
+use crate::openapi_spec;
 
 const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <html lang="en">
@@ -45,7 +45,7 @@ pub(crate) async fn openapi_yaml() -> impl IntoResponse {
             header::CONTENT_TYPE,
             HeaderValue::from_static("application/yaml; charset=utf-8"),
         )],
-        OPENAPI_YAML,
+        openapi_spec::merged_openapi_yaml_cached(),
     )
 }
 

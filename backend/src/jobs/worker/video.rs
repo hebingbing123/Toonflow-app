@@ -13,8 +13,9 @@ pub(super) async fn run_video_generate(
         .get("provider")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing provider".into()))?;
-    let provider = VideoProvider::from_str(provider_str)
-        .ok_or_else(|| JobRunError::Failed(format!("unknown video provider: {}", provider_str)))?;
+    let provider = provider_str
+        .parse::<VideoProvider>()
+        .map_err(|_| JobRunError::Failed(format!("unknown video provider: {}", provider_str)))?;
 
     let model = p
         .get("model")

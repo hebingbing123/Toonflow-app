@@ -15,6 +15,12 @@ pub struct WsNotifyHub {
     inner: Arc<RwLock<UserSockets>>,
 }
 
+impl Default for WsNotifyHub {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WsNotifyHub {
     pub fn new() -> Self {
         Self {

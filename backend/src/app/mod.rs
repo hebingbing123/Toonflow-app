@@ -7,7 +7,7 @@
 //! - `ops` — 运维端点
 //! - `router` — 路由构建器
 
-mod handlers;
+pub(crate) mod handlers;
 mod openapi;
 pub mod ops;
 mod router;

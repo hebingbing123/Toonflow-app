@@ -8,8 +8,9 @@ use axum::{
     Json,
 };
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct ErrorBody {
     pub code: String,
     pub message: String,

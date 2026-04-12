@@ -40,6 +40,8 @@ uuid = { version = "1", features = ["serde", "v4"] }
 walkdir = "2"
 wasmi = { version = "0.31", default-features = false }
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
+utoipa = { version = "5.4.0", features = ["yaml", "chrono", "uuid"] }
+serde_yaml = "0.9.34"
 
 [build-dependencies]
 wat = "1"
@@ -47,6 +49,10 @@ wat = "1"
 [dev-dependencies]
 tempfile = "3"
 tower = { version = "0.5", features = ["util"] }
+
+[[bin]]
+name = "export-openapi"
+path = "src/bin/export_openapi.rs"
 
 [features]
 redis = []

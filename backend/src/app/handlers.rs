@@ -13,22 +13,23 @@ use axum::Json;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use sqlx::FromRow;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Serialize)]
-pub(super) struct HealthResponse {
+#[derive(Serialize, ToSchema)]
+pub(crate) struct HealthResponse {
     pub status: &'static str,
     pub service: &'static str,
 }
 
 /// Minimal JSON probe; replaces Electron-era **`GET /api/test/test`** (`"ok"` plain text).
-#[derive(Serialize)]
-pub(super) struct PingResponse {
+#[derive(Serialize, ToSchema)]
+pub(crate) struct PingResponse {
     pub ok: bool,
 }
 
-#[derive(Serialize)]
-pub(super) struct VersionResponse {
+#[derive(Serialize, ToSchema)]
+pub(crate) struct VersionResponse {
     pub service: &'static str,
     pub version: &'static str,
     /// Present when the binary was built with env **`TOONFLOW_GIT_SHA`** set (compile-time `option_env!`).
@@ -36,14 +37,14 @@ pub(super) struct VersionResponse {
     pub git_sha: Option<&'static str>,
 }
 
-#[derive(Serialize)]
-pub(super) struct ReadyResponse {
+#[derive(Serialize, ToSchema)]
+pub(crate) struct ReadyResponse {
     pub status: &'static str,
     pub database: &'static str,
 }
 
-#[derive(Serialize)]
-pub(super) struct MeResponse {
+#[derive(Serialize, ToSchema)]
+pub(crate) struct MeResponse {
     pub sub: Uuid,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub email: Option<String>,
@@ -81,18 +82,44 @@ struct UserProfileRow {
     memory_config: Option<sqlx::types::Json<MemoryConfig>>,
 }
 
-pub(super) async fn health() -> Json<HealthResponse> {
+#[utoipa::path(
+    get,
+    path = "/health",
+    operation_id = "healthRoot",
+    tag = "system",
+    summary = "Liveness (unversioned)",
+    responses((status = 200, description = "OK", body = HealthResponse))
+)]
+pub(crate) async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok",
         service: "toonflow-server",
     })
 }
 
-pub(super) async fn ping() -> Json<PingResponse> {
+#[utoipa::path(
+    get,
+    path = "/api/v1/ping",
+    operation_id = "pingV1",
+    tag = "system",
+    summary = "Minimal connectivity probe (Electron `/api/test/test` parity)",
+    description = "Public, no auth, no database. Replaces Electron-era **`GET /api/test/test`** which returned plain text **`ok`**; this route returns JSON **`{\"ok\":true}`** for versioned API clients.",
+    responses((status = 200, description = "OK", body = PingResponse))
+)]
+pub(crate) async fn ping() -> Json<PingResponse> {
     Json(PingResponse { ok: true })
 }
 
-pub(super) async fn version() -> Json<VersionResponse> {
+#[utoipa::path(
+    get,
+    path = "/api/v1/version",
+    operation_id = "versionV1",
+    tag = "system",
+    summary = "Server semantic version (from Cargo package)",
+    description = "Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.\nWhen the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).",
+    responses((status = 200, description = "OK", body = VersionResponse))
+)]
+pub(crate) async fn version() -> Json<VersionResponse> {
     Json(VersionResponse {
         service: "toonflow-server",
         version: env!("CARGO_PKG_VERSION"),
@@ -100,7 +127,19 @@ pub(super) async fn version() -> Json<VersionResponse> {
     })
 }
 
-pub(super) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyResponse>, ApiError> {
+#[utoipa::path(
+    get,
+    path = "/api/v1/ready",
+    operation_id = "readyV1",
+    tag = "system",
+    summary = "Readiness (optional database ping)",
+    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200).",
+    responses(
+        (status = 200, description = "OK", body = ReadyResponse),
+        (status = 503, description = "Database unreachable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyResponse>, ApiError> {
     match &state.pool {
         None => Ok(Json(ReadyResponse {
             status: "ok",
@@ -119,7 +158,21 @@ pub(super) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyRes
     }
 }
 
-pub(super) async fn me(
+#[utoipa::path(
+    get,
+    path = "/api/v1/me",
+    operation_id = "meV1",
+    tag = "session",
+    summary = "Current user from JWT plus SaaS profile when database is configured",
+    description = "Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).\nIncludes `subscription_status` and `subscription_current_period_end_at` when present in profile.\nAlso returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.",
+    security(("bearerAuth" = [])),
+    responses(
+        (status = 200, description = "OK", body = MeResponse),
+        (status = 401, description = "Missing or invalid Bearer token", body = crate::error::ErrorBody),
+        (status = 503, description = "`SUPABASE_JWT_SECRET` not configured, or database error when loading profile", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn me(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<MeResponse>, ApiError> {

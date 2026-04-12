@@ -2,30 +2,9 @@
 //!
 //! 默认监听端口：8666（可通过 `PORT` 覆盖）。
 
-mod app;
-mod assets;
-mod auth;
-mod billing;
-mod error;
-mod harness;
-mod http_kit;
-mod jobs;
-mod llm;
-mod manuals;
-mod metering;
-mod narrative;
-mod production;
-mod production_flow;
-mod projects;
-mod prompting;
-mod scope;
-mod scripting;
-mod settings;
-mod state;
-mod vendor;
-
 use std::net::SocketAddr;
 
+use toonflow_server::{app, harness, jobs, state};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]

@@ -5,6 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::str::FromStr;
 use std::time::Duration;
 
 /// Supported video generation providers
@@ -16,17 +17,20 @@ pub enum VideoProvider {
     Kling,
 }
 
-impl VideoProvider {
-    /// Parse provider from string identifier
-    pub fn from_str(s: &str) -> Option<Self> {
+impl FromStr for VideoProvider {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
-            "runway" => Some(Self::Runway),
-            "pika" => Some(Self::Pika),
-            "kling" | "可灵" => Some(Self::Kling),
-            _ => None,
+            "runway" => Ok(Self::Runway),
+            "pika" => Ok(Self::Pika),
+            "kling" | "可灵" => Ok(Self::Kling),
+            _ => Err(()),
         }
     }
+}
 
+impl VideoProvider {
     /// Get the provider name
     pub fn name(&self) -> &'static str {
         match self {
@@ -641,18 +645,12 @@ mod tests {
 
     #[test]
     fn video_provider_from_str() {
-        assert_eq!(
-            VideoProvider::from_str("runway"),
-            Some(VideoProvider::Runway)
-        );
-        assert_eq!(
-            VideoProvider::from_str("RUNWAY"),
-            Some(VideoProvider::Runway)
-        );
-        assert_eq!(VideoProvider::from_str("pika"), Some(VideoProvider::Pika));
-        assert_eq!(VideoProvider::from_str("kling"), Some(VideoProvider::Kling));
-        assert_eq!(VideoProvider::from_str("可灵"), Some(VideoProvider::Kling));
-        assert_eq!(VideoProvider::from_str("unknown"), None);
+        assert_eq!("runway".parse::<VideoProvider>(), Ok(VideoProvider::Runway));
+        assert_eq!("RUNWAY".parse::<VideoProvider>(), Ok(VideoProvider::Runway));
+        assert_eq!("pika".parse::<VideoProvider>(), Ok(VideoProvider::Pika));
+        assert_eq!("kling".parse::<VideoProvider>(), Ok(VideoProvider::Kling));
+        assert_eq!("可灵".parse::<VideoProvider>(), Ok(VideoProvider::Kling));
+        assert!("unknown".parse::<VideoProvider>().is_err());
     }
 
     #[test]

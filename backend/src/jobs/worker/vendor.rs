@@ -174,8 +174,8 @@ pub(super) async fn run_vendor_model_test(
         "video" => {
             let provider = vendor
                 .as_ref()
-                .and_then(|v| VideoProvider::from_str(&v.slug))
-                .or_else(|| VideoProvider::from_str(raw_vendor_id))
+                .and_then(|v| v.slug.parse::<VideoProvider>().ok())
+                .or_else(|| raw_vendor_id.parse::<VideoProvider>().ok())
                 .ok_or_else(|| {
                     JobRunError::Failed(format!(
                         "video vendor '{raw_vendor_id}' is not supported; expected Runway, Pika, or Kling"

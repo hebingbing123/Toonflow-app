@@ -44,7 +44,10 @@ async fn openapi_yaml_and_swagger_ui_served_without_database() {
         .await
         .unwrap();
     let s = std::str::from_utf8(&body).expect("utf8");
-    assert!(s.starts_with("openapi:"));
+    assert!(
+        s.lines().any(|line| line.starts_with("openapi:")),
+        "merged YAML should include an openapi version line (key order may differ after merge)"
+    );
     assert!(s.contains("Toonflow API"));
     assert!(
         s.contains("  /api/v1/ws:") && s.contains("websocketUpgrade"),
