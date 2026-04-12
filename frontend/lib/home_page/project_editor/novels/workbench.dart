@@ -210,29 +210,12 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setLocalState) {
-              Future<void> runAction(Future<void> Function() action) async {
-                setLocalState(() => localBusy = true);
-                setDialogState(() => novelsBusy[0] = true);
-                try {
-                  await action();
-                } on RustApiException catch (e) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text('$e')));
-                  }
-                } catch (e) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text('$e')));
-                  }
-                } finally {
-                  if (ctx.mounted) {
-                    setDialogState(() => novelsBusy[0] = false);
-                  }
-                  setLocalState(() => localBusy = false);
-                }
+              void setLocalBusy(bool value) {
+                setLocalState(() => localBusy = value);
+              }
+
+              void updateInfoLine(String value) {
+                setLocalState(() => infoLine = value);
               }
 
               return AlertDialog(
@@ -302,31 +285,39 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                             FilledButton.tonal(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      final rows =
-                                          await fetchProjectNovelsByProjectId(
-                                            token,
-                                            p.id,
-                                            search: searchCtrl.text.trim(),
-                                            page: 1,
-                                            limit: 10,
-                                          );
-                                      setLocalState(() {
-                                        previewRows = List<NovelRow>.from(
-                                          rows.items,
-                                        );
-                                        infoLine =
-                                            '搜索命中 ${rows.total} 条，当前展示 ${rows.items.length} 条。';
-                                      });
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action: () => _searchNovelWorkbenchRows(
+                                        token: token,
+                                        project: p,
+                                        searchCtrl: searchCtrl,
+                                        applyResult: (rows, message) {
+                                          setLocalState(() {
+                                            previewRows = rows;
+                                            infoLine = message;
+                                          });
+                                        },
+                                      ),
+                                    ),
                               child: const Text('搜索'),
                             ),
                             OutlinedButton(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      await refreshWorkbench(setLocalState);
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action: () => refreshWorkbench(
+                                        setLocalState,
+                                      ),
+                                    ),
                               child: const Text('刷新列表'),
                             ),
                           ],
@@ -352,24 +343,27 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         FilledButton(
                           onPressed: localBusy
                               ? null
-                              : () => runAction(() async {
-                                  final created =
-                                      await createProjectNovelUnderProject(
-                                        token,
-                                        p.id,
-                                        chapter: createChapterCtrl.text.trim(),
-                                        chapterData: createBodyCtrl.text.trim(),
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine =
-                                        '已新增章节 #${created.numericId} ${created.chapter}。';
-                                    selectedNovelIdCtrl.text = created.numericId
-                                        .toString();
-                                    patchChapterCtrl.text = created.chapter;
-                                    patchBodyCtrl.text = created.chapterData;
-                                  });
-                                }),
+                              : () => _runNovelWorkbenchAction(
+                                  ctx: ctx,
+                                  setDialogState: setDialogState,
+                                  setLocalState: setLocalState,
+                                  novelsBusy: novelsBusy,
+                                  setLocalBusy: setLocalBusy,
+                                  action: () async {
+                                    await _createNovelWorkbenchChapter(
+                                      token: token,
+                                      project: p,
+                                      createChapterCtrl: createChapterCtrl,
+                                      createBodyCtrl: createBodyCtrl,
+                                      selectedNovelIdCtrl: selectedNovelIdCtrl,
+                                      patchChapterCtrl: patchChapterCtrl,
+                                      patchBodyCtrl: patchBodyCtrl,
+                                      refreshWorkbench: refreshWorkbench,
+                                      setLocalState: setLocalState,
+                                    );
+                                    updateInfoLine('已新增章节。');
+                                  },
+                                ),
                           child: const Text('新增章节'),
                         ),
                         const SizedBox(height: 16),
@@ -393,22 +387,22 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                             OutlinedButton(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      final id = int.parse(
-                                        selectedNovelIdCtrl.text.trim(),
-                                      );
-                                      final row =
-                                          await fetchProjectNovelByProjectIds(
-                                            token,
-                                            p.id,
-                                            id,
-                                          );
-                                      setLocalState(() {
-                                        patchChapterCtrl.text = row.chapter;
-                                        patchBodyCtrl.text = row.chapterData;
-                                        infoLine = '已读取章节 #${row.numericId}。';
-                                      });
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action: () => _readNovelWorkbenchChapter(
+                                        token: token,
+                                        project: p,
+                                        selectedNovelIdCtrl:
+                                            selectedNovelIdCtrl,
+                                        patchChapterCtrl: patchChapterCtrl,
+                                        patchBodyCtrl: patchBodyCtrl,
+                                        applyInfoLine: updateInfoLine,
+                                      ),
+                                    ),
                               child: const Text('读取章节'),
                             ),
                           ],
@@ -433,27 +427,23 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         FilledButton.tonal(
                           onPressed: localBusy
                               ? null
-                              : () => runAction(() async {
-                                  final id = int.parse(
-                                    selectedNovelIdCtrl.text.trim(),
-                                  );
-                                  final row =
-                                      await patchProjectNovelByProjectIds(
-                                        token,
-                                        p.id,
-                                        id,
-                                        {
-                                          'chapter': patchChapterCtrl.text
-                                              .trim(),
-                                          'chapter_data': patchBodyCtrl.text
-                                              .trim(),
-                                        },
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine = '已更新章节 #${row.numericId}。';
-                                  });
-                                }),
+                              : () => _runNovelWorkbenchAction(
+                                  ctx: ctx,
+                                  setDialogState: setDialogState,
+                                  setLocalState: setLocalState,
+                                  novelsBusy: novelsBusy,
+                                  setLocalBusy: setLocalBusy,
+                                  action: () => _saveNovelWorkbenchChapter(
+                                    token: token,
+                                    project: p,
+                                    selectedNovelIdCtrl: selectedNovelIdCtrl,
+                                    patchChapterCtrl: patchChapterCtrl,
+                                    patchBodyCtrl: patchBodyCtrl,
+                                    refreshWorkbench: refreshWorkbench,
+                                    setLocalState: setLocalState,
+                                    applyInfoLine: updateInfoLine,
+                                  ),
+                                ),
                           child: const Text('保存章节'),
                         ),
                         const SizedBox(height: 16),
@@ -473,20 +463,21 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         OutlinedButton(
                           onPressed: localBusy
                               ? null
-                              : () => runAction(() async {
-                                  final id = int.parse(
-                                    deleteNovelIdCtrl.text.trim(),
-                                  );
-                                  await deleteProjectNovelByProjectIds(
-                                    token,
-                                    p.id,
-                                    id,
-                                  );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine = '已删除章节 #$id。';
-                                  });
-                                }),
+                              : () => _runNovelWorkbenchAction(
+                                  ctx: ctx,
+                                  setDialogState: setDialogState,
+                                  setLocalState: setLocalState,
+                                  novelsBusy: novelsBusy,
+                                  setLocalBusy: setLocalBusy,
+                                  action: () => _deleteNovelWorkbenchChapter(
+                                    token: token,
+                                    project: p,
+                                    deleteNovelIdCtrl: deleteNovelIdCtrl,
+                                    refreshWorkbench: refreshWorkbench,
+                                    setLocalState: setLocalState,
+                                    applyInfoLine: updateInfoLine,
+                                  ),
+                                ),
                           child: const Text('删除章节'),
                         ),
                         const SizedBox(height: 12),
@@ -501,24 +492,21 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         FilledButton.tonal(
                           onPressed: localBusy
                               ? null
-                              : () => runAction(() async {
-                                  final ids = _parseNumericIdList(
-                                    generateIdsCtrl.text,
-                                  );
-                                  if (ids.isEmpty) {
-                                    throw const FormatException('至少提供一个章节 ID');
-                                  }
-                                  final message =
-                                      await postNovelEventsGenerateEvents(
-                                        token,
-                                        projectNumericId: p.numericId,
-                                        novelIds: ids,
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine = '已触发事件生成：$message';
-                                  });
-                                }),
+                              : () => _runNovelWorkbenchAction(
+                                  ctx: ctx,
+                                  setDialogState: setDialogState,
+                                  setLocalState: setLocalState,
+                                  novelsBusy: novelsBusy,
+                                  setLocalBusy: setLocalBusy,
+                                  action: () => _generateNovelWorkbenchEvents(
+                                    token: token,
+                                    project: p,
+                                    generateIdsCtrl: generateIdsCtrl,
+                                    refreshWorkbench: refreshWorkbench,
+                                    setLocalState: setLocalState,
+                                    applyInfoLine: updateInfoLine,
+                                  ),
+                                ),
                           child: const Text('生成章节事件'),
                         ),
                         const SizedBox(height: 16),
@@ -543,85 +531,54 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                             OutlinedButton(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      final rows =
-                                          await fetchNovelWorkbenchFullRows(
-                                            token,
-                                            p.numericId,
-                                          );
-                                      final sample = rows.isEmpty
-                                          ? '空列表'
-                                          : rows
-                                                .take(2)
-                                                .map(
-                                                  (row) =>
-                                                      '#${row.numericId} ${row.chapter}',
-                                                )
-                                                .join(' · ');
-                                      setLocalState(() {
-                                        infoLine =
-                                            'workbench get-novel-data 返回 ${rows.length} 条：$sample';
-                                      });
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action: () => _readNovelWorkbenchData(
+                                        token: token,
+                                        project: p,
+                                        applyInfoLine: updateInfoLine,
+                                      ),
+                                    ),
                               child: const Text('读取 get-novel-data'),
                             ),
                             OutlinedButton(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      final rows =
-                                          await fetchNovelWorkbenchIndex(
-                                            token,
-                                            p.numericId,
-                                          );
-                                      final sample = rows.isEmpty
-                                          ? '空列表'
-                                          : rows
-                                                .take(3)
-                                                .map(
-                                                  (row) =>
-                                                      '#${row.numericId}:${row.chapterIndex}',
-                                                )
-                                                .join(' · ');
-                                      setLocalState(() {
-                                        infoLine =
-                                            'workbench get-novel-index 返回 ${rows.length} 条：$sample';
-                                      });
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action: () => _readNovelWorkbenchIndex(
+                                        token: token,
+                                        project: p,
+                                        applyInfoLine: updateInfoLine,
+                                      ),
+                                    ),
                               child: const Text('读取 get-novel-index'),
                             ),
                             OutlinedButton(
                               onPressed: localBusy
                                   ? null
-                                  : () => runAction(() async {
-                                      final ids = _parseNumericIdList(
-                                        numericIdsCtrl.text,
-                                      );
-                                      if (ids.isEmpty) {
-                                        throw const FormatException(
-                                          '至少提供一个章节 ID',
-                                        );
-                                      }
-                                      final rows =
-                                          await fetchNovelWorkbenchEventStates(
-                                            token,
-                                            p.id,
-                                            ids,
-                                          );
-                                      final sample = rows.isEmpty
-                                          ? '当前均为 0'
-                                          : rows
-                                                .take(3)
-                                                .map(
-                                                  (row) =>
-                                                      '#${row.numericId}:${row.eventState}',
-                                                )
-                                                .join(' · ');
-                                      setLocalState(() {
-                                        infoLine =
-                                            'workbench get-novel-event-state 返回 ${rows.length} 条：$sample';
-                                      });
-                                    }),
+                                  : () => _runNovelWorkbenchAction(
+                                      ctx: ctx,
+                                      setDialogState: setDialogState,
+                                      setLocalState: setLocalState,
+                                      novelsBusy: novelsBusy,
+                                      setLocalBusy: setLocalBusy,
+                                      action:
+                                          () => _readNovelWorkbenchEventStates(
+                                            token: token,
+                                            project: p,
+                                            numericIdsCtrl: numericIdsCtrl,
+                                            applyInfoLine: updateInfoLine,
+                                          ),
+                                    ),
                               child: const Text('读取 event-state'),
                             ),
                           ],
@@ -639,25 +596,22 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         FilledButton.tonal(
                           onPressed: localBusy
                               ? null
-                              : () => runAction(() async {
-                                  final ids = _parseNumericIdList(
-                                    batchDeleteIdsCtrl.text,
-                                  );
-                                  if (ids.isEmpty) {
-                                    throw const FormatException('至少提供一个章节 ID');
-                                  }
-                                  final message =
-                                      await batchDeleteNovelsUnderProject(
-                                        token,
-                                        p.id,
-                                        ids,
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine =
-                                        '已批量删除 ${ids.length} 条章节：$message';
-                                  });
-                                }),
+                              : () => _runNovelWorkbenchAction(
+                                  ctx: ctx,
+                                  setDialogState: setDialogState,
+                                  setLocalState: setLocalState,
+                                  novelsBusy: novelsBusy,
+                                  setLocalBusy: setLocalBusy,
+                                  action:
+                                      () => _batchDeleteNovelWorkbenchChapters(
+                                        token: token,
+                                        project: p,
+                                        batchDeleteIdsCtrl: batchDeleteIdsCtrl,
+                                        refreshWorkbench: refreshWorkbench,
+                                        setLocalState: setLocalState,
+                                        applyInfoLine: updateInfoLine,
+                                      ),
+                                ),
                           child: const Text('批量删除章节'),
                         ),
                       ],
