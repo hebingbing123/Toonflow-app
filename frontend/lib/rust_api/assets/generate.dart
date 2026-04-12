@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1`.
 /// **200** = **`queued`** **`JobRow`** (**`asset.generate.image`**); worker **`succeeded`** inserts

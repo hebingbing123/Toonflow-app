@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `POST /api/v1/projects/{project_id}/assets/workbench/nested` — parent assets with nested `sonAssets` by **`type/name/page/limit`** (**`project_id`** = project UUID).
 Future<WorkbenchAssetTreeResponse> postWorkbenchAssetsGetAssetsApi(

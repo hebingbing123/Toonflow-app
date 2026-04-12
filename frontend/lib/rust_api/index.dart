@@ -11,11 +11,11 @@ export 'production.dart';
 
 part 'art_styles.dart';
 part 'agent_memory_api.dart';
-part 'assets_api.dart';
-part 'assets_crud.dart';
-part 'assets_images.dart';
-part 'assets_models.dart';
-part 'assets_generate.dart';
+part 'assets/api.dart';
+part 'assets/crud.dart';
+part 'assets/images.dart';
+part 'assets/models.dart';
+part 'assets/generate.dart';
 part 'catalog_memory_models.dart';
 part 'harness_api.dart';
 part 'jobs_api.dart';

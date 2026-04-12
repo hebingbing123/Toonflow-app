@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `POST /api/v1/projects/{project_id}/assets/corner-scape` — see `listCornerScapeAssetsByProjectIdV1`.
 Future<CornerScapeResponse> fetchCornerScapeAssetsByProjectId(
