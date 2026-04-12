@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
 
+part 'creative_manuals_view.dart';
+
 enum _CreativeManualKind { director, visual }
 
 class ProjectsCreativeManualsWorkbenchDialog extends StatefulWidget {
@@ -31,12 +33,12 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   String? _statusLine;
   bool _busy = false;
 
-  List<_CreativeManualRow> get _activeRows => _kind == _CreativeManualKind.director
-      ? _directorRows
-      : _visualRows;
+  List<_CreativeManualRow> get _activeRows =>
+      _kind == _CreativeManualKind.director ? _directorRows : _visualRows;
 
-  String get _pathLabel =>
-      _kind == _CreativeManualKind.director ? 'directorManual 文件夹' : 'stylePath';
+  String get _pathLabel => _kind == _CreativeManualKind.director
+      ? 'directorManual 文件夹'
+      : 'stylePath';
 
   String get _selectionLabel =>
       _kind == _CreativeManualKind.director ? '当前导演手册' : '当前视觉手册';
@@ -320,7 +322,10 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     });
     try {
       if (_kind == _CreativeManualKind.director) {
-        await postProjectDeleteDirectorManual(widget.accessToken, selected.path);
+        await postProjectDeleteDirectorManual(
+          widget.accessToken,
+          selected.path,
+        );
       } else {
         await postProjectDeleteVisualManual(widget.accessToken, selected.path);
       }
@@ -347,161 +352,35 @@ class _ProjectsCreativeManualsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline;
-    return AlertDialog(
-      title: const Text('创作手册工作台'),
-      content: SizedBox(
-        width: 820,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '把导演手册与视觉手册从首页探针收口到同一工作台，可直接刷新、查看、创建、更新和删除。',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 12),
-              SegmentedButton<_CreativeManualKind>(
-                segments: const <ButtonSegment<_CreativeManualKind>>[
-                  ButtonSegment<_CreativeManualKind>(
-                    value: _CreativeManualKind.director,
-                    label: Text('导演手册'),
-                  ),
-                  ButtonSegment<_CreativeManualKind>(
-                    value: _CreativeManualKind.visual,
-                    label: Text('视觉手册'),
-                  ),
-                ],
-                selected: <_CreativeManualKind>{_kind},
-                onSelectionChanged: _busy
-                    ? null
-                    : (selection) {
-                        final next = selection.firstOrNull;
-                        if (next != null) {
-                          _setKind(next);
-                        }
-                      },
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _busy ? null : _reloadAll,
-                    child: Text(_busy ? '处理中…' : '刷新全部手册'),
-                  ),
-                  FilledButton(
-                    onPressed: _busy ? null : _createCurrentKind,
-                    child: Text(_createLabel),
-                  ),
-                  FilledButton(
-                    onPressed: _busy || _selected == null
-                        ? null
-                        : _saveCurrentKind,
-                    child: Text(_saveLabel),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _busy || _selected == null
-                        ? null
-                        : _deleteCurrentKind,
-                    child: Text(_deleteLabel),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (_activeRows.isNotEmpty)
-                DropdownButtonFormField<String>(
-                  initialValue: _selected?.path,
-                  decoration: InputDecoration(labelText: _selectionLabel),
-                  items: _activeRows
-                      .map(
-                        (row) => DropdownMenuItem<String>(
-                          value: row.path,
-                          child: Text(
-                            '${row.path} · ${row.name}',
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: _busy
-                      ? null
-                      : (value) {
-                          if (value == null) {
-                            return;
-                          }
-                          for (final row in _activeRows) {
-                            if (row.path == value) {
-                              setState(() => _applyRow(row));
-                              break;
-                            }
-                          }
-                        },
-                )
-              else
-                Text(
-                  '当前类型还没有手册，可直接填写下方表单新建。',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
-                ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: '名称'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _pathCtrl,
-                decoration: InputDecoration(labelText: _pathLabel),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _imagesCtrl,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: '图片列表',
-                  helperText: '按换行或逗号分隔多个图片 URL / 路径。',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _slotsCtrl,
-                minLines: 5,
-                maxLines: 8,
-                decoration: const InputDecoration(
-                  labelText: '数据槽位',
-                  helperText: '每行一个槽位，格式为 label|value|data',
-                ),
-              ),
-              if (_selected != null) ...[
-                const SizedBox(height: 12),
-                Text('当前摘要', style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 4),
-                SelectableText(
-                  '${_selected!.name} · 路径 ${_selected!.path} · '
-                  '图片 ${_selected!.images.length} 张 · 槽位 ${_selected!.slots.length} 个',
-                ),
-              ],
-              if (_statusLine != null) ...[
-                const SizedBox(height: 12),
-                SelectableText(_statusLine!),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
-      ],
+    return CreativeManualsWorkbenchView(
+      kind: _kind,
+      busy: _busy,
+      activeRows: _activeRows,
+      selected: _selected,
+      statusLine: _statusLine,
+      nameCtrl: _nameCtrl,
+      pathCtrl: _pathCtrl,
+      imagesCtrl: _imagesCtrl,
+      slotsCtrl: _slotsCtrl,
+      pathLabel: _pathLabel,
+      selectionLabel: _selectionLabel,
+      createLabel: _createLabel,
+      saveLabel: _saveLabel,
+      deleteLabel: _deleteLabel,
+      onKindChanged: (next) => _setKind(next),
+      onReloadAll: _reloadAll,
+      onCreate: _createCurrentKind,
+      onSave: _saveCurrentKind,
+      onDelete: _deleteCurrentKind,
+      onSelectRowPath: (value) {
+        for (final row in _activeRows) {
+          if (row.path == value) {
+            setState(() => _applyRow(row));
+            break;
+          }
+        }
+      },
+      onClose: () => Navigator.of(context).pop(),
     );
   }
 }
