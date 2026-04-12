@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Storyboard CRUD endpoints scoped under project scripts.
 /// `GET /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards`.
 Future<List<StoryboardRow>> fetchStoryboardsForProjectScript(
   String accessToken,
