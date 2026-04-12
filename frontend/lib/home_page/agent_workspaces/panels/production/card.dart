@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../script/card.dart';
+import '../../prompt_preset.dart';
 import '../../contexts/production/action_panels.dart';
 import '../../contexts/production/card_panels.dart';
 import '../../contexts/production/context_snapshot.dart';

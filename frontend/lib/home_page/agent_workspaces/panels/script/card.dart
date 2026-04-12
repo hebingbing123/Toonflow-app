@@ -2,18 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../prompt_preset.dart';
 import '../../contexts/script/action_panels.dart';
 import '../../contexts/script/card_panels.dart';
 import '../../contexts/script/context_snapshot.dart';
 import '../../contexts/script/status_panels.dart';
 import '../../contexts/script/support.dart';
-
-class AgentWorkspacePromptPreset {
-  const AgentWorkspacePromptPreset({required this.label, required this.prompt});
-
-  final String label;
-  final String prompt;
-}
 
 class AgentWorkspaceScriptCard extends StatefulWidget {
   const AgentWorkspaceScriptCard({
