@@ -62,7 +62,9 @@ class _QualityReviewsWorkbenchDialogState
     );
     _createSourceCtrl = TextEditingController(text: 'manual');
     _createScoreCtrl = TextEditingController(text: '85');
-    _createCommentsCtrl = TextEditingController(text: 'quality workbench review');
+    _createCommentsCtrl = TextEditingController(
+      text: 'quality workbench review',
+    );
     _createBadCaseCategoryCtrl = TextEditingController();
     _reviews = List<QualityReview>.from(widget.initialReviews);
     _statsSummary = widget.initialStatsSummary;
@@ -231,10 +233,9 @@ class _QualityReviewsWorkbenchDialogState
               ? null
               : _createCommentsCtrl.text.trim(),
           isBadCase: _createBadCase,
-          badCaseCategory:
-              _createBadCaseCategoryCtrl.text.trim().isEmpty
-                  ? null
-                  : _createBadCaseCategoryCtrl.text.trim(),
+          badCaseCategory: _createBadCaseCategoryCtrl.text.trim().isEmpty
+              ? null
+              : _createBadCaseCategoryCtrl.text.trim(),
           modelName: 'manual',
           skillVersion: 'flutter.workbench',
           modelParams: const {'surface': 'quality_reviews_workbench'},
@@ -259,193 +260,47 @@ class _QualityReviewsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline;
-    return AlertDialog(
-      title: const Text('质量工作台'),
-      content: SizedBox(
-        width: 840,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _reviews.isEmpty
-                    ? '用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。'
-                    : summarizeQualityReviews(_reviews),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 12),
-              Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _targetTypeFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 targetType'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _targetIdFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 targetId'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _jobIdFilterCtrl,
-                decoration: const InputDecoration(labelText: '筛选 jobId'),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _loadingReviews || _creatingReview
-                        ? null
-                        : () => _loadReviews(onlyBadCases: false),
-                    child: Text(_loadingReviews ? '加载中…' : '加载评审列表'),
-                  ),
-                  OutlinedButton(
-                    onPressed: _loadingBadCases || _creatingReview
-                        ? null
-                        : () => _loadReviews(onlyBadCases: true),
-                    child: Text(_loadingBadCases ? '加载中…' : '只看坏例'),
-                  ),
-                  OutlinedButton(
-                    onPressed: _loadingStats ? null : _loadStats,
-                    child: Text(_loadingStats ? '统计中…' : '读取质量统计'),
-                  ),
-                  OutlinedButton(
-                    onPressed:
-                        _loadingStagePassRate ? null : _loadStagePassRate,
-                    child: Text(
-                      _loadingStagePassRate ? '读取中…' : '读取阶段通过率',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text('详情查询', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _reviewIdCtrl,
-                decoration: const InputDecoration(labelText: '评审 ID'),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed:
-                    _loadingReviewById || _creatingReview ? null : _loadReviewById,
-                child: Text(_loadingReviewById ? '读取中…' : '查看评审详情'),
-              ),
-              const SizedBox(height: 12),
-              Text('创建评审', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _createTargetTypeCtrl,
-                decoration: const InputDecoration(labelText: 'targetType'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _createTargetIdCtrl,
-                decoration: const InputDecoration(labelText: 'targetId'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _createSourceCtrl,
-                decoration: const InputDecoration(labelText: 'source'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _createScoreCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'overallScore'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _createCommentsCtrl,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'comments'),
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('passed'),
-                value: _createPassed,
-                onChanged: _creatingReview
-                    ? null
-                    : (value) => setState(() => _createPassed = value),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('isBadCase'),
-                value: _createBadCase,
-                onChanged: _creatingReview
-                    ? null
-                    : (value) => setState(() => _createBadCase = value),
-              ),
-              TextField(
-                controller: _createBadCaseCategoryCtrl,
-                decoration: const InputDecoration(labelText: 'badCaseCategory'),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: _creatingReview ? null : _createReview,
-                child: Text(_creatingReview ? '创建中…' : '创建评审'),
-              ),
-              if (_statusLine != null) ...[
-                const SizedBox(height: 12),
-                SelectableText('状态：$_statusLine'),
-              ],
-              if (_reviewDetails != null) ...[
-                const SizedBox(height: 12),
-                SelectableText('评审详情：$_reviewDetails'),
-              ],
-              if (_statsSummary != null) ...[
-                const SizedBox(height: 12),
-                SelectableText('质量统计：$_statsSummary'),
-              ],
-              if (_stagePassRateSummary != null) ...[
-                const SizedBox(height: 12),
-                SelectableText('阶段通过率：$_stagePassRateSummary'),
-              ],
-              if (_reviews.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _filterBadCasesOnly
-                      ? '坏例 ${_reviews.length} 条'
-                      : '评审 ${_reviews.length} 条',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 8),
-                ..._reviews.take(8).map(
-                  (review) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
-                    ),
-                    subtitle: Text(formatQualityReviewDetails(review)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      setState(() {
-                        _reviewIdCtrl.text = review.id;
-                        _reviewDetails = formatQualityReviewDetails(review);
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
-      ],
+    return _buildQualityReviewsWorkbenchDialogView(
+      context: context,
+      reviews: _reviews,
+      statsSummary: _statsSummary,
+      stagePassRateSummary: _stagePassRateSummary,
+      reviewDetails: _reviewDetails,
+      statusLine: _statusLine,
+      filterBadCasesOnly: _filterBadCasesOnly,
+      createPassed: _createPassed,
+      createBadCase: _createBadCase,
+      loadingReviews: _loadingReviews,
+      loadingBadCases: _loadingBadCases,
+      loadingStats: _loadingStats,
+      loadingStagePassRate: _loadingStagePassRate,
+      loadingReviewById: _loadingReviewById,
+      creatingReview: _creatingReview,
+      targetTypeFilterCtrl: _targetTypeFilterCtrl,
+      targetIdFilterCtrl: _targetIdFilterCtrl,
+      jobIdFilterCtrl: _jobIdFilterCtrl,
+      reviewIdCtrl: _reviewIdCtrl,
+      createTargetTypeCtrl: _createTargetTypeCtrl,
+      createTargetIdCtrl: _createTargetIdCtrl,
+      createSourceCtrl: _createSourceCtrl,
+      createScoreCtrl: _createScoreCtrl,
+      createCommentsCtrl: _createCommentsCtrl,
+      createBadCaseCategoryCtrl: _createBadCaseCategoryCtrl,
+      onLoadReviews: () => _loadReviews(onlyBadCases: false),
+      onLoadBadCases: () => _loadReviews(onlyBadCases: true),
+      onLoadStats: _loadStats,
+      onLoadStagePassRate: _loadStagePassRate,
+      onLoadReviewById: _loadReviewById,
+      onCreateReview: _createReview,
+      onCreatePassedChanged: (value) => setState(() => _createPassed = value),
+      onCreateBadCaseChanged: (value) => setState(() => _createBadCase = value),
+      onSelectReview: (review) {
+        setState(() {
+          _reviewIdCtrl.text = review.id;
+          _reviewDetails = formatQualityReviewDetails(review);
+        });
+      },
+      onClose: () => Navigator.of(context).pop(),
     );
   }
 }

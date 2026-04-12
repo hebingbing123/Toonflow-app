@@ -5,6 +5,7 @@ import 'support.dart';
 import '../../rust_api.dart';
 
 part 'workbench.dart';
+part 'workbench_view.dart';
 
 class QualityReviewsSection extends StatelessWidget {
   const QualityReviewsSection({
