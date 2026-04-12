@@ -2,314 +2,555 @@
 
 mod stubs {
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/add-assets",
-    operation_id = "postAssetsAddAssetsV1",
-    tag = "assets",
-    summary = "Workbench — create one project asset (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/add-assets",
+        operation_id = "postAssetsAddAssetsV1",
+        tag = "assets",
+        summary = "Workbench — create one project asset (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsAddAssetsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Asset created", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid type, name, or describe", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_add_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/batch-delete",
-    operation_id = "postAssetsBatchDeleteV1",
-    tag = "assets",
-    summary = "Workbench — batch delete assets by numeric ids (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/batch-delete",
+        operation_id = "postAssetsBatchDeleteV1",
+        tag = "assets",
+        summary = "Workbench — batch delete assets by numeric ids (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsBatchDeleteBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Assets deleted", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid id array", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_batch_delete_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/batch-generation-data",
-    operation_id = "postAssetsBatchGenerationDataV1",
-    tag = "assets",
-    summary = "Workbench — paged asset listing for batch generation picker (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/batch-generation-data",
+        operation_id = "postAssetsBatchGenerationDataV1",
+        tag = "assets",
+        summary = "Workbench — paged asset listing for batch generation picker (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsBatchGenerationDataBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Legacy paged rows", body = ref("LegacyAssetsBatchGenerationDataResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid body fields", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_batch_generation_data_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/del-assets",
-    operation_id = "postAssetsDelAssetsV1",
-    tag = "assets",
-    summary = "Workbench — delete one asset by numeric id (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/del-assets",
+        operation_id = "postAssetsDelAssetsV1",
+        tag = "assets",
+        summary = "Workbench — delete one asset by numeric id (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsDeleteBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Asset deleted (or already absent)", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid id", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_del_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/del-image",
-    operation_id = "postAssetsDelImageV1",
-    tag = "assets",
-    summary = "Workbench — delete one image by numeric image id (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/del-image",
+        operation_id = "postAssetsDelImageV1",
+        tag = "assets",
+        summary = "Workbench — delete one image by numeric image id (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsDeleteBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Image deleted", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid id", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_del_image_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/image-bundle",
-    operation_id = "postAssetsGetImageV1",
-    tag = "assets",
-    summary = "Workbench — load one asset image bundle by stable asset numeric id (project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/image-bundle",
+        operation_id = "postAssetsGetImageV1",
+        tag = "assets",
+        summary = "Workbench — load one asset image bundle by stable asset numeric id (project UUID)",
+    request_body(
+            content = ref("LegacyAssetsGetImageBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "OK", body = ref("LegacyAssetsGetImageResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid assetsId", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_get_image_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/material-data",
-    operation_id = "postAssetsGetMaterialDataV1",
-    tag = "assets",
-    summary = "Workbench — get clip assets and generated videos (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/material-data",
+        operation_id = "postAssetsGetMaterialDataV1",
+        tag = "assets",
+        summary = "Workbench — get clip assets and generated videos (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsGetMaterialDataBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Legacy material data", body = ref("LegacyAssetsGetMaterialDataResponse"), content_type = "application/json"),
+        (status = 400, description = "Malformed body (must be empty JSON object)", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_get_material_data_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/nested",
-    operation_id = "postAssetsGetAssetsApiV1",
-    tag = "assets",
-    summary = "Workbench — paged parent assets with nested children (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/nested",
+        operation_id = "postAssetsGetAssetsApiV1",
+        tag = "assets",
+        summary = "Workbench — paged parent assets with nested children (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsGetAssetsApiBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Legacy paged parent + child rows", body = ref("LegacyAssetsGetAssetsApiResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid type, page, or limit", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_get_assets_api_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/polling-image-assets",
-    operation_id = "postAssetsPollingImageAssetsV1",
-    tag = "assets",
-    summary = "Workbench — poll selected image completion by asset ids (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/polling-image-assets",
+        operation_id = "postAssetsPollingImageAssetsV1",
+        tag = "assets",
+        summary = "Workbench — poll selected image completion by asset ids (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsPollingImageAssetsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Polling rows (compact shape subset)", body = serde_json::Value, content_type = "application/json"),
+        (status = 400, description = "Unknown JSON fields, non-positive ids, or too many ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_polling_image_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/polling-prompt-assets",
-    operation_id = "postAssetsPollingPromptAssetsV1",
-    tag = "assets",
-    summary = "Workbench — poll prompt-generate completion by asset ids (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/polling-prompt-assets",
+        operation_id = "postAssetsPollingPromptAssetsV1",
+        tag = "assets",
+        summary = "Workbench — poll prompt-generate completion by asset ids (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsPollingPromptAssetsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Polling rows (compact shape subset)", body = serde_json::Value, content_type = "application/json"),
+        (status = 400, description = "Unknown JSON fields, non-positive ids, or too many ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_polling_prompt_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/save-assets",
-    operation_id = "postAssetsSaveAssetsV1",
-    tag = "assets",
-    summary = "Workbench — save selected image and prompt for an asset (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/save-assets",
+        operation_id = "postAssetsSaveAssetsV1",
+        tag = "assets",
+        summary = "Workbench — save selected image and prompt for an asset (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsSaveAssetsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Asset image selection saved", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid id, type, imageId, or base64", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_save_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/update-assets",
-    operation_id = "postAssetsUpdateAssetsV1",
-    tag = "assets",
-    summary = "Workbench — update asset name/describe and optional prompt remark (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/update-assets",
+        operation_id = "postAssetsUpdateAssetsV1",
+        tag = "assets",
+        summary = "Workbench — update asset name/describe and optional prompt remark (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsUpdateAssetsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Asset updated", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid id, name, or describe", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_update_assets_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/workbench/upload-clip",
-    operation_id = "postAssetsUploadClipV1",
-    tag = "assets",
-    summary = "Workbench — upload one clip asset with inline base64 (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/workbench/upload-clip",
+        operation_id = "postAssetsUploadClipV1",
+        tag = "assets",
+        summary = "Workbench — upload one clip asset with inline base64 (by project UUID)",
+    request_body(
+            content = ref("LegacyAssetsUploadClipBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Clip uploaded", body = ref("LegacyAssetsUploadClipResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid type, name, or base64Data", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_assets_upload_clip_v1() {}
 
     #[utoipa::path(
-    delete,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
-    operation_id = "deleteProjectAssetByProjectIdV1",
-    tag = "assets",
-    summary = "Delete an asset (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        delete,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
+        operation_id = "deleteProjectAssetByProjectIdV1",
+        tag = "assets",
+        summary = "Delete an asset (by project UUID)",
+    responses(
+        (status = 204, description = "Deleted"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_delete_project_asset_by_project_id_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
-    operation_id = "getProjectAssetByProjectIdV1",
-    tag = "assets",
-    summary = "Single asset by project UUID and asset numeric id",
-    responses((status = 200, description = "OK"))
-)]
+        get,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
+        operation_id = "getProjectAssetByProjectIdV1",
+        tag = "assets",
+        summary = "Single asset by project UUID and asset numeric id",
+    responses(
+        (status = 200, description = "OK", body = ref("AssetRow"), content_type = "application/json"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset not found for this user", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_get_project_asset_by_project_id_v1() {}
 
     #[utoipa::path(
-    patch,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
-    operation_id = "patchProjectAssetByProjectIdV1",
-    tag = "assets",
-    summary = "Partially update an asset (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        patch,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}",
+        operation_id = "patchProjectAssetByProjectIdV1",
+        tag = "assets",
+        summary = "Partially update an asset (by project UUID)",
+    request_body(
+            content = ref("PatchAssetBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Updated asset", body = ref("AssetRow"), content_type = "application/json"),
+        (status = 400, description = "Invalid body or empty name", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 409, description = "Name conflict in project", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_patch_project_asset_by_project_id_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images",
-    operation_id = "listProjectAssetImagesByProjectIdV1",
-    tag = "assets",
-    summary = "List image history rows (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        get,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images",
+        operation_id = "listProjectAssetImagesByProjectIdV1",
+        tag = "assets",
+        summary = "List image history rows (by project UUID)",
+    responses(
+        (status = 200, description = "List (may be empty)", body = ref("ListAssetImagesResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_list_project_asset_images_by_project_id_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images",
-    operation_id = "createProjectAssetImageByProjectIdV1",
-    tag = "assets",
-    summary = "Add an image history row (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images",
+        operation_id = "createProjectAssetImageByProjectIdV1",
+        tag = "assets",
+        summary = "Add an image history row (by project UUID)",
+    request_body(
+            content = ref("CreateAssetImageBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 201, description = "Created", body = ref("AssetImageRow"), content_type = "application/json"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project or asset not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_create_project_asset_image_by_project_id_v1() {}
 
     #[utoipa::path(
-    delete,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
-    operation_id = "deleteProjectAssetImageByProjectIdV1",
-    tag = "assets",
-    summary = "Delete an asset image row (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        delete,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
+        operation_id = "deleteProjectAssetImageByProjectIdV1",
+        tag = "assets",
+        summary = "Delete an asset image row (by project UUID)",
+    responses(
+        (status = 204, description = "Deleted"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project, asset, or image not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_delete_project_asset_image_by_project_id_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
-    operation_id = "getProjectAssetImageByProjectIdV1",
-    tag = "assets",
-    summary = "Get one asset image row (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        get,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
+        operation_id = "getProjectAssetImageByProjectIdV1",
+        tag = "assets",
+        summary = "Get one asset image row (by project UUID)",
+    responses(
+        (status = 200, description = "Found", body = ref("AssetImageRow"), content_type = "application/json"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project, asset, or image not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_get_project_asset_image_by_project_id_v1() {}
 
     #[utoipa::path(
-    patch,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
-    operation_id = "patchProjectAssetImageByProjectIdV1",
-    tag = "assets",
-    summary = "Update an asset image row (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        patch,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}",
+        operation_id = "patchProjectAssetImageByProjectIdV1",
+        tag = "assets",
+        summary = "Update an asset image row (by project UUID)",
+    request_body(
+            content = ref("PatchAssetImageBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Updated row", body = ref("AssetImageRow"), content_type = "application/json"),
+        (status = 400, description = "Invalid body, empty patch, or invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project, asset, or image not found", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_patch_project_asset_image_by_project_id_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",
-    operation_id = "getProjectAssetImageFileByProjectIdV1",
-    tag = "assets",
-    summary = "Download asset image bytes or redirect (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        get,
+        path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",
+        operation_id = "getProjectAssetImageFileByProjectIdV1",
+        tag = "assets",
+        summary = "Download asset image bytes or redirect (by project UUID)",
+    responses(
+        (status = 200, description = "PNG bytes when image is stored locally", body = serde_json::Value, content_type = "application/json"),
+        (status = 307, description = "Redirect to provider URL"),
+        (status = 400, description = "Invalid path ids", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project, asset, image not found, or local file missing", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured, database error, `DATABASE_URL` unset, or local storage misconfigured", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_get_project_asset_image_file_by_project_id_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/novel-events",
-    operation_id = "listProjectNovelEventsByProjectIdV1",
-    tag = "novel-events",
-    summary = "List novel events with chapter associations (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        get,
+        path = "/api/v1/projects/{project_id}/novel-events",
+        operation_id = "listProjectNovelEventsByProjectIdV1",
+        tag = "novel-events",
+        summary = "List novel events with chapter associations (by project UUID)",
+    responses(
+        (status = 200, description = "List of events with chapter associations", body = ref("NovelEventListResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid parameters", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Unauthorized", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project not found or not owned", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Database not configured", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_list_project_novel_events_by_project_id_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events",
-    operation_id = "createProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Create a novel event with chapter associations (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/novel-events",
+        operation_id = "createProjectNovelEventByProjectIdV1",
+        tag = "novel-events",
+        summary = "Create a novel event with chapter associations (by project UUID)",
+    request_body(
+            content = ref("CreateNovelEventBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Event created", body = ref("NovelEventCreateResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid input", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Unauthorized", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project not found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_create_project_novel_event_by_project_id_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events/batch-delete",
-    operation_id = "batchDeleteProjectNovelEventsByProjectIdV1",
-    tag = "novel-events",
-    summary = "Batch delete novel events (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/novel-events/batch-delete",
+        operation_id = "batchDeleteProjectNovelEventsByProjectIdV1",
+        tag = "novel-events",
+        summary = "Batch delete novel events (by project UUID)",
+    request_body(
+            content = ref("BatchDeleteNovelEventsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Events deleted", body = ref("NovelEventOkResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid input", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Unauthorized", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "No matching events found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_batch_delete_project_novel_events_by_project_id_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events/generate-events",
-    operation_id = "postProjectNovelEventsGenerateEventsV1",
-    tag = "novel-events",
-    summary = "Trigger async chapter event extraction (LLM)",
-    responses((status = 200, description = "OK"))
-)]
+        post,
+        path = "/api/v1/projects/{project_id}/novel-events/generate-events",
+        operation_id = "postProjectNovelEventsGenerateEventsV1",
+        tag = "novel-events",
+        summary = "Trigger async chapter event extraction (LLM)",
+    request_body(
+            content = ref("GenerateNovelEventsBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Trigger accepted", body = ref("LegacyNovelOkMessageResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid body, empty novelIds, invalid concurrentCount, or no matching chapters", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Project not found or not owned", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 503, description = "Auth not configured or database error", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_post_project_novel_events_generate_events_v1() {}
 
     #[utoipa::path(
-    delete,
-    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
-    operation_id = "deleteProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Delete a novel event (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        delete,
+        path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
+        operation_id = "deleteProjectNovelEventByProjectIdV1",
+        tag = "novel-events",
+        summary = "Delete a novel event (by project UUID)",
+    responses(
+        (status = 200, description = "Event deleted", body = ref("NovelEventOkResponse"), content_type = "application/json"),
+        (status = 401, description = "Unauthorized", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Event not found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_delete_project_novel_event_by_project_id_v1() {}
 
     #[utoipa::path(
-    patch,
-    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
-    operation_id = "updateProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Update a novel event (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
+        patch,
+        path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
+        operation_id = "updateProjectNovelEventByProjectIdV1",
+        tag = "novel-events",
+        summary = "Update a novel event (by project UUID)",
+    request_body(
+            content = ref("UpdateNovelEventBody"),
+            content_type = "application/json",
+        ),
+    responses(
+        (status = 200, description = "Event updated", body = ref("NovelEventOkResponse"), content_type = "application/json"),
+        (status = 400, description = "Invalid input", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Unauthorized", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "Event not found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
     #[allow(dead_code)]
     pub(crate) fn op_update_project_novel_event_by_project_id_v1() {}
 }
-
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
     stubs::op_post_assets_add_assets_v1,

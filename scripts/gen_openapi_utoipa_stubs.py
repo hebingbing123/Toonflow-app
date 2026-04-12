@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """Generate utoipa path stubs from `openapi_paths_index.yaml` (batch OpenApi structs + merge helper).
 
+Each stub mirrors the indexed operation's request/response shapes in utoipa using:
+- `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (defined in `openapi_base.yaml`)
+- `serde_json::Value` for inline JSON schemas without a component ref
+
 Run from repo root:
   python3 scripts/gen_openapi_utoipa_stubs.py
+  Output is formatted to satisfy `cargo fmt --check` in `backend/`.
 """
 
 from __future__ import annotations
 
 import re
-import textwrap
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -76,7 +81,6 @@ SKIP_OPERATION_IDS = frozenset(
         "postProductionWorkbenchGetVideoListV1",
         "postProductionWorkbenchGetVideoModelDetailV1",
         "postProductionWorkbenchSelectVideoV1",
-        # settings + agent memory (handler-level utoipa)
         "getSwitchAiDevToolV1",
         "putSwitchAiDevToolV1",
         "getMemoryConfigV1",
@@ -103,7 +107,6 @@ SKIP_OPERATION_IDS = frozenset(
         "queryAgentMemoryV1",
         "clearAgentMemoryV1",
         "appendAgentMemoryV1",
-        # vendor catalog + prompting HTTP
         "listModelsV1",
         "getTextModelDefaultV1",
         "patchTextModelDefaultV1",
@@ -173,6 +176,8 @@ RUST_KEYWORDS = frozenset(
     }
 )
 
+REF_PREFIX = "#/components/schemas/"
+
 
 def to_snake(operation_id: str) -> str:
     s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", operation_id)
@@ -184,7 +189,7 @@ def to_snake(operation_id: str) -> str:
 
 def rust_ident(operation_id: str) -> str:
     base = to_snake(operation_id)
-    if base in RUST_KEYWORDS or not base[0].isalpha() and base[0] != "_":
+    if base in RUST_KEYWORDS or (base and not base[0].isalpha() and base[0] != "_"):
         base = f"_{base}"
     return f"op_{base}"
 
@@ -193,12 +198,148 @@ def rust_str(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def trim_desc(desc: str | None, max_len: int = 180) -> str | None:
+    if not desc or not isinstance(desc, str):
+        return None
+    one = " ".join(desc.split())
+    if len(one) > max_len:
+        one = one[: max_len - 3] + "..."
+    return one
+
+
+def schema_to_rust_content(schema: Any) -> str:
+    """Expression for utoipa request_body content= or response body=."""
+    if isinstance(schema, dict) and isinstance(schema.get("$ref"), str):
+        ref = schema["$ref"]
+        if ref.startswith(REF_PREFIX):
+            name = ref.removeprefix(REF_PREFIX)
+            return f'ref("{name}")'
+    return "serde_json::Value"
+
+
+def pick_json_media(content: Any) -> tuple[str | None, Any | None]:
+    if not isinstance(content, dict):
+        return None, None
+    for ct in ("application/json", "application/problem+json"):
+        if ct in content and isinstance(content[ct], dict):
+            sch = content[ct].get("schema")
+            return ct, sch
+    for k, v in content.items():
+        if isinstance(v, dict) and "schema" in v:
+            return str(k), v.get("schema")
+    return None, None
+
+
+def format_request_body(op: dict[str, Any]) -> list[str] | None:
+    rb = op.get("requestBody")
+    if not isinstance(rb, dict):
+        return None
+    content = rb.get("content")
+    _ct, schema = pick_json_media(content)
+    if schema is None and isinstance(content, dict):
+        # e.g. only non-json — still document as Value
+        if not content:
+            return None
+    desc = trim_desc(rb.get("description"))
+    if schema is None:
+        inner = "serde_json::Value"
+    else:
+        inner = schema_to_rust_content(schema)
+    lines = ["request_body("]
+    lines.append(f"        content = {inner},")
+    lines.append('        content_type = "application/json",')
+    if desc:
+        lines.append(f"        description = {rust_str(desc)},")
+    lines.append("    ),")
+    return lines
+
+
+def status_sort_key(k: str) -> tuple[int, Any]:
+    if k == "default":
+        return (2, 0)
+    try:
+        return (0, int(k))
+    except ValueError:
+        return (1, k)
+
+
+def format_responses(op: dict[str, Any]) -> list[str]:
+    resps = op.get("responses")
+    if not isinstance(resps, dict) or not resps:
+        return ["responses((status = 200, description = \"OK\"))"]
+
+    parts: list[str] = []
+    for code in sorted(resps.keys(), key=status_sort_key):
+        entry = resps[code]
+        if not isinstance(entry, dict):
+            continue
+        desc = trim_desc(entry.get("description")) or "Response"
+        status_lit = f'"{code}"' if not code.isdigit() else code
+        content = entry.get("content")
+        _ct, schema = pick_json_media(content)
+        if schema is not None or (
+            isinstance(content, dict) and content and _ct is not None
+        ):
+            body = schema_to_rust_content(schema) if schema is not None else "serde_json::Value"
+            parts.append(
+                f"(status = {status_lit}, description = {rust_str(desc)}, "
+                f"body = {body}, content_type = \"application/json\")"
+            )
+        elif isinstance(content, dict) and content:
+            # has content types but no schema — still mark JSON bucket
+            parts.append(
+                f"(status = {status_lit}, description = {rust_str(desc)}, "
+                "body = serde_json::Value, content_type = \"application/json\")"
+            )
+        else:
+            parts.append(f"(status = {status_lit}, description = {rust_str(desc)})")
+
+    if not parts:
+        return ["responses((status = 200, description = \"OK\"))"]
+    inner = ",\n        ".join(parts)
+    return [f"responses(\n        {inner}\n    )"]
+
+
+def emit_path_macro(path: str, method: str, op: dict[str, Any]) -> list[str]:
+    oid = op["operationId"]
+    tags = op.get("tags") or []
+    tag0 = tags[0] if tags and isinstance(tags[0], str) else "api"
+    summary = op.get("summary")
+    sum_line = None
+    if isinstance(summary, str):
+        t = trim_desc(summary, 200)
+        if t:
+            sum_line = f"    summary = {rust_str(t)},"
+
+    p = rust_str(path)
+    oid_s = rust_str(oid)
+    tag_s = rust_str(tag0)
+
+    rb_lines = format_request_body(op)
+    resp_lines = format_responses(op)
+
+    attr_lines = [
+        "#[utoipa::path(",
+        f"    {method},",
+        f"    path = {p},",
+        f"    operation_id = {oid_s},",
+        f"    tag = {tag_s},",
+    ]
+    if sum_line:
+        attr_lines.append(sum_line)
+    if rb_lines:
+        attr_lines.extend(rb_lines)
+    attr_lines.extend(resp_lines)
+    attr_lines.append(")]")
+    return attr_lines
+
+
 def main() -> None:
     with OPENAPI.open(encoding="utf-8") as f:
         doc = yaml.safe_load(f)
     paths = doc.get("paths") or {}
 
-    ops: list[tuple[str, str, str, str | None, str | None]] = []
+    ops: list[tuple[str, str, dict[str, Any]]] = []
     for path, item in paths.items():
         if not isinstance(item, dict):
             continue
@@ -211,18 +352,12 @@ def main() -> None:
                 raise SystemExit(f"missing operationId for {method.upper()} {path}")
             if oid in SKIP_OPERATION_IDS:
                 continue
-            tags = op.get("tags") or []
-            tag0 = tags[0] if tags else "api"
-            if not isinstance(tag0, str):
-                tag0 = "api"
-            summary = op.get("summary")
-            sum_s = summary if isinstance(summary, str) else None
-            ops.append((path, method, oid, tag0, sum_s))
+            ops.append((path, method, op))
 
-    ops.sort(key=lambda t: (t[0], t[1], t[2]))
+    ops.sort(key=lambda t: (t[0], t[1], t[2].get("operationId", "")))
 
     BATCH = 28
-    batches: list[list[tuple[str, str, str, str | None, str | None]]] = []
+    batches: list[list[tuple[str, str, dict[str, Any]]]] = []
     for i in range(0, len(ops), BATCH):
         batches.append(ops[i : i + BATCH])
 
@@ -233,47 +368,24 @@ def main() -> None:
         lines.append("//! AUTO-GENERATED by `scripts/gen_openapi_utoipa_stubs.py`. Do not edit.")
         lines.append("")
         lines.append("mod stubs {")
-        for path, method, oid, tag0, sum_s in batch:
-            ident = rust_ident(oid)
-            p = rust_str(path)
-            oid_s = rust_str(oid)
-            tag_s = rust_str(tag0)
-            # Thin responses only — merge layer keeps rich YAML unless a handler supplies schemas.
-            attr_lines = [
-                "#[utoipa::path(",
-                f"    {method},",
-                f"    path = {p},",
-                f"    operation_id = {oid_s},",
-                f"    tag = {tag_s},",
-            ]
-            if sum_s:
-                one_line = sum_s.replace("\n", " ").strip()
-                if len(one_line) > 200:
-                    one_line = one_line[:197] + "..."
-                attr_lines.append(f"    summary = {rust_str(one_line)},")
-            attr_lines.extend(
-                [
-                    "    responses((status = 200, description = \"OK\"))",
-                    ")]",
-                    "#[allow(dead_code)]",
-                    f"    pub(crate) fn {ident}() {{}}",
-                    "",
-                ]
-            )
-            lines.extend(attr_lines)
+        for idx, (path, method, op) in enumerate(batch):
+            ident = rust_ident(op["operationId"])
+            macro_lines = emit_path_macro(path, method, op)
+            for line in macro_lines:
+                lines.append(f"    {line}")
+            lines.append("    #[allow(dead_code)]")
+            lines.append(f"    pub(crate) fn {ident}() {{}}")
+            if idx + 1 < len(batch):
+                lines.append("")
         lines.append("}")
-        lines.append("")
-        path_list = ",\n        ".join(
-            f"stubs::{rust_ident(oid)}" for _, _, oid, _, _ in batch
+        path_list = ",\n    ".join(
+            f"stubs::{rust_ident(op['operationId'])}" for _, _, op in batch
         )
         lines.append("#[derive(utoipa::OpenApi)]")
-        lines.append("#[openapi(")
-        lines.append("    paths(")
-        lines.append(f"        {path_list}")
-        lines.append("    ),")
-        lines.append(")]")
+        lines.append("#[openapi(paths(")
+        lines.append(f"    {path_list}")
+        lines.append("))]")
         lines.append(f"pub struct ApiDocBatch{bi:02};")
-        lines.append("")
 
         (OUT_DIR / f"batch{bi:02}.rs").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -285,17 +397,16 @@ def main() -> None:
     for bi in range(len(batches)):
         mod_lines.append(f"mod batch{bi:02};")
     mod_lines.append("")
-    mod_lines.append("/// All YAML-derived path stubs merged into one [`utoipa::openapi::OpenApi`].")
+    mod_lines.append("/// All YAML-indexed path stubs merged into one [`utoipa::openapi::OpenApi`].")
     mod_lines.append("pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {")
     if not batches:
         mod_lines.append("    utoipa::openapi::OpenApi::default()")
     else:
-        mod_lines.append(f"    let mut doc = batch00::ApiDocBatch00::openapi();")
+        mod_lines.append("    let mut doc = batch00::ApiDocBatch00::openapi();")
         for bi in range(1, len(batches)):
             mod_lines.append(f"    doc.merge(batch{bi:02}::ApiDocBatch{bi:02}::openapi());")
         mod_lines.append("    doc")
     mod_lines.append("}")
-    mod_lines.append("")
 
     (OUT_DIR / "mod.rs").write_text("\n".join(mod_lines) + "\n", encoding="utf-8")
 
