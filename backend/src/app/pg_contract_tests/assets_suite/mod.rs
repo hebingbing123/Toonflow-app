@@ -1,0 +1,8 @@
+mod asset_image_file_local_storage_roundtrip;
+mod assets_batch_generation_data_filters_roundtrip;
+mod assets_generate_cancel_generate_roundtrip;
+mod assets_generate_enqueue_four_kinds;
+mod assets_get_assets_api_parent_child_roundtrip;
+mod assets_polling_image_and_prompt_filters_roundtrip;
+mod assets_upload_clip_roundtrip;
+mod assets_workbench_mutation_endpoints_roundtrip;
