@@ -8,6 +8,7 @@ use super::{
     project_numeric_from_ctx, require_pool, script_numeric_id_from_args_or_ctx, InvokeError,
 };
 use crate::harness::HarnessContext;
+use crate::scope::{OwnedScriptScope, ScopeError};
 
 // ── Row types ────────────────────────────────────────────────────────────────
 
@@ -38,12 +39,6 @@ pub(super) struct HarnessNovelEventRow {
     pub detail: String,
 }
 
-#[derive(sqlx::FromRow)]
-pub(super) struct OwnedScriptScope {
-    pub project_id: uuid::Uuid,
-    pub script_id: uuid::Uuid,
-}
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 pub(super) async fn require_owned_script_scope(
@@ -52,23 +47,14 @@ pub(super) async fn require_owned_script_scope(
 ) -> Result<OwnedScriptScope, InvokeError> {
     let pool = require_pool(ctx)?;
     let project_numeric_id = project_numeric_from_ctx(ctx)?;
-    sqlx::query_as::<_, OwnedScriptScope>(
-        r#"
-        SELECT p.id AS project_id, s.id AS script_id
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(ctx.user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| InvokeError::MissingContext("script not found in attached project".into()))
+    crate::scope::owned_script_scope(pool, ctx.user_id, project_numeric_id, script_numeric_id)
+        .await
+        .map_err(|e| match e {
+            ScopeError::NotFound => {
+                InvokeError::MissingContext("script not found in attached project".into())
+            }
+            ScopeError::Database(msg) => InvokeError::DatabaseError(msg),
+        })
 }
 
 // ── Tool implementations ─────────────────────────────────────────────────────

@@ -18,6 +18,7 @@ mod production;
 mod production_flow;
 mod projects;
 mod prompting;
+mod scope;
 mod scripting;
 mod settings;
 mod state;
