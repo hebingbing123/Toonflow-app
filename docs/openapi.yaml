@@ -8724,7 +8724,7 @@ components:
 
     MemoryConfig:
       type: object
-      description: Legacy `o_setting` keys for memory / RAG UI (camelCase JSON)
+      description: Legacy `o_setting` keys for memory / RAG UI (camelCase JSON); also embedded in `GET /api/v1/me` as `memory_config`.
       required:
         - messagesPerSummary
         - shortTermLimit
@@ -8738,27 +8738,35 @@ components:
         messagesPerSummary:
           type: integer
           format: int64
+          description: Number of messages before triggering a summary
         shortTermLimit:
           type: integer
           format: int64
+          description: Short-term memory window size
         summaryMaxLength:
           type: integer
           format: int64
+          description: Maximum tokens per summary
         summaryLimit:
           type: integer
           format: int64
+          description: Maximum number of summaries to retain
         ragLimit:
           type: integer
           format: int64
+          description: Top-K retrieved chunks for RAG context
         deepRetrieveSummaryLimit:
           type: integer
           format: int64
+          description: Top-K summaries for deep retrieval
         modelOnnxFile:
           type: array
           items:
             type: string
+          description: Path segments to ONNX embedding model
         modelDtype:
           type: string
+          description: ONNX model data type (fp16/fp32)
 
     MemoryConfigSavedResponse:
       type: object
@@ -10543,43 +10551,6 @@ components:
             User memory/RAG configuration from `app_user_profile.memory_config`.
             Present when row exists and has non-null JSON; absent when unset.
             When DATABASE_URL is unset, falls back to server defaults (same as `GET /api/v1/settings/memory-config`).
-
-    MemoryConfig:
-      type: object
-      required: [messagesPerSummary, shortTermLimit, summaryMaxLength, summaryLimit, ragLimit, deepRetrieveSummaryLimit, modelOnnxFile, modelDtype]
-      properties:
-        messagesPerSummary:
-          type: integer
-          format: int64
-          description: Number of messages before triggering a summary
-        shortTermLimit:
-          type: integer
-          format: int64
-          description: Short-term memory window size
-        summaryMaxLength:
-          type: integer
-          format: int64
-          description: Maximum tokens per summary
-        summaryLimit:
-          type: integer
-          format: int64
-          description: Maximum number of summaries to retain
-        ragLimit:
-          type: integer
-          format: int64
-          description: Top-K retrieved chunks for RAG context
-        deepRetrieveSummaryLimit:
-          type: integer
-          format: int64
-          description: Top-K summaries for deep retrieval
-        modelOnnxFile:
-          type: array
-          items:
-            type: string
-          description: Path segments to ONNX embedding model
-        modelDtype:
-          type: string
-          description: ONNX model data type (fp16/fp32)
 
     UsageSummaryResponse:
       type: object
