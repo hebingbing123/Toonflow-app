@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'script.dart';
-import '../contexts/production/action_panels.dart';
-import '../contexts/production/card_panels.dart';
-import '../contexts/production/context_snapshot.dart';
-import '../contexts/production/flow_logic.dart';
-import '../contexts/production/status_panels.dart';
-import '../contexts/production/support.dart';
+import '../script/card.dart';
+import '../../contexts/production/action_panels.dart';
+import '../../contexts/production/card_panels.dart';
+import '../../contexts/production/context_snapshot.dart';
+import '../../contexts/production/flow_logic.dart';
+import '../../contexts/production/status_panels.dart';
+import '../../contexts/production/support.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({

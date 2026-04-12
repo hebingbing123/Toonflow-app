@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../contexts/script/action_panels.dart';
-import '../contexts/script/card_panels.dart';
-import '../contexts/script/context_snapshot.dart';
-import '../contexts/script/status_panels.dart';
-import '../contexts/script/support.dart';
+import '../../contexts/script/action_panels.dart';
+import '../../contexts/script/card_panels.dart';
+import '../../contexts/script/context_snapshot.dart';
+import '../../contexts/script/status_panels.dart';
+import '../../contexts/script/support.dart';
 
 class AgentWorkspacePromptPreset {
   const AgentWorkspacePromptPreset({required this.label, required this.prompt});
