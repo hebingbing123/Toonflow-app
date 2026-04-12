@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Model and vendor catalog query endpoints.
 /// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.
 Future<List<ModelListEntry>> fetchModelsCatalog(
   String accessToken, {

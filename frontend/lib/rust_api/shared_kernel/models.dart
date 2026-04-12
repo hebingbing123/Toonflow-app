@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Shared DTOs reused across system, project, and catalog API slices.
 /// `GET /api/v1/usage/summary` — OpenAPI `UsageSummaryResponse`.
 class UsageSummaryResponse {
   const UsageSummaryResponse({

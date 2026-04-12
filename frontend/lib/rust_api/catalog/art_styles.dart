@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Art-style catalog models and CRUD/extraction endpoints.
 /// One row from **`GET /api/v1/art-styles`** (`ArtStyleRow` in OpenAPI).
 class ArtStyleRow {
   const ArtStyleRow({
