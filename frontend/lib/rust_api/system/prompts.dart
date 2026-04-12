@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Prompt template listing and mutation endpoints.
 /// `GET /api/v1/prompts` — OpenAPI `listPromptsV1`.
 Future<List<PromptTemplateRowV1>> fetchPromptsV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/prompts');

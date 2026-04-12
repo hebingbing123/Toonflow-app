@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Usage summary endpoints tied to the authenticated account.
 /// `GET /api/v1/usage/summary` — see `usageSummaryV1`.
 Future<UsageSummaryResponse> fetchUsageSummary(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/usage/summary');

@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Health, ping, version, and readiness system probes.
 /// JSON body for **`GET /health`** and **`GET /api/v1/health`** (OpenAPI `HealthResponse`).
 class HealthResponse {
   const HealthResponse({required this.status, required this.service});

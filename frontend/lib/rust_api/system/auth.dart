@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Authenticated identity and developer-tool preference endpoints.
 /// `GET /api/v1/me` — Bearer; see `meV1` / OpenAPI `MeResponse`.
 class MeResponse {
   const MeResponse({

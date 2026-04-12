@@ -30,7 +30,7 @@ part 'project/overview.dart';
 part 'project/manuals.dart';
 part 'project/manuals_director.dart';
 part 'project/manuals_visual.dart';
-part 'prompts_api.dart';
+part 'system/prompts.dart';
 part 'projects_rest_extra.dart';
 part 'projects_rest_compat.dart';
 part 'quality/models.dart';
@@ -46,11 +46,11 @@ part 'settings/agent_deploy.dart';
 part 'settings/memory_config_api.dart';
 part 'settings/vendor_credentials.dart';
 part 'settings/vendors_mutations.dart';
-part 'status_auth_me.dart';
+part 'system/auth.dart';
 part 'storyboards_api.dart';
-part 'system_status_api.dart';
+part 'system/status.dart';
 part 'tasks_center_rest.dart';
-part 'usage_api.dart';
+part 'system/usage.dart';
 part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
