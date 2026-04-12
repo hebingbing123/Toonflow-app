@@ -222,7 +222,8 @@ rg -n "FROM app_script|owner_user_id|numeric_id" backend/src --glob '!**/pg_cont
 - **P0 / A2（制作 workbench 一批）**：**`production/workbench/`** 下 `meta`（生成 prompt / get_generate_data）、`track`（add/delete track、delete/select video）、`video`（generate 探针）、`assets`（batch 出图）、`storyboard`（add / batch_add）、`storyboard_ops`（batch_generate_image）已用 **`owned_script_scope`** 替代原 **COUNT + JOIN** 或改为 **`WHERE script_id = …`（UUID）** 更新/删除。
 - **P0 / A2（UUID 项目路径）**：新增 **`scope::owned_script_in_project`**（`app_project.id` + `script_numeric_id`）；已用于 **`scripting/scripts/crud`**（GET/PATCH/DELETE 剧本）、**`narrative/storyboards/handlers`**（按剧本列分镜、创建分镜）、**`assets/crud/links`**（脚本–资产解析）、**`assets/crud/list`**（`script_numeric_id` 过滤前校验）。
 - **分镜 numeric（项目 UUID）**：**`scope::owned_storyboard_in_project`** + **`fetch_storyboard_row`**；已用于 **`narrative/storyboards/handlers`** 的 get/patch/delete by numeric。
-- **仍可按需收敛**：其它仅 **project numeric** 的查询、Harness 内尚未点的路径等。
+- **继续**：**`scripting/asset_extract/extract_job`** 单剧本校验与 **`mark_script_failed`** 已用 **`owned_script_in_project`**；**`production/workbench/storyboard`** 的 **next/base numeric** 改为 **按 `script_id` 聚合**（修正跨项目取 MAX 问题）；**`post_get_storyboard_data`（project+script numeric）** 已先 **`owned_script_scope`** 再列分镜。
+- **仍可按需收敛**：**`export_poll`**（跨项目多 numeric）、仅 **storyboardId** 无 project 的旧接口、Harness **`get_planData`** 列表查询等。
 - 实施 P0/P1 后，可在本文档 **§2** 对应条目标记 **「已收敛到 `<路径>`」**，避免以后重复审查。
 
 若你希望下一步 **自动产出「重复 SQL 对照表」**（脚本 + 输出清单），可以单独开任务做 **rg + 人工标注** 半自动报告。

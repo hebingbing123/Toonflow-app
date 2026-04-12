@@ -4,6 +4,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::llm::LlmConfig;
+use crate::scope;
 
 use super::persist::persist_group;
 use super::tool::{call_extract_tool, filter_tool_existing, filter_tool_new_assets};
@@ -103,20 +104,22 @@ async fn process_one_group(
             mark_script_failed(pool, project_uuid, uid, sid, "script not found in project").await?;
             continue;
         };
-        let row: Option<(Option<i32>,)> = sqlx::query_as(
-            r#"
-            SELECT s.extract_state
-            FROM app_script s
-            INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.numeric_id = $1 AND s.project_id = $2 AND p.owner_user_id = $3
-            "#,
-        )
-        .bind(sid)
-        .bind(project_uuid)
-        .bind(uid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| e.to_string())?;
+        let oip = match scope::owned_script_in_project(pool, uid, project_uuid, sid).await {
+            Ok(o) => o,
+            Err(scope::ScopeError::NotFound) => {
+                mark_script_failed(pool, project_uuid, uid, sid, "script not found in project")
+                    .await?;
+                continue;
+            }
+            Err(scope::ScopeError::Database(m)) => return Err(m),
+        };
+
+        let row: Option<(Option<i32>,)> =
+            sqlx::query_as(r#"SELECT extract_state FROM app_script WHERE id = $1"#)
+                .bind(oip.script_id)
+                .fetch_optional(pool)
+                .await
+                .map_err(|e| e.to_string())?;
 
         let Some((Some(2),)) = row else {
             continue;
@@ -239,18 +242,18 @@ async fn mark_script_failed(
     script_numeric_id: i32,
     reason: &str,
 ) -> Result<(), String> {
+    let Ok(oip) = scope::owned_script_in_project(pool, uid, project_uuid, script_numeric_id).await
+    else {
+        return Ok(());
+    };
     sqlx::query(
         r#"
-        UPDATE app_script s
-        SET extract_state = -1, error_reason = $4, updated_at = NOW()
-        FROM app_project p
-        WHERE s.project_id = p.id AND p.id = $1 AND p.owner_user_id = $2
-          AND s.numeric_id = $3
+        UPDATE app_script
+        SET extract_state = -1, error_reason = $2, updated_at = NOW()
+        WHERE id = $1
         "#,
     )
-    .bind(project_uuid)
-    .bind(uid)
-    .bind(script_numeric_id)
+    .bind(oip.script_id)
     .bind(reason)
     .execute(pool)
     .await

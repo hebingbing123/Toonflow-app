@@ -55,14 +55,12 @@ pub(in crate::production) async fn post_storyboard_add(
     // Get next numeric_id
     let next_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(numeric_id), 0) + 1
+        SELECT COALESCE(MAX(sb.numeric_id), 0) + 1
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -152,14 +150,12 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
     // Get base numeric_id
     let base_id: i32 = sqlx::query_scalar(
         r#"
-        SELECT COALESCE(MAX(numeric_id), 0)
+        SELECT COALESCE(MAX(sb.numeric_id), 0)
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -458,6 +454,10 @@ pub(in crate::production) async fn post_get_storyboard_data(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
         SELECT
@@ -471,17 +471,11 @@ pub(in crate::production) async fn post_get_storyboard_data(
           sb.flow_id,
           sb.sb_index
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND sc.numeric_id = $3
+        WHERE sb.script_id = $1
         ORDER BY sb.sb_index ASC
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.script_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
