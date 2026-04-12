@@ -59,7 +59,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "add_deriveAsset",
         description:
-            "Production-agent parity write: add or update a derived asset under arguments.assetsId (with optional arguments.id).",
+            "Production-agent parity write: add or update a derived asset under arguments.assetsId (optional arguments.id); parent numeric id must be linked to the active script (app_script_asset).",
     },
     HarnessToolInfo {
         name: "del_deriveAsset",

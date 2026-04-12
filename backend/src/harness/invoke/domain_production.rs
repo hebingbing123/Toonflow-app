@@ -90,27 +90,36 @@ pub(super) async fn invoke_add_derive_asset(
         r#"
         SELECT a.asset_type
         FROM app_asset a
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
         WHERE a.project_id = $1
           AND a.numeric_id = $2
         "#,
     )
     .bind(scope.project_id)
     .bind(assets_id)
+    .bind(scope.script_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| InvokeError::MissingContext("parent asset not found".into()))?;
+    .ok_or_else(|| {
+        InvokeError::MissingContext(
+            "parent asset not found or not linked to this script (app_script_asset)".into(),
+        )
+    })?;
 
     if let Some(numeric_id) = maybe_numeric_id {
         let updated = sqlx::query(
             r#"
-            UPDATE app_asset
+            UPDATE app_asset a
             SET name = $4,
                 description = $5,
                 updated_at = NOW()
-            WHERE project_id = $1
-              AND numeric_id = $2
-              AND COALESCE((metadata ->> 'assetsId')::int, 0) = $3
+            FROM app_script_asset sa
+            WHERE a.id = sa.asset_id
+              AND sa.script_id = $6
+              AND a.project_id = $1
+              AND a.numeric_id = $2
+              AND COALESCE((a.metadata ->> 'assetsId')::int, 0) = $3
             "#,
         )
         .bind(scope.project_id)
@@ -118,6 +127,7 @@ pub(super) async fn invoke_add_derive_asset(
         .bind(assets_id)
         .bind(name)
         .bind(desc)
+        .bind(scope.script_id)
         .execute(pool)
         .await
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
