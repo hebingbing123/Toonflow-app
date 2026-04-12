@@ -49,6 +49,7 @@ part 'home_page/project_editor/novels/events/actions.dart';
 part 'home_page/project_editor/novels/events/compatibility.dart';
 part 'home_page/project_editor/novels/events/section.dart';
 part 'home_page/project_editor/novels/events/workbench.dart';
+part 'home_page/project_editor/novels/events/workbench_view.dart';
 part 'home_page/project_editor/novels/actions.dart';
 part 'home_page/project_editor/novels/sections/search.dart';
 part 'home_page/project_editor/novels/sections/create.dart';
