@@ -110,6 +110,8 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _loadCurrentPreview(int storyboardId) async {
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
     );
     if (mounted) {
@@ -128,6 +130,8 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _loadDownloadUrl(int storyboardId) async {
     final preview = await postStoryboardDownPreviewImageV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
     );
     if (mounted) {

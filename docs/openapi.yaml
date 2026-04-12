@@ -6026,8 +6026,8 @@ paths:
       summary: Get preview/download URL for a storyboard image (Electron `downPreviewImage`)
       operationId: postProductionStoryboardDownPreviewImageV1
       description: |
-        Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
-        preview URL when present.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, resolves scope,
+        then returns the owned storyboard's current preview URL when present.
       security:
         - bearerAuth: []
       requestBody:
@@ -6056,7 +6056,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned / has no preview URL
+          description: Project/script/storyboard not found, not owned, or has no preview URL
           content:
             application/json:
               schema:
@@ -6074,8 +6074,8 @@ paths:
       summary: Update storyboard prompt/duration (Electron `editStoryboardInfo`)
       operationId: postProductionStoryboardEditInfoV1
       description: |
-        Bearer JWT. Validates **`storyboardId`** and non-empty **`prompt`**, then updates
-        the owned storyboard.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, and non-empty **`prompt`**,
+        then updates the owned storyboard.
       security:
         - bearerAuth: []
       requestBody:
@@ -6104,7 +6104,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned
+          description: Project/script/storyboard not found or not owned
           content:
             application/json:
               schema:
@@ -6122,7 +6122,7 @@ paths:
       summary: Load one storyboard row (Electron `storyboard/getStoryboardData`)
       operationId: postProductionStoryboardGetDataV1
       description: |
-        Bearer JWT. Validates **`storyboardId`**, then returns that owned storyboard row.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, then returns that owned storyboard row.
       security:
         - bearerAuth: []
       requestBody:
@@ -6151,7 +6151,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned
+          description: Project/script/storyboard not found or not owned
           content:
             application/json:
               schema:
@@ -6169,7 +6169,7 @@ paths:
       summary: Preview current storyboard image (Electron `previewImage`)
       operationId: postProductionStoryboardPreviewImageV1
       description: |
-        Bearer JWT. Validates **`storyboardId`**, then returns the owned storyboard's current
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, then returns the owned storyboard's current
         image URL and prompt.
       security:
         - bearerAuth: []
@@ -6199,7 +6199,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned
+          description: Project/script/storyboard not found or not owned
           content:
             application/json:
               schema:
@@ -6217,7 +6217,7 @@ paths:
       summary: Clear storyboard image selection (Electron `removeFrame`)
       operationId: postProductionStoryboardRemoveFrameV1
       description: |
-        Bearer JWT. Validates **`storyboardId`**, then clears the owned storyboard's current image URL/state.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, then clears the owned storyboard's current image URL/state.
       security:
         - bearerAuth: []
       requestBody:
@@ -6246,7 +6246,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned
+          description: Project/script/storyboard not found or not owned
           content:
             application/json:
               schema:
@@ -6264,7 +6264,7 @@ paths:
       summary: Set storyboard image URL (Electron `updateStoryboardUrl`)
       operationId: postProductionStoryboardUpdateUrlV1
       description: |
-        Bearer JWT. Validates **`storyboardId`** and non-empty **`imageUrl`**, then stores it on the owned storyboard.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, **`storyboardId`**, and non-empty **`imageUrl`**, then stores it on the owned storyboard.
       security:
         - bearerAuth: []
       requestBody:
@@ -6293,7 +6293,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Storyboard not found / not owned
+          description: Project/script/storyboard not found or not owned
           content:
             application/json:
               schema:
@@ -10249,18 +10249,30 @@ components:
 
     ProductionStoryboardIdBody:
       type: object
-      required: [storyboardId]
+      required: [projectId, scriptId, storyboardId]
       additionalProperties: false
       properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
         storyboardId:
           type: integer
           format: int32
 
     ProductionStoryboardEditInfoBody:
       type: object
-      required: [storyboardId, prompt]
+      required: [projectId, scriptId, storyboardId, prompt]
       additionalProperties: false
       properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
         storyboardId:
           type: integer
           format: int32
@@ -10294,9 +10306,15 @@ components:
 
     ProductionStoryboardUpdateUrlBody:
       type: object
-      required: [storyboardId, imageUrl]
+      required: [projectId, scriptId, storyboardId, imageUrl]
       additionalProperties: false
       properties:
+        projectId:
+          type: integer
+          format: int32
+        scriptId:
+          type: integer
+          format: int32
         storyboardId:
           type: integer
           format: int32

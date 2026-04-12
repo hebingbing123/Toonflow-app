@@ -23,6 +23,8 @@ class UpdateStoryboardUrlResponseV1 {
 /// `POST /api/v1/production/storyboard/update-url` — OpenAPI `postStoryboardUpdateUrlV1`.
 Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
   required String imageUrl,
 }) async {
@@ -35,6 +37,8 @@ Future<UpdateStoryboardUrlResponseV1> postStoryboardUpdateUrlV1(
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
           'storyboardId': storyboardId,
           'imageUrl': imageUrl,
         }),
@@ -73,6 +77,8 @@ class PreviewImageResponseV1 {
 /// `POST /api/v1/production/storyboard/preview-image` — OpenAPI `postStoryboardPreviewImageV1`.
 Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
@@ -85,7 +91,11 @@ Future<PreviewImageResponseV1> postStoryboardPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'storyboardId': storyboardId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -121,6 +131,8 @@ class DownPreviewImageResponseV1 {
 /// `POST /api/v1/production/storyboard/down-preview-image` — OpenAPI `postStoryboardDownPreviewImageV1`.
 Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
@@ -133,7 +145,11 @@ Future<DownPreviewImageResponseV1> postStoryboardDownPreviewImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'storyboardId': storyboardId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

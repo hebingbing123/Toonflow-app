@@ -282,7 +282,7 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"storyboardId":{storyboard_id},"imageUrl":"{storyboard_data_uri}"}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"storyboardId":{storyboard_id},"imageUrl":"{storyboard_data_uri}"}}"#
                 )))
                 .unwrap(),
         )

@@ -161,32 +161,56 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     );
     statuses['prod/storyboard.down'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/down-preview-image',
-      run: () => postStoryboardDownPreviewImageV1(token, storyboardId: 1),
+      run: () => postStoryboardDownPreviewImageV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        storyboardId: 1,
+      ),
     );
     statuses['prod/storyboard.edit'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/edit-info',
       run: () => postStoryboardEditInfoV1(
         token,
+        projectId: 1,
+        scriptId: 1,
         storyboardId: 1,
         prompt: 'probe storyboard',
       ),
     );
     statuses['prod/storyboard.get'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/get-data',
-      run: () => postStoryboardGetDataV1(token, storyboardId: 1),
+      run: () => postStoryboardGetDataV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        storyboardId: 1,
+      ),
     );
     statuses['prod/storyboard.preview'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/preview-image',
-      run: () => postStoryboardPreviewImageV1(token, storyboardId: 1),
+      run: () => postStoryboardPreviewImageV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        storyboardId: 1,
+      ),
     );
     statuses['prod/storyboard.remove'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/remove-frame',
-      run: () => postStoryboardRemoveFrameV1(token, storyboardId: 1),
+      run: () => postStoryboardRemoveFrameV1(
+        token,
+        projectId: 1,
+        scriptId: 1,
+        storyboardId: 1,
+      ),
     );
     statuses['prod/storyboard.url'] = await _runTypedProductionProbe(
       label: 'POST production/storyboard/update-url',
       run: () => postStoryboardUpdateUrlV1(
         token,
+        projectId: 1,
+        scriptId: 1,
         storyboardId: 1,
         imageUrl: 'https://example.com/probe.png',
       ),

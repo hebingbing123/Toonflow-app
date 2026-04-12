@@ -305,7 +305,7 @@ async fn production_storyboard_get_data_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/get-data",
         &token,
-        r#"{"storyboardId":1}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -318,7 +318,7 @@ async fn production_storyboard_edit_info_rejects_empty_prompt_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/edit-info",
         &token,
-        r#"{"storyboardId":1,"prompt":"   "}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1,"prompt":"   "}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -331,7 +331,7 @@ async fn production_storyboard_edit_info_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/edit-info",
         &token,
-        r#"{"storyboardId":1,"prompt":"probe"}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1,"prompt":"probe"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -344,7 +344,7 @@ async fn production_storyboard_remove_frame_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/remove-frame",
         &token,
-        r#"{"storyboardId":1}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -357,7 +357,7 @@ async fn production_storyboard_update_url_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/update-url",
         &token,
-        r#"{"storyboardId":1,"imageUrl":"https://example.com/frame.png"}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1,"imageUrl":"https://example.com/frame.png"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -370,7 +370,7 @@ async fn production_storyboard_preview_image_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/preview-image",
         &token,
-        r#"{"storyboardId":1}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -383,7 +383,7 @@ async fn production_storyboard_down_preview_image_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/down-preview-image",
         &token,
-        r#"{"storyboardId":1}"#,
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

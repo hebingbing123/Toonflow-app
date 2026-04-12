@@ -72,12 +72,16 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
 /// `POST /api/v1/production/storyboard/edit-info` — OpenAPI `postStoryboardEditInfoV1`.
 Future<int> postStoryboardEditInfoV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
   required String prompt,
   int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/edit-info');
   final body = <String, dynamic>{
+    'projectId': projectId,
+    'scriptId': scriptId,
     'storyboardId': storyboardId,
     'prompt': prompt,
   };
@@ -101,6 +105,8 @@ Future<int> postStoryboardEditInfoV1(
 /// `POST /api/v1/production/storyboard/get-data` — OpenAPI `postStoryboardGetDataV1`.
 Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/get-data');
@@ -111,7 +117,11 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'storyboardId': storyboardId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -127,6 +137,8 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
 /// `POST /api/v1/production/storyboard/remove-frame` — OpenAPI `postStoryboardRemoveFrameV1`.
 Future<int> postStoryboardRemoveFrameV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required int storyboardId,
 }) async {
   final uri = Uri.parse(
@@ -139,7 +151,11 @@ Future<int> postStoryboardRemoveFrameV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'storyboardId': storyboardId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'storyboardId': storyboardId,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

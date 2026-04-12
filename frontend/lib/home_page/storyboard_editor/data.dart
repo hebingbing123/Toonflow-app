@@ -19,6 +19,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     try {
       final productionRow = await postStoryboardGetDataV1(
         widget.token,
+        projectId: widget.projectNumericId,
+        scriptId: widget.scriptNumericId,
         storyboardId: widget.storyNumericId,
       );
       final productionRows = await postProductionGetStoryboardDataV1(

@@ -90,6 +90,8 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   Future<void> _readCurrentPreview() async {
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
     );
     _imageUrlCtrl.text = preview.imageUrl ?? '';
@@ -109,6 +111,8 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     }
     final response = await postStoryboardUpdateUrlV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
       imageUrl: imageUrl,
     );
@@ -124,6 +128,8 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   Future<void> _clearCurrentFrame() async {
     await postStoryboardRemoveFrameV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
     );
     _imageUrlCtrl.clear();

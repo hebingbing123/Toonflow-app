@@ -11,6 +11,19 @@ use crate::error::ApiError;
 use crate::scope;
 use crate::state::AppState;
 
+fn require_positive_scope_ids(
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+) -> Result<(), ApiError> {
+    if project_id <= 0 || script_id <= 0 || storyboard_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId, scriptId, and storyboardId must be positive integers".into(),
+        ));
+    }
+    Ok(())
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AddStoryboardBody {
@@ -195,6 +208,8 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GetStoryboardDataBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
 }
 
@@ -204,16 +219,22 @@ pub(in crate::production) async fn post_storyboard_get_data(
     Json(body): Json<GetStoryboardDataBody>,
 ) -> Result<JsonResponse<ProductionStoryboardItem>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?;
 
     let row = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
@@ -228,14 +249,10 @@ pub(in crate::production) async fn post_storyboard_get_data(
           sb.flow_id,
           sb.sb_index
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND sb.numeric_id = $2
+        WHERE sb.id = $1
         "#,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
+    .bind(sb.storyboard_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -247,6 +264,8 @@ pub(in crate::production) async fn post_storyboard_get_data(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct EditStoryboardInfoBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
     prompt: String,
     #[serde(default)]
@@ -266,11 +285,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     Json(body): Json<EditStoryboardInfoBody>,
 ) -> Result<JsonResponse<EditStoryboardInfoResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     if body.prompt.trim().is_empty() {
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
     }
@@ -280,19 +295,24 @@ pub(in crate::production) async fn post_storyboard_edit_info(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?;
+
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
-        SET prompt = $3, duration = $4, updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_storyboard.numeric_id = $2
+        SET prompt = $2, duration = $3, updated_at = NOW()
+        WHERE id = $1
         "#,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
+    .bind(sb.storyboard_id)
     .bind(body.prompt.trim())
     .bind(body.duration)
     .execute(pool)
@@ -312,6 +332,8 @@ pub(in crate::production) async fn post_storyboard_edit_info(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct RemoveFrameBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
 }
 
@@ -328,30 +350,31 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     Json(body): Json<RemoveFrameBody>,
 ) -> Result<JsonResponse<RemoveFrameResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?;
+
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
         SET file_path = NULL, state = NULL, updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_storyboard.numeric_id = $2
+        WHERE id = $1
         "#,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
+    .bind(sb.storyboard_id)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -369,6 +392,8 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateStoryboardUrlBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
     image_url: String,
 }
@@ -387,11 +412,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
     Json(body): Json<UpdateStoryboardUrlBody>,
 ) -> Result<JsonResponse<UpdateStoryboardUrlResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     if body.image_url.trim().is_empty() {
         return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
     }
@@ -401,19 +422,24 @@ pub(in crate::production) async fn post_storyboard_update_url(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?;
+
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
-        SET file_path = $3, state = '已完成', updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_storyboard.numeric_id = $2
+        SET file_path = $2, state = '已完成', updated_at = NOW()
+        WHERE id = $1
         "#,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
+    .bind(sb.storyboard_id)
     .bind(body.image_url.trim())
     .execute(pool)
     .await
@@ -488,6 +514,8 @@ pub(in crate::production) async fn post_get_storyboard_data(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct DownPreviewImageBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
 }
 
@@ -505,32 +533,29 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     Json(body): Json<DownPreviewImageBody>,
 ) -> Result<JsonResponse<DownPreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let file_path: Option<String> = sqlx::query_scalar(
-        r#"
-        SELECT sb.file_path
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND sb.numeric_id = $2
-        "#,
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
-    .fetch_optional(pool)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| e.into_api_error())?;
+
+    let file_path: Option<String> =
+        sqlx::query_scalar(r#"SELECT file_path FROM app_storyboard WHERE id = $1"#)
+            .bind(sb.storyboard_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if file_path.is_none() {
         return Err(ApiError::NotFound);
@@ -546,6 +571,8 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct PreviewImageBody {
+    project_id: i32,
+    script_id: i32,
     storyboard_id: i32,
 }
 
@@ -563,38 +590,29 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     Json(body): Json<PreviewImageBody>,
 ) -> Result<JsonResponse<PreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "storyboardId must be a positive integer".into(),
-        ));
-    }
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let row: Option<(Option<String>, Option<String>)> = sqlx::query_as(
-        r#"
-        SELECT sb.file_path, sb.prompt
-        FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND sb.numeric_id = $2
-        "#,
+    let sb = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
     )
-    .bind(uid)
-    .bind(body.storyboard_id)
-    .fetch_optional(pool)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| e.into_api_error())?;
 
-    if row.is_none() {
-        return Err(ApiError::NotFound);
-    }
-
-    let (file_path, prompt) = row.unwrap();
+    let (file_path, prompt): (Option<String>, Option<String>) =
+        sqlx::query_as(r#"SELECT file_path, prompt FROM app_storyboard WHERE id = $1"#)
+            .bind(sb.storyboard_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(JsonResponse(PreviewImageResponse {
         storyboard_id: body.storyboard_id,
