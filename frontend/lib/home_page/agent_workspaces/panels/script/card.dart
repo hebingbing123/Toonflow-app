@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/script/action_panels.dart';
 import '../../contexts/script/card_panels.dart';
@@ -149,12 +150,6 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       return value;
     }
     return '${value.substring(0, maxChars)}...';
-  }
-
-  String? _resolveDropdownValue(String value, List<String> allowed) {
-    if (allowed.contains(value)) return value;
-    if (allowed.isEmpty) return null;
-    return allowed.first;
   }
 
   bool _validateJsonArgs(String raw) {
@@ -538,11 +533,11 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
               scriptDomainArgsController: widget.scriptDomainArgsController,
               scriptDomainToolPresets: widget.scriptDomainToolPresets,
               scriptSubAgentPresets: widget.scriptSubAgentPresets,
-              selectedScriptDomainTool: _resolveDropdownValue(
+              selectedScriptDomainTool: resolveWorkspaceDropdownValue(
                 widget.selectedScriptDomainTool,
                 widget.scriptDomainToolPresets,
               ),
-              selectedScriptSubAgentTool: _resolveDropdownValue(
+              selectedScriptSubAgentTool: resolveWorkspaceDropdownValue(
                 widget.scriptSubAgentToolController.text.trim(),
                 widget.scriptSubAgentPresets,
               ),

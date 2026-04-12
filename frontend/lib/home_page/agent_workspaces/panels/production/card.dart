@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/production/action_panels.dart';
 import '../../contexts/production/card_panels.dart';
@@ -78,12 +79,6 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
 class _AgentWorkspaceProductionCardState
     extends State<AgentWorkspaceProductionCard> {
   String? _taskStatusLine;
-
-  String? _resolveDropdownValue(String value, List<String> allowed) {
-    if (allowed.contains(value)) return value;
-    if (allowed.isEmpty) return null;
-    return allowed.first;
-  }
 
   Widget _buildPromptTemplates() {
     return ProductionWorkspacePromptTemplatesPanel(
@@ -514,15 +509,15 @@ class _AgentWorkspaceProductionCardState
               productionDomainToolPresets: widget.productionDomainToolPresets,
               productionSubAgentPresets: widget.productionSubAgentPresets,
               flowKeyPresets: widget.flowKeyPresets,
-              selectedProductionDomainTool: _resolveDropdownValue(
+              selectedProductionDomainTool: resolveWorkspaceDropdownValue(
                 widget.productionDomainToolController.text.trim(),
                 widget.productionDomainToolPresets,
               ),
-              selectedProductionSubAgentTool: _resolveDropdownValue(
+              selectedProductionSubAgentTool: resolveWorkspaceDropdownValue(
                 widget.productionSubAgentToolController.text.trim(),
                 widget.productionSubAgentPresets,
               ),
-              selectedFlowKey: _resolveDropdownValue(
+              selectedFlowKey: resolveWorkspaceDropdownValue(
                 widget.flowKeyController.text.trim(),
                 widget.flowKeyPresets,
               ),
