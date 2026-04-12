@@ -12,8 +12,8 @@ Writes:
     After updating, run `python3 scripts/gen_legacy_utoipa_registry.py` to refresh `legacy_components/`.
   backend/src/openapi_spec/ws_protocol_description.md
     — `GET /api/v1/ws` long description (for `include_str!` on the upgrade handler)
-  backend/src/openapi_spec/openapi_paths_index.yaml
-    — { paths: <all paths except /api/v1/ws> } for scripts/gen_openapi_utoipa_stubs.py
+  scripts/fixtures/openapi_stub_input.yaml
+    — { paths: <all paths except /api/v1/ws> } one-off input for `scripts/gen_openapi_utoipa_stubs.py` (not merged at runtime).
 
 Run from repo root:
   python3 scripts/extract_openapi_rust_sources.py
@@ -32,7 +32,7 @@ DEFAULT_SRC = ROOT / "docs" / "openapi.yaml"
 OUT_LEGACY_SCHEMAS = (
     ROOT / "backend" / "src" / "openapi_spec" / "embedded" / "legacy_component_schemas.json"
 )
-OUT_PATHS = ROOT / "backend" / "src" / "openapi_spec" / "openapi_paths_index.yaml"
+OUT_STUB_INPUT = ROOT / "scripts" / "fixtures" / "openapi_stub_input.yaml"
 OUT_WS_MD = ROOT / "backend" / "src" / "openapi_spec" / "ws_protocol_description.md"
 
 
@@ -71,11 +71,12 @@ def main() -> None:
 
     paths_index = dict(paths)
     paths_index.pop("/api/v1/ws", None)
-    with OUT_PATHS.open("w", encoding="utf-8") as f:
+    OUT_STUB_INPUT.parent.mkdir(parents=True, exist_ok=True)
+    with OUT_STUB_INPUT.open("w", encoding="utf-8") as f:
         yaml.dump({"paths": paths_index}, f, sort_keys=False, allow_unicode=True, width=120)
 
     print(f"Wrote {OUT_LEGACY_SCHEMAS}")
-    print(f"Wrote {OUT_PATHS}")
+    print(f"Wrote {OUT_STUB_INPUT}")
 
 
 if __name__ == "__main__":

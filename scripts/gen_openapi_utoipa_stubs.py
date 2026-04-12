@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""Generate utoipa path stubs from `openapi_paths_index.yaml` (batch OpenApi structs + merge helper).
+"""Generate utoipa path stubs from an OpenAPI YAML `paths:` document (batch OpenApi structs + merge helper).
 
-Each stub mirrors the indexed operation's request/response shapes in utoipa using:
+The **committed** `backend/src/openapi_spec/generated/*.rs` is what the server merges at runtime; this script
+is for **one-off regeneration** when you have a monolithic or paths-only YAML (e.g. from `docs/openapi.yaml`).
+
+Each stub mirrors the operation's request/response shapes in utoipa using:
 - `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (from `embedded/legacy_component_schemas.json` merged at runtime)
 - `serde_json::Value` for inline JSON schemas without a component ref
 
-Run from repo root:
+Run from repo root (default input: `docs/openapi.yaml` if it exists):
+
   python3 scripts/gen_openapi_utoipa_stubs.py
-  Output is formatted to satisfy `cargo fmt --check` in `backend/`.
+  python3 scripts/gen_openapi_utoipa_stubs.py path/to/openapi-with-paths.yaml
+
+Output is formatted to satisfy `cargo fmt --check` in `backend/`.
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 from pathlib import Path
 from typing import Any
@@ -19,8 +26,17 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-OPENAPI = ROOT / "backend" / "src" / "openapi_spec" / "openapi_paths_index.yaml"
+DEFAULT_OPENAPI = ROOT / "docs" / "openapi.yaml"
+STUB_INPUT_FIXTURE = ROOT / "scripts" / "fixtures" / "openapi_stub_input.yaml"
 OUT_DIR = ROOT / "backend" / "src" / "openapi_spec" / "generated"
+
+
+def _default_openapi_yaml() -> Path:
+    if DEFAULT_OPENAPI.is_file():
+        return DEFAULT_OPENAPI
+    if STUB_INPUT_FIXTURE.is_file():
+        return STUB_INPUT_FIXTURE
+    raise FileNotFoundError("no default OpenAPI YAML for stub regeneration")
 
 # Covered by hand-written / module OpenApi aggregates (avoid duplicate stubs in merge).
 SKIP_OPERATION_IDS = frozenset(
@@ -335,7 +351,31 @@ def emit_path_macro(path: str, method: str, op: dict[str, Any]) -> list[str]:
 
 
 def main() -> None:
-    with OPENAPI.open(encoding="utf-8") as f:
+    ap = argparse.ArgumentParser(
+        description="Regenerate openapi_spec/generated batch stubs from an OpenAPI YAML `paths:` section.",
+    )
+    ap.add_argument(
+        "openapi_yaml",
+        nargs="?",
+        default=None,
+        help="YAML with top-level `paths:` (monolith or paths-only). "
+        f"Default: {DEFAULT_OPENAPI} if present, else {STUB_INPUT_FIXTURE} (fixture updated by extract script).",
+    )
+    args = ap.parse_args()
+    if args.openapi_yaml:
+        src = Path(args.openapi_yaml)
+    else:
+        try:
+            src = _default_openapi_yaml()
+        except FileNotFoundError:
+            raise SystemExit(
+                "Missing OpenAPI YAML for stub regeneration. Pass a path, add docs/openapi.yaml, "
+                f"or run extract to refresh {STUB_INPUT_FIXTURE}.\n"
+                "Runtime OpenAPI merges committed stubs only (no backend paths YAML)."
+            ) from None
+    if not src.is_file():
+        raise SystemExit(f"OpenAPI YAML not found: {src}")
+    with src.open(encoding="utf-8") as f:
         doc = yaml.safe_load(f)
     paths = doc.get("paths") or {}
 
@@ -397,7 +437,9 @@ def main() -> None:
     for bi in range(len(batches)):
         mod_lines.append(f"mod batch{bi:02};")
     mod_lines.append("")
-    mod_lines.append("/// All YAML-indexed path stubs merged into one [`utoipa::openapi::OpenApi`].")
+    mod_lines.append(
+        "/// All generated path stubs (from `scripts/gen_openapi_utoipa_stubs.py`) merged into one [`utoipa::openapi::OpenApi`]."
+    )
     mod_lines.append("pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {")
     if not batches:
         mod_lines.append("    utoipa::openapi::OpenApi::default()")

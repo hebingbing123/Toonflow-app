@@ -63,7 +63,7 @@
 | **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
-| **`backend/src/openapi_spec/`** | OpenAPI：`shell.rs` + `legacy_components/`（由 `scripts/gen_legacy_utoipa_registry.py` 从嵌入 JSON 生成 `ToSchema` 注册）+ `openapi_paths_index.yaml`；合并结果由 Rust/utoipa 生成 |
+| **`backend/src/openapi_spec/`** | OpenAPI：`shell.rs` + `legacy_components/` + 已提交的 `generated/` 路径桩；运行时合并 **不含** 后端路径 YAML（桩重生成输入见 `scripts/fixtures/openapi_stub_input.yaml`） |
 | **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文见合并后的 OpenAPI **`/api/v1/ws`**） |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 
@@ -260,7 +260,11 @@ backend/data/skills/     # 打包技能 Markdown（运行时真源）
 backend/src/openapi_spec/shell.rs
 backend/src/openapi_spec/embedded/legacy_component_schemas.json
 backend/src/openapi_spec/legacy_components/
+backend/src/openapi_spec/generated/
+scripts/fixtures/openapi_stub_input.yaml
+scripts/gen_openapi_utoipa_stubs.py
 scripts/gen_legacy_utoipa_registry.py
+scripts/openapi_from_generated_stubs.py
 docs/plans/
 supabase/migrations/
 scripts/refactor-check.sh

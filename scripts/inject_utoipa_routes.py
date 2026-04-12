@@ -2,7 +2,7 @@
 """
 Inject #[utoipa::path(...)] before handler functions based on .route("...", METHOD(handler)) in the same file.
 
-- Parses `openapi_paths_index.yaml` for operationId per (path, method).
+- Parses committed `openapi_spec/generated/batch*.rs` stubs for operationId per (path, method).
 - For a given --rs-file, finds .route("PATH", METHOD(fn)) and METHOD1(fn1).METHOD2(fn2) chains.
 - Inserts utoipa blocks before `async fn FN` (must live in the same .rs file as the router).
 - Appends #[derive(OpenApi)] struct at end (--api-struct Name --tag tag).
@@ -18,25 +18,19 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(__file__).resolve().parents[1]
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import openapi_from_generated_stubs as _stub_index  # noqa: E402
 
 
 def load_openapi_ops() -> dict[tuple[str, str], str]:
-    doc = yaml.safe_load(
-        (ROOT / "backend/src/openapi_spec/openapi_paths_index.yaml").read_text(encoding="utf-8")
-    )
-    out: dict[tuple[str, str], str] = {}
-    for p, item in doc.get("paths", {}).items():
-        for m in ("get", "post", "put", "patch", "delete"):
-            if m in item and isinstance(item[m], dict):
-                oid = item[m].get("operationId")
-                if oid:
-                    out[(p, m)] = oid
-    return out
+    return _stub_index.operation_index_map()
 
 
 def _split_method_handlers(blob: str) -> list[tuple[str, str]]:
@@ -164,7 +158,9 @@ def inject_file(path: Path, ops: dict[tuple[str, str], str], tag: str, api_struc
     for meth, api_path, h in routes:
         oid = ops.get((api_path, meth))
         if not oid:
-            raise SystemExit(f"no operationId for {meth.upper()} {api_path} in openapi_paths_index.yaml")
+            raise SystemExit(
+                f"no operationId for {meth.upper()} {api_path} in openapi_spec/generated batch stubs"
+            )
         block_tpl = BLOCK_GET if meth == "get" else BLOCK_WRITE
         block = block_tpl.format(meth=meth, path=api_path, oid=oid, tag=tag)
         pat = rf"(async fn {re.escape(h)}\b|pub\(crate\) async fn {re.escape(h)}\b|pub\(super\) async fn {re.escape(h)}\b|pub async fn {re.escape(h)}\b)"

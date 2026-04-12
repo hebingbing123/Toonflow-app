@@ -1,8 +1,8 @@
-//! OpenAPI: Rust shell ([`shell`]), path index ([`merge`] reads `openapi_paths_index.yaml`), generated stubs
-//! ([`generated`]), and legacy component names ([`legacy_components`]).
+//! OpenAPI: Rust shell ([`shell`]), [`merge`] 输出，已提交的 path stubs（[`generated`]），以及 legacy 组件注册（[`legacy_components`]）。
 //!
-//! **你不需要维护一份「手写整本」`openapi.yaml`。** 运行中的契约来自本模块的 utoipa 合并结果；`openapi_paths_index.yaml`
-//! 与 `embedded/legacy_component_schemas.json` 是 **从单体 OpenAPI 抽取/再生成** 的产物（见 `scripts/extract_openapi_rust_sources.py`），
+//! **你不需要维护一份「手写整本」`openapi.yaml`。** 运行中的契约来自本模块的 utoipa 合并结果；`embedded/legacy_component_schemas.json`
+//! 与 `scripts/fixtures/openapi_stub_input.yaml`（仅用于 **重新生成** stubs，见 `scripts/extract_openapi_rust_sources.py` /
+//! `scripts/gen_openapi_utoipa_stubs.py`）是 **从单体 OpenAPI 抽取** 的产物，**不参与** `merge.rs` 运行时合并。
 //! 日常改接口应优先改各域 handler 上的 utoipa 注解与 Rust 类型。
 //!
 //! **目标形态（你描述的「只要 utoipa」）**：契约 **只** 由各域 `#[derive(OpenApi)]` / handler 上的 utoipa 注解与

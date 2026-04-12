@@ -5,22 +5,17 @@
 //! [`super::legacy_components::merged_legacy_components_openapi`].
 //!
 //! Merge order:
-//! 1. **`openapi_paths_index.yaml`** — canonical path items (request bodies, responses, parameters,
-//!    descriptions) migrated from the historical monolithic OpenAPI.
-//! 2. **[`crate::openapi_spec::combined_openapi`]** — utoipa output (hand-written handler docs + generated
-//!    stubs from `scripts/gen_openapi_utoipa_stubs.py`). When utoipa carries **request/response content** and the
-//!    index already documented the same operation, [`merge_rich_operation_onto_base`] **overlays** utoipa
-//!    `requestBody` / `responses` (and `operationId` / `summary` / `tags`) onto the YAML op so **`parameters`**,
-//!    **`security`**, and long **`description`** stay with the index. Thin utoipa stubs still do not erase YAML.
+//! 1. **[`crate::openapi_spec::combined_openapi`]** — utoipa output (hand-written handler docs + committed
+//!    stubs under [`super::generated`]). Path items come entirely from Rust; regenerate stubs only when you
+//!    have an external OpenAPI YAML (see `scripts/gen_openapi_utoipa_stubs.py`).
 //!
-//! Routes only documented in utoipa (e.g. **`GET /api/v1/ws`**) still appear because they merge after the index.
+//! [`merge_path_item_in_place`] / [`merge_rich_operation_onto_base`] remain for merging multiple utoipa
+//! fragments onto the same path key (later merges overlay richer `requestBody` / `responses`).
 
 use std::sync::OnceLock;
 
 use anyhow::Context;
 use serde_json::Value as Json;
-
-const PATHS_INDEX_YAML: &str = include_str!("openapi_paths_index.yaml");
 
 const FALLBACK_MINIMAL_YAML: &str =
     "openapi: 3.1.0\ninfo:\n  title: Toonflow API\n  version: 1.0.0\npaths: {}\n";
@@ -61,12 +56,9 @@ fn document_base_yaml_for_fallback() -> String {
     }
 }
 
-/// Full OpenAPI document: base + indexed paths + utoipa overlays and extra components.
+/// Full OpenAPI document: shell + utoipa paths/components (no embedded paths YAML).
 pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
     let mut base = document_base()?;
-    let paths_index: Json = serde_yaml::from_str(PATHS_INDEX_YAML)
-        .context("parse embedded openapi_paths_index.yaml")?;
-    overlay_paths(&mut base, &paths_index).context("merge openapi_paths_index paths")?;
 
     let gen = crate::openapi_spec::combined_openapi();
     let gen_val: Json = serde_json::to_value(&gen).context("serialize utoipa OpenApi")?;
@@ -143,7 +135,7 @@ fn merge_path_item_in_place(base_item: &mut Json, gen_item: &Json) {
     }
 }
 
-/// Rich utoipa overlays request/response onto the index op; thin stubs never replace YAML content.
+/// Rich utoipa overlays request/response when both sides carry content.
 fn merge_operation_in_place(base_op: &mut Json, gen_op: &Json) {
     if operation_has_content(gen_op) {
         if operation_has_content(base_op) {
@@ -162,7 +154,7 @@ fn merge_operation_in_place(base_op: &mut Json, gen_op: &Json) {
     *base_op = gen_op.clone();
 }
 
-/// Copy OpenAPI operation fields from `gen_op` onto `base_op`, keeping index-only fields (e.g. `parameters`).
+/// Copy OpenAPI operation fields from `gen_op` onto `base_op`, keeping base-only fields (e.g. `parameters`).
 fn merge_rich_operation_onto_base(base_op: &mut Json, gen_op: &Json) {
     let Some(base_obj) = base_op.as_object_mut() else {
         return;
@@ -264,18 +256,22 @@ mod tests {
         );
     }
 
-    /// Rich utoipa overlay must not drop path `parameters` from the YAML index.
+    /// UUID-scoped stats route must appear under the path template (utoipa stubs; parameters may be implicit).
     #[test]
-    fn merged_openapi_overlays_utoipa_onto_yaml_keeps_parameters() {
+    fn merged_openapi_project_stats_route_and_response_ref() {
         let yaml = merged_openapi_yaml_string().expect("merge");
+        assert!(
+            yaml.contains("/api/v1/projects/{project_id}/stats:"),
+            "expected stats path key in merged YAML"
+        );
+        assert!(
+            yaml.contains("operationId: getProjectStatsByProjectIdV1"),
+            "expected stats operation"
+        );
         let op = yaml
             .find("operationId: getProjectStatsByProjectIdV1")
             .expect("op present");
-        let window = &yaml[op..op.saturating_add(1600)];
-        assert!(
-            window.contains("name: project_id"),
-            "expected path parameter from index; got: {window:?}"
-        );
+        let window = &yaml[op..op.saturating_add(1200)];
         assert!(
             window.contains("ProjectStatsResponse"),
             "expected stats response ref; got: {window:?}"

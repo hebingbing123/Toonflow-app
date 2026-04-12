@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """Inject #[utoipa::path(...)] before each production workbench handler listed in production/mod.rs.
 
-Uses `backend/src/openapi_spec/openapi_paths_index.yaml` for operation_id. Request/response bodies documented as serde_json::Value
+Uses committed `openapi_spec/generated/batch*.rs` stubs for operation_id. Request/response bodies documented as serde_json::Value
 (actual handlers may return axum::Response — OpenAPI still shows JSON object schema).
 """
 
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(__file__).resolve().parents[1]
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import openapi_from_generated_stubs as _stub_index  # noqa: E402
+
 MOD = ROOT / "backend/src/production/mod.rs"
-YAML = ROOT / "backend/src/openapi_spec/openapi_paths_index.yaml"
 WB = ROOT / "backend/src/production/workbench"
 
 
 def main() -> None:
-    doc = yaml.safe_load(YAML.read_text(encoding="utf-8"))
-    paths_doc = doc["paths"]
+    paths_doc = _stub_index.operation_index_map()
 
     mod_txt = MOD.read_text(encoding="utf-8")
     routes = re.findall(
@@ -31,11 +34,11 @@ def main() -> None:
     # routes: list of (api_path, full_qual, fn_name)
 
     op_ids: dict[tuple[str, str], str] = {}
-    for p, item in paths_doc.items():
+    for (p, method), oid in paths_doc.items():
         if not p.startswith("/api/v1/production"):
             continue
-        if "post" in item:
-            op_ids[(p, "post")] = item["post"]["operationId"]
+        if method == "post":
+            op_ids[(p, "post")] = oid
 
     per_file: dict[Path, list[tuple[str, str, str]]] = {}
     for api_path, full, fn_name in routes:
