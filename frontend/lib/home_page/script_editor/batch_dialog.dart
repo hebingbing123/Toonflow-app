@@ -228,13 +228,16 @@ class _StoryboardBatchWorkbenchDialogState
             const SizedBox(height: 12),
             _buildDiagnosisCard(context, diagnosis, recommendedAction, recommendedActionLabel),
             const SizedBox(height: 12),
-            _buildTopActions(context, productionMap),
+            _buildBatchWorkbenchTopActions(),
             const SizedBox(height: 8),
-            _buildPromptRow(),
+            _buildBatchWorkbenchPromptSection(),
             const SizedBox(height: 8),
-            _buildModelRow(),
+            _buildBatchWorkbenchModelSection(),
             const SizedBox(height: 12),
-            _buildMutationActions(context, selected, singleSelectedId),
+            _buildBatchWorkbenchMutationActions(
+              selected: selected,
+              singleSelectedId: singleSelectedId,
+            ),
             if (_statusLine != null) ...[
               const SizedBox(height: 8),
               Text(_statusLine!, style: Theme.of(context).textTheme.bodySmall),
@@ -305,112 +308,6 @@ class _StoryboardBatchWorkbenchDialogState
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTopActions(
-    BuildContext context,
-    Map<int, ProductionStoryboardItemV1> productionMap,
-  ) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilledButton.tonal(
-          onPressed: _loadingProduction || _busyMutation
-              ? null
-              : _refreshProduction,
-          child: Text(_loadingProduction ? '同步中…' : '同步制作视图'),
-        ),
-        TextButton(
-          onPressed: _busyMutation ? null : _selectReadyStoryboards,
-          child: const Text('全选可出图分镜'),
-        ),
-        TextButton(
-          onPressed: _busyMutation ? null : _clearSelection,
-          child: const Text('清空选择'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPromptRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _promptSuffixCtrl,
-            decoration: const InputDecoration(
-              labelText: '追加提示词（可选）',
-              helperText: '会拼接到每条分镜原提示词末尾。',
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: TextField(
-            controller: _negativePromptCtrl,
-            decoration: const InputDecoration(labelText: '负面提示词（可选）'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModelRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _modelCtrl,
-            decoration: const InputDecoration(labelText: '模型（可选）'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: TextField(
-            controller: _resolutionCtrl,
-            decoration: const InputDecoration(labelText: '分辨率（可选）'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMutationActions(
-    BuildContext context,
-    List<int> selected,
-    int? singleSelectedId,
-  ) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilledButton(
-          onPressed: _busyMutation || _selectedIds.isEmpty
-              ? null
-              : () => _runMutation(_batchGenerate),
-          child: Text(_busyMutation ? '处理中…' : '批量发起出图'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || singleSelectedId == null
-              ? null
-              : () => _runMutation(() => _loadCurrentPreview(singleSelectedId)),
-          child: const Text('读取当前预览'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || singleSelectedId == null
-              ? null
-              : () => _runMutation(() => _loadDownloadUrl(singleSelectedId)),
-          child: const Text('读取下载链接'),
-        ),
-        TextButton(
-          onPressed: _busyMutation || _selectedIds.isEmpty
-              ? null
-              : () => _runMutation(() => _exportSelectedZip(selected)),
-          child: const Text('导出所选 ZIP'),
-        ),
-      ],
     );
   }
 
