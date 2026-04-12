@@ -239,7 +239,6 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                         const SizedBox(height: 12),
                         _buildNovelWorkbenchSearchSection(
                           ctx: ctx,
-                          dialogCtx: dialogCtx,
                           setDialogState: setDialogState,
                           setLocalState: setLocalState,
                           token: token,
@@ -257,128 +256,38 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           },
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          '新增章节',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: createChapterCtrl,
-                          decoration: const InputDecoration(labelText: '章节标题'),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: createBodyCtrl,
-                          minLines: 3,
-                          maxLines: 6,
-                          decoration: const InputDecoration(labelText: '章节正文'),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: localBusy
-                              ? null
-                              : () => _runNovelWorkbenchAction(
-                                  ctx: ctx,
-                                  setDialogState: setDialogState,
-                                  setLocalState: setLocalState,
-                                  novelsBusy: novelsBusy,
-                                  setLocalBusy: setLocalBusy,
-                                  action: () async {
-                                    await _createNovelWorkbenchChapter(
-                                      token: token,
-                                      project: p,
-                                      createChapterCtrl: createChapterCtrl,
-                                      createBodyCtrl: createBodyCtrl,
-                                      selectedNovelIdCtrl: selectedNovelIdCtrl,
-                                      patchChapterCtrl: patchChapterCtrl,
-                                      patchBodyCtrl: patchBodyCtrl,
-                                      refreshWorkbench: refreshWorkbench,
-                                      setLocalState: setLocalState,
-                                    );
-                                    updateInfoLine('已新增章节。');
-                                  },
-                                ),
-                          child: const Text('新增章节'),
+                        _buildNovelWorkbenchCreateSection(
+                          ctx: dialogCtx,
+                          setDialogState: setDialogState,
+                          setLocalState: setLocalState,
+                          token: token,
+                          project: p,
+                          novelsBusy: novelsBusy,
+                          localBusy: localBusy,
+                          setLocalBusy: setLocalBusy,
+                          updateInfoLine: updateInfoLine,
+                          createChapterCtrl: createChapterCtrl,
+                          createBodyCtrl: createBodyCtrl,
+                          selectedNovelIdCtrl: selectedNovelIdCtrl,
+                          patchChapterCtrl: patchChapterCtrl,
+                          patchBodyCtrl: patchBodyCtrl,
+                          refreshWorkbench: refreshWorkbench,
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          '读取 / 更新章节',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: selectedNovelIdCtrl,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: '章节 numeric ID',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action: () => _readNovelWorkbenchChapter(
-                                        token: token,
-                                        project: p,
-                                        selectedNovelIdCtrl:
-                                            selectedNovelIdCtrl,
-                                        patchChapterCtrl: patchChapterCtrl,
-                                        patchBodyCtrl: patchBodyCtrl,
-                                        applyInfoLine: updateInfoLine,
-                                      ),
-                                    ),
-                              child: const Text('读取章节'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: patchChapterCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '更新后的章节标题',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: patchBodyCtrl,
-                          minLines: 3,
-                          maxLines: 6,
-                          decoration: const InputDecoration(
-                            labelText: '更新后的章节正文',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton.tonal(
-                          onPressed: localBusy
-                              ? null
-                              : () => _runNovelWorkbenchAction(
-                                  ctx: ctx,
-                                  setDialogState: setDialogState,
-                                  setLocalState: setLocalState,
-                                  novelsBusy: novelsBusy,
-                                  setLocalBusy: setLocalBusy,
-                                  action: () => _saveNovelWorkbenchChapter(
-                                    token: token,
-                                    project: p,
-                                    selectedNovelIdCtrl: selectedNovelIdCtrl,
-                                    patchChapterCtrl: patchChapterCtrl,
-                                    patchBodyCtrl: patchBodyCtrl,
-                                    refreshWorkbench: refreshWorkbench,
-                                    setLocalState: setLocalState,
-                                    applyInfoLine: updateInfoLine,
-                                  ),
-                                ),
-                          child: const Text('保存章节'),
+                        _buildNovelWorkbenchEditSection(
+                          ctx: dialogCtx,
+                          setDialogState: setDialogState,
+                          setLocalState: setLocalState,
+                          token: token,
+                          project: p,
+                          novelsBusy: novelsBusy,
+                          localBusy: localBusy,
+                          setLocalBusy: setLocalBusy,
+                          updateInfoLine: updateInfoLine,
+                          selectedNovelIdCtrl: selectedNovelIdCtrl,
+                          patchChapterCtrl: patchChapterCtrl,
+                          patchBodyCtrl: patchBodyCtrl,
+                          refreshWorkbench: refreshWorkbench,
                         ),
                         const SizedBox(height: 16),
                         Text(
