@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Job queue listing, creation, and lifecycle mutation endpoints.
 /// `GET /api/v1/jobs` — jobs for the caller, newest first (default [limit] 100). See `listJobsV1`.
 ///
 /// [kind] and [status] are optional exact-match query filters (non-empty only).

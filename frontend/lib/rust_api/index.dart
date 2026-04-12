@@ -18,7 +18,7 @@ part 'assets/models.dart';
 part 'assets/generate.dart';
 part 'catalog_memory_models.dart';
 part 'harness_api.dart';
-part 'jobs_api.dart';
+part 'jobs/api.dart';
 part 'models_catalog.dart';
 part 'novels/models.dart';
 part 'novels/events_models.dart';
