@@ -59,6 +59,7 @@ part 'home_page/project_editor/dialog/state.dart';
 part 'home_page/project_editor/dialog/actions.dart';
 part 'home_page/project_editor/dialog/content.dart';
 part 'home_page/project_editor/scripts/probe/actions.dart';
+part 'home_page/project_editor/scripts/workbench/dialog_view.dart';
 part 'home_page/project_editor/scripts/workbench/dialog.dart';
 part 'home_page/project_editor/scripts/section.dart';
 part 'home_page/projects/controller.dart';
