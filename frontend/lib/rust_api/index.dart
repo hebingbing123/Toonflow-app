@@ -14,6 +14,7 @@ part 'agents/memory.dart';
 part 'assets/api.dart';
 part 'assets/crud.dart';
 part 'assets/images.dart';
+part 'assets/workbench/images.dart';
 part 'assets/models/core.dart';
 part 'assets/models/corner_scape.dart';
 part 'assets/models/images.dart';
