@@ -29,6 +29,7 @@ SKIP_OPERATION_IDS = frozenset(
         "postBillingWebhookV1",
         "listBillingWebhookEventsV1",
         "listHarnessToolsV1",
+        "websocketUpgrade",
         "usageSummaryV1",
         "cancelJobV1",
         "createJobV1",

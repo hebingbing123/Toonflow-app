@@ -43,6 +43,7 @@ pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(crate::production::ProductionApi::openapi());
     doc.merge(crate::jobs::JobsOpenApi::openapi());
     doc.merge(crate::harness::HarnessOpenApi::openapi());
+    doc.merge(crate::harness::WsUpgradeOpenApi::openapi());
     doc.merge(crate::metering::MeteringOpenApi::openapi());
     doc.merge(generated::merged_generated_openapi());
     doc

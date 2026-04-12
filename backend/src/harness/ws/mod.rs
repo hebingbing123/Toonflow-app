@@ -6,7 +6,10 @@ pub mod channel;
 pub mod chat;
 pub mod connection;
 pub mod dispatch;
+pub mod openapi;
 pub mod outbound;
 pub mod session;
 pub mod tool;
 pub mod upgrade;
+
+pub use openapi::WsUpgradeOpenApi;

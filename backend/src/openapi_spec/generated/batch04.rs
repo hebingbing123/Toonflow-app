@@ -176,17 +176,6 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_post_visual_manual_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/ws",
-    operation_id = "websocketUpgrade",
-    tag = "websocket",
-    summary = "WebSocket upgrade — JSON envelope protocol",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_websocket_upgrade() {}
 }
 
 #[derive(utoipa::OpenApi)]
@@ -206,7 +195,6 @@ mod stubs {
     stubs::op_put_skill_content_v1,
     stubs::op_get_skills_summary_v1,
     stubs::op_get_visual_manual_v1,
-    stubs::op_post_visual_manual_v1,
-    stubs::op_websocket_upgrade
+    stubs::op_post_visual_manual_v1
 ))]
 pub struct ApiDocBatch04;

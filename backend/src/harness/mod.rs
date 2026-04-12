@@ -25,6 +25,8 @@ pub(crate) mod wasm_runtime;
 pub mod wire;
 pub mod ws;
 
+pub use ws::WsUpgradeOpenApi;
+
 use uuid::Uuid;
 
 /// Harness 工具执行上下文。

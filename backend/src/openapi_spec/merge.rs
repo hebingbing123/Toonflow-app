@@ -1,7 +1,8 @@
 //! Merge utoipa-generated path/schema fragments into the embedded OpenAPI base (`openapi_base.yaml`).
 //!
-//! The base carries **metadata**, the **`/api/v1/ws`** operation (long description), and **components**
-//! (schemas, security). All other HTTP paths come from [`crate::openapi_spec::combined_openapi`].
+//! The base carries **metadata**, **empty `paths`** (paths come from utoipa), and **components**
+//! (schemas, security). [`crate::harness::WsUpgradeOpenApi`] documents **`GET /api/v1/ws`** (long
+//! `description` via `include_str!`). All HTTP paths are merged from [`crate::openapi_spec::combined_openapi`].
 
 use std::sync::OnceLock;
 
