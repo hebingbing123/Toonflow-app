@@ -1,6 +1,4 @@
 part of '../../../home_page.dart';
-part 'overview.dart';
-part 'compatibility/panel.dart';
 
 /// Presents the asset-workbench summary and current focus selectors so the
 /// assets dialog can stay centered on orchestration.

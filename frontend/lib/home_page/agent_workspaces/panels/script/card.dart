@@ -381,8 +381,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceRecipeSubAgent(ScriptWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty)
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
       return;
+    }
     _runScriptSubAgentTool();
   }
 
@@ -411,8 +412,9 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   void _runWorkspaceStageSubAgent(ScriptWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty)
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
       return;
+    }
     _runScriptSubAgentTool();
   }
 

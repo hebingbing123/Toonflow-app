@@ -1,7 +1,5 @@
 part of '../../../../home_page.dart';
 
-part 'workbench.dart';
-
 extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
   Widget _buildProjectNovelEventsWorkbenchSection({
     required BuildContext ctx,

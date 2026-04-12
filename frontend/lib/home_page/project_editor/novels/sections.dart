@@ -1,10 +1,5 @@
 part of '../../../home_page.dart';
 
-part 'sections/search.dart';
-part 'sections/create.dart';
-part 'sections/edit.dart';
-part 'sections/delete_snapshot.dart';
-
 /// Keeps novels workbench form sections close to the novels domain so the main
 /// workbench file can stay focused on dialog orchestration.
 extension _HomePageProjectEditorNovelWorkbenchSections on _HomePageState {

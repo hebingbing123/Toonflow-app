@@ -1,8 +1,15 @@
-//! Merge utoipa-generated path/schema fragments into the embedded OpenAPI base (`openapi_base.yaml`).
+//! Merge OpenAPI fragments into the embedded base (`openapi_base.yaml`).
 //!
-//! The base carries **metadata**, **empty `paths`** (paths come from utoipa), and **components**
-//! (schemas, security). [`crate::harness::WsUpgradeOpenApi`] documents **`GET /api/v1/ws`** (long
-//! `description` via `include_str!`). All HTTP paths are merged from [`crate::openapi_spec::combined_openapi`].
+//! The base carries **metadata**, **empty `paths`**, and **`components`** (schemas, security).
+//!
+//! Merge order:
+//! 1. **`openapi_paths_index.yaml`** — canonical path items (request bodies, responses, parameters,
+//!    descriptions) migrated from the historical monolithic OpenAPI.
+//! 2. **[`crate::openapi_spec::combined_openapi`]** — utoipa output (hand-written handler docs + generated
+//!    stubs). [`merge_operation_in_place`] keeps **rich** operations: real handler utoipa wins over YAML;
+//!    thin stubs do **not** replace YAML that already defines `requestBody` or response `content`.
+//!
+//! Routes only documented in utoipa (e.g. **`GET /api/v1/ws`**) still appear because they merge after the index.
 
 use std::sync::OnceLock;
 
@@ -10,11 +17,16 @@ use anyhow::Context;
 use serde_json::Value as Json;
 
 const BASE_OPENAPI_YAML: &str = include_str!("openapi_base.yaml");
+const PATHS_INDEX_YAML: &str = include_str!("openapi_paths_index.yaml");
 
-/// Full OpenAPI document: base YAML with utoipa overlays for migrated paths and schemas.
+/// Full OpenAPI document: base + indexed paths + utoipa overlays and extra components.
 pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
     let mut base: Json =
         serde_yaml::from_str(BASE_OPENAPI_YAML).context("parse embedded openapi_base.yaml")?;
+    let paths_index: Json = serde_yaml::from_str(PATHS_INDEX_YAML)
+        .context("parse embedded openapi_paths_index.yaml")?;
+    overlay_paths(&mut base, &paths_index).context("merge openapi_paths_index paths")?;
+
     let gen = crate::openapi_spec::combined_openapi();
     let gen_val: Json = serde_json::to_value(&gen).context("serialize utoipa OpenApi")?;
 
@@ -90,7 +102,7 @@ fn merge_path_item_in_place(base_item: &mut Json, gen_item: &Json) {
     }
 }
 
-/// Prefer rich utoipa operations (real handlers). Thin generated stubs must not replace a YAML op.
+/// Prefer rich utoipa operations (real handlers). Thin generated stubs must not replace a YAML/index op.
 fn merge_operation_in_place(base_op: &mut Json, gen_op: &Json) {
     if operation_has_content(gen_op) {
         *base_op = gen_op.clone();
@@ -163,7 +175,7 @@ mod tests {
         let yaml = merged_openapi_yaml_string().expect("merge");
         assert!(
             yaml.contains("/api/v1/ws:"),
-            "merged spec should retain base WebSocket path until migrated"
+            "merged spec should retain WebSocket path from utoipa"
         );
         assert!(
             yaml.contains("operationId: healthRoot"),
@@ -171,5 +183,19 @@ mod tests {
         );
         let v: Json = serde_yaml::from_str(&yaml).expect("round-trip yaml");
         assert_eq!(v.get("openapi").and_then(|x| x.as_str()), Some("3.1.0"));
+    }
+
+    /// Stub-only routes must keep response schemas from `openapi_paths_index.yaml`, not thin utoipa stubs.
+    #[test]
+    fn merged_openapi_stub_routes_keep_index_response_schemas() {
+        let yaml = merged_openapi_yaml_string().expect("merge");
+        let op = yaml
+            .find("operationId: listArtStylesV1")
+            .expect("op present");
+        let window = &yaml[op..op.saturating_add(1200)];
+        assert!(
+            window.contains("ListArtStylesResponse"),
+            "expected index YAML response schema ref; got: {window:?}"
+        );
     }
 }

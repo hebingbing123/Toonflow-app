@@ -1,4 +1,4 @@
-//! utoipa [`OpenApi`] fragments merged into the embedded `openapi_base.yaml` (metadata, WebSocket op, components).
+//! OpenAPI: embedded `openapi_base.yaml` + `openapi_paths_index.yaml` paths + utoipa merge (see [`merge`]).
 
 mod generated;
 mod merge;

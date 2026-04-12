@@ -1,4 +1,4 @@
-part of '../../../home_page.dart';
+part of '../../../../home_page.dart';
 
 extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
   /// 处理单条分镜新增弹窗，保持主工作台聚焦列表与编排。

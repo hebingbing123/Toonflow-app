@@ -367,8 +367,9 @@ class _AgentWorkspaceProductionCardState
 
   void _runWorkspaceStageSubAgent(ProductionWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty)
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) {
       return;
+    }
     _runProductionSubAgentTool();
   }
 
@@ -380,8 +381,9 @@ class _AgentWorkspaceProductionCardState
 
   void _runWorkspaceRecipeSubAgent(ProductionWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty)
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) {
       return;
+    }
     _runProductionSubAgentTool();
   }
 

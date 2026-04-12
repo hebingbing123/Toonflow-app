@@ -269,6 +269,7 @@ mod tests {
 
     #[test]
     fn toonflow_accepts_matching_header() {
+        let _lock = toonflow_env_lock();
         let secret = b"test-secret";
         let body = br#"{"id":"evt_1","amount":100}"#;
         let headers = make_toonflow_header(secret, body);

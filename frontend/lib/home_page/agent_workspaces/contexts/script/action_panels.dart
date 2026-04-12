@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../panels/script.dart';
+import '../../prompt_preset.dart';
 
 class ScriptWorkspaceArgumentTemplateEntry {
   const ScriptWorkspaceArgumentTemplateEntry({

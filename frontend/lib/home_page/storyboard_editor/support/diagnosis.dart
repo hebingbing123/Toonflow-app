@@ -1,4 +1,4 @@
-import 'support/media.dart';
+import 'media.dart';
 import '../../../rust_api.dart';
 
 class StoryboardListDiagnosis {

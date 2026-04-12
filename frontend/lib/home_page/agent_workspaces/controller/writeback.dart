@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 part of '../../../home_page.dart';
 
 extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
@@ -209,8 +211,11 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     Object? payloadForWriteback = result;
     var writebackSource = toolName;
     if (toolName != 'get_flowData' &&
-        _coreProductionFlowKeys.contains(flowKey)) {
-      final refreshableKey = _toolRefreshableCoreFlowKey[toolName];
+        _HomePageAgentWorkspacesControllerConstants._coreProductionFlowKeys
+            .contains(flowKey)) {
+      final refreshableKey =
+          _HomePageAgentWorkspacesControllerConstants._toolRefreshableCoreFlowKey[
+              toolName];
       if (refreshableKey == flowKey) {
         try {
           final latestFlow = await fetchProductionFlowDataV1(

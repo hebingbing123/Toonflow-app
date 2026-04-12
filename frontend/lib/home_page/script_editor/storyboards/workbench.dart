@@ -1,8 +1,5 @@
 part of '../../../home_page.dart';
 
-part 'dialogs/add.dart';
-part 'dialogs/batch_add.dart';
-
 extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _reloadProductionStoryboardSummary({
     required String token,

@@ -1,4 +1,4 @@
-part of '../../../home_page.dart';
+part of '../../../../home_page.dart';
 
 /// Renders the collapsed compatibility actions that keep legacy asset entry points available.
 class _ProjectAssetsCompatibilityPanel extends StatelessWidget {
