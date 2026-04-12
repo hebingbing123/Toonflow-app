@@ -13,6 +13,8 @@
 //! 代理/LLM 编排（`harness.agent.run`、流式聊天）位于 `llm` 和 `ws`；HTTP 升级入口是 `ws::upgrade`。
 
 pub mod http;
+
+pub use http::HarnessOpenApi;
 pub mod invoke;
 pub mod isolate;
 pub mod observe;

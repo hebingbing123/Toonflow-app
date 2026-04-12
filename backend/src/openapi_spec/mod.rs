@@ -39,6 +39,11 @@ pub struct CoreHandlersApi;
 /// Full utoipa document: core handlers plus all operations from `scripts/gen_openapi_utoipa_stubs.py`.
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
+    doc.merge(crate::billing::BillingApi::openapi());
+    doc.merge(crate::production::ProductionApi::openapi());
+    doc.merge(crate::jobs::JobsOpenApi::openapi());
+    doc.merge(crate::harness::HarnessOpenApi::openapi());
+    doc.merge(crate::metering::MeteringOpenApi::openapi());
     doc.merge(generated::merged_generated_openapi());
     doc
 }

@@ -6,3 +6,5 @@
 
 pub mod quota;
 pub mod usage;
+
+pub use usage::MeteringOpenApi;

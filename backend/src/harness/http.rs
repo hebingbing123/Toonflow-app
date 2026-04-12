@@ -15,11 +15,22 @@ use crate::harness::observe;
 use crate::harness::tools::{HarnessToolInfo, ToolRegistry};
 use crate::state::AppState;
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 pub struct HarnessToolsResponse {
     pub tools: &'static [HarnessToolInfo],
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/harness/tools",
+    operation_id = "listHarnessToolsV1",
+    tag = "harness",
+    responses(
+        (status = 200, description = "OK", body = HarnessToolsResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_harness_tools(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -34,3 +45,15 @@ async fn list_harness_tools(
 pub fn router() -> Router<AppState> {
     Router::new().route("/api/v1/harness/tools", get(list_harness_tools))
 }
+
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(list_harness_tools),
+    components(schemas(
+        HarnessToolsResponse,
+        crate::harness::tools::HarnessToolInfo,
+        crate::error::ErrorBody
+    )),
+    tags((name = "harness", description = "Harness tool catalog (invoke via WebSocket)"))
+)]
+pub struct HarnessOpenApi;

@@ -6,7 +6,7 @@
 use serde::Serialize;
 
 /// One entry in `GET /api/v1/harness/tools`.
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, utoipa::ToSchema)]
 pub struct HarnessToolInfo {
     pub name: &'static str,
     pub description: &'static str,

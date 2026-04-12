@@ -9,6 +9,7 @@ use axum::{Json, Router};
 use serde::Serialize;
 use serde_json::json;
 use sqlx::PgPool;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -59,7 +60,7 @@ async fn record_job_event(
     Ok(())
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 struct UsageSummaryResponse {
     events_last_24h: i64,
     events_last_7d: i64,
@@ -78,6 +79,26 @@ pub fn router() -> Router<AppState> {
     Router::new().route("/api/v1/usage/summary", get(usage_summary))
 }
 
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(usage_summary),
+    components(schemas(UsageSummaryResponse, crate::error::ErrorBody)),
+    tags((name = "usage", description = "Per-user usage and quota hints"))
+)]
+pub struct MeteringOpenApi;
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/usage/summary",
+    operation_id = "usageSummaryV1",
+    tag = "usage",
+    responses(
+        (status = 200, description = "OK", body = UsageSummaryResponse),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Database not configured", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn usage_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
