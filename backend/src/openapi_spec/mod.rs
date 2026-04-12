@@ -1,4 +1,12 @@
-//! OpenAPI: Rust shell (`shell`), legacy `ToSchema` registry, `openapi_paths_index.yaml` paths, and utoipa merge (see [`merge`]).
+//! OpenAPI: Rust shell ([`shell`]), path index ([`merge`] reads `openapi_paths_index.yaml`), generated stubs
+//! ([`generated`]), and legacy component names ([`legacy_components`]).
+//!
+//! **你不需要维护一份「手写整本」`openapi.yaml`。** 运行中的契约来自本模块的 utoipa 合并结果；`openapi_paths_index.yaml`
+//! 与 `embedded/legacy_component_schemas.json` 是 **从单体 OpenAPI 抽取/再生成** 的产物（见 `scripts/extract_openapi_rust_sources.py`），
+//! 日常改接口应优先改各域 handler 上的 utoipa 注解与 Rust 类型。
+//!
+//! **字段级 `#[derive(ToSchema)]` 的终点**：逐步用真实 Rust DTO（或 `typify` 等从 JSON Schema 批量生成再手修）
+//! 替换 `legacy_components` 里 JSON 反序列化的占位类型；每迁走一个 schema，就从嵌入 JSON 删掉对应键并再跑生成器。
 
 mod generated;
 mod legacy_components;
