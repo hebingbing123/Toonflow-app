@@ -7,7 +7,7 @@ extension _ScriptWorkbenchPanelView on _ScriptWorkbenchPanelState {
     required ThemeData theme,
     required Color outline,
     required ScriptWorkbenchDiagnosis diagnosis,
-    required List<RelatedAssetSummary> relatedAssets,
+    required List<ScriptRelatedAssetBrief> relatedAssets,
     required String errorReason,
     required VoidCallback? recommendedAction,
     required String recommendedActionLabel,
