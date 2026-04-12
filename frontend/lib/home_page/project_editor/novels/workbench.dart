@@ -290,172 +290,34 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
                           refreshWorkbench: refreshWorkbench,
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          '删除 / 生成事件',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: deleteNovelIdCtrl,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: '待删除章节 numeric ID',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton(
-                          onPressed: localBusy
-                              ? null
-                              : () => _runNovelWorkbenchAction(
-                                  ctx: ctx,
-                                  setDialogState: setDialogState,
-                                  setLocalState: setLocalState,
-                                  novelsBusy: novelsBusy,
-                                  setLocalBusy: setLocalBusy,
-                                  action: () => _deleteNovelWorkbenchChapter(
-                                    token: token,
-                                    project: p,
-                                    deleteNovelIdCtrl: deleteNovelIdCtrl,
-                                    refreshWorkbench: refreshWorkbench,
-                                    setLocalState: setLocalState,
-                                    applyInfoLine: updateInfoLine,
-                                  ),
-                                ),
-                          child: const Text('删除章节'),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: generateIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '生成事件章节 IDs',
-                            helperText: '用逗号分隔，如 1,2,3',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton.tonal(
-                          onPressed: localBusy
-                              ? null
-                              : () => _runNovelWorkbenchAction(
-                                  ctx: ctx,
-                                  setDialogState: setDialogState,
-                                  setLocalState: setLocalState,
-                                  novelsBusy: novelsBusy,
-                                  setLocalBusy: setLocalBusy,
-                                  action: () => _generateNovelWorkbenchEvents(
-                                    token: token,
-                                    project: p,
-                                    generateIdsCtrl: generateIdsCtrl,
-                                    refreshWorkbench: refreshWorkbench,
-                                    setLocalState: setLocalState,
-                                    applyInfoLine: updateInfoLine,
-                                  ),
-                                ),
-                          child: const Text('生成章节事件'),
+                        _buildNovelWorkbenchDeleteSection(
+                          ctx: dialogCtx,
+                          setDialogState: setDialogState,
+                          setLocalState: setLocalState,
+                          token: token,
+                          project: p,
+                          novelsBusy: novelsBusy,
+                          localBusy: localBusy,
+                          setLocalBusy: setLocalBusy,
+                          updateInfoLine: updateInfoLine,
+                          deleteNovelIdCtrl: deleteNovelIdCtrl,
+                          generateIdsCtrl: generateIdsCtrl,
+                          refreshWorkbench: refreshWorkbench,
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          '快照 / 批量动作',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: numericIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '查询章节 ID（numeric）',
-                            helperText:
-                                '用于 get-novel-event-state；用逗号分隔，如 1,2,3',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action: () => _readNovelWorkbenchData(
-                                        token: token,
-                                        project: p,
-                                        applyInfoLine: updateInfoLine,
-                                      ),
-                                    ),
-                              child: const Text('读取 get-novel-data'),
-                            ),
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action: () => _readNovelWorkbenchIndex(
-                                        token: token,
-                                        project: p,
-                                        applyInfoLine: updateInfoLine,
-                                      ),
-                                    ),
-                              child: const Text('读取 get-novel-index'),
-                            ),
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => _runNovelWorkbenchAction(
-                                      ctx: ctx,
-                                      setDialogState: setDialogState,
-                                      setLocalState: setLocalState,
-                                      novelsBusy: novelsBusy,
-                                      setLocalBusy: setLocalBusy,
-                                      action:
-                                          () => _readNovelWorkbenchEventStates(
-                                            token: token,
-                                            project: p,
-                                            numericIdsCtrl: numericIdsCtrl,
-                                            applyInfoLine: updateInfoLine,
-                                          ),
-                                    ),
-                              child: const Text('读取 event-state'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: batchDeleteIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '批量删除章节 IDs',
-                            helperText:
-                                '调用 workbench batch-delete；用逗号分隔，删除后会回刷工作台。',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton.tonal(
-                          onPressed: localBusy
-                              ? null
-                              : () => _runNovelWorkbenchAction(
-                                  ctx: ctx,
-                                  setDialogState: setDialogState,
-                                  setLocalState: setLocalState,
-                                  novelsBusy: novelsBusy,
-                                  setLocalBusy: setLocalBusy,
-                                  action:
-                                      () => _batchDeleteNovelWorkbenchChapters(
-                                        token: token,
-                                        project: p,
-                                        batchDeleteIdsCtrl: batchDeleteIdsCtrl,
-                                        refreshWorkbench: refreshWorkbench,
-                                        setLocalState: setLocalState,
-                                        applyInfoLine: updateInfoLine,
-                                      ),
-                                ),
-                          child: const Text('批量删除章节'),
+                        _buildNovelWorkbenchSnapshotSection(
+                          ctx: dialogCtx,
+                          setDialogState: setDialogState,
+                          setLocalState: setLocalState,
+                          token: token,
+                          project: p,
+                          novelsBusy: novelsBusy,
+                          localBusy: localBusy,
+                          setLocalBusy: setLocalBusy,
+                          updateInfoLine: updateInfoLine,
+                          numericIdsCtrl: numericIdsCtrl,
+                          batchDeleteIdsCtrl: batchDeleteIdsCtrl,
+                          refreshWorkbench: refreshWorkbench,
                         ),
                       ],
                     ),
