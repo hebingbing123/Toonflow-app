@@ -45,6 +45,8 @@ cargo run
 
 项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
+项目素材（**`app_asset`**）：**`GET`/`POST /api/v1/projects/{project_id}/assets`**（列表分页与筛选、创建）；**`GET`/`PATCH`/`DELETE …/assets/{asset_numeric_id}`**（**`asset_numeric_id`** = **`app_asset.numeric_id`**，与 OpenAPI 一致）。角景与图片子资源见 **`…/assets/corner-scape`**、**`…/assets/{asset_numeric_id}/images*`**。**旧 Electron 形 workbench**（nested 父子列表、image-bundle、clip 上传、material/batch-generation、polling、写删等）在 **`POST …/projects/{project_id}/assets/workbench/…`**；**无**顶层 **`POST /api/v1/assets/*`**。详见 [`docs/openapi.yaml`](../docs/openapi.yaml) 与 [`docs/plans/electron-node-parity.md`](../docs/plans/electron-node-parity.md)。
+
 画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`**（Bearer）— **`app_art_style`**（RLS）；**`numeric_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(numeric_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**；空数组或全空白项 **400**（先于 LLM 校验）；合法请求需 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
 
 新建剧本：**`POST /api/v1/projects/{project_id}/scripts`**（Bearer；**`project_id`** 为项目 UUID；JSON 体可选 `name` / `content` / `extract_state`）— 写入 **`app_script`**；**`numeric_id`** 在事务内用独立 **`pg_advisory_xact_lock`** + 全表 **`MAX(numeric_id)+1`**（与项目锁不同键）。父项目须为当前用户所有。
