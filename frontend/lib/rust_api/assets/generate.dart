@@ -82,6 +82,7 @@ Future<int> postAssetsGenerateBatchGenerateV1(
   required String resolution,
   required List<Map<String, dynamic>> items,
   int? concurrentCount,
+  int? scriptId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/assets-generate/batch-generate');
   final body = <String, dynamic>{
@@ -91,6 +92,7 @@ Future<int> postAssetsGenerateBatchGenerateV1(
     'items': items,
   };
   if (concurrentCount != null) body['concurrentCount'] = concurrentCount;
+  if (scriptId != null) body['scriptId'] = scriptId;
   final res = await http
       .post(
         uri,

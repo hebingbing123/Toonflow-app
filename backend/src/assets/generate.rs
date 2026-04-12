@@ -27,6 +27,7 @@ use crate::jobs::{
     enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE,
     JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
 };
+use crate::scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -85,6 +86,10 @@ struct BatchGenerateImageAssetsBody {
     project_id: i32,
     model: String,
     resolution: String,
+    /// When set, every **`items[].id`** must be an **`app_asset.numeric_id`** linked to this script
+    /// (**`app_script_asset`**) under the same owned **`project_id`** (numeric).
+    #[serde(default)]
+    script_id: Option<i32>,
     #[serde(default)]
     concurrent_count: Option<i32>,
     items: Vec<BatchGenItem>,
@@ -307,6 +312,46 @@ async fn post_polish_assets_prompt(
     Ok(JsonResponse(row))
 }
 
+async fn ensure_batch_asset_items_linked_to_script(
+    pool: &PgPool,
+    uid: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    asset_numeric_ids: &[i32],
+) -> Result<(), ApiError> {
+    let scope_row = scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let mut uniq: Vec<i32> = asset_numeric_ids.to_vec();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let linked: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT a.numeric_id)::bigint
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND a.numeric_id = ANY($4::int4[])
+        "#,
+    )
+    .bind(uid)
+    .bind(project_numeric_id)
+    .bind(scope_row.script_id)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if linked != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
+    Ok(())
+}
+
 async fn post_batch_generate_image_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -388,7 +433,24 @@ async fn post_batch_generate_image_assets(
 
     let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
 
-    let payload = json!({
+    if let Some(script_numeric_id) = body.script_id {
+        if script_numeric_id <= 0 {
+            return Err(ApiError::BadRequest(
+                "scriptId must be positive when provided".into(),
+            ));
+        }
+        let asset_ids: Vec<i32> = body.items.iter().map(|it| it.id).collect();
+        ensure_batch_asset_items_linked_to_script(
+            pool,
+            uid,
+            body.project_id,
+            script_numeric_id,
+            &asset_ids,
+        )
+        .await?;
+    }
+
+    let mut payload = json!({
         "source": "assets-generate.batch-generate",
         "project_numeric_id": body.project_id,
         "model": model,
@@ -396,6 +458,9 @@ async fn post_batch_generate_image_assets(
         "concurrent_count": body.concurrent_count,
         "items": items_json,
     });
+    if let Some(sid) = body.script_id {
+        payload["script_id"] = json!(sid);
+    }
 
     let row = enqueue_generation_job(pool, uid, JOB_KIND_ASSET_GENERATE_BATCH, payload).await?;
     Ok(JsonResponse(row))

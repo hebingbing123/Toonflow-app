@@ -4971,8 +4971,6 @@ paths:
       tags: [assets]
       summary: Batch-generate asset images (Electron `batchGenerateImageAssets` parity)
       operationId: postAssetsBatchGenerateV1
-      description: |
-        Bearer JWT. Validates Electron-era **`batchGenerateImageAssets`** body (non-empty **`items`**, at most **50** rows), enqueues **`asset.generate.batch`** with **`items`** metadata (including normalized optional **`image_base64`** per row). When **`OPENAI_API_KEY`/`LLM_API_KEY`** is set, the worker processes **`items`** sequentially ( **`concurrentCount`** is informational only), one image call (**`images/edits`** with reference image, else **`images/generations`**) + **`app_asset_image`** per row, and **`succeeded`** with **`result.items`** mirroring single-generate outcomes.
       security:
         - bearerAuth: []
       requestBody:
@@ -5001,7 +4999,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project not found for this user
+          description: Not found
           content:
             application/json:
               schema:
@@ -9243,6 +9241,10 @@ components:
         projectId:
           type: integer
           format: int32
+        scriptId:
+          type: integer
+          format: int32
+          nullable: true
         model:
           type: string
         resolution:

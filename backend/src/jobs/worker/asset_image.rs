@@ -336,6 +336,12 @@ async fn run_asset_generate_batch_items(
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing resolution".into()))?;
 
+    let optional_script_numeric_id = p
+        .get("script_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok())
+        .filter(|&n| n > 0);
+
     let image_model = resolve_openai_image_model(model_in);
     let size = resolve_openai_image_size(&image_model, resolution);
 
@@ -345,6 +351,7 @@ async fn run_asset_generate_batch_items(
         item_count = items.len(),
         image_model = %image_model,
         size = %size,
+        script_id = ?optional_script_numeric_id,
         "asset batch-generate: images API per item"
     );
 
@@ -371,6 +378,25 @@ async fn run_asset_generate_batch_items(
             .and_then(|x| x.as_i64())
             .and_then(|n| i32::try_from(n).ok())
             .ok_or_else(|| JobRunError::Failed("item missing asset_numeric_id".into()))?;
+
+        if let Some(sid) = optional_script_numeric_id {
+            resolve_owned_script_linked_asset_row_for_job(
+                pool,
+                row.owner_user_id,
+                project_numeric_id,
+                sid,
+                asset_numeric_id,
+            )
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?
+            .ok_or_else(|| {
+                JobRunError::Failed(
+                    "asset.generate.batch items: asset not linked to script (script_id in payload)"
+                        .into(),
+                )
+            })?;
+        }
+
         let name = item.get("name").and_then(|x| x.as_str()).unwrap_or("");
         let prompt = item
             .get("prompt")

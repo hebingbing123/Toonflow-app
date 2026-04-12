@@ -11,7 +11,8 @@ pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
 /// Batch / multiplex image work (**`POST …/assets-generate/batch-generate`** and production enqueue paths).
 /// Worker branches on **`payload`**: non-empty **`items`** → one image + **`app_asset_image`** per item
-/// (project-owned assets); **`source: production.assets.batch-generate`** → script-linked asset only
+/// (project-owned assets; optional positive **`script_id`** restricts each item to **`app_script_asset`**);
+/// **`source: production.assets.batch-generate`** → script-linked asset only
 /// (**`app_script_asset`**) then one **`app_asset_image`**; **`source: production.storyboard.batch-generate-image`**
 /// → owned storyboard row then **`images/generations`** + **`app_storyboard.file_path`**; **`source: production.edit-image.generate-flow`**
 /// → **`images/generations`** with result URL only (no DB row).
