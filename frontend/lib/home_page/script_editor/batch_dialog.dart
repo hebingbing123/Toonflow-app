@@ -38,6 +38,10 @@ class _StoryboardBatchWorkbenchDialogState
   String? _downloadUrl;
   String? _exportLine;
 
+  void _applyBatchWorkbenchState(VoidCallback action) {
+    setState(action);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -155,97 +159,6 @@ class _StoryboardBatchWorkbenchDialogState
     }
   }
 
-  Future<void> _runMutation(Future<void> Function() action) async {
-    widget.onMutationStart();
-    setState(() => _busyMutation = true);
-    try {
-      await action();
-    } on RustApiException catch (e) {
-      if (mounted) setState(() => _statusLine = '$e');
-    } catch (e) {
-      if (mounted) setState(() => _statusLine = '$e');
-    } finally {
-      if (mounted) setState(() => _busyMutation = false);
-      widget.onMutationEnd();
-    }
-  }
-
-  Future<void> _batchGenerate() async {
-    final productionMap = _productionById();
-    final selected = _sortedSelection();
-    final suffix = _promptSuffixCtrl.text.trim();
-    final negativePrompt = _negativePromptCtrl.text.trim();
-    final items = <BatchGenerateImageItem>[];
-    for (final numericId in selected) {
-      final scriptRow = _findScriptRow(numericId);
-      final prompt = resolveStoryboardGenerationPrompt(
-        scriptStoryboard: scriptRow,
-        productionStoryboard: productionMap[numericId],
-      );
-      if (prompt == null) continue;
-      final combinedPrompt = suffix.isEmpty ? prompt : '$prompt\n$suffix';
-      items.add(
-        BatchGenerateImageItem(
-          storyboardId: numericId,
-          prompt: combinedPrompt,
-          negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
-          model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
-          resolution: _resolutionCtrl.text.trim().isEmpty
-              ? null
-              : _resolutionCtrl.text.trim(),
-        ),
-      );
-    }
-    if (items.isEmpty) {
-      throw const FormatException('所选分镜没有可用提示词，无法发起批量出图');
-    }
-    final response = await postStoryboardBatchGenerateImageV1(
-      widget.token,
-      projectId: widget.projectNumericId,
-      scriptId: widget.scriptNumericId,
-      items: items,
-      model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
-      resolution: _resolutionCtrl.text.trim().isEmpty
-          ? null
-          : _resolutionCtrl.text.trim(),
-    );
-    await _refreshProduction();
-    if (mounted) {
-      setState(() {
-        _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-          actionSummary:
-              '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
-          diagnosis: _currentDiagnosis(),
-        );
-      });
-    }
-  }
-
-  void _selectReadyStoryboards() {
-    final productionMap = _productionById();
-    setState(() {
-      _selectedIds
-        ..clear()
-        ..addAll(
-          widget.boardsList
-              .where(
-                (row) =>
-                    resolveStoryboardGenerationPrompt(
-                      scriptStoryboard: row,
-                      productionStoryboard: productionMap[row.numericId],
-                    ) !=
-                    null,
-              )
-              .map((row) => row.numericId),
-        );
-      _clearSelectionScopedOutputs();
-      _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-        actionSummary: '已选择全部可直接出图的分镜。',
-        diagnosis: _currentDiagnosis(),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final productionMap = _productionById();
@@ -283,23 +196,7 @@ class _StoryboardBatchWorkbenchDialogState
       case StoryboardBatchWorkbenchRecommendedAction.previewSelected:
         recommendedAction = _busyMutation || singleSelectedId == null
             ? null
-            : () => _runMutation(() async {
-                final preview = await postStoryboardPreviewImageV1(
-                  widget.token,
-                  storyboardId: singleSelectedId,
-                );
-                if (mounted) {
-                  setState(() {
-                    _previewUrl = preview.imageUrl;
-                    _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                      actionSummary: preview.imageUrl == null
-                          ? '当前分镜还没有预览图。'
-                          : '已读取分镜 #$singleSelectedId 的当前预览。',
-                      diagnosis: _currentDiagnosis(),
-                    );
-                  });
-                }
-              });
+            : () => _runMutation(() => _loadCurrentPreview(singleSelectedId));
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
               diagnosis.recommendedAction,
@@ -307,24 +204,7 @@ class _StoryboardBatchWorkbenchDialogState
       case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
         recommendedAction = _busyMutation || _selectedIds.isEmpty
             ? null
-            : () => _runMutation(() async {
-                final zip = await fetchProductionExportImageZipV1(
-                  widget.token,
-                  shotId: selected
-                      .map((id) => <String, dynamic>{'id': '$id'})
-                      .toList(growable: false),
-                );
-                if (mounted) {
-                  setState(() {
-                    _exportLine =
-                        '已导出 ${selected.length} 张分镜图片，文件 ${zip.filename ?? "storyboards.zip"}，大小 ${zip.bytes.length} bytes';
-                    _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                      actionSummary: _exportLine!,
-                      diagnosis: _currentDiagnosis(),
-                    );
-                  });
-                }
-              });
+            : () => _runMutation(() => _exportSelectedZip(selected));
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
               diagnosis.recommendedAction,
@@ -447,19 +327,7 @@ class _StoryboardBatchWorkbenchDialogState
           child: const Text('全选可出图分镜'),
         ),
         TextButton(
-          onPressed: _busyMutation
-              ? null
-              : () {
-                  setState(() {
-                    _selectedIds.clear();
-                    _clearSelectionScopedOutputs();
-                    _exportLine = null;
-                    _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                      actionSummary: '已清空选择。',
-                      diagnosis: _currentDiagnosis(),
-                    );
-                  });
-                },
+          onPressed: _busyMutation ? null : _clearSelection,
           child: const Text('清空选择'),
         ),
       ],
@@ -527,68 +395,19 @@ class _StoryboardBatchWorkbenchDialogState
         TextButton(
           onPressed: _busyMutation || singleSelectedId == null
               ? null
-              : () => _runMutation(() async {
-                  final preview = await postStoryboardPreviewImageV1(
-                    widget.token,
-                    storyboardId: singleSelectedId,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _previewUrl = preview.imageUrl;
-                      _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                        actionSummary: preview.imageUrl == null
-                            ? '当前分镜还没有预览图。'
-                            : '已读取分镜 #$singleSelectedId 的当前预览。',
-                        diagnosis: _currentDiagnosis(),
-                      );
-                    });
-                  }
-                }),
+              : () => _runMutation(() => _loadCurrentPreview(singleSelectedId)),
           child: const Text('读取当前预览'),
         ),
         TextButton(
           onPressed: _busyMutation || singleSelectedId == null
               ? null
-              : () => _runMutation(() async {
-                  final preview = await postStoryboardDownPreviewImageV1(
-                    widget.token,
-                    storyboardId: singleSelectedId,
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _downloadUrl = preview.previewUrl;
-                      _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                        actionSummary: preview.previewUrl == null
-                            ? preview.message
-                            : '已生成分镜 #$singleSelectedId 的下载链接。',
-                        diagnosis: _currentDiagnosis(),
-                      );
-                    });
-                  }
-                }),
+              : () => _runMutation(() => _loadDownloadUrl(singleSelectedId)),
           child: const Text('读取下载链接'),
         ),
         TextButton(
           onPressed: _busyMutation || _selectedIds.isEmpty
               ? null
-              : () => _runMutation(() async {
-                  final zip = await fetchProductionExportImageZipV1(
-                    widget.token,
-                    shotId: selected
-                        .map((id) => <String, dynamic>{'id': '$id'})
-                        .toList(growable: false),
-                  );
-                  if (mounted) {
-                    setState(() {
-                      _exportLine =
-                          '已导出 ${selected.length} 张分镜图片，文件 ${zip.filename ?? "storyboards.zip"}，大小 ${zip.bytes.length} bytes';
-                      _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-                        actionSummary: _exportLine!,
-                        diagnosis: _currentDiagnosis(),
-                      );
-                    });
-                  }
-                }),
+              : () => _runMutation(() => _exportSelectedZip(selected)),
           child: const Text('导出所选 ZIP'),
         ),
       ],
