@@ -1,4 +1,4 @@
-part of 'production.dart';
+part of '../production.dart';
 
 /// `POST /api/v1/production/assets/batch-generate-assets-image` — OpenAPI `postAssetsBatchGenerateAssetsImageV1`.
 Future<BatchGenerateAssetsImageResponseV1>

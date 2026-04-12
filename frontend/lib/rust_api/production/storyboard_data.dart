@@ -1,4 +1,4 @@
-part of 'production.dart';
+part of '../production.dart';
 
 /// `POST /api/v1/production/storyboard/add` — OpenAPI `postStoryboardAddV1`.
 Future<StoryboardAddResponse> postStoryboardAddV1(

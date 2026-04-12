@@ -1,4 +1,4 @@
-part of 'production.dart';
+part of '../production.dart';
 
 class UpdateStoryboardUrlResponseV1 {
   const UpdateStoryboardUrlResponseV1({
