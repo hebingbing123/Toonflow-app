@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// OpenAPI **`DirectorManualDataSlot`** (also used for visual manual POST bodies).
 class DirectorManualDataSlot {
