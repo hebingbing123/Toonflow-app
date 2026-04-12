@@ -30,6 +30,7 @@ part 'project/overview.dart';
 part 'project/manuals.dart';
 part 'project/manuals_director.dart';
 part 'project/manuals_visual.dart';
+part 'project/visual_manual.dart';
 part 'system/prompts.dart';
 part 'project/rest.dart';
 part 'project/compat.dart';
@@ -51,7 +52,6 @@ part 'scripts/storyboards_api.dart';
 part 'system/status.dart';
 part 'tasks_center_rest.dart';
 part 'system/usage.dart';
-part 'visual_manual_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Visual manual fetch endpoints grouped under the project creative-manual subdomain.
 /// `GET /api/v1/visual-manual` — OpenAPI `getVisualManualV1`.
 Future<VisualManualResponseV1> fetchVisualManualV1(String accessToken) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/visual-manual');
