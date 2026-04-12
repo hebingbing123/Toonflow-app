@@ -268,221 +268,45 @@ class _TaskCenterWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline;
     final projectSummary = summarizeTaskProjects(_projects);
     final jobSummary = _jobs.isEmpty
         ? (_taskSummary ?? '当前没有任务记录')
         : summarizeTaskJobs(_jobs);
-    return AlertDialog(
-      title: const Text('任务工作台'),
-      content: SizedBox(
-        width: 760,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '在一个对话框内完成任务项目/分类读取、按项目或分类筛选列表，以及按 numeric task id 或 UUID 查看详情。',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 12),
-              Text('筛选与列表', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: _loadingProjects ? null : _loadProjects,
-                    child: Text(_loadingProjects ? '…' : '刷新任务项目'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingCategories ? null : _loadCategories,
-                    child: Text(_loadingCategories ? '…' : '刷新任务分类'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: _loadingTasks ? null : _loadTasks,
-                    child: Text(_loadingTasks ? '…' : '按筛选加载任务'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                projectSummary,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              if (_categoriesSummary != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  _categoriesSummary!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
-                ),
-              ],
-              const SizedBox(height: 4),
-              Text(
-                jobSummary,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _pageCtrl,
-                      decoration: const InputDecoration(labelText: '页码'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _limitCtrl,
-                      decoration: const InputDecoration(labelText: '每页数量'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _projectIdCtrl,
-                      decoration: const InputDecoration(
-                        labelText: '项目 numeric ID（可空）',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _taskClassCtrl,
-                      decoration: const InputDecoration(labelText: '任务分类（可空）'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _stateCtrl,
-                decoration: const InputDecoration(labelText: '任务状态（可空）'),
-              ),
-              if (_categories.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _categories
-                      .take(6)
-                      .map(
-                        (row) => ActionChip(
-                          label: Text(row.taskClass),
-                          onPressed: () => setState(
-                            () => _taskClassCtrl.text = row.taskClass,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              ],
-              if (_jobs.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '${_jobs.length} 条任务',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                ..._jobs
-                    .take(8)
-                    .map(
-                      (job) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text('${job.kind} · ${job.status}'),
-                        subtitle: Text('#${job.numericTaskId} · ${job.id}'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          setState(() {
-                            _numericTaskIdCtrl.text = job.numericTaskId
-                                .toString();
-                            _uuidCtrl.text = job.id;
-                          });
-                        },
-                      ),
-                    ),
-              ],
-              const SizedBox(height: 12),
-              Text('任务详情', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _numericTaskIdCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'numeric task id',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.tonal(
-                    onPressed: _loadingNumericIdTaskDetail
-                        ? null
-                        : _loadNumericIdTaskDetail,
-                    child: Text(_loadingNumericIdTaskDetail ? '…' : '读取任务详情（numeric ID）'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _uuidCtrl,
-                      decoration: const InputDecoration(labelText: '任务 UUID'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.tonal(
-                    onPressed: _loadingUuidDetails ? null : _loadUuidDetails,
-                    child: Text(_loadingUuidDetails ? '…' : '读取 UUID 详情'),
-                  ),
-                ],
-              ),
-              if (_numericIdTaskDetailText != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('任务详情（numeric ID）：$_numericIdTaskDetailText'),
-              ],
-              if (_uuidDetails != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('UUID 详情：$_uuidDetails'),
-              ],
-              if (_statusLine != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _statusLine!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
-      ],
+    return _buildTaskCenterWorkbenchDialogView(
+      context: context,
+      projectSummary: projectSummary,
+      jobSummary: jobSummary,
+      pageCtrl: _pageCtrl,
+      limitCtrl: _limitCtrl,
+      stateCtrl: _stateCtrl,
+      taskClassCtrl: _taskClassCtrl,
+      projectIdCtrl: _projectIdCtrl,
+      numericTaskIdCtrl: _numericTaskIdCtrl,
+      uuidCtrl: _uuidCtrl,
+      categories: _categories,
+      jobs: _jobs,
+      categoriesSummary: _categoriesSummary,
+      numericIdTaskDetailText: _numericIdTaskDetailText,
+      uuidDetails: _uuidDetails,
+      statusLine: _statusLine,
+      loadingProjects: _loadingProjects,
+      loadingCategories: _loadingCategories,
+      loadingTasks: _loadingTasks,
+      loadingNumericIdTaskDetail: _loadingNumericIdTaskDetail,
+      loadingUuidDetails: _loadingUuidDetails,
+      onLoadProjects: _loadProjects,
+      onLoadCategories: _loadCategories,
+      onLoadTasks: _loadTasks,
+      onLoadNumericIdTaskDetail: _loadNumericIdTaskDetail,
+      onLoadUuidDetails: _loadUuidDetails,
+      onPickCategory: (value) => setState(() => _taskClassCtrl.text = value),
+      onPickJob: (job) {
+        setState(() {
+          _numericTaskIdCtrl.text = job.numericTaskId.toString();
+          _uuidCtrl.text = job.id;
+        });
+      },
+      onClose: () => Navigator.of(context).pop(),
     );
   }
 }

@@ -5,6 +5,7 @@ import '../../rust_api.dart';
 import 'support.dart';
 
 part 'workbench.dart';
+part 'workbench_view.dart';
 
 class TaskCenterSection extends StatelessWidget {
   const TaskCenterSection({
