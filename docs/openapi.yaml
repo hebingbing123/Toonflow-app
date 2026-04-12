@@ -10,6 +10,7 @@ info:
     WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in **`docs/websocket-events.md`** (also linked from `externalDocs` above); optional query `access_token`.
 
     **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `isolated.echo`, `skills.read`, `wasm.probe`). **Agent loop:** **`harness.agent.run`** drives multi-round OpenAI tool calling over the same tool surface (requires LLM env + channel attach) — see **`docs/websocket-events.md`** for envelopes and `error.occurred` codes (`wasm_failed`, `isolation_failed`, etc.).
+    **Harness `add_deriveAsset`:** Parent **`arguments.assetsId`** must be linked to the active script (**`app_script_asset`**) — see **`docs/websocket-events.md`** (section **Production `add_deriveAsset`**).
 
     **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — verify **`X-Toonflow-Signature: sha256=<hex>`** as HMAC-SHA256(raw body, `BILLING_WEBHOOK_SECRET`). Body must be JSON with string **`id`** (dedupe key). Returns **`received`** + **`duplicate`** when replayed. **Not** JWT-authenticated; configure secret in production. **Not** in the per-IP rate-limit bucket (same as `/health`).
 
@@ -7397,7 +7398,7 @@ paths:
   /api/v1/harness/tools:
     get:
       tags: [harness]
-      summary: List registered Harness tools (name and description; dispatch still WIP)
+      summary: List registered Harness tools (name and description; see docs/websocket-events.md for invoke semantics e.g. add_deriveAsset)
       operationId: listHarnessToolsV1
       security:
         - bearerAuth: []
