@@ -1,7 +1,6 @@
 part of '../../../../home_page.dart';
 
-extension _HomePageProjectEditorNovelEventsWorkbenchDialog
-    on _HomePageState {
+extension _HomePageProjectEditorNovelEventsWorkbenchDialog on _HomePageState {
   /// 事件工作台负责搜索、创建、更新和删除事件，避免 section 混入完整表单流。
   Future<void> _openNovelEventsWorkbenchDialog({
     required BuildContext ctx,
@@ -115,309 +114,135 @@ extension _HomePageProjectEditorNovelEventsWorkbenchDialog
                 }
               }
 
-              return AlertDialog(
-                title: const Text('事件工作台'),
-                content: SizedBox(
-                  width: 760,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          infoLine,
-                          style: Theme.of(dialogCtx).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 8),
-                        if (previewRows.isNotEmpty)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Theme.of(
-                                  dialogCtx,
-                                ).colorScheme.outlineVariant,
+              return _buildNovelEventsWorkbenchDialogView(
+                dialogCtx: dialogCtx,
+                infoLine: infoLine,
+                previewRows: previewRows,
+                localBusy: localBusy,
+                searchCtrl: searchCtrl,
+                createNameCtrl: createNameCtrl,
+                createDetailCtrl: createDetailCtrl,
+                createChapterIdsCtrl: createChapterIdsCtrl,
+                selectedEventIdCtrl: selectedEventIdCtrl,
+                patchNameCtrl: patchNameCtrl,
+                patchDetailCtrl: patchDetailCtrl,
+                patchChapterIdsCtrl: patchChapterIdsCtrl,
+                batchDeleteIdsCtrl: batchDeleteIdsCtrl,
+                onSearch: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        final rows = await fetchProjectNovelEventsByProjectId(
+                          token,
+                          p.id,
+                          search: searchCtrl.text.trim(),
+                          page: 1,
+                          limit: 10,
+                        );
+                        final workbenchPage = await fetchNovelEventsPaged(
+                          token,
+                          p.numericId,
+                          page: 1,
+                          limit: 10,
+                          search: searchCtrl.text.trim(),
+                        );
+                        setLocalState(() {
+                          previewRows = List<NovelEventRow>.from(rows.items);
+                          infoLine =
+                              'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
+                        });
+                      }),
+                onRefresh: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        await refreshWorkbench(setLocalState);
+                      }),
+                onCreate: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        final created =
+                            await createProjectNovelEventUnderProject(
+                              token,
+                              p.id,
+                              name: createNameCtrl.text.trim(),
+                              detail: createDetailCtrl.text.trim(),
+                              chapterIds: _parseNumericIdList(
+                                createChapterIdsCtrl.text,
                               ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '当前事件预览',
-                                  style: Theme.of(
-                                    dialogCtx,
-                                  ).textTheme.labelLarge,
+                            );
+                        await refreshWorkbench(setLocalState);
+                        setLocalState(() {
+                          final numericId = (created['id'] as num?)?.toInt();
+                          infoLine = numericId == null
+                              ? '已新增事件。'
+                              : '已新增事件 #$numericId。';
+                          if (numericId != null) {
+                            selectedEventIdCtrl.text = numericId.toString();
+                          }
+                          patchNameCtrl.text = createNameCtrl.text.trim();
+                          patchDetailCtrl.text = createDetailCtrl.text.trim();
+                          patchChapterIdsCtrl.text = createChapterIdsCtrl.text
+                              .trim();
+                        });
+                      }),
+                onSave: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        final eventId = int.parse(
+                          selectedEventIdCtrl.text.trim(),
+                        );
+                        final message =
+                            await patchProjectNovelEventByProjectIds(
+                              token,
+                              p.id,
+                              eventId,
+                              {
+                                'name': patchNameCtrl.text.trim(),
+                                'detail': patchDetailCtrl.text.trim(),
+                                'chapterIds': _parseNumericIdList(
+                                  patchChapterIdsCtrl.text,
                                 ),
-                                const SizedBox(height: 8),
-                                ...previewRows.map(
-                                  (row) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 6),
-                                    child: Text(
-                                      '#${row.numericId} · ${row.name} · 章节索引 ${row.chapterIndexes.join('/')}',
-                                      style: Theme.of(
-                                        dialogCtx,
-                                      ).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: searchCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '搜索事件关键字',
-                            helperText: '同时调用 REST 与 workbench get-events 搜索',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            FilledButton.tonal(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => runAction(() async {
-                                      final rows =
-                                          await fetchProjectNovelEventsByProjectId(
-                                            token,
-                                            p.id,
-                                            search: searchCtrl.text.trim(),
-                                            page: 1,
-                                            limit: 10,
-                                          );
-                                      final workbenchPage =
-                                          await fetchNovelEventsPaged(
-                                            token,
-                                            p.numericId,
-                                            page: 1,
-                                            limit: 10,
-                                            search: searchCtrl.text.trim(),
-                                          );
-                                      setLocalState(() {
-                                        previewRows = List<NovelEventRow>.from(
-                                          rows.items,
-                                        );
-                                        infoLine =
-                                            'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
-                                      });
-                                    }),
-                              child: const Text('搜索事件'),
-                            ),
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => runAction(() async {
-                                      await refreshWorkbench(setLocalState);
-                                    }),
-                              child: const Text('刷新列表'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '新增事件',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: createNameCtrl,
-                          decoration: const InputDecoration(labelText: '事件名称'),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: createDetailCtrl,
-                          minLines: 3,
-                          maxLines: 5,
-                          decoration: const InputDecoration(labelText: '事件描述'),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: createChapterIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '关联章节 IDs',
-                            helperText: '用逗号分隔，按章节 numeric ID 填写',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: localBusy
-                              ? null
-                              : () => runAction(() async {
-                                  final created =
-                                      await createProjectNovelEventUnderProject(
-                                        token,
-                                        p.id,
-                                        name: createNameCtrl.text.trim(),
-                                        detail: createDetailCtrl.text.trim(),
-                                        chapterIds: _parseNumericIdList(
-                                          createChapterIdsCtrl.text,
-                                        ),
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    final numericId = (created['id'] as num?)
-                                        ?.toInt();
-                                    infoLine = numericId == null
-                                        ? '已新增事件。'
-                                        : '已新增事件 #$numericId。';
-                                    if (numericId != null) {
-                                      selectedEventIdCtrl.text = numericId
-                                          .toString();
-                                    }
-                                    patchNameCtrl.text = createNameCtrl.text
-                                        .trim();
-                                    patchDetailCtrl.text = createDetailCtrl.text
-                                        .trim();
-                                    patchChapterIdsCtrl.text =
-                                        createChapterIdsCtrl.text.trim();
-                                  });
-                                }),
-                          child: const Text('新增事件'),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '更新事件',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: selectedEventIdCtrl,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: '事件 numeric ID',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: patchNameCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '更新后的事件名称',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: patchDetailCtrl,
-                          minLines: 3,
-                          maxLines: 5,
-                          decoration: const InputDecoration(
-                            labelText: '更新后的事件描述',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: patchChapterIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '更新后的章节 IDs',
-                            helperText: '按章节 numeric ID 填写；内部会映射为 chapterIds',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton.tonal(
-                          onPressed: localBusy
-                              ? null
-                              : () => runAction(() async {
-                                  final eventId = int.parse(
-                                    selectedEventIdCtrl.text.trim(),
-                                  );
-                                  final message =
-                                      await patchProjectNovelEventByProjectIds(
-                                        token,
-                                        p.id,
-                                        eventId,
-                                        {
-                                          'name': patchNameCtrl.text.trim(),
-                                          'detail': patchDetailCtrl.text.trim(),
-                                          'chapterIds': _parseNumericIdList(
-                                            patchChapterIdsCtrl.text,
-                                          ),
-                                        },
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine = '已更新事件 #$eventId：$message';
-                                  });
-                                }),
-                          child: const Text('保存事件'),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '删除 / 批量删除',
-                          style: Theme.of(dialogCtx).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton(
-                              onPressed: localBusy
-                                  ? null
-                                  : () => runAction(() async {
-                                      final eventId = int.parse(
-                                        selectedEventIdCtrl.text.trim(),
-                                      );
-                                      final message =
-                                          await deleteProjectNovelEventByProjectIds(
-                                            token,
-                                            p.id,
-                                            eventId,
-                                          );
-                                      await refreshWorkbench(setLocalState);
-                                      setLocalState(() {
-                                        infoLine = '已删除事件 #$eventId：$message';
-                                      });
-                                    }),
-                              child: const Text('删除当前事件'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: batchDeleteIdsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '批量删除事件 IDs',
-                            helperText: 'POST …/projects/{uuid}/novel-events/batch-delete；用逗号分隔',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton.tonal(
-                          onPressed: localBusy
-                              ? null
-                              : () => runAction(() async {
-                                  final ids = _parseNumericIdList(
-                                    batchDeleteIdsCtrl.text,
-                                  );
-                                  final message =
-                                      await postProjectNovelEventsBatchDeleteByProjectId(
-                                        token,
-                                        p.id,
-                                        ids,
-                                      );
-                                  await refreshWorkbench(setLocalState);
-                                  setLocalState(() {
-                                    infoLine =
-                                        '已批量删除 ${ids.length} 条事件：$message';
-                                  });
-                                }),
-                          child: const Text('批量删除事件'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: localBusy
-                        ? null
-                        : () => Navigator.of(dialogCtx).pop(),
-                    child: const Text('关闭'),
-                  ),
-                ],
+                              },
+                            );
+                        await refreshWorkbench(setLocalState);
+                        setLocalState(() {
+                          infoLine = '已更新事件 #$eventId：$message';
+                        });
+                      }),
+                onDeleteCurrent: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        final eventId = int.parse(
+                          selectedEventIdCtrl.text.trim(),
+                        );
+                        final message =
+                            await deleteProjectNovelEventByProjectIds(
+                              token,
+                              p.id,
+                              eventId,
+                            );
+                        await refreshWorkbench(setLocalState);
+                        setLocalState(() {
+                          infoLine = '已删除事件 #$eventId：$message';
+                        });
+                      }),
+                onBatchDelete: localBusy
+                    ? null
+                    : () => runAction(() async {
+                        final ids = _parseNumericIdList(
+                          batchDeleteIdsCtrl.text,
+                        );
+                        final message =
+                            await postProjectNovelEventsBatchDeleteByProjectId(
+                              token,
+                              p.id,
+                              ids,
+                            );
+                        await refreshWorkbench(setLocalState);
+                        setLocalState(() {
+                          infoLine = '已批量删除 ${ids.length} 条事件：$message';
+                        });
+                      }),
+                onClose: localBusy ? null : () => Navigator.of(dialogCtx).pop(),
               );
             },
           );
