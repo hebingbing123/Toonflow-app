@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Skills catalog models and CRUD-style content endpoints.
 class SkillFileMeta {
   const SkillFileMeta({required this.path, required this.sizeBytes});
 

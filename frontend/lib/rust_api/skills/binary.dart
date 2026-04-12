@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Binary fetch helpers for skill assets under `data/skills`.
 /// Builds `GET /api/v1/skills/binary?path=` — OpenAPI `getSkillBinaryV1` (JWT on the request).
 Uri skillsBinaryV1Uri(String pathUnderDataSkills) {
   return Uri.parse(
