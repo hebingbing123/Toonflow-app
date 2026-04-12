@@ -7,6 +7,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final getData = await postProductionGetProductionDataV1(
       token,
+      projectId: 1,
+      scriptId: 1,
       storyboardIds: const [1],
     );
     _expectProbeStatus(
@@ -63,6 +65,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final storyboardPoll = await postProductionStoryboardPollingImageV1(
       token,
+      projectId: 1,
+      scriptId: 1,
       ids: const [1],
     );
     _expectProbeStatus(
@@ -74,6 +78,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
 
     final exportImage = await postProductionExportImageV1(
       token,
+      projectId: 1,
+      scriptId: 1,
       shotId: const [
         {'id': '1'},
       ],

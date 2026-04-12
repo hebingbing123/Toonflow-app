@@ -150,6 +150,8 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _exportSelectedZip(List<int> selected) async {
     final zip = await fetchProductionExportImageZipV1(
       widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
       shotId: selected
           .map((id) => <String, dynamic>{'id': '$id'})
           .toList(growable: false),

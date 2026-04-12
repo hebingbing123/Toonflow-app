@@ -47,7 +47,7 @@ async fn production_storyboard_polling_image_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/storyboard/polling-image",
         &token,
-        r#"{"ids":[1]}"#,
+        r#"{"projectId":1,"scriptId":1,"ids":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -60,7 +60,7 @@ async fn production_export_image_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/export-image",
         &token,
-        r#"{"shotId":[{"id":"1"}]}"#,
+        r#"{"projectId":1,"scriptId":1,"shotId":[{"id":"1"}]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

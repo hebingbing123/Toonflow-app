@@ -17,10 +17,21 @@ use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH}
 use crate::scope;
 use crate::state::AppState;
 
+fn require_positive_project_script_ids(project_id: i32, script_id: i32) -> Result<(), ApiError> {
+    if project_id <= 0 || script_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and scriptId must be positive integers".into(),
+        ));
+    }
+    Ok(())
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct StoryboardIdListBody {
+    pub(in crate::production) project_id: i32,
+    pub(in crate::production) script_id: i32,
     pub(in crate::production) ids: Vec<i32>,
 }
 
@@ -49,18 +60,18 @@ pub(crate) struct ProductionGetProductionDataResponse {
     pub(crate) data: Vec<ProductionStoryboardItem>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ExportImageShotRef {
-    id: String,
+pub(in crate::production) struct ExportImageShotRef {
+    pub(in crate::production) id: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct ExportImageBody {
-    shot_id: Vec<ExportImageShotRef>,
+    pub(in crate::production) project_id: i32,
+    pub(in crate::production) script_id: i32,
+    pub(in crate::production) shot_id: Vec<ExportImageShotRef>,
 }
 
 #[derive(Debug, FromRow)]
@@ -107,6 +118,7 @@ pub(in crate::production) async fn post_get_production_data(
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    require_positive_project_script_ids(body.project_id, body.script_id)?;
     if body.ids.is_empty() {
         return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
     }
@@ -118,6 +130,10 @@ pub(in crate::production) async fn post_get_production_data(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
@@ -132,14 +148,12 @@ pub(in crate::production) async fn post_get_production_data(
           sb.flow_id,
           sb.sb_index
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
         ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .bind(&body.ids)
     .fetch_all(pool)
     .await
@@ -154,6 +168,7 @@ pub(in crate::production) async fn post_storyboard_polling_image(
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    require_positive_project_script_ids(body.project_id, body.script_id)?;
     if body.ids.is_empty() {
         return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
     }
@@ -166,21 +181,23 @@ pub(in crate::production) async fn post_storyboard_polling_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let mut uniq = body.ids.clone();
     uniq.sort_unstable();
     uniq.dedup();
 
     let owned_count = sqlx::query_scalar::<_, i64>(
         r#"
-        SELECT COUNT(DISTINCT sb.numeric_id)
+        SELECT COUNT(*)::bigint
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .bind(&uniq)
     .fetch_one(pool)
     .await
@@ -199,6 +216,7 @@ pub(in crate::production) async fn post_export_image(
     Json(body): Json<ExportImageBody>,
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    require_positive_project_script_ids(body.project_id, body.script_id)?;
     if body.shot_id.is_empty() {
         return Err(ApiError::BadRequest(
             "shotId must be a non-empty array".into(),
@@ -224,20 +242,22 @@ pub(in crate::production) async fn post_export_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     uniq.sort_unstable();
     uniq.dedup();
 
     let owned_count = sqlx::query_scalar::<_, i64>(
         r#"
-        SELECT COUNT(DISTINCT sb.numeric_id)
+        SELECT COUNT(*)::bigint
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .bind(&uniq)
     .fetch_one(pool)
     .await
@@ -251,14 +271,12 @@ pub(in crate::production) async fn post_export_image(
         r#"
         SELECT sb.numeric_id, sb.file_path
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
+        WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
         ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
-    .bind(uid)
+    .bind(scope_row.script_id)
     .bind(&uniq)
     .fetch_all(pool)
     .await
@@ -529,13 +547,18 @@ mod tests {
 
     #[test]
     fn storyboard_id_list_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<StoryboardIdListBody>(r#"{"ids":[1,2],"extra":1}"#);
+        let err = serde_json::from_str::<StoryboardIdListBody>(
+            r#"{"projectId":1,"scriptId":1,"ids":[1,2],"extra":1}"#,
+        );
         assert!(err.is_err());
     }
 
     #[test]
     fn storyboard_id_list_body_accepts_valid() {
-        let b: StoryboardIdListBody = serde_json::from_str(r#"{"ids":[1,2,3]}"#).unwrap();
+        let b: StoryboardIdListBody =
+            serde_json::from_str(r#"{"projectId":9,"scriptId":3,"ids":[1,2,3]}"#).unwrap();
+        assert_eq!(b.project_id, 9);
+        assert_eq!(b.script_id, 3);
         assert_eq!(b.ids, vec![1, 2, 3]);
     }
 
@@ -553,14 +576,20 @@ mod tests {
 
     #[test]
     fn export_image_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<ExportImageBody>(r#"{"shotId":[{"id":"1"}],"extra":1}"#);
+        let err = serde_json::from_str::<ExportImageBody>(
+            r#"{"projectId":1,"scriptId":1,"shotId":[{"id":"1"}],"extra":1}"#,
+        );
         assert!(err.is_err());
     }
 
     #[test]
     fn export_image_body_accepts_valid() {
-        let b: ExportImageBody =
-            serde_json::from_str(r#"{"shotId":[{"id":"1"},{"id":"2"}]}"#).unwrap();
+        let b: ExportImageBody = serde_json::from_str(
+            r#"{"projectId":7,"scriptId":2,"shotId":[{"id":"1"},{"id":"2"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, 7);
+        assert_eq!(b.script_id, 2);
         assert_eq!(b.shot_id.len(), 2);
         assert_eq!(b.shot_id[0].id, "1");
     }

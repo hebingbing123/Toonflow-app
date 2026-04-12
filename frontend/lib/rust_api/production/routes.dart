@@ -9,6 +9,8 @@ class ProductionExportZipResponse {
 
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required List<int> storyboardIds,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-production-data');
@@ -19,7 +21,11 @@ Future<int> postProductionGetProductionDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'ids': storyboardIds}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'ids': storyboardIds,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -146,6 +152,8 @@ Future<int> postProductionWorkbenchGenerateVideoV1(
 /// (implemented; returns **200** or **404** / **503** when DB-gated).
 Future<int> postProductionStoryboardPollingImageV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required List<int> ids,
 }) async {
   final uri = Uri.parse(
@@ -158,7 +166,11 @@ Future<int> postProductionStoryboardPollingImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'ids': ids}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'ids': ids,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -168,6 +180,8 @@ Future<int> postProductionStoryboardPollingImageV1(
 /// Returns a ZIP attachment on **200**; this helper currently exposes status-only probing.
 Future<int> postProductionExportImageV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required List<Map<String, dynamic>> shotId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
@@ -178,7 +192,11 @@ Future<int> postProductionExportImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'shotId': shotId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'shotId': shotId,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -187,6 +205,8 @@ Future<int> postProductionExportImageV1(
 /// `POST /api/v1/production/export-image` — fetches the ZIP attachment body.
 Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required List<Map<String, dynamic>> shotId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
@@ -197,7 +217,11 @@ Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'shotId': shotId}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'shotId': shotId,
+        }),
       )
       .timeout(const Duration(seconds: 120));
   if (res.statusCode != 200) {

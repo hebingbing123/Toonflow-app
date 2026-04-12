@@ -68,7 +68,9 @@ async fn production_endpoints_minimal_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(r#"{"ids":[]}"#))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[]}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -152,7 +154,9 @@ async fn production_endpoints_minimal_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(r#"{"ids":[]}"#))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[]}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -170,7 +174,9 @@ async fn production_endpoints_minimal_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(r#"{"shotId":[]}"#))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"shotId":[]}}"#
+                )))
                 .unwrap(),
         )
         .await

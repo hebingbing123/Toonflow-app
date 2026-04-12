@@ -119,7 +119,9 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[{storyboard_id}]}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -308,7 +310,9 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[{storyboard_id}]}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -329,7 +333,7 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"shotId":[{{"id":"{storyboard_id}"}}]}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"shotId":[{{"id":"{storyboard_id}"}}]}}"#
                 )))
                 .unwrap(),
         )
@@ -511,7 +515,9 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[{storyboard_id}]}}"#
+                )))
                 .unwrap(),
         )
         .await
@@ -610,7 +616,9 @@ async fn production_workbench_video_roundtrip() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(format!(r#"{{"ids":[{storyboard_id}]}}"#)))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"ids":[{storyboard_id}]}}"#
+                )))
                 .unwrap(),
         )
         .await
