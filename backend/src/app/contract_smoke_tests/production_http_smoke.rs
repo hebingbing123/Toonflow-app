@@ -112,7 +112,7 @@ async fn production_assets_polling_image_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/assets/polling-image",
         &token,
-        r#"{"projectId":1,"assetIds":[1]}"#,
+        r#"{"projectId":1,"scriptId":1,"assetIds":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

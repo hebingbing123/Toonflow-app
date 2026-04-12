@@ -5549,8 +5549,10 @@ paths:
       summary: Poll derivative asset image status (Electron `assets/pollingImage`)
       operationId: postProductionAssetsPollingImageV1
       description: |
-        Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then returns current
-        image counts and latest states for owned assets.
+        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`assetIds`**, resolves
+        owned script scope, then returns image counts and latest states only for assets **linked to that script**
+        via **`app_script_asset`**. Returns **404** if project/script is not owned, if any **`assetId`** is not
+        linked to the script, or if any id is not positive.
       security:
         - bearerAuth: []
       requestBody:
@@ -5574,6 +5576,12 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "401":
           description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Project/script not owned, or one or more assets are not linked to that script
           content:
             application/json:
               schema:
@@ -9929,10 +9937,13 @@ components:
 
     ProductionAssetsPollingImageBody:
       type: object
-      required: [projectId, assetIds]
+      required: [projectId, scriptId, assetIds]
       additionalProperties: false
       properties:
         projectId:
+          type: integer
+          format: int32
+        scriptId:
           type: integer
           format: int32
         assetIds:

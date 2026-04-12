@@ -63,6 +63,45 @@ async fn production_assets_derivative_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
+                .uri(format!("/api/v1/projects/{project_uuid}/scripts"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(r#"{"name":"pg_derivative_script"}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, script) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::CREATED, "script={script}");
+    let script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::PUT)
+                .uri(format!(
+                    "/api/v1/projects/{project_uuid}/scripts/{script_id}/assets/{asset_id}"
+                ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        res.status(),
+        StatusCode::NO_CONTENT,
+        "script↔asset link for production polling scope"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
                 .uri("/api/v1/production/assets/get-assets-data")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -114,7 +153,7 @@ async fn production_assets_derivative_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"assetIds":[{asset_id}]}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetIds":[{asset_id}]}}"#
                 )))
                 .unwrap(),
         )
@@ -162,7 +201,7 @@ async fn production_assets_derivative_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"assetIds":[{asset_id}]}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetIds":[{asset_id}]}}"#
                 )))
                 .unwrap(),
         )

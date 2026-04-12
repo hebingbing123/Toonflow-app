@@ -117,6 +117,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       run: () => postProductionAssetsPollingImageV1(
         token,
         projectId: 1,
+        scriptId: 1,
         assetIds: const [1],
       ),
     );

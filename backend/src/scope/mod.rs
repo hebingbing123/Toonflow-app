@@ -4,7 +4,8 @@
 //! 本模块解析 **UUID 级的 `project_id` / `script_id`**；REST 常见 **`project_id` = `app_project.id`** 时用
 //! [`owned_script_in_project`]，Electron 风格 **numeric project id** 时用 [`owned_script_scope`]；
 //! 分镜按 **numeric_id** 落在项目下时用 [`owned_storyboard_in_project`]；
-//! **numeric project + numeric script + numeric storyboard** 时用 [`owned_storyboard_in_script_scope`]。
+//! **numeric project + numeric script + numeric storyboard** 时用 [`owned_storyboard_in_script_scope`]；
+//! 仅 **`app_project.numeric_id`** 时用 [`owned_project_id_by_numeric`]。
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -53,6 +54,31 @@ impl ScopeError {
             ScopeError::Database(msg) => ApiError::DatabaseError(msg),
         }
     }
+}
+
+/// 解析 `owner_user_id` 拥有的项目主键（**`app_project.id`**），按 **`app_project.numeric_id`**。
+pub async fn owned_project_id_by_numeric(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+) -> Result<Uuid, ScopeError> {
+    if project_numeric_id <= 0 {
+        return Err(ScopeError::NotFound);
+    }
+    sqlx::query_scalar(
+        r#"
+        SELECT p.id
+        FROM app_project p
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ScopeError::Database(e.to_string()))?
+    .ok_or(ScopeError::NotFound)
 }
 
 /// 解析 `owner_user_id` 在 `project_numeric_id` 下对 `script_numeric_id` 的剧本 scope。

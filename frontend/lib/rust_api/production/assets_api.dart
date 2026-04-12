@@ -111,6 +111,7 @@ Future<AssetsDataResponseV1> postProductionAssetsGetAssetsDataV1(
 Future<AssetsPollingImageResponseV1> postProductionAssetsPollingImageV1(
   String accessToken, {
   required int projectId,
+  required int scriptId,
   required List<int> assetIds,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/assets/polling-image');
@@ -121,7 +122,11 @@ Future<AssetsPollingImageResponseV1> postProductionAssetsPollingImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'assetIds': assetIds}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'assetIds': assetIds,
+        }),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

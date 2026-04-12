@@ -252,6 +252,7 @@ pub(in crate::production) async fn post_assets_get_data(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AssetsPollingImageBody {
     project_id: i32,
+    script_id: i32,
     asset_ids: Vec<i32>,
 }
 
@@ -275,19 +276,32 @@ pub(in crate::production) async fn post_assets_polling_image(
     Json(body): Json<AssetsPollingImageBody>,
 ) -> Result<JsonResponse<AssetsPollingImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
+    if body.project_id <= 0 || body.script_id <= 0 {
         return Err(ApiError::BadRequest(
-            "projectId must be a positive integer".into(),
+            "projectId and scriptId must be positive integers".into(),
         ));
     }
     if body.asset_ids.is_empty() {
         return Err(ApiError::BadRequest("assetIds must not be empty".into()));
+    }
+    if body.asset_ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest(
+            "assetIds must be positive integers".into(),
+        ));
     }
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let mut uniq = body.asset_ids.clone();
+    uniq.sort_unstable();
+    uniq.dedup();
 
     let statuses = sqlx::query_as::<_, AssetImageStatus>(
         r#"
@@ -297,19 +311,26 @@ pub(in crate::production) async fn post_assets_polling_image(
           MAX(ai.state) AS latest_state
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $1
         LEFT JOIN app_asset_image ai ON ai.asset_id = a.id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND a.numeric_id = ANY($3::int4[])
+        WHERE p.owner_user_id = $2
+          AND p.numeric_id = $3
+          AND a.numeric_id = ANY($4::int4[])
         GROUP BY a.numeric_id
+        ORDER BY array_position($4::int4[], a.numeric_id)
         "#,
     )
+    .bind(scope_row.script_id)
     .bind(uid)
     .bind(body.project_id)
-    .bind(&body.asset_ids)
+    .bind(&uniq)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if statuses.len() != uniq.len() {
+        return Err(ApiError::NotFound);
+    }
 
     Ok(JsonResponse(AssetsPollingImageResponse { statuses }))
 }

@@ -63,20 +63,15 @@ pub(super) async fn invoke_get_plan_data(ctx: &HarnessContext) -> Result<Value, 
     let pool = require_pool(ctx)?;
     let project_numeric_id = project_numeric_from_ctx(ctx)?;
 
-    let project_uuid: uuid::Uuid = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE numeric_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_numeric_id)
-    .bind(ctx.user_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| {
-        InvokeError::MissingContext("attached project is not owned or missing".into())
-    })?;
+    let project_uuid =
+        crate::scope::owned_project_id_by_numeric(pool, ctx.user_id, project_numeric_id)
+            .await
+            .map_err(|e| match e {
+                ScopeError::NotFound => {
+                    InvokeError::MissingContext("attached project is not owned or missing".into())
+                }
+                ScopeError::Database(msg) => InvokeError::DatabaseError(msg),
+            })?;
 
     let plan_row: Option<(i64, Json<Value>)> = sqlx::query_as(
         r#"

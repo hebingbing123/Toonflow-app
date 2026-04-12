@@ -143,6 +143,7 @@ class _AssetGenerationWorkbenchDialogState
         nextPollingData = await postProductionAssetsPollingImageV1(
           widget.token,
           projectId: widget.project.numericId,
+          scriptId: _selectedScriptNumericId,
           assetIds: selected,
         );
         nextPromptPollingData = await postWorkbenchAssetsPollingPromptAssets(
@@ -381,6 +382,7 @@ class _AssetGenerationWorkbenchDialogState
                   final response = await postProductionAssetsPollingImageV1(
                     widget.token,
                     projectId: widget.project.numericId,
+                    scriptId: _selectedScriptNumericId,
                     assetIds: selected,
                   );
                   if (mounted) {
