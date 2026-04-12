@@ -6,8 +6,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> docs/openapi.yaml (YAML parse)"
-ruby -ryaml -e "YAML.load_file('docs/openapi.yaml')"
+echo "==> merged OpenAPI export (YAML parse)"
+(cd backend && cargo run --quiet --bin export-openapi) | ruby -ryaml -e "YAML.load(STDIN.read)"
 
 echo "==> backend/ (fmt, clippy, test)"
 (

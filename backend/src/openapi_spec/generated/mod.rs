@@ -16,4 +16,3 @@ pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(batch04::ApiDocBatch04::openapi());
     doc
 }
-

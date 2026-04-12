@@ -1,16 +1,19 @@
-//! Merge utoipa-generated path/schema fragments into the hand-maintained `docs/openapi.yaml` base.
+//! Merge utoipa-generated path/schema fragments into the embedded OpenAPI base (`openapi_base.yaml`).
+//!
+//! The base carries **metadata**, the **`/api/v1/ws`** operation (long description), and **components**
+//! (schemas, security). All other HTTP paths come from [`crate::openapi_spec::combined_openapi`].
 
 use std::sync::OnceLock;
 
 use anyhow::Context;
 use serde_json::Value as Json;
 
-const BASE_OPENAPI_YAML: &str = include_str!("../../../docs/openapi.yaml");
+const BASE_OPENAPI_YAML: &str = include_str!("openapi_base.yaml");
 
 /// Full OpenAPI document: base YAML with utoipa overlays for migrated paths and schemas.
 pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
     let mut base: Json =
-        serde_yaml::from_str(BASE_OPENAPI_YAML).context("parse base openapi.yaml")?;
+        serde_yaml::from_str(BASE_OPENAPI_YAML).context("parse embedded openapi_base.yaml")?;
     let gen = crate::openapi_spec::combined_openapi();
     let gen_val: Json = serde_json::to_value(&gen).context("serialize utoipa OpenApi")?;
 
@@ -36,7 +39,7 @@ pub fn merged_openapi_yaml_cached() -> &'static str {
     static DOC: OnceLock<String> = OnceLock::new();
     DOC.get_or_init(|| {
         merged_openapi_yaml_string().unwrap_or_else(|err| {
-            tracing::error!(%err, "OpenAPI merge failed; serving static docs/openapi.yaml");
+            tracing::error!(%err, "OpenAPI merge failed; serving embedded openapi_base.yaml only");
             BASE_OPENAPI_YAML.to_string()
         })
     })

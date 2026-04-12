@@ -21,14 +21,14 @@
 
 ## 重构栈门禁（自动跑，别让用户手动点）
 
-凡改动 **`backend/`**、**`frontend/`**、**`docs/openapi.yaml`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
+凡改动 **`backend/`**（含 **`backend/src/openapi_spec/openapi_base.yaml`** / **`openapi_paths_index.yaml`**）、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
 
 ```bash
 yarn refactor:check
 # 等价：bash scripts/refactor-check.sh
 ```
 
-须 **OpenAPI 可解析** + **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 CI 任务 **`refactor-monorepo`**（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)，内部即 **`scripts/refactor-check.sh`**）一致；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
+须 **合并后 OpenAPI 可解析**（`cargo run --bin export-openapi`，由 `scripts/refactor-check.sh` 执行）+ **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 CI 任务 **`refactor-monorepo`**（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)，内部即 **`scripts/refactor-check.sh`**）一致；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
 
 ## 为什么人类端还会觉得「每一步都要确认」？
 
@@ -45,7 +45,7 @@ yarn refactor:check
    - `bash scripts/refactor-check.sh`、`yarn refactor:check`
    - `cargo fmt`、`cargo clippy`、`cargo test`（工作目录在 `backend/` 时）
    - `flutter pub get`、`flutter analyze`、`flutter test`（工作目录在 `frontend/` 时）
-   - `ruby -ryaml`（解析 `docs/openapi.yaml` 时）
+   - `cargo run --bin export-openapi`（工作目录在 `backend/` 时）与 `ruby -ryaml`（解析导出的 YAML）
 4. **不要**把高危操作放进允许列表（如 `rm -rf`、`git push --force`、直连生产数据库）；重构门禁脚本本身是只读检查 + 本地测试，风险可控。
 5. 若仍频繁拦截：看 **Sandbox / Allowlist** 相关说明，或临时用 **Agent / Max** 模式（名称因版本而异），在**可信仓库**内使用。
 

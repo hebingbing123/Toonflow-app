@@ -1,4 +1,4 @@
-//! Browser-friendly OpenAPI：`docs/openapi.yaml` 与 utoipa 片段合并后供 Swagger UI 加载。
+//! Browser-friendly OpenAPI：嵌入的 `openapi_base.yaml` 与 utoipa 合并结果，供 Swagger UI 加载。
 
 use axum::http::{header, HeaderValue};
 use axum::response::{Html, IntoResponse};

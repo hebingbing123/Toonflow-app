@@ -45,7 +45,7 @@ cargo run --bin toonflow-server
 
 项目统计：**`GET /api/v1/projects/{project_id}/stats`**（Bearer；**`project_id`** UUID）— 返回当前用户该项目下 **`app_script`** / **`app_storyboard`** 条数、**`app_asset`（`asset_type = role`）** 的 **`role_count`**、**`app_novel`** 的 **`novel_count`**；**`video_count`** 仍为 **`0`**（尚无 PG 版 **`o_video`**；对齐旧 **`generalStatistics`** 命名）。
 
-项目素材（**`app_asset`**）：**`GET`/`POST /api/v1/projects/{project_id}/assets`**（列表分页与筛选、创建）；**`GET`/`PATCH`/`DELETE …/assets/{asset_numeric_id}`**（**`asset_numeric_id`** = **`app_asset.numeric_id`**，与 OpenAPI 一致）。角景与图片子资源见 **`…/assets/corner-scape`**、**`…/assets/{asset_numeric_id}/images*`**。**旧 Electron 形 workbench**（nested 父子列表、image-bundle、clip 上传、material/batch-generation、polling、写删等）在 **`POST …/projects/{project_id}/assets/workbench/…`**；**无**顶层 **`POST /api/v1/assets/*`**。详见 [`docs/openapi.yaml`](../docs/openapi.yaml) 与 [`docs/plans/electron-node-parity.md`](../docs/plans/electron-node-parity.md)。
+项目素材（**`app_asset`**）：**`GET`/`POST /api/v1/projects/{project_id}/assets`**（列表分页与筛选、创建）；**`GET`/`PATCH`/`DELETE …/assets/{asset_numeric_id}`**（**`asset_numeric_id`** = **`app_asset.numeric_id`**，与 OpenAPI 一致）。角景与图片子资源见 **`…/assets/corner-scape`**、**`…/assets/{asset_numeric_id}/images*`**。**旧 Electron 形 workbench**（nested 父子列表、image-bundle、clip 上传、material/batch-generation、polling、写删等）在 **`POST …/projects/{project_id}/assets/workbench/…`**；**无**顶层 **`POST /api/v1/assets/*`**。详见合并 OpenAPI（`GET /api/v1/openapi.yaml` 或 `cargo run --bin export-openapi`）与 [`docs/plans/electron-node-parity.md`](../docs/plans/electron-node-parity.md)。
 
 画风库（用户级）：**`GET`/`POST /api/v1/art-styles`**、**`GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`**（Bearer）— **`app_art_style`**（RLS）；**`numeric_id`** 用 **`pg_advisory_xact_lock(884_422_008)`** + 全表 **`MAX(numeric_id)+1`**。**`POST /api/v1/art-styles/extract-prompt`**：多模态 **`chat/completions`**（与旧 **`extractStylePrompt`** 同系统提示词），**`images[]`→`image_url.url`**；空数组或全空白项 **400**（先于 LLM 校验）；合法请求需 LLM 密钥、不访问 PG。不含旧栈 base64 封面写本地 OSS。
 
@@ -69,7 +69,7 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 
 **素材出图任务（`app_generation_job`）**：**`asset.generate.image`** / **`asset.generate.batch`** worker 使用同一密钥调用 **`POST {OPENAI_BASE_URL}/v1/images/generations`**（`response_format: url`）。未设置 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** 时，将供应商临时 **`url`** 写入 **`app_asset_image.file_path`**（**`state`** = **`已完成`**）。设置该目录后，worker 会下载 PNG（体大小上限约 **32 MB**）到 **`{dir}/{user_uuid}/{image_row_id}.png`**，**`file_path`** 设为 **`GET /api/v1/projects/{project_uuid}/assets/{al}/images/{id}/file`** 路径（**`project_uuid`** = **`app_project.id`**），**`metadata.storage`** = **`local`**，**`metadata.provider_url`** 保留原链接；**`GET …/images/{id}/file`** 在 **`https?`** **`file_path`** 时 **307** 跳转，在 **`local`** 时返回 **`image/png`**。请求体里的 **`model`** 若不含 **`dall-e-2`** / **`dall-e-3`** 子串，则回退到环境变量 **`TOONFLOW_IMAGE_MODEL`**（默认 **`dall-e-3`**）。**`asset.polish.*`** 仍走 **`chat/completions`**。Enqueue 时的 **`base64`** 提示尚未参与生图；对象存储/CDN 仍见 **`electron-node-parity.md`**。
 
-**HTTP 接口文档（浏览器）**：`GET http://127.0.0.1:8666/api/v1/docs` — Swagger UI **Standalone**；默认折叠 tag、带 **Filter**；`info.description` 仅一行摘要，细节见各 operation 与仓库 **`docs/plans/electron-node-parity.md`**。改 `docs/openapi.yaml` 后需重新 `cargo run` 嵌入 spec。
+**HTTP 接口文档（浏览器）**：`GET http://127.0.0.1:8666/api/v1/docs` — Swagger UI **Standalone**；默认折叠 tag、带 **Filter**；`info.description` 仅一行摘要，细节见各 operation 与仓库 **`docs/plans/electron-node-parity.md`**。契约由 **`openapi_base.yaml` + utoipa** 合并生成，改 handler 注解或嵌入的 base 后需重新 `cargo run` 查看。
 
 健康检查：
 
@@ -90,7 +90,7 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
   - `POST /api/v1/agents/memory/clear` — 清除语义对齐旧 **`/api/agents/clearMemory`**（`type` 或 `clearType`：`all` / `message` / `summary`）
   - `POST /api/v1/agents/memory/append` — 追加一条 message（不做 Node 侧自动摘要压缩）
 
-WebSocket（JSON 信封见 **`docs/openapi.yaml`** 中 **`paths` → `/api/v1/ws` → `get`**；仓库 **`docs/websocket-events.md`** 为稳定链接入口，正文以 OpenAPI 为准）：
+WebSocket（JSON 信封见合并 OpenAPI 中 **`GET /api/v1/ws`**；仓库 **`docs/websocket-events.md`** 为稳定链接入口，正文以 OpenAPI 为准）：
 
 - 可选 **`HARNESS_WS_CHANNELS`**：逗号分隔的频道白名单（**`script`**、**`production`**）。未设置时两种 attach 均允许；设置后仅列表中的频道可通过 `agent.script.attach` / `agent.production.attach`（用于运维或阶段性关频道）。
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`

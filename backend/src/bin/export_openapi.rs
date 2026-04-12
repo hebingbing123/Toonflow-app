@@ -1,7 +1,7 @@
-//! Emit the merged OpenAPI document (base `docs/openapi.yaml` + utoipa overlays) to stdout.
+//! Emit the merged OpenAPI document (embedded `openapi_base.yaml` + utoipa overlays) to stdout.
 //!
 //! ```text
-//! cargo run --bin export-openapi --manifest-path backend/Cargo.toml > docs/openapi.merged.yaml
+//! cargo run --bin export-openapi --manifest-path backend/Cargo.toml > openapi.export.yaml
 //! ```
 
 fn main() -> anyhow::Result<()> {

@@ -1,4 +1,4 @@
-//! utoipa [`OpenApi`] fragment; merged into `docs/openapi.yaml` for serving and export.
+//! utoipa [`OpenApi`] fragments merged into the embedded `openapi_base.yaml` (metadata, WebSocket op, components).
 
 mod generated;
 mod merge;

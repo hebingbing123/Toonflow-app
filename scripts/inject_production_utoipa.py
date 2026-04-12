@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inject #[utoipa::path(...)] before each production workbench handler listed in production/mod.rs.
 
-Uses docs/openapi.yaml for operation_id. Request/response bodies documented as serde_json::Value
+Uses `backend/src/openapi_spec/openapi_paths_index.yaml` for operation_id. Request/response bodies documented as serde_json::Value
 (actual handlers may return axum::Response — OpenAPI still shows JSON object schema).
 """
 
@@ -14,7 +14,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MOD = ROOT / "backend/src/production/mod.rs"
-YAML = ROOT / "docs/openapi.yaml"
+YAML = ROOT / "backend/src/openapi_spec/openapi_paths_index.yaml"
 WB = ROOT / "backend/src/production/workbench"
 
 

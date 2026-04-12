@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate utoipa path stubs from docs/openapi.yaml (batch OpenApi structs + merge helper).
+"""Generate utoipa path stubs from `openapi_paths_index.yaml` (batch OpenApi structs + merge helper).
 
 Run from repo root:
   python3 scripts/gen_openapi_utoipa_stubs.py
@@ -14,7 +14,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-OPENAPI = ROOT / "docs" / "openapi.yaml"
+OPENAPI = ROOT / "backend" / "src" / "openapi_spec" / "openapi_paths_index.yaml"
 OUT_DIR = ROOT / "backend" / "src" / "openapi_spec" / "generated"
 
 # Covered by hand-written / module OpenApi aggregates (avoid duplicate stubs in merge).

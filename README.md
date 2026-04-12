@@ -63,8 +63,8 @@
 | **`backend/`** | Rust（Axum）API，默认端口 **8666**；技能 Markdown 在 **`backend/data/skills/`** |
 | **`frontend/`** | Flutter 桌面 + Web；`API_BASE_URL` + 可选 `SUPABASE_URL` / `SUPABASE_ANON_KEY`（见 `frontend/README.md`） |
 | **`docs/plans/`** | 路线图快照：[`harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md) |
-| **`docs/openapi.yaml`** | REST `/api/v1` 契约（OpenAPI 3.1） |
-| **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文在 **`docs/openapi.yaml`** → **`paths` → `/api/v1/ws`**） |
+| **`backend/src/openapi_spec/`** | OpenAPI：`openapi_base.yaml`（元数据、WebSocket、`components`）+ `openapi_paths_index.yaml`（路径索引）；合并结果由 Rust/utoipa 生成 |
+| **`docs/websocket-events.md`** | WebSocket 稳定链接入口（正文见合并后的 OpenAPI **`/api/v1/ws`**） |
 | **`supabase/`** | 本地 Postgres/Auth：`supabase start`；迁移在 `supabase/migrations/`（Flyway 式版本化 SQL，由 Supabase CLI 管理） |
 
 > **重构完成**：旧 Electron + Node 栈已下线（`decommission-electron`）。当前主产品为 `backend/` + `frontend/` 新栈。  
@@ -73,7 +73,7 @@
 
 ### CI 与工程规范
 
-- **本地重构门禁（与 CI 对齐，含 OpenAPI 解析）**：仓库根执行 **`yarn refactor:check`**（[`scripts/refactor-check.sh`](scripts/refactor-check.sh)）— `docs/openapi.yaml` YAML 校验 + `backend/` fmt/clippy/test + `frontend/` analyze/test。需本机已装 **Rust stable** 与 **Flutter**。
+- **本地重构门禁（与 CI 对齐，含 OpenAPI 解析）**：仓库根执行 **`yarn refactor:check`**（[`scripts/refactor-check.sh`](scripts/refactor-check.sh)）— `cargo run --bin export-openapi` 导出 YAML 校验 + `backend/` fmt/clippy/test + `frontend/` analyze/test。需本机已装 **Rust stable** 与 **Flutter**。
 - **持续集成**：向 `main` / `master` 提 PR 或推送时运行 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — **`refactor-monorepo`** 任务执行与本地相同的 [`scripts/refactor-check.sh`](scripts/refactor-check.sh)（OpenAPI 解析 + `backend/` + `frontend/`）；**`supabase/migrations`**：`supabase db start` + `supabase db reset`；仓库根：旧栈 **`yarn lint`**（`tsc --noEmit`）。
 - **迁移说明**：仅维护 [`supabase/migrations/`](supabase/migrations/)，详见 [`docs/migration/database-migrations.md`](docs/migration/database-migrations.md)。
 - **工具链**：根目录 [`rust-toolchain.toml`](rust-toolchain.toml) 锁定 Rust stable + `rustfmt` / `clippy`。
@@ -196,7 +196,7 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 
 - **`backend/README.md`**：`cargo run --bin toonflow-server`、**`DATABASE_URL`**（Supabase Postgres）及可选存储/模型环境变量  
 - **`supabase/`** 与 **`docs/migration/database-migrations.md`**  
-- 契约：**`docs/openapi.yaml`**、**`docs/websocket-events.md`**
+- 契约：**合并 OpenAPI**（`GET /api/v1/openapi.yaml` 或 `export-openapi`）、**`docs/websocket-events.md`**
 
 容器镜像若仍引用历史 Dockerfile，以路线图 **[`docs/plans/harness-rust-flutter.md`](docs/plans/harness-rust-flutter.md)** 为准逐步替换。
 
@@ -257,7 +257,7 @@ yarn lint             # 根目录 TypeScript 配置体检（可选）
 backend/                 # Rust API、任务 worker、Harness
 frontend/                # Flutter 应用
 backend/data/skills/     # 打包技能 Markdown（运行时真源）
-docs/openapi.yaml
+backend/src/openapi_spec/openapi_base.yaml
 docs/plans/
 supabase/migrations/
 scripts/refactor-check.sh
