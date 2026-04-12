@@ -35,6 +35,8 @@ part 'home_page/project_editor/assets/compatibility/panel.dart';
 part 'home_page/project_editor/assets/section.dart';
 part 'home_page/project_editor/assets/generation/section.dart';
 part 'home_page/project_editor/assets/generation/dialog.dart';
+part 'home_page/project_editor/assets/generation/state.dart';
+part 'home_page/project_editor/assets/generation/mutations.dart';
 part 'home_page/project_editor/assets/generation/dialog_view.dart';
 part 'home_page/project_editor/assets/generation/actions.dart';
 part 'home_page/project_editor/assets/generation/controls.dart';
