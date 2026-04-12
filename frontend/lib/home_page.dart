@@ -82,6 +82,7 @@ part 'home_page/storyboard_editor/editor.dart';
 part 'home_page/script_editor/batch_workbench.dart';
 part 'home_page/script_editor/batch_dialog.dart';
 part 'home_page/storyboard_editor/workbench.dart';
+part 'home_page/storyboard_editor/actions.dart';
 part 'home_page/storyboard_editor/status_panels.dart';
 part 'home_page/storyboard_editor/image_section.dart';
 part 'home_page/storyboard_editor/video_section.dart';
