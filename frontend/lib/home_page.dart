@@ -32,6 +32,7 @@ part 'home_page/project_editor/assets/clip_upload.dart';
 part 'home_page/project_editor/assets/section.dart';
 part 'home_page/project_editor/assets/generation/section.dart';
 part 'home_page/project_editor/assets/generation/dialog.dart';
+part 'home_page/project_editor/assets/generation/dialog_view.dart';
 part 'home_page/project_editor/assets/generation/actions.dart';
 part 'home_page/project_editor/assets/generation/controls.dart';
 part 'home_page/project_editor/assets/generation/selection.dart';
