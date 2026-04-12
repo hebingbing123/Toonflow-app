@@ -105,7 +105,19 @@ fn merge_slot(def: &'static DefaultSlot, row: Option<&UserPromptRow>) -> PromptT
     }
 }
 
-async fn list_prompts(
+#[utoipa::path(
+    get,
+    path = "/api/v1/prompts",
+    operation_id = "listPromptsV1",
+    tag = "prompts",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_prompts(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<PromptTemplateJson>>, ApiError> {
@@ -137,7 +149,23 @@ async fn list_prompts(
     Ok(Json(out))
 }
 
-async fn get_prompt(
+#[utoipa::path(
+    get,
+    path = "/api/v1/prompts/{numeric_id}",
+    operation_id = "getPromptByNumericIdV1",
+    tag = "prompts",
+    params(
+        ("numeric_id" = i32, Path, description = "Prompt slot id (1–3)")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(numeric_id): Path<i32>,
@@ -165,7 +193,25 @@ async fn get_prompt(
     Ok(Json(merge_slot(def, row.as_ref())))
 }
 
-async fn patch_prompt(
+#[utoipa::path(
+    patch,
+    path = "/api/v1/prompts/{numeric_id}",
+    operation_id = "patchPromptByNumericIdV1",
+    tag = "prompts",
+    params(
+        ("numeric_id" = i32, Path, description = "Prompt slot id (1–3)")
+    ),
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn patch_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(numeric_id): Path<i32>,

@@ -2,50 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    patch,
-    path = "/api/v1/projects/{project_id}",
-    operation_id = "patchProjectByProjectIdV1",
-    tag = "projects",
-    summary = "Partially update project by UUID",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_patch_project_by_project_id_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets",
-    operation_id = "listProjectAssetsByProjectIdV1",
-    tag = "assets",
-    summary = "List assets for a project (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_project_assets_by_project_id_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets",
-    operation_id = "createProjectAssetByProjectIdV1",
-    tag = "assets",
-    summary = "Create a manual asset under a project (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_create_project_asset_by_project_id_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/assets/corner-scape",
-    operation_id = "listCornerScapeAssetsByProjectIdV1",
-    tag = "assets",
-    summary = "Corner-scape asset list (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_corner_scape_assets_by_project_id_v1() {}
-
-    #[utoipa::path(
     post,
     path = "/api/v1/projects/{project_id}/assets/workbench/add-assets",
     operation_id = "postAssetsAddAssetsV1",
@@ -308,14 +264,54 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_create_project_novel_event_by_project_id_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/novel-events/batch-delete",
+    operation_id = "batchDeleteProjectNovelEventsByProjectIdV1",
+    tag = "novel-events",
+    summary = "Batch delete novel events (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_batch_delete_project_novel_events_by_project_id_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/novel-events/generate-events",
+    operation_id = "postProjectNovelEventsGenerateEventsV1",
+    tag = "novel-events",
+    summary = "Trigger async chapter event extraction (LLM)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_post_project_novel_events_generate_events_v1() {}
+
+    #[utoipa::path(
+    delete,
+    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
+    operation_id = "deleteProjectNovelEventByProjectIdV1",
+    tag = "novel-events",
+    summary = "Delete a novel event (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_delete_project_novel_event_by_project_id_v1() {}
+
+    #[utoipa::path(
+    patch,
+    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
+    operation_id = "updateProjectNovelEventByProjectIdV1",
+    tag = "novel-events",
+    summary = "Update a novel event (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_update_project_novel_event_by_project_id_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_patch_project_by_project_id_v1,
-    stubs::op_list_project_assets_by_project_id_v1,
-    stubs::op_create_project_asset_by_project_id_v1,
-    stubs::op_list_corner_scape_assets_by_project_id_v1,
     stubs::op_post_assets_add_assets_v1,
     stubs::op_post_assets_batch_delete_v1,
     stubs::op_post_assets_batch_generation_data_v1,
@@ -339,6 +335,10 @@ mod stubs {
     stubs::op_patch_project_asset_image_by_project_id_v1,
     stubs::op_get_project_asset_image_file_by_project_id_v1,
     stubs::op_list_project_novel_events_by_project_id_v1,
-    stubs::op_create_project_novel_event_by_project_id_v1
+    stubs::op_create_project_novel_event_by_project_id_v1,
+    stubs::op_batch_delete_project_novel_events_by_project_id_v1,
+    stubs::op_post_project_novel_events_generate_events_v1,
+    stubs::op_delete_project_novel_event_by_project_id_v1,
+    stubs::op_update_project_novel_event_by_project_id_v1
 ))]
 pub struct ApiDocBatch01;

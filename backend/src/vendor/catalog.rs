@@ -18,7 +18,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct PatchTextModelDefaultBody {
+pub(crate) struct PatchTextModelDefaultBody {
     /// Composite id `{vendor_id}:{model_name}` — must exist in the catalog.
     /// Pass `null` to reset to server default.
     model_id: Option<String>,
@@ -50,7 +50,7 @@ static CATALOG: LazyLock<CatalogFile> = LazyLock::new(|| {
 });
 
 #[derive(Debug, Serialize)]
-struct ModelListEntry {
+pub(crate) struct ModelListEntry {
     /// Vendor id (Electron-era `o_vendorConfig.id` analogue).
     id: i32,
     label: String,
@@ -62,7 +62,7 @@ struct ModelListEntry {
 }
 
 #[derive(Debug, Serialize)]
-struct ModelDetailResponse {
+pub(crate) struct ModelDetailResponse {
     vendor_id: i32,
     vendor_name: String,
     name: String,
@@ -72,7 +72,7 @@ struct ModelDetailResponse {
 }
 
 #[derive(Debug, Deserialize)]
-struct ListQuery {
+pub(crate) struct ListQuery {
     /// One of `text`, `image`, `video`, `all`. When omitted, treated as `all`.
     /// `all` excludes `video` entries (Electron-era `getModelList` behaviour).
     #[serde(default, rename = "type")]
@@ -80,7 +80,7 @@ struct ListQuery {
 }
 
 #[derive(Debug, Deserialize)]
-struct DetailQuery {
+pub(crate) struct DetailQuery {
     /// Composite id: `{vendor_id}:{model_name}` (e.g. `1:gpt-4o-mini`).
     model_id: String,
 }
@@ -245,14 +245,26 @@ fn default_text_model_composite_id() -> String {
 }
 
 #[derive(Debug, Serialize)]
-struct TextModelDefaultResponse {
+pub(crate) struct TextModelDefaultResponse {
     /// Historical **`POST /api/setting/getTextModel`** returned this string as envelope **`data`** (stub).
     stub_placeholder: &'static str,
     /// Composite id for **`GET /api/v1/models/detail?model_id=`**.
     default_model_id: String,
 }
 
-async fn text_model_default(
+#[utoipa::path(
+    get,
+    path = "/api/v1/models/text-default",
+    operation_id = "getTextModelDefaultV1",
+    tag = "models",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn text_model_default(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<TextModelDefaultResponse>, ApiError> {
@@ -285,7 +297,21 @@ async fn text_model_default(
     }))
 }
 
-async fn patch_text_model_default(
+#[utoipa::path(
+    patch,
+    path = "/api/v1/models/text-default",
+    operation_id = "patchTextModelDefaultV1",
+    tag = "models",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn patch_text_model_default(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<PatchTextModelDefaultBody>,
@@ -341,7 +367,23 @@ async fn patch_text_model_default(
     }))
 }
 
-async fn list_models(
+#[utoipa::path(
+    get,
+    path = "/api/v1/models",
+    operation_id = "listModelsV1",
+    tag = "models",
+    params(
+        ("type" = Option<String>, Query, description = "Filter: text, image, video, or all (default all)")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_models(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(q): Query<ListQuery>,
@@ -351,7 +393,24 @@ async fn list_models(
     Ok(Json(list_filtered(&filter)))
 }
 
-async fn model_detail(
+#[utoipa::path(
+    get,
+    path = "/api/v1/models/detail",
+    operation_id = "modelDetailV1",
+    tag = "models",
+    params(
+        ("model_id" = String, Query, description = "Composite id `{vendor_id}:{model_name}`")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn model_detail(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(q): Query<DetailQuery>,

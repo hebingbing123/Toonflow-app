@@ -103,6 +103,19 @@ SKIP_OPERATION_IDS = frozenset(
         "queryAgentMemoryV1",
         "clearAgentMemoryV1",
         "appendAgentMemoryV1",
+        # vendor catalog + prompting HTTP
+        "listModelsV1",
+        "getTextModelDefaultV1",
+        "patchTextModelDefaultV1",
+        "modelDetailV1",
+        "listPromptsV1",
+        "getPromptByNumericIdV1",
+        "patchPromptByNumericIdV1",
+        "listQualityReviewsV1",
+        "createQualityReviewV1",
+        "getQualityReviewV1",
+        "getQualityStatsV1",
+        "getQualityStagePassRateV1",
     }
 )
 

@@ -5,6 +5,9 @@
 //! - `quality` — 质量审查
 //! - `skills` — 磁盘技能
 
+mod openapi;
 pub mod prompts;
 pub mod quality;
 pub mod skills;
+
+pub use openapi::PromptingHttpOpenApi;

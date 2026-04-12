@@ -2,50 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events/batch-delete",
-    operation_id = "batchDeleteProjectNovelEventsByProjectIdV1",
-    tag = "novel-events",
-    summary = "Batch delete novel events (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_batch_delete_project_novel_events_by_project_id_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events/generate-events",
-    operation_id = "postProjectNovelEventsGenerateEventsV1",
-    tag = "novel-events",
-    summary = "Trigger async chapter event extraction (LLM)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_project_novel_events_generate_events_v1() {}
-
-    #[utoipa::path(
-    delete,
-    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
-    operation_id = "deleteProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Delete a novel event (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_delete_project_novel_event_by_project_id_v1() {}
-
-    #[utoipa::path(
-    patch,
-    path = "/api/v1/projects/{project_id}/novel-events/{event_numeric_id}",
-    operation_id = "updateProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Update a novel event (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_update_project_novel_event_by_project_id_v1() {}
-
-    #[utoipa::path(
     get,
     path = "/api/v1/projects/{project_id}/novels",
     operation_id = "listProjectNovelsByProjectIdV1",
@@ -255,67 +211,107 @@ mod stubs {
     pub(crate) fn op_patch_storyboard_by_project_and_legacy_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/prompts",
-    operation_id = "listPromptsV1",
-    tag = "prompts",
-    summary = "List prompt templates for the current user",
+    post,
+    path = "/api/v1/script-agent/get-plan-data",
+    operation_id = "postScriptAgentGetPlanDataV1",
+    tag = "scripts",
+    summary = "Load script agent plan (Electron `getPlanData` parity)",
     responses((status = 200, description = "OK"))
 )]
     #[allow(dead_code)]
-    pub(crate) fn op_list_prompts_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/prompts/{numeric_id}",
-    operation_id = "getPromptByNumericIdV1",
-    tag = "prompts",
-    summary = "Get one prompt template by slot id",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_prompt_by_numeric_id_v1() {}
-
-    #[utoipa::path(
-    patch,
-    path = "/api/v1/prompts/{numeric_id}",
-    operation_id = "patchPromptByNumericIdV1",
-    tag = "prompts",
-    summary = "Update prompt template body by slot id",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_patch_prompt_by_numeric_id_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/quality/reviews",
-    operation_id = "listQualityReviewsV1",
-    tag = "quality",
-    summary = "List quality reviews for the current user",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_quality_reviews_v1() {}
+    pub(crate) fn op_post_script_agent_get_plan_data_v1() {}
 
     #[utoipa::path(
     post,
-    path = "/api/v1/quality/reviews",
-    operation_id = "createQualityReviewV1",
-    tag = "quality",
-    summary = "Create a quality review for the current user",
+    path = "/api/v1/script-agent/set-plan-data",
+    operation_id = "postScriptAgentSetPlanDataV1",
+    tag = "scripts",
+    summary = "Save script agent plan and sync scripts (Electron `setPlanData` parity)",
     responses((status = 200, description = "OK"))
 )]
     #[allow(dead_code)]
-    pub(crate) fn op_create_quality_review_v1() {}
+    pub(crate) fn op_post_script_agent_set_plan_data_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/script-agent/update-data",
+    operation_id = "postScriptAgentUpdateDataV1",
+    tag = "scripts",
+    summary = "Patch agent work row by id (Electron `updateData` parity)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_post_script_agent_update_data_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/scripts/export",
+    operation_id = "exportScriptsZipV1",
+    tag = "scripts",
+    summary = "Export scripts as a ZIP of text files (Electron `exportScript` parity)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_export_scripts_zip_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/scripts/extract-assets",
+    operation_id = "startScriptAssetExtractV1",
+    tag = "scripts",
+    summary = "Start async script asset extraction (Electron `extractAssets` parity)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_start_script_asset_extract_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/scripts/extract-state/poll",
+    operation_id = "pollScriptExtractStateV1",
+    tag = "scripts",
+    summary = "Poll script asset-extract state (Electron `pollScriptAssets` parity)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_poll_script_extract_state_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/skills",
+    operation_id = "listSkillsV1",
+    tag = "skills",
+    summary = "List Markdown skills (relative paths under `data/skills`)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_skills_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/skills/binary",
+    operation_id = "getSkillBinaryV1",
+    tag = "skills",
+    summary = "Read one bundled image under `data/skills` (binary)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_skill_binary_v1() {}
+
+    #[utoipa::path(
+    delete,
+    path = "/api/v1/skills/content",
+    operation_id = "deleteSkillContentV1",
+    tag = "skills",
+    summary = "Delete one skill file",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_delete_skill_content_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_batch_delete_project_novel_events_by_project_id_v1,
-    stubs::op_post_project_novel_events_generate_events_v1,
-    stubs::op_delete_project_novel_event_by_project_id_v1,
-    stubs::op_update_project_novel_event_by_project_id_v1,
     stubs::op_list_project_novels_by_project_id_v1,
     stubs::op_create_project_novel_by_project_id_v1,
     stubs::op_delete_project_novel_by_project_id_v1,
@@ -335,10 +331,14 @@ mod stubs {
     stubs::op_delete_storyboard_by_project_and_legacy_v1,
     stubs::op_get_storyboard_by_project_and_legacy_v1,
     stubs::op_patch_storyboard_by_project_and_legacy_v1,
-    stubs::op_list_prompts_v1,
-    stubs::op_get_prompt_by_numeric_id_v1,
-    stubs::op_patch_prompt_by_numeric_id_v1,
-    stubs::op_list_quality_reviews_v1,
-    stubs::op_create_quality_review_v1
+    stubs::op_post_script_agent_get_plan_data_v1,
+    stubs::op_post_script_agent_set_plan_data_v1,
+    stubs::op_post_script_agent_update_data_v1,
+    stubs::op_export_scripts_zip_v1,
+    stubs::op_start_script_asset_extract_v1,
+    stubs::op_poll_script_extract_state_v1,
+    stubs::op_list_skills_v1,
+    stubs::op_get_skill_binary_v1,
+    stubs::op_delete_skill_content_v1
 ))]
 pub struct ApiDocBatch02;

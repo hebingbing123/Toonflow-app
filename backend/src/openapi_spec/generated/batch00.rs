@@ -134,50 +134,6 @@ mod stubs {
     pub(crate) fn op_post_assets_polish_prompt_v1() {}
 
     #[utoipa::path(
-    get,
-    path = "/api/v1/models",
-    operation_id = "listModelsV1",
-    tag = "models",
-    summary = "List models from static catalog (filtered by type)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_models_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/models/detail",
-    operation_id = "modelDetailV1",
-    tag = "models",
-    summary = "Resolve one model by composite id",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_model_detail_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/models/text-default",
-    operation_id = "getTextModelDefaultV1",
-    tag = "models",
-    summary = "Default text model id (getTextModel stub parity)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_text_model_default_v1() {}
-
-    #[utoipa::path(
-    patch,
-    path = "/api/v1/models/text-default",
-    operation_id = "patchTextModelDefaultV1",
-    tag = "models",
-    summary = "Set or reset per-user preferred text model",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_patch_text_model_default_v1() {}
-
-    #[utoipa::path(
     post,
     path = "/api/v1/project/add-director-manual",
     operation_id = "postProjectAddDirectorManualV1",
@@ -308,6 +264,50 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_get_project_by_project_id_v1() {}
+
+    #[utoipa::path(
+    patch,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "patchProjectByProjectIdV1",
+    tag = "projects",
+    summary = "Partially update project by UUID",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_patch_project_by_project_id_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/assets",
+    operation_id = "listProjectAssetsByProjectIdV1",
+    tag = "assets",
+    summary = "List assets for a project (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_project_assets_by_project_id_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/assets",
+    operation_id = "createProjectAssetByProjectIdV1",
+    tag = "assets",
+    summary = "Create a manual asset under a project (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_create_project_asset_by_project_id_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/assets/corner-scape",
+    operation_id = "listCornerScapeAssetsByProjectIdV1",
+    tag = "assets",
+    summary = "Corner-scape asset list (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_corner_scape_assets_by_project_id_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
@@ -324,10 +324,6 @@ mod stubs {
     stubs::op_post_assets_generate_cancel_generate_v1,
     stubs::op_post_assets_generate_v1,
     stubs::op_post_assets_polish_prompt_v1,
-    stubs::op_list_models_v1,
-    stubs::op_model_detail_v1,
-    stubs::op_get_text_model_default_v1,
-    stubs::op_patch_text_model_default_v1,
     stubs::op_post_project_add_director_manual_v1,
     stubs::op_post_project_add_visual_manual_v1,
     stubs::op_post_project_delete_director_manual_v1,
@@ -339,6 +335,10 @@ mod stubs {
     stubs::op_create_project_v1,
     stubs::op_get_projects_summary_v1,
     stubs::op_delete_project_by_project_id_v1,
-    stubs::op_get_project_by_project_id_v1
+    stubs::op_get_project_by_project_id_v1,
+    stubs::op_patch_project_by_project_id_v1,
+    stubs::op_list_project_assets_by_project_id_v1,
+    stubs::op_create_project_asset_by_project_id_v1,
+    stubs::op_list_corner_scape_assets_by_project_id_v1
 ))]
 pub struct ApiDocBatch00;

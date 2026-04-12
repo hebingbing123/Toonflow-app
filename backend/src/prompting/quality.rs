@@ -91,8 +91,9 @@ pub struct CreateQualityReviewBody {
 }
 
 /// 质量评估列表查询参数
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::IntoParams)]
 #[serde(rename_all = "camelCase")]
+#[into_params(parameter_in = Query, rename_all = "camelCase")]
 pub struct ListQualityReviewsQuery {
     pub target_type: Option<String>,
     pub target_id: Option<String>,
@@ -210,7 +211,21 @@ pub fn routes() -> Router<AppState> {
 // ============================================================================
 
 /// POST /api/v1/quality/reviews - 创建质量评估
-async fn create_review(
+#[utoipa::path(
+    post,
+    path = "/api/v1/quality/reviews",
+    operation_id = "createQualityReviewV1",
+    tag = "quality",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn create_review(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<CreateQualityReviewBody>,
@@ -266,7 +281,21 @@ async fn create_review(
 }
 
 /// GET /api/v1/quality/reviews - 列出自己的质量评估
-async fn list_reviews(
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/reviews",
+    operation_id = "listQualityReviewsV1",
+    tag = "quality",
+    params(ListQualityReviewsQuery),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn list_reviews(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(query): Query<ListQualityReviewsQuery>,
@@ -314,7 +343,23 @@ async fn list_reviews(
 }
 
 /// GET /api/v1/quality/reviews/{id} - 获取单个质量评估
-async fn get_review(
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/reviews/{id}",
+    operation_id = "getQualityReviewV1",
+    tag = "quality",
+    params(
+        ("id" = uuid::Uuid, Path, description = "Review id")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_review(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(id): Path<Uuid>,
@@ -339,7 +384,19 @@ async fn get_review(
 }
 
 /// GET /api/v1/quality/stats - 获取质量统计
-async fn get_stats(
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/stats",
+    operation_id = "getQualityStatsV1",
+    tag = "quality",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_stats(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<QualityStatsResponse>>, ApiError> {
@@ -373,7 +430,19 @@ async fn get_stats(
 }
 
 /// GET /api/v1/quality/stage-pass-rate - 分环节通过率（按日期聚合）
-async fn get_stage_pass_rate(
+#[utoipa::path(
+    get,
+    path = "/api/v1/quality/stage-pass-rate",
+    operation_id = "getQualityStagePassRateV1",
+    tag = "quality",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_stage_pass_rate(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<StagePassRateItem>>, ApiError> {
