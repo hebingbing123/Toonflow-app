@@ -12,6 +12,11 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Toonflow API — Swagger UI</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" crossorigin="anonymous" />
+  <style>
+    /* Keep top “intro” readable; long OpenAPI info.description scrolls instead of pushing operations away */
+    .swagger-ui .information-container .markdown { max-height: 38vh; overflow-y: auto; padding-right: 0.75rem; }
+    .swagger-ui .information-container .markdown table { font-size: 0.95em; }
+  </style>
 </head>
 <body>
   <div id="swagger-ui"></div>
@@ -23,12 +28,16 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
         url: "/api/v1/openapi.yaml",
         dom_id: "#swagger-ui",
         deepLinking: true,
-        // StandaloneLayout 需要上文的 swagger-ui-standalone-preset.js；全局 SwaggerUIStandalonePreset。
         presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
         plugins: [SwaggerUIBundle.plugins.DownloadUrl],
         layout: "StandaloneLayout",
-        // 本地 spec 不向 swagger.io 做远程校验，避免无关报错
-        validatorUrl: null
+        validatorUrl: null,
+        // 默认折叠 tag，页面以「接口列表」为主；Filter 便于前端按路径搜
+        docExpansion: "none",
+        filter: true,
+        displayRequestDuration: true,
+        tagsSorter: "alpha",
+        operationsSorter: "alpha"
       });
     };
   </script>

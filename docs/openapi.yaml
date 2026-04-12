@@ -6,60 +6,21 @@ info:
   title: Toonflow API
   version: 1.0.0
   description: |
-    **Interactive docs:** when the Rust server is running, open **`GET /api/v1/docs`** (Swagger UI; spec at **`GET /api/v1/openapi.yaml`**).
+    **Toonflow** REST API — all routes under **`/api/v1`** (see tags and operations below).
 
-    HTTP surface for the Rust backend (`backend/`). All versioned routes live under `/api/v1`.
-    WebSocket: `GET /api/v1/ws` (Upgrade) — JSON envelope protocol in **`docs/websocket-events.md`** (also linked from `externalDocs` above); optional query `access_token`.
+    | Topic | Where to read |
+    |-------|----------------|
+    | WebSocket envelopes (`/api/v1/ws`) | Repo **`docs/websocket-events.md`** (also `info.externalDocs`) |
+    | Electron / legacy parity & ops notes | **`docs/plans/electron-node-parity.md`**, **`backend/README.md`** |
+    | Per-route contract | Each operation's **summary** / **description** in this file |
 
-    **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `isolated.echo`, `skills.read`, `wasm.probe`). **Agent loop:** **`harness.agent.run`** drives multi-round OpenAI tool calling over the same tool surface (requires LLM env + channel attach) — see **`docs/websocket-events.md`** for envelopes and `error.occurred` codes (`wasm_failed`, `isolation_failed`, etc.).
-    **Harness `add_deriveAsset`:** Parent **`arguments.assetsId`** must be linked to the active script (**`app_script_asset`**) — see **`docs/websocket-events.md`** (section **Production `add_deriveAsset`**).
+    **Auth:** `Authorization: Bearer <Supabase access_token>` unless the operation states otherwise (e.g. billing webhook).
 
-    **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — **`X-Toonflow-Signature: sha256=<hex>`** with `BILLING_WEBHOOK_SECRET`. Prefer **`X-Toonflow-Timestamp`** + HMAC(`"<ts>." + raw_body`) for replay resistance (see operation **`postBillingWebhookV1`**). Legacy HMAC(raw body) remains unless **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`**. Body must be JSON with string **`id`** (dedupe key). **Not** JWT-authenticated. **Not** in the per-IP rate-limit bucket (same as `/health`).
+    **Rate limits:** Per client IP by default; exempt: `/health`, `/api/v1/health`, `/api/v1/ping`, `/api/v1/version`, `/api/v1/ready`, `POST /api/v1/webhooks/billing`. Env: `RATE_LIMIT_REFILL_MS`, `RATE_LIMIT_BURST`, `RATE_LIMIT_TRUST_FORWARDED_HEADERS` (proxy only).
 
-    **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, `/api/v1/ping`, `/api/v1/version`, `/api/v1/ready`, and **`POST /api/v1/webhooks/billing`**.
-    Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
-    Exceeding the limit returns **429** with **`Retry-After`** (seconds) and **`x-ratelimit-*`** headers.
-    Tune with `RATE_LIMIT_REFILL_MS` (default `20`) and `RATE_LIMIT_BURST` (default `100`).
+    **Errors:** JSON `code` + `message`; responses include **`X-Request-Id`**.
 
-    **Request correlation:** Responses include **`X-Request-Id`** (echo client value or server-generated UUID).
-    JSON error bodies (`code`, `message`) also include **`request_id`** when applicable. Clients may send **`X-Request-Id`** on requests (optional).
-
-    **Usage (MVP):** Successful generation jobs append **`app_usage_event`** (`generation_job.succeeded`). **`GET /api/v1/usage/summary`** returns per-user counts (24h / 7d) for fair-use dashboards.
-
-    **Prompt templates:** **`GET /api/v1/prompts`** returns three built-in rows (**`id`** 1–3, historical **`o_prompt`** parity); **`GET /api/v1/prompts/{numeric_id}`** returns one merged row (**`numeric_id`** must be **1**, **2**, or **3**); **`PATCH /api/v1/prompts/{numeric_id}`** upserts per-user **`data`** in **`app_user_prompt`**.
-
-    **Visual manual:** **`GET`** or **`POST /api/v1/visual-manual`** reads bundled **`data/skills/art_skills/*`** (**POST** matches Electron-era **`POST /api/project/getVisualManual`**; body ignored). **`POST /api/v1/project/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** mirror **`addVisualManual`** / **`editVisualManual`** / **`deleteVisualManual`** (same 12 Markdown slots as **`GET`**). **`image`** paths stay relative under **`data/skills`** (no OSS signing).
-
-    **Text model default:** **`GET /api/v1/models/text-default`** replaces Electron-era **`POST /api/setting/getTextModel`** stub (**`data`: `"123"`**) with the same placeholder plus a real **`default_model_id`**. Priority: per-user preference (set via **`PATCH /api/v1/models/text-default`** → `app_user_profile.preferred_text_model_id`) → **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`** env → first catalog text model.
-
-    **Dev settings:** **`GET /api/v1/settings/dev/switch-ai-tool`** returns the process-local effective value for Electron-era **`getSwitchAiDevTool`**. **`PUT`** validates **`value`** (**`"0"`** / **`"1"`**) and updates the in-process override; startup bootstraps from **`TOONFLOW_SWITCH_AI_DEV_TOOL`**, and restart resets to env/default.
-
-    **Memory config (RAG / summary limits):** **`GET`** and **`POST /api/v1/settings/memory-config`** mirror Electron-era **`getMemory`** / **`sureMemory`** (**camelCase** fields, same defaults as SQLite **`initDB`**). Values persist per user in **`app_user_profile.memory_config`** with server defaults as fallback; when **`DATABASE_URL`** is unset these endpoints return **503** **`database_error`** instead of using process-local storage.
-    **`POST /api/v1/settings/memory-config/clear-agent-memories`** maps Electron-era **`delAllMemory`**: SaaS requires **`projectId`** + **`agentType`** (optional **`episodesId`**); clears **`app_agent_memory`** for the JWT user only — same rows as **`POST /api/v1/agents/memory/clear`** with **`clearType: all`** (not a global SQLite wipe).
-
-    **Vendor summary (keyless):** **`GET /api/v1/settings/vendors/summary`** replaces the *non-secret* part of Electron-era **`getVendorList`** intent (vendor ids, names, model counts) from the same static catalog as **`GET /api/v1/models`**. It never returns **`inputValues`** / API keys (those stay in server env or billing).
-    **`POST /api/v1/settings/vendors/model-test`** validates Electron-era **`modelTest`** fields and enqueues **`app_generation_job`** kind **`settings.vendor.model_test`** (**`queued`** **`JobRow`**); the worker then performs a live probe: **text/image** use a stored vendor credential when available (fallback **`OPENAI_API_KEY`** / **`LLM_API_KEY`**), while **video** resolves **Runway/Pika/Kling** and submits a minimal provider request (fallback provider env vars).
-    **Vendor writes (SQLite → SaaS):** **`POST …/vendors/add`**, **`…/update`**, **`…/delete`**, **`…/enable`**, **`…/update-code`**, **`…/code-from-link`** now persist non-sensitive vendor metadata into **`app_user_profile.vendor_config`**. The Rust API stores **`tsCode`** / **`code_link`** references only; it does **not** execute TS, evaluate vm2, or fetch remote code server-side.
-
-    **Danger / wipe (Electron-only):** Legacy **`POST /api/other/deleteAllData`** and **`GET /api/setting/dbConfig/clearData`** rebuilt local SQLite. SaaS keeps **`POST /api/v1/settings/danger/delete-all-data`** and **`POST …/danger/clear-database`** as **501** **`not_implemented`** placeholders — no bulk wipe endpoint on the hosted API. The supported operational replacement is the guarded CLI: **`cargo run --bin toonflow-server -- ops clear-user-data --user-id <uuid> --dry-run`** and then **`--execute --confirm clear-user-data:<uuid>`**.
-
-    **Agent deploy (local SQLite → SaaS):** **`POST /api/v1/settings/agent-deploy/list`** returns the four default **`o_agentDeploy`** rows from **`initDB`**, overlaid with per-user model selection from **`app_user_profile.agent_deploy_config`** when Postgres is configured. **`POST …/deploy-model`** persists model / vendor choice for one of the four rows. **`POST …/set-key`** is a safe **200** no-op: keys are still server-side only.
-
-    **Script agent plan (SQLite → SaaS):** **`POST /api/v1/script-agent/get-plan-data`**, **`POST …/set-plan-data`**, **`POST …/update-data`** accept the same JSON shapes as Electron-era **`/api/scriptAgent/getPlanData`**, **`setPlanData`**, **`updateData`**, backed by Postgres **`app_script_agent_plan`** + **`app_script`** (JWT **`owner_user_id`**, project by **`app_project.numeric_id`**). Responses use the Electron-era **`{ code, data, message }`** envelope (**`code`** is numeric **200** on success). Live agent streaming remains **Harness WS**.
-
-    **Asset generate (SQLite image pipeline → SaaS):** **`POST …/assets-generate/generate`**, **`polish-prompt`**, **`batch-generate`**, **`batch-polish`** validate Electron-era bodies, resolve **`app_project`**, check quota, enqueue one **`app_generation_job`** each (**`asset.generate.image`**, **`asset.polish.prompt`**, **`asset.generate.batch`**, **`asset.polish.batch`**). **`POST …/assets-generate/cancel-generate`** mirrors Electron-era cancel semantics by marking caller-owned **`app_asset_image`** row (**`numeric_image_id = id`**) as **`生成失败`**, and additionally cancels matching caller-owned queued/running **`asset.generate.*`**/**`asset.polish.*`** jobs for the same asset; response remains **`{ message: "取消成功" }`** (idempotent success when no row matches). **`asset.polish.*`** and **`asset.generate.*`** **`succeeded`** when **`OPENAI_API_KEY`/`LLM_API_KEY`** is set: polish uses chat completions; image jobs call **`POST {OPENAI_BASE_URL}/v1/images/edits`** when **`payload.image_base64`** is present (multipart reference image), otherwise **`POST …/images/generations`** (model from request or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**). Both paths insert **`app_asset_image`** (**`file_path`** = temporary **`url`**). Legacy **`base64`** is normalized into queue **`payload.image_base64`** (raw base64 → **`data:image/jpeg;base64,...`**). **`concurrentCount`** on batch routes is stored in **`payload`** only (worker runs sequentially). Otherwise those jobs **`failed`**.
-
-    **Production / workbench:** Legacy **`/api/production/*`** **`POST`** routes are exposed under **`/api/v1/production/*`**. **29 endpoints fully implemented** including video track management, batch image generation, video generation with Runway/Pika/Kling support, edit-image flow（含 upload-image）, and storyboard CRUD. All endpoints use strict request schemas and return proper responses. Video generation jobs are handled by the worker with provider polling.
-
-    **Task center (replaces `/api/task/*` POST):** use **`GET /api/v1/projects`** (non-empty names + **`numeric_id`** client-side), **`GET /api/v1/jobs/kinds`**, **`GET /api/v1/jobs/page`** (query **`page`/`limit`/`task_class`/`state`/`project_id`**; **`project_id`** only filters when **`> 0`**, same as Electron-era **`projectId`** vs **`payload.project_numeric_id`**), and **`GET /api/v1/jobs/task-detail/{task_id}`** (**UUID** or positive integer / digit path for **`numeric_task_id`**). Flutter **`postTasks*`** names remain as compat wrappers over these GETs.
-
-    **Project CRUD (UUID):** **`GET`/`POST /api/v1/projects`**, **`GET`/`PATCH`/`DELETE /api/v1/projects/{project_id}`**. **Director manual (`story_skills`):** **`POST …/query-director-manual`** (**`{}`**); **`POST …/add-director-manual`** / **`…/edit-director-manual`** / **`…/delete-director-manual`**. **Visual manual (`art_skills`):** **`POST …/add-visual-manual`** / **`…/edit-visual-manual`** / **`…/delete-visual-manual`** (**`stylePath`** = folder under **`art_skills`**).
-
-    **Script list (UUID project):** **`POST …/projects/{project_id}/scripts/get-script-api`** lists scripts under the UUID project with optional substring **`name`** filter and **`relatedAssets`** (**`app_script_asset`** → **`app_asset`** stable **`numeric_id`** values). Flutter **`postGeneralGetSingleProject`** / **`postGeneralUpdateProject`** are compat names only: they use **`GET /api/v1/projects`** (paged, filter by **`numeric_id`**) and **`PATCH /api/v1/projects/{project_id}`** (field mapping from Electron-era camelCase), not **`/api/v1/general/*`**.
-
-        **Novels + novel-events (UUID project):** **`GET`/`POST …/projects/{project_id}/novels`**，**`GET`/`PATCH`/`DELETE …/novels/{novel_numeric_id}`**（**`novel_numeric_id`** = **`app_novel.numeric_id`**）。**`GET`/`POST …/novel-events`**、**`PATCH`/`DELETE …/novel-events/{event_numeric_id}`**、**`POST …/novel-events/batch-delete`**、**`POST …/novel-events/generate-events`**（异步章节事件抽取）。Flutter **`novels_workbench_http` / `novels_events`** 中的 **`postCompat*`** 名称为兼容包装，内部走上述 REST。**已删除** **`/api/v1/novels/*`** 与 **`…/projects/compat/{id}/novel-events*`**。
-
-    **About / updates:** **`POST /api/v1/settings/about/check-update`** accepts the same **`source`** enum as Electron-era **`checkUpdate`** but does **not** fetch **`update.json`** from OSS. Instead it compares the current crate version with an optional env-driven release manifest (**`TOONFLOW_UPDATE_LATEST_VERSION`**, **`TOONFLOW_UPDATE_TIME`**, **`TOONFLOW_UPDATE_{SOURCE}_URL`**); when unset it safely falls back to **`needUpdate: false`** and the current version. **`POST /api/v1/settings/about/download-app`** validates **`url`** then returns **200** with a policy message — Flutter apps use platform stores/installers, not this API.
+    The long narrative that used to live here was removed so **Swagger UI stays scannable** for frontend; git history still has the old text if needed.
 
 servers:
   - url: http://127.0.0.1:8666
