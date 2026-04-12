@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Script CRUD, export, and extraction endpoints.
 /// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — script list + **`relatedAssets`**.
 Future<List<ScriptWorkbenchDetailRow>> postScriptsGetScriptApiByProjectId(
   String accessToken,

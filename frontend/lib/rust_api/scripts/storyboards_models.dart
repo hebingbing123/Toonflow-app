@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Script-side storyboard and batch generation data models.
 class ScriptRow {
   const ScriptRow({
     required this.id,

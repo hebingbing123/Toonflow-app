@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Script-agent plan persistence endpoints.
 /// `POST /api/v1/script-agent/get-plan-data` — OpenAPI `postScriptAgentGetPlanDataV1` (**200**/**404**/**503**).
 Future<int> postScriptAgentGetPlanDataV1(
   String accessToken, {
