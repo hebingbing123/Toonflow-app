@@ -109,6 +109,7 @@ part 'home_page/script_editor/editor.dart';
 part 'home_page/script_editor/edit_image/workbench.dart';
 part 'home_page/script_editor/edit_image/workbench_view.dart';
 part 'home_page/script_editor/workbench.dart';
+part 'home_page/script_editor/workbench_view.dart';
 part 'home_page/storyboard_editor/editor.dart';
 part 'home_page/script_editor/batch/workbench.dart';
 part 'home_page/script_editor/batch/dialog.dart';
