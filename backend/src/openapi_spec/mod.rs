@@ -40,6 +40,7 @@ pub struct CoreHandlersApi;
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
     doc.merge(crate::billing::BillingApi::openapi());
+    doc.merge(crate::settings::SettingsOpenApi::openapi());
     doc.merge(crate::production::ProductionApi::openapi());
     doc.merge(crate::jobs::JobsOpenApi::openapi());
     doc.merge(crate::harness::HarnessOpenApi::openapi());

@@ -48,13 +48,13 @@ impl CheckUpdateSource {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct CheckUpdateBody {
+pub(crate) struct CheckUpdateBody {
     source: CheckUpdateSource,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct CheckUpdateResponse {
+pub(crate) struct CheckUpdateResponse {
     pub need_update: bool,
     pub latest_version: String,
     pub reinstall: bool,
@@ -165,7 +165,21 @@ fn resolve_check_update_response(
     }
 }
 
-async fn post_check_update(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/about/check-update",
+    operation_id = "postAboutCheckUpdateV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_check_update(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<CheckUpdateBody>,
@@ -176,18 +190,32 @@ async fn post_check_update(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct DownloadAppBody {
+pub(crate) struct DownloadAppBody {
     url: String,
     reinstall: bool,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct DownloadAppAcceptedResponse {
+pub(crate) struct DownloadAppAcceptedResponse {
     message: &'static str,
 }
 
-async fn post_download_app(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/about/download-app",
+    operation_id = "postAboutDownloadAppV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_download_app(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DownloadAppBody>,

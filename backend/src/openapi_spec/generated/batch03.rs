@@ -2,39 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    patch,
-    path = "/api/v1/prompts/{numeric_id}",
-    operation_id = "patchPromptByNumericIdV1",
-    tag = "prompts",
-    summary = "Update prompt template body by slot id",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_patch_prompt_by_numeric_id_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/quality/reviews",
-    operation_id = "listQualityReviewsV1",
-    tag = "quality",
-    summary = "List quality reviews for the current user",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_quality_reviews_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/quality/reviews",
-    operation_id = "createQualityReviewV1",
-    tag = "quality",
-    summary = "Create a quality review for the current user",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_create_quality_review_v1() {}
-
-    #[utoipa::path(
     get,
     path = "/api/v1/quality/reviews/{id}",
     operation_id = "getQualityReviewV1",
@@ -134,187 +101,107 @@ mod stubs {
     pub(crate) fn op_poll_script_extract_state_v1() {}
 
     #[utoipa::path(
-    post,
-    path = "/api/v1/settings/about/check-update",
-    operation_id = "postAboutCheckUpdateV1",
-    tag = "settings",
-    summary = "Desktop update check (SaaS policy response)",
+    get,
+    path = "/api/v1/skills",
+    operation_id = "listSkillsV1",
+    tag = "skills",
+    summary = "List Markdown skills (relative paths under `data/skills`)",
     responses((status = 200, description = "OK"))
 )]
     #[allow(dead_code)]
-    pub(crate) fn op_post_about_check_update_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/about/download-app",
-    operation_id = "postAboutDownloadAppV1",
-    tag = "settings",
-    summary = "Download and run installer (policy response only)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_about_download_app_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/agent-deploy/deploy-model",
-    operation_id = "postSettingsAgentDeployModelV1",
-    tag = "settings",
-    summary = "Update agent deploy row",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_agent_deploy_model_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/agent-deploy/list",
-    operation_id = "postSettingsAgentDeployListV1",
-    tag = "settings",
-    summary = "List agent deploy rows with user overlay",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_agent_deploy_list_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/agent-deploy/set-key",
-    operation_id = "postSettingsAgentDeploySetKeyV1",
-    tag = "settings",
-    summary = "Ignore vendor API key body and confirm server-side policy",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_agent_deploy_set_key_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/danger/clear-database",
-    operation_id = "postSettingsDangerClearDatabaseV1",
-    tag = "settings",
-    summary = "Legacy drop all SQLite tables and re-init (not supported)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_danger_clear_database_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/danger/delete-all-data",
-    operation_id = "postSettingsDangerDeleteAllDataV1",
-    tag = "settings",
-    summary = "Legacy wipe all local tables (not supported)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_danger_delete_all_data_v1() {}
+    pub(crate) fn op_list_skills_v1() {}
 
     #[utoipa::path(
     get,
-    path = "/api/v1/settings/dev/switch-ai-tool",
-    operation_id = "getSwitchAiDevToolV1",
-    tag = "settings",
-    summary = "AI dev-tool switch (effective server value)",
+    path = "/api/v1/skills/binary",
+    operation_id = "getSkillBinaryV1",
+    tag = "skills",
+    summary = "Read one bundled image under `data/skills` (binary)",
     responses((status = 200, description = "OK"))
 )]
     #[allow(dead_code)]
-    pub(crate) fn op_get_switch_ai_dev_tool_v1() {}
-
-    #[utoipa::path(
-    put,
-    path = "/api/v1/settings/dev/switch-ai-tool",
-    operation_id = "putSwitchAiDevToolV1",
-    tag = "settings",
-    summary = "Update AI dev-tool switch (not persisted)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_put_switch_ai_dev_tool_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/settings/memory-config",
-    operation_id = "getMemoryConfigV1",
-    tag = "settings",
-    summary = "Memory / RAG configuration (Electron-era getMemory)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_memory_config_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/memory-config",
-    operation_id = "postMemoryConfigV1",
-    tag = "settings",
-    summary = "Save memory / RAG configuration (Electron-era sureMemory)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_memory_config_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/memory-config/clear-agent-memories",
-    operation_id = "postSettingsClearAgentMemoriesV1",
-    tag = "settings",
-    summary = "Clear all agent memory for a project (Electron-era delAllMemory scope)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_clear_agent_memories_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/vendors/add",
-    operation_id = "postSettingsVendorsAddV1",
-    tag = "settings",
-    summary = "Add custom vendor metadata",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_vendors_add_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/vendors/code-from-link",
-    operation_id = "postSettingsVendorsCodeFromLinkV1",
-    tag = "settings",
-    summary = "Store external provider-code link metadata",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_post_settings_vendors_code_from_link_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/settings/vendors/credential",
-    operation_id = "storeVendorCredentialV1",
-    tag = "settings",
-    summary = "Store vendor API credential (encrypted)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_store_vendor_credential_v1() {}
+    pub(crate) fn op_get_skill_binary_v1() {}
 
     #[utoipa::path(
     delete,
-    path = "/api/v1/settings/vendors/credential/{vendor_id}",
-    operation_id = "deleteVendorCredentialV1",
-    tag = "settings",
-    summary = "Delete vendor credential",
+    path = "/api/v1/skills/content",
+    operation_id = "deleteSkillContentV1",
+    tag = "skills",
+    summary = "Delete one skill file",
     responses((status = 200, description = "OK"))
 )]
     #[allow(dead_code)]
-    pub(crate) fn op_delete_vendor_credential_v1() {}
+    pub(crate) fn op_delete_skill_content_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/skills/content",
+    operation_id = "getSkillContentV1",
+    tag = "skills",
+    summary = "Read one skill file (UTF-8 text)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_skill_content_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/skills/content",
+    operation_id = "postSkillContentV1",
+    tag = "skills",
+    summary = "Create a new skill file (UTF-8 text)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_post_skill_content_v1() {}
+
+    #[utoipa::path(
+    put,
+    path = "/api/v1/skills/content",
+    operation_id = "putSkillContentV1",
+    tag = "skills",
+    summary = "Overwrite an existing skill file (UTF-8 text)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_put_skill_content_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/skills/summary",
+    operation_id = "getSkillsSummaryV1",
+    tag = "skills",
+    summary = "Aggregate Markdown skill count and total bytes",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_skills_summary_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/visual-manual",
+    operation_id = "getVisualManualV1",
+    tag = "skills",
+    summary = "List bundled art style visual manuals (Markdown slots + image paths)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_visual_manual_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/visual-manual",
+    operation_id = "postVisualManualV1",
+    tag = "skills",
+    summary = "Same as GET — Electron-era POST verb for getVisualManual",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_post_visual_manual_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_patch_prompt_by_numeric_id_v1,
-    stubs::op_list_quality_reviews_v1,
-    stubs::op_create_quality_review_v1,
     stubs::op_get_quality_review_v1,
     stubs::op_get_quality_stage_pass_rate_v1,
     stubs::op_get_quality_stats_v1,
@@ -324,21 +211,14 @@ mod stubs {
     stubs::op_export_scripts_zip_v1,
     stubs::op_start_script_asset_extract_v1,
     stubs::op_poll_script_extract_state_v1,
-    stubs::op_post_about_check_update_v1,
-    stubs::op_post_about_download_app_v1,
-    stubs::op_post_settings_agent_deploy_model_v1,
-    stubs::op_post_settings_agent_deploy_list_v1,
-    stubs::op_post_settings_agent_deploy_set_key_v1,
-    stubs::op_post_settings_danger_clear_database_v1,
-    stubs::op_post_settings_danger_delete_all_data_v1,
-    stubs::op_get_switch_ai_dev_tool_v1,
-    stubs::op_put_switch_ai_dev_tool_v1,
-    stubs::op_get_memory_config_v1,
-    stubs::op_post_memory_config_v1,
-    stubs::op_post_settings_clear_agent_memories_v1,
-    stubs::op_post_settings_vendors_add_v1,
-    stubs::op_post_settings_vendors_code_from_link_v1,
-    stubs::op_store_vendor_credential_v1,
-    stubs::op_delete_vendor_credential_v1
+    stubs::op_list_skills_v1,
+    stubs::op_get_skill_binary_v1,
+    stubs::op_delete_skill_content_v1,
+    stubs::op_get_skill_content_v1,
+    stubs::op_post_skill_content_v1,
+    stubs::op_put_skill_content_v1,
+    stubs::op_get_skills_summary_v1,
+    stubs::op_get_visual_manual_v1,
+    stubs::op_post_visual_manual_v1
 ))]
 pub struct ApiDocBatch03;

@@ -18,4 +18,7 @@ pub mod agent_memory;
 pub mod danger;
 pub mod dev;
 pub mod memory_config;
+pub mod openapi;
 pub mod vendors;
+
+pub use openapi::SettingsOpenApi;

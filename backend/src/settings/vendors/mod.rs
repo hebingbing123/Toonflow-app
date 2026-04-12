@@ -10,7 +10,7 @@
 //! API 密钥（`inputValues`）故意不存储；使用服务器环境或 Vault。
 
 mod dto;
-mod handlers;
+pub(crate) mod handlers;
 mod store;
 
 pub(super) const MAX_VENDOR_MODEL_TEST_FIELD_LEN: usize = 512;

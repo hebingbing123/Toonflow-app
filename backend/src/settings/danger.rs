@@ -18,7 +18,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct EmptyDangerBody {}
+pub(crate) struct EmptyDangerBody {}
 
 fn wipe_not_supported() -> ApiError {
     ApiError::NotImplemented(
@@ -27,7 +27,21 @@ fn wipe_not_supported() -> ApiError {
     )
 }
 
-async fn post_delete_all_data(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/danger/delete-all-data",
+    operation_id = "postSettingsDangerDeleteAllDataV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 501, description = "Not implemented", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_delete_all_data(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(_body): Json<EmptyDangerBody>,
@@ -36,7 +50,21 @@ async fn post_delete_all_data(
     Err(wipe_not_supported())
 }
 
-async fn post_clear_database(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/danger/clear-database",
+    operation_id = "postSettingsDangerClearDatabaseV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 501, description = "Not implemented", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_clear_database(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(_body): Json<EmptyDangerBody>,

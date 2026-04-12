@@ -69,7 +69,7 @@ struct MessageRow {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct ContentBlock {
+pub(crate) struct ContentBlock {
     #[serde(rename = "type")]
     block_type: &'static str,
     status: &'static str,
@@ -78,7 +78,7 @@ struct ContentBlock {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct MemoryHistoryItem {
+pub(crate) struct MemoryHistoryItem {
     id: String,
     role: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -90,7 +90,7 @@ struct MemoryHistoryItem {
 }
 
 #[derive(Serialize)]
-struct AppendMemoryResponse {
+pub(crate) struct AppendMemoryResponse {
     id: String,
 }
 
@@ -174,7 +174,21 @@ pub(crate) async fn delete_all_agent_memory_rows(
     Ok(())
 }
 
-async fn query_memory(
+#[utoipa::path(
+    post,
+    path = "/api/v1/agents/memory/query",
+    operation_id = "queryAgentMemoryV1",
+    tag = "agents",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn query_memory(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<QueryMemoryBody>,
@@ -234,7 +248,21 @@ async fn query_memory(
     Ok(Json(out))
 }
 
-async fn clear_memory(
+#[utoipa::path(
+    post,
+    path = "/api/v1/agents/memory/clear",
+    operation_id = "clearAgentMemoryV1",
+    tag = "agents",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn clear_memory(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<ClearMemoryBody>,
@@ -354,7 +382,21 @@ async fn clear_memory(
     Ok(Json(ClearMemoryResponse { ok: true }))
 }
 
-async fn append_memory(
+#[utoipa::path(
+    post,
+    path = "/api/v1/agents/memory/append",
+    operation_id = "appendAgentMemoryV1",
+    tag = "agents",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn append_memory(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AppendMemoryBody>,

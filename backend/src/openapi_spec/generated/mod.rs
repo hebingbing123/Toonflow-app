@@ -5,7 +5,6 @@ mod batch00;
 mod batch01;
 mod batch02;
 mod batch03;
-mod batch04;
 
 /// All YAML-derived path stubs merged into one [`utoipa::openapi::OpenApi`].
 pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {
@@ -13,6 +12,5 @@ pub fn merged_generated_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(batch01::ApiDocBatch01::openapi());
     doc.merge(batch02::ApiDocBatch02::openapi());
     doc.merge(batch03::ApiDocBatch03::openapi());
-    doc.merge(batch04::ApiDocBatch04::openapi());
     doc
 }

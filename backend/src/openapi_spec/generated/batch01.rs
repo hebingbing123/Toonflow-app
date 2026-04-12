@@ -2,39 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/summary",
-    operation_id = "getProjectsSummaryV1",
-    tag = "projects",
-    summary = "Aggregate project, script, storyboard, novel, role, art-style, asset, and video counts for the current user",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_projects_summary_v1() {}
-
-    #[utoipa::path(
-    delete,
-    path = "/api/v1/projects/{project_id}",
-    operation_id = "deleteProjectByProjectIdV1",
-    tag = "projects",
-    summary = "Delete project by UUID",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_delete_project_by_project_id_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}",
-    operation_id = "getProjectByProjectIdV1",
-    tag = "projects",
-    summary = "Project detail by UUID",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_project_by_project_id_v1() {}
-
-    #[utoipa::path(
     patch,
     path = "/api/v1/projects/{project_id}",
     operation_id = "patchProjectByProjectIdV1",
@@ -308,13 +275,43 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_patch_project_asset_image_by_project_id_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",
+    operation_id = "getProjectAssetImageFileByProjectIdV1",
+    tag = "assets",
+    summary = "Download asset image bytes or redirect (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_project_asset_image_file_by_project_id_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}/novel-events",
+    operation_id = "listProjectNovelEventsByProjectIdV1",
+    tag = "novel-events",
+    summary = "List novel events with chapter associations (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_project_novel_events_by_project_id_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/projects/{project_id}/novel-events",
+    operation_id = "createProjectNovelEventByProjectIdV1",
+    tag = "novel-events",
+    summary = "Create a novel event with chapter associations (by project UUID)",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_create_project_novel_event_by_project_id_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_get_projects_summary_v1,
-    stubs::op_delete_project_by_project_id_v1,
-    stubs::op_get_project_by_project_id_v1,
     stubs::op_patch_project_by_project_id_v1,
     stubs::op_list_project_assets_by_project_id_v1,
     stubs::op_create_project_asset_by_project_id_v1,
@@ -339,6 +336,9 @@ mod stubs {
     stubs::op_create_project_asset_image_by_project_id_v1,
     stubs::op_delete_project_asset_image_by_project_id_v1,
     stubs::op_get_project_asset_image_by_project_id_v1,
-    stubs::op_patch_project_asset_image_by_project_id_v1
+    stubs::op_patch_project_asset_image_by_project_id_v1,
+    stubs::op_get_project_asset_image_file_by_project_id_v1,
+    stubs::op_list_project_novel_events_by_project_id_v1,
+    stubs::op_create_project_novel_event_by_project_id_v1
 ))]
 pub struct ApiDocBatch01;

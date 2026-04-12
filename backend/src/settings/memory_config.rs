@@ -23,7 +23,7 @@ use crate::settings::agent_memory::{self, ClearMemoryResponse};
 use crate::state::{AppState, MemoryConfig};
 
 #[derive(Debug, Serialize)]
-struct MemoryConfigSavedResponse {
+pub(crate) struct MemoryConfigSavedResponse {
     /// Electron-era **`sureMemory`** success message string.
     message: &'static str,
 }
@@ -66,7 +66,19 @@ async fn save_memory_config(
     Ok(())
 }
 
-async fn get_memory_config(
+#[utoipa::path(
+    get,
+    path = "/api/v1/settings/memory-config",
+    operation_id = "getMemoryConfigV1",
+    tag = "settings",
+    responses(
+        (status = 200, description = "OK", body = crate::state::MemoryConfig),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_memory_config(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<MemoryConfig>, ApiError> {
@@ -80,7 +92,21 @@ async fn get_memory_config(
     Ok(Json(cfg))
 }
 
-async fn post_memory_config(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/memory-config",
+    operation_id = "postMemoryConfigV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_memory_config(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<MemoryConfig>,
@@ -98,14 +124,28 @@ async fn post_memory_config(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ClearAgentMemoriesSettingsBody {
+pub(crate) struct ClearAgentMemoriesSettingsBody {
     project_id: i32,
     agent_type: String,
     #[serde(default)]
     episodes_id: Option<i32>,
 }
 
-async fn post_clear_agent_memories_type_field_alias(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/memory-config/clear-agent-memories",
+    operation_id = "postSettingsClearAgentMemoriesV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_clear_agent_memories_type_field_alias(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<ClearAgentMemoriesSettingsBody>,

@@ -2,39 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/assets/{asset_numeric_id}/images/{image_id}/file",
-    operation_id = "getProjectAssetImageFileByProjectIdV1",
-    tag = "assets",
-    summary = "Download asset image bytes or redirect (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_get_project_asset_image_file_by_project_id_v1() {}
-
-    #[utoipa::path(
-    get,
-    path = "/api/v1/projects/{project_id}/novel-events",
-    operation_id = "listProjectNovelEventsByProjectIdV1",
-    tag = "novel-events",
-    summary = "List novel events with chapter associations (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_list_project_novel_events_by_project_id_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/projects/{project_id}/novel-events",
-    operation_id = "createProjectNovelEventByProjectIdV1",
-    tag = "novel-events",
-    summary = "Create a novel event with chapter associations (by project UUID)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_create_project_novel_event_by_project_id_v1() {}
-
-    #[utoipa::path(
     post,
     path = "/api/v1/projects/{project_id}/novel-events/batch-delete",
     operation_id = "batchDeleteProjectNovelEventsByProjectIdV1",
@@ -308,13 +275,43 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_get_prompt_by_numeric_id_v1() {}
+
+    #[utoipa::path(
+    patch,
+    path = "/api/v1/prompts/{numeric_id}",
+    operation_id = "patchPromptByNumericIdV1",
+    tag = "prompts",
+    summary = "Update prompt template body by slot id",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_patch_prompt_by_numeric_id_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/quality/reviews",
+    operation_id = "listQualityReviewsV1",
+    tag = "quality",
+    summary = "List quality reviews for the current user",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_quality_reviews_v1() {}
+
+    #[utoipa::path(
+    post,
+    path = "/api/v1/quality/reviews",
+    operation_id = "createQualityReviewV1",
+    tag = "quality",
+    summary = "Create a quality review for the current user",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_create_quality_review_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_get_project_asset_image_file_by_project_id_v1,
-    stubs::op_list_project_novel_events_by_project_id_v1,
-    stubs::op_create_project_novel_event_by_project_id_v1,
     stubs::op_batch_delete_project_novel_events_by_project_id_v1,
     stubs::op_post_project_novel_events_generate_events_v1,
     stubs::op_delete_project_novel_event_by_project_id_v1,
@@ -339,6 +336,9 @@ mod stubs {
     stubs::op_get_storyboard_by_project_and_legacy_v1,
     stubs::op_patch_storyboard_by_project_and_legacy_v1,
     stubs::op_list_prompts_v1,
-    stubs::op_get_prompt_by_numeric_id_v1
+    stubs::op_get_prompt_by_numeric_id_v1,
+    stubs::op_patch_prompt_by_numeric_id_v1,
+    stubs::op_list_quality_reviews_v1,
+    stubs::op_create_quality_review_v1
 ))]
 pub struct ApiDocBatch02;

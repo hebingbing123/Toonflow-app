@@ -26,7 +26,19 @@ use super::dto::{
 use super::store::{load_vendor_config, save_vendor_config};
 use super::MAX_VENDOR_MODEL_TEST_FIELD_LEN;
 
-pub(super) async fn get_vendors_summary(
+#[utoipa::path(
+    get,
+    path = "/api/v1/settings/vendors/summary",
+    operation_id = "getSettingsVendorsSummaryV1",
+    tag = "settings",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_vendors_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<VendorsSummaryResponse>, ApiError> {
@@ -59,7 +71,21 @@ pub(super) async fn get_vendors_summary(
     }))
 }
 
-pub(super) async fn post_vendor_model_test(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/model-test",
+    operation_id = "postSettingsVendorModelTestV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_vendor_model_test(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorModelTestBody>,
@@ -103,7 +129,21 @@ pub(super) async fn post_vendor_model_test(
     Ok(Json(row))
 }
 
-pub(super) async fn post_add_vendor(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/add",
+    operation_id = "postSettingsVendorsAddV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_add_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AddVendorBody>,
@@ -144,7 +184,21 @@ pub(super) async fn post_add_vendor(
     })))
 }
 
-pub(super) async fn post_update_vendor(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/update",
+    operation_id = "postSettingsVendorsUpdateV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_update_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorBody>,
@@ -188,7 +242,22 @@ pub(super) async fn post_update_vendor(
     }))
 }
 
-pub(super) async fn post_delete_vendor(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/delete",
+    operation_id = "postSettingsVendorsDeleteV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_delete_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeleteVendorBody>,
@@ -230,7 +299,21 @@ pub(super) async fn post_delete_vendor(
     })))
 }
 
-pub(super) async fn post_enable_vendor(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/enable",
+    operation_id = "postSettingsVendorsEnableV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_enable_vendor(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<EnableVendorBody>,
@@ -256,7 +339,21 @@ pub(super) async fn post_enable_vendor(
     })))
 }
 
-pub(super) async fn post_update_vendor_code(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/update-code",
+    operation_id = "postSettingsVendorsUpdateCodeV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_update_vendor_code(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<UpdateVendorCodeBody>,
@@ -287,7 +384,21 @@ pub(super) async fn post_update_vendor_code(
     })))
 }
 
-pub(super) async fn post_vendor_code_from_link(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/code-from-link",
+    operation_id = "postSettingsVendorsCodeFromLinkV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_vendor_code_from_link(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<VendorCodeFromLinkBody>,
@@ -339,7 +450,22 @@ pub(super) async fn post_vendor_code_from_link(
     })))
 }
 
-pub(super) async fn post_store_credential(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/vendors/credential",
+    operation_id = "storeVendorCredentialV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 501, description = "Not implemented", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_store_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<StoreCredentialBody>,
@@ -404,8 +530,25 @@ pub(super) async fn post_store_credential(
     }))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/settings/vendors/credential/{vendor_id}",
+    operation_id = "getVendorCredentialV1",
+    tag = "settings",
+    params(
+        ("vendor_id" = String, Path, description = "Vendor id")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 #[allow(clippy::type_complexity)]
-pub(super) async fn get_credential(
+pub(crate) async fn get_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(vendor_id): Path<String>,
@@ -448,7 +591,24 @@ pub(super) async fn get_credential(
     }))
 }
 
-pub(super) async fn delete_credential(
+#[utoipa::path(
+    delete,
+    path = "/api/v1/settings/vendors/credential/{vendor_id}",
+    operation_id = "deleteVendorCredentialV1",
+    tag = "settings",
+    params(
+        ("vendor_id" = String, Path, description = "Vendor id")
+    ),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn delete_credential(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(vendor_id): Path<String>,

@@ -23,11 +23,23 @@ pub struct SwitchAiDevToolResponse {
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct SwitchAiDevToolPutBody {
+pub(crate) struct SwitchAiDevToolPutBody {
     value: String,
 }
 
-async fn get_switch_ai_dev_tool(
+#[utoipa::path(
+    get,
+    path = "/api/v1/settings/dev/switch-ai-tool",
+    operation_id = "getSwitchAiDevToolV1",
+    tag = "settings",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn get_switch_ai_dev_tool(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<SwitchAiDevToolResponse>, ApiError> {
@@ -36,7 +48,21 @@ async fn get_switch_ai_dev_tool(
     Ok(Json(SwitchAiDevToolResponse { value }))
 }
 
-async fn put_switch_ai_dev_tool(
+#[utoipa::path(
+    put,
+    path = "/api/v1/settings/dev/switch-ai-tool",
+    operation_id = "putSwitchAiDevToolV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn put_switch_ai_dev_tool(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<SwitchAiDevToolPutBody>,

@@ -2,39 +2,6 @@
 
 mod stubs {
     #[utoipa::path(
-    post,
-    path = "/api/v1/agents/memory/append",
-    operation_id = "appendAgentMemoryV1",
-    tag = "agents",
-    summary = "Append a single message memory (no auto-summary)",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_append_agent_memory_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/agents/memory/clear",
-    operation_id = "clearAgentMemoryV1",
-    tag = "agents",
-    summary = "Clear agent memories for an integer project id scope",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_clear_agent_memory_v1() {}
-
-    #[utoipa::path(
-    post,
-    path = "/api/v1/agents/memory/query",
-    operation_id = "queryAgentMemoryV1",
-    tag = "agents",
-    summary = "List agent message memories for an integer project id scope",
-    responses((status = 200, description = "OK"))
-)]
-    #[allow(dead_code)]
-    pub(crate) fn op_query_agent_memory_v1() {}
-
-    #[utoipa::path(
     get,
     path = "/api/v1/art-styles",
     operation_id = "listArtStylesV1",
@@ -308,13 +275,43 @@ mod stubs {
 )]
     #[allow(dead_code)]
     pub(crate) fn op_create_project_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/projects/summary",
+    operation_id = "getProjectsSummaryV1",
+    tag = "projects",
+    summary = "Aggregate project, script, storyboard, novel, role, art-style, asset, and video counts for the current user",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_projects_summary_v1() {}
+
+    #[utoipa::path(
+    delete,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "deleteProjectByProjectIdV1",
+    tag = "projects",
+    summary = "Delete project by UUID",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_delete_project_by_project_id_v1() {}
+
+    #[utoipa::path(
+    get,
+    path = "/api/v1/projects/{project_id}",
+    operation_id = "getProjectByProjectIdV1",
+    tag = "projects",
+    summary = "Project detail by UUID",
+    responses((status = 200, description = "OK"))
+)]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_project_by_project_id_v1() {}
 }
 
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
-    stubs::op_append_agent_memory_v1,
-    stubs::op_clear_agent_memory_v1,
-    stubs::op_query_agent_memory_v1,
     stubs::op_list_art_styles_v1,
     stubs::op_create_art_style_v1,
     stubs::op_extract_art_style_prompt_v1,
@@ -339,6 +336,9 @@ mod stubs {
     stubs::op_post_project_edit_visual_manual_v1,
     stubs::op_post_project_query_director_manual_v1,
     stubs::op_list_projects_v1,
-    stubs::op_create_project_v1
+    stubs::op_create_project_v1,
+    stubs::op_get_projects_summary_v1,
+    stubs::op_delete_project_by_project_id_v1,
+    stubs::op_get_project_by_project_id_v1
 ))]
 pub struct ApiDocBatch00;

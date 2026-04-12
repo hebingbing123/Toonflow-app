@@ -21,11 +21,11 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct AgentDeployListBody {}
+pub(crate) struct AgentDeployListBody {}
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct AgentDeployListItem {
+pub(crate) struct AgentDeployListItem {
     id: i32,
     model: String,
     key: String,
@@ -56,14 +56,14 @@ struct AgentDeployConfig {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct AgentDeploySavedResponse {
+pub(crate) struct AgentDeploySavedResponse {
     key: String,
     message: &'static str,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct AgentDeployKeyIgnoredResponse {
+pub(crate) struct AgentDeployKeyIgnoredResponse {
     message: &'static str,
 }
 
@@ -160,7 +160,21 @@ async fn save_agent_deploy_config(
     Ok(())
 }
 
-async fn post_agent_deploy_list(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/agent-deploy/list",
+    operation_id = "postSettingsAgentDeployListV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_agent_deploy_list(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(_body): Json<AgentDeployListBody>,
@@ -182,7 +196,7 @@ async fn post_agent_deploy_list(
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct DeployAgentModelBody {
+pub(crate) struct DeployAgentModelBody {
     id: i32,
     name: String,
     model: String,
@@ -192,7 +206,21 @@ struct DeployAgentModelBody {
     desc: String,
 }
 
-async fn post_deploy_agent_model(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/agent-deploy/deploy-model",
+    operation_id = "postSettingsAgentDeployModelV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_deploy_agent_model(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<DeployAgentModelBody>,
@@ -233,12 +261,26 @@ async fn post_deploy_agent_model(
 #[allow(dead_code)] // Deserialize-only; keys are not accepted over HTTP.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct AgentSetKeyBody {
+pub(crate) struct AgentSetKeyBody {
     #[serde(default)]
     key: Option<String>,
 }
 
-async fn post_agent_set_key(
+#[utoipa::path(
+    post,
+    path = "/api/v1/settings/agent-deploy/set-key",
+    operation_id = "postSettingsAgentDeploySetKeyV1",
+    tag = "settings",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
+pub(crate) async fn post_agent_set_key(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<AgentSetKeyBody>,
