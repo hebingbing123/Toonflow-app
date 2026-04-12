@@ -17,12 +17,21 @@ flutter run -d macos           # macOS 桌面
 flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8666
 ```
 
-本地全链路（登录 → `GET /api/v1/me` → WebSocket）需与 `supabase start` 一致的项目 URL 与 **anon key**（`supabase status`）：
+本地全链路（登录 → `GET /api/v1/me` → WebSocket）需与 `supabase start` 一致的项目 URL 与 **anon key**（`supabase status -o env`）。
+
+推荐：`dart_defines.dev.json` 已与默认配置对齐（Rust **`API_BASE_URL` → 8666**；Supabase **`SUPABASE_URL` → 64321**，见 `supabase/config.toml`）。若你改了 Supabase 端口，请同步编辑该 JSON：
+
+```bash
+cd frontend
+flutter run -d chrome --dart-define-from-file=dart_defines.dev.json
+```
+
+或手写 `--dart-define`（端口以 `supabase status` 为准）：
 
 ```bash
 flutter run -d chrome \
   --dart-define=API_BASE_URL=http://127.0.0.1:8666 \
-  --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
+  --dart-define=SUPABASE_URL=http://127.0.0.1:64321 \
   --dart-define=SUPABASE_ANON_KEY=eyJ...你的anon密钥
 ```
 
