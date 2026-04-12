@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// OpenAPI **`MemoryConfig`** — prior **`getMemory`** / **`sureMemory`** (**camelCase**).
 class MemoryConfigV1 {

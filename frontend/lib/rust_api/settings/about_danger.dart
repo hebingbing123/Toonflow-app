@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `POST /api/v1/settings/danger/delete-all-data` — OpenAPI `postSettingsDangerDeleteAllDataV1` (typically **501**).
 Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {

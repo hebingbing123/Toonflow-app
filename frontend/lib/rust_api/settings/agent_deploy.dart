@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// OpenAPI **`AgentDeployListItem`** — prior **`o_agentDeploy`** row shape (**camelCase**).
 class AgentDeployListItemV1 {

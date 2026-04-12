@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// OpenAPI `VendorCredentialResponse` — encrypted vendor credential metadata only.
 class VendorCredentialResponseV1 {

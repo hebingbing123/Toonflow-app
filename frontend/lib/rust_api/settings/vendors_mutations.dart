@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `POST /api/v1/settings/vendors/model-test` — OpenAPI `postSettingsVendorModelTestV1`.
 /// **200** = **`queued`** **`JobRow`** (**`settings.vendor.model_test`**); **429**/**503** as elsewhere.
