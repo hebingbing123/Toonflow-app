@@ -12,6 +12,8 @@
 //!
 //! **过渡期**：`legacy_components` 仍从嵌入 JSON 批量注册组件名，直到每个 `ref("…")` 都有对应 Rust `ToSchema`；
 //! 每迁走一个 schema，从 JSON 删掉该键并执行 `python3 scripts/gen_legacy_utoipa_registry.py` 再提交。
+//! **已迁 Rust（示例）**：`manuals::art_styles` 的 6 个 DTO 经 [`crate::manuals::art_styles::ArtStyleSchemasOpenApi`] 在 `legacy` 之前合并；
+//! `scripts/extract_openapi_rust_sources.py` 会跳过同名键以免抽回 JSON。
 
 mod generated;
 mod legacy_components;
@@ -54,6 +56,7 @@ pub struct CoreHandlersApi;
 /// Full utoipa document: core handlers, legacy component registry, domain APIs, and YAML-index stubs.
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
+    doc.merge(crate::manuals::art_styles::ArtStyleSchemasOpenApi::openapi());
     // TODO(utoipa-only): 当 `embedded/legacy_component_schemas.json` 为空时，删除此行并移除 `legacy_components` 模块与生成脚本。
     doc.merge(legacy_components::merged_legacy_components_openapi());
     doc.merge(crate::billing::BillingApi::openapi());

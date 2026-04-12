@@ -7,22 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct DownloadAppAcceptedResponse;
-impl PartialSchema for DownloadAppAcceptedResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("DownloadAppAcceptedResponse")
-    }
-}
-impl ToSchema for DownloadAppAcceptedResponse {}
-
-pub struct ErrorBody;
-impl PartialSchema for ErrorBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ErrorBody")
-    }
-}
-impl ToSchema for ErrorBody {}
-
 pub struct ExportScriptsBody;
 impl PartialSchema for ExportScriptsBody {
     fn schema() -> RefOr<Schema> {
@@ -30,22 +14,6 @@ impl PartialSchema for ExportScriptsBody {
     }
 }
 impl ToSchema for ExportScriptsBody {}
-
-pub struct ExtractArtStylePromptBody;
-impl PartialSchema for ExtractArtStylePromptBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ExtractArtStylePromptBody")
-    }
-}
-impl ToSchema for ExtractArtStylePromptBody {}
-
-pub struct ExtractArtStylePromptResponse;
-impl PartialSchema for ExtractArtStylePromptResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ExtractArtStylePromptResponse")
-    }
-}
-impl ToSchema for ExtractArtStylePromptResponse {}
 
 pub struct ExtractAssetsAcceptedResponse;
 impl PartialSchema for ExtractAssetsAcceptedResponse {
@@ -367,14 +335,42 @@ impl PartialSchema for LegacyDirectorManualDataSlot {
 }
 impl ToSchema for LegacyDirectorManualDataSlot {}
 
+pub struct LegacyDirectorManualDeleteBody;
+impl PartialSchema for LegacyDirectorManualDeleteBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("LegacyDirectorManualDeleteBody")
+    }
+}
+impl ToSchema for LegacyDirectorManualDeleteBody {}
+
+pub struct LegacyDirectorManualDeleteResponse;
+impl PartialSchema for LegacyDirectorManualDeleteResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("LegacyDirectorManualDeleteResponse")
+    }
+}
+impl ToSchema for LegacyDirectorManualDeleteResponse {}
+
+pub struct LegacyDirectorManualEditBody;
+impl PartialSchema for LegacyDirectorManualEditBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("LegacyDirectorManualEditBody")
+    }
+}
+impl ToSchema for LegacyDirectorManualEditBody {}
+
+pub struct LegacyDirectorManualListResponse;
+impl PartialSchema for LegacyDirectorManualListResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("LegacyDirectorManualListResponse")
+    }
+}
+impl ToSchema for LegacyDirectorManualListResponse {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<DownloadAppAcceptedResponse>();
-    c = c.schema_from::<ErrorBody>();
     c = c.schema_from::<ExportScriptsBody>();
-    c = c.schema_from::<ExtractArtStylePromptBody>();
-    c = c.schema_from::<ExtractArtStylePromptResponse>();
     c = c.schema_from::<ExtractAssetsAcceptedResponse>();
     c = c.schema_from::<ExtractAssetsStartBody>();
     c = c.schema_from::<GenerateAssetsBody>();
@@ -415,5 +411,9 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<LegacyAssetsUploadClipResponse>();
     c = c.schema_from::<LegacyDirectorManualAddBody>();
     c = c.schema_from::<LegacyDirectorManualDataSlot>();
+    c = c.schema_from::<LegacyDirectorManualDeleteBody>();
+    c = c.schema_from::<LegacyDirectorManualDeleteResponse>();
+    c = c.schema_from::<LegacyDirectorManualEditBody>();
+    c = c.schema_from::<LegacyDirectorManualListResponse>();
     c
 }

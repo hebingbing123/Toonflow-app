@@ -7,54 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct VendorMutationResponse;
-impl PartialSchema for VendorMutationResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorMutationResponse")
-    }
-}
-impl ToSchema for VendorMutationResponse {}
-
-pub struct VendorSummaryItem;
-impl PartialSchema for VendorSummaryItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorSummaryItem")
-    }
-}
-impl ToSchema for VendorSummaryItem {}
-
-pub struct VendorUpdateBody;
-impl PartialSchema for VendorUpdateBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorUpdateBody")
-    }
-}
-impl ToSchema for VendorUpdateBody {}
-
-pub struct VendorUpdateCodeBody;
-impl PartialSchema for VendorUpdateCodeBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorUpdateCodeBody")
-    }
-}
-impl ToSchema for VendorUpdateCodeBody {}
-
-pub struct VendorUpdateResponse;
-impl PartialSchema for VendorUpdateResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorUpdateResponse")
-    }
-}
-impl ToSchema for VendorUpdateResponse {}
-
-pub struct VendorsSummaryResponse;
-impl PartialSchema for VendorsSummaryResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VendorsSummaryResponse")
-    }
-}
-impl ToSchema for VendorsSummaryResponse {}
-
 pub struct VersionResponse;
 impl PartialSchema for VersionResponse {
     fn schema() -> RefOr<Schema> {
@@ -98,12 +50,6 @@ impl ToSchema for VisualManualStyle {}
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<VendorMutationResponse>();
-    c = c.schema_from::<VendorSummaryItem>();
-    c = c.schema_from::<VendorUpdateBody>();
-    c = c.schema_from::<VendorUpdateCodeBody>();
-    c = c.schema_from::<VendorUpdateResponse>();
-    c = c.schema_from::<VendorsSummaryResponse>();
     c = c.schema_from::<VersionResponse>();
     c = c.schema_from::<VideoItem>();
     c = c.schema_from::<VisualManualEntry>();

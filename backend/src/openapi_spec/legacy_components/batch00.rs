@@ -95,14 +95,6 @@ impl PartialSchema for AppendAgentMemoryResponse {
 }
 impl ToSchema for AppendAgentMemoryResponse {}
 
-pub struct ArtStyleRow;
-impl PartialSchema for ArtStyleRow {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ArtStyleRow")
-    }
-}
-impl ToSchema for ArtStyleRow {}
-
 pub struct AssetGenTypeV1;
 impl PartialSchema for AssetGenTypeV1 {
     fn schema() -> RefOr<Schema> {
@@ -279,14 +271,6 @@ impl PartialSchema for CornerScapeResponse {
 }
 impl ToSchema for CornerScapeResponse {}
 
-pub struct CreateArtStyleBody;
-impl PartialSchema for CreateArtStyleBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("CreateArtStyleBody")
-    }
-}
-impl ToSchema for CreateArtStyleBody {}
-
 pub struct CreateAssetBody;
 impl PartialSchema for CreateAssetBody {
     fn schema() -> RefOr<Schema> {
@@ -367,6 +351,22 @@ impl PartialSchema for DeployAgentModelBody {
 }
 impl ToSchema for DeployAgentModelBody {}
 
+pub struct DownloadAppAcceptedResponse;
+impl PartialSchema for DownloadAppAcceptedResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("DownloadAppAcceptedResponse")
+    }
+}
+impl ToSchema for DownloadAppAcceptedResponse {}
+
+pub struct ErrorBody;
+impl PartialSchema for ErrorBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ErrorBody")
+    }
+}
+impl ToSchema for ErrorBody {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
@@ -381,7 +381,6 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<AgentSetKeyBody>();
     c = c.schema_from::<AppendAgentMemoryBody>();
     c = c.schema_from::<AppendAgentMemoryResponse>();
-    c = c.schema_from::<ArtStyleRow>();
     c = c.schema_from::<AssetGenTypeV1>();
     c = c.schema_from::<AssetImageListItem>();
     c = c.schema_from::<AssetImageRow>();
@@ -404,7 +403,6 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<CornerScapeHistoryImage>();
     c = c.schema_from::<CornerScapeRequestBody>();
     c = c.schema_from::<CornerScapeResponse>();
-    c = c.schema_from::<CreateArtStyleBody>();
     c = c.schema_from::<CreateAssetBody>();
     c = c.schema_from::<CreateAssetImageBody>();
     c = c.schema_from::<CreateJobBody>();
@@ -415,5 +413,7 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<CreateScriptBody>();
     c = c.schema_from::<CreateStoryboardBody>();
     c = c.schema_from::<DeployAgentModelBody>();
+    c = c.schema_from::<DownloadAppAcceptedResponse>();
+    c = c.schema_from::<ErrorBody>();
     c
 }

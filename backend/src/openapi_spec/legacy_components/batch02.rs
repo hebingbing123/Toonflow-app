@@ -7,38 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct LegacyDirectorManualDeleteBody;
-impl PartialSchema for LegacyDirectorManualDeleteBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualDeleteBody")
-    }
-}
-impl ToSchema for LegacyDirectorManualDeleteBody {}
-
-pub struct LegacyDirectorManualDeleteResponse;
-impl PartialSchema for LegacyDirectorManualDeleteResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualDeleteResponse")
-    }
-}
-impl ToSchema for LegacyDirectorManualDeleteResponse {}
-
-pub struct LegacyDirectorManualEditBody;
-impl PartialSchema for LegacyDirectorManualEditBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualEditBody")
-    }
-}
-impl ToSchema for LegacyDirectorManualEditBody {}
-
-pub struct LegacyDirectorManualListResponse;
-impl PartialSchema for LegacyDirectorManualListResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("LegacyDirectorManualListResponse")
-    }
-}
-impl ToSchema for LegacyDirectorManualListResponse {}
-
 pub struct LegacyDirectorManualSlotRow;
 impl PartialSchema for LegacyDirectorManualSlotRow {
     fn schema() -> RefOr<Schema> {
@@ -311,14 +279,6 @@ impl PartialSchema for LegacyVisualManualEditBody {
 }
 impl ToSchema for LegacyVisualManualEditBody {}
 
-pub struct ListArtStylesResponse;
-impl PartialSchema for ListArtStylesResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ListArtStylesResponse")
-    }
-}
-impl ToSchema for ListArtStylesResponse {}
-
 pub struct ListAssetImagesResponse;
 impl PartialSchema for ListAssetImagesResponse {
     fn schema() -> RefOr<Schema> {
@@ -367,13 +327,49 @@ impl PartialSchema for MemoryConfigSavedResponse {
 }
 impl ToSchema for MemoryConfigSavedResponse {}
 
+pub struct MemoryHistoryItem;
+impl PartialSchema for MemoryHistoryItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("MemoryHistoryItem")
+    }
+}
+impl ToSchema for MemoryHistoryItem {}
+
+pub struct MemoryMarkdownBlock;
+impl PartialSchema for MemoryMarkdownBlock {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("MemoryMarkdownBlock")
+    }
+}
+impl ToSchema for MemoryMarkdownBlock {}
+
+pub struct ModelDetailResponse;
+impl PartialSchema for ModelDetailResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ModelDetailResponse")
+    }
+}
+impl ToSchema for ModelDetailResponse {}
+
+pub struct ModelListEntry;
+impl PartialSchema for ModelListEntry {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ModelListEntry")
+    }
+}
+impl ToSchema for ModelListEntry {}
+
+pub struct NovelEventCreateResponse;
+impl PartialSchema for NovelEventCreateResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("NovelEventCreateResponse")
+    }
+}
+impl ToSchema for NovelEventCreateResponse {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<LegacyDirectorManualDeleteBody>();
-    c = c.schema_from::<LegacyDirectorManualDeleteResponse>();
-    c = c.schema_from::<LegacyDirectorManualEditBody>();
-    c = c.schema_from::<LegacyDirectorManualListResponse>();
     c = c.schema_from::<LegacyDirectorManualSlotRow>();
     c = c.schema_from::<LegacyDirectorManualStyleRow>();
     c = c.schema_from::<LegacyEmptyObjectResponse>();
@@ -408,12 +404,16 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<LegacyTasksEmptyBody>();
     c = c.schema_from::<LegacyVisualManualAddBody>();
     c = c.schema_from::<LegacyVisualManualEditBody>();
-    c = c.schema_from::<ListArtStylesResponse>();
     c = c.schema_from::<ListAssetImagesResponse>();
     c = c.schema_from::<ListAssetsResponse>();
     c = c.schema_from::<ListNovelsResponse>();
     c = c.schema_from::<MeResponse>();
     c = c.schema_from::<MemoryConfig>();
     c = c.schema_from::<MemoryConfigSavedResponse>();
+    c = c.schema_from::<MemoryHistoryItem>();
+    c = c.schema_from::<MemoryMarkdownBlock>();
+    c = c.schema_from::<ModelDetailResponse>();
+    c = c.schema_from::<ModelListEntry>();
+    c = c.schema_from::<NovelEventCreateResponse>();
     c
 }

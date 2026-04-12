@@ -35,6 +35,18 @@ OUT_LEGACY_SCHEMAS = (
 OUT_STUB_INPUT = ROOT / "scripts" / "fixtures" / "openapi_stub_input.yaml"
 OUT_WS_MD = ROOT / "backend" / "src" / "openapi_spec" / "ws_protocol_description.md"
 
+# `components.schemas` names already registered via Rust `ToSchema` + domain `OpenApi` (see `openapi_spec::combined_openapi`).
+RUST_OWNED_SCHEMA_KEYS = frozenset(
+    {
+        "ArtStyleRow",
+        "ListArtStylesResponse",
+        "CreateArtStyleBody",
+        "ExtractArtStylePromptBody",
+        "ExtractArtStylePromptResponse",
+        "PatchArtStyleBody",
+    }
+)
+
 
 def main() -> None:
     src = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DEFAULT_SRC
@@ -62,6 +74,9 @@ def main() -> None:
     schemas = components.get("schemas")
     if not isinstance(schemas, dict):
         raise SystemExit("full OpenAPI must include components.schemas (object)")
+
+    for k in RUST_OWNED_SCHEMA_KEYS:
+        schemas.pop(k, None)
 
     OUT_LEGACY_SCHEMAS.parent.mkdir(parents=True, exist_ok=True)
     OUT_LEGACY_SCHEMAS.write_text(

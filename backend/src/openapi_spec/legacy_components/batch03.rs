@@ -7,46 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct MemoryHistoryItem;
-impl PartialSchema for MemoryHistoryItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("MemoryHistoryItem")
-    }
-}
-impl ToSchema for MemoryHistoryItem {}
-
-pub struct MemoryMarkdownBlock;
-impl PartialSchema for MemoryMarkdownBlock {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("MemoryMarkdownBlock")
-    }
-}
-impl ToSchema for MemoryMarkdownBlock {}
-
-pub struct ModelDetailResponse;
-impl PartialSchema for ModelDetailResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ModelDetailResponse")
-    }
-}
-impl ToSchema for ModelDetailResponse {}
-
-pub struct ModelListEntry;
-impl PartialSchema for ModelListEntry {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ModelListEntry")
-    }
-}
-impl ToSchema for ModelListEntry {}
-
-pub struct NovelEventCreateResponse;
-impl PartialSchema for NovelEventCreateResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("NovelEventCreateResponse")
-    }
-}
-impl ToSchema for NovelEventCreateResponse {}
-
 pub struct NovelEventListResponse;
 impl PartialSchema for NovelEventListResponse {
     fn schema() -> RefOr<Schema> {
@@ -78,14 +38,6 @@ impl PartialSchema for NovelRow {
     }
 }
 impl ToSchema for NovelRow {}
-
-pub struct PatchArtStyleBody;
-impl PartialSchema for PatchArtStyleBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("PatchArtStyleBody")
-    }
-}
-impl ToSchema for PatchArtStyleBody {}
 
 pub struct PatchAssetBody;
 impl PartialSchema for PatchAssetBody {
@@ -367,19 +319,61 @@ impl PartialSchema for ProductionExportImageBody {
 }
 impl ToSchema for ProductionExportImageBody {}
 
+pub struct ProductionExportImageShotRef;
+impl PartialSchema for ProductionExportImageShotRef {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionExportImageShotRef")
+    }
+}
+impl ToSchema for ProductionExportImageShotRef {}
+
+pub struct ProductionFlowAssetDerivativeItem;
+impl PartialSchema for ProductionFlowAssetDerivativeItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowAssetDerivativeItem")
+    }
+}
+impl ToSchema for ProductionFlowAssetDerivativeItem {}
+
+pub struct ProductionFlowAssetItem;
+impl PartialSchema for ProductionFlowAssetItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowAssetItem")
+    }
+}
+impl ToSchema for ProductionFlowAssetItem {}
+
+pub struct ProductionFlowDataResponse;
+impl PartialSchema for ProductionFlowDataResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowDataResponse")
+    }
+}
+impl ToSchema for ProductionFlowDataResponse {}
+
+pub struct ProductionFlowStoryboardItem;
+impl PartialSchema for ProductionFlowStoryboardItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowStoryboardItem")
+    }
+}
+impl ToSchema for ProductionFlowStoryboardItem {}
+
+pub struct ProductionGetFlowDataBody;
+impl PartialSchema for ProductionGetFlowDataBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionGetFlowDataBody")
+    }
+}
+impl ToSchema for ProductionGetFlowDataBody {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<MemoryHistoryItem>();
-    c = c.schema_from::<MemoryMarkdownBlock>();
-    c = c.schema_from::<ModelDetailResponse>();
-    c = c.schema_from::<ModelListEntry>();
-    c = c.schema_from::<NovelEventCreateResponse>();
     c = c.schema_from::<NovelEventListResponse>();
     c = c.schema_from::<NovelEventOkResponse>();
     c = c.schema_from::<NovelEventWithChapters>();
     c = c.schema_from::<NovelRow>();
-    c = c.schema_from::<PatchArtStyleBody>();
     c = c.schema_from::<PatchAssetBody>();
     c = c.schema_from::<PatchAssetImageBody>();
     c = c.schema_from::<PatchNovelBody>();
@@ -415,5 +409,11 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<ProductionEditImageUploadImageBody>();
     c = c.schema_from::<ProductionEditImageUploadImageResponse>();
     c = c.schema_from::<ProductionExportImageBody>();
+    c = c.schema_from::<ProductionExportImageShotRef>();
+    c = c.schema_from::<ProductionFlowAssetDerivativeItem>();
+    c = c.schema_from::<ProductionFlowAssetItem>();
+    c = c.schema_from::<ProductionFlowDataResponse>();
+    c = c.schema_from::<ProductionFlowStoryboardItem>();
+    c = c.schema_from::<ProductionGetFlowDataBody>();
     c
 }

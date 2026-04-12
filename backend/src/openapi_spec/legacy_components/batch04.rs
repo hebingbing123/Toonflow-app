@@ -7,54 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct ProductionExportImageShotRef;
-impl PartialSchema for ProductionExportImageShotRef {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionExportImageShotRef")
-    }
-}
-impl ToSchema for ProductionExportImageShotRef {}
-
-pub struct ProductionFlowAssetDerivativeItem;
-impl PartialSchema for ProductionFlowAssetDerivativeItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowAssetDerivativeItem")
-    }
-}
-impl ToSchema for ProductionFlowAssetDerivativeItem {}
-
-pub struct ProductionFlowAssetItem;
-impl PartialSchema for ProductionFlowAssetItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowAssetItem")
-    }
-}
-impl ToSchema for ProductionFlowAssetItem {}
-
-pub struct ProductionFlowDataResponse;
-impl PartialSchema for ProductionFlowDataResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowDataResponse")
-    }
-}
-impl ToSchema for ProductionFlowDataResponse {}
-
-pub struct ProductionFlowStoryboardItem;
-impl PartialSchema for ProductionFlowStoryboardItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowStoryboardItem")
-    }
-}
-impl ToSchema for ProductionFlowStoryboardItem {}
-
-pub struct ProductionGetFlowDataBody;
-impl PartialSchema for ProductionGetFlowDataBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionGetFlowDataBody")
-    }
-}
-impl ToSchema for ProductionGetFlowDataBody {}
-
 pub struct ProductionGetProductionDataResponse;
 impl PartialSchema for ProductionGetProductionDataResponse {
     fn schema() -> RefOr<Schema> {
@@ -367,15 +319,57 @@ impl PartialSchema for ProductionWorkbenchVideoModelDetailResponse {
 }
 impl ToSchema for ProductionWorkbenchVideoModelDetailResponse {}
 
+pub struct ProjectDetailResponse;
+impl PartialSchema for ProjectDetailResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProjectDetailResponse")
+    }
+}
+impl ToSchema for ProjectDetailResponse {}
+
+pub struct ProjectRow;
+impl PartialSchema for ProjectRow {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProjectRow")
+    }
+}
+impl ToSchema for ProjectRow {}
+
+pub struct ProjectStatsResponse;
+impl PartialSchema for ProjectStatsResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProjectStatsResponse")
+    }
+}
+impl ToSchema for ProjectStatsResponse {}
+
+pub struct ProjectsSummaryResponse;
+impl PartialSchema for ProjectsSummaryResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProjectsSummaryResponse")
+    }
+}
+impl ToSchema for ProjectsSummaryResponse {}
+
+pub struct QualityReview;
+impl PartialSchema for QualityReview {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("QualityReview")
+    }
+}
+impl ToSchema for QualityReview {}
+
+pub struct QualityStatsResponse;
+impl PartialSchema for QualityStatsResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("QualityStatsResponse")
+    }
+}
+impl ToSchema for QualityStatsResponse {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<ProductionExportImageShotRef>();
-    c = c.schema_from::<ProductionFlowAssetDerivativeItem>();
-    c = c.schema_from::<ProductionFlowAssetItem>();
-    c = c.schema_from::<ProductionFlowDataResponse>();
-    c = c.schema_from::<ProductionFlowStoryboardItem>();
-    c = c.schema_from::<ProductionGetFlowDataBody>();
     c = c.schema_from::<ProductionGetProductionDataResponse>();
     c = c.schema_from::<ProductionLegacyJsonStubBody>();
     c = c.schema_from::<ProductionSaveFlowDataBody>();
@@ -415,5 +409,11 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<ProductionWorkbenchSelectVideoBody>();
     c = c.schema_from::<ProductionWorkbenchSelectVideoResponse>();
     c = c.schema_from::<ProductionWorkbenchVideoModelDetailResponse>();
+    c = c.schema_from::<ProjectDetailResponse>();
+    c = c.schema_from::<ProjectRow>();
+    c = c.schema_from::<ProjectStatsResponse>();
+    c = c.schema_from::<ProjectsSummaryResponse>();
+    c = c.schema_from::<QualityReview>();
+    c = c.schema_from::<QualityStatsResponse>();
     c
 }

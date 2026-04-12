@@ -7,54 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct ProjectDetailResponse;
-impl PartialSchema for ProjectDetailResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProjectDetailResponse")
-    }
-}
-impl ToSchema for ProjectDetailResponse {}
-
-pub struct ProjectRow;
-impl PartialSchema for ProjectRow {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProjectRow")
-    }
-}
-impl ToSchema for ProjectRow {}
-
-pub struct ProjectStatsResponse;
-impl PartialSchema for ProjectStatsResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProjectStatsResponse")
-    }
-}
-impl ToSchema for ProjectStatsResponse {}
-
-pub struct ProjectsSummaryResponse;
-impl PartialSchema for ProjectsSummaryResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProjectsSummaryResponse")
-    }
-}
-impl ToSchema for ProjectsSummaryResponse {}
-
-pub struct QualityReview;
-impl PartialSchema for QualityReview {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("QualityReview")
-    }
-}
-impl ToSchema for QualityReview {}
-
-pub struct QualityStatsResponse;
-impl PartialSchema for QualityStatsResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("QualityStatsResponse")
-    }
-}
-impl ToSchema for QualityStatsResponse {}
-
 pub struct QueryAgentMemoryBody;
 impl PartialSchema for QueryAgentMemoryBody {
     fn schema() -> RefOr<Schema> {
@@ -367,15 +319,57 @@ impl PartialSchema for VendorModelTestBody {
 }
 impl ToSchema for VendorModelTestBody {}
 
+pub struct VendorMutationResponse;
+impl PartialSchema for VendorMutationResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorMutationResponse")
+    }
+}
+impl ToSchema for VendorMutationResponse {}
+
+pub struct VendorSummaryItem;
+impl PartialSchema for VendorSummaryItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorSummaryItem")
+    }
+}
+impl ToSchema for VendorSummaryItem {}
+
+pub struct VendorUpdateBody;
+impl PartialSchema for VendorUpdateBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorUpdateBody")
+    }
+}
+impl ToSchema for VendorUpdateBody {}
+
+pub struct VendorUpdateCodeBody;
+impl PartialSchema for VendorUpdateCodeBody {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorUpdateCodeBody")
+    }
+}
+impl ToSchema for VendorUpdateCodeBody {}
+
+pub struct VendorUpdateResponse;
+impl PartialSchema for VendorUpdateResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorUpdateResponse")
+    }
+}
+impl ToSchema for VendorUpdateResponse {}
+
+pub struct VendorsSummaryResponse;
+impl PartialSchema for VendorsSummaryResponse {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("VendorsSummaryResponse")
+    }
+}
+impl ToSchema for VendorsSummaryResponse {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<ProjectDetailResponse>();
-    c = c.schema_from::<ProjectRow>();
-    c = c.schema_from::<ProjectStatsResponse>();
-    c = c.schema_from::<ProjectsSummaryResponse>();
-    c = c.schema_from::<QualityReview>();
-    c = c.schema_from::<QualityStatsResponse>();
     c = c.schema_from::<QueryAgentMemoryBody>();
     c = c.schema_from::<RateLimitError>();
     c = c.schema_from::<ReadyResponse>();
@@ -415,5 +409,11 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<VendorIdBody>();
     c = c.schema_from::<VendorLinkResponse>();
     c = c.schema_from::<VendorModelTestBody>();
+    c = c.schema_from::<VendorMutationResponse>();
+    c = c.schema_from::<VendorSummaryItem>();
+    c = c.schema_from::<VendorUpdateBody>();
+    c = c.schema_from::<VendorUpdateCodeBody>();
+    c = c.schema_from::<VendorUpdateResponse>();
+    c = c.schema_from::<VendorsSummaryResponse>();
     c
 }
