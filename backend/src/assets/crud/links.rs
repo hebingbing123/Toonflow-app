@@ -10,10 +10,9 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope;
 use crate::state::AppState;
 use sqlx::PgPool;
-
-use super::resolve::ensure_owned_project_pk;
 
 async fn resolve_script_and_asset_for_project(
     pool: &PgPool,
@@ -25,26 +24,24 @@ async fn resolve_script_and_asset_for_project(
     if script_numeric_id <= 0 || asset_numeric_id <= 0 {
         return Err(ApiError::BadRequest("numeric ids must be positive".into()));
     }
-    let row: Option<(Uuid, Uuid)> = sqlx::query_as(
+    let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let asset_id: Option<Uuid> = sqlx::query_scalar(
         r#"
-        SELECT s.id, a.id
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        INNER JOIN app_asset a ON a.project_id = p.id
-        WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND s.numeric_id = $3
-          AND a.numeric_id = $4
+        SELECT id FROM app_asset
+        WHERE project_id = $1 AND numeric_id = $2
         "#,
     )
-    .bind(project_id)
-    .bind(uid)
-    .bind(script_numeric_id)
+    .bind(oip.project_id)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    row.ok_or(ApiError::NotFound)
+
+    let asset_id = asset_id.ok_or(ApiError::NotFound)?;
+    Ok((oip.script_id, asset_id))
 }
 
 pub(crate) async fn link_script_to_asset_for_project(
@@ -57,8 +54,6 @@ pub(crate) async fn link_script_to_asset_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    ensure_owned_project_pk(pool, uid, project_id).await?;
 
     let (script_id, asset_id) = resolve_script_and_asset_for_project(
         pool,
@@ -95,8 +90,6 @@ pub(crate) async fn unlink_script_from_asset_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    ensure_owned_project_pk(pool, uid, project_id).await?;
 
     let (script_id, asset_id) = resolve_script_and_asset_for_project(
         pool,

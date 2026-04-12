@@ -15,6 +15,7 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
+use crate::scope;
 use crate::state::AppState;
 
 use super::types::{
@@ -204,19 +205,18 @@ pub(super) async fn get_script_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let row = sqlx::query_as::<_, ScriptRow>(
         r#"
-        SELECT s.id, s.project_id, s.numeric_id, s.name, s.content, s.extract_state, s.create_time_ms
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        SELECT id, project_id, numeric_id, name, content, extract_state, create_time_ms
+        FROM app_script
+        WHERE id = $1
         "#,
     )
-    .bind(script_numeric_id)
-    .bind(project_id)
-    .bind(uid)
+    .bind(oip.script_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -237,7 +237,6 @@ pub(super) async fn patch_script_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
     patch_script_inner(pool, uid, script_numeric_id, body, project_id).await
 }
 
@@ -261,17 +260,18 @@ async fn patch_script_inner(
         ));
     }
 
+    let oip = scope::owned_script_in_project(pool, uid, project_id, numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let current = sqlx::query_as::<_, ScriptRow>(
         r#"
-        SELECT s.id, s.project_id, s.numeric_id, s.name, s.content, s.extract_state, s.create_time_ms
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE s.numeric_id = $1 AND p.id = $2 AND p.owner_user_id = $3
+        SELECT id, project_id, numeric_id, name, content, extract_state, create_time_ms
+        FROM app_script
+        WHERE id = $1
         "#,
     )
-    .bind(numeric_id)
-    .bind(project_id)
-    .bind(uid)
+    .bind(oip.script_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -321,24 +321,15 @@ pub(super) async fn delete_script_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
-    let res = sqlx::query(
-        r#"
-        DELETE FROM app_script s
-        USING app_project p
-        WHERE s.project_id = p.id
-          AND s.numeric_id = $1
-          AND p.owner_user_id = $2
-          AND p.id = $3
-        "#,
-    )
-    .bind(script_numeric_id)
-    .bind(uid)
-    .bind(project_id)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let res = sqlx::query(r#"DELETE FROM app_script WHERE id = $1"#)
+        .bind(oip.script_id)
+        .execute(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if res.rows_affected() == 0 {
         return Err(ApiError::NotFound);

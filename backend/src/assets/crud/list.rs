@@ -12,6 +12,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope;
 use crate::state::AppState;
 
 use super::super::models::*;
@@ -140,27 +141,9 @@ async fn list_project_assets_inner(
                 "script_numeric_id must be positive when set".into(),
             ));
         }
-        let script_ok: bool = sqlx::query_scalar(
-            r#"
-            SELECT EXISTS (
-              SELECT 1
-              FROM app_script s
-              INNER JOIN app_project p ON p.id = s.project_id
-              WHERE p.id = $1
-                AND p.owner_user_id = $2
-                AND s.numeric_id = $3
-            )
-            "#,
-        )
-        .bind(project_id)
-        .bind(uid)
-        .bind(sid)
-        .fetch_one(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-        if !script_ok {
-            return Err(ApiError::NotFound);
-        }
+        scope::owned_script_in_project(pool, uid, project_id, sid)
+            .await
+            .map_err(|e| e.into_api_error())?;
     }
 
     let type_filter = normalize_list_asset_type_filter(query.asset_type)?;

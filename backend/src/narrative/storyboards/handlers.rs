@@ -16,6 +16,7 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
+use crate::scope;
 use crate::state::AppState;
 
 use super::dto::{CreateStoryboardBody, PatchStoryboardBody, StoryboardRow};
@@ -108,7 +109,9 @@ pub(super) async fn list_by_script_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let rows = sqlx::query_as::<_, StoryboardRow>(
         r#"
@@ -117,15 +120,11 @@ pub(super) async fn list_by_script_for_project(
           sb.duration, sb.state, sb.track_id, sb.reason, sb.track, sb.video_desc,
           sb.should_generate_image, sb.numeric_project_id, sb.flow_id, sb.sb_index, sb.create_time_ms
         FROM app_storyboard sb
-        INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.id = $1 AND sc.numeric_id = $2 AND p.owner_user_id = $3
+        WHERE sb.script_id = $1
         ORDER BY sb.sb_index ASC NULLS LAST, sb.numeric_id ASC
         "#,
     )
-    .bind(project_id)
-    .bind(script_numeric_id)
-    .bind(uid)
+    .bind(oip.script_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -145,33 +144,19 @@ pub(super) async fn create_under_script_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let mut tx = pool
         .begin()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let (script_uuid, project_numeric_id): (Uuid, i32) = sqlx::query_as(
-        r#"
-        SELECT s.id, p.numeric_id
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.id = $1 AND s.numeric_id = $2 AND p.owner_user_id = $3
-        "#,
-    )
-    .bind(project_id)
-    .bind(script_numeric_id)
-    .bind(uid)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
     let row = create_storyboard_locked(
         &mut tx,
-        script_uuid,
-        project_numeric_id,
+        oip.script_id,
+        oip.project_numeric_id,
         script_numeric_id,
         body,
     )
