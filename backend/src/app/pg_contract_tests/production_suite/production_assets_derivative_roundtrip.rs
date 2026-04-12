@@ -107,7 +107,7 @@ async fn production_assets_derivative_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"assetType":"role","limit":10,"offset":0}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetType":"role","limit":10,"offset":0}}"#
                 )))
                 .unwrap(),
         )
@@ -132,7 +132,7 @@ async fn production_assets_derivative_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"assetId":{asset_id},"imageUrl":"{image_url}"}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetId":{asset_id},"imageUrl":"{image_url}"}}"#
                 )))
                 .unwrap(),
         )
@@ -181,7 +181,7 @@ async fn production_assets_derivative_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(format!(
-                    r#"{{"projectId":{project_id},"assetIds":[{asset_id}]}}"#
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetIds":[{asset_id}]}}"#
                 )))
                 .unwrap(),
         )

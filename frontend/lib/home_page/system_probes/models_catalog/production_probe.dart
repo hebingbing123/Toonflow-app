@@ -105,12 +105,14 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       run: () => postProductionAssetsDeleteAssetsDerivativeV1(
         token,
         projectId: 1,
+        scriptId: 1,
         assetIds: const [1],
       ),
     );
     statuses['prod/assets.data'] = await _runTypedProductionProbe(
       label: 'POST production/assets/get-assets-data',
-      run: () => postProductionAssetsGetAssetsDataV1(token, projectId: 1),
+      run: () =>
+          postProductionAssetsGetAssetsDataV1(token, projectId: 1, scriptId: 1),
     );
     statuses['prod/assets.poll'] = await _runTypedProductionProbe(
       label: 'POST production/assets/polling-image',
@@ -126,6 +128,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       run: () => postProductionAssetsUpdateAssetsUrlV1(
         token,
         projectId: 1,
+        scriptId: 1,
         assetId: 1,
         imageUrl: 'https://example.com/probe.png',
       ),

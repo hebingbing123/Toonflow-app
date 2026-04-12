@@ -84,6 +84,7 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct DeleteAssetsDerivativeBody {
     project_id: i32,
+    script_id: i32,
     asset_ids: Vec<i32>,
 }
 
@@ -100,13 +101,18 @@ pub(in crate::production) async fn post_assets_delete_derivative(
     Json(body): Json<DeleteAssetsDerivativeBody>,
 ) -> Result<JsonResponse<DeleteAssetsDerivativeResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
+    if body.project_id <= 0 || body.script_id <= 0 {
         return Err(ApiError::BadRequest(
-            "projectId must be a positive integer".into(),
+            "projectId and scriptId must be positive integers".into(),
         ));
     }
     if body.asset_ids.is_empty() {
         return Err(ApiError::BadRequest("assetIds must not be empty".into()));
+    }
+    if body.asset_ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest(
+            "assetIds must be positive integers".into(),
+        ));
     }
 
     let pool = state
@@ -114,22 +120,55 @@ pub(in crate::production) async fn post_assets_delete_derivative(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    // Delete asset images (derivatives) for the given assets
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let mut uniq = body.asset_ids.clone();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let linked: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT a.numeric_id)::bigint
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND a.numeric_id = ANY($4::int4[])
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(scope_row.script_id)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if linked != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
+
+    // Delete asset images (derivatives) for the given assets linked to this script
     let result = sqlx::query(
         r#"
         DELETE FROM app_asset_image
         WHERE asset_id IN (
             SELECT a.id FROM app_asset a
             INNER JOIN app_project p ON p.id = a.project_id
+            INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
             WHERE p.owner_user_id = $1
               AND p.numeric_id = $2
-              AND a.numeric_id = ANY($3::int4[])
+              AND a.numeric_id = ANY($4::int4[])
         )
         "#,
     )
     .bind(uid)
     .bind(body.project_id)
-    .bind(&body.asset_ids)
+    .bind(scope_row.script_id)
+    .bind(&uniq)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -163,6 +202,7 @@ pub(in crate::production) struct AssetsDataResponse {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GetAssetsDataBody {
     project_id: i32,
+    script_id: i32,
     #[serde(default)]
     asset_type: Option<String>,
     #[serde(default)]
@@ -177,9 +217,9 @@ pub(in crate::production) async fn post_assets_get_data(
     Json(body): Json<GetAssetsDataBody>,
 ) -> Result<JsonResponse<AssetsDataResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
+    if body.project_id <= 0 || body.script_id <= 0 {
         return Err(ApiError::BadRequest(
-            "projectId must be a positive integer".into(),
+            "projectId and scriptId must be positive integers".into(),
         ));
     }
 
@@ -187,6 +227,10 @@ pub(in crate::production) async fn post_assets_get_data(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);
@@ -202,15 +246,17 @@ pub(in crate::production) async fn post_assets_get_data(
           a.created_at
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
         WHERE p.owner_user_id = $1
           AND p.numeric_id = $2
-          AND ($3::text IS NULL OR a.asset_type = $3)
+          AND ($4::text IS NULL OR a.asset_type = $4)
         ORDER BY a.created_at DESC
-        LIMIT $4 OFFSET $5
+        LIMIT $5 OFFSET $6
         "#,
     )
     .bind(uid)
     .bind(body.project_id)
+    .bind(scope_row.script_id)
     .bind(
         body.asset_type
             .as_ref()
@@ -228,13 +274,15 @@ pub(in crate::production) async fn post_assets_get_data(
         SELECT COUNT(*)
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
         WHERE p.owner_user_id = $1
           AND p.numeric_id = $2
-          AND ($3::text IS NULL OR a.asset_type = $3)
+          AND ($4::text IS NULL OR a.asset_type = $4)
         "#,
     )
     .bind(uid)
     .bind(body.project_id)
+    .bind(scope_row.script_id)
     .bind(
         body.asset_type
             .as_ref()
@@ -339,6 +387,7 @@ pub(in crate::production) async fn post_assets_polling_image(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateAssetsUrlBody {
     project_id: i32,
+    script_id: i32,
     asset_id: i32,
     image_url: String,
 }
@@ -357,9 +406,9 @@ pub(in crate::production) async fn post_assets_update_url(
     Json(body): Json<UpdateAssetsUrlBody>,
 ) -> Result<JsonResponse<UpdateAssetsUrlResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 || body.asset_id <= 0 {
+    if body.project_id <= 0 || body.script_id <= 0 || body.asset_id <= 0 {
         return Err(ApiError::BadRequest(
-            "projectId and assetId must be positive integers".into(),
+            "projectId, scriptId, and assetId must be positive integers".into(),
         ));
     }
     if body.image_url.trim().is_empty() {
@@ -371,21 +420,27 @@ pub(in crate::production) async fn post_assets_update_url(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    // Insert new asset image with the provided URL
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    // Insert new asset image with the provided URL (asset must be linked to this script)
     let image_id = sqlx::query_scalar::<_, uuid::Uuid>(
         r#"
         INSERT INTO app_asset_image (id, asset_id, sort_index, file_path, state, metadata)
-        SELECT $4, a.id, COALESCE(MAX(ai.sort_index), 0) + 1, $5, '已完成', '{}'::jsonb
+        SELECT $5, a.id, COALESCE(MAX(ai.sort_index), 0) + 1, $6, '已完成', '{}'::jsonb
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $1
         LEFT JOIN app_asset_image ai ON ai.asset_id = a.id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND a.numeric_id = $3
+        WHERE p.owner_user_id = $2
+          AND p.numeric_id = $3
+          AND a.numeric_id = $4
         GROUP BY a.id
         RETURNING id
         "#,
     )
+    .bind(scope_row.script_id)
     .bind(uid)
     .bind(body.project_id)
     .bind(body.asset_id)

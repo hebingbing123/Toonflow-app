@@ -134,6 +134,7 @@ class _AssetGenerationWorkbenchDialogState
         nextProductionData = await postProductionAssetsGetAssetsDataV1(
           widget.token,
           projectId: widget.project.numericId,
+          scriptId: _selectedScriptNumericId,
           assetType: _selectedType.isEmpty ? null : _selectedType,
         );
       }
@@ -422,6 +423,7 @@ class _AssetGenerationWorkbenchDialogState
                       await postProductionAssetsDeleteAssetsDerivativeV1(
                         widget.token,
                         projectId: widget.project.numericId,
+                        scriptId: _selectedScriptNumericId,
                         assetIds: selected,
                       );
                   await widget.reloadAssetsAndStats();
@@ -435,6 +437,7 @@ class _AssetGenerationWorkbenchDialogState
                   final response = await postProductionAssetsUpdateAssetsUrlV1(
                     widget.token,
                     projectId: widget.project.numericId,
+                    scriptId: _selectedScriptNumericId,
                     assetId: selectedSingleAssetId!,
                     imageUrl: _imageUrlCtrl.text.trim(),
                   );

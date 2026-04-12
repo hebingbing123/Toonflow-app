@@ -45,6 +45,7 @@ Future<DeleteAssetsDerivativeResponseV1>
 postProductionAssetsDeleteAssetsDerivativeV1(
   String accessToken, {
   required int projectId,
+  required int scriptId,
   required List<int> assetIds,
 }) async {
   final uri = Uri.parse(
@@ -57,7 +58,11 @@ postProductionAssetsDeleteAssetsDerivativeV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'assetIds': assetIds}),
+        body: jsonEncode({
+          'projectId': projectId,
+          'scriptId': scriptId,
+          'assetIds': assetIds,
+        }),
       )
       .timeout(const Duration(seconds: 30));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -74,6 +79,7 @@ postProductionAssetsDeleteAssetsDerivativeV1(
 Future<AssetsDataResponseV1> postProductionAssetsGetAssetsDataV1(
   String accessToken, {
   required int projectId,
+  required int scriptId,
   String? assetType,
   int limit = 50,
   int offset = 0,
@@ -83,6 +89,7 @@ Future<AssetsDataResponseV1> postProductionAssetsGetAssetsDataV1(
   );
   final body = <String, dynamic>{
     'projectId': projectId,
+    'scriptId': scriptId,
     'limit': limit,
     'offset': offset,
   };
@@ -143,6 +150,7 @@ Future<AssetsPollingImageResponseV1> postProductionAssetsPollingImageV1(
 Future<UpdateAssetsUrlResponseV1> postProductionAssetsUpdateAssetsUrlV1(
   String accessToken, {
   required int projectId,
+  required int scriptId,
   required int assetId,
   required String imageUrl,
 }) async {
@@ -158,6 +166,7 @@ Future<UpdateAssetsUrlResponseV1> postProductionAssetsUpdateAssetsUrlV1(
         },
         body: jsonEncode({
           'projectId': projectId,
+          'scriptId': scriptId,
           'assetId': assetId,
           'imageUrl': imageUrl,
         }),

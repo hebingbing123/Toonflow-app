@@ -9854,10 +9854,13 @@ components:
 
     ProductionAssetsDeleteDerivativeBody:
       type: object
-      required: [projectId, assetIds]
+      required: [projectId, scriptId, assetIds]
       additionalProperties: false
       properties:
         projectId:
+          type: integer
+          format: int32
+        scriptId:
           type: integer
           format: int32
         assetIds:
@@ -9882,10 +9885,13 @@ components:
 
     ProductionAssetsGetDataBody:
       type: object
-      required: [projectId]
+      required: [projectId, scriptId]
       additionalProperties: false
       properties:
         projectId:
+          type: integer
+          format: int32
+        scriptId:
           type: integer
           format: int32
         assetType:
@@ -9978,10 +9984,13 @@ components:
 
     ProductionAssetsUpdateUrlBody:
       type: object
-      required: [projectId, assetId, imageUrl]
+      required: [projectId, scriptId, assetId, imageUrl]
       additionalProperties: false
       properties:
         projectId:
+          type: integer
+          format: int32
+        scriptId:
           type: integer
           format: int32
         assetId:

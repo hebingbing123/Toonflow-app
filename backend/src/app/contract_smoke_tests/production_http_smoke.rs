@@ -73,7 +73,7 @@ async fn production_assets_get_assets_data_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/assets/get-assets-data",
         &token,
-        r#"{"projectId":1}"#,
+        r#"{"projectId":1,"scriptId":1}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -99,7 +99,7 @@ async fn production_assets_delete_derivative_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/assets/delete-assets-derivative",
         &token,
-        r#"{"projectId":1,"assetIds":[1]}"#,
+        r#"{"projectId":1,"scriptId":1,"assetIds":[1]}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
@@ -125,7 +125,7 @@ async fn production_assets_update_url_requires_database_with_jwt() {
     let (status, v) = post_json_bearer(
         "/api/v1/production/assets/update-assets-url",
         &token,
-        r#"{"projectId":1,"assetId":1,"imageUrl":"https://example.com/a.png"}"#,
+        r#"{"projectId":1,"scriptId":1,"assetId":1,"imageUrl":"https://example.com/a.png"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
