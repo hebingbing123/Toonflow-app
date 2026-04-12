@@ -256,6 +256,8 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       label: 'POST production/edit-image/generate-flow-image',
       run: () => postProductionEditImageGenerateFlowImageV1(
         token,
+        projectId: 1,
+        scriptId: 1,
         flowId: 'img-flow-001',
         prompt: 'probe',
       ),

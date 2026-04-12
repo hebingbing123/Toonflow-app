@@ -113,6 +113,8 @@ Future<UpdateImageFlowResponseV1> postProductionEditImageUpdateImageFlowV1(
 /// `POST /api/v1/production/edit-image/generate-flow-image` — OpenAPI `postEditImageGenerateFlowImageV1`.
 Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   String accessToken, {
+  required int projectId,
+  required int scriptId,
   required String flowId,
   required String prompt,
   String? model,
@@ -120,7 +122,12 @@ Future<GenerateFlowImageResponseV1> postProductionEditImageGenerateFlowImageV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/edit-image/generate-flow-image',
   );
-  final body = <String, dynamic>{'flowId': flowId, 'prompt': prompt};
+  final body = <String, dynamic>{
+    'projectId': projectId,
+    'scriptId': scriptId,
+    'flowId': flowId,
+    'prompt': prompt,
+  };
   if (model != null) body['model'] = model;
   final res = await http
       .post(

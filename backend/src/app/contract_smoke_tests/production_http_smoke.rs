@@ -227,7 +227,7 @@ async fn production_edit_image_generate_flow_image_rejects_empty_flow_id_with_jw
     let (status, v) = post_json_bearer(
         "/api/v1/production/edit-image/generate-flow-image",
         &token,
-        r#"{"flowId":"   ","prompt":"probe"}"#,
+        r#"{"projectId":1,"scriptId":1,"flowId":"   ","prompt":"probe"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -240,7 +240,7 @@ async fn production_edit_image_generate_flow_image_rejects_empty_prompt_with_jwt
     let (status, v) = post_json_bearer(
         "/api/v1/production/edit-image/generate-flow-image",
         &token,
-        r#"{"flowId":"img-flow-001","prompt":"   "}"#,
+        r#"{"projectId":1,"scriptId":1,"flowId":"img-flow-001","prompt":"   "}"#,
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -253,7 +253,7 @@ async fn production_edit_image_generate_flow_image_requires_database_with_jwt() 
     let (status, v) = post_json_bearer(
         "/api/v1/production/edit-image/generate-flow-image",
         &token,
-        r#"{"flowId":"img-flow-001","prompt":"probe"}"#,
+        r#"{"projectId":1,"scriptId":1,"flowId":"img-flow-001","prompt":"probe"}"#,
     )
     .await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);

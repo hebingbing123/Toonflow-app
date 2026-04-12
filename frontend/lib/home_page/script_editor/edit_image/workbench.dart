@@ -228,6 +228,8 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                                       final response =
                                           await postProductionEditImageGenerateFlowImageV1(
                                             token,
+                                            projectId: projectNumericId,
+                                            scriptId: scriptNumericId,
                                             flowId: flowId,
                                             prompt: prompt,
                                             model: modelCtrl.text.trim().isEmpty

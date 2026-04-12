@@ -231,6 +231,8 @@ pub(in crate::production) async fn post_edit_image_upload_image(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateFlowImageBody {
+    project_id: i32,
+    script_id: i32,
     flow_id: String,
     prompt: String,
     #[serde(default)]
@@ -250,6 +252,12 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
     Json(body): Json<GenerateFlowImageBody>,
 ) -> Result<JsonResponse<GenerateFlowImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+    if body.project_id <= 0 {
+        return Err(ApiError::BadRequest("projectId must be > 0".into()));
+    }
+    if body.script_id <= 0 {
+        return Err(ApiError::BadRequest("scriptId must be > 0".into()));
+    }
     if body.flow_id.trim().is_empty() {
         return Err(ApiError::BadRequest("flowId must not be empty".into()));
     }
@@ -262,8 +270,18 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    crate::production_flow::resolve_owned_production_scope(
+        pool,
+        uid,
+        body.project_id,
+        body.script_id,
+    )
+    .await?;
+
     let payload = serde_json::json!({
         "source": "production.edit-image.generate-flow",
+        "project_numeric_id": body.project_id,
+        "script_id": body.script_id,
         "flow_id": body.flow_id.trim(),
         "prompt": body.prompt.trim(),
         "model": body.model.unwrap_or_else(|| "dall-e-3".to_string()),

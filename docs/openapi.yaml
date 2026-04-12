@@ -5641,7 +5641,8 @@ paths:
       summary: Enqueue edit-image generation job (Electron `generateFlowImage`)
       operationId: postProductionEditImageGenerateFlowImageV1
       description: |
-        Bearer JWT. Validates **`flowId`**, non-empty **`prompt`**, and optional **`model`**,
+        Bearer JWT. Resolves **`projectId`** + **`scriptId`** to an owned script scope (same as upload-image),
+        validates **`flowId`**, non-empty **`prompt`**, and optional **`model`**,
         then enqueues an **`asset.generate.batch`** job for the edit-image flow.
       security:
         - bearerAuth: []
@@ -10099,9 +10100,19 @@ components:
 
     ProductionEditImageGenerateFlowImageBody:
       type: object
-      required: [flowId, prompt]
+      required: [projectId, scriptId, flowId, prompt]
       additionalProperties: false
       properties:
+        projectId:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Numeric project id; must belong to the caller and pair with scriptId.
+        scriptId:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Numeric script id under that project; scope is verified before enqueue.
         flowId:
           type: string
           description: Whitespace-only values are rejected (HTTP 400).
