@@ -29,6 +29,7 @@ part 'home_page/project_editor/assets/compatibility/images_workbench_actions.dar
 part 'home_page/project_editor/assets/compatibility/crud.dart';
 part 'home_page/project_editor/assets/compatibility/relations.dart';
 part 'home_page/project_editor/assets/corner_scape.dart';
+part 'home_page/project_editor/assets/corner_scape_view.dart';
 part 'home_page/project_editor/assets/clip_upload.dart';
 part 'home_page/project_editor/assets/overview.dart';
 part 'home_page/project_editor/assets/compatibility/panel.dart';
