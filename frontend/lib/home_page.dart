@@ -22,6 +22,7 @@ part 'home_page/project_editor/http_probes/general_probe.dart';
 part 'home_page/project_editor/http_probes/project_probe.dart';
 part 'home_page/project_editor/http_probes/tasks_probe.dart';
 part 'home_page/project_editor/assets/compatibility/images.dart';
+part 'home_page/project_editor/assets/compatibility/images_actions.dart';
 part 'home_page/project_editor/assets/compatibility/crud.dart';
 part 'home_page/project_editor/assets/compatibility/relations.dart';
 part 'home_page/project_editor/assets/corner_scape.dart';
