@@ -12,11 +12,6 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Toonflow API — Swagger UI</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" crossorigin="anonymous" />
-  <style>
-    /* Keep top “intro” readable; long OpenAPI info.description scrolls instead of pushing operations away */
-    .swagger-ui .information-container .markdown { max-height: 38vh; overflow-y: auto; padding-right: 0.75rem; }
-    .swagger-ui .information-container .markdown table { font-size: 0.95em; }
-  </style>
 </head>
 <body>
   <div id="swagger-ui"></div>

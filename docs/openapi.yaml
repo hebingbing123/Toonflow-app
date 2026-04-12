@@ -1,26 +1,11 @@
 openapi: 3.1.0
 externalDocs:
-  description: WebSocket `/api/v1/ws` — JSON envelope; Harness `harness.tool.invoke` / `harness.tool.result` / `harness.agent.run` (tool loop)
+  description: WebSocket `/api/v1/ws` (JSON protocol)
   url: ./websocket-events.md
 info:
   title: Toonflow API
   version: 1.0.0
-  description: |
-    **Toonflow** REST API — all routes under **`/api/v1`** (see tags and operations below).
-
-    | Topic | Where to read |
-    |-------|----------------|
-    | WebSocket envelopes (`/api/v1/ws`) | Repo **`docs/websocket-events.md`** (also `info.externalDocs`) |
-    | Electron / legacy parity & ops notes | **`docs/plans/electron-node-parity.md`**, **`backend/README.md`** |
-    | Per-route contract | Each operation's **summary** / **description** in this file |
-
-    **Auth:** `Authorization: Bearer <Supabase access_token>` unless the operation states otherwise (e.g. billing webhook).
-
-    **Rate limits:** Per client IP by default; exempt: `/health`, `/api/v1/health`, `/api/v1/ping`, `/api/v1/version`, `/api/v1/ready`, `POST /api/v1/webhooks/billing`. Env: `RATE_LIMIT_REFILL_MS`, `RATE_LIMIT_BURST`, `RATE_LIMIT_TRUST_FORWARDED_HEADERS` (proxy only).
-
-    **Errors:** JSON `code` + `message`; responses include **`X-Request-Id`**.
-
-    The long narrative that used to live here was removed so **Swagger UI stays scannable** for frontend; git history still has the old text if needed.
+  description: "HTTP under `/api/v1` (use tags below). Typical calls: `Authorization: Bearer <Supabase access_token>`."
 
 servers:
   - url: http://127.0.0.1:8666
