@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (workbench **`getNovelData`**).
 Future<List<NovelRow>> fetchNovelWorkbenchFullRows(

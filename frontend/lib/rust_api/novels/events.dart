@@ -1,4 +1,4 @@
-part of 'index.dart';
+part of '../index.dart';
 
 /// `GET /api/v1/projects/{project_id}/novel-events` — paginated events list with chapter associations.
 Future<ListNovelEventsResponse> fetchProjectNovelEventsByProjectId(
