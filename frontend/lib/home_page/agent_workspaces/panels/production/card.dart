@@ -11,6 +11,8 @@ import '../../contexts/production/flow_logic.dart';
 import '../../contexts/production/status_panels.dart';
 import '../../contexts/production/support.dart';
 
+part 'card_support.dart';
+
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
     super.key,
@@ -319,42 +321,6 @@ class _AgentWorkspaceProductionCardState
     );
   }
 
-  List<String> _buildResultSummaryLines() {
-    final toolName = widget.workspaceLastToolName?.trim();
-    final result = widget.workspaceLastToolResultData;
-    final lines = <String>[
-      if (toolName != null && toolName.isNotEmpty) 'tool=$toolName',
-      if (result != null) 'resultType=${result.runtimeType}',
-      ...summarizeProductionResultSnapshot(toolName, result),
-    ];
-    return lines.take(6).toList(growable: false);
-  }
-
-  List<Widget> _buildContextSnapshot(BuildContext context) {
-    return <Widget>[
-      ProductionContextSnapshotView(
-        workspaceLastToolName: widget.workspaceLastToolName,
-        workspaceLastToolResultData: widget.workspaceLastToolResultData,
-      ),
-    ];
-  }
-
-  List<ProductionWorkspaceRecipe> _buildWorkspaceRecipes() {
-    return buildProductionWorkspaceRecipes(
-      toolName: widget.workspaceLastToolName,
-      suggestedFlowKey: _suggestedFlowKeyLine,
-      result: widget.workspaceLastToolResultData,
-    );
-  }
-
-  List<ProductionWorkspaceStage> _buildWorkspaceStages() {
-    return buildProductionWorkspaceStages(
-      toolName: widget.workspaceLastToolName,
-      suggestedFlowKey: _suggestedFlowKeyLine,
-      result: widget.workspaceLastToolResultData,
-    );
-  }
-
   void _applyWorkspaceRecipe(ProductionWorkspaceRecipe recipe) {
     widget.onFlowKeyChanged(recipe.flowKey);
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
@@ -401,7 +367,8 @@ class _AgentWorkspaceProductionCardState
 
   void _runWorkspaceStageSubAgent(ProductionWorkspaceStage stage) {
     _applyWorkspaceStage(stage);
-    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty) return;
+    if (stage.subAgentTool == null || stage.subAgentTool!.trim().isEmpty)
+      return;
     _runProductionSubAgentTool();
   }
 
@@ -413,28 +380,9 @@ class _AgentWorkspaceProductionCardState
 
   void _runWorkspaceRecipeSubAgent(ProductionWorkspaceRecipe recipe) {
     _applyWorkspaceRecipe(recipe);
-    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty) return;
+    if (recipe.subAgentTool == null || recipe.subAgentTool!.trim().isEmpty)
+      return;
     _runProductionSubAgentTool();
-  }
-
-  Widget _buildWorkspaceStagesPanel(BuildContext context) {
-    return ProductionWorkspaceStagesPanel(
-      stages: _buildWorkspaceStages(),
-      busy: widget.busy,
-      onApplyStage: _applyWorkspaceStage,
-      onRunStageDomainTool: _runWorkspaceStageDomainTool,
-      onRunStageSubAgent: _runWorkspaceStageSubAgent,
-    );
-  }
-
-  Widget _buildWorkspaceDiagnosis(BuildContext context) {
-    return ProductionWorkspaceDiagnosisPanel(
-      recipes: _buildWorkspaceRecipes(),
-      busy: widget.busy,
-      onApplyRecipe: _applyWorkspaceRecipe,
-      onRunRecipeDomainTool: _runWorkspaceRecipeDomainTool,
-      onRunRecipeSubAgent: _runWorkspaceRecipeSubAgent,
-    );
   }
 
   Widget _buildGuidedTasks() {
@@ -447,9 +395,7 @@ class _AgentWorkspaceProductionCardState
         _probeProductionDomainTool();
       },
       onRunAssetsSubAgent: () {
-        _applyProductionPromptIfEmpty(
-          '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
-        );
+        _applyProductionPromptIfEmpty('请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。');
         widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
         _runProductionSubAgentTool();
       },
@@ -461,9 +407,7 @@ class _AgentWorkspaceProductionCardState
       onWriteBackFlow: _writeBackProductionFlowResult,
       onRunStoryboardSubAgent: () {
         widget.onFlowKeyChanged('storyboard');
-        _applyProductionPromptIfEmpty(
-          '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
-        );
+        _applyProductionPromptIfEmpty('请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。');
         widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
         _runProductionSubAgentTool();
       },
@@ -497,7 +441,8 @@ class _AgentWorkspaceProductionCardState
             const SizedBox(height: 8),
             ProductionWorkspaceControlsPanel(
               busy: widget.busy,
-              loadingProductionWorkspaceRun: widget.loadingProductionWorkspaceRun,
+              loadingProductionWorkspaceRun:
+                  widget.loadingProductionWorkspaceRun,
               loadingProductionFlowProbe: widget.loadingProductionFlowProbe,
               loadingProductionSubAgentRun: widget.loadingProductionSubAgentRun,
               loadingProductionResultWriteback:
@@ -522,7 +467,8 @@ class _AgentWorkspaceProductionCardState
                 widget.flowKeyPresets,
               ),
               onRunProductionWorkspace: _runProductionWorkspace,
-              onProductionDomainToolChanged: widget.onProductionDomainToolChanged,
+              onProductionDomainToolChanged:
+                  widget.onProductionDomainToolChanged,
               onFlowKeyChanged: widget.onFlowKeyChanged,
               onProbeProductionDomainTool: _probeProductionDomainTool,
               onProductionSubAgentChanged: widget.onProductionSubAgentChanged,
