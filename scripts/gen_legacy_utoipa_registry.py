@@ -4,6 +4,10 @@
 Each OpenAPI component becomes a ZST + `PartialSchema`/`ToSchema` backed by the embedded JSON
 (serde into utoipa's `Schema`), so the merge pipeline no longer injects raw JSON in `merge.rs`.
 
+**End goal (utoipa-only):** every component schema should live as Rust `#[derive(ToSchema)]` (or domain
+`OpenApi` merges). When `legacy_component_schemas.json` has **no keys**, delete this script and the
+`legacy_components/` output, and remove the `legacy_components` merge from `openapi_spec::combined_openapi`.
+
 Run from repo root after updating the embedded JSON (e.g. from `extract_openapi_rust_sources.py`):
 
   python3 scripts/gen_legacy_utoipa_registry.py

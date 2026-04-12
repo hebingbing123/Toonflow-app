@@ -7,7 +7,8 @@ Reads a **full** OpenAPI 3.1 YAML (default: `docs/openapi.yaml` if present), or 
 
 Writes:
   backend/src/openapi_spec/embedded/legacy_component_schemas.json
-    — `components.schemas` only (metadata/tags/security live in `backend/src/openapi_spec/shell.rs`).
+    — `components.schemas` only (transitional; metadata/tags/security live in `shell.rs`).
+    Long-term these schemas should move to Rust `ToSchema` + utoipa merges until this file is empty.
     After updating, run `python3 scripts/gen_legacy_utoipa_registry.py` to refresh `legacy_components/`.
   backend/src/openapi_spec/ws_protocol_description.md
     — `GET /api/v1/ws` long description (for `include_str!` on the upgrade handler)

@@ -5,8 +5,13 @@
 //! 与 `embedded/legacy_component_schemas.json` 是 **从单体 OpenAPI 抽取/再生成** 的产物（见 `scripts/extract_openapi_rust_sources.py`），
 //! 日常改接口应优先改各域 handler 上的 utoipa 注解与 Rust 类型。
 //!
-//! **字段级 `#[derive(ToSchema)]` 的终点**：逐步用真实 Rust DTO（或 `typify` 等从 JSON Schema 批量生成再手修）
-//! 替换 `legacy_components` 里 JSON 反序列化的占位类型；每迁走一个 schema，就从嵌入 JSON 删掉对应键并再跑生成器。
+//! **目标形态（你描述的「只要 utoipa」）**：契约 **只** 由各域 `#[derive(OpenApi)]` / handler 上的 utoipa 注解与
+//! **`#[derive(ToSchema)]`（或等价 `PartialSchema`）Rust 类型** 组成；**不再**把 `embedded/legacy_component_schemas.json`
+//! 当作需要人工维护的真源——迁完后应 **删空该 JSON**、移除下面 `legacy_components` 的 `merge`、删掉
+//! `scripts/gen_legacy_utoipa_registry.py` 与 `legacy_components/` 生成物。
+//!
+//! **过渡期**：`legacy_components` 仍从嵌入 JSON 批量注册组件名，直到每个 `ref("…")` 都有对应 Rust `ToSchema`；
+//! 每迁走一个 schema，从 JSON 删掉该键并执行 `python3 scripts/gen_legacy_utoipa_registry.py` 再提交。
 
 mod generated;
 mod legacy_components;
@@ -49,6 +54,7 @@ pub struct CoreHandlersApi;
 /// Full utoipa document: core handlers, legacy component registry, domain APIs, and YAML-index stubs.
 pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     let mut doc = CoreHandlersApi::openapi();
+    // TODO(utoipa-only): 当 `embedded/legacy_component_schemas.json` 为空时，删除此行并移除 `legacy_components` 模块与生成脚本。
     doc.merge(legacy_components::merged_legacy_components_openapi());
     doc.merge(crate::billing::BillingApi::openapi());
     doc.merge(crate::settings::SettingsOpenApi::openapi());
