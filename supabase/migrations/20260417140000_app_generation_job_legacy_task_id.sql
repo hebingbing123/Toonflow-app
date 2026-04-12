@@ -12,7 +12,10 @@ WHERE legacy_task_id IS NULL;
 
 SELECT setval(
   'public.app_generation_job_legacy_task_id_seq',
-  COALESCE((SELECT MAX(legacy_task_id) FROM public.app_generation_job), 0),
+  GREATEST(
+    1::bigint,
+    COALESCE((SELECT MAX(legacy_task_id) FROM public.app_generation_job), 0)
+  ),
   true
 );
 
