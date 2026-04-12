@@ -5416,9 +5416,6 @@ paths:
       tags: [production]
       summary: Batch enqueue asset image generation (Electron `batchGenerateAssetsImage`)
       operationId: postProductionAssetsBatchGenerateImageV1
-      description: |
-        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`assetIds`**,
-        verifies ownership, then enqueues one **`asset.generate.batch`** job per asset id.
       security:
         - bearerAuth: []
       requestBody:
@@ -5447,7 +5444,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project/script not found / not owned
+          description: Not found
           content:
             application/json:
               schema:
@@ -5464,9 +5461,6 @@ paths:
       tags: [production]
       summary: Delete derivative asset images (Electron `deleteAssetsDireve`)
       operationId: postProductionAssetsDeleteDerivativeV1
-      description: |
-        Bearer JWT. Validates **`projectId`** and non-empty **`assetIds`**, then deletes owned
-        **`app_asset_image`** rows for those asset ids. Returns **200** even when nothing matched.
       security:
         - bearerAuth: []
       requestBody:
@@ -5494,6 +5488,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured or `DATABASE_URL` unset
           content:
@@ -5506,9 +5506,6 @@ paths:
       tags: [production]
       summary: List project assets for production workbench (Electron `getAssetsData`)
       operationId: postProductionAssetsGetAssetsDataV1
-      description: |
-        Bearer JWT. Validates **`projectId`**, optional **`assetType`**, and pagination fields,
-        then returns owned assets ordered by creation time descending.
       security:
         - bearerAuth: []
       requestBody:
@@ -5536,6 +5533,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "503":
           description: Auth not configured or `DATABASE_URL` unset
           content:
@@ -5548,11 +5551,6 @@ paths:
       tags: [production]
       summary: Poll derivative asset image status (Electron `assets/pollingImage`)
       operationId: postProductionAssetsPollingImageV1
-      description: |
-        Bearer JWT. Validates **`projectId`**, **`scriptId`**, and non-empty **`assetIds`**, resolves
-        owned script scope, then returns image counts and latest states only for assets **linked to that script**
-        via **`app_script_asset`**. Returns **404** if project/script is not owned, if any **`assetId`** is not
-        linked to the script, or if any id is not positive.
       security:
         - bearerAuth: []
       requestBody:
@@ -5581,7 +5579,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Project/script not owned, or one or more assets are not linked to that script
+          description: Not found
           content:
             application/json:
               schema:
@@ -5598,9 +5596,6 @@ paths:
       tags: [production]
       summary: Append a generated asset image URL (Electron `updateAssetsUrl`)
       operationId: postProductionAssetsUpdateUrlV1
-      description: |
-        Bearer JWT. Validates **`projectId`**, **`assetId`**, and non-empty **`imageUrl`**, then
-        inserts a completed **`app_asset_image`** row for that owned asset.
       security:
         - bearerAuth: []
       requestBody:
@@ -5629,7 +5624,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
         "404":
-          description: Asset not found / not owned
+          description: Not found
           content:
             application/json:
               schema:
@@ -9920,7 +9915,7 @@ components:
         describe:
           type: string
           nullable: true
-        coverLegacyImageId:
+        coverNumericImageId:
           type: integer
           format: int32
           nullable: true

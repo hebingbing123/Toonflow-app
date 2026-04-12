@@ -102,6 +102,69 @@ async fn production_assets_derivative_roundtrip() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(
+                    r#"{"name":"pg_derivative_asset_unlinked","type":"role","description":"extra"}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, asset2) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::CREATED, "asset2={asset2}");
+    let asset2_id = asset2["numeric_id"].as_i64().expect("asset2 numeric_id") as i32;
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/production/assets/batch-generate-assets-image")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetIds":[{asset2_id}]}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        res.status(),
+        StatusCode::NOT_FOUND,
+        "batch-generate must require app_script_asset link"
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/production/assets/batch-generate-assets-image")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"scriptId":{script_id},"assetIds":[{asset_id}]}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, batch) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "batch={batch}");
+    assert_eq!(batch["total"].as_i64(), Some(1));
+    assert_eq!(batch["enqueued"].as_array().map(|a| a.len()), Some(1));
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
                 .uri("/api/v1/production/assets/get-assets-data")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")

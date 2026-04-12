@@ -45,15 +45,47 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     if body.asset_ids.is_empty() {
         return Err(ApiError::BadRequest("assetIds must not be empty".into()));
     }
+    if body.asset_ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest(
+            "assetIds must be positive integers".into(),
+        ));
+    }
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
         .await
         .map_err(|e| e.into_api_error())?;
+
+    let mut uniq = body.asset_ids.clone();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let linked: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT a.numeric_id)::bigint
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND a.numeric_id = ANY($4::int4[])
+        "#,
+    )
+    .bind(uid)
+    .bind(body.project_id)
+    .bind(scope_row.script_id)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if linked != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
     let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
