@@ -57,6 +57,12 @@ cargo run
 
 分镜删除：**`DELETE /api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}`**（Bearer；**`project_id`** UUID）— 删除归属当前用户剧本树下的 **`app_storyboard`** 单行（`script → project` 所有权校验）。
 
+小说事件：**`POST /api/v1/projects/{project_id}/novel-events`** 创建 **`app_novel_event`** 行时，事务内 **`pg_advisory_xact_lock(884_422_007)`** + 全表 **`MAX(numeric_id)+1`**（**`numeric_id`** 全局唯一）。
+
+Workbench 轨道：**`POST /api/v1/production/workbench/add-track`** 在计算下一槽位（**`GREATEST`** 于该剧本下分镜 **`track_id`** 与同项目 **`app_video_track.numeric_id`**）前取 **`pg_advisory_xact_lock(884_422_009)`**，避免并发读到同一序号。
+
+Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`**、**`…/batch-add-info`**）与上文 REST 新建分镜一致：**`pg_advisory_xact_lock(884_422_003)`** + 全表 **`MAX(numeric_id)+1`**。
+
 ### LLM（WebSocket `agent.chat.send`）
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。**`POST /api/v1/art-styles/extract-prompt`** 使用同一密钥走**非流式**多模态 **`chat/completions`**（需 vision 模型，如默认 **`gpt-4o-mini`**）。
