@@ -1,0 +1,95 @@
+part of '../../../../home_page.dart';
+
+AlertDialog buildProjectAssetsWorkbenchDialog({
+  required BuildContext dialogCtx,
+  required bool localBusy,
+  required bool assetsBusy,
+  required String statusLine,
+  required List<AssetRow> scopedAssets,
+  required int? assetsFilterScriptNumericId,
+  required AssetRow? selectedAsset,
+  required List<AssetRow> assets,
+  required List<ScriptBrief> scriptList,
+  required int? selectedAssetNumericId,
+  required int? selectedScriptNumericId,
+  required ValueChanged<int?>? onAssetChanged,
+  required ValueChanged<int?>? onScriptChanged,
+  required Future<void> Function() onCreate,
+  required Future<void> Function() onEdit,
+  required Future<void> Function() onDelete,
+  required Future<void> Function() onFilter,
+  required Future<void> Function() onLink,
+  required Future<void> Function() onUnlink,
+  required Future<void> Function() onUploadEditImage,
+  required Future<void> Function() onUploadClip,
+  required Future<void> Function() onOpenImagesWorkbench,
+  required Future<void> Function() onOpenGenerationWorkbench,
+  required Future<void> Function() onOpenHistoryWorkbench,
+  required VoidCallback? onRefresh,
+  required VoidCallback? onClose,
+}) {
+  return AlertDialog(
+    title: const Text('资产主工作台'),
+    content: SizedBox(
+      width: 780,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '把资产 CRUD、剧本关联、筛选和上传入口收口到一个正式工作台，主区不再堆一排控制台式按钮。',
+              style: Theme.of(dialogCtx).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            _ProjectAssetsWorkbenchOverview(
+              statusLine: statusLine,
+              scriptScopedLine: summarizeScriptScopedAssets(
+                assetsFilterScriptNumericId,
+                scopedAssets,
+              ),
+              selectedAsset: selectedAsset,
+              assets: assets,
+              scriptList: scriptList,
+              selectedAssetNumericId: selectedAssetNumericId,
+              selectedScriptNumericId: selectedScriptNumericId,
+              onAssetChanged: onAssetChanged,
+              onScriptChanged: onScriptChanged,
+            ),
+            const SizedBox(height: 12),
+            _ProjectAssetsWorkbenchActions(
+              localBusy: localBusy,
+              assetsBusy: assetsBusy,
+              assets: assets,
+              scriptList: scriptList,
+              selectedScriptNumericId: selectedScriptNumericId,
+              onCreate: onCreate,
+              onEdit: onEdit,
+              onDelete: onDelete,
+              onFilter: onFilter,
+              onLink: onLink,
+              onUnlink: onUnlink,
+              onUploadEditImage: onUploadEditImage,
+              onUploadClip: onUploadClip,
+            ),
+            const SizedBox(height: 12),
+            _ProjectAssetsWorkbenchLaunchers(
+              localBusy: localBusy,
+              assetsBusy: assetsBusy,
+              onOpenImagesWorkbench: onOpenImagesWorkbench,
+              onOpenGenerationWorkbench: onOpenGenerationWorkbench,
+              onOpenHistoryWorkbench: onOpenHistoryWorkbench,
+            ),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: onRefresh,
+        child: Text(localBusy ? '处理中…' : '刷新工作台'),
+      ),
+      TextButton(onPressed: onClose, child: const Text('关闭')),
+    ],
+  );
+}

@@ -46,6 +46,7 @@ part 'home_page/project_editor/assets/images/workbench_mutations.dart';
 part 'home_page/project_editor/assets/images/workbench_state.dart';
 part 'home_page/project_editor/assets/images/workbench_dialog.dart';
 part 'home_page/project_editor/assets/workbench/dialog.dart';
+part 'home_page/project_editor/assets/workbench/dialog_view.dart';
 part 'home_page/project_editor/novels/compatibility/actions.dart';
 part 'home_page/project_editor/novels/compatibility/section.dart';
 part 'home_page/project_editor/novels/events/actions.dart';
