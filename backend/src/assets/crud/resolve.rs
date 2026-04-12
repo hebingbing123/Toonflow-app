@@ -3,7 +3,7 @@
 //! 资产 ID 解析（UUID 项目段）与元数据解析；队列侧仍可按 **`project_numeric_id`** 解析（见 **`resolve_asset_id_for_job`**）。
 
 use serde_json::Value;
-use sqlx::{types::Json as SqlxJson, PgPool};
+use sqlx::{types::Json as SqlxJson, FromRow, PgPool};
 use uuid::Uuid;
 
 use crate::error::ApiError;
@@ -95,6 +95,43 @@ pub async fn resolve_asset_id_for_job(
     )
     .bind(project_numeric_id)
     .bind(owner_user_id)
+    .bind(asset_numeric_id)
+    .fetch_optional(pool)
+    .await
+}
+
+/// Worker-only row: owned asset linked to a script via **`app_script_asset`**
+/// (**`project_numeric_id`**, **`script_numeric_id`**, **`asset_numeric_id`**).
+#[derive(Debug, Clone, FromRow)]
+pub struct OwnedScriptLinkedAssetJobRow {
+    pub id: Uuid,
+    pub name: String,
+    pub describe: Option<String>,
+}
+
+/// Resolve **`app_asset.id`** (and display fields) for jobs that must stay inside **`app_script_asset`** scope.
+pub async fn resolve_owned_script_linked_asset_row_for_job(
+    pool: &PgPool,
+    owner_user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    asset_numeric_id: i32,
+) -> Result<Option<OwnedScriptLinkedAssetJobRow>, sqlx::Error> {
+    sqlx::query_as::<_, OwnedScriptLinkedAssetJobRow>(
+        r#"
+        SELECT a.id, a.name, a.describe
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        INNER JOIN app_script s ON s.project_id = p.id AND s.numeric_id = $3
+        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = s.id
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND a.numeric_id = $4
+        "#,
+    )
+    .bind(owner_user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
     .bind(asset_numeric_id)
     .fetch_optional(pool)
     .await

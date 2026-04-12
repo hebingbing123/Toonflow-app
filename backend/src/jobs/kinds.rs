@@ -9,10 +9,12 @@
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 /// Single prompt polish (Electron-era **`POST …/assets-generate/polish-prompt`**); worker calls chat completion when **`LlmConfig`** is set, else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
-/// Batch image generate (**`POST …/assets-generate/batch-generate`**); worker runs one image call
-/// (prefer **`images/edits`** when `image_base64` exists, fallback **`images/generations`**) plus
-/// one **`app_asset_image`** insert per item when LLM key is set (same **`file_path`** rules as
-/// single-image).
+/// Batch / multiplex image work (**`POST …/assets-generate/batch-generate`** and production enqueue paths).
+/// Worker branches on **`payload`**: non-empty **`items`** → one image + **`app_asset_image`** per item
+/// (project-owned assets); **`source: production.assets.batch-generate`** → script-linked asset only
+/// (**`app_script_asset`**) then one **`app_asset_image`**; **`source: production.storyboard.batch-generate-image`**
+/// → owned storyboard row then **`images/generations`** + **`app_storyboard.file_path`**; **`source: production.edit-image.generate-flow`**
+/// → **`images/generations`** with result URL only (no DB row).
 pub const JOB_KIND_ASSET_GENERATE_BATCH: &str = "asset.generate.batch";
 /// Batch prompt polish (**`POST …/assets-generate/batch-polish`**); worker runs **`chat_completion_assistant_text`** per item when **`LlmConfig`** is set (cooperative cancel between items), else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";

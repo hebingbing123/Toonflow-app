@@ -15,7 +15,10 @@ pub mod models;
 mod workbench_query;
 mod workbench_write;
 
-pub use crud::{next_asset_image_sort_index, resolve_asset_id_for_job};
+pub use crud::{
+    next_asset_image_sort_index, resolve_asset_id_for_job,
+    resolve_owned_script_linked_asset_row_for_job,
+};
 
 /// Shared by other domains (e.g. narrative novels) that scope rows by **`app_project.id`**.
 pub(crate) use crud::ensure_owned_project_pk;

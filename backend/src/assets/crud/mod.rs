@@ -29,4 +29,7 @@ pub(crate) use resolve::{
     ensure_owned_project_numeric_id, ensure_owned_project_pk,
     resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
 };
-pub use resolve::{next_asset_image_sort_index, resolve_asset_id_for_job};
+pub use resolve::{
+    next_asset_image_sort_index, resolve_asset_id_for_job,
+    resolve_owned_script_linked_asset_row_for_job,
+};
