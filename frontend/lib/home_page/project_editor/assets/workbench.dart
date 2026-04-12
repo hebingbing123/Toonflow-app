@@ -99,97 +99,25 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                           style: Theme.of(dialogCtx).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(
-                                dialogCtx,
-                              ).colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                        _ProjectAssetsWorkbenchOverview(
+                          statusLine: statusLine,
+                          scriptScopedLine: summarizeScriptScopedAssets(
+                            assetsFilterScriptNumericId[0],
+                            scopedAssets,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                statusLine,
-                                style: Theme.of(dialogCtx).textTheme.bodySmall,
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                summarizeScriptScopedAssets(
-                                  assetsFilterScriptNumericId[0],
-                                  scopedAssets,
-                                ),
-                                style: Theme.of(dialogCtx).textTheme.bodySmall,
-                              ),
-                              if (selectedAsset != null) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  '当前焦点资产：#${selectedAsset.numericId} ${selectedAsset.name} · ${selectedAsset.assetType}',
-                                  style: Theme.of(
-                                    dialogCtx,
-                                  ).textTheme.bodySmall,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<int?>(
-                          initialValue: selectedAssetNumericId,
-                          decoration: const InputDecoration(
-                            labelText: '当前焦点资产',
-                            helperText: '用于快速查看当前工作焦点；具体编辑在下方动作中完成。',
-                          ),
-                          items: [
-                            const DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('（当前无资产）'),
-                            ),
-                            ...assets.map(
-                              (asset) => DropdownMenuItem<int?>(
-                                value: asset.numericId,
-                                child: Text(
-                                  '#${asset.numericId} ${asset.name}',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: assets.isEmpty
+                          selectedAsset: selectedAsset,
+                          assets: assets,
+                          scriptList: scriptList,
+                          selectedAssetNumericId: selectedAssetNumericId,
+                          selectedScriptNumericId: selectedScriptNumericId,
+                          onAssetChanged: assets.isEmpty
                               ? null
                               : (value) {
                                   setLocalState(
                                     () => selectedAssetNumericId = value,
                                   );
                                 },
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<int?>(
-                          initialValue: selectedScriptNumericId,
-                          decoration: const InputDecoration(
-                            labelText: '当前焦点剧本',
-                            helperText: '用于剧本-资产关联相关动作。',
-                          ),
-                          items: [
-                            const DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('（当前无剧本）'),
-                            ),
-                            ...scriptList.map(
-                              (script) => DropdownMenuItem<int?>(
-                                value: script.numericId,
-                                child: Text(
-                                  '#${script.numericId} ${script.name ?? ""}',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: scriptList.isEmpty
+                          onScriptChanged: scriptList.isEmpty
                               ? null
                               : (value) {
                                   setLocalState(
