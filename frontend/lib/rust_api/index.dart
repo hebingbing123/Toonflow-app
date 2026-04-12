@@ -10,14 +10,14 @@ export 'core.dart';
 export 'production.dart';
 
 part 'art_styles.dart';
-part 'agent_memory_api.dart';
+part 'agents/memory.dart';
 part 'assets/api.dart';
 part 'assets/crud.dart';
 part 'assets/images.dart';
 part 'assets/models.dart';
 part 'assets/generate.dart';
 part 'catalog_memory_models.dart';
-part 'harness_api.dart';
+part 'harness/api.dart';
 part 'jobs/api.dart';
 part 'jobs/task_center.dart';
 part 'models_catalog.dart';

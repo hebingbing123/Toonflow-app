@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Harness tool discovery models and endpoints.
 class HarnessToolInfo {
   const HarnessToolInfo({required this.name, required this.description});
 

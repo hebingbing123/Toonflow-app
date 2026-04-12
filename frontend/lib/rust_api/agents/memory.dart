@@ -1,5 +1,6 @@
-part of 'index.dart';
+part of '../index.dart';
 
+/// Agent memory query, append, and clear endpoints.
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
 Future<List<dynamic>> queryAgentMemory(
   String accessToken, {
