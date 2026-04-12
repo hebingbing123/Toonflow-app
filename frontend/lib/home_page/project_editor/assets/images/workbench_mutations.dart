@@ -1,0 +1,294 @@
+part of '../../../../home_page.dart';
+
+Future<void> createAssetImage({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+  required TextEditingController createFilePathCtrl,
+  required TextEditingController createStateCtrl,
+  required TextEditingController createSortCtrl,
+  required StateSetter setState,
+  required BuildContext ctx,
+  required StateSetter setDialogState,
+  required List<bool> assetsBusy,
+  required ValueChanged<bool> onBusyMutationChanged,
+  required Future<void> Function() reloadAssetsAndStats,
+  required String? currentSelectedImageId,
+  required ListAssetImagesResponse? Function() getImagesResponse,
+  required String? Function() getSelectedImageId,
+  required Uint8List? Function() getPreviewBytes,
+  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
+  required ValueChanged<String?> onSelectedImageIdChanged,
+  required ValueChanged<Uint8List?> onPreviewBytesChanged,
+  required ValueChanged<bool> onListLoadingChanged,
+  required ValueChanged<bool> onPreviewLoadingChanged,
+  required ValueChanged<String?> onStatusChanged,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+}) async {
+  final filePath = createFilePathCtrl.text.trim();
+  final state = createStateCtrl.text.trim();
+  final sort = parsePositiveWorkbenchInt(createSortCtrl.text);
+  if (createSortCtrl.text.trim().isNotEmpty && sort == null) {
+    setState(() => onStatusChanged('新增 sort_index 需为正整数'));
+    return;
+  }
+  setDialogState(() => assetsBusy[0] = true);
+  setState(() => onBusyMutationChanged(true));
+  try {
+    await createProjectAssetImageForProject(
+      token,
+      projectId,
+      assetNumericId,
+      filePath: filePath.isEmpty ? null : filePath,
+      state: state.isEmpty ? null : state,
+      sortIndex: sort,
+    );
+    await reloadAssetImages(
+      token: token,
+      projectId: projectId,
+      assetNumericId: assetNumericId,
+      currentSelectedImageId: currentSelectedImageId,
+      setState: setState,
+      onImagesResponseChanged: onImagesResponseChanged,
+      onSelectedImageIdChanged: onSelectedImageIdChanged,
+      onPreviewBytesChanged: onPreviewBytesChanged,
+      onLoadingChanged: onListLoadingChanged,
+      onPreviewLoadingChanged: onPreviewLoadingChanged,
+      onStatusChanged: onStatusChanged,
+      patchFilePathCtrl: patchFilePathCtrl,
+      patchStateCtrl: patchStateCtrl,
+      patchSortCtrl: patchSortCtrl,
+    );
+    await reloadAssetsAndStats();
+    final diagnosis = diagnoseAssetImagesWorkbench(
+      imagesResponse: getImagesResponse(),
+      selectedImageId: getSelectedImageId(),
+      hasPreviewBytes: getPreviewBytes() != null,
+    );
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFollowUp(
+          actionSummary: '已新增资产图片。',
+          diagnosis: diagnosis,
+        ),
+      );
+    });
+  } on RustApiException catch (e) {
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFailureNotice(
+          actionSummary: '新增资产图片失败。',
+          recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
+          error: e,
+          fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
+        ),
+      );
+    });
+  } finally {
+    setState(() => onBusyMutationChanged(false));
+    if (ctx.mounted) {
+      setDialogState(() => assetsBusy[0] = false);
+    }
+  }
+}
+
+Future<void> patchAssetImage({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required Uint8List? previewBytes,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+  required StateSetter setState,
+  required BuildContext ctx,
+  required StateSetter setDialogState,
+  required List<bool> assetsBusy,
+  required ValueChanged<bool> onBusyMutationChanged,
+  required Future<void> Function() reloadAssetsAndStats,
+  required ListAssetImagesResponse? Function() getImagesResponse,
+  required String? Function() getSelectedImageId,
+  required Uint8List? Function() getPreviewBytes,
+  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
+  required ValueChanged<String?> onSelectedImageIdChanged,
+  required ValueChanged<Uint8List?> onPreviewBytesChanged,
+  required ValueChanged<bool> onListLoadingChanged,
+  required ValueChanged<bool> onPreviewLoadingChanged,
+  required ValueChanged<String?> onStatusChanged,
+}) async {
+  final image = selectedAssetImageRow(
+    imagesResponse,
+    selectedImageId: selectedImageId,
+  );
+  if (image == null) {
+    setState(() => onStatusChanged('请先选择要编辑的图片'));
+    return;
+  }
+  final body = <String, dynamic>{};
+  final filePath = patchFilePathCtrl.text.trim();
+  final state = patchStateCtrl.text.trim();
+  final sortRaw = patchSortCtrl.text.trim();
+  body['file_path'] = filePath.isNotEmpty ? filePath : null;
+  body['state'] = state.isNotEmpty ? state : null;
+  if (sortRaw.isNotEmpty) {
+    final sort = parsePositiveWorkbenchInt(sortRaw);
+    if (sort == null) {
+      setState(() => onStatusChanged('编辑 sort_index 需为正整数'));
+      return;
+    }
+    body['sort_index'] = sort;
+  }
+  setDialogState(() => assetsBusy[0] = true);
+  setState(() => onBusyMutationChanged(true));
+  try {
+    await patchProjectAssetImageByProjectIds(
+      token,
+      projectId,
+      assetNumericId,
+      image.id,
+      body,
+    );
+    await reloadAssetImages(
+      token: token,
+      projectId: projectId,
+      assetNumericId: assetNumericId,
+      currentSelectedImageId: selectedImageId,
+      setState: setState,
+      onImagesResponseChanged: onImagesResponseChanged,
+      onSelectedImageIdChanged: onSelectedImageIdChanged,
+      onPreviewBytesChanged: onPreviewBytesChanged,
+      onLoadingChanged: onListLoadingChanged,
+      onPreviewLoadingChanged: onPreviewLoadingChanged,
+      onStatusChanged: onStatusChanged,
+      patchFilePathCtrl: patchFilePathCtrl,
+      patchStateCtrl: patchStateCtrl,
+      patchSortCtrl: patchSortCtrl,
+    );
+    await reloadAssetsAndStats();
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFollowUp(
+          actionSummary: '已更新当前图片。',
+          diagnosis: diagnoseAssetImagesWorkbench(
+            imagesResponse: getImagesResponse(),
+            selectedImageId: getSelectedImageId(),
+            hasPreviewBytes: getPreviewBytes() != null,
+          ),
+        ),
+      );
+    });
+  } on RustApiException catch (e) {
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFailureNotice(
+          actionSummary: '更新当前图片失败。',
+          recommendedAction:
+              AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+          error: e,
+          fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+        ),
+      );
+    });
+  } finally {
+    setState(() => onBusyMutationChanged(false));
+    if (ctx.mounted) {
+      setDialogState(() => assetsBusy[0] = false);
+    }
+  }
+}
+
+Future<void> deleteAssetImage({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required Uint8List? previewBytes,
+  required StateSetter setState,
+  required BuildContext ctx,
+  required StateSetter setDialogState,
+  required List<bool> assetsBusy,
+  required ValueChanged<bool> onBusyMutationChanged,
+  required Future<void> Function() reloadAssetsAndStats,
+  required ListAssetImagesResponse? Function() getImagesResponse,
+  required String? Function() getSelectedImageId,
+  required Uint8List? Function() getPreviewBytes,
+  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
+  required ValueChanged<String?> onSelectedImageIdChanged,
+  required ValueChanged<Uint8List?> onPreviewBytesChanged,
+  required ValueChanged<bool> onListLoadingChanged,
+  required ValueChanged<bool> onPreviewLoadingChanged,
+  required ValueChanged<String?> onStatusChanged,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+}) async {
+  final image = selectedAssetImageRow(
+    imagesResponse,
+    selectedImageId: selectedImageId,
+  );
+  if (image == null) {
+    setState(() => onStatusChanged('请先选择要删除的图片'));
+    return;
+  }
+  setDialogState(() => assetsBusy[0] = true);
+  setState(() => onBusyMutationChanged(true));
+  try {
+    await deleteProjectAssetImageByProjectIds(
+      token,
+      projectId,
+      assetNumericId,
+      image.id,
+    );
+    await reloadAssetImages(
+      token: token,
+      projectId: projectId,
+      assetNumericId: assetNumericId,
+      currentSelectedImageId: selectedImageId,
+      setState: setState,
+      onImagesResponseChanged: onImagesResponseChanged,
+      onSelectedImageIdChanged: onSelectedImageIdChanged,
+      onPreviewBytesChanged: onPreviewBytesChanged,
+      onLoadingChanged: onListLoadingChanged,
+      onPreviewLoadingChanged: onPreviewLoadingChanged,
+      onStatusChanged: onStatusChanged,
+      patchFilePathCtrl: patchFilePathCtrl,
+      patchStateCtrl: patchStateCtrl,
+      patchSortCtrl: patchSortCtrl,
+    );
+    await reloadAssetsAndStats();
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFollowUp(
+          actionSummary: '已删除当前图片。',
+          diagnosis: diagnoseAssetImagesWorkbench(
+            imagesResponse: getImagesResponse(),
+            selectedImageId: getSelectedImageId(),
+            hasPreviewBytes: getPreviewBytes() != null,
+          ),
+        ),
+      );
+    });
+  } on RustApiException catch (e) {
+    setState(() {
+      onStatusChanged(
+        buildAssetImagesWorkbenchFailureNotice(
+          actionSummary: '删除当前图片失败。',
+          recommendedAction:
+              AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+          error: e,
+          fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+        ),
+      );
+    });
+  } finally {
+    setState(() => onBusyMutationChanged(false));
+    if (ctx.mounted) {
+      setDialogState(() => assetsBusy[0] = false);
+    }
+  }
+}
