@@ -9,7 +9,7 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::error::ApiError;
-use crate::scope::ScopeError;
+use crate::scope;
 
 #[derive(Debug, FromRow)]
 struct ScriptContentRow {
@@ -49,12 +49,9 @@ pub(crate) async fn resolve_owned_production_scope(
     project_numeric_id: i32,
     script_numeric_id: i32,
 ) -> Result<(Uuid, Uuid, Option<String>), ApiError> {
-    let scope = crate::scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
+    let scope = scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
         .await
-        .map_err(|e| match e {
-            ScopeError::NotFound => ApiError::NotFound,
-            ScopeError::Database(msg) => ApiError::DatabaseError(msg),
-        })?;
+        .map_err(|e| e.into_api_error())?;
 
     let row: ScriptContentRow = sqlx::query_as(
         r#"

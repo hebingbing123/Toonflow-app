@@ -218,7 +218,9 @@ rg -n "FROM app_script|owner_user_id|numeric_id" backend/src --glob '!**/pg_cont
 ## 7. 文档维护
 
 - **P0 / A1**：已新增顶层 **`backend/src/scope/mod.rs`**（`owned_script_scope`）；**Harness** `require_owned_script_scope` 委托该模块。
-- **P0 / A2（部分）**：**`production_flow::resolve_owned_production_scope`** 已先 `owned_script_scope` 再读 `app_script.content`；**`invoke_get_script_content`** 同样先 scope 再按 `script_id` 读剧本列。其余竖切（`scripting/`、`narrative/` 等）重复 JOIN 仍可按需继续收敛。
+- **P0 / A2（部分）**：**`production_flow::resolve_owned_production_scope`**、**`invoke_get_script_content`** 已先 scope 再读剧本列；**`scope::ScopeError::into_api_error`** 供 HTTP 侧复用。
+- **P0 / A2（制作 workbench 一批）**：**`production/workbench/`** 下 `meta`（生成 prompt / get_generate_data）、`track`（add/delete track、delete/select video）、`video`（generate 探针）、`assets`（batch 出图）、`storyboard`（add / batch_add）、`storyboard_ops`（batch_generate_image）已用 **`owned_script_scope`** 替代原 **COUNT + JOIN** 或改为 **`WHERE script_id = …`（UUID）** 更新/删除。
+- **仍可按需收敛**：`scripting/scripts/crud`（路径为 **project UUID**）、`assets/crud/links`、`narrative/storyboards`、仅 **project numeric** 的查询等，入口与 `owned_script_scope` 不完全一致时需另加重载或先解析 numeric。
 - 实施 P0/P1 后，可在本文档 **§2** 对应条目标记 **「已收敛到 `<路径>`」**，避免以后重复审查。
 
 若你希望下一步 **自动产出「重复 SQL 对照表」**（脚本 + 输出清单），可以单独开任务做 **rg + 人工标注** 半自动报告。

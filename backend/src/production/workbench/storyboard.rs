@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -47,26 +48,9 @@ pub(in crate::production) async fn post_storyboard_add(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let owned_count = sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT COUNT(*)
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     // Get next numeric_id
     let next_id: i32 = sqlx::query_scalar(
@@ -90,18 +74,12 @@ pub(in crate::production) async fn post_storyboard_add(
             script_id, numeric_id, numeric_script_id, prompt, duration,
             state, sb_index, created_at, updated_at
         )
-        SELECT sc.id, $4, $3, $5, $6, '草稿', $7, NOW(), NOW()
-        FROM app_script sc
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND sc.numeric_id = $3
+        VALUES ($1, $2, $3, $4, $5, '草稿', $6, NOW(), NOW())
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.script_id)
     .bind(next_id)
+    .bind(body.script_id)
     .bind(body.prompt.trim())
     .bind(body.duration.unwrap_or(5))
     .bind(next_id) // sb_index = numeric_id for now
@@ -167,26 +145,9 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let owned_count = sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT COUNT(*)
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     // Get base numeric_id
     let base_id: i32 = sqlx::query_scalar(
@@ -213,18 +174,12 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
                 script_id, numeric_id, numeric_script_id, prompt, duration,
                 state, sb_index, created_at, updated_at
             )
-            SELECT sc.id, $4, $3, $5, $6, '草稿', $7, NOW(), NOW()
-            FROM app_script sc
-            INNER JOIN app_project p ON p.id = sc.project_id
-            WHERE p.owner_user_id = $1
-              AND p.numeric_id = $2
-              AND sc.numeric_id = $3
+            VALUES ($1, $2, $3, $4, $5, '草稿', $6, NOW(), NOW())
             "#,
         )
-        .bind(uid)
-        .bind(body.project_id)
-        .bind(body.script_id)
+        .bind(scope_row.script_id)
         .bind(next_id)
+        .bind(body.script_id)
         .bind(sb.prompt.trim())
         .bind(sb.duration.unwrap_or(5))
         .bind(next_id)

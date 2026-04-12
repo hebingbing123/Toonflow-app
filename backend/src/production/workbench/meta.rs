@@ -9,6 +9,7 @@ use super::super::VideoItem;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
+use crate::scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -48,26 +49,9 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let owned_count = sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT COUNT(*)
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
+    scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let prompt = if let Some(desc) = body.description {
         format!(
@@ -118,6 +102,10 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let generated_videos = sqlx::query_as::<_, VideoItem>(
         r#"
         SELECT
@@ -131,18 +119,13 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
           sb.created_at
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND sc.numeric_id = $3
+        WHERE sb.script_id = $1
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
         ORDER BY sb.created_at DESC
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope.script_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

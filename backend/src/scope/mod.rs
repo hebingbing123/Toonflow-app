@@ -6,6 +6,8 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::error::ApiError;
+
 /// 当前用户拥有下的项目与剧本（`app_project` / `app_script` 行）。
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct OwnedScriptScope {
@@ -18,6 +20,16 @@ pub enum ScopeError {
     /// 无匹配行（未拥有或 ID 不存在）。
     NotFound,
     Database(String),
+}
+
+impl ScopeError {
+    #[must_use]
+    pub fn into_api_error(self) -> ApiError {
+        match self {
+            ScopeError::NotFound => ApiError::NotFound,
+            ScopeError::Database(msg) => ApiError::DatabaseError(msg),
+        }
+    }
 }
 
 /// 解析 `owner_user_id` 在 `project_numeric_id` 下对 `script_numeric_id` 的剧本 scope。

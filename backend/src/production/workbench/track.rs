@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -48,28 +49,16 @@ pub(in crate::production) async fn post_workbench_add_track(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+    let project_uuid = scope_row.project_id;
+    let script_uuid = scope_row.script_id;
+
     let mut tx = pool
         .begin()
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let (project_uuid, script_uuid): (uuid::Uuid, uuid::Uuid) = sqlx::query_as(
-        r#"
-        SELECT p.id, s.id
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
 
     let next_track_id: i32 = sqlx::query_scalar(
         r#"
@@ -153,6 +142,10 @@ pub(in crate::production) async fn post_workbench_delete_track(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let mut tx = pool
         .begin()
         .await
@@ -161,22 +154,13 @@ pub(in crate::production) async fn post_workbench_delete_track(
     let deleted_track = sqlx::query(
         r#"
         DELETE FROM app_video_track vt
-        USING app_project p
-        WHERE vt.project_id = p.id
-          AND p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND (vt.script_id IS NULL OR EXISTS (
-            SELECT 1
-            FROM app_script s
-            WHERE s.id = vt.script_id
-              AND s.numeric_id = $3
-          ))
-          AND vt.numeric_id = $4
+        WHERE vt.project_id = $1
+          AND vt.script_id = $2
+          AND vt.numeric_id = $3
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.project_id)
+    .bind(scope_row.script_id)
     .bind(body.track_id)
     .execute(&mut *tx)
     .await
@@ -186,18 +170,11 @@ pub(in crate::production) async fn post_workbench_delete_track(
         r#"
         UPDATE app_storyboard
         SET track_id = NULL, updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_project.numeric_id = $2
-          AND app_script.numeric_id = $3
-          AND app_storyboard.track_id = $4
+        WHERE script_id = $1
+          AND track_id = $2
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.script_id)
     .bind(body.track_id)
     .execute(&mut *tx)
     .await
@@ -249,22 +226,19 @@ pub(in crate::production) async fn post_workbench_delete_video(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
         SET file_path = NULL, state = NULL, updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_project.numeric_id = $2
-          AND app_script.numeric_id = $3
-          AND app_storyboard.numeric_id = $4
+        WHERE script_id = $1
+          AND numeric_id = $2
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.script_id)
     .bind(body.storyboard_id)
     .execute(pool)
     .await
@@ -317,22 +291,19 @@ pub(in crate::production) async fn post_workbench_select_video(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
+    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
-        SET file_path = $5, state = '已完成', updated_at = NOW()
-        FROM app_script, app_project
-        WHERE app_storyboard.script_id = app_script.id
-          AND app_script.project_id = app_project.id
-          AND app_project.owner_user_id = $1
-          AND app_project.numeric_id = $2
-          AND app_script.numeric_id = $3
-          AND app_storyboard.numeric_id = $4
+        SET file_path = $3, state = '已完成', updated_at = NOW()
+        WHERE script_id = $1
+          AND numeric_id = $2
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
+    .bind(scope_row.script_id)
     .bind(body.storyboard_id)
     .bind(body.video_url.trim())
     .execute(pool)

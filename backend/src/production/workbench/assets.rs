@@ -9,6 +9,7 @@ use sqlx::FromRow;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH};
+use crate::scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -50,27 +51,9 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    // Verify ownership
-    let owned_count = sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT COUNT(*)
-        FROM app_script s
-        INNER JOIN app_project p ON p.id = s.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND s.numeric_id = $3
-        "#,
-    )
-    .bind(uid)
-    .bind(body.project_id)
-    .bind(body.script_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if owned_count == 0 {
-        return Err(ApiError::NotFound);
-    }
+    scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
     let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
