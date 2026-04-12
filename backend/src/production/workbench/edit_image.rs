@@ -27,6 +27,24 @@ pub(in crate::production) struct ImageFlowStep {
     status: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/get-image-flow",
+    operation_id = "postProductionEditImageGetFlowV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_get_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -64,6 +82,24 @@ pub(in crate::production) struct ImageDefaultModelResponse {
     resolution: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/get-image-default-model",
+    operation_id = "postProductionEditImageGetDefaultModelV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_get_image_default_model(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -101,6 +137,24 @@ pub(in crate::production) struct SaveImageFlowResponse {
     saved: bool,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/save-image-flow",
+    operation_id = "postProductionEditImageSaveFlowV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_save_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -133,6 +187,24 @@ pub(in crate::production) struct UpdateImageFlowResponse {
     updated: bool,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/update-image-flow",
+    operation_id = "postProductionEditImageUpdateFlowV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_update_image_flow(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -197,6 +269,24 @@ fn normalize_upload_image_data_uri(input: &str) -> Result<String, ApiError> {
     Ok(format!("data:{mime};base64,{payload}"))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/upload-image",
+    operation_id = "postProductionEditImageUploadImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_upload_image(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -246,6 +336,24 @@ pub(in crate::production) struct GenerateFlowImageResponse {
     status: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/edit-image/generate-flow-image",
+    operation_id = "postProductionEditImageGenerateFlowImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_edit_image_generate_flow_image(
     State(state): State<AppState>,
     headers: HeaderMap,

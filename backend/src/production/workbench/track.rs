@@ -32,6 +32,24 @@ pub(in crate::production) struct AddTrackResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/add-track",
+    operation_id = "postProductionWorkbenchAddTrackV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_add_track(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -134,6 +152,24 @@ pub(in crate::production) struct DeleteTrackResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/delete-track",
+    operation_id = "postProductionWorkbenchDeleteTrackV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_delete_track(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -218,6 +254,24 @@ pub(in crate::production) struct DeleteVideoResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/delete-video",
+    operation_id = "postProductionWorkbenchDeleteVideoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_delete_video(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -280,6 +334,24 @@ pub(in crate::production) struct SelectVideoResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/select-video",
+    operation_id = "postProductionWorkbenchSelectVideoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_select_video(
     State(state): State<AppState>,
     headers: HeaderMap,

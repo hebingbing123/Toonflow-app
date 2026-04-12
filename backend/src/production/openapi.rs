@@ -1,0 +1,45 @@
+//! OpenAPI aggregate for **`/api/v1/production/*`** (workbench handlers).
+
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(
+        super::workbench::storyboard_ops::post_get_production_data,
+        super::workbench::flow::post_get_flow_data,
+        super::workbench::flow::post_save_flow_data,
+        super::workbench::video::post_workbench_generate_video,
+        super::workbench::storyboard_ops::post_storyboard_polling_image,
+        super::workbench::storyboard_ops::post_export_image,
+        super::workbench::storyboard_ops::post_storyboard_batch_generate_image,
+        super::workbench::video::post_workbench_get_video_list,
+        super::workbench::track::post_workbench_add_track,
+        super::workbench::track::post_workbench_delete_track,
+        super::workbench::track::post_workbench_delete_video,
+        super::workbench::track::post_workbench_select_video,
+        super::workbench::assets::post_assets_batch_generate_image,
+        super::workbench::assets::post_assets_delete_derivative,
+        super::workbench::assets::post_assets_get_data,
+        super::workbench::assets::post_assets_polling_image,
+        super::workbench::assets::post_assets_update_url,
+        super::workbench::edit_image::post_edit_image_get_image_flow,
+        super::workbench::edit_image::post_edit_image_get_image_default_model,
+        super::workbench::edit_image::post_edit_image_save_image_flow,
+        super::workbench::edit_image::post_edit_image_update_image_flow,
+        super::workbench::edit_image::post_edit_image_generate_flow_image,
+        super::workbench::edit_image::post_edit_image_upload_image,
+        super::workbench::storyboard::post_get_storyboard_data,
+        super::workbench::storyboard::post_storyboard_add,
+        super::workbench::storyboard::post_storyboard_batch_add_info,
+        super::workbench::storyboard::post_storyboard_down_preview_image,
+        super::workbench::storyboard::post_storyboard_edit_info,
+        super::workbench::storyboard::post_storyboard_get_data,
+        super::workbench::storyboard::post_storyboard_preview_image,
+        super::workbench::storyboard::post_storyboard_remove_frame,
+        super::workbench::storyboard::post_storyboard_update_url,
+        super::workbench::meta::post_workbench_generate_video_prompt,
+        super::workbench::meta::post_workbench_get_generate_data,
+        super::workbench::meta::post_workbench_get_video_model_detail,
+    ),
+    components(schemas(crate::error::ErrorBody)),
+    tags((name = "production", description = "Production workbench (Electron parity)"))
+)]
+pub struct ProductionApi;

@@ -10,7 +10,10 @@ use sqlx::FromRow;
 
 use crate::state::AppState;
 
+mod openapi;
 mod workbench;
+
+pub use openapi::ProductionApi;
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]

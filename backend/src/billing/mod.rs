@@ -10,9 +10,12 @@
 //! - `provider_rules` — 提供商规则
 
 mod ingest;
+mod openapi;
 mod provider_adapter;
 mod provider_rules;
 mod verify;
+
+pub use openapi::BillingApi;
 
 use axum::body::Bytes;
 use axum::extract::{Query, State};
@@ -21,9 +24,10 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use sqlx::FromRow;
 use sqlx::QueryBuilder;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -39,11 +43,38 @@ pub fn router() -> Router<AppState> {
         )
 }
 
+#[derive(Debug, Serialize, ToSchema)]
+struct BillingWebhookResponse {
+    received: bool,
+    duplicate: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(nullable = true)]
+    provider_event_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    profile_updated: Option<bool>,
+    informational_event: bool,
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/webhooks/billing",
+    operation_id = "postBillingWebhookV1",
+    tag = "webhooks",
+    request_body(content = serde_json::Value, content_type = "application/json", description = "Provider-specific billing JSON payload"),
+    responses(
+        (status = 200, description = "Accepted (or duplicate replay)", body = BillingWebhookResponse),
+        (status = 400, description = "Invalid JSON", body = crate::error::ErrorBody),
+        (status = 401, description = "Missing/bad signature", body = crate::error::ErrorBody),
+        (status = 503, description = "Secret or database not configured", body = crate::error::ErrorBody)
+    )
+)]
 async fn post_billing_webhook(
     State(state): State<AppState>,
     headers: HeaderMap,
     body: Bytes,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<BillingWebhookResponse>, ApiError> {
     let secret = verify::billing_secret()?;
     verify::verify_signature(&secret, &body, &headers)?;
 
@@ -58,22 +89,22 @@ async fn post_billing_webhook(
     let (duplicate, row_id, profile_updated, provider_event_id, informational_event) =
         ingest::ingest_webhook(pool, &v).await?;
 
-    let mut out = json!({
-        "received": true,
-        "duplicate": duplicate,
-        "provider_event_id": provider_event_id,
-        "informational_event": informational_event,
-    });
-    if let Some(id) = row_id {
-        out["id"] = json!(id);
-    }
-    if !duplicate {
-        out["profile_updated"] = json!(profile_updated);
-    }
-    Ok(Json(out))
+    Ok(Json(BillingWebhookResponse {
+        received: true,
+        duplicate,
+        id: row_id,
+        provider_event_id: Some(provider_event_id).filter(|s| !s.is_empty()),
+        profile_updated: if duplicate {
+            None
+        } else {
+            Some(profile_updated)
+        },
+        informational_event,
+    }))
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, IntoParams, ToSchema)]
+#[into_params(parameter_in = Query)]
 struct BillingEventsQuery {
     informational_event: Option<bool>,
     provider: Option<String>,
@@ -93,7 +124,7 @@ struct BillingEventsQuery {
     offset: Option<i64>,
 }
 
-#[derive(Debug, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow, ToSchema)]
 struct BillingWebhookEventItem {
     id: i64,
     provider_event_id: String,
@@ -109,7 +140,7 @@ struct BillingWebhookEventItem {
     created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 struct BillingWebhookEventsResponse {
     items: Vec<BillingWebhookEventItem>,
     total: i64,
@@ -177,6 +208,21 @@ fn validate_time_range(
     Ok(())
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/webhooks/billing/events",
+    operation_id = "listBillingWebhookEventsV1",
+    tag = "webhooks",
+    params(BillingEventsQuery),
+    security(("bearerAuth" = [])),
+    responses(
+        (status = 200, description = "OK", body = BillingWebhookEventsResponse),
+        (status = 400, description = "Bad filter parameters", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Listing disabled", body = crate::error::ErrorBody),
+        (status = 503, description = "Database not configured", body = crate::error::ErrorBody)
+    )
+)]
 async fn list_billing_webhook_events(
     State(state): State<AppState>,
     headers: HeaderMap,

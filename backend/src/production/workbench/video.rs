@@ -12,6 +12,24 @@ use crate::error::ApiError;
 use crate::scope;
 use crate::state::AppState;
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/generate-video",
+    operation_id = "postProductionWorkbenchGenerateVideoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_generate_video(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -55,6 +73,24 @@ pub(in crate::production) struct VideoListBody {
     offset: Option<i64>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/workbench/get-video-list",
+    operation_id = "postProductionWorkbenchGetVideoListV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_workbench_get_video_list(
     State(state): State<AppState>,
     headers: HeaderMap,

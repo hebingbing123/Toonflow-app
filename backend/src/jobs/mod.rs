@@ -12,6 +12,7 @@ mod kinds;
 #[allow(unused_imports)]
 pub use dto::{CreateJobBody, JobRow};
 pub use enqueue::{enqueue_generation_job, envelope_generation_job_updated};
+pub use handlers::JobsOpenApi;
 pub use kinds::{
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,

@@ -38,6 +38,24 @@ fn is_unique_violation(e: &sqlx::Error) -> bool {
     }
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/kinds",
+    operation_id = "listJobKindsV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_job_kinds(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -62,6 +80,24 @@ async fn list_job_kinds(
     Ok(Json(kinds))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/kinds/summary",
+    operation_id = "listJobKindSummariesV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_job_kind_summaries(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -87,6 +123,24 @@ async fn list_job_kind_summaries(
     Ok(Json(rows))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/status/summary",
+    operation_id = "listJobStatusSummariesV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_job_status_summaries(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -164,6 +218,24 @@ pub(crate) fn list_jobs_limit_offset(
     Ok((limit, offset))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs",
+    operation_id = "listJobsV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_jobs(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -230,6 +302,24 @@ async fn fetch_job_by_numeric_task_id(
     .ok_or(ApiError::NotFound)
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/page",
+    operation_id = "listJobsPageV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn list_jobs_page(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -300,6 +390,24 @@ async fn list_jobs_page(
     Ok(Json(ListJobsPageResponse { data: rows, total }))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/task-detail/{task_id}",
+    operation_id = "getJobTaskDetailCompatV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn get_job_task_detail_compat(
     State(state): State<AppState>,
     Path(task_id): Path<String>,
@@ -354,6 +462,25 @@ async fn get_job_task_detail_compat(
     ))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/jobs",
+    operation_id = "createJobV1",
+    tag = "jobs",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn create_job(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -440,6 +567,24 @@ async fn create_job(
     Ok(Json(row))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/{id}",
+    operation_id = "getJobV1",
+    tag = "jobs",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn get_job(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
@@ -466,6 +611,25 @@ async fn get_job(
     Ok(Json(row))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/jobs/{id}/cancel",
+    operation_id = "cancelJobV1",
+    tag = "jobs",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn cancel_job(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
@@ -515,6 +679,25 @@ async fn cancel_job(
     ))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/jobs/{id}/retry",
+    operation_id = "retryJobV1",
+    tag = "jobs",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 429, description = "Too many requests", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 async fn retry_job(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
@@ -582,3 +765,22 @@ pub(crate) fn router() -> Router<AppState> {
         .route("/api/v1/jobs/{id}/cancel", post(cancel_job))
         .route("/api/v1/jobs/{id}/retry", post(retry_job))
 }
+
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(
+        list_jobs_page,
+        get_job_task_detail_compat,
+        list_job_kind_summaries,
+        list_job_kinds,
+        list_job_status_summaries,
+        list_jobs,
+        create_job,
+        get_job,
+        cancel_job,
+        retry_job,
+    ),
+    components(schemas(crate::error::ErrorBody)),
+    tags((name = "jobs", description = "Generation jobs"))
+)]
+pub struct JobsOpenApi;

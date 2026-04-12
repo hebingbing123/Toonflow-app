@@ -42,6 +42,24 @@ pub(in crate::production) struct AddStoryboardResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/add",
+    operation_id = "postProductionStoryboardAddV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_add(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -139,6 +157,24 @@ pub(in crate::production) struct BatchAddInfoResponse {
     storyboard_ids: Vec<i32>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/batch-add-info",
+    operation_id = "postProductionStoryboardBatchAddInfoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_batch_add_info(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -233,6 +269,24 @@ pub(in crate::production) struct GetStoryboardDataBody {
     storyboard_id: i32,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/get-data",
+    operation_id = "postProductionStoryboardGetDataV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_get_data(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -299,6 +353,24 @@ pub(in crate::production) struct EditStoryboardInfoResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/edit-info",
+    operation_id = "postProductionStoryboardEditInfoV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_edit_info(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -364,6 +436,24 @@ pub(in crate::production) struct RemoveFrameResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/remove-frame",
+    operation_id = "postProductionStoryboardRemoveFrameV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_remove_frame(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -426,6 +516,24 @@ pub(in crate::production) struct UpdateStoryboardUrlResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/update-url",
+    operation_id = "postProductionStoryboardUpdateUrlV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_update_url(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -483,6 +591,24 @@ pub(in crate::production) struct GetStoryboardDataByProjectBody {
     script_id: i32,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/get-storyboard-data",
+    operation_id = "postProductionGetStoryboardDataV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_get_storyboard_data(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -547,6 +673,24 @@ pub(in crate::production) struct DownPreviewImageResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/down-preview-image",
+    operation_id = "postProductionStoryboardDownPreviewImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_down_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -604,6 +748,24 @@ pub(in crate::production) struct PreviewImageResponse {
     prompt: Option<String>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/storyboard/preview-image",
+    operation_id = "postProductionStoryboardPreviewImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_storyboard_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,

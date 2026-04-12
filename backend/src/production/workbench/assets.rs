@@ -31,6 +31,24 @@ pub(in crate::production) struct BatchGenerateAssetsImageResponse {
     total: usize,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/assets/batch-generate-assets-image",
+    operation_id = "postProductionAssetsBatchGenerateImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_assets_batch_generate_image(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -127,6 +145,24 @@ pub(in crate::production) struct DeleteAssetsDerivativeResponse {
     asset_ids: Vec<i32>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/assets/delete-assets-derivative",
+    operation_id = "postProductionAssetsDeleteDerivativeV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_assets_delete_derivative(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -243,6 +279,24 @@ pub(in crate::production) struct GetAssetsDataBody {
     offset: Option<i64>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/assets/get-assets-data",
+    operation_id = "postProductionAssetsGetAssetsDataV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_assets_get_data(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -350,6 +404,24 @@ pub(in crate::production) struct AssetsPollingImageResponse {
     statuses: Vec<AssetImageStatus>,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/assets/polling-image",
+    operation_id = "postProductionAssetsPollingImageV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_assets_polling_image(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -432,6 +504,24 @@ pub(in crate::production) struct UpdateAssetsUrlResponse {
     message: &'static str,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/production/assets/update-assets-url",
+    operation_id = "postProductionAssetsUpdateUrlV1",
+    tag = "production",
+    request_body(content = serde_json::Value, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 404, description = "Not found", body = crate::error::ErrorBody),
+        (status = 409, description = "Conflict", body = crate::error::ErrorBody),
+        (status = 500, description = "Server error", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    ),
+    security(("bearerAuth" = []))
+)]
 pub(in crate::production) async fn post_assets_update_url(
     State(state): State<AppState>,
     headers: HeaderMap,
