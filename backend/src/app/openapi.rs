@@ -18,12 +18,11 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
   <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin="anonymous"></script>
   <script>
     window.onload = function () {
+      // Default layout only — StandaloneLayout requires swagger-ui-standalone-preset.js (extra script).
       window.ui = SwaggerUIBundle({
         url: "/api/v1/openapi.yaml",
         dom_id: "#swagger-ui",
-        deepLinking: true,
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
-        layout: "StandaloneLayout"
+        deepLinking: true
       });
     };
   </script>
