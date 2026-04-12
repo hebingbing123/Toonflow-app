@@ -1,4 +1,4 @@
-part of '../production.dart';
+part of '../../production.dart';
 
 /// OpenAPI **`BatchGenerateImageItem`** — single item for batch image generation.
 class BatchGenerateImageItem {
