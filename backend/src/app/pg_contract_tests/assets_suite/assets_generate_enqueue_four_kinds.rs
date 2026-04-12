@@ -36,10 +36,30 @@ async fn assets_generate_enqueue_four_kinds() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED, "body={created}");
     let numeric_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
-    let _project_uuid = created["id"].as_str().expect("project uuid");
+    let project_uuid = created["id"].as_str().expect("project uuid");
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri(format!("/api/v1/projects/{project_uuid}/assets"))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(
+                    r#"{"name":"pg_ag_role","type":"role","description":"pg contract"}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, asset_row) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::CREATED, "asset body={asset_row}");
+    let asset_numeric_id = asset_row["numeric_id"].as_i64().expect("asset numeric_id") as i32;
 
     let gen_body = format!(
-        r#"{{"projectId":{numeric_id},"model":"1:pg_ag","resolution":"1024x1024","id":1,"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
+        r#"{{"projectId":{numeric_id},"model":"1:pg_ag","resolution":"1024x1024","id":{asset_numeric_id},"type":"role","name":"pg_ag_gen","prompt":"probe","base64":"QUJDRA=="}}"#
     );
     let res = app
         .clone()
@@ -66,7 +86,7 @@ async fn assets_generate_enqueue_four_kinds() {
     );
 
     let pol_body = format!(
-        r#"{{"assetsId":1,"projectId":{numeric_id},"type":"role","name":"n","describe":"d"}}"#
+        r#"{{"assetsId":{asset_numeric_id},"projectId":{numeric_id},"type":"role","name":"n","describe":"d"}}"#
     );
     let res = app
         .clone()
@@ -88,7 +108,7 @@ async fn assets_generate_enqueue_four_kinds() {
     assert_eq!(job["status"].as_str(), Some("queued"));
 
     let bat_gen = format!(
-        r#"{{"projectId":{numeric_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":1,"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
+        r#"{{"projectId":{numeric_id},"model":"1:x","resolution":"1024x1024","items":[{{"id":{asset_numeric_id},"type":"role","name":"n","prompt":"p","base64":"data:image/png;base64,AA=="}}]}}"#
     );
     let res = app
         .clone()
@@ -118,7 +138,7 @@ async fn assets_generate_enqueue_four_kinds() {
     );
 
     let bat_pol = format!(
-        r#"{{"projectId":{numeric_id},"items":[{{"assetsId":1,"type":"role","name":"n","describe":"d"}}]}}"#
+        r#"{{"projectId":{numeric_id},"items":[{{"assetsId":{asset_numeric_id},"type":"role","name":"n","describe":"d"}}]}}"#
     );
     let res = app
         .oneshot(

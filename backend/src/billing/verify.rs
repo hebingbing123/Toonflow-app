@@ -3,7 +3,11 @@
 //! 支持两种方案，根据存在的请求头选择：
 //!
 //! 1. **Toonflow 原生** (`X-Toonflow-Signature: sha256=<hex>`)：
-//!    使用 `BILLING_WEBHOOK_SECRET` 对原始请求体进行 HMAC-SHA256。
+//!    - **推荐（抗重放）**：同时发送 **`X-Toonflow-Timestamp: <unix_secs>`**，签名为
+//!      `HMAC-SHA256(secret, "<unix_secs>." + raw_body)`（与 Stripe 负载形式一致），并校验时间窗
+//!      **`BILLING_TOONFLOW_TOLERANCE_SECS`**（默认与 Stripe 相同 **300** 秒）。
+//!    - **兼容旧客户端**：无时间戳头时，仍为 `HMAC-SHA256(secret, raw_body)`（可重放）。
+//!    - 设 **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`** 则**仅允许**带时间戳的方案（拒绝纯 body 签名）。
 //!
 //! 2. **Stripe** (`Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]`：
 //!    Stripe 的签名负载方案：`HMAC-SHA256("<unix>.<raw_body>")`。
@@ -21,7 +25,7 @@ use crate::error::ApiError;
 
 pub(crate) type HmacSha256 = Hmac<Sha256>;
 
-/// Default Stripe timestamp tolerance in seconds.
+/// Default Stripe / Toonflow timestamp tolerance in seconds.
 const DEFAULT_STRIPE_TOLERANCE_SECS: u64 = 300;
 
 pub(crate) fn billing_secret() -> Result<Vec<u8>, ApiError> {
@@ -39,6 +43,22 @@ fn stripe_tolerance_secs() -> u64 {
         .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)
 }
 
+fn toonflow_tolerance_secs() -> u64 {
+    std::env::var("BILLING_TOONFLOW_TOLERANCE_SECS")
+        .ok()
+        .and_then(|s| s.trim().parse::<u64>().ok())
+        .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)
+}
+
+fn toonflow_require_timestamp() -> bool {
+    matches!(
+        std::env::var("BILLING_TOONFLOW_REQUIRE_TIMESTAMP")
+            .ok()
+            .as_deref(),
+        Some("1")
+    )
+}
+
 fn now_unix_secs() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -46,7 +66,7 @@ fn now_unix_secs() -> u64 {
         .unwrap_or(0)
 }
 
-/// Verify `X-Toonflow-Signature: sha256=<hex>` (constant-time HMAC-SHA256 of raw body).
+/// Verify `X-Toonflow-Signature: sha256=<hex>` (see module docs for timestamped vs legacy body MAC).
 fn verify_toonflow_signature(
     secret: &[u8],
     body: &[u8],
@@ -69,6 +89,35 @@ fn verify_toonflow_signature(
         .as_slice()
         .try_into()
         .map_err(|_| ApiError::InvalidWebhookSignature)?;
+
+    let ts_header = headers
+        .get("x-toonflow-timestamp")
+        .and_then(|v| v.to_str().ok())
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
+
+    if let Some(ts_str) = ts_header {
+        let ts: u64 = ts_str
+            .parse()
+            .map_err(|_| ApiError::InvalidWebhookSignature)?;
+        if now_unix_secs().abs_diff(ts) > toonflow_tolerance_secs() {
+            return Err(ApiError::InvalidWebhookSignature);
+        }
+        let mut mac =
+            HmacSha256::new_from_slice(secret).map_err(|_| ApiError::InvalidWebhookSignature)?;
+        mac.update(ts_str.as_bytes());
+        mac.update(b".");
+        mac.update(body);
+        let computed = mac.finalize().into_bytes();
+        if !bool::from(computed.ct_eq(&expected)) {
+            return Err(ApiError::InvalidWebhookSignature);
+        }
+        return Ok(());
+    }
+
+    if toonflow_require_timestamp() {
+        return Err(ApiError::InvalidWebhookSignature);
+    }
 
     let mut mac =
         HmacSha256::new_from_slice(secret).map_err(|_| ApiError::InvalidWebhookSignature)?;
@@ -161,7 +210,16 @@ pub(crate) fn verify_signature(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::{Mutex, OnceLock};
+
     use super::*;
+
+    fn toonflow_env_lock() -> std::sync::MutexGuard<'static, ()> {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        LOCK.get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("toonflow env test lock")
+    }
 
     fn make_toonflow_header(secret: &[u8], body: &[u8]) -> HeaderMap {
         let mut mac = HmacSha256::new_from_slice(secret).unwrap();
@@ -171,6 +229,25 @@ mod tests {
         headers.insert(
             "x-toonflow-signature",
             format!("sha256={hex}").parse().unwrap(),
+        );
+        headers
+    }
+
+    fn make_toonflow_timestamped_header(secret: &[u8], body: &[u8], ts: u64) -> HeaderMap {
+        let ts_str = ts.to_string();
+        let mut mac = HmacSha256::new_from_slice(secret).unwrap();
+        mac.update(ts_str.as_bytes());
+        mac.update(b".");
+        mac.update(body);
+        let hex = hex::encode(mac.finalize().into_bytes());
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "x-toonflow-signature",
+            format!("sha256={hex}").parse().unwrap(),
+        );
+        headers.insert(
+            "x-toonflow-timestamp",
+            ts_str.parse().expect("numeric timestamp header"),
         );
         headers
     }
@@ -196,6 +273,54 @@ mod tests {
         let body = br#"{"id":"evt_1","amount":100}"#;
         let headers = make_toonflow_header(secret, body);
         assert!(verify_signature(secret, body, &headers).is_ok());
+    }
+
+    #[test]
+    fn toonflow_accepts_timestamped_signature_within_tolerance() {
+        let secret = b"test-secret";
+        let body = br#"{"id":"evt_ts_ok"}"#;
+        let ts = now_unix_secs();
+        let headers = make_toonflow_timestamped_header(secret, body, ts);
+        assert!(verify_signature(secret, body, &headers).is_ok());
+    }
+
+    #[test]
+    fn toonflow_rejects_timestamped_when_ts_stale() {
+        let secret = b"test-secret";
+        let body = br#"{"id":"evt_ts_stale"}"#;
+        let headers = make_toonflow_timestamped_header(secret, body, 1_000_000);
+        assert!(verify_signature(secret, body, &headers).is_err());
+    }
+
+    #[test]
+    fn toonflow_timestamp_with_legacy_mac_fails() {
+        let secret = b"test-secret";
+        let body = br#"{"id":"evt_ts_bad_mac"}"#;
+        let mut headers = make_toonflow_header(secret, body);
+        headers.insert(
+            "x-toonflow-timestamp",
+            now_unix_secs().to_string().parse().unwrap(),
+        );
+        assert!(verify_signature(secret, body, &headers).is_err());
+    }
+
+    #[test]
+    fn toonflow_require_timestamp_rejects_legacy_only() {
+        let _lock = toonflow_env_lock();
+        let prev = std::env::var("BILLING_TOONFLOW_REQUIRE_TIMESTAMP").ok();
+        std::env::set_var("BILLING_TOONFLOW_REQUIRE_TIMESTAMP", "1");
+        let secret = b"test-secret";
+        let body = br#"{"id":"evt_legacy_blocked"}"#;
+        let headers = make_toonflow_header(secret, body);
+        let r = verify_signature(secret, body, &headers);
+        match &prev {
+            None => std::env::remove_var("BILLING_TOONFLOW_REQUIRE_TIMESTAMP"),
+            Some(v) => std::env::set_var("BILLING_TOONFLOW_REQUIRE_TIMESTAMP", v),
+        }
+        assert!(
+            r.is_err(),
+            "legacy body-only must fail when require-timestamp is on"
+        );
     }
 
     #[test]

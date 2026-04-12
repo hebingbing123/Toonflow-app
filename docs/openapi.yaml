@@ -12,7 +12,7 @@ info:
     **Harness tools (MVP):** Tool **catalog** and metadata are exposed over HTTP at **`GET /api/v1/harness/tools`**. **Execution** uses **`harness.tool.invoke`** / **`harness.tool.result`** (e.g. `echo`, `isolated.echo`, `skills.read`, `wasm.probe`). **Agent loop:** **`harness.agent.run`** drives multi-round OpenAI tool calling over the same tool surface (requires LLM env + channel attach) — see **`docs/websocket-events.md`** for envelopes and `error.occurred` codes (`wasm_failed`, `isolation_failed`, etc.).
     **Harness `add_deriveAsset`:** Parent **`arguments.assetsId`** must be linked to the active script (**`app_script_asset`**) — see **`docs/websocket-events.md`** (section **Production `add_deriveAsset`**).
 
-    **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — verify **`X-Toonflow-Signature: sha256=<hex>`** as HMAC-SHA256(raw body, `BILLING_WEBHOOK_SECRET`). Body must be JSON with string **`id`** (dedupe key). Returns **`received`** + **`duplicate`** when replayed. **Not** JWT-authenticated; configure secret in production. **Not** in the per-IP rate-limit bucket (same as `/health`).
+    **Billing webhook (MVP):** `POST /api/v1/webhooks/billing` — **`X-Toonflow-Signature: sha256=<hex>`** with `BILLING_WEBHOOK_SECRET`. Prefer **`X-Toonflow-Timestamp`** + HMAC(`"<ts>." + raw_body`) for replay resistance (see operation **`postBillingWebhookV1`**). Legacy HMAC(raw body) remains unless **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`**. Body must be JSON with string **`id`** (dedupe key). **Not** JWT-authenticated. **Not** in the per-IP rate-limit bucket (same as `/health`).
 
     **Rate limiting (MVP):** Per client IP on all routes except unversioned `/health`, `/api/v1/health`, `/api/v1/ping`, `/api/v1/version`, `/api/v1/ready`, and **`POST /api/v1/webhooks/billing`**.
     Default key is **TCP peer** IP; set **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** only behind a **trusted** proxy to use `Forwarded` / `X-Forwarded-For` / `X-Real-Ip` (spoofing risk if untrusted).
@@ -188,7 +188,7 @@ paths:
       description: |
         Verifies signature of the **raw request body** using `BILLING_WEBHOOK_SECRET`.
         Supports either:
-        - **Toonflow native**: `X-Toonflow-Signature: sha256=<hex>` (HMAC-SHA256 of raw body)
+        - **Toonflow native**: `X-Toonflow-Signature: sha256=<hex>`. Recommended: also send **`X-Toonflow-Timestamp: <unix_secs>`** and sign **`HMAC-SHA256(secret, "<unix_secs>." + raw_body)`** (replay-resistant; window **`BILLING_TOONFLOW_TOLERANCE_SECS`**, default 300s). Without the timestamp header, legacy **`HMAC-SHA256(secret, raw_body)`** still works unless **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`**.
         - **Stripe native**: `Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]` (HMAC-SHA256 of `<unix>.<raw_body>`)
         When both are present, `Stripe-Signature` takes precedence.
         Persists to `app_billing_webhook_event` when event id is new; replays return `duplicate: true` (HTTP 200).

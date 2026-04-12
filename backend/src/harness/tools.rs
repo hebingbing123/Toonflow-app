@@ -64,7 +64,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "del_deriveAsset",
         description:
-            "Production-agent parity write: delete one derived asset by arguments.id under arguments.assetsId.",
+            "Production-agent write: deletes the derived **app_asset** row (arguments.id under arguments.assetsId, script-linked). This is **not** the same as REST delete-assets-derivative, which removes **app_asset_image** rows for parent numeric ids — do not confuse the two.",
     },
     HarnessToolInfo {
         name: "generate_deriveAsset",

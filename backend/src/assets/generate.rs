@@ -196,6 +196,43 @@ async fn resolve_owned_project_uuid(
     id.ok_or(ApiError::NotFound)
 }
 
+/// Returns **404** when any `numeric_id` is missing from this owned project (defense before enqueue).
+async fn ensure_asset_numerics_exist_in_owned_project(
+    pool: &PgPool,
+    uid: Uuid,
+    project_uuid: Uuid,
+    asset_numeric_ids: &[i32],
+) -> Result<(), ApiError> {
+    if asset_numeric_ids.is_empty() {
+        return Ok(());
+    }
+    let mut uniq: Vec<i32> = asset_numeric_ids.to_vec();
+    uniq.sort_unstable();
+    uniq.dedup();
+
+    let cnt: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT a.numeric_id)::bigint
+        FROM app_asset a
+        INNER JOIN app_project p ON p.id = a.project_id
+        WHERE p.id = $1
+          AND p.owner_user_id = $2
+          AND a.numeric_id = ANY($3::int4[])
+        "#,
+    )
+    .bind(project_uuid)
+    .bind(uid)
+    .bind(&uniq)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if cnt != uniq.len() as i64 {
+        return Err(ApiError::NotFound);
+    }
+    Ok(())
+}
+
 async fn post_generate_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -241,7 +278,14 @@ async fn post_generate_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    ensure_asset_numerics_exist_in_owned_project(
+        pool,
+        uid,
+        project_uuid,
+        std::slice::from_ref(&body.id),
+    )
+    .await?;
 
     let asset_type = asset_type_str(&body.asset_type);
     let payload = json!({
@@ -297,7 +341,14 @@ async fn post_polish_assets_prompt(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    ensure_asset_numerics_exist_in_owned_project(
+        pool,
+        uid,
+        project_uuid,
+        std::slice::from_ref(&body.assets_id),
+    )
+    .await?;
 
     let payload = json!({
         "source": "assets-generate.polish-prompt",
@@ -431,7 +482,7 @@ async fn post_batch_generate_image_assets(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
 
     if let Some(script_numeric_id) = body.script_id {
         if script_numeric_id <= 0 {
@@ -448,6 +499,9 @@ async fn post_batch_generate_image_assets(
             &asset_ids,
         )
         .await?;
+    } else {
+        let asset_ids: Vec<i32> = body.items.iter().map(|it| it.id).collect();
+        ensure_asset_numerics_exist_in_owned_project(pool, uid, project_uuid, &asset_ids).await?;
     }
 
     let mut payload = json!({
@@ -534,7 +588,9 @@ async fn post_batch_polish_assets_prompt(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    let _project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
+    let polish_ids: Vec<i32> = body.items.iter().map(|it| it.assets_id).collect();
+    ensure_asset_numerics_exist_in_owned_project(pool, uid, project_uuid, &polish_ids).await?;
 
     let payload = json!({
         "source": "assets-generate.batch-polish",
