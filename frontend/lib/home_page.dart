@@ -89,6 +89,7 @@ part 'home_page/skills_harness/controller.dart';
 part 'home_page/script_editor/storyboards/dialogs/add.dart';
 part 'home_page/script_editor/storyboards/dialogs/batch_add.dart';
 part 'home_page/script_editor/storyboards/workbench.dart';
+part 'home_page/script_editor/storyboards/workbench_view.dart';
 part 'home_page/quality_reviews/summary.dart';
 part 'home_page/quality_reviews/controller.dart';
 part 'home_page/system_probes/controller.dart';
