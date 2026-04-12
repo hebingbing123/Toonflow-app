@@ -1,7 +1,5 @@
 part of '../../../../home_page.dart';
 
-part 'dialogs/batch_add.dart';
-
 extension _HomePageProjectEditorScripts on _HomePageState {
   Widget _buildProjectScriptsSection({
     required BuildContext ctx,
@@ -192,270 +190,116 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         overviewActionLabel = '导出全部剧本';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '${scriptList.length} 条剧本',
-          style: Theme.of(ctx).textTheme.labelLarge,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '在项目下管理剧本，并进入剧本详情维护内容与分镜。',
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(
+    return _buildProjectScriptsSectionView(
+      ctx: ctx,
+      outline: outline,
+      p: p,
+      saving: saving,
+      scriptProbeBusy: scriptProbeBusy,
+      scriptTaskBusy: scriptTaskBusy,
+      scriptTaskLine: scriptTaskLine,
+      scriptList: scriptList,
+      statsRef: statsRef,
+      overviewDiagnosis: overviewDiagnosis,
+      overviewAction: overviewAction,
+      overviewActionLabel: overviewActionLabel,
+      onOpenWorkbench: () => _openProjectScriptsWorkbenchDialog(
+        ctx: ctx,
+        setDialogState: setDialogState,
+        token: token,
+        p: p,
+        saving: saving,
+        scriptTaskBusy: scriptTaskBusy,
+        scriptTaskLine: scriptTaskLine,
+        scriptList: scriptList,
+        statsRef: statsRef,
+      ),
+      onOpenBatchAddDialog: () => _openBatchAddScriptsDialog(
+        ctx: ctx,
+        setDialogState: setDialogState,
+        token: token,
+        p: p,
+        saving: saving,
+        scriptTaskLine: scriptTaskLine,
+        scriptList: scriptList,
+        statsRef: statsRef,
+      ),
+      onExportAll: runProjectScriptsExportAll,
+      onPollAll: runProjectScriptsPollAll,
+      onExtractAll: runProjectScriptsExtractAll,
+      onCreateEmptyScript: () async {
+        setDialogState(() => saving[0] = true);
+        try {
+          final s = await createScriptUnderProject(token, p.id);
+          if (!ctx.mounted) return;
+          scriptList.add(
+            ScriptBrief(
+              numericId: s.numericId,
+              name: s.name,
+              extractState: s.extractState,
+            ),
+          );
+          try {
+            statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
+          } catch (_) {}
+          final nextDiagnosis = diagnoseScriptBatchWorkbench(
+            selectedIds: scriptList.map((script) => script.numericId),
+            scripts: scriptList,
+            previewRows: const [],
+          );
+          if (!ctx.mounted) return;
+          setDialogState(() {
+            saving[0] = false;
+            scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+              actionSummary: '已创建剧本 #${s.numericId}。',
+              diagnosis: nextDiagnosis,
+            );
+          });
+          ScaffoldMessenger.of(
+            ctx,
+          ).showSnackBar(SnackBar(content: Text('已创建剧本 #${s.numericId}')));
+        } on RustApiException catch (e) {
+          if (ctx.mounted) {
+            setDialogState(() => saving[0] = false);
+            ScaffoldMessenger.of(
               ctx,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('剧本批量工作台', style: Theme.of(ctx).textTheme.titleSmall),
-              const SizedBox(height: 4),
-              Text(
-                '把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。',
-                style: Theme.of(
-                  ctx,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: saving[0] || scriptTaskBusy[0]
-                    ? null
-                    : () => _openProjectScriptsWorkbenchDialog(
-                        ctx: ctx,
-                        setDialogState: setDialogState,
-                        token: token,
-                        p: p,
-                        saving: saving,
-                        scriptTaskBusy: scriptTaskBusy,
-                        scriptTaskLine: scriptTaskLine,
-                        scriptList: scriptList,
-                        statsRef: statsRef,
-                      ),
-                child: const Text('打开剧本批量工作台'),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(
+            ).showSnackBar(SnackBar(content: Text(e.toString())));
+          }
+        } catch (e) {
+          if (ctx.mounted) {
+            setDialogState(() => saving[0] = false);
+            ScaffoldMessenger.of(
               ctx,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('当前批量建议', style: Theme.of(ctx).textTheme.titleSmall),
-              const SizedBox(height: 4),
-              Text(
-                overviewDiagnosis.summary,
-                style: Theme.of(ctx).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                overviewDiagnosis.detail,
-                style: Theme.of(
-                  ctx,
-                ).textTheme.bodySmall?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed: overviewAction,
-                child: Text(overviewActionLabel),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 4,
-          runSpacing: 0,
-          children: [
-            TextButton(
-              onPressed: saving[0]
-                  ? null
-                  : () => _openBatchAddScriptsDialog(
-                      ctx: ctx,
-                      setDialogState: setDialogState,
-                      token: token,
-                      p: p,
-                      saving: saving,
-                      scriptTaskLine: scriptTaskLine,
-                      scriptList: scriptList,
-                      statsRef: statsRef,
-                    ),
-              child: const Text('批量新增剧本'),
-            ),
-            TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
-                  ? null
-                  : runProjectScriptsExportAll,
-              child: Text(scriptTaskBusy[0] ? '处理中…' : '导出全部剧本'),
-            ),
-            TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
-                  ? null
-                  : runProjectScriptsPollAll,
-              child: const Text('轮询全部提取状态'),
-            ),
-            TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
-                  ? null
-                  : runProjectScriptsExtractAll,
-              child: const Text('提取全部剧本素材'),
-            ),
-          ],
-        ),
-        if (scriptTaskLine[0] != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            scriptTaskLine[0]!,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-        ],
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: saving[0]
-                ? null
-                : () async {
-                    setDialogState(() => saving[0] = true);
-                    try {
-                      final s = await createScriptUnderProject(
-                        token,
-                        p.id,
-                      );
-                      if (!ctx.mounted) return;
-                      scriptList.add(
-                        ScriptBrief(
-                          numericId: s.numericId,
-                          name: s.name,
-                          extractState: s.extractState,
-                        ),
-                      );
-                      try {
-                        statsRef[0] = await fetchProjectStatsByProjectId(
-                          token,
-                          p.id,
-                        );
-                      } catch (_) {}
-                      final nextDiagnosis = diagnoseScriptBatchWorkbench(
-                        selectedIds: scriptList.map(
-                          (script) => script.numericId,
-                        ),
-                        scripts: scriptList,
-                        previewRows: const [],
-                      );
-                      if (!ctx.mounted) return;
-                      setDialogState(() {
-                        saving[0] = false;
-                        scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-                          actionSummary: '已创建剧本 #${s.numericId}。',
-                          diagnosis: nextDiagnosis,
-                        );
-                      });
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('已创建剧本 #${s.numericId}')),
-                      );
-                    } on RustApiException catch (e) {
-                      if (ctx.mounted) {
-                        setDialogState(() => saving[0] = false);
-                        ScaffoldMessenger.of(
-                          ctx,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                    } catch (e) {
-                      if (ctx.mounted) {
-                        setDialogState(() => saving[0] = false);
-                        ScaffoldMessenger.of(
-                          ctx,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                    }
-                  },
-            child: const Text('新建空剧本'),
-          ),
-        ),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          title: const Text('兼容性检查'),
-          subtitle: Text(
-            '保留旧剧本接口与导出/提取回归入口，默认折叠',
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 0,
-                children: [
-                  ..._buildProjectScriptsProbeActions(
-                    ctx: ctx,
-                    setDialogState: setDialogState,
-                    token: token,
-                    p: p,
-                    saving: saving,
-                    scriptProbeBusy: scriptProbeBusy,
-                    scriptList: scriptList,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...scriptList.map(
-          (s) => ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              '#${s.numericId} ${s.name ?? ""}',
-              style: Theme.of(ctx).textTheme.bodySmall,
-            ),
-            trailing: const Icon(Icons.edit_outlined, size: 18),
-            onTap: saving[0]
-                ? null
-                : () => _openScriptEditor(
-                    token,
-                    s.numericId,
-                    projectId: p.id,
-                    projectNumericId: p.numericId,
-                    onScriptTreeMutated: () async {
-                      final d = await fetchProjectByProjectId(token, p.id);
-                      if (!ctx.mounted) return;
-                      scriptList
-                        ..clear()
-                        ..addAll(d.scripts);
-                      try {
-                        statsRef[0] = await fetchProjectStatsByProjectId(
-                          token,
-                          p.id,
-                        );
-                      } catch (_) {}
-                      setDialogState(() {});
-                    },
-                  ),
-          ),
-        ),
-      ],
+            ).showSnackBar(SnackBar(content: Text(e.toString())));
+          }
+        }
+      },
+      buildProbeActions: () => _buildProjectScriptsProbeActions(
+        ctx: ctx,
+        setDialogState: setDialogState,
+        token: token,
+        p: p,
+        saving: saving,
+        scriptProbeBusy: scriptProbeBusy,
+        scriptList: scriptList,
+      ),
+      onOpenScriptEditor: (script) => _openScriptEditor(
+        token,
+        script.numericId,
+        projectId: p.id,
+        projectNumericId: p.numericId,
+        onScriptTreeMutated: () async {
+          final d = await fetchProjectByProjectId(token, p.id);
+          if (!ctx.mounted) return;
+          scriptList
+            ..clear()
+            ..addAll(d.scripts);
+          try {
+            statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
+          } catch (_) {}
+          setDialogState(() {});
+        },
+      ),
     );
   }
 }
