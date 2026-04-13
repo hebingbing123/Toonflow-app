@@ -4,32 +4,28 @@ Future<void> loadAssetImagePreview({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required ListAssetImagesResponse? imagesResponse,
+  required AssetImagesWorkbenchRuntime runtime,
   required String? selectedImageId,
-  required Uint8List? previewBytes,
   required StateSetter setState,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
 }) async {
   final image = selectedAssetImageRow(
-    imagesResponse,
+    runtime.imagesResponse(),
     selectedImageId: selectedImageId,
   );
   if (image == null) {
-    setState(() => onPreviewBytesChanged(null));
+    setState(() => runtime.onPreviewBytesChanged(null));
     syncAssetImagesStatusLine(
       setState: setState,
-      imagesResponse: imagesResponse,
+      imagesResponse: runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       previewBytes: null,
-      onStatusChanged: onStatusChanged,
+      onStatusChanged: runtime.onStatusChanged,
     );
     return;
   }
   setState(() {
-    onLoadingChanged(true);
-    onPreviewBytesChanged(null);
+    runtime.onPreviewLoadingChanged(true);
+    runtime.onPreviewBytesChanged(null);
   });
   try {
     final bytes = await fetchProjectAssetImageFileByProjectIds(
@@ -38,14 +34,14 @@ Future<void> loadAssetImagePreview({
       assetNumericId,
       image.id,
     );
-    setState(() => onPreviewBytesChanged(bytes));
+    setState(() => runtime.onPreviewBytesChanged(bytes));
     final diagnosis = diagnoseAssetImagesWorkbench(
-      imagesResponse: imagesResponse,
+      imagesResponse: runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       hasPreviewBytes: true,
     );
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已读取当前图片预览。',
           diagnosis: diagnosis,
@@ -54,7 +50,7 @@ Future<void> loadAssetImagePreview({
     });
   } on RustApiException catch (e) {
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '读取当前图片预览失败。',
           recommendedAction:
@@ -65,7 +61,7 @@ Future<void> loadAssetImagePreview({
       );
     });
   } finally {
-    setState(() => onLoadingChanged(false));
+    setState(() => runtime.onPreviewLoadingChanged(false));
   }
 }
 
@@ -73,21 +69,15 @@ Future<void> reloadAssetImages({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required String? currentSelectedImageId,
+  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
 }) async {
   setState(() {
-    onLoadingChanged(true);
-    onStatusChanged(null);
+    runtime.onListLoadingChanged(true);
+    runtime.onStatusChanged(null);
   });
   try {
     final response = await fetchProjectAssetImagesByProjectIds(
@@ -97,13 +87,13 @@ Future<void> reloadAssetImages({
     );
     final nextSelectedImageId = chooseInitialAssetImageId(
       response,
-      preferredImageId: currentSelectedImageId,
+      preferredImageId: runtime.currentSelectedImageId,
     );
     setState(() {
-      onImagesResponseChanged(response);
-      onSelectedImageIdChanged(nextSelectedImageId);
-      onPreviewBytesChanged(null);
-      onStatusChanged(
+      runtime.onImagesResponseChanged(response);
+      runtime.onSelectedImageIdChanged(nextSelectedImageId);
+      runtime.onPreviewBytesChanged(null);
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已同步当前资产的图片列表。',
           diagnosis: diagnoseAssetImagesWorkbench(
@@ -126,21 +116,17 @@ Future<void> reloadAssetImages({
       token: token,
       projectId: projectId,
       assetNumericId: assetNumericId,
-      imagesResponse: response,
+      runtime: runtime,
       selectedImageId: nextSelectedImageId,
-      previewBytes: null,
       setState: setState,
-      onPreviewBytesChanged: onPreviewBytesChanged,
-      onLoadingChanged: onPreviewLoadingChanged,
-      onStatusChanged: onStatusChanged,
     );
   } on RustApiException catch (e) {
     setState(() {
-      onImagesResponseChanged(null);
-      onSelectedImageIdChanged(null);
-      onPreviewBytesChanged(null);
-      onStatusChanged(
-        buildAssetImagesWorkbenchFailureNotice(
+      runtime.clearSelection(
+        images: null,
+        selectedId: null,
+        preview: null,
+        statusLine: buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '读取当前资产图片列表失败。',
           recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
           error: e,
@@ -150,11 +136,11 @@ Future<void> reloadAssetImages({
     });
   } catch (e) {
     setState(() {
-      onImagesResponseChanged(null);
-      onSelectedImageIdChanged(null);
-      onPreviewBytesChanged(null);
-      onStatusChanged(
-        buildAssetImagesWorkbenchFailureNotice(
+      runtime.clearSelection(
+        images: null,
+        selectedId: null,
+        preview: null,
+        statusLine: buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '读取当前资产图片列表失败。',
           recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
           error: e,
@@ -163,7 +149,7 @@ Future<void> reloadAssetImages({
       );
     });
   } finally {
-    setState(() => onLoadingChanged(false));
+    setState(() => runtime.onListLoadingChanged(false));
   }
 }
 
@@ -171,16 +157,8 @@ Future<void> runAssetImagesRecommendedAction({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required ListAssetImagesResponse? imagesResponse,
-  required String? selectedImageId,
-  required Uint8List? previewBytes,
+  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onListLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -192,29 +170,16 @@ Future<void> runAssetImagesRecommendedAction({
   required List<bool> assetsBusy,
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
-  required ListAssetImagesResponse? Function() getImagesResponse,
-  required String? Function() getSelectedImageId,
-  required Uint8List? Function() getPreviewBytes,
 }) async {
-  final diagnosis = diagnoseAssetImagesWorkbench(
-    imagesResponse: imagesResponse,
-    selectedImageId: selectedImageId,
-    hasPreviewBytes: previewBytes != null,
-  );
+  final diagnosis = runtime.diagnose();
   switch (diagnosis.recommendedAction) {
     case AssetImagesWorkbenchRecommendedAction.loadImages:
       await reloadAssetImages(
         token: token,
         projectId: projectId,
         assetNumericId: assetNumericId,
-        currentSelectedImageId: selectedImageId,
+        runtime: runtime,
         setState: setState,
-        onImagesResponseChanged: onImagesResponseChanged,
-        onSelectedImageIdChanged: onSelectedImageIdChanged,
-        onPreviewBytesChanged: onPreviewBytesChanged,
-        onLoadingChanged: onListLoadingChanged,
-        onPreviewLoadingChanged: onPreviewLoadingChanged,
-        onStatusChanged: onStatusChanged,
         patchFilePathCtrl: patchFilePathCtrl,
         patchStateCtrl: patchStateCtrl,
         patchSortCtrl: patchSortCtrl,
@@ -234,16 +199,7 @@ Future<void> runAssetImagesRecommendedAction({
         assetsBusy: assetsBusy,
         onBusyMutationChanged: onBusyMutationChanged,
         reloadAssetsAndStats: reloadAssetsAndStats,
-        currentSelectedImageId: selectedImageId,
-        getImagesResponse: getImagesResponse,
-        getSelectedImageId: getSelectedImageId,
-        getPreviewBytes: getPreviewBytes,
-        onImagesResponseChanged: onImagesResponseChanged,
-        onSelectedImageIdChanged: onSelectedImageIdChanged,
-        onPreviewBytesChanged: onPreviewBytesChanged,
-        onListLoadingChanged: onListLoadingChanged,
-        onPreviewLoadingChanged: onPreviewLoadingChanged,
-        onStatusChanged: onStatusChanged,
+        runtime: runtime,
         patchFilePathCtrl: patchFilePathCtrl,
         patchStateCtrl: patchStateCtrl,
         patchSortCtrl: patchSortCtrl,
@@ -254,13 +210,9 @@ Future<void> runAssetImagesRecommendedAction({
         token: token,
         projectId: projectId,
         assetNumericId: assetNumericId,
-        imagesResponse: imagesResponse,
-        selectedImageId: selectedImageId,
-        previewBytes: previewBytes,
+        runtime: runtime,
+        selectedImageId: runtime.currentSelectedImageId,
         setState: setState,
-        onPreviewBytesChanged: onPreviewBytesChanged,
-        onLoadingChanged: onPreviewLoadingChanged,
-        onStatusChanged: onStatusChanged,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.updateSelectedImage:
@@ -268,9 +220,8 @@ Future<void> runAssetImagesRecommendedAction({
         token: token,
         projectId: projectId,
         assetNumericId: assetNumericId,
-        imagesResponse: imagesResponse,
-        selectedImageId: selectedImageId,
-        previewBytes: previewBytes,
+        imagesResponse: runtime.imagesResponse(),
+        selectedImageId: runtime.currentSelectedImageId,
         patchFilePathCtrl: patchFilePathCtrl,
         patchStateCtrl: patchStateCtrl,
         patchSortCtrl: patchSortCtrl,
@@ -280,15 +231,7 @@ Future<void> runAssetImagesRecommendedAction({
         assetsBusy: assetsBusy,
         onBusyMutationChanged: onBusyMutationChanged,
         reloadAssetsAndStats: reloadAssetsAndStats,
-        getImagesResponse: getImagesResponse,
-        getSelectedImageId: getSelectedImageId,
-        getPreviewBytes: getPreviewBytes,
-        onImagesResponseChanged: onImagesResponseChanged,
-        onSelectedImageIdChanged: onSelectedImageIdChanged,
-        onPreviewBytesChanged: onPreviewBytesChanged,
-        onListLoadingChanged: onListLoadingChanged,
-        onPreviewLoadingChanged: onPreviewLoadingChanged,
-        onStatusChanged: onStatusChanged,
+        runtime: runtime,
       );
       break;
   }

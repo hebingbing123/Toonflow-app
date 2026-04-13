@@ -5,14 +5,8 @@ void scheduleInitialAssetImagesLoad({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required String? currentSelectedImageId,
+  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -25,14 +19,8 @@ void scheduleInitialAssetImagesLoad({
       token: token,
       projectId: projectId,
       assetNumericId: assetNumericId,
-      currentSelectedImageId: currentSelectedImageId,
+      runtime: runtime,
       setState: setState,
-      onImagesResponseChanged: onImagesResponseChanged,
-      onSelectedImageIdChanged: onSelectedImageIdChanged,
-      onPreviewBytesChanged: onPreviewBytesChanged,
-      onLoadingChanged: onLoadingChanged,
-      onPreviewLoadingChanged: onPreviewLoadingChanged,
-      onStatusChanged: onStatusChanged,
       patchFilePathCtrl: patchFilePathCtrl,
       patchStateCtrl: patchStateCtrl,
       patchSortCtrl: patchSortCtrl,
@@ -45,15 +33,9 @@ Future<void> changeAssetImagesWorkbenchAsset({
   required String token,
   required String projectId,
   required int currentAssetNumericId,
-  required String? currentSelectedImageId,
+  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
   required ValueChanged<int> onAssetNumericIdChanged,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -63,23 +45,19 @@ Future<void> changeAssetImagesWorkbenchAsset({
   }
   setState(() {
     onAssetNumericIdChanged(value);
-    onImagesResponseChanged(null);
-    onSelectedImageIdChanged(null);
-    onPreviewBytesChanged(null);
-    onStatusChanged('正在切换到资产 #$value 并加载图片列表…');
+    runtime.clearSelection(
+      images: null,
+      selectedId: null,
+      preview: null,
+      statusLine: '正在切换到资产 #$value 并加载图片列表…',
+    );
   });
   await reloadAssetImages(
     token: token,
     projectId: projectId,
     assetNumericId: value,
-    currentSelectedImageId: currentSelectedImageId,
+    runtime: runtime,
     setState: setState,
-    onImagesResponseChanged: onImagesResponseChanged,
-    onSelectedImageIdChanged: onSelectedImageIdChanged,
-    onPreviewBytesChanged: onPreviewBytesChanged,
-    onLoadingChanged: onLoadingChanged,
-    onPreviewLoadingChanged: onPreviewLoadingChanged,
-    onStatusChanged: onStatusChanged,
     patchFilePathCtrl: patchFilePathCtrl,
     patchStateCtrl: patchStateCtrl,
     patchSortCtrl: patchSortCtrl,
@@ -91,13 +69,8 @@ Future<void> selectAssetImagesWorkbenchImage({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required ListAssetImagesResponse? imagesResponse,
-  required Uint8List? previewBytes,
+  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -106,20 +79,20 @@ Future<void> selectAssetImagesWorkbenchImage({
     return;
   }
   setState(() {
-    onSelectedImageIdChanged(value);
-    onPreviewBytesChanged(null);
-    onStatusChanged('正在切换图片并刷新预览…');
+    runtime.onSelectedImageIdChanged(value);
+    runtime.onPreviewBytesChanged(null);
+    runtime.onStatusChanged('正在切换图片并刷新预览…');
   });
   syncAssetImagesStatusLine(
     setState: setState,
-    imagesResponse: imagesResponse,
+    imagesResponse: runtime.imagesResponse(),
     selectedImageId: value,
     previewBytes: null,
-    onStatusChanged: onStatusChanged,
+    onStatusChanged: runtime.onStatusChanged,
   );
   syncAssetImagesPatchFieldsFromSelected(
     setState: setState,
-    imagesResponse: imagesResponse,
+    imagesResponse: runtime.imagesResponse(),
     selectedImageId: value,
     patchFilePathCtrl: patchFilePathCtrl,
     patchStateCtrl: patchStateCtrl,
@@ -129,12 +102,8 @@ Future<void> selectAssetImagesWorkbenchImage({
     token: token,
     projectId: projectId,
     assetNumericId: assetNumericId,
-    imagesResponse: imagesResponse,
+    runtime: runtime,
     selectedImageId: value,
-    previewBytes: previewBytes,
     setState: setState,
-    onPreviewBytesChanged: onPreviewBytesChanged,
-    onLoadingChanged: onLoadingChanged,
-    onStatusChanged: onStatusChanged,
   );
 }

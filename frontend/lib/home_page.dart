@@ -45,6 +45,7 @@ part 'home_page/project_editor/assets/generation/controls.dart';
 part 'home_page/project_editor/assets/generation/selection.dart';
 part 'home_page/project_editor/assets/generation/status.dart';
 part 'home_page/project_editor/assets/images/workbench.dart';
+part 'home_page/project_editor/assets/images/workbench_runtime.dart';
 part 'home_page/project_editor/assets/images/workbench_loading.dart';
 part 'home_page/project_editor/assets/images/workbench_mutations.dart';
 part 'home_page/project_editor/assets/images/workbench_actions.dart';

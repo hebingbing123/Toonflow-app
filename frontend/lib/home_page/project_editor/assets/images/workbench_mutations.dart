@@ -13,16 +13,7 @@ Future<void> createAssetImage({
   required List<bool> assetsBusy,
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
-  required String? currentSelectedImageId,
-  required ListAssetImagesResponse? Function() getImagesResponse,
-  required String? Function() getSelectedImageId,
-  required Uint8List? Function() getPreviewBytes,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onListLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
+  required AssetImagesWorkbenchRuntime runtime,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -31,7 +22,7 @@ Future<void> createAssetImage({
   final state = createStateCtrl.text.trim();
   final sort = parsePositiveWorkbenchInt(createSortCtrl.text);
   if (createSortCtrl.text.trim().isNotEmpty && sort == null) {
-    setState(() => onStatusChanged('新增 sort_index 需为正整数'));
+    setState(() => runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
   setDialogState(() => assetsBusy[0] = true);
@@ -49,26 +40,16 @@ Future<void> createAssetImage({
       token: token,
       projectId: projectId,
       assetNumericId: assetNumericId,
-      currentSelectedImageId: currentSelectedImageId,
+      runtime: runtime,
       setState: setState,
-      onImagesResponseChanged: onImagesResponseChanged,
-      onSelectedImageIdChanged: onSelectedImageIdChanged,
-      onPreviewBytesChanged: onPreviewBytesChanged,
-      onLoadingChanged: onListLoadingChanged,
-      onPreviewLoadingChanged: onPreviewLoadingChanged,
-      onStatusChanged: onStatusChanged,
       patchFilePathCtrl: patchFilePathCtrl,
       patchStateCtrl: patchStateCtrl,
       patchSortCtrl: patchSortCtrl,
     );
     await reloadAssetsAndStats();
-    final diagnosis = diagnoseAssetImagesWorkbench(
-      imagesResponse: getImagesResponse(),
-      selectedImageId: getSelectedImageId(),
-      hasPreviewBytes: getPreviewBytes() != null,
-    );
+    final diagnosis = runtime.diagnose();
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已新增资产图片。',
           diagnosis: diagnosis,
@@ -77,7 +58,7 @@ Future<void> createAssetImage({
     });
   } on RustApiException catch (e) {
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '新增资产图片失败。',
           recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
@@ -100,7 +81,6 @@ Future<void> patchAssetImage({
   required int assetNumericId,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required Uint8List? previewBytes,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -110,22 +90,14 @@ Future<void> patchAssetImage({
   required List<bool> assetsBusy,
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
-  required ListAssetImagesResponse? Function() getImagesResponse,
-  required String? Function() getSelectedImageId,
-  required Uint8List? Function() getPreviewBytes,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onListLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
+  required AssetImagesWorkbenchRuntime runtime,
 }) async {
   final image = selectedAssetImageRow(
     imagesResponse,
     selectedImageId: selectedImageId,
   );
   if (image == null) {
-    setState(() => onStatusChanged('请先选择要编辑的图片'));
+    setState(() => runtime.onStatusChanged('请先选择要编辑的图片'));
     return;
   }
   final body = <String, dynamic>{};
@@ -137,7 +109,7 @@ Future<void> patchAssetImage({
   if (sortRaw.isNotEmpty) {
     final sort = parsePositiveWorkbenchInt(sortRaw);
     if (sort == null) {
-      setState(() => onStatusChanged('编辑 sort_index 需为正整数'));
+      setState(() => runtime.onStatusChanged('编辑 sort_index 需为正整数'));
       return;
     }
     body['sort_index'] = sort;
@@ -156,34 +128,24 @@ Future<void> patchAssetImage({
       token: token,
       projectId: projectId,
       assetNumericId: assetNumericId,
-      currentSelectedImageId: selectedImageId,
+      runtime: runtime,
       setState: setState,
-      onImagesResponseChanged: onImagesResponseChanged,
-      onSelectedImageIdChanged: onSelectedImageIdChanged,
-      onPreviewBytesChanged: onPreviewBytesChanged,
-      onLoadingChanged: onListLoadingChanged,
-      onPreviewLoadingChanged: onPreviewLoadingChanged,
-      onStatusChanged: onStatusChanged,
       patchFilePathCtrl: patchFilePathCtrl,
       patchStateCtrl: patchStateCtrl,
       patchSortCtrl: patchSortCtrl,
     );
     await reloadAssetsAndStats();
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已更新当前图片。',
-          diagnosis: diagnoseAssetImagesWorkbench(
-            imagesResponse: getImagesResponse(),
-            selectedImageId: getSelectedImageId(),
-            hasPreviewBytes: getPreviewBytes() != null,
-          ),
+          diagnosis: runtime.diagnose(),
         ),
       );
     });
   } on RustApiException catch (e) {
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '更新当前图片失败。',
           recommendedAction:
@@ -214,15 +176,7 @@ Future<void> deleteAssetImage({
   required List<bool> assetsBusy,
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
-  required ListAssetImagesResponse? Function() getImagesResponse,
-  required String? Function() getSelectedImageId,
-  required Uint8List? Function() getPreviewBytes,
-  required ValueChanged<ListAssetImagesResponse?> onImagesResponseChanged,
-  required ValueChanged<String?> onSelectedImageIdChanged,
-  required ValueChanged<Uint8List?> onPreviewBytesChanged,
-  required ValueChanged<bool> onListLoadingChanged,
-  required ValueChanged<bool> onPreviewLoadingChanged,
-  required ValueChanged<String?> onStatusChanged,
+  required AssetImagesWorkbenchRuntime runtime,
   required TextEditingController patchFilePathCtrl,
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
@@ -232,7 +186,7 @@ Future<void> deleteAssetImage({
     selectedImageId: selectedImageId,
   );
   if (image == null) {
-    setState(() => onStatusChanged('请先选择要删除的图片'));
+    setState(() => runtime.onStatusChanged('请先选择要删除的图片'));
     return;
   }
   setDialogState(() => assetsBusy[0] = true);
@@ -248,34 +202,24 @@ Future<void> deleteAssetImage({
       token: token,
       projectId: projectId,
       assetNumericId: assetNumericId,
-      currentSelectedImageId: selectedImageId,
+      runtime: runtime,
       setState: setState,
-      onImagesResponseChanged: onImagesResponseChanged,
-      onSelectedImageIdChanged: onSelectedImageIdChanged,
-      onPreviewBytesChanged: onPreviewBytesChanged,
-      onLoadingChanged: onListLoadingChanged,
-      onPreviewLoadingChanged: onPreviewLoadingChanged,
-      onStatusChanged: onStatusChanged,
       patchFilePathCtrl: patchFilePathCtrl,
       patchStateCtrl: patchStateCtrl,
       patchSortCtrl: patchSortCtrl,
     );
     await reloadAssetsAndStats();
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已删除当前图片。',
-          diagnosis: diagnoseAssetImagesWorkbench(
-            imagesResponse: getImagesResponse(),
-            selectedImageId: getSelectedImageId(),
-            hasPreviewBytes: getPreviewBytes() != null,
-          ),
+          diagnosis: runtime.diagnose(),
         ),
       );
     });
   } on RustApiException catch (e) {
     setState(() {
-      onStatusChanged(
+      runtime.onStatusChanged(
         buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '删除当前图片失败。',
           recommendedAction:
