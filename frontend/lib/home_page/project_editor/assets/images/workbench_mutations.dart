@@ -115,26 +115,16 @@ Map<String, dynamic>? _buildPatchAssetImageBody({
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
 }) {
-  final body = <String, dynamic>{
-    'file_path': _optionalWorkbenchText(patchControllers.filePathCtrl),
-    'state': _optionalWorkbenchText(patchControllers.stateCtrl),
-  };
-  final sortRaw = patchControllers.sortCtrl.text.trim();
-  if (sortRaw.isEmpty) {
-    return body;
-  }
-  final sort = parsePositiveWorkbenchInt(sortRaw);
-  if (sort == null) {
+  final draft = parseAssetImagePatchDraft(
+    filePath: patchControllers.filePathCtrl.text,
+    state: patchControllers.stateCtrl.text,
+    sortIndex: patchControllers.sortCtrl.text,
+  );
+  if (draft == null) {
     setState(() => runtime.onStatusChanged('编辑 sort_index 需为正整数'));
     return null;
   }
-  body['sort_index'] = sort;
-  return body;
-}
-
-String? _optionalWorkbenchText(TextEditingController controller) {
-  final value = controller.text.trim();
-  return value.isEmpty ? null : value;
+  return draft.body;
 }
 
 Future<void> createAssetImage({
@@ -142,13 +132,15 @@ Future<void> createAssetImage({
   required int assetNumericId,
   required StateSetter setState,
 }) async {
-  final createControllers = scope.createControllers;
-  if (createControllers.sortCtrl.text.trim().isNotEmpty &&
-      parsePositiveWorkbenchInt(createControllers.sortCtrl.text) == null) {
+  final draft = parseAssetImageCreateDraft(
+    filePath: scope.createControllers.filePathCtrl.text,
+    state: scope.createControllers.stateCtrl.text,
+    sortIndex: scope.createControllers.sortCtrl.text,
+  );
+  if (draft == null) {
     setState(() => scope.runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
-  final sort = parsePositiveWorkbenchInt(createControllers.sortCtrl.text);
   await _runAssetImageMutation(
     setState: setState,
     ctx: scope.mutation.ctx,
@@ -168,9 +160,9 @@ Future<void> createAssetImage({
           scope.token,
           scope.projectId,
           assetNumericId,
-          filePath: _optionalWorkbenchText(createControllers.filePathCtrl),
-          state: _optionalWorkbenchText(createControllers.stateCtrl),
-          sortIndex: sort,
+          filePath: draft.filePath,
+          state: draft.state,
+          sortIndex: draft.sortIndex,
         ),
       );
     },

@@ -12,6 +12,26 @@ class AssetImagesWorkbenchDiagnosis {
   final AssetImagesWorkbenchRecommendedAction recommendedAction;
 }
 
+class AssetImageCreateDraft {
+  const AssetImageCreateDraft({
+    this.filePath,
+    this.state,
+    this.sortIndex,
+  });
+
+  final String? filePath;
+  final String? state;
+  final int? sortIndex;
+}
+
+class AssetImagePatchDraft {
+  const AssetImagePatchDraft({
+    required this.body,
+  });
+
+  final Map<String, dynamic> body;
+}
+
 enum AssetImagesWorkbenchRecommendedAction {
   loadImages,
   createImage,
@@ -70,6 +90,53 @@ String buildAssetImagesWorkbenchFailureNotice({
     recommendedAction,
   );
   return '$actionSummary 下一步建议：$nextAction。失败原因：$reason。$fallbackDetail';
+}
+
+String? trimAssetImageWorkbenchText(String raw) {
+  final value = raw.trim();
+  return value.isEmpty ? null : value;
+}
+
+int? parsePositiveWorkbenchInt(String raw) {
+  if (raw.trim().isEmpty) return null;
+  final parsed = int.tryParse(raw.trim());
+  if (parsed == null || parsed <= 0) return null;
+  return parsed;
+}
+
+AssetImageCreateDraft? parseAssetImageCreateDraft({
+  required String filePath,
+  required String state,
+  required String sortIndex,
+}) {
+  final parsedSort = parsePositiveWorkbenchInt(sortIndex);
+  if (sortIndex.trim().isNotEmpty && parsedSort == null) {
+    return null;
+  }
+  return AssetImageCreateDraft(
+    filePath: trimAssetImageWorkbenchText(filePath),
+    state: trimAssetImageWorkbenchText(state),
+    sortIndex: parsedSort,
+  );
+}
+
+AssetImagePatchDraft? parseAssetImagePatchDraft({
+  required String filePath,
+  required String state,
+  required String sortIndex,
+}) {
+  final body = <String, dynamic>{
+    'file_path': trimAssetImageWorkbenchText(filePath),
+    'state': trimAssetImageWorkbenchText(state),
+  };
+  final parsedSort = parsePositiveWorkbenchInt(sortIndex);
+  if (sortIndex.trim().isNotEmpty && parsedSort == null) {
+    return null;
+  }
+  if (parsedSort != null) {
+    body['sort_index'] = parsedSort;
+  }
+  return AssetImagePatchDraft(body: body);
 }
 
 AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({

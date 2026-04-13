@@ -81,6 +81,52 @@ void main() {
     expect(text, contains('可继续更新 file_path。'));
   });
 
+  test('parseAssetImageCreateDraft trims fields and accepts blank sort', () {
+    final draft = parseAssetImageCreateDraft(
+      filePath: '  /tmp/demo.png  ',
+      state: '  done ',
+      sortIndex: ' ',
+    );
+
+    expect(draft, isNotNull);
+    expect(draft!.filePath, '/tmp/demo.png');
+    expect(draft.state, 'done');
+    expect(draft.sortIndex, isNull);
+  });
+
+  test('parseAssetImageCreateDraft rejects non-positive sort', () {
+    final draft = parseAssetImageCreateDraft(
+      filePath: '',
+      state: '',
+      sortIndex: '0',
+    );
+
+    expect(draft, isNull);
+  });
+
+  test('parseAssetImagePatchDraft builds sparse request body', () {
+    final draft = parseAssetImagePatchDraft(
+      filePath: '  /tmp/demo.png ',
+      state: ' ',
+      sortIndex: '7',
+    );
+
+    expect(draft, isNotNull);
+    expect(draft!.body['file_path'], '/tmp/demo.png');
+    expect(draft.body['state'], isNull);
+    expect(draft.body['sort_index'], 7);
+  });
+
+  test('parseAssetImagePatchDraft rejects invalid sort', () {
+    final draft = parseAssetImagePatchDraft(
+      filePath: '',
+      state: '',
+      sortIndex: '-3',
+    );
+
+    expect(draft, isNull);
+  });
+
   test('collectVisibleAssetNumericIds sorts and deduplicates ids', () {
     expect(
       collectVisibleAssetNumericIds(const [

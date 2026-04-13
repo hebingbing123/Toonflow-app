@@ -328,10 +328,3 @@ void applyAssetImagePreviewState({
     actionSummary: actionSummary,
   );
 }
-
-int? parsePositiveWorkbenchInt(String raw) {
-  if (raw.trim().isEmpty) return null;
-  final parsed = int.tryParse(raw.trim());
-  if (parsed == null || parsed <= 0) return null;
-  return parsed;
-}
