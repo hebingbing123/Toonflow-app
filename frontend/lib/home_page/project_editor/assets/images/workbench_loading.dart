@@ -1,5 +1,25 @@
 part of '../../../../home_page.dart';
 
+void _setAssetImagesReloadFailure({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required Object error,
+}) {
+  setState(() {
+    runtime.clearSelection(
+      images: null,
+      selectedId: null,
+      preview: null,
+      statusLine: buildAssetImagesWorkbenchFailureNotice(
+        actionSummary: '读取当前资产图片列表失败。',
+        recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
+        error: error,
+        fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
+      ),
+    );
+  });
+}
+
 Future<void> loadAssetImagePreview({
   required String token,
   required String projectId,
@@ -120,34 +140,12 @@ Future<void> reloadAssetImages({
       selectedImageId: nextSelectedImageId,
       setState: setState,
     );
-  } on RustApiException catch (e) {
-    setState(() {
-      runtime.clearSelection(
-        images: null,
-        selectedId: null,
-        preview: null,
-        statusLine: buildAssetImagesWorkbenchFailureNotice(
-          actionSummary: '读取当前资产图片列表失败。',
-          recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
-          error: e,
-          fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
-        ),
-      );
-    });
   } catch (e) {
-    setState(() {
-      runtime.clearSelection(
-        images: null,
-        selectedId: null,
-        preview: null,
-        statusLine: buildAssetImagesWorkbenchFailureNotice(
-          actionSummary: '读取当前资产图片列表失败。',
-          recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
-          error: e,
-          fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
-        ),
-      );
-    });
+    _setAssetImagesReloadFailure(
+      setState: setState,
+      runtime: runtime,
+      error: e,
+    );
   } finally {
     setState(() => runtime.onListLoadingChanged(false));
   }
