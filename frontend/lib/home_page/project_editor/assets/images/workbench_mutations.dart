@@ -156,9 +156,7 @@ Future<void> createAssetImage({
   required String token,
   required String projectId,
   required int assetNumericId,
-  required TextEditingController createFilePathCtrl,
-  required TextEditingController createStateCtrl,
-  required TextEditingController createSortCtrl,
+  required AssetImagesWorkbenchFormControllers createControllers,
   required StateSetter setState,
   required BuildContext ctx,
   required StateSetter setDialogState,
@@ -168,8 +166,8 @@ Future<void> createAssetImage({
   required AssetImagesWorkbenchRuntime runtime,
   required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
-  final sort = parsePositiveWorkbenchInt(createSortCtrl.text);
-  if (createSortCtrl.text.trim().isNotEmpty && sort == null) {
+  final sort = parsePositiveWorkbenchInt(createControllers.sortCtrl.text);
+  if (createControllers.sortCtrl.text.trim().isNotEmpty && sort == null) {
     setState(() => runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
@@ -196,8 +194,8 @@ Future<void> createAssetImage({
           token,
           projectId,
           assetNumericId,
-          filePath: _optionalWorkbenchText(createFilePathCtrl),
-          state: _optionalWorkbenchText(createStateCtrl),
+          filePath: _optionalWorkbenchText(createControllers.filePathCtrl),
+          state: _optionalWorkbenchText(createControllers.stateCtrl),
           sortIndex: sort,
         ),
       );
