@@ -1,20 +1,28 @@
 part of '../../../../home_page.dart';
 
-class _SelectedAssetImageMutationPlan {
-  const _SelectedAssetImageMutationPlan({
-    required this.missingSelectionNotice,
+class _AssetImageMutationRequestPlan {
+  const _AssetImageMutationRequestPlan({
     required this.successSummary,
     required this.failureSummary,
     required this.recommendedAction,
     required this.fallbackDetail,
-    required this.request,
   });
 
-  final String missingSelectionNotice;
   final String successSummary;
   final String failureSummary;
   final AssetImagesWorkbenchRecommendedAction recommendedAction;
   final String fallbackDetail;
+}
+
+class _SelectedAssetImageMutationPlan {
+  const _SelectedAssetImageMutationPlan({
+    required this.missingSelectionNotice,
+    required this.requestPlan,
+    required this.request,
+  });
+
+  final String missingSelectionNotice;
+  final _AssetImageMutationRequestPlan requestPlan;
   final Future<void> Function(AssetImageRow image) request;
 }
 
@@ -64,10 +72,7 @@ Future<void> _runAssetImageMutationRequest({
   required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
   required StateSetter setState,
-  required String successSummary,
-  required String failureSummary,
-  required AssetImagesWorkbenchRecommendedAction recommendedAction,
-  required String fallbackDetail,
+  required _AssetImageMutationRequestPlan plan,
   required Future<void> Function() request,
 }) async {
   try {
@@ -76,18 +81,43 @@ Future<void> _runAssetImageMutationRequest({
       scope: scope,
       assetNumericId: assetNumericId,
       setState: setState,
-      successSummary: successSummary,
+      successSummary: plan.successSummary,
     );
   } on RustApiException catch (e) {
     _setAssetImageMutationFailure(
       setState: setState,
       runtime: scope.runtime,
-      actionSummary: failureSummary,
-      recommendedAction: recommendedAction,
+      actionSummary: plan.failureSummary,
+      recommendedAction: plan.recommendedAction,
       error: e,
-      fallbackDetail: fallbackDetail,
+      fallbackDetail: plan.fallbackDetail,
     );
   }
+}
+
+Future<void> _runAssetImageMutationPlan({
+  required AssetImagesWorkbenchScope scope,
+  required int assetNumericId,
+  required StateSetter setState,
+  required _AssetImageMutationRequestPlan plan,
+  required Future<void> Function() request,
+}) async {
+  await _runAssetImageMutation(
+    setState: setState,
+    ctx: scope.mutation.ctx,
+    setDialogState: scope.mutation.setDialogState,
+    assetsBusy: scope.mutation.assetsBusy,
+    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
+    action: () async {
+      await _runAssetImageMutationRequest(
+        scope: scope,
+        assetNumericId: assetNumericId,
+        setState: setState,
+        plan: plan,
+        request: request,
+      );
+    },
+  );
 }
 
 void _setAssetImageMutationFailure({
@@ -163,24 +193,12 @@ Future<void> _runSelectedAssetImageMutation({
   if (image == null) {
     return;
   }
-  await _runAssetImageMutation(
+  await _runAssetImageMutationPlan(
+    scope: scope,
+    assetNumericId: assetNumericId,
     setState: setState,
-    ctx: scope.mutation.ctx,
-    setDialogState: scope.mutation.setDialogState,
-    assetsBusy: scope.mutation.assetsBusy,
-    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
-    action: () async {
-      await _runAssetImageMutationRequest(
-        scope: scope,
-        assetNumericId: assetNumericId,
-        setState: setState,
-        successSummary: plan.successSummary,
-        failureSummary: plan.failureSummary,
-        recommendedAction: plan.recommendedAction,
-        fallbackDetail: plan.fallbackDetail,
-        request: () => plan.request(image),
-      );
-    },
+    plan: plan.requestPlan,
+    request: () => plan.request(image),
   );
 }
 
@@ -198,31 +216,24 @@ Future<void> createAssetImage({
     setState(() => scope.runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
-  await _runAssetImageMutation(
+  await _runAssetImageMutationPlan(
+    scope: scope,
+    assetNumericId: assetNumericId,
     setState: setState,
-    ctx: scope.mutation.ctx,
-    setDialogState: scope.mutation.setDialogState,
-    assetsBusy: scope.mutation.assetsBusy,
-    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
-    action: () async {
-      await _runAssetImageMutationRequest(
-        scope: scope,
-        assetNumericId: assetNumericId,
-        setState: setState,
-        successSummary: '已新增资产图片。',
-        failureSummary: '新增资产图片失败。',
-        recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
-        fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
-        request: () => createProjectAssetImageForProject(
-          scope.token,
-          scope.projectId,
-          assetNumericId,
-          filePath: draft.filePath,
-          state: draft.state,
-          sortIndex: draft.sortIndex,
-        ),
-      );
-    },
+    plan: const _AssetImageMutationRequestPlan(
+      successSummary: '已新增资产图片。',
+      failureSummary: '新增资产图片失败。',
+      recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
+      fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
+    ),
+    request: () => createProjectAssetImageForProject(
+      scope.token,
+      scope.projectId,
+      assetNumericId,
+      filePath: draft.filePath,
+      state: draft.state,
+      sortIndex: draft.sortIndex,
+    ),
   );
 }
 
@@ -249,11 +260,13 @@ Future<void> patchAssetImage({
     setState: setState,
     plan: _SelectedAssetImageMutationPlan(
       missingSelectionNotice: '请先选择要编辑的图片',
-      successSummary: '已更新当前图片。',
-      failureSummary: '更新当前图片失败。',
-      recommendedAction:
-          AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-      fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+      requestPlan: const _AssetImageMutationRequestPlan(
+        successSummary: '已更新当前图片。',
+        failureSummary: '更新当前图片失败。',
+        recommendedAction:
+            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+        fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+      ),
       request: (image) => patchProjectAssetImageByProjectIds(
           scope.token,
           scope.projectId,
@@ -280,11 +293,13 @@ Future<void> deleteAssetImage({
     setState: setState,
     plan: _SelectedAssetImageMutationPlan(
       missingSelectionNotice: '请先选择要删除的图片',
-      successSummary: '已删除当前图片。',
-      failureSummary: '删除当前图片失败。',
-      recommendedAction:
-          AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-      fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+      requestPlan: const _AssetImageMutationRequestPlan(
+        successSummary: '已删除当前图片。',
+        failureSummary: '删除当前图片失败。',
+        recommendedAction:
+            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+        fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+      ),
       request: (image) => deleteProjectAssetImageByProjectIds(
           scope.token,
           scope.projectId,
