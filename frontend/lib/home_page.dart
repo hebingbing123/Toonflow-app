@@ -52,6 +52,7 @@ part 'home_page/project_editor/assets/images/workbench_actions.dart';
 part 'home_page/project_editor/assets/images/workbench_controller.dart';
 part 'home_page/project_editor/assets/images/workbench_state.dart';
 part 'home_page/project_editor/assets/images/workbench_dialog.dart';
+part 'home_page/project_editor/assets/images/workbench_dialog_sections.dart';
 part 'home_page/project_editor/assets/workbench/dialog.dart';
 part 'home_page/project_editor/assets/workbench/dialog_actions.dart';
 part 'home_page/project_editor/assets/workbench/dialog_view.dart';
