@@ -53,6 +53,48 @@ Future<void> _finishAssetImageMutation({
   });
 }
 
+Future<void> _runAssetImageMutationRequest({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+  required AssetImagesWorkbenchRuntime runtime,
+  required StateSetter setState,
+  required Future<void> Function() reloadAssetsAndStats,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+  required String successSummary,
+  required String failureSummary,
+  required AssetImagesWorkbenchRecommendedAction recommendedAction,
+  required String fallbackDetail,
+  required Future<void> Function() request,
+}) async {
+  try {
+    await request();
+    await _finishAssetImageMutation(
+      token: token,
+      projectId: projectId,
+      assetNumericId: assetNumericId,
+      runtime: runtime,
+      setState: setState,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+      patchFilePathCtrl: patchFilePathCtrl,
+      patchStateCtrl: patchStateCtrl,
+      patchSortCtrl: patchSortCtrl,
+      successSummary: successSummary,
+    );
+  } on RustApiException catch (e) {
+    _setAssetImageMutationFailure(
+      setState: setState,
+      runtime: runtime,
+      actionSummary: failureSummary,
+      recommendedAction: recommendedAction,
+      error: e,
+      fallbackDetail: fallbackDetail,
+    );
+  }
+}
+
 void _setAssetImageMutationFailure({
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
@@ -150,37 +192,29 @@ Future<void> createAssetImage({
     assetsBusy: assetsBusy,
     onBusyMutationChanged: onBusyMutationChanged,
     action: () async {
-      try {
-        await createProjectAssetImageForProject(
+      await _runAssetImageMutationRequest(
+        token: token,
+        projectId: projectId,
+        assetNumericId: assetNumericId,
+        runtime: runtime,
+        setState: setState,
+        reloadAssetsAndStats: reloadAssetsAndStats,
+        patchFilePathCtrl: patchFilePathCtrl,
+        patchStateCtrl: patchStateCtrl,
+        patchSortCtrl: patchSortCtrl,
+        successSummary: '已新增资产图片。',
+        failureSummary: '新增资产图片失败。',
+        recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
+        fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
+        request: () => createProjectAssetImageForProject(
           token,
           projectId,
           assetNumericId,
           filePath: _optionalWorkbenchText(createFilePathCtrl),
           state: _optionalWorkbenchText(createStateCtrl),
           sortIndex: sort,
-        );
-        await _finishAssetImageMutation(
-          token: token,
-          projectId: projectId,
-          assetNumericId: assetNumericId,
-          runtime: runtime,
-          setState: setState,
-          reloadAssetsAndStats: reloadAssetsAndStats,
-          patchFilePathCtrl: patchFilePathCtrl,
-          patchStateCtrl: patchStateCtrl,
-          patchSortCtrl: patchSortCtrl,
-          successSummary: '已新增资产图片。',
-        );
-      } on RustApiException catch (e) {
-        _setAssetImageMutationFailure(
-          setState: setState,
-          runtime: runtime,
-          actionSummary: '新增资产图片失败。',
-          recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
-          error: e,
-          fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
-        );
-      }
+        ),
+      );
     },
   );
 }
@@ -229,37 +263,29 @@ Future<void> patchAssetImage({
     assetsBusy: assetsBusy,
     onBusyMutationChanged: onBusyMutationChanged,
     action: () async {
-      try {
-        await patchProjectAssetImageByProjectIds(
+      await _runAssetImageMutationRequest(
+        token: token,
+        projectId: projectId,
+        assetNumericId: assetNumericId,
+        runtime: runtime,
+        setState: setState,
+        reloadAssetsAndStats: reloadAssetsAndStats,
+        patchFilePathCtrl: patchFilePathCtrl,
+        patchStateCtrl: patchStateCtrl,
+        patchSortCtrl: patchSortCtrl,
+        successSummary: '已更新当前图片。',
+        failureSummary: '更新当前图片失败。',
+        recommendedAction:
+            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+        fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+        request: () => patchProjectAssetImageByProjectIds(
           token,
           projectId,
           assetNumericId,
           image.id,
           body,
-        );
-        await _finishAssetImageMutation(
-          token: token,
-          projectId: projectId,
-          assetNumericId: assetNumericId,
-          runtime: runtime,
-          setState: setState,
-          reloadAssetsAndStats: reloadAssetsAndStats,
-          patchFilePathCtrl: patchFilePathCtrl,
-          patchStateCtrl: patchStateCtrl,
-          patchSortCtrl: patchSortCtrl,
-          successSummary: '已更新当前图片。',
-        );
-      } on RustApiException catch (e) {
-        _setAssetImageMutationFailure(
-          setState: setState,
-          runtime: runtime,
-          actionSummary: '更新当前图片失败。',
-          recommendedAction:
-              AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-          error: e,
-          fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
-        );
-      }
+        ),
+      );
     },
   );
 }
@@ -298,36 +324,28 @@ Future<void> deleteAssetImage({
     assetsBusy: assetsBusy,
     onBusyMutationChanged: onBusyMutationChanged,
     action: () async {
-      try {
-        await deleteProjectAssetImageByProjectIds(
+      await _runAssetImageMutationRequest(
+        token: token,
+        projectId: projectId,
+        assetNumericId: assetNumericId,
+        runtime: runtime,
+        setState: setState,
+        reloadAssetsAndStats: reloadAssetsAndStats,
+        patchFilePathCtrl: patchFilePathCtrl,
+        patchStateCtrl: patchStateCtrl,
+        patchSortCtrl: patchSortCtrl,
+        successSummary: '已删除当前图片。',
+        failureSummary: '删除当前图片失败。',
+        recommendedAction:
+            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+        fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+        request: () => deleteProjectAssetImageByProjectIds(
           token,
           projectId,
           assetNumericId,
           image.id,
-        );
-        await _finishAssetImageMutation(
-          token: token,
-          projectId: projectId,
-          assetNumericId: assetNumericId,
-          runtime: runtime,
-          setState: setState,
-          reloadAssetsAndStats: reloadAssetsAndStats,
-          patchFilePathCtrl: patchFilePathCtrl,
-          patchStateCtrl: patchStateCtrl,
-          patchSortCtrl: patchSortCtrl,
-          successSummary: '已删除当前图片。',
-        );
-      } on RustApiException catch (e) {
-        _setAssetImageMutationFailure(
-          setState: setState,
-          runtime: runtime,
-          actionSummary: '删除当前图片失败。',
-          recommendedAction:
-              AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-          error: e,
-          fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
-        );
-      }
+        ),
+      );
     },
   );
 }
