@@ -148,4 +148,23 @@ class AssetImagesWorkbenchController {
     runtime: runtime,
     patchControllers: patchControllers,
   );
+
+  AssetImagesWorkbenchDialogCallbacks buildDialogCallbacks({
+    required StateSetter setState,
+  }) {
+    final imageItems =
+        runtime.imagesResponse()?.items ?? const <AssetImageRow>[];
+    return AssetImagesWorkbenchDialogCallbacks(
+      onAssetChanged: (value) => changeAsset(value: value, setState: setState),
+      onRecommendedAction: () => runRecommendedAction(setState),
+      onReloadImages: () => reloadImages(setState),
+      onLoadPreview: () => loadPreview(setState),
+      onImageChanged: imageItems.isEmpty
+          ? null
+          : (value) => selectImage(value: value, setState: setState),
+      onCreateImage: () => createImage(setState),
+      onPatchImage: () => patchImage(setState),
+      onDeleteImage: () => deleteImage(setState),
+    );
+  }
 }

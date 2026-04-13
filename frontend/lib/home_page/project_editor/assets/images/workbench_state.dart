@@ -45,6 +45,41 @@ class AssetImagesWorkbenchDialogState {
   final Uint8List? previewBytes;
   final AssetImagesWorkbenchFormControllers createControllers;
   final AssetImagesWorkbenchFormControllers patchControllers;
+
+  factory AssetImagesWorkbenchDialogState.capture({
+    required List<AssetRow> assets,
+    required ListAssetImagesResponse? imagesResponse,
+    required int selectedAssetNumericId,
+    required String? selectedImageId,
+    required bool loadingList,
+    required bool loadingPreview,
+    required bool busyMutation,
+    required String? statusLine,
+    required Uint8List? previewBytes,
+    required AssetImagesWorkbenchFormControllers createControllers,
+    required AssetImagesWorkbenchFormControllers patchControllers,
+  }) {
+    final imageItems = imagesResponse?.items ?? const <AssetImageRow>[];
+    final diagnosis = diagnoseAssetImagesWorkbench(
+      imagesResponse: imagesResponse,
+      selectedImageId: selectedImageId,
+      hasPreviewBytes: previewBytes != null,
+    );
+    return AssetImagesWorkbenchDialogState(
+      assets: assets,
+      imageItems: imageItems,
+      selectedAssetNumericId: selectedAssetNumericId,
+      selectedImageId: selectedImageId,
+      diagnosis: diagnosis,
+      loadingList: loadingList,
+      loadingPreview: loadingPreview,
+      busyMutation: busyMutation,
+      statusLine: statusLine,
+      previewBytes: previewBytes,
+      createControllers: createControllers,
+      patchControllers: patchControllers,
+    );
+  }
 }
 
 class AssetImagesWorkbenchDialogCallbacks {

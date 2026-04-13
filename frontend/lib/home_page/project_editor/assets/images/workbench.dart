@@ -74,19 +74,11 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                   setState: setState,
                 );
               }
-              final imageItems =
-                  imagesResponse?.items ?? const <AssetImageRow>[];
-              final diagnosis = diagnoseAssetImagesWorkbench(
-                imagesResponse: imagesResponse,
-                selectedImageId: selectedImageId,
-                hasPreviewBytes: previewBytes != null,
-              );
-              final dialogState = AssetImagesWorkbenchDialogState(
+              final dialogState = AssetImagesWorkbenchDialogState.capture(
                 assets: assets,
-                imageItems: imageItems,
+                imagesResponse: imagesResponse,
                 selectedAssetNumericId: selectedAssetNumericId,
                 selectedImageId: selectedImageId,
-                diagnosis: diagnosis,
                 loadingList: loadingList,
                 loadingPreview: loadingPreview,
                 busyMutation: busyMutation,
@@ -95,28 +87,11 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 createControllers: createControllers,
                 patchControllers: patchControllers,
               );
-              final dialogCallbacks = AssetImagesWorkbenchDialogCallbacks(
-                onAssetChanged: (value) =>
-                    controller.changeAsset(value: value, setState: setState),
-                onRecommendedAction: () =>
-                    controller.runRecommendedAction(setState),
-                onReloadImages: () => controller.reloadImages(setState),
-                onLoadPreview: () => controller.loadPreview(setState),
-                onImageChanged: imageItems.isEmpty
-                    ? null
-                    : (value) => controller.selectImage(
-                        value: value,
-                        setState: setState,
-                      ),
-                onCreateImage: () => controller.createImage(setState),
-                onPatchImage: () => controller.patchImage(setState),
-                onDeleteImage: () => controller.deleteImage(setState),
-              );
               return _buildAssetImagesWorkbenchDialog(
                 ctx: ctx,
                 dialogCtx: dialogCtx,
                 state: dialogState,
-                callbacks: dialogCallbacks,
+                callbacks: controller.buildDialogCallbacks(setState: setState),
               );
             },
           );
