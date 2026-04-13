@@ -20,44 +20,26 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先创建资产再管理图片')));
       return;
     }
-    var selectedAssetNumericId = chooseInitialAssetNumericId(
-      assets,
-      preferredNumericId: preferredAssetNumericId,
-    )!;
-    String? selectedImageId;
-    ListAssetImagesResponse? imagesResponse;
-    Uint8List? previewBytes;
-    bool loadingList = false;
-    bool loadingPreview = false;
-    bool busyMutation = false;
-    bool initialLoadTriggered = false;
-    String? statusLine;
+    final session = AssetImagesWorkbenchSession.initialize(
+      assets: assets,
+      preferredAssetNumericId: preferredAssetNumericId,
+    );
 
     final createControllers = AssetImagesWorkbenchFormControllers();
     final patchControllers = AssetImagesWorkbenchFormControllers();
-    final runtime = AssetImagesWorkbenchRuntime(
-      imagesResponse: () => imagesResponse,
-      selectedImageId: () => selectedImageId,
-      previewBytes: () => previewBytes,
-      onImagesResponseChanged: (response) => imagesResponse = response,
-      onSelectedImageIdChanged: (value) => selectedImageId = value,
-      onPreviewBytesChanged: (bytes) => previewBytes = bytes,
-      onListLoadingChanged: (loading) => loadingList = loading,
-      onPreviewLoadingChanged: (loading) => loadingPreview = loading,
-      onStatusChanged: (line) => statusLine = line,
-    );
+    final runtime = session.buildRuntime();
     final controller = AssetImagesWorkbenchController(
       token: token,
       projectId: p.id,
       runtime: runtime,
-      currentAssetNumericId: () => selectedAssetNumericId,
-      onAssetNumericIdChanged: (value) => selectedAssetNumericId = value,
+      currentAssetNumericId: () => session.selectedAssetNumericId,
+      onAssetNumericIdChanged: (value) => session.selectedAssetNumericId = value,
       createControllers: createControllers,
       patchControllers: patchControllers,
       ctx: ctx,
       setDialogState: setDialogState,
       assetsBusy: assetsBusy,
-      onBusyMutationChanged: (busy) => busyMutation = busy,
+      onBusyMutationChanged: (busy) => session.busyMutation = busy,
       reloadAssetsAndStats: reloadAssetsAndStats,
     );
 
@@ -67,23 +49,15 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
-              if (!initialLoadTriggered) {
-                initialLoadTriggered = true;
+              if (!session.initialLoadTriggered) {
+                session.initialLoadTriggered = true;
                 controller.scheduleInitialLoad(
                   dialogCtx: dialogCtx,
                   setState: setState,
                 );
               }
-              final dialogState = AssetImagesWorkbenchDialogState.capture(
+              final dialogState = session.captureDialogState(
                 assets: assets,
-                imagesResponse: imagesResponse,
-                selectedAssetNumericId: selectedAssetNumericId,
-                selectedImageId: selectedImageId,
-                loadingList: loadingList,
-                loadingPreview: loadingPreview,
-                busyMutation: busyMutation,
-                statusLine: statusLine,
-                previewBytes: previewBytes,
                 createControllers: createControllers,
                 patchControllers: patchControllers,
               );
