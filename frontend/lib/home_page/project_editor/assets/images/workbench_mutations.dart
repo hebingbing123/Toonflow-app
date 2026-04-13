@@ -202,33 +202,11 @@ T? _resolveAssetImageDraft<T>({
   return draft;
 }
 
-Map<String, dynamic>? _buildPatchAssetImageBody({
-  required AssetImagesWorkbenchFormControllers patchControllers,
-  required StateSetter setState,
-  required AssetImagesWorkbenchRuntime runtime,
-}) {
-  final draft = _resolveAssetImageDraft(
-    setState: setState,
-    runtime: runtime,
-    invalidDraftNotice: '编辑 sort_index 需为正整数',
-    draft: parseAssetImagePatchDraft(
-      filePath: patchControllers.filePathCtrl.text,
-      state: patchControllers.stateCtrl.text,
-      sortIndex: patchControllers.sortCtrl.text,
-    ),
-  );
-  if (draft == null) {
-    return null;
-  }
-  return draft.body;
-}
-
-_AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
+AssetImageCreateDraft? _resolveCreateAssetImageDraft({
   required AssetImagesWorkbenchScope scope,
-  required int assetNumericId,
   required StateSetter setState,
 }) {
-  final draft = _resolveAssetImageDraft(
+  return _resolveAssetImageDraft(
     setState: setState,
     runtime: scope.runtime,
     invalidDraftNotice: '新增 sort_index 需为正整数',
@@ -238,6 +216,30 @@ _AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
       sortIndex: scope.createControllers.sortCtrl.text,
     ),
   );
+}
+
+AssetImagePatchDraft? _resolvePatchAssetImageDraft({
+  required AssetImagesWorkbenchScope scope,
+  required StateSetter setState,
+}) {
+  return _resolveAssetImageDraft(
+    setState: setState,
+    runtime: scope.runtime,
+    invalidDraftNotice: '编辑 sort_index 需为正整数',
+    draft: parseAssetImagePatchDraft(
+      filePath: scope.patchControllers.filePathCtrl.text,
+      state: scope.patchControllers.stateCtrl.text,
+      sortIndex: scope.patchControllers.sortCtrl.text,
+    ),
+  );
+}
+
+_AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
+  required AssetImagesWorkbenchScope scope,
+  required int assetNumericId,
+  required StateSetter setState,
+}) {
+  final draft = _resolveCreateAssetImageDraft(scope: scope, setState: setState);
   if (draft == null) {
     return null;
   }
@@ -254,36 +256,38 @@ _AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
   );
 }
 
-_SelectedAssetImageMutationPlan _buildPatchAssetImageMutationPlan({
-  required String token,
-  required String projectId,
+_SelectedAssetImageMutationPlan? _buildPatchAssetImageMutationPlan({
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required Map<String, dynamic> body,
+  required StateSetter setState,
 }) {
+  final draft = _resolvePatchAssetImageDraft(scope: scope, setState: setState);
+  if (draft == null) {
+    return null;
+  }
   return _SelectedAssetImageMutationPlan(
     missingSelectionNotice: '请先选择要编辑的图片',
     requestPlan: _patchAssetImageRequestPlan,
     request: (image) => patchProjectAssetImageByProjectIds(
-      token,
-      projectId,
+      scope.token,
+      scope.projectId,
       assetNumericId,
       image.id,
-      body,
+      draft.body,
     ),
   );
 }
 
 _SelectedAssetImageMutationPlan _buildDeleteAssetImageMutationPlan({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
 }) {
   return _SelectedAssetImageMutationPlan(
     missingSelectionNotice: '请先选择要删除的图片',
     requestPlan: _deleteAssetImageRequestPlan,
     request: (image) => deleteProjectAssetImageByProjectIds(
-      token,
-      projectId,
+      scope.token,
+      scope.projectId,
       assetNumericId,
       image.id,
     ),
@@ -296,8 +300,11 @@ Future<void> _runSelectedAssetImageMutation({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required StateSetter setState,
-  required _SelectedAssetImageMutationPlan plan,
+  required _SelectedAssetImageMutationPlan? plan,
 }) async {
+  if (plan == null) {
+    return;
+  }
   final image = _requireSelectedAssetImage(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
@@ -346,14 +353,6 @@ Future<void> patchAssetImage({
   required String? selectedImageId,
   required StateSetter setState,
 }) async {
-  final body = _buildPatchAssetImageBody(
-    patchControllers: scope.patchControllers,
-    setState: setState,
-    runtime: scope.runtime,
-  );
-  if (body == null) {
-    return;
-  }
   await _runSelectedAssetImageMutation(
     scope: scope,
     assetNumericId: assetNumericId,
@@ -361,10 +360,9 @@ Future<void> patchAssetImage({
     selectedImageId: selectedImageId,
     setState: setState,
     plan: _buildPatchAssetImageMutationPlan(
-      token: scope.token,
-      projectId: scope.projectId,
+      scope: scope,
       assetNumericId: assetNumericId,
-      body: body,
+      setState: setState,
     ),
   );
 }
@@ -383,8 +381,7 @@ Future<void> deleteAssetImage({
     selectedImageId: selectedImageId,
     setState: setState,
     plan: _buildDeleteAssetImageMutationPlan(
-      token: scope.token,
-      projectId: scope.projectId,
+      scope: scope,
       assetNumericId: assetNumericId,
     ),
   );
