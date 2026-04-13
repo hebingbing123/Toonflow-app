@@ -179,18 +179,35 @@ AssetImageRow? _requireSelectedAssetImage({
   return null;
 }
 
+T? _resolveAssetImageDraft<T>({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required String invalidDraftNotice,
+  required T? draft,
+}) {
+  if (draft == null) {
+    setState(() => runtime.onStatusChanged(invalidDraftNotice));
+    return null;
+  }
+  return draft;
+}
+
 Map<String, dynamic>? _buildPatchAssetImageBody({
   required AssetImagesWorkbenchFormControllers patchControllers,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
 }) {
-  final draft = parseAssetImagePatchDraft(
-    filePath: patchControllers.filePathCtrl.text,
-    state: patchControllers.stateCtrl.text,
-    sortIndex: patchControllers.sortCtrl.text,
+  final draft = _resolveAssetImageDraft(
+    setState: setState,
+    runtime: runtime,
+    invalidDraftNotice: '编辑 sort_index 需为正整数',
+    draft: parseAssetImagePatchDraft(
+      filePath: patchControllers.filePathCtrl.text,
+      state: patchControllers.stateCtrl.text,
+      sortIndex: patchControllers.sortCtrl.text,
+    ),
   );
   if (draft == null) {
-    setState(() => runtime.onStatusChanged('编辑 sort_index 需为正整数'));
     return null;
   }
   return draft.body;
@@ -228,13 +245,17 @@ Future<void> createAssetImage({
   required int assetNumericId,
   required StateSetter setState,
 }) async {
-  final draft = parseAssetImageCreateDraft(
-    filePath: scope.createControllers.filePathCtrl.text,
-    state: scope.createControllers.stateCtrl.text,
-    sortIndex: scope.createControllers.sortCtrl.text,
+  final draft = _resolveAssetImageDraft(
+    setState: setState,
+    runtime: scope.runtime,
+    invalidDraftNotice: '新增 sort_index 需为正整数',
+    draft: parseAssetImageCreateDraft(
+      filePath: scope.createControllers.filePathCtrl.text,
+      state: scope.createControllers.stateCtrl.text,
+      sortIndex: scope.createControllers.sortCtrl.text,
+    ),
   );
   if (draft == null) {
-    setState(() => scope.runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
   await _runAssetImageMutationPlan(
