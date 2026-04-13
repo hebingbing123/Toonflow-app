@@ -199,24 +199,85 @@ String _buildAssetImagesStatusLine({
       : '$selectionLine ${diagnosis.detail}';
 }
 
-void _syncAssetImagesPatchFieldsFromSelected({
+class _AssetImagesPatchFieldValues {
+  const _AssetImagesPatchFieldValues({
+    required this.filePath,
+    required this.state,
+    required this.sortIndex,
+  });
+
+  final String filePath;
+  final String state;
+  final String sortIndex;
+}
+
+class _AssetImagesSelectionSyncState {
+  const _AssetImagesSelectionSyncState({
+    required this.selectedImageId,
+    required this.previewBytes,
+    required this.statusLine,
+    required this.patchFields,
+  });
+
+  final String? selectedImageId;
+  final Uint8List? previewBytes;
+  final String statusLine;
+  final _AssetImagesPatchFieldValues patchFields;
+}
+
+_AssetImagesPatchFieldValues _buildAssetImagesPatchFieldValues({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
   final image = selectedAssetImageRow(
     imagesResponse,
     selectedImageId: selectedImageId,
   );
   if (image == null) {
-    patchControllers.filePathCtrl.text = '';
-    patchControllers.stateCtrl.text = '';
-    patchControllers.sortCtrl.text = '';
-    return;
+    return const _AssetImagesPatchFieldValues(
+      filePath: '',
+      state: '',
+      sortIndex: '',
+    );
   }
-  patchControllers.filePathCtrl.text = image.filePath ?? '';
-  patchControllers.stateCtrl.text = image.state ?? '';
-  patchControllers.sortCtrl.text = image.sortIndex.toString();
+  return _AssetImagesPatchFieldValues(
+    filePath: image.filePath ?? '',
+    state: image.state ?? '',
+    sortIndex: image.sortIndex.toString(),
+  );
+}
+
+_AssetImagesSelectionSyncState _prepareAssetImagesSelectionSyncState({
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required Uint8List? previewBytes,
+}) {
+  return _AssetImagesSelectionSyncState(
+    selectedImageId: selectedImageId,
+    previewBytes: previewBytes,
+    statusLine: _buildAssetImagesStatusLine(
+      imagesResponse: imagesResponse,
+      selectedImageId: selectedImageId,
+      previewBytes: previewBytes,
+    ),
+    patchFields: _buildAssetImagesPatchFieldValues(
+      imagesResponse: imagesResponse,
+      selectedImageId: selectedImageId,
+    ),
+  );
+}
+
+void _applyAssetImagesSelectionSyncState({
+  required AssetImagesWorkbenchRuntime runtime,
+  required AssetImagesWorkbenchFormControllers patchControllers,
+  required _AssetImagesSelectionSyncState state,
+}) {
+  runtime.onSelectedImageIdChanged(state.selectedImageId);
+  runtime.onPreviewBytesChanged(state.previewBytes);
+  runtime.onStatusChanged(state.statusLine);
+  patchControllers.filePathCtrl.text = state.patchFields.filePath;
+  patchControllers.stateCtrl.text = state.patchFields.state;
+  patchControllers.sortCtrl.text = state.patchFields.sortIndex;
 }
 
 void syncAssetImagesSelectionState({
@@ -227,19 +288,16 @@ void syncAssetImagesSelectionState({
   required Uint8List? previewBytes,
   required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
-  final nextStatusLine = _buildAssetImagesStatusLine(
+  final nextState = _prepareAssetImagesSelectionSyncState(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     previewBytes: previewBytes,
   );
   setState(() {
-    runtime.onSelectedImageIdChanged(selectedImageId);
-    runtime.onPreviewBytesChanged(previewBytes);
-    runtime.onStatusChanged(nextStatusLine);
-    _syncAssetImagesPatchFieldsFromSelected(
-      imagesResponse: imagesResponse,
-      selectedImageId: selectedImageId,
+    _applyAssetImagesSelectionSyncState(
+      runtime: runtime,
       patchControllers: patchControllers,
+      state: nextState,
     );
   });
 }
@@ -277,23 +335,28 @@ String? applyReloadedAssetImagesState({
     response,
     preferredImageId: runtime.currentSelectedImageId,
   );
-  setState(() => runtime.onImagesResponseChanged(response));
-  syncAssetImagesSelectionState(
-    setState: setState,
-    runtime: runtime,
-    imagesResponse: runtime.imagesResponse(),
+  final nextState = _prepareAssetImagesSelectionSyncState(
+    imagesResponse: response,
     selectedImageId: nextSelectedImageId,
     previewBytes: null,
-    patchControllers: patchControllers,
   );
-  setAssetImagesFollowUpStatus(
-    setState: setState,
-    runtime: runtime,
-    imagesResponse: runtime.imagesResponse(),
-    selectedImageId: nextSelectedImageId,
-    hasPreviewBytes: false,
+  final followUpStatus = buildAssetImagesWorkbenchFollowUp(
     actionSummary: '已同步当前资产的图片列表。',
+    diagnosis: diagnoseAssetImagesWorkbench(
+      imagesResponse: response,
+      selectedImageId: nextSelectedImageId,
+      hasPreviewBytes: false,
+    ),
   );
+  setState(() {
+    runtime.onImagesResponseChanged(response);
+    _applyAssetImagesSelectionSyncState(
+      runtime: runtime,
+      patchControllers: patchControllers,
+      state: nextState,
+    );
+    runtime.onStatusChanged(followUpStatus);
+  });
   return nextSelectedImageId;
 }
 
@@ -305,13 +368,16 @@ void applyAssetImagePreviewState({
   required Uint8List? previewBytes,
   required String actionSummary,
 }) {
-  setState(() => runtime.onPreviewBytesChanged(previewBytes));
-  setAssetImagesFollowUpStatus(
-    setState: setState,
-    runtime: runtime,
-    imagesResponse: imagesResponse,
-    selectedImageId: selectedImageId,
-    hasPreviewBytes: previewBytes != null,
+  final followUpStatus = buildAssetImagesWorkbenchFollowUp(
     actionSummary: actionSummary,
+    diagnosis: diagnoseAssetImagesWorkbench(
+      imagesResponse: imagesResponse,
+      selectedImageId: selectedImageId,
+      hasPreviewBytes: previewBytes != null,
+    ),
   );
+  setState(() {
+    runtime.onPreviewBytesChanged(previewBytes);
+    runtime.onStatusChanged(followUpStatus);
+  });
 }
