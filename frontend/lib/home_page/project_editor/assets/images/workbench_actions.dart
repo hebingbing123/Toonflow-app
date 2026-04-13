@@ -35,17 +35,19 @@ Future<void> selectAssetImagesWorkbenchImage({
   if (value == null) {
     return;
   }
-  setState(() {
-    scope.runtime.onStatusChanged('正在切换图片并刷新预览…');
-  });
-  syncAssetImagesSelectionState(
-    setState: setState,
-    runtime: scope.runtime,
+  final nextState = _prepareAssetImagesSelectionSyncState(
     imagesResponse: scope.runtime.imagesResponse(),
     selectedImageId: value,
     previewBytes: null,
-    patchControllers: scope.patchControllers,
   );
+  setState(() {
+    _applyAssetImagesSelectionSyncState(
+      runtime: scope.runtime,
+      patchControllers: scope.patchControllers,
+      state: nextState,
+    );
+    scope.runtime.onStatusChanged('正在切换图片并刷新预览…');
+  });
   await loadAssetImagePreview(
     scope: scope,
     assetNumericId: assetNumericId,
