@@ -66,6 +66,37 @@ void syncAssetImagesPatchFieldsFromSelected({
   });
 }
 
+void syncAssetImagesSelectionState({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required Uint8List? previewBytes,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+}) {
+  setState(() {
+    runtime.onSelectedImageIdChanged(selectedImageId);
+    runtime.onPreviewBytesChanged(previewBytes);
+  });
+  syncAssetImagesStatusLine(
+    setState: setState,
+    imagesResponse: imagesResponse,
+    selectedImageId: selectedImageId,
+    previewBytes: previewBytes,
+    onStatusChanged: runtime.onStatusChanged,
+  );
+  syncAssetImagesPatchFieldsFromSelected(
+    setState: setState,
+    imagesResponse: imagesResponse,
+    selectedImageId: selectedImageId,
+    patchFilePathCtrl: patchFilePathCtrl,
+    patchStateCtrl: patchStateCtrl,
+    patchSortCtrl: patchSortCtrl,
+  );
+}
+
 int? parsePositiveWorkbenchInt(String raw) {
   if (raw.trim().isEmpty) return null;
   final parsed = int.tryParse(raw.trim());

@@ -51,21 +51,14 @@ Future<void> selectAssetImagesWorkbenchImage({
     return;
   }
   setState(() {
-    runtime.onSelectedImageIdChanged(value);
-    runtime.onPreviewBytesChanged(null);
     runtime.onStatusChanged('正在切换图片并刷新预览…');
   });
-  syncAssetImagesStatusLine(
+  syncAssetImagesSelectionState(
     setState: setState,
+    runtime: runtime,
     imagesResponse: runtime.imagesResponse(),
     selectedImageId: value,
     previewBytes: null,
-    onStatusChanged: runtime.onStatusChanged,
-  );
-  syncAssetImagesPatchFieldsFromSelected(
-    setState: setState,
-    imagesResponse: runtime.imagesResponse(),
-    selectedImageId: value,
     patchFilePathCtrl: patchFilePathCtrl,
     patchStateCtrl: patchStateCtrl,
     patchSortCtrl: patchSortCtrl,

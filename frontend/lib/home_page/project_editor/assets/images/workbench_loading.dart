@@ -109,29 +109,29 @@ Future<void> reloadAssetImages({
       response,
       preferredImageId: runtime.currentSelectedImageId,
     );
+    setState(() => runtime.onImagesResponseChanged(response));
+    syncAssetImagesSelectionState(
+      setState: setState,
+      runtime: runtime,
+      imagesResponse: runtime.imagesResponse(),
+      selectedImageId: nextSelectedImageId,
+      previewBytes: null,
+      patchFilePathCtrl: patchFilePathCtrl,
+      patchStateCtrl: patchStateCtrl,
+      patchSortCtrl: patchSortCtrl,
+    );
     setState(() {
-      runtime.onImagesResponseChanged(response);
-      runtime.onSelectedImageIdChanged(nextSelectedImageId);
-      runtime.onPreviewBytesChanged(null);
       runtime.onStatusChanged(
         buildAssetImagesWorkbenchFollowUp(
           actionSummary: '已同步当前资产的图片列表。',
           diagnosis: diagnoseAssetImagesWorkbench(
-            imagesResponse: response,
+            imagesResponse: runtime.imagesResponse(),
             selectedImageId: nextSelectedImageId,
             hasPreviewBytes: false,
           ),
         ),
       );
     });
-    syncAssetImagesPatchFieldsFromSelected(
-      setState: setState,
-      imagesResponse: response,
-      selectedImageId: nextSelectedImageId,
-      patchFilePathCtrl: patchFilePathCtrl,
-      patchStateCtrl: patchStateCtrl,
-      patchSortCtrl: patchSortCtrl,
-    );
     await loadAssetImagePreview(
       token: token,
       projectId: projectId,
