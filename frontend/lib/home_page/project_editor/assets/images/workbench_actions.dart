@@ -1,33 +1,5 @@
 part of '../../../../home_page.dart';
 
-void scheduleInitialAssetImagesLoad({
-  required BuildContext dialogCtx,
-  required String token,
-  required String projectId,
-  required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
-  required StateSetter setState,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
-}) {
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (!dialogCtx.mounted) {
-      return;
-    }
-    await reloadAssetImages(
-      token: token,
-      projectId: projectId,
-      assetNumericId: assetNumericId,
-      runtime: runtime,
-      setState: setState,
-      patchFilePathCtrl: patchFilePathCtrl,
-      patchStateCtrl: patchStateCtrl,
-      patchSortCtrl: patchSortCtrl,
-    );
-  });
-}
-
 Future<void> changeAssetImagesWorkbenchAsset({
   required int? value,
   required String token,
