@@ -26,6 +26,27 @@ class _SelectedAssetImageMutationPlan {
   final Future<void> Function(AssetImageRow image) request;
 }
 
+const _createAssetImageRequestPlan = _AssetImageMutationRequestPlan(
+  successSummary: '已新增资产图片。',
+  failureSummary: '新增资产图片失败。',
+  recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
+  fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
+);
+
+const _patchAssetImageRequestPlan = _AssetImageMutationRequestPlan(
+  successSummary: '已更新当前图片。',
+  failureSummary: '更新当前图片失败。',
+  recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+  fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
+);
+
+const _deleteAssetImageRequestPlan = _AssetImageMutationRequestPlan(
+  successSummary: '已删除当前图片。',
+  failureSummary: '删除当前图片失败。',
+  recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+  fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
+);
+
 Future<void> _runAssetImageMutation({
   required StateSetter setState,
   required BuildContext ctx,
@@ -220,12 +241,7 @@ Future<void> createAssetImage({
     scope: scope,
     assetNumericId: assetNumericId,
     setState: setState,
-    plan: const _AssetImageMutationRequestPlan(
-      successSummary: '已新增资产图片。',
-      failureSummary: '新增资产图片失败。',
-      recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
-      fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
-    ),
+    plan: _createAssetImageRequestPlan,
     request: () => createProjectAssetImageForProject(
       scope.token,
       scope.projectId,
@@ -260,13 +276,7 @@ Future<void> patchAssetImage({
     setState: setState,
     plan: _SelectedAssetImageMutationPlan(
       missingSelectionNotice: '请先选择要编辑的图片',
-      requestPlan: const _AssetImageMutationRequestPlan(
-        successSummary: '已更新当前图片。',
-        failureSummary: '更新当前图片失败。',
-        recommendedAction:
-            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-        fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
-      ),
+      requestPlan: _patchAssetImageRequestPlan,
       request: (image) => patchProjectAssetImageByProjectIds(
           scope.token,
           scope.projectId,
@@ -293,13 +303,7 @@ Future<void> deleteAssetImage({
     setState: setState,
     plan: _SelectedAssetImageMutationPlan(
       missingSelectionNotice: '请先选择要删除的图片',
-      requestPlan: const _AssetImageMutationRequestPlan(
-        successSummary: '已删除当前图片。',
-        failureSummary: '删除当前图片失败。',
-        recommendedAction:
-            AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-        fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
-      ),
+      requestPlan: _deleteAssetImageRequestPlan,
       request: (image) => deleteProjectAssetImageByProjectIds(
           scope.token,
           scope.projectId,
