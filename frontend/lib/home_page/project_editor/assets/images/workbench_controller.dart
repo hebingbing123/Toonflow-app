@@ -29,6 +29,21 @@ class AssetImagesWorkbenchController {
   final ValueChanged<bool> onBusyMutationChanged;
   final Future<void> Function() reloadAssetsAndStats;
 
+  AssetImagesWorkbenchScope get _scope => AssetImagesWorkbenchScope(
+    token: token,
+    projectId: projectId,
+    runtime: runtime,
+    createControllers: createControllers,
+    patchControllers: patchControllers,
+    mutation: AssetImagesWorkbenchMutationContext(
+      ctx: ctx,
+      setDialogState: setDialogState,
+      assetsBusy: assetsBusy,
+      onBusyMutationChanged: onBusyMutationChanged,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+    ),
+  );
+
   void scheduleInitialLoad({
     required BuildContext dialogCtx,
     required StateSetter setState,
@@ -46,47 +61,31 @@ class AssetImagesWorkbenchController {
     required StateSetter setState,
   }) => changeAssetImagesWorkbenchAsset(
     value: value,
-    token: token,
-    projectId: projectId,
+    scope: _scope,
     currentAssetNumericId: currentAssetNumericId(),
-    runtime: runtime,
     setState: setState,
     onAssetNumericIdChanged: onAssetNumericIdChanged,
-    patchControllers: patchControllers,
   );
 
-  Future<void> reloadImages(StateSetter setState) => reloadAssetImages(
-    token: token,
-    projectId: projectId,
-    assetNumericId: currentAssetNumericId(),
-    runtime: runtime,
-    setState: setState,
-    patchControllers: patchControllers,
-  );
+  Future<void> reloadImages(StateSetter setState) =>
+      reloadAssetImages(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        setState: setState,
+      );
 
   Future<void> loadPreview(StateSetter setState) => loadAssetImagePreview(
-    token: token,
-    projectId: projectId,
+    scope: _scope,
     assetNumericId: currentAssetNumericId(),
-    runtime: runtime,
     selectedImageId: runtime.currentSelectedImageId,
     setState: setState,
   );
 
   Future<void> runRecommendedAction(StateSetter setState) =>
       runAssetImagesRecommendedAction(
-        token: token,
-        projectId: projectId,
+        scope: _scope,
         assetNumericId: currentAssetNumericId(),
-        runtime: runtime,
         setState: setState,
-        createControllers: createControllers,
-        patchControllers: patchControllers,
-        ctx: ctx,
-        setDialogState: setDialogState,
-        assetsBusy: assetsBusy,
-        onBusyMutationChanged: onBusyMutationChanged,
-        reloadAssetsAndStats: reloadAssetsAndStats,
       );
 
   Future<void> selectImage({
@@ -94,60 +93,35 @@ class AssetImagesWorkbenchController {
     required StateSetter setState,
   }) => selectAssetImagesWorkbenchImage(
     value: value,
-    token: token,
-    projectId: projectId,
+    scope: _scope,
     assetNumericId: currentAssetNumericId(),
-    runtime: runtime,
     setState: setState,
-    patchControllers: patchControllers,
   );
 
-  Future<void> createImage(StateSetter setState) => createAssetImage(
-    token: token,
-    projectId: projectId,
-    assetNumericId: currentAssetNumericId(),
-    createControllers: createControllers,
-    setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
-    reloadAssetsAndStats: reloadAssetsAndStats,
-    runtime: runtime,
-    patchControllers: patchControllers,
-  );
+  Future<void> createImage(StateSetter setState) =>
+      createAssetImage(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        setState: setState,
+      );
 
-  Future<void> patchImage(StateSetter setState) => patchAssetImage(
-    token: token,
-    projectId: projectId,
-    assetNumericId: currentAssetNumericId(),
-    imagesResponse: runtime.imagesResponse(),
-    selectedImageId: runtime.currentSelectedImageId,
-    patchControllers: patchControllers,
-    setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
-    reloadAssetsAndStats: reloadAssetsAndStats,
-    runtime: runtime,
-  );
+  Future<void> patchImage(StateSetter setState) =>
+      patchAssetImage(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        imagesResponse: runtime.imagesResponse(),
+        selectedImageId: runtime.currentSelectedImageId,
+        setState: setState,
+      );
 
-  Future<void> deleteImage(StateSetter setState) => deleteAssetImage(
-    token: token,
-    projectId: projectId,
-    assetNumericId: currentAssetNumericId(),
-    imagesResponse: runtime.imagesResponse(),
-    selectedImageId: runtime.currentSelectedImageId,
-    setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
-    reloadAssetsAndStats: reloadAssetsAndStats,
-    runtime: runtime,
-    patchControllers: patchControllers,
-  );
+  Future<void> deleteImage(StateSetter setState) =>
+      deleteAssetImage(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        imagesResponse: runtime.imagesResponse(),
+        selectedImageId: runtime.currentSelectedImageId,
+        setState: setState,
+      );
 
   AssetImagesWorkbenchDialogCallbacks buildDialogCallbacks({
     required StateSetter setState,

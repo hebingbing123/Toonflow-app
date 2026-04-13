@@ -45,3 +45,37 @@ class AssetImagesWorkbenchRuntime {
     onStatusChanged(statusLine);
   }
 }
+
+class AssetImagesWorkbenchMutationContext {
+  const AssetImagesWorkbenchMutationContext({
+    required this.ctx,
+    required this.setDialogState,
+    required this.assetsBusy,
+    required this.onBusyMutationChanged,
+    required this.reloadAssetsAndStats,
+  });
+
+  final BuildContext ctx;
+  final StateSetter setDialogState;
+  final List<bool> assetsBusy;
+  final ValueChanged<bool> onBusyMutationChanged;
+  final Future<void> Function() reloadAssetsAndStats;
+}
+
+class AssetImagesWorkbenchScope {
+  const AssetImagesWorkbenchScope({
+    required this.token,
+    required this.projectId,
+    required this.runtime,
+    required this.createControllers,
+    required this.patchControllers,
+    required this.mutation,
+  });
+
+  final String token;
+  final String projectId;
+  final AssetImagesWorkbenchRuntime runtime;
+  final AssetImagesWorkbenchFormControllers createControllers;
+  final AssetImagesWorkbenchFormControllers patchControllers;
+  final AssetImagesWorkbenchMutationContext mutation;
+}

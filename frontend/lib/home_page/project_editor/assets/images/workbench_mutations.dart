@@ -21,42 +21,31 @@ Future<void> _runAssetImageMutation({
 }
 
 Future<void> _finishAssetImageMutation({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required Future<void> Function() reloadAssetsAndStats,
-  required AssetImagesWorkbenchFormControllers patchControllers,
   required String successSummary,
 }) async {
   await reloadAssetImages(
-    token: token,
-    projectId: projectId,
+    scope: scope,
     assetNumericId: assetNumericId,
-    runtime: runtime,
     setState: setState,
-    patchControllers: patchControllers,
   );
-  await reloadAssetsAndStats();
+  await scope.mutation.reloadAssetsAndStats();
   setState(() {
-    runtime.onStatusChanged(
+    scope.runtime.onStatusChanged(
       buildAssetImagesWorkbenchFollowUp(
         actionSummary: successSummary,
-        diagnosis: runtime.diagnose(),
+        diagnosis: scope.runtime.diagnose(),
       ),
     );
   });
 }
 
 Future<void> _runAssetImageMutationRequest({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required Future<void> Function() reloadAssetsAndStats,
-  required AssetImagesWorkbenchFormControllers patchControllers,
   required String successSummary,
   required String failureSummary,
   required AssetImagesWorkbenchRecommendedAction recommendedAction,
@@ -66,19 +55,15 @@ Future<void> _runAssetImageMutationRequest({
   try {
     await request();
     await _finishAssetImageMutation(
-      token: token,
-      projectId: projectId,
+      scope: scope,
       assetNumericId: assetNumericId,
-      runtime: runtime,
       setState: setState,
-      reloadAssetsAndStats: reloadAssetsAndStats,
-      patchControllers: patchControllers,
       successSummary: successSummary,
     );
   } on RustApiException catch (e) {
     _setAssetImageMutationFailure(
       setState: setState,
-      runtime: runtime,
+      runtime: scope.runtime,
       actionSummary: failureSummary,
       recommendedAction: recommendedAction,
       error: e,
@@ -153,46 +138,35 @@ String? _optionalWorkbenchText(TextEditingController controller) {
 }
 
 Future<void> createAssetImage({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchFormControllers createControllers,
   required StateSetter setState,
-  required BuildContext ctx,
-  required StateSetter setDialogState,
-  required List<bool> assetsBusy,
-  required ValueChanged<bool> onBusyMutationChanged,
-  required Future<void> Function() reloadAssetsAndStats,
-  required AssetImagesWorkbenchRuntime runtime,
-  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
-  final sort = parsePositiveWorkbenchInt(createControllers.sortCtrl.text);
-  if (createControllers.sortCtrl.text.trim().isNotEmpty && sort == null) {
-    setState(() => runtime.onStatusChanged('新增 sort_index 需为正整数'));
+  final createControllers = scope.createControllers;
+  if (createControllers.sortCtrl.text.trim().isNotEmpty &&
+      parsePositiveWorkbenchInt(createControllers.sortCtrl.text) == null) {
+    setState(() => scope.runtime.onStatusChanged('新增 sort_index 需为正整数'));
     return;
   }
+  final sort = parsePositiveWorkbenchInt(createControllers.sortCtrl.text);
   await _runAssetImageMutation(
     setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
+    ctx: scope.mutation.ctx,
+    setDialogState: scope.mutation.setDialogState,
+    assetsBusy: scope.mutation.assetsBusy,
+    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
     action: () async {
       await _runAssetImageMutationRequest(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        runtime: runtime,
         setState: setState,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        patchControllers: patchControllers,
         successSummary: '已新增资产图片。',
         failureSummary: '新增资产图片失败。',
         recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
         fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
         request: () => createProjectAssetImageForProject(
-          token,
-          projectId,
+          scope.token,
+          scope.projectId,
           assetNumericId,
           filePath: _optionalWorkbenchText(createControllers.filePathCtrl),
           state: _optionalWorkbenchText(createControllers.stateCtrl),
@@ -204,61 +178,49 @@ Future<void> createAssetImage({
 }
 
 Future<void> patchAssetImage({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required AssetImagesWorkbenchFormControllers patchControllers,
   required StateSetter setState,
-  required BuildContext ctx,
-  required StateSetter setDialogState,
-  required List<bool> assetsBusy,
-  required ValueChanged<bool> onBusyMutationChanged,
-  required Future<void> Function() reloadAssetsAndStats,
-  required AssetImagesWorkbenchRuntime runtime,
 }) async {
   final image = _requireSelectedAssetImage(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     setState: setState,
-    runtime: runtime,
+    runtime: scope.runtime,
     missingSelectionNotice: '请先选择要编辑的图片',
   );
   if (image == null) {
     return;
   }
   final body = _buildPatchAssetImageBody(
-    patchControllers: patchControllers,
+    patchControllers: scope.patchControllers,
     setState: setState,
-    runtime: runtime,
+    runtime: scope.runtime,
   );
   if (body == null) {
     return;
   }
   await _runAssetImageMutation(
     setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
+    ctx: scope.mutation.ctx,
+    setDialogState: scope.mutation.setDialogState,
+    assetsBusy: scope.mutation.assetsBusy,
+    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
     action: () async {
       await _runAssetImageMutationRequest(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        runtime: runtime,
         setState: setState,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        patchControllers: patchControllers,
         successSummary: '已更新当前图片。',
         failureSummary: '更新当前图片失败。',
         recommendedAction:
             AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
         fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
         request: () => patchProjectAssetImageByProjectIds(
-          token,
-          projectId,
+          scope.token,
+          scope.projectId,
           assetNumericId,
           image.id,
           body,
@@ -269,25 +231,17 @@ Future<void> patchAssetImage({
 }
 
 Future<void> deleteAssetImage({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required StateSetter setState,
-  required BuildContext ctx,
-  required StateSetter setDialogState,
-  required List<bool> assetsBusy,
-  required ValueChanged<bool> onBusyMutationChanged,
-  required Future<void> Function() reloadAssetsAndStats,
-  required AssetImagesWorkbenchRuntime runtime,
-  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   final image = _requireSelectedAssetImage(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     setState: setState,
-    runtime: runtime,
+    runtime: scope.runtime,
     missingSelectionNotice: '请先选择要删除的图片',
   );
   if (image == null) {
@@ -295,27 +249,23 @@ Future<void> deleteAssetImage({
   }
   await _runAssetImageMutation(
     setState: setState,
-    ctx: ctx,
-    setDialogState: setDialogState,
-    assetsBusy: assetsBusy,
-    onBusyMutationChanged: onBusyMutationChanged,
+    ctx: scope.mutation.ctx,
+    setDialogState: scope.mutation.setDialogState,
+    assetsBusy: scope.mutation.assetsBusy,
+    onBusyMutationChanged: scope.mutation.onBusyMutationChanged,
     action: () async {
       await _runAssetImageMutationRequest(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        runtime: runtime,
         setState: setState,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        patchControllers: patchControllers,
         successSummary: '已删除当前图片。',
         failureSummary: '删除当前图片失败。',
         recommendedAction:
             AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
         fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
         request: () => deleteProjectAssetImageByProjectIds(
-          token,
-          projectId,
+          scope.token,
+          scope.projectId,
           assetNumericId,
           image.id,
         ),

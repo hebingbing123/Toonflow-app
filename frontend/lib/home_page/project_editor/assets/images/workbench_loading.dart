@@ -21,22 +21,20 @@ void _setAssetImagesReloadFailure({
 }
 
 Future<void> loadAssetImagePreview({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
   required String? selectedImageId,
   required StateSetter setState,
 }) async {
   final image = selectedAssetImageRow(
-    runtime.imagesResponse(),
+    scope.runtime.imagesResponse(),
     selectedImageId: selectedImageId,
   );
   if (image == null) {
     applyAssetImagePreviewState(
       setState: setState,
-      runtime: runtime,
-      imagesResponse: runtime.imagesResponse(),
+      runtime: scope.runtime,
+      imagesResponse: scope.runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       previewBytes: null,
       actionSummary: '当前没有可预览的图片，已清空预览内容。',
@@ -44,27 +42,27 @@ Future<void> loadAssetImagePreview({
     return;
   }
   setState(() {
-    runtime.onPreviewLoadingChanged(true);
-    runtime.onPreviewBytesChanged(null);
+    scope.runtime.onPreviewLoadingChanged(true);
+    scope.runtime.onPreviewBytesChanged(null);
   });
   try {
     final bytes = await fetchProjectAssetImageFileByProjectIds(
-      token,
-      projectId,
+      scope.token,
+      scope.projectId,
       assetNumericId,
       image.id,
     );
     applyAssetImagePreviewState(
       setState: setState,
-      runtime: runtime,
-      imagesResponse: runtime.imagesResponse(),
+      runtime: scope.runtime,
+      imagesResponse: scope.runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       previewBytes: bytes,
       actionSummary: '已读取当前图片预览。',
     );
   } on RustApiException catch (e) {
     setState(() {
-      runtime.onStatusChanged(
+      scope.runtime.onStatusChanged(
         buildAssetImagesWorkbenchFailureNotice(
           actionSummary: '读取当前图片预览失败。',
           recommendedAction:
@@ -75,120 +73,84 @@ Future<void> loadAssetImagePreview({
       );
     });
   } finally {
-    setState(() => runtime.onPreviewLoadingChanged(false));
+    setState(() => scope.runtime.onPreviewLoadingChanged(false));
   }
 }
 
 Future<void> reloadAssetImages({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   setState(() {
-    runtime.onListLoadingChanged(true);
-    runtime.onStatusChanged(null);
+    scope.runtime.onListLoadingChanged(true);
+    scope.runtime.onStatusChanged(null);
   });
   try {
     final response = await fetchProjectAssetImagesByProjectIds(
-      token,
-      projectId,
+      scope.token,
+      scope.projectId,
       assetNumericId,
     );
     final nextSelectedImageId = applyReloadedAssetImagesState(
       setState: setState,
-      runtime: runtime,
+      runtime: scope.runtime,
       response: response,
-      patchControllers: patchControllers,
+      patchControllers: scope.patchControllers,
     );
     await loadAssetImagePreview(
-      token: token,
-      projectId: projectId,
+      scope: scope,
       assetNumericId: assetNumericId,
-      runtime: runtime,
       selectedImageId: nextSelectedImageId,
       setState: setState,
     );
   } catch (e) {
     _setAssetImagesReloadFailure(
       setState: setState,
-      runtime: runtime,
+      runtime: scope.runtime,
       error: e,
     );
   } finally {
-    setState(() => runtime.onListLoadingChanged(false));
+    setState(() => scope.runtime.onListLoadingChanged(false));
   }
 }
 
 Future<void> runAssetImagesRecommendedAction({
-  required String token,
-  required String projectId,
+  required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
-  required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required AssetImagesWorkbenchFormControllers createControllers,
-  required AssetImagesWorkbenchFormControllers patchControllers,
-  required BuildContext ctx,
-  required StateSetter setDialogState,
-  required List<bool> assetsBusy,
-  required ValueChanged<bool> onBusyMutationChanged,
-  required Future<void> Function() reloadAssetsAndStats,
 }) async {
-  final diagnosis = runtime.diagnose();
+  final diagnosis = scope.runtime.diagnose();
   switch (diagnosis.recommendedAction) {
     case AssetImagesWorkbenchRecommendedAction.loadImages:
       await reloadAssetImages(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        runtime: runtime,
         setState: setState,
-        patchControllers: patchControllers,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.createImage:
       await createAssetImage(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        createControllers: createControllers,
         setState: setState,
-        ctx: ctx,
-        setDialogState: setDialogState,
-        assetsBusy: assetsBusy,
-        onBusyMutationChanged: onBusyMutationChanged,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        runtime: runtime,
-        patchControllers: patchControllers,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.previewSelectedImage:
       await loadAssetImagePreview(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        runtime: runtime,
-        selectedImageId: runtime.currentSelectedImageId,
+        selectedImageId: scope.runtime.currentSelectedImageId,
         setState: setState,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.updateSelectedImage:
       await patchAssetImage(
-        token: token,
-        projectId: projectId,
+        scope: scope,
         assetNumericId: assetNumericId,
-        imagesResponse: runtime.imagesResponse(),
-        selectedImageId: runtime.currentSelectedImageId,
-        patchControllers: patchControllers,
+        imagesResponse: scope.runtime.imagesResponse(),
+        selectedImageId: scope.runtime.currentSelectedImageId,
         setState: setState,
-        ctx: ctx,
-        setDialogState: setDialogState,
-        assetsBusy: assetsBusy,
-        onBusyMutationChanged: onBusyMutationChanged,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        runtime: runtime,
       );
       break;
   }
