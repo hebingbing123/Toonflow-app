@@ -213,6 +213,42 @@ Map<String, dynamic>? _buildPatchAssetImageBody({
   return draft.body;
 }
 
+_SelectedAssetImageMutationPlan _buildPatchAssetImageMutationPlan({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+  required Map<String, dynamic> body,
+}) {
+  return _SelectedAssetImageMutationPlan(
+    missingSelectionNotice: '请先选择要编辑的图片',
+    requestPlan: _patchAssetImageRequestPlan,
+    request: (image) => patchProjectAssetImageByProjectIds(
+      token,
+      projectId,
+      assetNumericId,
+      image.id,
+      body,
+    ),
+  );
+}
+
+_SelectedAssetImageMutationPlan _buildDeleteAssetImageMutationPlan({
+  required String token,
+  required String projectId,
+  required int assetNumericId,
+}) {
+  return _SelectedAssetImageMutationPlan(
+    missingSelectionNotice: '请先选择要删除的图片',
+    requestPlan: _deleteAssetImageRequestPlan,
+    request: (image) => deleteProjectAssetImageByProjectIds(
+      token,
+      projectId,
+      assetNumericId,
+      image.id,
+    ),
+  );
+}
+
 Future<void> _runSelectedAssetImageMutation({
   required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
@@ -295,16 +331,11 @@ Future<void> patchAssetImage({
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     setState: setState,
-    plan: _SelectedAssetImageMutationPlan(
-      missingSelectionNotice: '请先选择要编辑的图片',
-      requestPlan: _patchAssetImageRequestPlan,
-      request: (image) => patchProjectAssetImageByProjectIds(
-          scope.token,
-          scope.projectId,
-          assetNumericId,
-          image.id,
-          body,
-        ),
+    plan: _buildPatchAssetImageMutationPlan(
+      token: scope.token,
+      projectId: scope.projectId,
+      assetNumericId: assetNumericId,
+      body: body,
     ),
   );
 }
@@ -322,15 +353,10 @@ Future<void> deleteAssetImage({
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     setState: setState,
-    plan: _SelectedAssetImageMutationPlan(
-      missingSelectionNotice: '请先选择要删除的图片',
-      requestPlan: _deleteAssetImageRequestPlan,
-      request: (image) => deleteProjectAssetImageByProjectIds(
-          scope.token,
-          scope.projectId,
-          assetNumericId,
-          image.id,
-        ),
+    plan: _buildDeleteAssetImageMutationPlan(
+      token: scope.token,
+      projectId: scope.projectId,
+      assetNumericId: assetNumericId,
     ),
   );
 }
