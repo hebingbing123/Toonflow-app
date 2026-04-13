@@ -23,64 +23,16 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
         : summarizeProjectAssetRows(visibleAssets);
     bool localBusy = false;
 
-    Future<void> refreshWorkbench(StateSetter setLocalState) async {
-      await reloadAssetsAndStats();
-      final refreshed = assetsRef[0]?.items ?? const <AssetRow>[];
-      setLocalState(() {
-        selectedAssetNumericId = chooseInitialAssetNumericId(
-          refreshed,
-          preferredNumericId: selectedAssetNumericId,
-        );
-        statusLine = refreshed.isEmpty
-            ? '当前项目还没有资产，可直接在这里创建。'
-            : summarizeProjectAssetRows(refreshed);
-      });
-    }
-
-    Future<void> runAction(
-      StateSetter setLocalState,
-      Future<void> Function() action,
-    ) async {
-      setLocalState(() => localBusy = true);
-      try {
-        await action();
-        if (ctx.mounted) {
-          await refreshWorkbench(setLocalState);
-        }
-      } finally {
-        if (ctx.mounted) {
-          setLocalState(() => localBusy = false);
-        }
-      }
-    }
-
-    Future<void> openChildWorkbench(
-      BuildContext dialogCtx,
-      StateSetter setLocalState,
-      Future<void> Function() action,
-    ) async {
-      await action();
-      if (!dialogCtx.mounted || !ctx.mounted) {
-        return;
-      }
-      await refreshWorkbench(setLocalState);
-    }
-
     await showDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (dialogCtx, setLocalState) {
             final assets = assetsRef[0]?.items ?? const <AssetRow>[];
-            AssetRow? selectedAsset;
-            if (selectedAssetNumericId != null) {
-              for (final row in assets) {
-                if (row.numericId == selectedAssetNumericId) {
-                  selectedAsset = row;
-                  break;
-                }
-              }
-            }
+            final selectedAsset = findAssetByNumericId(
+              assets,
+              selectedAssetNumericId,
+            );
             final scopedAssets = assetsFilterScriptNumericId[0] == null
                 ? assets
                 : (assetsForScriptRef[0]?.items ?? const <AssetRow>[]);
@@ -107,8 +59,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                       setLocalState(() => selectedScriptNumericId = value);
                     },
               onCreate: () => runAction(
-                setLocalState,
-                () => _openCreateAssetDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openCreateAssetDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -118,8 +81,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onEdit: () => runAction(
-                setLocalState,
-                () => _openEditAssetDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openEditAssetDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -130,8 +104,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onDelete: () => runAction(
-                setLocalState,
-                () => _openDeleteAssetDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openDeleteAssetDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -142,8 +127,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onFilter: () => runAction(
-                setLocalState,
-                () => _openAssetFilterDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openAssetFilterDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -156,8 +152,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onLink: () => runAction(
-                setLocalState,
-                () => _openScriptAssetLinkDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openScriptAssetLinkDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -170,8 +177,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onUnlink: () => runAction(
-                setLocalState,
-                () => _openScriptAssetLinkDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openScriptAssetLinkDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -184,8 +202,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onUploadEditImage: () => runAction(
-                setLocalState,
-                () => _openEditImageUploadDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openEditImageUploadDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -195,8 +224,19 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onUploadClip: () => runAction(
-                setLocalState,
-                () => _openClipUploadDialog(
+                ctx: ctx,
+                setLocalState: setLocalState,
+                onBusyChanged: (busy) => localBusy = busy,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openClipUploadDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -206,9 +246,18 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onOpenImagesWorkbench: () => openChildWorkbench(
-                dialogCtx,
-                setLocalState,
-                () => _openAssetImagesWorkbenchDialog(
+                parentCtx: ctx,
+                dialogCtx: dialogCtx,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openAssetImagesWorkbenchDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -220,9 +269,18 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onOpenGenerationWorkbench: () => openChildWorkbench(
-                dialogCtx,
-                setLocalState,
-                () => _openAssetGenerationWorkbenchDialog(
+                parentCtx: ctx,
+                dialogCtx: dialogCtx,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openAssetGenerationWorkbenchDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -237,9 +295,18 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
                 ),
               ),
               onOpenHistoryWorkbench: () => openChildWorkbench(
-                dialogCtx,
-                setLocalState,
-                () => _openCornerScapeWorkbenchDialog(
+                parentCtx: ctx,
+                dialogCtx: dialogCtx,
+                refreshWorkbench: () => refreshProjectAssetsWorkbench(
+                  reloadAssetsAndStats: reloadAssetsAndStats,
+                  assetsRef: assetsRef,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  onSelectedAssetNumericIdChanged: (value) =>
+                      selectedAssetNumericId = value,
+                  onStatusLineChanged: (line) => statusLine = line,
+                  setLocalState: setLocalState,
+                ),
+                action: () => _openCornerScapeWorkbenchDialog(
                   ctx: dialogCtx,
                   setDialogState: setDialogState,
                   token: token,
@@ -250,7 +317,15 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
               ),
               onRefresh: localBusy
                   ? null
-                  : () => refreshWorkbench(setLocalState),
+                  : () => refreshProjectAssetsWorkbench(
+                      reloadAssetsAndStats: reloadAssetsAndStats,
+                      assetsRef: assetsRef,
+                      selectedAssetNumericId: selectedAssetNumericId,
+                      onSelectedAssetNumericIdChanged: (value) =>
+                          selectedAssetNumericId = value,
+                      onStatusLineChanged: (line) => statusLine = line,
+                      setLocalState: setLocalState,
+                    ),
               onClose: localBusy ? null : () => Navigator.of(dialogCtx).pop(),
             );
           },
