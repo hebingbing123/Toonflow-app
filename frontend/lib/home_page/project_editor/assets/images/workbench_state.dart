@@ -97,6 +97,82 @@ void syncAssetImagesSelectionState({
   );
 }
 
+void setAssetImagesFollowUpStatus({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required bool hasPreviewBytes,
+  required String actionSummary,
+}) {
+  final diagnosis = diagnoseAssetImagesWorkbench(
+    imagesResponse: imagesResponse,
+    selectedImageId: selectedImageId,
+    hasPreviewBytes: hasPreviewBytes,
+  );
+  setState(() {
+    runtime.onStatusChanged(
+      buildAssetImagesWorkbenchFollowUp(
+        actionSummary: actionSummary,
+        diagnosis: diagnosis,
+      ),
+    );
+  });
+}
+
+String? applyReloadedAssetImagesState({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required ListAssetImagesResponse response,
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+}) {
+  final nextSelectedImageId = chooseInitialAssetImageId(
+    response,
+    preferredImageId: runtime.currentSelectedImageId,
+  );
+  setState(() => runtime.onImagesResponseChanged(response));
+  syncAssetImagesSelectionState(
+    setState: setState,
+    runtime: runtime,
+    imagesResponse: runtime.imagesResponse(),
+    selectedImageId: nextSelectedImageId,
+    previewBytes: null,
+    patchFilePathCtrl: patchFilePathCtrl,
+    patchStateCtrl: patchStateCtrl,
+    patchSortCtrl: patchSortCtrl,
+  );
+  setAssetImagesFollowUpStatus(
+    setState: setState,
+    runtime: runtime,
+    imagesResponse: runtime.imagesResponse(),
+    selectedImageId: nextSelectedImageId,
+    hasPreviewBytes: false,
+    actionSummary: '已同步当前资产的图片列表。',
+  );
+  return nextSelectedImageId;
+}
+
+void applyAssetImagePreviewState({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required Uint8List? previewBytes,
+  required String actionSummary,
+}) {
+  setState(() => runtime.onPreviewBytesChanged(previewBytes));
+  setAssetImagesFollowUpStatus(
+    setState: setState,
+    runtime: runtime,
+    imagesResponse: imagesResponse,
+    selectedImageId: selectedImageId,
+    hasPreviewBytes: previewBytes != null,
+    actionSummary: actionSummary,
+  );
+}
+
 int? parsePositiveWorkbenchInt(String raw) {
   if (raw.trim().isEmpty) return null;
   final parsed = int.tryParse(raw.trim());

@@ -33,13 +33,13 @@ Future<void> loadAssetImagePreview({
     selectedImageId: selectedImageId,
   );
   if (image == null) {
-    setState(() => runtime.onPreviewBytesChanged(null));
-    syncAssetImagesStatusLine(
+    applyAssetImagePreviewState(
       setState: setState,
+      runtime: runtime,
       imagesResponse: runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       previewBytes: null,
-      onStatusChanged: runtime.onStatusChanged,
+      actionSummary: '当前没有可预览的图片，已清空预览内容。',
     );
     return;
   }
@@ -54,20 +54,14 @@ Future<void> loadAssetImagePreview({
       assetNumericId,
       image.id,
     );
-    setState(() => runtime.onPreviewBytesChanged(bytes));
-    final diagnosis = diagnoseAssetImagesWorkbench(
+    applyAssetImagePreviewState(
+      setState: setState,
+      runtime: runtime,
       imagesResponse: runtime.imagesResponse(),
       selectedImageId: selectedImageId,
-      hasPreviewBytes: true,
+      previewBytes: bytes,
+      actionSummary: '已读取当前图片预览。',
     );
-    setState(() {
-      runtime.onStatusChanged(
-        buildAssetImagesWorkbenchFollowUp(
-          actionSummary: '已读取当前图片预览。',
-          diagnosis: diagnosis,
-        ),
-      );
-    });
   } on RustApiException catch (e) {
     setState(() {
       runtime.onStatusChanged(
@@ -105,33 +99,14 @@ Future<void> reloadAssetImages({
       projectId,
       assetNumericId,
     );
-    final nextSelectedImageId = chooseInitialAssetImageId(
-      response,
-      preferredImageId: runtime.currentSelectedImageId,
-    );
-    setState(() => runtime.onImagesResponseChanged(response));
-    syncAssetImagesSelectionState(
+    final nextSelectedImageId = applyReloadedAssetImagesState(
       setState: setState,
       runtime: runtime,
-      imagesResponse: runtime.imagesResponse(),
-      selectedImageId: nextSelectedImageId,
-      previewBytes: null,
+      response: response,
       patchFilePathCtrl: patchFilePathCtrl,
       patchStateCtrl: patchStateCtrl,
       patchSortCtrl: patchSortCtrl,
     );
-    setState(() {
-      runtime.onStatusChanged(
-        buildAssetImagesWorkbenchFollowUp(
-          actionSummary: '已同步当前资产的图片列表。',
-          diagnosis: diagnoseAssetImagesWorkbench(
-            imagesResponse: runtime.imagesResponse(),
-            selectedImageId: nextSelectedImageId,
-            hasPreviewBytes: false,
-          ),
-        ),
-      );
-    });
     await loadAssetImagePreview(
       token: token,
       projectId: projectId,
