@@ -85,9 +85,7 @@ Future<void> reloadAssetImages({
   required int assetNumericId,
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   setState(() {
     runtime.onListLoadingChanged(true);
@@ -103,9 +101,7 @@ Future<void> reloadAssetImages({
       setState: setState,
       runtime: runtime,
       response: response,
-      patchFilePathCtrl: patchFilePathCtrl,
-      patchStateCtrl: patchStateCtrl,
-      patchSortCtrl: patchSortCtrl,
+      patchControllers: patchControllers,
     );
     await loadAssetImagePreview(
       token: token,
@@ -132,9 +128,7 @@ Future<void> runAssetImagesRecommendedAction({
   required int assetNumericId,
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
   required TextEditingController createFilePathCtrl,
   required TextEditingController createStateCtrl,
   required TextEditingController createSortCtrl,
@@ -153,9 +147,7 @@ Future<void> runAssetImagesRecommendedAction({
         assetNumericId: assetNumericId,
         runtime: runtime,
         setState: setState,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.createImage:
@@ -173,9 +165,7 @@ Future<void> runAssetImagesRecommendedAction({
         onBusyMutationChanged: onBusyMutationChanged,
         reloadAssetsAndStats: reloadAssetsAndStats,
         runtime: runtime,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
       );
       break;
     case AssetImagesWorkbenchRecommendedAction.previewSelectedImage:
@@ -195,9 +185,7 @@ Future<void> runAssetImagesRecommendedAction({
         assetNumericId: assetNumericId,
         imagesResponse: runtime.imagesResponse(),
         selectedImageId: runtime.currentSelectedImageId,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
         setState: setState,
         ctx: ctx,
         setDialogState: setDialogState,

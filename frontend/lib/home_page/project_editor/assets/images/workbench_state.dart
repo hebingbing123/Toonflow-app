@@ -1,5 +1,22 @@
 part of '../../../../home_page.dart';
 
+class AssetImagesWorkbenchFormControllers {
+  AssetImagesWorkbenchFormControllers()
+    : filePathCtrl = TextEditingController(),
+      stateCtrl = TextEditingController(),
+      sortCtrl = TextEditingController();
+
+  final TextEditingController filePathCtrl;
+  final TextEditingController stateCtrl;
+  final TextEditingController sortCtrl;
+
+  void dispose() {
+    filePathCtrl.dispose();
+    stateCtrl.dispose();
+    sortCtrl.dispose();
+  }
+}
+
 AssetImageRow? selectedAssetImageRow(
   ListAssetImagesResponse? imagesResponse, {
   required String? selectedImageId,
@@ -45,9 +62,7 @@ void syncAssetImagesPatchFieldsFromSelected({
   required StateSetter setState,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
   final image = selectedAssetImageRow(
     imagesResponse,
@@ -55,14 +70,14 @@ void syncAssetImagesPatchFieldsFromSelected({
   );
   setState(() {
     if (image == null) {
-      patchFilePathCtrl.text = '';
-      patchStateCtrl.text = '';
-      patchSortCtrl.text = '';
+      patchControllers.filePathCtrl.text = '';
+      patchControllers.stateCtrl.text = '';
+      patchControllers.sortCtrl.text = '';
       return;
     }
-    patchFilePathCtrl.text = image.filePath ?? '';
-    patchStateCtrl.text = image.state ?? '';
-    patchSortCtrl.text = image.sortIndex.toString();
+    patchControllers.filePathCtrl.text = image.filePath ?? '';
+    patchControllers.stateCtrl.text = image.state ?? '';
+    patchControllers.sortCtrl.text = image.sortIndex.toString();
   });
 }
 
@@ -72,9 +87,7 @@ void syncAssetImagesSelectionState({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required Uint8List? previewBytes,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
   setState(() {
     runtime.onSelectedImageIdChanged(selectedImageId);
@@ -91,9 +104,7 @@ void syncAssetImagesSelectionState({
     setState: setState,
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 }
 
@@ -124,9 +135,7 @@ String? applyReloadedAssetImagesState({
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required ListAssetImagesResponse response,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
   final nextSelectedImageId = chooseInitialAssetImageId(
     response,
@@ -139,9 +148,7 @@ String? applyReloadedAssetImagesState({
     imagesResponse: runtime.imagesResponse(),
     selectedImageId: nextSelectedImageId,
     previewBytes: null,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
   setAssetImagesFollowUpStatus(
     setState: setState,

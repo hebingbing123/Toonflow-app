@@ -8,9 +8,7 @@ Future<void> changeAssetImagesWorkbenchAsset({
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
   required ValueChanged<int> onAssetNumericIdChanged,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   if (value == null || value == currentAssetNumericId) {
     return;
@@ -30,9 +28,7 @@ Future<void> changeAssetImagesWorkbenchAsset({
     assetNumericId: value,
     runtime: runtime,
     setState: setState,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 }
 
@@ -43,9 +39,7 @@ Future<void> selectAssetImagesWorkbenchImage({
   required int assetNumericId,
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   if (value == null) {
     return;
@@ -59,9 +53,7 @@ Future<void> selectAssetImagesWorkbenchImage({
     imagesResponse: runtime.imagesResponse(),
     selectedImageId: value,
     previewBytes: null,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
   await loadAssetImagePreview(
     token: token,

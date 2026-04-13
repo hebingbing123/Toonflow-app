@@ -33,12 +33,8 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
     bool initialLoadTriggered = false;
     String? statusLine;
 
-    final createFilePathCtrl = TextEditingController();
-    final createStateCtrl = TextEditingController();
-    final createSortCtrl = TextEditingController();
-    final patchFilePathCtrl = TextEditingController();
-    final patchStateCtrl = TextEditingController();
-    final patchSortCtrl = TextEditingController();
+    final createControllers = AssetImagesWorkbenchFormControllers();
+    final patchControllers = AssetImagesWorkbenchFormControllers();
     final runtime = AssetImagesWorkbenchRuntime(
       imagesResponse: () => imagesResponse,
       selectedImageId: () => selectedImageId,
@@ -56,12 +52,8 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       runtime: runtime,
       currentAssetNumericId: () => selectedAssetNumericId,
       onAssetNumericIdChanged: (value) => selectedAssetNumericId = value,
-      createFilePathCtrl: createFilePathCtrl,
-      createStateCtrl: createStateCtrl,
-      createSortCtrl: createSortCtrl,
-      patchFilePathCtrl: patchFilePathCtrl,
-      patchStateCtrl: patchStateCtrl,
-      patchSortCtrl: patchSortCtrl,
+      createControllers: createControllers,
+      patchControllers: patchControllers,
       ctx: ctx,
       setDialogState: setDialogState,
       assetsBusy: assetsBusy,
@@ -102,12 +94,12 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 busyMutation: busyMutation,
                 statusLine: statusLine,
                 previewBytes: previewBytes,
-                createFilePathCtrl: createFilePathCtrl,
-                createStateCtrl: createStateCtrl,
-                createSortCtrl: createSortCtrl,
-                patchFilePathCtrl: patchFilePathCtrl,
-                patchStateCtrl: patchStateCtrl,
-                patchSortCtrl: patchSortCtrl,
+                createFilePathCtrl: createControllers.filePathCtrl,
+                createStateCtrl: createControllers.stateCtrl,
+                createSortCtrl: createControllers.sortCtrl,
+                patchFilePathCtrl: patchControllers.filePathCtrl,
+                patchStateCtrl: patchControllers.stateCtrl,
+                patchSortCtrl: patchControllers.sortCtrl,
                 onAssetChanged: (value) =>
                     controller.changeAsset(value: value, setState: setState),
                 onRecommendedAction: () =>
@@ -129,12 +121,8 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         },
       );
     } finally {
-      createFilePathCtrl.dispose();
-      createStateCtrl.dispose();
-      createSortCtrl.dispose();
-      patchFilePathCtrl.dispose();
-      patchStateCtrl.dispose();
-      patchSortCtrl.dispose();
+      createControllers.dispose();
+      patchControllers.dispose();
     }
   }
 }

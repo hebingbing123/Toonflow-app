@@ -27,9 +27,7 @@ Future<void> _finishAssetImageMutation({
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
   required Future<void> Function() reloadAssetsAndStats,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
   required String successSummary,
 }) async {
   await reloadAssetImages(
@@ -38,9 +36,7 @@ Future<void> _finishAssetImageMutation({
     assetNumericId: assetNumericId,
     runtime: runtime,
     setState: setState,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
   await reloadAssetsAndStats();
   setState(() {
@@ -60,9 +56,7 @@ Future<void> _runAssetImageMutationRequest({
   required AssetImagesWorkbenchRuntime runtime,
   required StateSetter setState,
   required Future<void> Function() reloadAssetsAndStats,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
   required String successSummary,
   required String failureSummary,
   required AssetImagesWorkbenchRecommendedAction recommendedAction,
@@ -78,9 +72,7 @@ Future<void> _runAssetImageMutationRequest({
       runtime: runtime,
       setState: setState,
       reloadAssetsAndStats: reloadAssetsAndStats,
-      patchFilePathCtrl: patchFilePathCtrl,
-      patchStateCtrl: patchStateCtrl,
-      patchSortCtrl: patchSortCtrl,
+      patchControllers: patchControllers,
       successSummary: successSummary,
     );
   } on RustApiException catch (e) {
@@ -134,17 +126,15 @@ AssetImageRow? _requireSelectedAssetImage({
 }
 
 Map<String, dynamic>? _buildPatchAssetImageBody({
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
 }) {
   final body = <String, dynamic>{
-    'file_path': _optionalWorkbenchText(patchFilePathCtrl),
-    'state': _optionalWorkbenchText(patchStateCtrl),
+    'file_path': _optionalWorkbenchText(patchControllers.filePathCtrl),
+    'state': _optionalWorkbenchText(patchControllers.stateCtrl),
   };
-  final sortRaw = patchSortCtrl.text.trim();
+  final sortRaw = patchControllers.sortCtrl.text.trim();
   if (sortRaw.isEmpty) {
     return body;
   }
@@ -176,9 +166,7 @@ Future<void> createAssetImage({
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
   required AssetImagesWorkbenchRuntime runtime,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   final sort = parsePositiveWorkbenchInt(createSortCtrl.text);
   if (createSortCtrl.text.trim().isNotEmpty && sort == null) {
@@ -199,9 +187,7 @@ Future<void> createAssetImage({
         runtime: runtime,
         setState: setState,
         reloadAssetsAndStats: reloadAssetsAndStats,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
         successSummary: '已新增资产图片。',
         failureSummary: '新增资产图片失败。',
         recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
@@ -225,9 +211,7 @@ Future<void> patchAssetImage({
   required int assetNumericId,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
   required StateSetter setState,
   required BuildContext ctx,
   required StateSetter setDialogState,
@@ -247,9 +231,7 @@ Future<void> patchAssetImage({
     return;
   }
   final body = _buildPatchAssetImageBody(
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
     setState: setState,
     runtime: runtime,
   );
@@ -270,9 +252,7 @@ Future<void> patchAssetImage({
         runtime: runtime,
         setState: setState,
         reloadAssetsAndStats: reloadAssetsAndStats,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
         successSummary: '已更新当前图片。',
         failureSummary: '更新当前图片失败。',
         recommendedAction:
@@ -303,9 +283,7 @@ Future<void> deleteAssetImage({
   required ValueChanged<bool> onBusyMutationChanged,
   required Future<void> Function() reloadAssetsAndStats,
   required AssetImagesWorkbenchRuntime runtime,
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers patchControllers,
 }) async {
   final image = _requireSelectedAssetImage(
     imagesResponse: imagesResponse,
@@ -331,9 +309,7 @@ Future<void> deleteAssetImage({
         runtime: runtime,
         setState: setState,
         reloadAssetsAndStats: reloadAssetsAndStats,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
+        patchControllers: patchControllers,
         successSummary: '已删除当前图片。',
         failureSummary: '删除当前图片失败。',
         recommendedAction:

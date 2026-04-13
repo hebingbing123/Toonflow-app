@@ -7,12 +7,8 @@ class AssetImagesWorkbenchController {
     required this.runtime,
     required this.currentAssetNumericId,
     required this.onAssetNumericIdChanged,
-    required this.createFilePathCtrl,
-    required this.createStateCtrl,
-    required this.createSortCtrl,
-    required this.patchFilePathCtrl,
-    required this.patchStateCtrl,
-    required this.patchSortCtrl,
+    required this.createControllers,
+    required this.patchControllers,
     required this.ctx,
     required this.setDialogState,
     required this.assetsBusy,
@@ -25,12 +21,8 @@ class AssetImagesWorkbenchController {
   final AssetImagesWorkbenchRuntime runtime;
   final int Function() currentAssetNumericId;
   final ValueChanged<int> onAssetNumericIdChanged;
-  final TextEditingController createFilePathCtrl;
-  final TextEditingController createStateCtrl;
-  final TextEditingController createSortCtrl;
-  final TextEditingController patchFilePathCtrl;
-  final TextEditingController patchStateCtrl;
-  final TextEditingController patchSortCtrl;
+  final AssetImagesWorkbenchFormControllers createControllers;
+  final AssetImagesWorkbenchFormControllers patchControllers;
   final BuildContext ctx;
   final StateSetter setDialogState;
   final List<bool> assetsBusy;
@@ -60,9 +52,7 @@ class AssetImagesWorkbenchController {
     runtime: runtime,
     setState: setState,
     onAssetNumericIdChanged: onAssetNumericIdChanged,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 
   Future<void> reloadImages(StateSetter setState) => reloadAssetImages(
@@ -71,9 +61,7 @@ class AssetImagesWorkbenchController {
     assetNumericId: currentAssetNumericId(),
     runtime: runtime,
     setState: setState,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 
   Future<void> loadPreview(StateSetter setState) => loadAssetImagePreview(
@@ -92,12 +80,10 @@ class AssetImagesWorkbenchController {
         assetNumericId: currentAssetNumericId(),
         runtime: runtime,
         setState: setState,
-        patchFilePathCtrl: patchFilePathCtrl,
-        patchStateCtrl: patchStateCtrl,
-        patchSortCtrl: patchSortCtrl,
-        createFilePathCtrl: createFilePathCtrl,
-        createStateCtrl: createStateCtrl,
-        createSortCtrl: createSortCtrl,
+        patchControllers: patchControllers,
+        createFilePathCtrl: createControllers.filePathCtrl,
+        createStateCtrl: createControllers.stateCtrl,
+        createSortCtrl: createControllers.sortCtrl,
         ctx: ctx,
         setDialogState: setDialogState,
         assetsBusy: assetsBusy,
@@ -115,18 +101,16 @@ class AssetImagesWorkbenchController {
     assetNumericId: currentAssetNumericId(),
     runtime: runtime,
     setState: setState,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 
   Future<void> createImage(StateSetter setState) => createAssetImage(
     token: token,
     projectId: projectId,
     assetNumericId: currentAssetNumericId(),
-    createFilePathCtrl: createFilePathCtrl,
-    createStateCtrl: createStateCtrl,
-    createSortCtrl: createSortCtrl,
+    createFilePathCtrl: createControllers.filePathCtrl,
+    createStateCtrl: createControllers.stateCtrl,
+    createSortCtrl: createControllers.sortCtrl,
     setState: setState,
     ctx: ctx,
     setDialogState: setDialogState,
@@ -134,9 +118,7 @@ class AssetImagesWorkbenchController {
     onBusyMutationChanged: onBusyMutationChanged,
     reloadAssetsAndStats: reloadAssetsAndStats,
     runtime: runtime,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 
   Future<void> patchImage(StateSetter setState) => patchAssetImage(
@@ -145,9 +127,7 @@ class AssetImagesWorkbenchController {
     assetNumericId: currentAssetNumericId(),
     imagesResponse: runtime.imagesResponse(),
     selectedImageId: runtime.currentSelectedImageId,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
     setState: setState,
     ctx: ctx,
     setDialogState: setDialogState,
@@ -170,8 +150,6 @@ class AssetImagesWorkbenchController {
     onBusyMutationChanged: onBusyMutationChanged,
     reloadAssetsAndStats: reloadAssetsAndStats,
     runtime: runtime,
-    patchFilePathCtrl: patchFilePathCtrl,
-    patchStateCtrl: patchStateCtrl,
-    patchSortCtrl: patchSortCtrl,
+    patchControllers: patchControllers,
   );
 }
