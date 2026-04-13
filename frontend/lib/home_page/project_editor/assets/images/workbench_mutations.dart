@@ -169,7 +169,6 @@ Future<void> deleteAssetImage({
   required int assetNumericId,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
-  required Uint8List? previewBytes,
   required StateSetter setState,
   required BuildContext ctx,
   required StateSetter setDialogState,

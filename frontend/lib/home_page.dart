@@ -49,6 +49,7 @@ part 'home_page/project_editor/assets/images/workbench_runtime.dart';
 part 'home_page/project_editor/assets/images/workbench_loading.dart';
 part 'home_page/project_editor/assets/images/workbench_mutations.dart';
 part 'home_page/project_editor/assets/images/workbench_actions.dart';
+part 'home_page/project_editor/assets/images/workbench_controller.dart';
 part 'home_page/project_editor/assets/images/workbench_state.dart';
 part 'home_page/project_editor/assets/images/workbench_dialog.dart';
 part 'home_page/project_editor/assets/workbench/dialog.dart';
