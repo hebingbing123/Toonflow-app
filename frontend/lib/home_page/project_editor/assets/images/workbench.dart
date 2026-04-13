@@ -56,9 +56,6 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       runtime: runtime,
       currentAssetNumericId: () => selectedAssetNumericId,
       onAssetNumericIdChanged: (value) => selectedAssetNumericId = value,
-      currentImagesResponse: () => imagesResponse,
-      currentSelectedImageId: () => selectedImageId,
-      currentPreviewBytes: () => previewBytes,
       createFilePathCtrl: createFilePathCtrl,
       createStateCtrl: createStateCtrl,
       createSortCtrl: createSortCtrl,
@@ -80,16 +77,9 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
             builder: (dialogCtx, setState) {
               if (!initialLoadTriggered) {
                 initialLoadTriggered = true;
-                scheduleInitialAssetImagesLoad(
+                controller.scheduleInitialLoad(
                   dialogCtx: dialogCtx,
-                  token: token,
-                  projectId: p.id,
-                  assetNumericId: selectedAssetNumericId,
-                  runtime: runtime,
                   setState: setState,
-                  patchFilePathCtrl: patchFilePathCtrl,
-                  patchStateCtrl: patchStateCtrl,
-                  patchSortCtrl: patchSortCtrl,
                 );
               }
               final imageItems =
@@ -126,8 +116,10 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 onLoadPreview: () => controller.loadPreview(setState),
                 onImageChanged: imageItems.isEmpty
                     ? null
-                    : (value) =>
-                        controller.selectImage(value: value, setState: setState),
+                    : (value) => controller.selectImage(
+                        value: value,
+                        setState: setState,
+                      ),
                 onCreateImage: () => controller.createImage(setState),
                 onPatchImage: () => controller.patchImage(setState),
                 onDeleteImage: () => controller.deleteImage(setState),

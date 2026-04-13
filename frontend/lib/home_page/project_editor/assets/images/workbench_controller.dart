@@ -7,9 +7,6 @@ class AssetImagesWorkbenchController {
     required this.runtime,
     required this.currentAssetNumericId,
     required this.onAssetNumericIdChanged,
-    required this.currentImagesResponse,
-    required this.currentSelectedImageId,
-    required this.currentPreviewBytes,
     required this.createFilePathCtrl,
     required this.createStateCtrl,
     required this.createSortCtrl,
@@ -28,9 +25,6 @@ class AssetImagesWorkbenchController {
   final AssetImagesWorkbenchRuntime runtime;
   final int Function() currentAssetNumericId;
   final ValueChanged<int> onAssetNumericIdChanged;
-  final ListAssetImagesResponse? Function() currentImagesResponse;
-  final String? Function() currentSelectedImageId;
-  final Uint8List? Function() currentPreviewBytes;
   final TextEditingController createFilePathCtrl;
   final TextEditingController createStateCtrl;
   final TextEditingController createSortCtrl;
@@ -42,6 +36,18 @@ class AssetImagesWorkbenchController {
   final List<bool> assetsBusy;
   final ValueChanged<bool> onBusyMutationChanged;
   final Future<void> Function() reloadAssetsAndStats;
+
+  void scheduleInitialLoad({
+    required BuildContext dialogCtx,
+    required StateSetter setState,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!dialogCtx.mounted) {
+        return;
+      }
+      await reloadImages(setState);
+    });
+  }
 
   Future<void> changeAsset({
     required int? value,
@@ -75,7 +81,7 @@ class AssetImagesWorkbenchController {
     projectId: projectId,
     assetNumericId: currentAssetNumericId(),
     runtime: runtime,
-    selectedImageId: currentSelectedImageId(),
+    selectedImageId: runtime.currentSelectedImageId,
     setState: setState,
   );
 
@@ -137,8 +143,8 @@ class AssetImagesWorkbenchController {
     token: token,
     projectId: projectId,
     assetNumericId: currentAssetNumericId(),
-    imagesResponse: currentImagesResponse(),
-    selectedImageId: currentSelectedImageId(),
+    imagesResponse: runtime.imagesResponse(),
+    selectedImageId: runtime.currentSelectedImageId,
     patchFilePathCtrl: patchFilePathCtrl,
     patchStateCtrl: patchStateCtrl,
     patchSortCtrl: patchSortCtrl,
@@ -155,8 +161,8 @@ class AssetImagesWorkbenchController {
     token: token,
     projectId: projectId,
     assetNumericId: currentAssetNumericId(),
-    imagesResponse: currentImagesResponse(),
-    selectedImageId: currentSelectedImageId(),
+    imagesResponse: runtime.imagesResponse(),
+    selectedImageId: runtime.currentSelectedImageId,
     setState: setState,
     ctx: ctx,
     setDialogState: setDialogState,
