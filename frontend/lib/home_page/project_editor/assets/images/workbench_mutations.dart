@@ -26,6 +26,16 @@ class _SelectedAssetImageMutationPlan {
   final Future<void> Function(AssetImageRow image) request;
 }
 
+class _AssetImageMutationPlan {
+  const _AssetImageMutationPlan({
+    required this.requestPlan,
+    required this.request,
+  });
+
+  final _AssetImageMutationRequestPlan requestPlan;
+  final Future<void> Function() request;
+}
+
 const _createAssetImageRequestPlan = _AssetImageMutationRequestPlan(
   successSummary: '已新增资产图片。',
   failureSummary: '新增资产图片失败。',
@@ -213,6 +223,37 @@ Map<String, dynamic>? _buildPatchAssetImageBody({
   return draft.body;
 }
 
+_AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
+  required AssetImagesWorkbenchScope scope,
+  required int assetNumericId,
+  required StateSetter setState,
+}) {
+  final draft = _resolveAssetImageDraft(
+    setState: setState,
+    runtime: scope.runtime,
+    invalidDraftNotice: '新增 sort_index 需为正整数',
+    draft: parseAssetImageCreateDraft(
+      filePath: scope.createControllers.filePathCtrl.text,
+      state: scope.createControllers.stateCtrl.text,
+      sortIndex: scope.createControllers.sortCtrl.text,
+    ),
+  );
+  if (draft == null) {
+    return null;
+  }
+  return _AssetImageMutationPlan(
+    requestPlan: _createAssetImageRequestPlan,
+    request: () => createProjectAssetImageForProject(
+      scope.token,
+      scope.projectId,
+      assetNumericId,
+      filePath: draft.filePath,
+      state: draft.state,
+      sortIndex: draft.sortIndex,
+    ),
+  );
+}
+
 _SelectedAssetImageMutationPlan _buildPatchAssetImageMutationPlan({
   required String token,
   required String projectId,
@@ -281,32 +322,20 @@ Future<void> createAssetImage({
   required int assetNumericId,
   required StateSetter setState,
 }) async {
-  final draft = _resolveAssetImageDraft(
+  final plan = _buildCreateAssetImageMutationPlan(
+    scope: scope,
+    assetNumericId: assetNumericId,
     setState: setState,
-    runtime: scope.runtime,
-    invalidDraftNotice: '新增 sort_index 需为正整数',
-    draft: parseAssetImageCreateDraft(
-      filePath: scope.createControllers.filePathCtrl.text,
-      state: scope.createControllers.stateCtrl.text,
-      sortIndex: scope.createControllers.sortCtrl.text,
-    ),
   );
-  if (draft == null) {
+  if (plan == null) {
     return;
   }
   await _runAssetImageMutationPlan(
     scope: scope,
     assetNumericId: assetNumericId,
     setState: setState,
-    plan: _createAssetImageRequestPlan,
-    request: () => createProjectAssetImageForProject(
-      scope.token,
-      scope.projectId,
-      assetNumericId,
-      filePath: draft.filePath,
-      state: draft.state,
-      sortIndex: draft.sortIndex,
-    ),
+    plan: plan.requestPlan,
+    request: plan.request,
   );
 }
 
