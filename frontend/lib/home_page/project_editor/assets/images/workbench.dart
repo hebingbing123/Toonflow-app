@@ -48,28 +48,24 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
             builder: (dialogCtx, setState) {
               if (!initialLoadTriggered) {
                 initialLoadTriggered = true;
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
-                  if (!dialogCtx.mounted) return;
-                  await reloadAssetImages(
-                    token: token,
-                    projectId: p.id,
-                    assetNumericId: selectedAssetNumericId,
-                    currentSelectedImageId: selectedImageId,
-                    setState: setState,
-                    onImagesResponseChanged: (response) =>
-                        imagesResponse = response,
-                    onSelectedImageIdChanged: (value) =>
-                        selectedImageId = value,
-                    onPreviewBytesChanged: (bytes) => previewBytes = bytes,
-                    onLoadingChanged: (loading) => loadingList = loading,
-                    onPreviewLoadingChanged: (loading) =>
-                        loadingPreview = loading,
-                    onStatusChanged: (line) => statusLine = line,
-                    patchFilePathCtrl: patchFilePathCtrl,
-                    patchStateCtrl: patchStateCtrl,
-                    patchSortCtrl: patchSortCtrl,
-                  );
-                });
+                scheduleInitialAssetImagesLoad(
+                  dialogCtx: dialogCtx,
+                  token: token,
+                  projectId: p.id,
+                  assetNumericId: selectedAssetNumericId,
+                  currentSelectedImageId: selectedImageId,
+                  setState: setState,
+                  onImagesResponseChanged: (response) =>
+                      imagesResponse = response,
+                  onSelectedImageIdChanged: (value) => selectedImageId = value,
+                  onPreviewBytesChanged: (bytes) => previewBytes = bytes,
+                  onLoadingChanged: (loading) => loadingList = loading,
+                  onPreviewLoadingChanged: (loading) => loadingPreview = loading,
+                  onStatusChanged: (line) => statusLine = line,
+                  patchFilePathCtrl: patchFilePathCtrl,
+                  patchStateCtrl: patchStateCtrl,
+                  patchSortCtrl: patchSortCtrl,
+                );
               }
               final imageItems =
                   imagesResponse?.items ?? const <AssetImageRow>[];
@@ -97,35 +93,27 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 patchFilePathCtrl: patchFilePathCtrl,
                 patchStateCtrl: patchStateCtrl,
                 patchSortCtrl: patchSortCtrl,
-                onAssetChanged: (value) async {
-                  if (value == null) return;
-                  setState(() {
-                    selectedAssetNumericId = value;
-                    imagesResponse = null;
-                    selectedImageId = null;
-                    previewBytes = null;
-                    statusLine = '正在切换到资产 #$value 并加载图片列表…';
-                  });
-                  await reloadAssetImages(
-                    token: token,
-                    projectId: p.id,
-                    assetNumericId: selectedAssetNumericId,
-                    currentSelectedImageId: selectedImageId,
-                    setState: setState,
-                    onImagesResponseChanged: (response) =>
-                        imagesResponse = response,
-                    onSelectedImageIdChanged: (nextValue) =>
-                        selectedImageId = nextValue,
-                    onPreviewBytesChanged: (bytes) => previewBytes = bytes,
-                    onLoadingChanged: (loading) => loadingList = loading,
-                    onPreviewLoadingChanged: (loading) =>
-                        loadingPreview = loading,
-                    onStatusChanged: (line) => statusLine = line,
-                    patchFilePathCtrl: patchFilePathCtrl,
-                    patchStateCtrl: patchStateCtrl,
-                    patchSortCtrl: patchSortCtrl,
-                  );
-                },
+                onAssetChanged: (value) => changeAssetImagesWorkbenchAsset(
+                  value: value,
+                  token: token,
+                  projectId: p.id,
+                  currentAssetNumericId: selectedAssetNumericId,
+                  currentSelectedImageId: selectedImageId,
+                  setState: setState,
+                  onAssetNumericIdChanged: (nextValue) =>
+                      selectedAssetNumericId = nextValue,
+                  onImagesResponseChanged: (response) =>
+                      imagesResponse = response,
+                  onSelectedImageIdChanged: (nextValue) =>
+                      selectedImageId = nextValue,
+                  onPreviewBytesChanged: (bytes) => previewBytes = bytes,
+                  onLoadingChanged: (loading) => loadingList = loading,
+                  onPreviewLoadingChanged: (loading) => loadingPreview = loading,
+                  onStatusChanged: (line) => statusLine = line,
+                  patchFilePathCtrl: patchFilePathCtrl,
+                  patchStateCtrl: patchStateCtrl,
+                  patchSortCtrl: patchSortCtrl,
+                ),
                 onRecommendedAction: () => runAssetImagesRecommendedAction(
                   token: token,
                   projectId: p.id,
@@ -189,43 +177,23 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 ),
                 onImageChanged: imageItems.isEmpty
                     ? null
-                    : (value) async {
-                        if (value == null) return;
-                        setState(() {
-                          selectedImageId = value;
-                          previewBytes = null;
-                          statusLine = '正在切换图片并刷新预览…';
-                        });
-                        syncAssetImagesStatusLine(
-                          setState: setState,
-                          imagesResponse: imagesResponse,
-                          selectedImageId: selectedImageId,
-                          previewBytes: previewBytes,
-                          onStatusChanged: (line) => statusLine = line,
-                        );
-                        syncAssetImagesPatchFieldsFromSelected(
-                          setState: setState,
-                          imagesResponse: imagesResponse,
-                          selectedImageId: selectedImageId,
-                          patchFilePathCtrl: patchFilePathCtrl,
-                          patchStateCtrl: patchStateCtrl,
-                          patchSortCtrl: patchSortCtrl,
-                        );
-                        await loadAssetImagePreview(
-                          token: token,
-                          projectId: p.id,
-                          assetNumericId: selectedAssetNumericId,
-                          imagesResponse: imagesResponse,
-                          selectedImageId: selectedImageId,
-                          previewBytes: previewBytes,
-                          setState: setState,
-                          onPreviewBytesChanged: (bytes) =>
-                              previewBytes = bytes,
-                          onLoadingChanged: (loading) =>
-                              loadingPreview = loading,
-                          onStatusChanged: (line) => statusLine = line,
-                        );
-                      },
+                    : (value) => selectAssetImagesWorkbenchImage(
+                      value: value,
+                      token: token,
+                      projectId: p.id,
+                      assetNumericId: selectedAssetNumericId,
+                      imagesResponse: imagesResponse,
+                      previewBytes: previewBytes,
+                      setState: setState,
+                      onSelectedImageIdChanged: (nextValue) =>
+                          selectedImageId = nextValue,
+                      onPreviewBytesChanged: (bytes) => previewBytes = bytes,
+                      onLoadingChanged: (loading) => loadingPreview = loading,
+                      onStatusChanged: (line) => statusLine = line,
+                      patchFilePathCtrl: patchFilePathCtrl,
+                      patchStateCtrl: patchStateCtrl,
+                      patchSortCtrl: patchSortCtrl,
+                    ),
                 onCreateImage: () => createAssetImage(
                   token: token,
                   projectId: p.id,
