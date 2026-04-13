@@ -81,9 +81,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 selectedImageId: selectedImageId,
                 hasPreviewBytes: previewBytes != null,
               );
-              return _buildAssetImagesWorkbenchDialog(
-                ctx: ctx,
-                dialogCtx: dialogCtx,
+              final dialogState = AssetImagesWorkbenchDialogState(
                 assets: assets,
                 imageItems: imageItems,
                 selectedAssetNumericId: selectedAssetNumericId,
@@ -94,12 +92,10 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 busyMutation: busyMutation,
                 statusLine: statusLine,
                 previewBytes: previewBytes,
-                createFilePathCtrl: createControllers.filePathCtrl,
-                createStateCtrl: createControllers.stateCtrl,
-                createSortCtrl: createControllers.sortCtrl,
-                patchFilePathCtrl: patchControllers.filePathCtrl,
-                patchStateCtrl: patchControllers.stateCtrl,
-                patchSortCtrl: patchControllers.sortCtrl,
+                createControllers: createControllers,
+                patchControllers: patchControllers,
+              );
+              final dialogCallbacks = AssetImagesWorkbenchDialogCallbacks(
                 onAssetChanged: (value) =>
                     controller.changeAsset(value: value, setState: setState),
                 onRecommendedAction: () =>
@@ -115,6 +111,12 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                 onCreateImage: () => controller.createImage(setState),
                 onPatchImage: () => controller.patchImage(setState),
                 onDeleteImage: () => controller.deleteImage(setState),
+              );
+              return _buildAssetImagesWorkbenchDialog(
+                ctx: ctx,
+                dialogCtx: dialogCtx,
+                state: dialogState,
+                callbacks: dialogCallbacks,
               );
             },
           );

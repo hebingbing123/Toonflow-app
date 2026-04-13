@@ -17,6 +17,58 @@ class AssetImagesWorkbenchFormControllers {
   }
 }
 
+class AssetImagesWorkbenchDialogState {
+  const AssetImagesWorkbenchDialogState({
+    required this.assets,
+    required this.imageItems,
+    required this.selectedAssetNumericId,
+    required this.selectedImageId,
+    required this.diagnosis,
+    required this.loadingList,
+    required this.loadingPreview,
+    required this.busyMutation,
+    required this.statusLine,
+    required this.previewBytes,
+    required this.createControllers,
+    required this.patchControllers,
+  });
+
+  final List<AssetRow> assets;
+  final List<AssetImageRow> imageItems;
+  final int selectedAssetNumericId;
+  final String? selectedImageId;
+  final AssetImagesWorkbenchDiagnosis diagnosis;
+  final bool loadingList;
+  final bool loadingPreview;
+  final bool busyMutation;
+  final String? statusLine;
+  final Uint8List? previewBytes;
+  final AssetImagesWorkbenchFormControllers createControllers;
+  final AssetImagesWorkbenchFormControllers patchControllers;
+}
+
+class AssetImagesWorkbenchDialogCallbacks {
+  const AssetImagesWorkbenchDialogCallbacks({
+    required this.onAssetChanged,
+    required this.onRecommendedAction,
+    required this.onReloadImages,
+    required this.onLoadPreview,
+    required this.onImageChanged,
+    required this.onCreateImage,
+    required this.onPatchImage,
+    required this.onDeleteImage,
+  });
+
+  final Future<void> Function(int? value) onAssetChanged;
+  final Future<void> Function() onRecommendedAction;
+  final Future<void> Function() onReloadImages;
+  final Future<void> Function() onLoadPreview;
+  final Future<void> Function(String? value)? onImageChanged;
+  final Future<void> Function() onCreateImage;
+  final Future<void> Function() onPatchImage;
+  final Future<void> Function() onDeleteImage;
+}
+
 AssetImageRow? selectedAssetImageRow(
   ListAssetImagesResponse? imagesResponse, {
   required String? selectedImageId,

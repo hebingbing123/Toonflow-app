@@ -110,9 +110,7 @@ Widget _buildAssetImagesWorkbenchImageField({
 }
 
 Widget _buildAssetImagesWorkbenchCreateForm({
-  required TextEditingController createFilePathCtrl,
-  required TextEditingController createStateCtrl,
-  required TextEditingController createSortCtrl,
+  required AssetImagesWorkbenchFormControllers controllers,
   required bool busyMutation,
   required Future<void> Function() onCreateImage,
 }) {
@@ -120,13 +118,13 @@ Widget _buildAssetImagesWorkbenchCreateForm({
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        controller: createFilePathCtrl,
+        controller: controllers.filePathCtrl,
         decoration: const InputDecoration(labelText: '新增 file_path（可选）'),
       ),
       const SizedBox(height: 8),
       _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: createStateCtrl,
-        sortCtrl: createSortCtrl,
+        stateCtrl: controllers.stateCtrl,
+        sortCtrl: controllers.sortCtrl,
         stateLabel: '新增 state（可选）',
         sortLabel: '新增 sort_index（可选）',
       ),
@@ -142,9 +140,7 @@ Widget _buildAssetImagesWorkbenchCreateForm({
 }
 
 Widget _buildAssetImagesWorkbenchPatchForm({
-  required TextEditingController patchFilePathCtrl,
-  required TextEditingController patchStateCtrl,
-  required TextEditingController patchSortCtrl,
+  required AssetImagesWorkbenchFormControllers controllers,
   required bool busyMutation,
   required Future<void> Function() onPatchImage,
   required Future<void> Function() onDeleteImage,
@@ -153,13 +149,13 @@ Widget _buildAssetImagesWorkbenchPatchForm({
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        controller: patchFilePathCtrl,
+        controller: controllers.filePathCtrl,
         decoration: const InputDecoration(labelText: '编辑 file_path（可置空）'),
       ),
       const SizedBox(height: 8),
       _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: patchStateCtrl,
-        sortCtrl: patchSortCtrl,
+        stateCtrl: controllers.stateCtrl,
+        sortCtrl: controllers.sortCtrl,
         stateLabel: '编辑 state（可置空）',
         sortLabel: '编辑 sort_index（可选）',
       ),
