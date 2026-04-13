@@ -18,9 +18,7 @@ class AssetImagesWorkbenchFormControllers {
 }
 
 class AssetImagesWorkbenchSession {
-  AssetImagesWorkbenchSession._({
-    required this.selectedAssetNumericId,
-  });
+  AssetImagesWorkbenchSession._({required this.selectedAssetNumericId});
 
   factory AssetImagesWorkbenchSession.initialize({
     required List<AssetRow> assets,
@@ -180,35 +178,28 @@ AssetImageRow? selectedAssetImageRow(
   return null;
 }
 
-void syncAssetImagesStatusLine({
-  required StateSetter setState,
+String _buildAssetImagesStatusLine({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required Uint8List? previewBytes,
-  required ValueChanged<String?> onStatusChanged,
 }) {
   final diagnosis = diagnoseAssetImagesWorkbench(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     hasPreviewBytes: previewBytes != null,
   );
-  setState(() {
-    final selectionLine = imagesResponse == null
-        ? ''
-        : summarizeAssetImageSelection(
-            imagesResponse,
-            selectedImageId: selectedImageId,
-          );
-    onStatusChanged(
-      selectionLine.isEmpty
-          ? '${diagnosis.summary} ${diagnosis.detail}'
-          : '$selectionLine ${diagnosis.detail}',
-    );
-  });
+  final selectionLine = imagesResponse == null
+      ? ''
+      : summarizeAssetImageSelection(
+          imagesResponse,
+          selectedImageId: selectedImageId,
+        );
+  return selectionLine.isEmpty
+      ? '${diagnosis.summary} ${diagnosis.detail}'
+      : '$selectionLine ${diagnosis.detail}';
 }
 
-void syncAssetImagesPatchFieldsFromSelected({
-  required StateSetter setState,
+void _syncAssetImagesPatchFieldsFromSelected({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required AssetImagesWorkbenchFormControllers patchControllers,
@@ -217,17 +208,15 @@ void syncAssetImagesPatchFieldsFromSelected({
     imagesResponse,
     selectedImageId: selectedImageId,
   );
-  setState(() {
-    if (image == null) {
-      patchControllers.filePathCtrl.text = '';
-      patchControllers.stateCtrl.text = '';
-      patchControllers.sortCtrl.text = '';
-      return;
-    }
-    patchControllers.filePathCtrl.text = image.filePath ?? '';
-    patchControllers.stateCtrl.text = image.state ?? '';
-    patchControllers.sortCtrl.text = image.sortIndex.toString();
-  });
+  if (image == null) {
+    patchControllers.filePathCtrl.text = '';
+    patchControllers.stateCtrl.text = '';
+    patchControllers.sortCtrl.text = '';
+    return;
+  }
+  patchControllers.filePathCtrl.text = image.filePath ?? '';
+  patchControllers.stateCtrl.text = image.state ?? '';
+  patchControllers.sortCtrl.text = image.sortIndex.toString();
 }
 
 void syncAssetImagesSelectionState({
@@ -238,23 +227,21 @@ void syncAssetImagesSelectionState({
   required Uint8List? previewBytes,
   required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
-  setState(() {
-    runtime.onSelectedImageIdChanged(selectedImageId);
-    runtime.onPreviewBytesChanged(previewBytes);
-  });
-  syncAssetImagesStatusLine(
-    setState: setState,
+  final nextStatusLine = _buildAssetImagesStatusLine(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     previewBytes: previewBytes,
-    onStatusChanged: runtime.onStatusChanged,
   );
-  syncAssetImagesPatchFieldsFromSelected(
-    setState: setState,
-    imagesResponse: imagesResponse,
-    selectedImageId: selectedImageId,
-    patchControllers: patchControllers,
-  );
+  setState(() {
+    runtime.onSelectedImageIdChanged(selectedImageId);
+    runtime.onPreviewBytesChanged(previewBytes);
+    runtime.onStatusChanged(nextStatusLine);
+    _syncAssetImagesPatchFieldsFromSelected(
+      imagesResponse: imagesResponse,
+      selectedImageId: selectedImageId,
+      patchControllers: patchControllers,
+    );
+  });
 }
 
 void setAssetImagesFollowUpStatus({
