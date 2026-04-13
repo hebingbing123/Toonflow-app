@@ -73,6 +73,53 @@ void _setAssetImageMutationFailure({
   });
 }
 
+AssetImageRow? _requireSelectedAssetImage({
+  required ListAssetImagesResponse? imagesResponse,
+  required String? selectedImageId,
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required String missingSelectionNotice,
+}) {
+  final image = selectedAssetImageRow(
+    imagesResponse,
+    selectedImageId: selectedImageId,
+  );
+  if (image != null) {
+    return image;
+  }
+  setState(() => runtime.onStatusChanged(missingSelectionNotice));
+  return null;
+}
+
+Map<String, dynamic>? _buildPatchAssetImageBody({
+  required TextEditingController patchFilePathCtrl,
+  required TextEditingController patchStateCtrl,
+  required TextEditingController patchSortCtrl,
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+}) {
+  final body = <String, dynamic>{
+    'file_path': _optionalWorkbenchText(patchFilePathCtrl),
+    'state': _optionalWorkbenchText(patchStateCtrl),
+  };
+  final sortRaw = patchSortCtrl.text.trim();
+  if (sortRaw.isEmpty) {
+    return body;
+  }
+  final sort = parsePositiveWorkbenchInt(sortRaw);
+  if (sort == null) {
+    setState(() => runtime.onStatusChanged('编辑 sort_index 需为正整数'));
+    return null;
+  }
+  body['sort_index'] = sort;
+  return body;
+}
+
+String? _optionalWorkbenchText(TextEditingController controller) {
+  final value = controller.text.trim();
+  return value.isEmpty ? null : value;
+}
+
 Future<void> createAssetImage({
   required String token,
   required String projectId,
@@ -91,8 +138,6 @@ Future<void> createAssetImage({
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
 }) async {
-  final filePath = createFilePathCtrl.text.trim();
-  final state = createStateCtrl.text.trim();
   final sort = parsePositiveWorkbenchInt(createSortCtrl.text);
   if (createSortCtrl.text.trim().isNotEmpty && sort == null) {
     setState(() => runtime.onStatusChanged('新增 sort_index 需为正整数'));
@@ -110,8 +155,8 @@ Future<void> createAssetImage({
           token,
           projectId,
           assetNumericId,
-          filePath: filePath.isEmpty ? null : filePath,
-          state: state.isEmpty ? null : state,
+          filePath: _optionalWorkbenchText(createFilePathCtrl),
+          state: _optionalWorkbenchText(createStateCtrl),
           sortIndex: sort,
         );
         await _finishAssetImageMutation(
@@ -157,27 +202,25 @@ Future<void> patchAssetImage({
   required Future<void> Function() reloadAssetsAndStats,
   required AssetImagesWorkbenchRuntime runtime,
 }) async {
-  final image = selectedAssetImageRow(
-    imagesResponse,
+  final image = _requireSelectedAssetImage(
+    imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
+    setState: setState,
+    runtime: runtime,
+    missingSelectionNotice: '请先选择要编辑的图片',
   );
   if (image == null) {
-    setState(() => runtime.onStatusChanged('请先选择要编辑的图片'));
     return;
   }
-  final body = <String, dynamic>{};
-  final filePath = patchFilePathCtrl.text.trim();
-  final state = patchStateCtrl.text.trim();
-  final sortRaw = patchSortCtrl.text.trim();
-  body['file_path'] = filePath.isNotEmpty ? filePath : null;
-  body['state'] = state.isNotEmpty ? state : null;
-  if (sortRaw.isNotEmpty) {
-    final sort = parsePositiveWorkbenchInt(sortRaw);
-    if (sort == null) {
-      setState(() => runtime.onStatusChanged('编辑 sort_index 需为正整数'));
-      return;
-    }
-    body['sort_index'] = sort;
+  final body = _buildPatchAssetImageBody(
+    patchFilePathCtrl: patchFilePathCtrl,
+    patchStateCtrl: patchStateCtrl,
+    patchSortCtrl: patchSortCtrl,
+    setState: setState,
+    runtime: runtime,
+  );
+  if (body == null) {
+    return;
   }
   await _runAssetImageMutation(
     setState: setState,
@@ -238,12 +281,14 @@ Future<void> deleteAssetImage({
   required TextEditingController patchStateCtrl,
   required TextEditingController patchSortCtrl,
 }) async {
-  final image = selectedAssetImageRow(
-    imagesResponse,
+  final image = _requireSelectedAssetImage(
+    imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
+    setState: setState,
+    runtime: runtime,
+    missingSelectionNotice: '请先选择要删除的图片',
   );
   if (image == null) {
-    setState(() => runtime.onStatusChanged('请先选择要删除的图片'));
     return;
   }
   await _runAssetImageMutation(
