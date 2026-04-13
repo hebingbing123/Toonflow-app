@@ -1,14 +1,13 @@
 part of '../../../../home_page.dart';
 
 Widget _buildAssetImagesWorkbenchAssetField({
-  required List<AssetRow> assets,
-  required int selectedAssetNumericId,
-  required Future<void> Function(int? value) onAssetChanged,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return DropdownButtonFormField<int>(
-    initialValue: selectedAssetNumericId,
+    initialValue: state.selectedAssetNumericId,
     decoration: const InputDecoration(labelText: '目标资产'),
-    items: assets
+    items: state.assets
         .map(
           (asset) => DropdownMenuItem<int>(
             value: asset.numericId,
@@ -19,17 +18,14 @@ Widget _buildAssetImagesWorkbenchAssetField({
           ),
         )
         .toList(),
-    onChanged: onAssetChanged,
+    onChanged: callbacks.onAssetChanged,
   );
 }
 
 Widget _buildAssetImagesWorkbenchDiagnosisCard({
   required BuildContext dialogCtx,
-  required AssetImagesWorkbenchDiagnosis diagnosis,
-  required bool loadingList,
-  required bool loadingPreview,
-  required bool busyMutation,
-  required Future<void> Function() onRecommendedAction,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return Container(
     width: double.infinity,
@@ -42,19 +38,23 @@ Widget _buildAssetImagesWorkbenchDiagnosisCard({
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          diagnosis.summary,
+          state.diagnosis.summary,
           style: Theme.of(dialogCtx).textTheme.titleSmall,
         ),
         const SizedBox(height: 6),
-        Text(diagnosis.detail, style: Theme.of(dialogCtx).textTheme.bodySmall),
+        Text(
+          state.diagnosis.detail,
+          style: Theme.of(dialogCtx).textTheme.bodySmall,
+        ),
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: loadingList || loadingPreview || busyMutation
+          onPressed:
+              state.loadingList || state.loadingPreview || state.busyMutation
               ? null
-              : onRecommendedAction,
+              : callbacks.onRecommendedAction,
           child: Text(
             describeAssetImagesWorkbenchRecommendedAction(
-              diagnosis.recommendedAction,
+              state.diagnosis.recommendedAction,
             ),
           ),
         ),
@@ -64,37 +64,37 @@ Widget _buildAssetImagesWorkbenchDiagnosisCard({
 }
 
 Widget _buildAssetImagesWorkbenchToolbar({
-  required bool loadingList,
-  required bool loadingPreview,
-  required bool busyMutation,
-  required Future<void> Function() onReloadImages,
-  required Future<void> Function() onLoadPreview,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return Wrap(
     spacing: 8,
     runSpacing: 8,
     children: [
       FilledButton(
-        onPressed: loadingList || busyMutation ? null : onReloadImages,
-        child: Text(loadingList ? '加载中…' : '加载图片列表'),
+        onPressed: state.loadingList || state.busyMutation
+            ? null
+            : callbacks.onReloadImages,
+        child: Text(state.loadingList ? '加载中…' : '加载图片列表'),
       ),
       TextButton(
-        onPressed: loadingPreview || busyMutation ? null : onLoadPreview,
-        child: Text(loadingPreview ? '预览中…' : '预览当前图片'),
+        onPressed: state.loadingPreview || state.busyMutation
+            ? null
+            : callbacks.onLoadPreview,
+        child: Text(state.loadingPreview ? '预览中…' : '预览当前图片'),
       ),
     ],
   );
 }
 
 Widget _buildAssetImagesWorkbenchImageField({
-  required List<AssetImageRow> imageItems,
-  required String? selectedImageId,
-  required Future<void> Function(String? value)? onImageChanged,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return DropdownButtonFormField<String>(
-    initialValue: selectedImageId,
+    initialValue: state.selectedImageId,
     decoration: const InputDecoration(labelText: '图片列表'),
-    items: imageItems
+    items: state.imageItems
         .map(
           (img) => DropdownMenuItem<String>(
             value: img.id,
@@ -105,33 +105,32 @@ Widget _buildAssetImagesWorkbenchImageField({
           ),
         )
         .toList(),
-    onChanged: onImageChanged,
+    onChanged: callbacks.onImageChanged,
   );
 }
 
 Widget _buildAssetImagesWorkbenchCreateForm({
-  required AssetImagesWorkbenchFormControllers controllers,
-  required bool busyMutation,
-  required Future<void> Function() onCreateImage,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        controller: controllers.filePathCtrl,
+        controller: state.createControllers.filePathCtrl,
         decoration: const InputDecoration(labelText: '新增 file_path（可选）'),
       ),
       const SizedBox(height: 8),
       _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: controllers.stateCtrl,
-        sortCtrl: controllers.sortCtrl,
+        stateCtrl: state.createControllers.stateCtrl,
+        sortCtrl: state.createControllers.sortCtrl,
         stateLabel: '新增 state（可选）',
         sortLabel: '新增 sort_index（可选）',
       ),
       Align(
         alignment: Alignment.centerLeft,
         child: TextButton(
-          onPressed: busyMutation ? null : onCreateImage,
+          onPressed: state.busyMutation ? null : callbacks.onCreateImage,
           child: const Text('新增图片'),
         ),
       ),
@@ -140,22 +139,20 @@ Widget _buildAssetImagesWorkbenchCreateForm({
 }
 
 Widget _buildAssetImagesWorkbenchPatchForm({
-  required AssetImagesWorkbenchFormControllers controllers,
-  required bool busyMutation,
-  required Future<void> Function() onPatchImage,
-  required Future<void> Function() onDeleteImage,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        controller: controllers.filePathCtrl,
+        controller: state.patchControllers.filePathCtrl,
         decoration: const InputDecoration(labelText: '编辑 file_path（可置空）'),
       ),
       const SizedBox(height: 8),
       _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: controllers.stateCtrl,
-        sortCtrl: controllers.sortCtrl,
+        stateCtrl: state.patchControllers.stateCtrl,
+        sortCtrl: state.patchControllers.sortCtrl,
         stateLabel: '编辑 state（可置空）',
         sortLabel: '编辑 sort_index（可选）',
       ),
@@ -164,11 +161,11 @@ Widget _buildAssetImagesWorkbenchPatchForm({
         runSpacing: 8,
         children: [
           TextButton(
-            onPressed: busyMutation ? null : onPatchImage,
+            onPressed: state.busyMutation ? null : callbacks.onPatchImage,
             child: const Text('保存当前图片'),
           ),
           TextButton(
-            onPressed: busyMutation ? null : onDeleteImage,
+            onPressed: state.busyMutation ? null : callbacks.onDeleteImage,
             child: const Text('删除当前图片'),
           ),
         ],
@@ -203,14 +200,16 @@ Widget _buildAssetImagesWorkbenchStateSortRow({
   );
 }
 
-Widget _buildAssetImagesWorkbenchPreview(Uint8List? previewBytes) {
-  if (previewBytes == null) {
+Widget _buildAssetImagesWorkbenchPreview({
+  required AssetImagesWorkbenchDialogState state,
+}) {
+  if (state.previewBytes == null) {
     return const SizedBox.shrink();
   }
   return ClipRRect(
     borderRadius: BorderRadius.circular(8),
     child: Image.memory(
-      previewBytes,
+      state.previewBytes!,
       height: 160,
       width: double.infinity,
       fit: BoxFit.cover,
