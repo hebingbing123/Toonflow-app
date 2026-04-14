@@ -1,4 +1,4 @@
-# Toonflow `frontend` (Flutter)
+# OpenFlow `frontend` (Flutter)
 
 桌面 + Web（**无 iOS/Android** 目标）。通过可配置 **`API_BASE_URL`** 连接 Rust 后端；**Supabase Auth** 通过 `supabase_flutter`（可选，需 dart-define）。
 

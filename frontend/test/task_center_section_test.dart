@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/task_center/section.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/task_center/section.dart';
+import 'package:openflow_app/rust_api.dart';
 
 void main() {
   testWidgets('task center exposes workbench entry and summary', (

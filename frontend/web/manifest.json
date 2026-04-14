@@ -1,11 +1,11 @@
 {
-    "name": "toonflow_app",
-    "short_name": "toonflow_app",
+    "name": "openflow_app",
+    "short_name": "openflow_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Toonflow client (desktop + web)",
+    "description": "OpenFlow client (desktop + web)",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/quality_reviews/support.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/quality_reviews/support.dart';
+import 'package:openflow_app/rust_api.dart';
 
 void main() {
   test('summarizeQualityReviews compacts review list', () {

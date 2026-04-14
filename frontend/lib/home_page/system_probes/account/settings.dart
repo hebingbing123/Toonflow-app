@@ -137,10 +137,10 @@ extension _HomePageSystemProbesAccountSettings on _HomePageState {
       _aboutProbeBody = null;
     });
     try {
-      final cu = await postAboutCheckUpdateV1(token, 'toonflow');
+      final cu = await postAboutCheckUpdateV1(token, 'openflow');
       final dl = await postAboutDownloadAppV1(
         token,
-        url: 'https://example.com/toonflow-setup.dmg',
+        url: 'https://example.com/openflow-setup.dmg',
         reinstall: true,
       );
       if (!mounted) return;

@@ -1,5 +1,5 @@
-name: toonflow_app
-description: "Toonflow client (desktop + web)"
+name: openflow_app
+description: "OpenFlow client (desktop + web)"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

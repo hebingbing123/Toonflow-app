@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/projects/workbenches/art_styles_view.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/projects/workbenches/art_styles_view.dart';
+import 'package:openflow_app/rust_api.dart';
 
 ArtStyleRow buildStyle({
   required int numericId,

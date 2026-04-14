@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/shell/workspace_ws_event_resolution.dart';
+import 'package:openflow_app/home_page/shell/workspace_ws_event_resolution.dart';
 
 void main() {
   test('tool result clears only tool-scoped operations', () {

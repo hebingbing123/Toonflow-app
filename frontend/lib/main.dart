@@ -14,16 +14,16 @@ Future<void> main() async {
     );
   }
 
-  runApp(const ToonflowApp());
+  runApp(const OpenFlowApp());
 }
 
-class ToonflowApp extends StatelessWidget {
-  const ToonflowApp({super.key});
+class OpenFlowApp extends StatelessWidget {
+  const OpenFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Toonflow',
+      title: 'OpenFlow',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,

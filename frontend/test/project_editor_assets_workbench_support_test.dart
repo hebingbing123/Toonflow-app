@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/project_editor/assets/support.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/project_editor/assets/support.dart';
+import 'package:openflow_app/rust_api.dart';
 
 void main() {
   test('diagnoseAssetImagesWorkbench suggests loading images first', () {

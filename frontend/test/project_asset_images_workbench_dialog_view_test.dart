@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/project_editor/assets/images/workbench_dialog_view.dart';
-import 'package:toonflow_app/home_page/project_editor/assets/support.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/project_editor/assets/images/workbench_dialog_view.dart';
+import 'package:openflow_app/home_page/project_editor/assets/support.dart';
+import 'package:openflow_app/rust_api.dart';
 
 AssetImagesWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController createFilePathController,

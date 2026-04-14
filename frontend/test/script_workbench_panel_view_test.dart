@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/home_page/script_editor/support.dart';
-import 'package:toonflow_app/home_page/script_editor/workbench_view.dart';
-import 'package:toonflow_app/rust_api.dart';
+import 'package:openflow_app/home_page/script_editor/support.dart';
+import 'package:openflow_app/home_page/script_editor/workbench_view.dart';
+import 'package:openflow_app/rust_api.dart';
 
 ScriptWorkbenchPanelViewModel buildModel({
   ScriptWorkbenchDiagnosis? diagnosis,

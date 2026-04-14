@@ -345,7 +345,7 @@ class _HomePageState extends State<HomePage> {
     final session = _session;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Toonflow')),
+      appBar: AppBar(title: const Text('OpenFlow')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: _buildHomePageSections(context, session),
