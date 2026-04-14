@@ -1,37 +1,87 @@
-part of 'section.dart';
+import 'package:flutter/material.dart';
 
-extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
-  AlertDialog _buildTaskCenterWorkbenchDialogView({
-    required BuildContext context,
-    required String projectSummary,
-    required String jobSummary,
-    required TextEditingController pageCtrl,
-    required TextEditingController limitCtrl,
-    required TextEditingController stateCtrl,
-    required TextEditingController taskClassCtrl,
-    required TextEditingController projectIdCtrl,
-    required TextEditingController numericTaskIdCtrl,
-    required TextEditingController uuidCtrl,
-    required List<TaskCenterTaskClassRow> categories,
-    required List<JobRow> jobs,
-    required String? categoriesSummary,
-    required String? numericIdTaskDetailText,
-    required String? uuidDetails,
-    required String? statusLine,
-    required bool loadingProjects,
-    required bool loadingCategories,
-    required bool loadingTasks,
-    required bool loadingNumericIdTaskDetail,
-    required bool loadingUuidDetails,
-    required Future<void> Function() onLoadProjects,
-    required Future<void> Function() onLoadCategories,
-    required Future<void> Function() onLoadTasks,
-    required Future<void> Function() onLoadNumericIdTaskDetail,
-    required Future<void> Function() onLoadUuidDetails,
-    required ValueChanged<String> onPickCategory,
-    required ValueChanged<JobRow> onPickJob,
-    required VoidCallback onClose,
-  }) {
+import '../../rust_api.dart';
+
+class TaskCenterWorkbenchDialogViewModel {
+  const TaskCenterWorkbenchDialogViewModel({
+    required this.projectSummary,
+    required this.jobSummary,
+    required this.pageCtrl,
+    required this.limitCtrl,
+    required this.stateCtrl,
+    required this.taskClassCtrl,
+    required this.projectIdCtrl,
+    required this.numericTaskIdCtrl,
+    required this.uuidCtrl,
+    required this.categories,
+    required this.jobs,
+    required this.categoriesSummary,
+    required this.numericIdTaskDetailText,
+    required this.uuidDetails,
+    required this.statusLine,
+    required this.loadingProjects,
+    required this.loadingCategories,
+    required this.loadingTasks,
+    required this.loadingNumericIdTaskDetail,
+    required this.loadingUuidDetails,
+  });
+
+  final String projectSummary;
+  final String jobSummary;
+  final TextEditingController pageCtrl;
+  final TextEditingController limitCtrl;
+  final TextEditingController stateCtrl;
+  final TextEditingController taskClassCtrl;
+  final TextEditingController projectIdCtrl;
+  final TextEditingController numericTaskIdCtrl;
+  final TextEditingController uuidCtrl;
+  final List<TaskCenterTaskClassRow> categories;
+  final List<JobRow> jobs;
+  final String? categoriesSummary;
+  final String? numericIdTaskDetailText;
+  final String? uuidDetails;
+  final String? statusLine;
+  final bool loadingProjects;
+  final bool loadingCategories;
+  final bool loadingTasks;
+  final bool loadingNumericIdTaskDetail;
+  final bool loadingUuidDetails;
+}
+
+class TaskCenterWorkbenchDialogViewCallbacks {
+  const TaskCenterWorkbenchDialogViewCallbacks({
+    required this.onLoadProjects,
+    required this.onLoadCategories,
+    required this.onLoadTasks,
+    required this.onLoadNumericIdTaskDetail,
+    required this.onLoadUuidDetails,
+    required this.onPickCategory,
+    required this.onPickJob,
+    required this.onClose,
+  });
+
+  final VoidCallback onLoadProjects;
+  final VoidCallback onLoadCategories;
+  final VoidCallback onLoadTasks;
+  final VoidCallback onLoadNumericIdTaskDetail;
+  final VoidCallback onLoadUuidDetails;
+  final ValueChanged<String> onPickCategory;
+  final ValueChanged<JobRow> onPickJob;
+  final VoidCallback onClose;
+}
+
+class TaskCenterWorkbenchDialogView extends StatelessWidget {
+  const TaskCenterWorkbenchDialogView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final TaskCenterWorkbenchDialogViewModel model;
+  final TaskCenterWorkbenchDialogViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
       title: const Text('任务工作台'),
@@ -56,30 +106,36 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                 runSpacing: 8,
                 children: [
                   FilledButton.tonal(
-                    onPressed: loadingProjects ? null : onLoadProjects,
-                    child: Text(loadingProjects ? '…' : '刷新任务项目'),
+                    onPressed: model.loadingProjects
+                        ? null
+                        : callbacks.onLoadProjects,
+                    child: Text(model.loadingProjects ? '…' : '刷新任务项目'),
                   ),
                   FilledButton.tonal(
-                    onPressed: loadingCategories ? null : onLoadCategories,
-                    child: Text(loadingCategories ? '…' : '刷新任务分类'),
+                    onPressed: model.loadingCategories
+                        ? null
+                        : callbacks.onLoadCategories,
+                    child: Text(model.loadingCategories ? '…' : '刷新任务分类'),
                   ),
                   FilledButton.tonal(
-                    onPressed: loadingTasks ? null : onLoadTasks,
-                    child: Text(loadingTasks ? '…' : '按筛选加载任务'),
+                    onPressed: model.loadingTasks
+                        ? null
+                        : callbacks.onLoadTasks,
+                    child: Text(model.loadingTasks ? '…' : '按筛选加载任务'),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                projectSummary,
+                model.projectSummary,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
-              if (categoriesSummary != null) ...[
+              if (model.categoriesSummary != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  categoriesSummary,
+                  model.categoriesSummary!,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -87,7 +143,7 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
               ],
               const SizedBox(height: 4),
               Text(
-                jobSummary,
+                model.jobSummary,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -97,14 +153,14 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: pageCtrl,
+                      controller: model.pageCtrl,
                       decoration: const InputDecoration(labelText: '页码'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
-                      controller: limitCtrl,
+                      controller: model.limitCtrl,
                       decoration: const InputDecoration(labelText: '每页数量'),
                     ),
                   ),
@@ -115,7 +171,7 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: projectIdCtrl,
+                      controller: model.projectIdCtrl,
                       decoration: const InputDecoration(
                         labelText: '项目 numeric ID（可空）',
                       ),
@@ -124,7 +180,7 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
-                      controller: taskClassCtrl,
+                      controller: model.taskClassCtrl,
                       decoration: const InputDecoration(labelText: '任务分类（可空）'),
                     ),
                   ),
@@ -132,32 +188,33 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: stateCtrl,
+                controller: model.stateCtrl,
                 decoration: const InputDecoration(labelText: '任务状态（可空）'),
               ),
-              if (categories.isNotEmpty) ...[
+              if (model.categories.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: categories
+                  children: model.categories
                       .take(6)
                       .map(
                         (row) => ActionChip(
                           label: Text(row.taskClass),
-                          onPressed: () => onPickCategory(row.taskClass),
+                          onPressed: () =>
+                              callbacks.onPickCategory(row.taskClass),
                         ),
                       )
                       .toList(growable: false),
                 ),
               ],
-              if (jobs.isNotEmpty) ...[
+              if (model.jobs.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '${jobs.length} 条任务',
+                  '${model.jobs.length} 条任务',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                ...jobs
+                ...model.jobs
                     .take(8)
                     .map(
                       (job) => ListTile(
@@ -166,7 +223,7 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                         title: Text('${job.kind} · ${job.status}'),
                         subtitle: Text('#${job.numericTaskId} · ${job.id}'),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => onPickJob(job),
+                        onTap: () => callbacks.onPickJob(job),
                       ),
                     ),
               ],
@@ -177,7 +234,7 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: numericTaskIdCtrl,
+                      controller: model.numericTaskIdCtrl,
                       decoration: const InputDecoration(
                         labelText: 'numeric task id',
                       ),
@@ -185,11 +242,13 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
-                    onPressed: loadingNumericIdTaskDetail
+                    onPressed: model.loadingNumericIdTaskDetail
                         ? null
-                        : onLoadNumericIdTaskDetail,
+                        : callbacks.onLoadNumericIdTaskDetail,
                     child: Text(
-                      loadingNumericIdTaskDetail ? '…' : '读取任务详情（numeric ID）',
+                      model.loadingNumericIdTaskDetail
+                          ? '…'
+                          : '读取任务详情（numeric ID）',
                     ),
                   ),
                 ],
@@ -199,39 +258,40 @@ extension _TaskCenterWorkbenchDialogView on _TaskCenterWorkbenchDialogState {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: uuidCtrl,
+                      controller: model.uuidCtrl,
                       decoration: const InputDecoration(labelText: '任务 UUID'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
-                    onPressed: loadingUuidDetails ? null : onLoadUuidDetails,
-                    child: Text(loadingUuidDetails ? '…' : '读取 UUID 详情'),
+                    onPressed: model.loadingUuidDetails
+                        ? null
+                        : callbacks.onLoadUuidDetails,
+                    child: Text(model.loadingUuidDetails ? '…' : '读取 UUID 详情'),
                   ),
                 ],
               ),
-              if (numericIdTaskDetailText != null) ...[
+              if (model.numericIdTaskDetailText != null) ...[
                 const SizedBox(height: 8),
-                SelectableText('任务详情（numeric ID）：$numericIdTaskDetailText'),
-              ],
-              if (uuidDetails != null) ...[
-                const SizedBox(height: 8),
-                SelectableText('UUID 详情：$uuidDetails'),
-              ],
-              if (statusLine != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  statusLine,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                SelectableText(
+                  '任务详情（numeric ID）：${model.numericIdTaskDetailText}',
                 ),
+              ],
+              if (model.uuidDetails != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('UUID 详情：${model.uuidDetails}'),
+              ],
+              if (model.statusLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText('状态：${model.statusLine}'),
               ],
             ],
           ),
         ),
       ),
-      actions: [TextButton(onPressed: onClose, child: const Text('关闭'))],
+      actions: [
+        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+      ],
     );
   }
 }
