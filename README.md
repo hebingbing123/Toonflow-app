@@ -8,7 +8,6 @@
   </a>
   &nbsp;|&nbsp;
   <a href="https://gitcode.com/HBAI-Ltd/Toonflow-app">
-    <img src="./docs/atomgitLogo.svg" alt="Atomgit" style="height:20px"/>
   </a>
 </p>
 
@@ -24,9 +23,8 @@
 
 <div align="center">
 
-<img src="./docs/logo.png" alt="Toonflow Logo" height="120"/>
 
-# Toonflow
+# OpenFlow
 
   <p align="center">
     <b>
@@ -81,7 +79,7 @@
 
 # 🌐 多语言支持
 
-Toonflow 支持以下语言界面：
+OpenFlow 支持以下语言界面：
 
 | 语言 | Language |
 |------|----------|
@@ -99,7 +97,7 @@ Toonflow 支持以下语言界面：
 
 # 🌟 主要功能
 
-Toonflow v1.0.8 是面向短剧生产的 AI 工作台，围绕“策划 → 编剧 → 分镜 → 出片”构建完整闭环，并支持本地化、可编程、可持续迭代的生产流程。
+OpenFlow v1.0.8 是面向短剧生产的 AI 工作台，围绕“策划 → 编剧 → 分镜 → 出片”构建完整闭环，并支持本地化、可编程、可持续迭代的生产流程。
 
 - ✅ **无限画布生产工作台**  
   以类无限画布形式组织剧本、角色、分镜、素材与视频节点，支持自由编排、回溯与并行生产，不受线性步骤限制。
@@ -142,14 +140,11 @@ Toonflow v1.0.8 是面向短剧生产的 AI 工作台，围绕“策划 → 编�
 ## 📺 视频教程(待更新，老版本教程已无参考价值)
 
 https://www.bilibili.com/video/BV1na6wB6Ea2
-[![Toonflow 8 分钟快速上手 AI 视频](./docs/videoCover.png)](https://www.bilibili.com/video/BV1na6wB6Ea2)
-
-**Toonflow 8 分钟快速上手 AI 视频**
+**OpenFlow 8 分钟快速上手 AI 视频**
 👉 [点击观看](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
 
 📱 手机微信扫码观看
 
-<img src="./docs/videoQR.png" alt="微信扫码观看" width="150"/>
 
 ---
 
@@ -213,7 +208,7 @@ https://www.bilibili.com/video/BV1na6wB6Ea2
 >
 > ⛔ `master` 分支不接受任何 PR ｜ ✅ 请将 PR 提交到 `develop` 分支
 >
-> 欢迎开发者们共同参与 Toonflow 的共创。如有兴趣加入，请在交流群内联系主理人 ACT
+> 欢迎开发者们共同参与 OpenFlow 的共创。如有兴趣加入，请在交流群内联系主理人 ACT
 
 ## 🛠️ 技术栈（当前）
 
@@ -285,19 +280,18 @@ package.json             # yarn lint / yarn refactor:check
 
 拉群小助手:
 
-<img src="./docs/QR.png" alt="Toonflow QR" height="400"/>
 
 ---
 
 # 💌 联系我们
 
-📧 邮箱：[ltlctools@outlook.com](mailto:ltlctools@outlook.com?subject=Toonflow咨询)
+📧 邮箱：[ltlctools@outlook.com](mailto:ltlctools@outlook.com?subject=OpenFlow咨询)
 
 ---
 
 # 📜 许可证
 
-Toonflow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
+OpenFlow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 许可证详情：https://www.apache.org/licenses/LICENSE-2.0
 
@@ -305,11 +299,11 @@ Toonflow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 - 若将本软件以产品形式分发给 **2 个及以上独立第三方**使用，须取得 HBAI-Ltd **书面商业授权**。
 - **≤ 5 个法人**联合运营内部使用，不对外提供服务的，视为内部使用，**无需授权**。
-- 不得删除或修改 Toonflow 中的标识或版权信息。
+- 不得删除或修改 OpenFlow 中的标识或版权信息。
 
 ## 永久免费场景
 
-- ✅ 用 Toonflow 制作内容并获得平台分账
+- ✅ 用 OpenFlow 制作内容并获得平台分账
 - ✅ 二次开发供自己团队内部使用
 - ✅ ≤ 5 个法人联合运营内部使用
 - ✅ 个人学习、研究、非商业用途
@@ -338,7 +332,7 @@ Toonflow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 # 🙏 致谢
 
-感谢以下开源项目为 Toonflow 提供支持（当前栈节选）：
+感谢以下开源项目为 OpenFlow 提供支持（当前栈节选）：
 
 - [Rust](https://www.rust-lang.org/) / [Tokio](https://tokio.rs/) / [Axum](https://github.com/tokio-rs/axum)
 - [Flutter](https://flutter.dev/)
@@ -346,12 +340,11 @@ Toonflow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 - [SQLx](https://github.com/launchbadge/sqlx)
 - [PostgreSQL](https://www.postgresql.org/)
 
-感谢以下组织/单位/个人为 Toonflow 提供支持：
+感谢以下组织/单位/个人为 OpenFlow 提供支持：
 
 <table>
   <tr>
     <td>
-      <img src="./docs/sponsored/sophnet.png" alt="算能云 Logo" width="48">
     </td>
     <td>
       <b>算能云</b> 提供算力赞助

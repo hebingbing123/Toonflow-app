@@ -1,4 +1,4 @@
-# Toonflow `backend` (Rust)
+# OpenFlow `backend` (Rust)
 
 Axum HTTP 服务，默认端口 **8666**（环境变量 `PORT` 可覆盖）。
 
@@ -23,7 +23,7 @@ cp .env.example .env   # 填入 DATABASE_URL、SUPABASE_JWT_SECRET、（可选�
 cargo run --bin toonflow-server
 ```
 
-每 **客户端 IP** 限流（`tower_governor`）；默认按 **连接 peer IP**。仅在**受信**反向代理后可将 **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** 设为使用 `Forwarded` / `X-Forwarded-For` 等（未受信时勿开，易被伪造）。可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、**`/api/v1/version`**、`/api/v1/ready`、**`POST /api/v1/webhooks/billing`**（计费 webhook，供收单方服务器回调；需 **`BILLING_WEBHOOK_SECRET`** + **`DATABASE_URL`**）。Toonflow 原生签名建议带 **`X-Toonflow-Timestamp`** 并对 **`"<unix>." + body`** 做 HMAC（抗重放；容差 **`BILLING_TOONFLOW_TOLERANCE_SECS`**）；设 **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`** 则禁止仅对 body 签名的旧方式。**`GET /api/v1/webhooks/billing/events`**（全局审计表）仅在 **`BILLING_WEBHOOK_EVENTS_LIST_ENABLED=1`** 时可用，否则 **403**；**`backend/.env.example`** 对本地开发默认写入 **1**，生产多租户请关闭。Webhook 首次成功入库时，若 JSON 含 **`user_id`**（UUID）与 **`plan_tier`**，会 upsert **`app_user_profile`**（可选 **`billing_currency`** / **`billing_provider`**）。
+每 **客户端 IP** 限流（`tower_governor`）；默认按 **连接 peer IP**。仅在**受信**反向代理后可将 **`RATE_LIMIT_TRUST_FORWARDED_HEADERS=1`** 设为使用 `Forwarded` / `X-Forwarded-For` 等（未受信时勿开，易被伪造）。可用 **`RATE_LIMIT_REFILL_MS`**（默认 `20`）、**`RATE_LIMIT_BURST`**（默认 `100`）调节。**不限流**：`/health`、`/api/v1/health`、**`/api/v1/version`**、`/api/v1/ready`、**`POST /api/v1/webhooks/billing`**（计费 webhook，供收单方服务器回调；需 **`BILLING_WEBHOOK_SECRET`** + **`DATABASE_URL`**）。OpenFlow 原生签名建议带 **`X-Toonflow-Timestamp`** 并对 **`"<unix>." + body`** 做 HMAC（抗重放；容差 **`BILLING_TOONFLOW_TOLERANCE_SECS`**）；设 **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`** 则禁止仅对 body 签名的旧方式。**`GET /api/v1/webhooks/billing/events`**（全局审计表）仅在 **`BILLING_WEBHOOK_EVENTS_LIST_ENABLED=1`** 时可用，否则 **403**；**`backend/.env.example`** 对本地开发默认写入 **1**，生产多租户请关闭。Webhook 首次成功入库时，若 JSON 含 **`user_id`**（UUID）与 **`plan_tier`**，会 upsert **`app_user_profile`**（可选 **`billing_currency`** / **`billing_provider`**）。
 
 异步任务 worker 多实例时设置不同 **`WORKER_ID`**，便于在任务行的 **`claimed_by`** 上区分认领实例（仍依赖 Postgres `SKIP LOCKED` 协调）。
 
