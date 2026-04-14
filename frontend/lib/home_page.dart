@@ -42,7 +42,6 @@ part 'home_page/project_editor/assets/compatibility/relations.dart';
 part 'home_page/project_editor/assets/corner_scape.dart';
 part 'home_page/project_editor/assets/clip_upload.dart';
 part 'home_page/project_editor/assets/compatibility/panel.dart';
-part 'home_page/project_editor/assets/section.dart';
 part 'home_page/project_editor/assets/generation/section.dart';
 part 'home_page/project_editor/assets/images/workbench.dart';
 part 'home_page/project_editor/assets/images/workbench_runtime.dart';
