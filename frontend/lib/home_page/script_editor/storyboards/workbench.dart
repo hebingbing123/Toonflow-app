@@ -111,75 +111,115 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                   );
                 });
               }
-              final outline = Theme.of(ctx2).colorScheme.outline;
               final diagnosis = diagnoseStoryboardList(
                 boards: boardsList,
                 productionSummaryLoaded: productionSummaryLoaded[0],
               );
-              return _buildScriptStoryboardsDialogView(
-                ctx: ctx2,
-                outline: outline,
-                boardsList: boardsList,
-                diagnosis: diagnosis,
-                productionSummaryLine: productionSummaryLine[0],
-                storyboardTaskLine: storyboardTaskLine[0],
-                actionBusy: actionBusy[0],
-                boardsLoading: boardsLoading[0],
-                productionSummaryLoading: productionSummaryLoading[0],
-                onAddStoryboard: actionBusy[0] || boardsLoading[0]
-                    ? null
-                    : () => _openAddStoryboardDialog(
-                        ctx: ctx2,
-                        setBoardsState: setBoardsState,
-                        token: token,
-                        projectId: projectId,
-                        projectNumericId: projectNumericId,
-                        scriptNumericId: scriptNumericId,
-                        boardsList: boardsList,
-                        actionBusy: actionBusy,
-                        storyboardTaskLine: storyboardTaskLine,
-                        productionSummaryLine: productionSummaryLine,
-                        productionSummaryLoaded: productionSummaryLoaded,
-                      ),
-                onBatchAddStoryboards: actionBusy[0] || boardsLoading[0]
-                    ? null
-                    : () => _openBatchAddStoryboardsDialog(
-                        ctx: ctx2,
-                        setBoardsState: setBoardsState,
-                        token: token,
-                        projectId: projectId,
-                        projectNumericId: projectNumericId,
-                        scriptNumericId: scriptNumericId,
-                        boardsList: boardsList,
-                        actionBusy: actionBusy,
-                        storyboardTaskLine: storyboardTaskLine,
-                        productionSummaryLine: productionSummaryLine,
-                        productionSummaryLoaded: productionSummaryLoaded,
-                      ),
-                onReloadBoards: actionBusy[0] || boardsLoading[0]
-                    ? null
-                    : () => _reloadScriptStoryboards(
-                        token: token,
-                        projectId: projectId,
-                        scriptNumericId: scriptNumericId,
-                        boardsList: boardsList,
-                        ctx: ctx2,
-                        setBoardsState: setBoardsState,
-                        boardsLoading: boardsLoading,
-                      ),
-                onOpenBatchWorkbench: actionBusy[0] || boardsLoading[0]
-                    ? null
-                    : () async {
-                        await _openStoryboardBatchWorkbenchDialog(
+              return StoryboardsWorkbenchDialogView(
+                model: StoryboardsWorkbenchDialogViewModel(
+                  boardsList: boardsList,
+                  diagnosis: diagnosis,
+                  productionSummaryLine: productionSummaryLine[0],
+                  storyboardTaskLine: storyboardTaskLine[0],
+                  actionBusy: actionBusy[0],
+                  boardsLoading: boardsLoading[0],
+                  productionSummaryLoading: productionSummaryLoading[0],
+                ),
+                callbacks: StoryboardsWorkbenchDialogViewCallbacks(
+                  onAddStoryboard: actionBusy[0] || boardsLoading[0]
+                      ? null
+                      : () => _openAddStoryboardDialog(
                           ctx: ctx2,
+                          setBoardsState: setBoardsState,
                           token: token,
+                          projectId: projectId,
                           projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           boardsList: boardsList,
-                          setBoardsState: setBoardsState,
                           actionBusy: actionBusy,
-                        );
-                        if (!ctx2.mounted) return;
+                          storyboardTaskLine: storyboardTaskLine,
+                          productionSummaryLine: productionSummaryLine,
+                          productionSummaryLoaded: productionSummaryLoaded,
+                        ),
+                  onBatchAddStoryboards: actionBusy[0] || boardsLoading[0]
+                      ? null
+                      : () => _openBatchAddStoryboardsDialog(
+                          ctx: ctx2,
+                          setBoardsState: setBoardsState,
+                          token: token,
+                          projectId: projectId,
+                          projectNumericId: projectNumericId,
+                          scriptNumericId: scriptNumericId,
+                          boardsList: boardsList,
+                          actionBusy: actionBusy,
+                          storyboardTaskLine: storyboardTaskLine,
+                          productionSummaryLine: productionSummaryLine,
+                          productionSummaryLoaded: productionSummaryLoaded,
+                        ),
+                  onReloadBoards: actionBusy[0] || boardsLoading[0]
+                      ? null
+                      : () => _reloadScriptStoryboards(
+                          token: token,
+                          projectId: projectId,
+                          scriptNumericId: scriptNumericId,
+                          boardsList: boardsList,
+                          ctx: ctx2,
+                          setBoardsState: setBoardsState,
+                          boardsLoading: boardsLoading,
+                        ),
+                  onOpenBatchWorkbench: actionBusy[0] || boardsLoading[0]
+                      ? null
+                      : () async {
+                          await _openStoryboardBatchWorkbenchDialog(
+                            ctx: ctx2,
+                            token: token,
+                            projectNumericId: projectNumericId,
+                            scriptNumericId: scriptNumericId,
+                            boardsList: boardsList,
+                            setBoardsState: setBoardsState,
+                            actionBusy: actionBusy,
+                          );
+                          if (!ctx2.mounted) return;
+                          await _reloadScriptStoryboards(
+                            token: token,
+                            projectId: projectId,
+                            scriptNumericId: scriptNumericId,
+                            boardsList: boardsList,
+                            ctx: ctx2,
+                            setBoardsState: setBoardsState,
+                            boardsLoading: boardsLoading,
+                          );
+                          if (!ctx2.mounted) return;
+                          await _reloadProductionStoryboardSummary(
+                            token: token,
+                            projectNumericId: projectNumericId,
+                            scriptNumericId: scriptNumericId,
+                            productionSummaryLine: productionSummaryLine,
+                            productionSummaryLoaded: productionSummaryLoaded,
+                            productionSummaryLoading: productionSummaryLoading,
+                            setBoardsState: setBoardsState,
+                          );
+                        },
+                  onReloadProductionSummary:
+                      actionBusy[0] || productionSummaryLoading[0]
+                      ? null
+                      : () => _reloadProductionStoryboardSummary(
+                          token: token,
+                          projectNumericId: projectNumericId,
+                          scriptNumericId: scriptNumericId,
+                          productionSummaryLine: productionSummaryLine,
+                          productionSummaryLoaded: productionSummaryLoaded,
+                          productionSummaryLoading: productionSummaryLoading,
+                          setBoardsState: setBoardsState,
+                        ),
+                  onOpenStoryboard: (board) async {
+                    await _openStoryboardEditor(
+                      token,
+                      board.numericId,
+                      projectId: projectId,
+                      projectNumericId: projectNumericId,
+                      scriptNumericId: scriptNumericId,
+                      onStoryboardTreeMutated: () async {
                         await _reloadScriptStoryboards(
                           token: token,
                           projectId: projectId,
@@ -200,49 +240,10 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           setBoardsState: setBoardsState,
                         );
                       },
-                onReloadProductionSummary:
-                    actionBusy[0] || productionSummaryLoading[0]
-                    ? null
-                    : () => _reloadProductionStoryboardSummary(
-                        token: token,
-                        projectNumericId: projectNumericId,
-                        scriptNumericId: scriptNumericId,
-                        productionSummaryLine: productionSummaryLine,
-                        productionSummaryLoaded: productionSummaryLoaded,
-                        productionSummaryLoading: productionSummaryLoading,
-                        setBoardsState: setBoardsState,
-                      ),
-                onOpenStoryboard: (b) async {
-                  await _openStoryboardEditor(
-                    token,
-                    b.numericId,
-                    projectId: projectId,
-                    projectNumericId: projectNumericId,
-                    scriptNumericId: scriptNumericId,
-                    onStoryboardTreeMutated: () async {
-                      await _reloadScriptStoryboards(
-                        token: token,
-                        projectId: projectId,
-                        scriptNumericId: scriptNumericId,
-                        boardsList: boardsList,
-                        ctx: ctx2,
-                        setBoardsState: setBoardsState,
-                        boardsLoading: boardsLoading,
-                      );
-                      if (!ctx2.mounted) return;
-                      await _reloadProductionStoryboardSummary(
-                        token: token,
-                        projectNumericId: projectNumericId,
-                        scriptNumericId: scriptNumericId,
-                        productionSummaryLine: productionSummaryLine,
-                        productionSummaryLoaded: productionSummaryLoaded,
-                        productionSummaryLoading: productionSummaryLoading,
-                        setBoardsState: setBoardsState,
-                      );
-                    },
-                  );
-                },
-                onClose: () => Navigator.of(ctx2).pop(),
+                    );
+                  },
+                  onClose: () => Navigator.of(ctx2).pop(),
+                ),
               );
             },
           );
