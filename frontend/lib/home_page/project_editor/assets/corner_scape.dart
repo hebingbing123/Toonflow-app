@@ -158,41 +158,54 @@ extension _HomePageProjectEditorAssetsCornerScapeWorkbench on _HomePageState {
                   await refreshAssets(setState);
                 });
               }
-              return _buildCornerScapeWorkbenchDialog(
-                ctx: dialogCtx,
-                typesCtrl: typesCtrl,
-                assetsBusy: assetsBusy,
-                assets: assets,
-                selectedAssetNumericId: selectedAssetNumericId,
-                selectedHistoryImageId: selectedHistoryImageId,
-                selectedPreviewBytes: selectedPreviewBytes,
-                loading: loading,
-                loadingPreview: loadingPreview,
-                summaryLine: summaryLine,
-                selectedAsset: selectedAsset(),
-                selectedImage: selectedHistoryImage(),
-                setState: setState,
-                refreshAssets: refreshAssets,
-                loadPreview: loadPreview,
-                syncSummaryLine: syncSummaryLine,
-                onAssetSelected: (assetNumericId) {
-                  setState(() {
-                    selectedAssetNumericId = assetNumericId;
-                    selectedHistoryImageId =
-                        chooseInitialCornerScapeHistoryImageId(
-                          assets,
-                          selectedAssetNumericId: assetNumericId,
-                          preferredHistoryImageId: selectedHistoryImageId,
-                        );
-                    selectedPreviewBytes = null;
-                  });
-                },
-                onHistoryImageSelected: (historyImageId) {
-                  setState(() {
-                    selectedHistoryImageId = historyImageId;
-                    selectedPreviewBytes = null;
-                  });
-                },
+              return CornerScapeWorkbenchDialogView(
+                model: CornerScapeWorkbenchDialogViewModel(
+                  typesCtrl: typesCtrl,
+                  busy: assetsBusy[0],
+                  assets: assets,
+                  selectedAssetNumericId: selectedAssetNumericId,
+                  selectedHistoryImageId: selectedHistoryImageId,
+                  selectedPreviewBytes: selectedPreviewBytes,
+                  loading: loading,
+                  loadingPreview: loadingPreview,
+                  summaryLine: summaryLine,
+                  selectedAsset: selectedAsset(),
+                  selectedImage: selectedHistoryImage(),
+                ),
+                callbacks: CornerScapeWorkbenchDialogViewCallbacks(
+                  onRefresh: () => refreshAssets(setState),
+                  onClearFilter: () async {
+                    typesCtrl.clear();
+                    await refreshAssets(setState);
+                  },
+                  onPresetType: (type) async {
+                    typesCtrl.text = type;
+                    await refreshAssets(setState);
+                  },
+                  onAssetSelected: (assetNumericId) async {
+                    setState(() {
+                      selectedAssetNumericId = assetNumericId;
+                      selectedHistoryImageId =
+                          chooseInitialCornerScapeHistoryImageId(
+                            assets,
+                            selectedAssetNumericId: assetNumericId,
+                            preferredHistoryImageId: selectedHistoryImageId,
+                          );
+                      selectedPreviewBytes = null;
+                    });
+                    syncSummaryLine(setState);
+                    await loadPreview(setState);
+                  },
+                  onHistoryImageSelected: (historyImageId) async {
+                    setState(() {
+                      selectedHistoryImageId = historyImageId;
+                      selectedPreviewBytes = null;
+                    });
+                    syncSummaryLine(setState);
+                    await loadPreview(setState);
+                  },
+                  onClose: () => Navigator.of(dialogCtx).pop(),
+                ),
               );
             },
           );
