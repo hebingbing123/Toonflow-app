@@ -105,7 +105,7 @@ pub struct PatchArtStyleBody {
     pub prompt: Option<Value>,
 }
 
-/// OpenAPI component schemas for art-style REST (`ref("ArtStyleRow")`, etc.); merged before legacy JSON.
+/// OpenAPI component schemas for art-style REST (`ref("ArtStyleRow")`, etc.).
 #[derive(OpenApi)]
 #[openapi(components(schemas(
     ArtStyleRow,

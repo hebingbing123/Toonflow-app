@@ -1,6 +1,6 @@
 part of '../../../../home_page.dart';
 
-/// Renders the collapsed compatibility actions that keep legacy asset entry points available.
+/// Renders collapsed asset probe actions for project editor diagnostics.
 class _ProjectAssetsCompatibilityPanel extends StatelessWidget {
   const _ProjectAssetsCompatibilityPanel({
     required this.ctx,
@@ -41,9 +41,9 @@ class _ProjectAssetsCompatibilityPanel extends StatelessWidget {
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('兼容性检查'),
+      title: const Text('资产探针'),
       subtitle: Text(
-        '保留旧资产轮询、历史图片和 workbench 形检查入口，默认折叠',
+        '用于资产轮询、历史图片与 workbench 形检查，默认折叠',
         style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
           color: Theme.of(ctx).colorScheme.outline,
         ),

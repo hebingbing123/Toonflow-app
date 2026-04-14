@@ -6,7 +6,7 @@
 //! 日常改接口应优先改各域 handler 上的 utoipa 注解与 Rust 类型。
 //!
 //! 契约由各域 `#[derive(OpenApi)]` / handler utoipa 注解与 Rust `#[derive(ToSchema)]` 类型组成；
-//! 不再保留 legacy 组件注册层或相关生成物。
+//! 不再保留旧组件注册层或相关生成物。
 
 mod generated;
 mod merge;

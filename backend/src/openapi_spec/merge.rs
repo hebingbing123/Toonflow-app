@@ -84,7 +84,7 @@ pub fn merged_openapi_yaml_cached() -> &'static str {
     static DOC: OnceLock<String> = OnceLock::new();
     DOC.get_or_init(|| {
         merged_openapi_yaml_string().unwrap_or_else(|err| {
-            tracing::error!(%err, "OpenAPI merge failed; serving document base only (shell + legacy schemas)");
+            tracing::error!(%err, "OpenAPI merge failed; serving document base only (shell only)");
             document_base_yaml_for_fallback()
         })
     })

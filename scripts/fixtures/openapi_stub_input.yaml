@@ -96,7 +96,7 @@ paths:
 
         - **Toonflow native**: `X-Toonflow-Signature: sha256=<hex>`. Recommended: also send **`X-Toonflow-Timestamp: <unix_secs>`**
         and sign **`HMAC-SHA256(secret, "<unix_secs>." + raw_body)`** (replay-resistant; window **`BILLING_TOONFLOW_TOLERANCE_SECS`**,
-        default 300s). Without the timestamp header, legacy **`HMAC-SHA256(secret, raw_body)`** still works unless **`BILLING_TOONFLOW_REQUIRE_TIMESTAMP=1`**.
+        default 300s). The timestamp header is required; signature uses **`HMAC-SHA256(secret, "<unix_secs>." + raw_body)`**.
 
         - **Stripe native**: `Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]` (HMAC-SHA256 of `<unix>.<raw_body>`)
 

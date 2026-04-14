@@ -175,7 +175,14 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
 
     let body_json = r#"{"id":"evt_contract_smoke_billing_no_db"}"#;
     let body = body_json.as_bytes();
+    let ts: u64 = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(1_700_000_000);
+    let ts_str = ts.to_string();
     let mut mac = Hmac::<Sha256>::new_from_slice(SM_SECRET.as_bytes()).expect("hmac key");
+    mac.update(ts_str.as_bytes());
+    mac.update(b".");
     mac.update(body);
     let sig = hex::encode(mac.finalize().into_bytes());
     let sig_hdr = HeaderValue::from_str(&format!("sha256={sig}")).expect("signature header");
@@ -187,6 +194,7 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
             .uri("/api/v1/webhooks/billing")
             .header(header::CONTENT_TYPE, "application/json")
             .header("x-toonflow-signature", sig_hdr)
+            .header("x-toonflow-timestamp", ts_str)
             .extension(ConnectInfo(test_addr()))
             .body(Body::from(body_json.to_string()))
             .unwrap(),

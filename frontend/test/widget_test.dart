@@ -3,7 +3,7 @@ import 'package:toonflow_app/main.dart';
 
 void main() {
   testWidgets('App renders title', (WidgetTester tester) async {
-    await tester.pumpWidget(const ToonflowApp());
+    await tester.pumpWidget(const OpenFlowApp());
     expect(find.text('Toonflow'), findsOneWidget);
   });
 }
