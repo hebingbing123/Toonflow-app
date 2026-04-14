@@ -1,12 +1,12 @@
 //! OpenAPI: Rust shell ([`shell`]), [`merge`] 输出，以及已提交的 path stubs（[`generated`]）。
 //!
-//! **你不需要维护一份「手写整本」`openapi.yaml`。** 运行中的契约来自本模块的 utoipa 合并结果；`embedded/legacy_component_schemas.json`
-//! 与 `scripts/fixtures/openapi_stub_input.yaml`（仅用于 **重新生成** stubs，见 `scripts/extract_openapi_rust_sources.py` /
+//! **你不需要维护一份「手写整本」`openapi.yaml`。** 运行中的契约来自本模块的 utoipa 合并结果；`scripts/fixtures/openapi_stub_input.yaml`
+//! （仅用于 **重新生成** stubs，见 `scripts/extract_openapi_rust_sources.py` /
 //! `scripts/gen_openapi_utoipa_stubs.py`）是 **从单体 OpenAPI 抽取** 的产物，**不参与** `merge.rs` 运行时合并。
 //! 日常改接口应优先改各域 handler 上的 utoipa 注解与 Rust 类型。
 //!
 //! 契约由各域 `#[derive(OpenApi)]` / handler utoipa 注解与 Rust `#[derive(ToSchema)]` 类型组成；
-//! `embedded/legacy_component_schemas.json` 仅保留为空占位，不再参与运行时合并。
+//! 不再保留 legacy 组件注册层或相关生成物。
 
 mod generated;
 mod merge;
