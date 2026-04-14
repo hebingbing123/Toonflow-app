@@ -114,135 +114,140 @@ extension _HomePageProjectEditorNovelEventsWorkbenchDialog on _HomePageState {
                 }
               }
 
-              return _buildNovelEventsWorkbenchDialogView(
-                dialogCtx: dialogCtx,
-                infoLine: infoLine,
-                previewRows: previewRows,
-                localBusy: localBusy,
-                searchCtrl: searchCtrl,
-                createNameCtrl: createNameCtrl,
-                createDetailCtrl: createDetailCtrl,
-                createChapterIdsCtrl: createChapterIdsCtrl,
-                selectedEventIdCtrl: selectedEventIdCtrl,
-                patchNameCtrl: patchNameCtrl,
-                patchDetailCtrl: patchDetailCtrl,
-                patchChapterIdsCtrl: patchChapterIdsCtrl,
-                batchDeleteIdsCtrl: batchDeleteIdsCtrl,
-                onSearch: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        final rows = await fetchProjectNovelEventsByProjectId(
-                          token,
-                          p.id,
-                          search: searchCtrl.text.trim(),
-                          page: 1,
-                          limit: 10,
-                        );
-                        final workbenchPage = await fetchNovelEventsPaged(
-                          token,
-                          p.numericId,
-                          page: 1,
-                          limit: 10,
-                          search: searchCtrl.text.trim(),
-                        );
-                        setLocalState(() {
-                          previewRows = List<NovelEventRow>.from(rows.items);
-                          infoLine =
-                              'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
-                        });
-                      }),
-                onRefresh: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        await refreshWorkbench(setLocalState);
-                      }),
-                onCreate: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        final created =
-                            await createProjectNovelEventUnderProject(
-                              token,
-                              p.id,
-                              name: createNameCtrl.text.trim(),
-                              detail: createDetailCtrl.text.trim(),
-                              chapterIds: _parseNumericIdList(
-                                createChapterIdsCtrl.text,
-                              ),
-                            );
-                        await refreshWorkbench(setLocalState);
-                        setLocalState(() {
-                          final numericId = (created['id'] as num?)?.toInt();
-                          infoLine = numericId == null
-                              ? '已新增事件。'
-                              : '已新增事件 #$numericId。';
-                          if (numericId != null) {
-                            selectedEventIdCtrl.text = numericId.toString();
-                          }
-                          patchNameCtrl.text = createNameCtrl.text.trim();
-                          patchDetailCtrl.text = createDetailCtrl.text.trim();
-                          patchChapterIdsCtrl.text = createChapterIdsCtrl.text
-                              .trim();
-                        });
-                      }),
-                onSave: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        final eventId = int.parse(
-                          selectedEventIdCtrl.text.trim(),
-                        );
-                        final message =
-                            await patchProjectNovelEventByProjectIds(
-                              token,
-                              p.id,
-                              eventId,
-                              {
-                                'name': patchNameCtrl.text.trim(),
-                                'detail': patchDetailCtrl.text.trim(),
-                                'chapterIds': _parseNumericIdList(
-                                  patchChapterIdsCtrl.text,
+              return NovelEventsWorkbenchDialogView(
+                model: NovelEventsWorkbenchDialogViewModel(
+                  infoLine: infoLine,
+                  previewRows: previewRows,
+                  localBusy: localBusy,
+                  searchCtrl: searchCtrl,
+                  createNameCtrl: createNameCtrl,
+                  createDetailCtrl: createDetailCtrl,
+                  createChapterIdsCtrl: createChapterIdsCtrl,
+                  selectedEventIdCtrl: selectedEventIdCtrl,
+                  patchNameCtrl: patchNameCtrl,
+                  patchDetailCtrl: patchDetailCtrl,
+                  patchChapterIdsCtrl: patchChapterIdsCtrl,
+                  batchDeleteIdsCtrl: batchDeleteIdsCtrl,
+                ),
+                callbacks: NovelEventsWorkbenchDialogViewCallbacks(
+                  onSearch: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          final rows = await fetchProjectNovelEventsByProjectId(
+                            token,
+                            p.id,
+                            search: searchCtrl.text.trim(),
+                            page: 1,
+                            limit: 10,
+                          );
+                          final workbenchPage = await fetchNovelEventsPaged(
+                            token,
+                            p.numericId,
+                            page: 1,
+                            limit: 10,
+                            search: searchCtrl.text.trim(),
+                          );
+                          setLocalState(() {
+                            previewRows = List<NovelEventRow>.from(rows.items);
+                            infoLine =
+                                'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
+                          });
+                        }),
+                  onRefresh: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          await refreshWorkbench(setLocalState);
+                        }),
+                  onCreate: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          final created =
+                              await createProjectNovelEventUnderProject(
+                                token,
+                                p.id,
+                                name: createNameCtrl.text.trim(),
+                                detail: createDetailCtrl.text.trim(),
+                                chapterIds: _parseNumericIdList(
+                                  createChapterIdsCtrl.text,
                                 ),
-                              },
-                            );
-                        await refreshWorkbench(setLocalState);
-                        setLocalState(() {
-                          infoLine = '已更新事件 #$eventId：$message';
-                        });
-                      }),
-                onDeleteCurrent: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        final eventId = int.parse(
-                          selectedEventIdCtrl.text.trim(),
-                        );
-                        final message =
-                            await deleteProjectNovelEventByProjectIds(
-                              token,
-                              p.id,
-                              eventId,
-                            );
-                        await refreshWorkbench(setLocalState);
-                        setLocalState(() {
-                          infoLine = '已删除事件 #$eventId：$message';
-                        });
-                      }),
-                onBatchDelete: localBusy
-                    ? null
-                    : () => runAction(() async {
-                        final ids = _parseNumericIdList(
-                          batchDeleteIdsCtrl.text,
-                        );
-                        final message =
-                            await postProjectNovelEventsBatchDeleteByProjectId(
-                              token,
-                              p.id,
-                              ids,
-                            );
-                        await refreshWorkbench(setLocalState);
-                        setLocalState(() {
-                          infoLine = '已批量删除 ${ids.length} 条事件：$message';
-                        });
-                      }),
-                onClose: localBusy ? null : () => Navigator.of(dialogCtx).pop(),
+                              );
+                          await refreshWorkbench(setLocalState);
+                          setLocalState(() {
+                            final numericId = (created['id'] as num?)?.toInt();
+                            infoLine = numericId == null
+                                ? '已新增事件。'
+                                : '已新增事件 #$numericId。';
+                            if (numericId != null) {
+                              selectedEventIdCtrl.text = numericId.toString();
+                            }
+                            patchNameCtrl.text = createNameCtrl.text.trim();
+                            patchDetailCtrl.text = createDetailCtrl.text.trim();
+                            patchChapterIdsCtrl.text = createChapterIdsCtrl.text
+                                .trim();
+                          });
+                        }),
+                  onSave: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          final eventId = int.parse(
+                            selectedEventIdCtrl.text.trim(),
+                          );
+                          final message =
+                              await patchProjectNovelEventByProjectIds(
+                                token,
+                                p.id,
+                                eventId,
+                                {
+                                  'name': patchNameCtrl.text.trim(),
+                                  'detail': patchDetailCtrl.text.trim(),
+                                  'chapterIds': _parseNumericIdList(
+                                    patchChapterIdsCtrl.text,
+                                  ),
+                                },
+                              );
+                          await refreshWorkbench(setLocalState);
+                          setLocalState(() {
+                            infoLine = '已更新事件 #$eventId：$message';
+                          });
+                        }),
+                  onDeleteCurrent: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          final eventId = int.parse(
+                            selectedEventIdCtrl.text.trim(),
+                          );
+                          final message =
+                              await deleteProjectNovelEventByProjectIds(
+                                token,
+                                p.id,
+                                eventId,
+                              );
+                          await refreshWorkbench(setLocalState);
+                          setLocalState(() {
+                            infoLine = '已删除事件 #$eventId：$message';
+                          });
+                        }),
+                  onBatchDelete: localBusy
+                      ? null
+                      : () => runAction(() async {
+                          final ids = _parseNumericIdList(
+                            batchDeleteIdsCtrl.text,
+                          );
+                          final message =
+                              await postProjectNovelEventsBatchDeleteByProjectId(
+                                token,
+                                p.id,
+                                ids,
+                              );
+                          await refreshWorkbench(setLocalState);
+                          setLocalState(() {
+                            infoLine = '已批量删除 ${ids.length} 条事件：$message';
+                          });
+                        }),
+                  onClose: localBusy
+                      ? null
+                      : () => Navigator.of(dialogCtx).pop(),
+                ),
               );
             },
           );
