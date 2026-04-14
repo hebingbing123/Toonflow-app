@@ -39,7 +39,7 @@ cargo run --bin toonflow-server
 
 新建项目：**`POST /api/v1/projects`**（Bearer，JSON 体字段均可选）— 写入 **`app_project`**；**`numeric_id`** 在事务内用 **`pg_advisory_xact_lock`** + 全表 **`MAX(numeric_id)+1`** 分配，避免并发撞号。
 
-项目删除：**`DELETE /api/v1/projects/{project_id}`**（Bearer；**`project_id`** 为项目 UUID）— 删除当前用户名下该项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同 legacy 项目范围。
+项目删除：**`DELETE /api/v1/projects/{project_id}`**（Bearer；**`project_id`** 为项目 UUID）— 删除当前用户名下该项目；子表 **`app_script`** / **`app_storyboard`** / **`app_novel`** 等随 FK 级联删除；并清理 **`app_agent_memory`** 中同历史项目范围。
 
 全局汇总：**`GET /api/v1/projects/summary`**（Bearer）— 单次查询当前用户的 **`app_project`**、**`app_script`**、**`app_storyboard`**、**`app_novel`**、**`role_count`**（**`app_asset`** 且 **`asset_type = 'role'`**，与 **`…/stats`** 一致）、**`app_art_style`**、**`asset_count`**（全部 **`app_asset`**）、**`video_count`**（当前恒 **0**，与 **`…/stats`** 占位一致，待 PG 视频表）。
 
