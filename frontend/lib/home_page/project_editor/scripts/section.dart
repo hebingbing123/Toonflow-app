@@ -13,7 +13,6 @@ extension _HomePageProjectEditorScripts on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) {
-    final outline = Theme.of(ctx).colorScheme.outline;
     final allScriptIds = scriptList
         .map((script) => script.numericId)
         .toList(growable: false);
@@ -190,115 +189,114 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         overviewActionLabel = '导出全部剧本';
     }
 
-    return _buildProjectScriptsSectionView(
-      ctx: ctx,
-      outline: outline,
-      p: p,
-      saving: saving,
-      scriptProbeBusy: scriptProbeBusy,
-      scriptTaskBusy: scriptTaskBusy,
-      scriptTaskLine: scriptTaskLine,
-      scriptList: scriptList,
-      statsRef: statsRef,
-      overviewDiagnosis: overviewDiagnosis,
-      overviewAction: overviewAction,
-      overviewActionLabel: overviewActionLabel,
-      onOpenWorkbench: () => _openProjectScriptsWorkbenchDialog(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        saving: saving,
-        scriptTaskBusy: scriptTaskBusy,
-        scriptTaskLine: scriptTaskLine,
+    return ProjectScriptsSectionView(
+      model: ProjectScriptsSectionViewModel(
+        saving: saving[0],
+        scriptTaskBusy: scriptTaskBusy[0],
+        scriptTaskLine: scriptTaskLine[0],
         scriptList: scriptList,
-        statsRef: statsRef,
+        overviewDiagnosis: overviewDiagnosis,
+        overviewActionLabel: overviewActionLabel,
+        overviewAction: overviewAction,
+        probeActions: _buildProjectScriptsProbeActions(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          saving: saving,
+          scriptProbeBusy: scriptProbeBusy,
+          scriptList: scriptList,
+        ),
       ),
-      onOpenBatchAddDialog: () => _openBatchAddScriptsDialog(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        saving: saving,
-        scriptTaskLine: scriptTaskLine,
-        scriptList: scriptList,
-        statsRef: statsRef,
-      ),
-      onExportAll: runProjectScriptsExportAll,
-      onPollAll: runProjectScriptsPollAll,
-      onExtractAll: runProjectScriptsExtractAll,
-      onCreateEmptyScript: () async {
-        setDialogState(() => saving[0] = true);
-        try {
-          final s = await createScriptUnderProject(token, p.id);
-          if (!ctx.mounted) return;
-          scriptList.add(
-            ScriptBrief(
-              numericId: s.numericId,
-              name: s.name,
-              extractState: s.extractState,
-            ),
-          );
+      callbacks: ProjectScriptsSectionViewCallbacks(
+        onOpenWorkbench: () => _openProjectScriptsWorkbenchDialog(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          saving: saving,
+          scriptTaskBusy: scriptTaskBusy,
+          scriptTaskLine: scriptTaskLine,
+          scriptList: scriptList,
+          statsRef: statsRef,
+        ),
+        onOpenBatchAddDialog: () => _openBatchAddScriptsDialog(
+          ctx: ctx,
+          setDialogState: setDialogState,
+          token: token,
+          p: p,
+          saving: saving,
+          scriptTaskLine: scriptTaskLine,
+          scriptList: scriptList,
+          statsRef: statsRef,
+        ),
+        onExportAll: runProjectScriptsExportAll,
+        onPollAll: runProjectScriptsPollAll,
+        onExtractAll: runProjectScriptsExtractAll,
+        onCreateEmptyScript: () async {
+          setDialogState(() => saving[0] = true);
           try {
-            statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
-          } catch (_) {}
-          final nextDiagnosis = diagnoseScriptBatchWorkbench(
-            selectedIds: scriptList.map((script) => script.numericId),
-            scripts: scriptList,
-            previewRows: const [],
-          );
-          if (!ctx.mounted) return;
-          setDialogState(() {
-            saving[0] = false;
-            scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-              actionSummary: '已创建剧本 #${s.numericId}。',
-              diagnosis: nextDiagnosis,
+            final s = await createScriptUnderProject(token, p.id);
+            if (!ctx.mounted) return;
+            scriptList.add(
+              ScriptBrief(
+                numericId: s.numericId,
+                name: s.name,
+                extractState: s.extractState,
+              ),
             );
-          });
-          ScaffoldMessenger.of(
-            ctx,
-          ).showSnackBar(SnackBar(content: Text('已创建剧本 #${s.numericId}')));
-        } on RustApiException catch (e) {
-          if (ctx.mounted) {
-            setDialogState(() => saving[0] = false);
+            try {
+              statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
+            } catch (_) {}
+            final nextDiagnosis = diagnoseScriptBatchWorkbench(
+              selectedIds: scriptList.map((script) => script.numericId),
+              scripts: scriptList,
+              previewRows: const [],
+            );
+            if (!ctx.mounted) return;
+            setDialogState(() {
+              saving[0] = false;
+              scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
+                actionSummary: '已创建剧本 #${s.numericId}。',
+                diagnosis: nextDiagnosis,
+              );
+            });
             ScaffoldMessenger.of(
               ctx,
-            ).showSnackBar(SnackBar(content: Text(e.toString())));
+            ).showSnackBar(SnackBar(content: Text('已创建剧本 #${s.numericId}')));
+          } on RustApiException catch (e) {
+            if (ctx.mounted) {
+              setDialogState(() => saving[0] = false);
+              ScaffoldMessenger.of(
+                ctx,
+              ).showSnackBar(SnackBar(content: Text(e.toString())));
+            }
+          } catch (e) {
+            if (ctx.mounted) {
+              setDialogState(() => saving[0] = false);
+              ScaffoldMessenger.of(
+                ctx,
+              ).showSnackBar(SnackBar(content: Text(e.toString())));
+            }
           }
-        } catch (e) {
-          if (ctx.mounted) {
-            setDialogState(() => saving[0] = false);
-            ScaffoldMessenger.of(
-              ctx,
-            ).showSnackBar(SnackBar(content: Text(e.toString())));
-          }
-        }
-      },
-      buildProbeActions: () => _buildProjectScriptsProbeActions(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        saving: saving,
-        scriptProbeBusy: scriptProbeBusy,
-        scriptList: scriptList,
-      ),
-      onOpenScriptEditor: (script) => _openScriptEditor(
-        token,
-        script.numericId,
-        projectId: p.id,
-        projectNumericId: p.numericId,
-        onScriptTreeMutated: () async {
-          final d = await fetchProjectByProjectId(token, p.id);
-          if (!ctx.mounted) return;
-          scriptList
-            ..clear()
-            ..addAll(d.scripts);
-          try {
-            statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
-          } catch (_) {}
-          setDialogState(() {});
         },
+        onOpenScriptEditor: (script) => _openScriptEditor(
+          token,
+          script.numericId,
+          projectId: p.id,
+          projectNumericId: p.numericId,
+          onScriptTreeMutated: () async {
+            final d = await fetchProjectByProjectId(token, p.id);
+            if (!ctx.mounted) return;
+            scriptList
+              ..clear()
+              ..addAll(d.scripts);
+            try {
+              statsRef[0] = await fetchProjectStatsByProjectId(token, p.id);
+            } catch (_) {}
+            setDialogState(() {});
+          },
+        ),
       ),
     );
   }

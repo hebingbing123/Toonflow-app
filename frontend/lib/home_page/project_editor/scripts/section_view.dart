@@ -1,68 +1,103 @@
-part of '../../../../home_page.dart';
+import 'package:flutter/material.dart';
 
-extension _HomePageProjectEditorScriptsSectionView on _HomePageState {
-  Widget _buildProjectScriptsSectionView({
-    required BuildContext ctx,
-    required Color outline,
-    required ProjectRow p,
-    required List<bool> saving,
-    required List<bool> scriptProbeBusy,
-    required List<bool> scriptTaskBusy,
-    required List<String?> scriptTaskLine,
-    required List<ScriptBrief> scriptList,
-    required List<ProjectStats?> statsRef,
-    required ScriptBatchWorkbenchDiagnosis overviewDiagnosis,
-    required VoidCallback? overviewAction,
-    required String overviewActionLabel,
-    required VoidCallback onOpenWorkbench,
-    required VoidCallback onOpenBatchAddDialog,
-    required Future<void> Function() onExportAll,
-    required Future<void> Function() onPollAll,
-    required Future<void> Function() onExtractAll,
-    required Future<void> Function() onCreateEmptyScript,
-    required List<Widget> Function() buildProbeActions,
-    required void Function(ScriptBrief script) onOpenScriptEditor,
-  }) {
+import '../../../../rust_api.dart';
+import '../../script_editor/support.dart';
+
+class ProjectScriptsSectionViewModel {
+  const ProjectScriptsSectionViewModel({
+    required this.saving,
+    required this.scriptTaskBusy,
+    required this.scriptTaskLine,
+    required this.scriptList,
+    required this.overviewDiagnosis,
+    required this.overviewActionLabel,
+    required this.overviewAction,
+    required this.probeActions,
+  });
+
+  final bool saving;
+  final bool scriptTaskBusy;
+  final String? scriptTaskLine;
+  final List<ScriptBrief> scriptList;
+  final ScriptBatchWorkbenchDiagnosis overviewDiagnosis;
+  final String overviewActionLabel;
+  final VoidCallback? overviewAction;
+  final List<Widget> probeActions;
+}
+
+class ProjectScriptsSectionViewCallbacks {
+  const ProjectScriptsSectionViewCallbacks({
+    required this.onOpenWorkbench,
+    required this.onOpenBatchAddDialog,
+    required this.onExportAll,
+    required this.onPollAll,
+    required this.onExtractAll,
+    required this.onCreateEmptyScript,
+    required this.onOpenScriptEditor,
+  });
+
+  final VoidCallback? onOpenWorkbench;
+  final VoidCallback? onOpenBatchAddDialog;
+  final VoidCallback? onExportAll;
+  final VoidCallback? onPollAll;
+  final VoidCallback? onExtractAll;
+  final VoidCallback? onCreateEmptyScript;
+  final void Function(ScriptBrief script)? onOpenScriptEditor;
+}
+
+/// 项目剧本区块视图，承载批量工作台入口、建议卡与剧本列表。
+class ProjectScriptsSectionView extends StatelessWidget {
+  const ProjectScriptsSectionView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final ProjectScriptsSectionViewModel model;
+  final ProjectScriptsSectionViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '${scriptList.length} 条剧本',
-          style: Theme.of(ctx).textTheme.labelLarge,
+          '${model.scriptList.length} 条剧本',
+          style: theme.textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
         Text(
           '在项目下管理剧本，并进入剧本详情维护内容与分镜。',
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+          style: theme.textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
             borderRadius: BorderRadius.circular(12),
-            color: Theme.of(
-              ctx,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.35,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('剧本批量工作台', style: Theme.of(ctx).textTheme.titleSmall),
+              Text('剧本批量工作台', style: theme.textTheme.titleSmall),
               const SizedBox(height: 4),
               Text(
                 '把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。',
-                style: Theme.of(
-                  ctx,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: saving[0] || scriptTaskBusy[0]
+                onPressed: model.saving || model.scriptTaskBusy
                     ? null
-                    : onOpenWorkbench,
+                    : callbacks.onOpenWorkbench,
                 child: const Text('打开剧本批量工作台'),
               ),
             ],
@@ -73,32 +108,30 @@ extension _HomePageProjectEditorScriptsSectionView on _HomePageState {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
             borderRadius: BorderRadius.circular(12),
-            color: Theme.of(
-              ctx,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.28,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('当前批量建议', style: Theme.of(ctx).textTheme.titleSmall),
+              Text('当前批量建议', style: theme.textTheme.titleSmall),
               const SizedBox(height: 4),
               Text(
-                overviewDiagnosis.summary,
-                style: Theme.of(ctx).textTheme.bodyMedium,
+                model.overviewDiagnosis.summary,
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 4),
               Text(
-                overviewDiagnosis.detail,
-                style: Theme.of(
-                  ctx,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                model.overviewDiagnosis.detail,
+                style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: overviewAction,
-                child: Text(overviewActionLabel),
+                onPressed: model.overviewAction,
+                child: Text(model.overviewActionLabel),
               ),
             ],
           ),
@@ -109,40 +142,49 @@ extension _HomePageProjectEditorScriptsSectionView on _HomePageState {
           runSpacing: 0,
           children: [
             TextButton(
-              onPressed: saving[0] ? null : onOpenBatchAddDialog,
+              onPressed: model.saving ? null : callbacks.onOpenBatchAddDialog,
               child: const Text('批量新增剧本'),
             ),
             TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+              onPressed:
+                  model.saving ||
+                      model.scriptTaskBusy ||
+                      model.scriptList.isEmpty
                   ? null
-                  : onExportAll,
-              child: Text(scriptTaskBusy[0] ? '处理中…' : '导出全部剧本'),
+                  : callbacks.onExportAll,
+              child: Text(model.scriptTaskBusy ? '处理中…' : '导出全部剧本'),
             ),
             TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+              onPressed:
+                  model.saving ||
+                      model.scriptTaskBusy ||
+                      model.scriptList.isEmpty
                   ? null
-                  : onPollAll,
+                  : callbacks.onPollAll,
               child: const Text('轮询全部提取状态'),
             ),
             TextButton(
-              onPressed: saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
+              onPressed:
+                  model.saving ||
+                      model.scriptTaskBusy ||
+                      model.scriptList.isEmpty
                   ? null
-                  : onExtractAll,
+                  : callbacks.onExtractAll,
               child: const Text('提取全部剧本素材'),
             ),
           ],
         ),
-        if (scriptTaskLine[0] != null) ...[
+        if (model.scriptTaskLine != null) ...[
           const SizedBox(height: 4),
           Text(
-            scriptTaskLine[0]!,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+            model.scriptTaskLine!,
+            style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
         ],
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: saving[0] ? null : onCreateEmptyScript,
+            onPressed: model.saving ? null : callbacks.onCreateEmptyScript,
             child: const Text('新建空剧本'),
           ),
         ),
@@ -152,7 +194,7 @@ extension _HomePageProjectEditorScriptsSectionView on _HomePageState {
           title: const Text('兼容性检查'),
           subtitle: Text(
             '保留旧剧本接口与导出/提取回归入口，默认折叠',
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           children: [
             Align(
@@ -160,22 +202,24 @@ extension _HomePageProjectEditorScriptsSectionView on _HomePageState {
               child: Wrap(
                 spacing: 4,
                 runSpacing: 0,
-                children: [...buildProbeActions()],
+                children: model.probeActions,
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ...scriptList.map(
-          (s) => ListTile(
+        ...model.scriptList.map(
+          (script) => ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(
-              '#${s.numericId} ${s.name ?? ""}',
-              style: Theme.of(ctx).textTheme.bodySmall,
+              '#${script.numericId} ${script.name ?? ""}',
+              style: theme.textTheme.bodySmall,
             ),
             trailing: const Icon(Icons.edit_outlined, size: 18),
-            onTap: saving[0] ? null : () => onOpenScriptEditor(s),
+            onTap: model.saving || callbacks.onOpenScriptEditor == null
+                ? null
+                : () => callbacks.onOpenScriptEditor!(script),
           ),
         ),
       ],
