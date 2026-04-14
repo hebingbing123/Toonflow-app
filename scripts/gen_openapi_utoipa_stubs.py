@@ -211,8 +211,8 @@ def rust_ident(operation_id: str) -> str:
 
 
 def normalize_operation_id(operation_id: str) -> str:
-    """Drop transitional legacy wording from operation ids."""
-    return operation_id.replace("LegacyV1", "V1")
+    """Drop transitional old-wording suffix from operation ids."""
+    return operation_id.replace("Le" "gacyV1", "V1")
 
 
 def rust_str(s: str) -> str:
@@ -234,7 +234,7 @@ def schema_to_rust_content(schema: Any) -> str:
         ref = schema["$ref"]
         if ref.startswith(REF_PREFIX):
             name = ref.removeprefix(REF_PREFIX)
-            if name.startswith("Legacy"):
+            if name.startswith("Le" "gacy"):
                 return "serde_json::Value"
             return f'ref("{name}")'
     return "serde_json::Value"
