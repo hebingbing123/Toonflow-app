@@ -41,7 +41,7 @@
 收口说明：
 
 - `upload-image`：增加 project/script ownership 校验，限制 JPEG/JPG/PNG base64 data URI，返回标准化 `url`。
-- `batch-add`：增加 `projectId + data[{scriptName,scriptData}]` 批量写入契约，事务内顺序分配 `legacy_id`，并返回插入结果。
+- `batch-add`：增加 `projectId + data[{scriptName,scriptData}]` 批量写入契约，事务内顺序分配 `numeric_id`，并返回插入结果。
 
 ### 2.3 Harness / Socket.IO Agent 的真实遗漏
 
@@ -166,7 +166,7 @@
 - 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
 - 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
 - 已增加 production 领域工具直调入口（`get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard`）并支持 JSON 参数探测，减少必须靠提示词间接触发工具的调试成本。
-- 已增加 script 结果回写优先策略：workspace 优先使用 `get_script_content` 工具返回的结构化 `content` 作为写回源，并支持 `run_sub_agent_script` 结果文本直接作为写回候选；缺省回退到 `chat.content.updated` 聚合文本，并一键调用 `PATCH /api/v1/projects/{project_id}/scripts/{script_legacy_id}` 写回，降低 Agent 产出到业务数据落库的错写风险与手工搬运成本。
+- 已增加 script 结果回写优先策略：workspace 优先使用 `get_script_content` 工具返回的结构化 `content` 作为写回源，并支持 `run_sub_agent_script` 结果文本直接作为写回候选；缺省回退到 `chat.content.updated` 聚合文本，并一键调用 `PATCH /api/v1/projects/{project_id}/scripts/{script_numeric_id}` 写回，降低 Agent 产出到业务数据落库的错写风险与手工搬运成本。
 - 已增加 production 侧 flow 回写：workspace 可基于最新 `get_flowData` 结果，先拉取完整 flow JSON，再按当前 key 合并并调用 `POST /api/v1/production/save-flow-data` 保存，避免只写单 key 时覆盖其他 flow 字段。
 - 已扩展 production 工具结果回写面：除 `get_flowData` 外，其他工具结果也可写入自定义扩展 key（如 `workspaceResult`）；同时增加核心 key 保护，阻止非 `get_flowData` 结果覆盖 `assets/script/scriptPlan/storyboardTable/storyboard`。
 - 已增强 production 核心 key 回写闭环：当 `add_deriveAsset`/`del_deriveAsset`/`generate_deriveAsset`/`generate_storyboard` 触发后，若用户选择对应核心 key 回写，workspace 会先刷新最新 flow key 数据再写回，避免把工具执行回执误写成核心 flow 结构；同时新增建议写回 key 提示与一键应用。
@@ -188,11 +188,11 @@
 - 项目详情剧本区已新增“剧本批量工作台”：可按名称读取 `get-script-api` 上下文、显式编辑目标剧本 id 集合，并在同一对话框内完成批量导出、提取状态轮询、素材抽取与批量创建，把原先分散的全量按钮和 `get-script-api` probe 收口为正式项目级工作流。
 - 剧本批量工作台现也已补“批量状态诊断 + 推荐动作”卡片：会根据当前选中的剧本 id、已读取的上下文与提取状态，自动区分“未选择 / 提取中 / 提取失败 / 已有素材 / 仍待抽取”，并直接给出读取上下文、轮询状态、重试抽取或导出 ZIP 的推荐批量动作，减少多剧本场景下手工解释状态串的成本。
 - 项目详情剧本摘要区现已复用同一套批量诊断逻辑与 follow-up 文案：全量导出 / 轮询 / 抽取快捷动作会先同步本地提取状态，再写回“动作结果 + 下一步建议”；当摘要区还缺少 `get-script-api` 上下文时，会优先引导打开正式工作台读取快照，而不是在未知素材关联状态下直接建议批量抽取。
-- 项目详情章节工作台已新增 legacy 快照与批量动作区：可直接读取 `get-novel-data` / `get-novel-index` / `get-novel-event-state`，并在同一入口执行 legacy `batch-delete`，把高频 novels 包装接口从兼容性折叠区收口进正式章节工作流。
-- 项目详情“小说与事件”区已进一步去 probe 化：主视图现在只保留章节/事件正式工作台摘要卡与刷新入口，旧 REST 首条/末条探针已退出主链路，仅在兼容性折叠区保留 legacy 回归检查。
+- 项目详情章节工作台已新增 历史 快照与批量动作区：可直接读取 `get-novel-data` / `get-novel-index` / `get-novel-event-state`，并在同一入口执行 历史 `batch-delete`，把高频 novels 包装接口从兼容性折叠区收口进正式章节工作流。
+- 项目详情“小说与事件”区已进一步去 probe 化：主视图现在只保留章节/事件正式工作台摘要卡与刷新入口，旧 REST 首条/末条探针已退出主链路，仅在兼容性折叠区保留 历史 回归检查。
 - 首页“质量评审”区已完成 probe 收口：主区现在以“质量工作台”承载评审筛选、坏例查看、统计/阶段通过率读取、详情查询与手动创建，旧 probe 创建入口仅保留在兼容性折叠区。
-- 首页“任务中心”区已完成首轮 probe 收口：主区现在以“任务工作台”承载任务项目/分类读取、按项目/分类/状态筛选列表，以及按 legacy id 或 UUID 查看详情，旧加载按钮与首条/UUID probe 下沉到兼容性折叠区。
-- Projects 页已新增“记忆工作台”：可按项目 legacy id、agent type 与可选 episodes id 查询、追加、清理 Agent 记忆，不再只保留“首项目 scriptAgent query+append”探针。
+- 首页“任务中心”区已完成首轮 probe 收口：主区现在以“任务工作台”承载任务项目/分类读取、按项目/分类/状态筛选列表，以及按 历史 id 或 UUID 查看详情，旧加载按钮与首条/UUID probe 下沉到兼容性折叠区。
+- Projects 页已新增“记忆工作台”：可按项目 历史 id、agent type 与可选 episodes id 查询、追加、清理 Agent 记忆，不再只保留“首项目 scriptAgent query+append”探针。
 - Projects 页已新增“创作手册工作台”：导演手册与视觉手册现在可在同一对话框内完成刷新、查看、创建、更新、删除，并交叉校验 `GET/POST /api/v1/visual-manual` 结果一致性，不再只靠首页 probe。
 - 项目详情资产区已提供“上传编辑图片”正式表单，直接调用 `POST /api/v1/production/edit-image/upload-image`。
 - 项目详情资产区已补齐显式资产工作流表单：可直接选择目标资产执行新建/编辑/删除，并可选择剧本与资产执行关联/取消关联；原先“首条/末条”隐式 probe 动作已收敛到兼容性折叠区。
@@ -215,7 +215,7 @@
 - 项目详情资产区已新增“上传 Clip 资产”正式表单：可直接调用 `POST /api/v1/projects/{project_id}/assets/workbench/upload-clip`（**`project_id`** 为项目 UUID）并回刷资产列表，把原先兼容性 `POST upload-clip` 从 probe 按钮收口到主工作流。
 - 项目详情资产区已新增“资产图片工作台”：可按目标资产加载图片列表，并在同一对话框内完成 `GET/POST/PATCH/DELETE …/assets/{aid}/images*` 与文件预览，替代原先分散的兼容性单按钮操作。
 - 资产图片工作台现也继续收口为共享诊断卡 + follow-up：会根据当前资产是否已同步图片列表、是否已有图片、是否已读取当前预览来自动推荐“读取图片列表 / 新增当前图片 / 读取当前预览 / 保存当前图片”，并把列表同步、预览、增删改结果统一写回下一步建议，减少资产图片流里仍需人工判断下一步的控制台式负担。
-- 项目详情资产区已新增“资产出图工作台”：可在项目资产主视图内按当前可见资产选择目标、同步 `production/assets/get-assets-data` 摘要、读取 legacy `get-material-data` / `batch-generation-data` / `polling-prompt-assets` 上下文、批量触发 `batch-generate-assets-image`、轮询图片状态、清理衍生图并更新单资产封面 URL，把 production + legacy 资产生成链路从 system probe/兼容性按钮收口回正式产品流。
+- 项目详情资产区已新增“资产出图工作台”：可在项目资产主视图内按当前可见资产选择目标、同步 `production/assets/get-assets-data` 摘要、读取 历史 `get-material-data` / `batch-generation-data` / `polling-prompt-assets` 上下文、批量触发 `batch-generate-assets-image`、轮询图片状态、清理衍生图并更新单资产封面 URL，把 production + 历史 资产生成链路从 system probe/兼容性按钮收口回正式产品流。
 - Projects 页已新增“画风工作台”：可在同一对话框内刷新画风列表、查看 JWT 保护的本地封面、执行 `GET/POST/PATCH/DELETE …/art-styles*`，并直接调用 `POST /api/v1/art-styles/extract-prompt` 把多图输入转成可保存 prompt，替代首页原先仅有的列表加载与 CRUD 探针摘要。
 - 剧本编辑器已升级为脚本工作台入口：除基础字段编辑外，现可直接读取 `get-script-api` 当前脚本上下文、查看关联素材摘要、导出当前剧本 ZIP、轮询提取状态并发起当前剧本素材抽取，开始把“脚本导出与抽取流程”从 probe 操作收口到正式产品交互。
 - 剧本工作台现已把脚本上下文与提取状态收口为统一“同步工作台”动作：打开时自动同步、发起素材抽取后自动回刷，且从编辑图片子工作台返回后也会立即刷新当前脚本上下文与提取状态，避免脚本编辑器保留过期状态。
