@@ -1,44 +1,100 @@
-part of 'section.dart';
+import 'package:flutter/material.dart';
 
-extension _QualityReviewsWorkbenchDialogView
-    on _QualityReviewsWorkbenchDialogState {
-  AlertDialog _buildQualityReviewsWorkbenchDialogView({
-    required BuildContext context,
-    required List<QualityReview> reviews,
-    required String? statsSummary,
-    required String? stagePassRateSummary,
-    required String? reviewDetails,
-    required String? statusLine,
-    required bool filterBadCasesOnly,
-    required bool createPassed,
-    required bool createBadCase,
-    required bool loadingReviews,
-    required bool loadingBadCases,
-    required bool loadingStats,
-    required bool loadingStagePassRate,
-    required bool loadingReviewById,
-    required bool creatingReview,
-    required TextEditingController targetTypeFilterCtrl,
-    required TextEditingController targetIdFilterCtrl,
-    required TextEditingController jobIdFilterCtrl,
-    required TextEditingController reviewIdCtrl,
-    required TextEditingController createTargetTypeCtrl,
-    required TextEditingController createTargetIdCtrl,
-    required TextEditingController createSourceCtrl,
-    required TextEditingController createScoreCtrl,
-    required TextEditingController createCommentsCtrl,
-    required TextEditingController createBadCaseCategoryCtrl,
-    required Future<void> Function() onLoadReviews,
-    required Future<void> Function() onLoadBadCases,
-    required Future<void> Function() onLoadStats,
-    required Future<void> Function() onLoadStagePassRate,
-    required Future<void> Function() onLoadReviewById,
-    required Future<void> Function() onCreateReview,
-    required ValueChanged<bool> onCreatePassedChanged,
-    required ValueChanged<bool> onCreateBadCaseChanged,
-    required ValueChanged<QualityReview> onSelectReview,
-    required VoidCallback onClose,
-  }) {
+import '../../rust_api.dart';
+import 'support.dart';
+
+class QualityReviewsWorkbenchDialogViewModel {
+  const QualityReviewsWorkbenchDialogViewModel({
+    required this.reviews,
+    required this.statsSummary,
+    required this.stagePassRateSummary,
+    required this.reviewDetails,
+    required this.statusLine,
+    required this.filterBadCasesOnly,
+    required this.createPassed,
+    required this.createBadCase,
+    required this.loadingReviews,
+    required this.loadingBadCases,
+    required this.loadingStats,
+    required this.loadingStagePassRate,
+    required this.loadingReviewById,
+    required this.creatingReview,
+    required this.targetTypeFilterCtrl,
+    required this.targetIdFilterCtrl,
+    required this.jobIdFilterCtrl,
+    required this.reviewIdCtrl,
+    required this.createTargetTypeCtrl,
+    required this.createTargetIdCtrl,
+    required this.createSourceCtrl,
+    required this.createScoreCtrl,
+    required this.createCommentsCtrl,
+    required this.createBadCaseCategoryCtrl,
+  });
+
+  final List<QualityReview> reviews;
+  final String? statsSummary;
+  final String? stagePassRateSummary;
+  final String? reviewDetails;
+  final String? statusLine;
+  final bool filterBadCasesOnly;
+  final bool createPassed;
+  final bool createBadCase;
+  final bool loadingReviews;
+  final bool loadingBadCases;
+  final bool loadingStats;
+  final bool loadingStagePassRate;
+  final bool loadingReviewById;
+  final bool creatingReview;
+  final TextEditingController targetTypeFilterCtrl;
+  final TextEditingController targetIdFilterCtrl;
+  final TextEditingController jobIdFilterCtrl;
+  final TextEditingController reviewIdCtrl;
+  final TextEditingController createTargetTypeCtrl;
+  final TextEditingController createTargetIdCtrl;
+  final TextEditingController createSourceCtrl;
+  final TextEditingController createScoreCtrl;
+  final TextEditingController createCommentsCtrl;
+  final TextEditingController createBadCaseCategoryCtrl;
+}
+
+class QualityReviewsWorkbenchDialogViewCallbacks {
+  const QualityReviewsWorkbenchDialogViewCallbacks({
+    required this.onLoadReviews,
+    required this.onLoadBadCases,
+    required this.onLoadStats,
+    required this.onLoadStagePassRate,
+    required this.onLoadReviewById,
+    required this.onCreateReview,
+    required this.onCreatePassedChanged,
+    required this.onCreateBadCaseChanged,
+    required this.onSelectReview,
+    required this.onClose,
+  });
+
+  final VoidCallback onLoadReviews;
+  final VoidCallback onLoadBadCases;
+  final VoidCallback onLoadStats;
+  final VoidCallback onLoadStagePassRate;
+  final VoidCallback onLoadReviewById;
+  final VoidCallback onCreateReview;
+  final ValueChanged<bool> onCreatePassedChanged;
+  final ValueChanged<bool> onCreateBadCaseChanged;
+  final ValueChanged<QualityReview> onSelectReview;
+  final VoidCallback onClose;
+}
+
+class QualityReviewsWorkbenchDialogView extends StatelessWidget {
+  const QualityReviewsWorkbenchDialogView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final QualityReviewsWorkbenchDialogViewModel model;
+  final QualityReviewsWorkbenchDialogViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
       title: const Text('质量工作台'),
@@ -50,28 +106,28 @@ extension _QualityReviewsWorkbenchDialogView
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                reviews.isEmpty
+                model.reviews.isEmpty
                     ? '用同一入口完成评审筛选、坏例查看、统计读取、详情查询和手动创建。'
-                    : summarizeQualityReviews(reviews),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                    : summarizeQualityReviews(model.reviews),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: outline,
+                ),
               ),
               const SizedBox(height: 12),
               Text('筛选与读取', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               TextField(
-                controller: targetTypeFilterCtrl,
+                controller: model.targetTypeFilterCtrl,
                 decoration: const InputDecoration(labelText: '筛选 targetType'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: targetIdFilterCtrl,
+                controller: model.targetIdFilterCtrl,
                 decoration: const InputDecoration(labelText: '筛选 targetId'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: jobIdFilterCtrl,
+                controller: model.jobIdFilterCtrl,
                 decoration: const InputDecoration(labelText: '筛选 jobId'),
               ),
               const SizedBox(height: 8),
@@ -80,26 +136,30 @@ extension _QualityReviewsWorkbenchDialogView
                 runSpacing: 8,
                 children: [
                   FilledButton.tonal(
-                    onPressed: loadingReviews || creatingReview
+                    onPressed: model.loadingReviews || model.creatingReview
                         ? null
-                        : onLoadReviews,
-                    child: Text(loadingReviews ? '加载中…' : '加载评审列表'),
+                        : callbacks.onLoadReviews,
+                    child: Text(model.loadingReviews ? '加载中…' : '加载评审列表'),
                   ),
                   OutlinedButton(
-                    onPressed: loadingBadCases || creatingReview
+                    onPressed: model.loadingBadCases || model.creatingReview
                         ? null
-                        : onLoadBadCases,
-                    child: Text(loadingBadCases ? '加载中…' : '只看坏例'),
+                        : callbacks.onLoadBadCases,
+                    child: Text(model.loadingBadCases ? '加载中…' : '只看坏例'),
                   ),
                   OutlinedButton(
-                    onPressed: loadingStats ? null : onLoadStats,
-                    child: Text(loadingStats ? '统计中…' : '读取质量统计'),
+                    onPressed: model.loadingStats
+                        ? null
+                        : callbacks.onLoadStats,
+                    child: Text(model.loadingStats ? '统计中…' : '读取质量统计'),
                   ),
                   OutlinedButton(
-                    onPressed: loadingStagePassRate
+                    onPressed: model.loadingStagePassRate
                         ? null
-                        : onLoadStagePassRate,
-                    child: Text(loadingStagePassRate ? '读取中…' : '读取阶段通过率'),
+                        : callbacks.onLoadStagePassRate,
+                    child: Text(
+                      model.loadingStagePassRate ? '读取中…' : '读取阶段通过率',
+                    ),
                   ),
                 ],
               ),
@@ -107,42 +167,42 @@ extension _QualityReviewsWorkbenchDialogView
               Text('详情查询', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               TextField(
-                controller: reviewIdCtrl,
+                controller: model.reviewIdCtrl,
                 decoration: const InputDecoration(labelText: '评审 ID'),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: loadingReviewById || creatingReview
+                onPressed: model.loadingReviewById || model.creatingReview
                     ? null
-                    : onLoadReviewById,
-                child: Text(loadingReviewById ? '读取中…' : '查看评审详情'),
+                    : callbacks.onLoadReviewById,
+                child: Text(model.loadingReviewById ? '读取中…' : '查看评审详情'),
               ),
               const SizedBox(height: 12),
               Text('创建评审', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               TextField(
-                controller: createTargetTypeCtrl,
+                controller: model.createTargetTypeCtrl,
                 decoration: const InputDecoration(labelText: 'targetType'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: createTargetIdCtrl,
+                controller: model.createTargetIdCtrl,
                 decoration: const InputDecoration(labelText: 'targetId'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: createSourceCtrl,
+                controller: model.createSourceCtrl,
                 decoration: const InputDecoration(labelText: 'source'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: createScoreCtrl,
+                controller: model.createScoreCtrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'overallScore'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: createCommentsCtrl,
+                controller: model.createCommentsCtrl,
                 minLines: 2,
                 maxLines: 4,
                 decoration: const InputDecoration(labelText: 'comments'),
@@ -151,69 +211,73 @@ extension _QualityReviewsWorkbenchDialogView
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('passed'),
-                value: createPassed,
-                onChanged: creatingReview ? null : onCreatePassedChanged,
+                value: model.createPassed,
+                onChanged: model.creatingReview
+                    ? null
+                    : callbacks.onCreatePassedChanged,
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('isBadCase'),
-                value: createBadCase,
-                onChanged: creatingReview ? null : onCreateBadCaseChanged,
+                value: model.createBadCase,
+                onChanged: model.creatingReview
+                    ? null
+                    : callbacks.onCreateBadCaseChanged,
               ),
               TextField(
-                controller: createBadCaseCategoryCtrl,
+                controller: model.createBadCaseCategoryCtrl,
                 decoration: const InputDecoration(labelText: 'badCaseCategory'),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: creatingReview ? null : onCreateReview,
-                child: Text(creatingReview ? '创建中…' : '创建评审'),
+                onPressed: model.creatingReview ? null : callbacks.onCreateReview,
+                child: Text(model.creatingReview ? '创建中…' : '创建评审'),
               ),
-              if (statusLine != null) ...[
+              if (model.statusLine != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('状态：$statusLine'),
+                SelectableText('状态：${model.statusLine}'),
               ],
-              if (reviewDetails != null) ...[
+              if (model.reviewDetails != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('评审详情：$reviewDetails'),
+                SelectableText('评审详情：${model.reviewDetails}'),
               ],
-              if (statsSummary != null) ...[
+              if (model.statsSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('质量统计：$statsSummary'),
+                SelectableText('质量统计：${model.statsSummary}'),
               ],
-              if (stagePassRateSummary != null) ...[
+              if (model.stagePassRateSummary != null) ...[
                 const SizedBox(height: 12),
-                SelectableText('阶段通过率：$stagePassRateSummary'),
+                SelectableText('阶段通过率：${model.stagePassRateSummary}'),
               ],
-              if (reviews.isNotEmpty) ...[
+              if (model.reviews.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
-                  filterBadCasesOnly
-                      ? '坏例 ${reviews.length} 条'
-                      : '评审 ${reviews.length} 条',
+                  model.filterBadCasesOnly
+                      ? '坏例 ${model.reviews.length} 条'
+                      : '评审 ${model.reviews.length} 条',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
-                ...reviews
-                    .take(8)
-                    .map(
-                      (review) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
-                        ),
-                        subtitle: Text(formatQualityReviewDetails(review)),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => onSelectReview(review),
-                      ),
+                ...model.reviews.take(8).map(
+                  (review) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
                     ),
+                    subtitle: Text(formatQualityReviewDetails(review)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => callbacks.onSelectReview(review),
+                  ),
+                ),
               ],
             ],
           ),
         ),
       ),
-      actions: [TextButton(onPressed: onClose, child: const Text('关闭'))],
+      actions: [
+        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+      ],
     );
   }
 }

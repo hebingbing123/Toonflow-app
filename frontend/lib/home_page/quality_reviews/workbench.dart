@@ -260,47 +260,62 @@ class _QualityReviewsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    return _buildQualityReviewsWorkbenchDialogView(
-      context: context,
-      reviews: _reviews,
-      statsSummary: _statsSummary,
-      stagePassRateSummary: _stagePassRateSummary,
-      reviewDetails: _reviewDetails,
-      statusLine: _statusLine,
-      filterBadCasesOnly: _filterBadCasesOnly,
-      createPassed: _createPassed,
-      createBadCase: _createBadCase,
-      loadingReviews: _loadingReviews,
-      loadingBadCases: _loadingBadCases,
-      loadingStats: _loadingStats,
-      loadingStagePassRate: _loadingStagePassRate,
-      loadingReviewById: _loadingReviewById,
-      creatingReview: _creatingReview,
-      targetTypeFilterCtrl: _targetTypeFilterCtrl,
-      targetIdFilterCtrl: _targetIdFilterCtrl,
-      jobIdFilterCtrl: _jobIdFilterCtrl,
-      reviewIdCtrl: _reviewIdCtrl,
-      createTargetTypeCtrl: _createTargetTypeCtrl,
-      createTargetIdCtrl: _createTargetIdCtrl,
-      createSourceCtrl: _createSourceCtrl,
-      createScoreCtrl: _createScoreCtrl,
-      createCommentsCtrl: _createCommentsCtrl,
-      createBadCaseCategoryCtrl: _createBadCaseCategoryCtrl,
-      onLoadReviews: () => _loadReviews(onlyBadCases: false),
-      onLoadBadCases: () => _loadReviews(onlyBadCases: true),
-      onLoadStats: _loadStats,
-      onLoadStagePassRate: _loadStagePassRate,
-      onLoadReviewById: _loadReviewById,
-      onCreateReview: _createReview,
-      onCreatePassedChanged: (value) => setState(() => _createPassed = value),
-      onCreateBadCaseChanged: (value) => setState(() => _createBadCase = value),
-      onSelectReview: (review) {
-        setState(() {
-          _reviewIdCtrl.text = review.id;
-          _reviewDetails = formatQualityReviewDetails(review);
-        });
-      },
-      onClose: () => Navigator.of(context).pop(),
+    return QualityReviewsWorkbenchDialogView(
+      model: QualityReviewsWorkbenchDialogViewModel(
+        reviews: _reviews,
+        statsSummary: _statsSummary,
+        stagePassRateSummary: _stagePassRateSummary,
+        reviewDetails: _reviewDetails,
+        statusLine: _statusLine,
+        filterBadCasesOnly: _filterBadCasesOnly,
+        createPassed: _createPassed,
+        createBadCase: _createBadCase,
+        loadingReviews: _loadingReviews,
+        loadingBadCases: _loadingBadCases,
+        loadingStats: _loadingStats,
+        loadingStagePassRate: _loadingStagePassRate,
+        loadingReviewById: _loadingReviewById,
+        creatingReview: _creatingReview,
+        targetTypeFilterCtrl: _targetTypeFilterCtrl,
+        targetIdFilterCtrl: _targetIdFilterCtrl,
+        jobIdFilterCtrl: _jobIdFilterCtrl,
+        reviewIdCtrl: _reviewIdCtrl,
+        createTargetTypeCtrl: _createTargetTypeCtrl,
+        createTargetIdCtrl: _createTargetIdCtrl,
+        createSourceCtrl: _createSourceCtrl,
+        createScoreCtrl: _createScoreCtrl,
+        createCommentsCtrl: _createCommentsCtrl,
+        createBadCaseCategoryCtrl: _createBadCaseCategoryCtrl,
+      ),
+      callbacks: QualityReviewsWorkbenchDialogViewCallbacks(
+        onLoadReviews: () {
+          _loadReviews(onlyBadCases: false);
+        },
+        onLoadBadCases: () {
+          _loadReviews(onlyBadCases: true);
+        },
+        onLoadStats: () {
+          _loadStats();
+        },
+        onLoadStagePassRate: () {
+          _loadStagePassRate();
+        },
+        onLoadReviewById: () {
+          _loadReviewById();
+        },
+        onCreateReview: () {
+          _createReview();
+        },
+        onCreatePassedChanged: (value) => setState(() => _createPassed = value),
+        onCreateBadCaseChanged: (value) => setState(() => _createBadCase = value),
+        onSelectReview: (review) {
+          setState(() {
+            _reviewIdCtrl.text = review.id;
+            _reviewDetails = formatQualityReviewDetails(review);
+          });
+        },
+        onClose: () => Navigator.of(context).pop(),
+      ),
     );
   }
 }

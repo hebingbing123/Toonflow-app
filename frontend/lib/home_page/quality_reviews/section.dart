@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'previews.dart';
 import 'support.dart';
+import 'workbench_view.dart';
 import '../../rust_api.dart';
 
 part 'workbench.dart';
-part 'workbench_view.dart';
 
 class QualityReviewsSection extends StatelessWidget {
   const QualityReviewsSection({
