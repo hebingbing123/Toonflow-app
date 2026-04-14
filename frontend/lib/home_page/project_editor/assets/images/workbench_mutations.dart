@@ -171,46 +171,58 @@ void _setAssetImageMutationFailure({
   });
 }
 
-AssetImageRow? _requireSelectedAssetImage({
+void _setAssetImageMutationStatus({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required String statusLine,
+}) {
+  setState(() => runtime.onStatusChanged(statusLine));
+}
+
+T? _resolveAssetImageMutationValue<T>({
+  required StateSetter setState,
+  required AssetImagesWorkbenchRuntime runtime,
+  required String emptyValueNotice,
+  required T? value,
+}) {
+  if (value == null) {
+    _setAssetImageMutationStatus(
+      setState: setState,
+      runtime: runtime,
+      statusLine: emptyValueNotice,
+    );
+    return null;
+  }
+  return value;
+}
+
+AssetImageRow? _resolveSelectedAssetImage({
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required String missingSelectionNotice,
 }) {
-  final image = selectedAssetImageRow(
-    imagesResponse,
-    selectedImageId: selectedImageId,
+  return _resolveAssetImageMutationValue(
+    setState: setState,
+    runtime: runtime,
+    emptyValueNotice: missingSelectionNotice,
+    value: selectedAssetImageRow(
+      imagesResponse,
+      selectedImageId: selectedImageId,
+    ),
   );
-  if (image != null) {
-    return image;
-  }
-  setState(() => runtime.onStatusChanged(missingSelectionNotice));
-  return null;
-}
-
-T? _resolveAssetImageDraft<T>({
-  required StateSetter setState,
-  required AssetImagesWorkbenchRuntime runtime,
-  required String invalidDraftNotice,
-  required T? draft,
-}) {
-  if (draft == null) {
-    setState(() => runtime.onStatusChanged(invalidDraftNotice));
-    return null;
-  }
-  return draft;
 }
 
 AssetImageCreateDraft? _resolveCreateAssetImageDraft({
   required AssetImagesWorkbenchScope scope,
   required StateSetter setState,
 }) {
-  return _resolveAssetImageDraft(
+  return _resolveAssetImageMutationValue(
     setState: setState,
     runtime: scope.runtime,
-    invalidDraftNotice: '新增 sort_index 需为正整数',
-    draft: parseAssetImageCreateDraft(
+    emptyValueNotice: '新增 sort_index 需为正整数',
+    value: parseAssetImageCreateDraft(
       filePath: scope.createControllers.filePathCtrl.text,
       state: scope.createControllers.stateCtrl.text,
       sortIndex: scope.createControllers.sortCtrl.text,
@@ -222,11 +234,11 @@ AssetImagePatchDraft? _resolvePatchAssetImageDraft({
   required AssetImagesWorkbenchScope scope,
   required StateSetter setState,
 }) {
-  return _resolveAssetImageDraft(
+  return _resolveAssetImageMutationValue(
     setState: setState,
     runtime: scope.runtime,
-    invalidDraftNotice: '编辑 sort_index 需为正整数',
-    draft: parseAssetImagePatchDraft(
+    emptyValueNotice: '编辑 sort_index 需为正整数',
+    value: parseAssetImagePatchDraft(
       filePath: scope.patchControllers.filePathCtrl.text,
       state: scope.patchControllers.stateCtrl.text,
       sortIndex: scope.patchControllers.sortCtrl.text,
@@ -256,6 +268,18 @@ _AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
   );
 }
 
+_SelectedAssetImageMutationPlan _buildSelectedAssetImageMutationPlan({
+  required String missingSelectionNotice,
+  required _AssetImageMutationRequestPlan requestPlan,
+  required Future<void> Function(AssetImageRow image) request,
+}) {
+  return _SelectedAssetImageMutationPlan(
+    missingSelectionNotice: missingSelectionNotice,
+    requestPlan: requestPlan,
+    request: request,
+  );
+}
+
 _SelectedAssetImageMutationPlan? _buildPatchAssetImageMutationPlan({
   required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
@@ -265,7 +289,7 @@ _SelectedAssetImageMutationPlan? _buildPatchAssetImageMutationPlan({
   if (draft == null) {
     return null;
   }
-  return _SelectedAssetImageMutationPlan(
+  return _buildSelectedAssetImageMutationPlan(
     missingSelectionNotice: '请先选择要编辑的图片',
     requestPlan: _patchAssetImageRequestPlan,
     request: (image) => patchProjectAssetImageByProjectIds(
@@ -282,7 +306,7 @@ _SelectedAssetImageMutationPlan _buildDeleteAssetImageMutationPlan({
   required AssetImagesWorkbenchScope scope,
   required int assetNumericId,
 }) {
-  return _SelectedAssetImageMutationPlan(
+  return _buildSelectedAssetImageMutationPlan(
     missingSelectionNotice: '请先选择要删除的图片',
     requestPlan: _deleteAssetImageRequestPlan,
     request: (image) => deleteProjectAssetImageByProjectIds(
@@ -305,7 +329,7 @@ Future<void> _runSelectedAssetImageMutation({
   if (plan == null) {
     return;
   }
-  final image = _requireSelectedAssetImage(
+  final image = _resolveSelectedAssetImage(
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     setState: setState,
