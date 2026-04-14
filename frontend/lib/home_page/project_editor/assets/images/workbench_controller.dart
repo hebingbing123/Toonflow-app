@@ -1,5 +1,19 @@
 part of '../../../../home_page.dart';
 
+class _AssetImagesWorkbenchRequestContext {
+  const _AssetImagesWorkbenchRequestContext({
+    required this.scope,
+    required this.assetNumericId,
+    required this.selectedImageId,
+    required this.imagesResponse,
+  });
+
+  final AssetImagesWorkbenchScope scope;
+  final int assetNumericId;
+  final String? selectedImageId;
+  final ListAssetImagesResponse? imagesResponse;
+}
+
 class AssetImagesWorkbenchController {
   AssetImagesWorkbenchController({
     required this.token,
@@ -44,6 +58,14 @@ class AssetImagesWorkbenchController {
     ),
   );
 
+  _AssetImagesWorkbenchRequestContext get _requestContext =>
+      _AssetImagesWorkbenchRequestContext(
+        scope: _scope,
+        assetNumericId: currentAssetNumericId(),
+        selectedImageId: runtime.currentSelectedImageId,
+        imagesResponse: runtime.imagesResponse(),
+      );
+
   void scheduleInitialLoad({
     required BuildContext dialogCtx,
     required StateSetter setState,
@@ -59,69 +81,88 @@ class AssetImagesWorkbenchController {
   Future<void> changeAsset({
     required int? value,
     required StateSetter setState,
-  }) => changeAssetImagesWorkbenchAsset(
-    value: value,
-    scope: _scope,
-    currentAssetNumericId: currentAssetNumericId(),
-    setState: setState,
-    onAssetNumericIdChanged: onAssetNumericIdChanged,
-  );
+  }) {
+    final request = _requestContext;
+    return changeAssetImagesWorkbenchAsset(
+      value: value,
+      scope: request.scope,
+      currentAssetNumericId: request.assetNumericId,
+      setState: setState,
+      onAssetNumericIdChanged: onAssetNumericIdChanged,
+    );
+  }
 
-  Future<void> reloadImages(StateSetter setState) =>
-      reloadAssetImages(
-        scope: _scope,
-        assetNumericId: currentAssetNumericId(),
-        setState: setState,
-      );
+  Future<void> reloadImages(StateSetter setState) {
+    final request = _requestContext;
+    return reloadAssetImages(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      setState: setState,
+    );
+  }
 
-  Future<void> loadPreview(StateSetter setState) => loadAssetImagePreview(
-    scope: _scope,
-    assetNumericId: currentAssetNumericId(),
-    selectedImageId: runtime.currentSelectedImageId,
-    setState: setState,
-  );
+  Future<void> loadPreview(StateSetter setState) {
+    final request = _requestContext;
+    return loadAssetImagePreview(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      selectedImageId: request.selectedImageId,
+      setState: setState,
+    );
+  }
 
-  Future<void> runRecommendedAction(StateSetter setState) =>
-      runAssetImagesRecommendedAction(
-        scope: _scope,
-        assetNumericId: currentAssetNumericId(),
-        setState: setState,
-      );
+  Future<void> runRecommendedAction(StateSetter setState) {
+    final request = _requestContext;
+    return runAssetImagesRecommendedAction(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      setState: setState,
+    );
+  }
 
   Future<void> selectImage({
     required String? value,
     required StateSetter setState,
-  }) => selectAssetImagesWorkbenchImage(
-    value: value,
-    scope: _scope,
-    assetNumericId: currentAssetNumericId(),
-    setState: setState,
-  );
+  }) {
+    final request = _requestContext;
+    return selectAssetImagesWorkbenchImage(
+      value: value,
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      setState: setState,
+    );
+  }
 
-  Future<void> createImage(StateSetter setState) =>
-      createAssetImage(
-        scope: _scope,
-        assetNumericId: currentAssetNumericId(),
-        setState: setState,
-      );
+  Future<void> createImage(StateSetter setState) {
+    final request = _requestContext;
+    return createAssetImage(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      setState: setState,
+    );
+  }
 
-  Future<void> patchImage(StateSetter setState) =>
-      patchAssetImage(
-        scope: _scope,
-        assetNumericId: currentAssetNumericId(),
-        imagesResponse: runtime.imagesResponse(),
-        selectedImageId: runtime.currentSelectedImageId,
-        setState: setState,
-      );
+  Future<void> patchImage(StateSetter setState) {
+    final request = _requestContext;
+    return patchAssetImage(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      imagesResponse: request.imagesResponse,
+      selectedImageId: request.selectedImageId,
+      setState: setState,
+    );
+  }
 
-  Future<void> deleteImage(StateSetter setState) =>
-      deleteAssetImage(
-        scope: _scope,
-        assetNumericId: currentAssetNumericId(),
-        imagesResponse: runtime.imagesResponse(),
-        selectedImageId: runtime.currentSelectedImageId,
-        setState: setState,
-      );
+  Future<void> deleteImage(StateSetter setState) {
+    final request = _requestContext;
+    return deleteAssetImage(
+      scope: request.scope,
+      assetNumericId: request.assetNumericId,
+      imagesResponse: request.imagesResponse,
+      selectedImageId: request.selectedImageId,
+      setState: setState,
+    );
+  }
 
   AssetImagesWorkbenchDialogCallbacks buildDialogCallbacks({
     required StateSetter setState,
