@@ -18,6 +18,7 @@ import 'home_page/project_editor/assets/corner_scape_view.dart';
 import 'home_page/project_editor/assets/workbench/dialog_support.dart';
 import 'home_page/project_editor/novels/events/workbench_view.dart';
 import 'home_page/project_editor/scripts/section_view.dart';
+import 'home_page/project_editor/scripts/workbench/dialog_support.dart';
 import 'home_page/project_editor/scripts/workbench/dialog_view.dart';
 import 'home_page/script_editor/edit_image/workbench_view.dart';
 import 'home_page/script_editor/workbench_view.dart';
