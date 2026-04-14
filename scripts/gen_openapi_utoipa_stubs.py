@@ -5,7 +5,7 @@ The **committed** `backend/src/openapi_spec/generated/*.rs` is what the server m
 is for **one-off regeneration** when you have a monolithic or paths-only YAML (e.g. from `docs/openapi.yaml`).
 
 Each stub mirrors the operation's request/response shapes in utoipa using:
-- `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (from `embedded/legacy_component_schemas.json` merged at runtime)
+- `body = ref("ComponentName")` / `content = ref("...")` for `#/components/schemas/*` (resolved by runtime merged utoipa components)
 - `serde_json::Value` for inline JSON schemas without a component ref
 
 Run from repo root (default input: `docs/openapi.yaml` if it exists):

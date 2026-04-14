@@ -1,8 +1,7 @@
 //! Merge OpenAPI fragments into the document base.
 //!
 //! The base is built from **[`super::shell::openapi_shell`]** (metadata + security) with **empty `paths`**
-//! before merges. Component schemas come from **[`super::combined_openapi`]** (utoipa), including
-//! [`super::legacy_components::merged_legacy_components_openapi`].
+//! before merges. Component schemas come from **[`super::combined_openapi`]** (utoipa).
 //!
 //! Merge order:
 //! 1. **[`crate::openapi_spec::combined_openapi`]** — utoipa output (hand-written handler docs + committed

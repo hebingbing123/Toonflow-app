@@ -1,7 +1,6 @@
 //! OpenAPI document shell: `info`, `servers`, `tags`, and `components.securitySchemes` only.
 //!
-//! Reusable HTTP schemas are registered via [`super::legacy_components`] and domain `OpenApi` merges
-//! (see [`super::combined_openapi`]); `embedded/legacy_component_schemas.json` is the generator input only.
+//! Reusable HTTP schemas are registered via domain `OpenApi` merges (see [`super::combined_openapi`]).
 
 use utoipa::openapi::{
     security::{HttpAuthScheme, HttpBuilder, SecurityScheme},

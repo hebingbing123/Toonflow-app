@@ -6,8 +6,6 @@ Reads a full OpenAPI 3.1 YAML (default: `docs/openapi.yaml`, or pass a path):
   python3 scripts/extract_openapi_rust_sources.py path/to/full-openapi.yaml
 
 Writes:
-  - `backend/src/openapi_spec/embedded/legacy_component_schemas.json`
-      Kept as `{}` (legacy component registry has been fully removed).
   - `backend/src/openapi_spec/ws_protocol_description.md`
       Description of `GET /api/v1/ws` for the upgrade handler `include_str!`.
   - `scripts/fixtures/openapi_stub_input.yaml`
@@ -23,9 +21,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SRC = ROOT / "docs" / "openapi.yaml"
-OUT_LEGACY_SCHEMAS = (
-    ROOT / "backend" / "src" / "openapi_spec" / "embedded" / "legacy_component_schemas.json"
-)
 OUT_STUB_INPUT = ROOT / "scripts" / "fixtures" / "openapi_stub_input.yaml"
 OUT_WS_MD = ROOT / "backend" / "src" / "openapi_spec" / "ws_protocol_description.md"
 
@@ -52,17 +47,12 @@ def main() -> None:
         OUT_WS_MD.write_text(desc, encoding="utf-8")
         print(f"Wrote {OUT_WS_MD}")
 
-    # Legacy component registry has been removed from runtime merge.
-    OUT_LEGACY_SCHEMAS.parent.mkdir(parents=True, exist_ok=True)
-    OUT_LEGACY_SCHEMAS.write_text("{}\n", encoding="utf-8")
-
     paths_index = dict(paths)
     paths_index.pop("/api/v1/ws", None)
     OUT_STUB_INPUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT_STUB_INPUT.open("w", encoding="utf-8") as f:
         yaml.dump({"paths": paths_index}, f, sort_keys=False, allow_unicode=True, width=120)
 
-    print(f"Wrote {OUT_LEGACY_SCHEMAS}")
     print(f"Wrote {OUT_STUB_INPUT}")
 
 
