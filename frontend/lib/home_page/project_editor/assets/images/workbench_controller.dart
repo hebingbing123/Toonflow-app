@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of 'workbench_support.dart';
 
 class _AssetImagesWorkbenchRequestContext {
   const _AssetImagesWorkbenchRequestContext({
@@ -188,8 +188,8 @@ class AssetImagesWorkbenchController {
         onRecommendedAction: () => runRecommendedAction(setState),
         onReloadImages: () => reloadImages(setState),
         onLoadPreview: () => loadPreview(setState),
-        onImageChanged: (request.imagesResponse?.items ?? const <AssetImageRow>[])
-                .isEmpty
+        onImageChanged:
+            (request.imagesResponse?.items ?? const <AssetImageRow>[]).isEmpty
             ? null
             : (value) => selectImage(value: value, setState: setState),
         onCreateImage: () => createImage(setState),

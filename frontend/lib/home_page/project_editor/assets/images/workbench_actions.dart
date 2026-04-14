@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of 'workbench_support.dart';
 
 Future<void> changeAssetImagesWorkbenchAsset({
   required int? value,
