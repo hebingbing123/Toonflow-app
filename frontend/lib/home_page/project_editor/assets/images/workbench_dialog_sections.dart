@@ -1,5 +1,57 @@
 part of '../../../../home_page.dart';
 
+const double _assetImagesWorkbenchSectionSpacing = 8;
+
+List<Widget> _buildAssetImagesWorkbenchBodySections({
+  required BuildContext ctx,
+  required BuildContext dialogCtx,
+  required AssetImagesWorkbenchDialogState state,
+  required AssetImagesWorkbenchDialogCallbacks callbacks,
+}) {
+  final sections = <Widget>[
+    _buildAssetImagesWorkbenchAssetField(state: state, callbacks: callbacks),
+    _buildAssetImagesWorkbenchDiagnosisCard(
+      dialogCtx: dialogCtx,
+      state: state,
+      callbacks: callbacks,
+    ),
+    _buildAssetImagesWorkbenchToolbar(state: state, callbacks: callbacks),
+    if (state.statusLine != null)
+      _buildAssetImagesWorkbenchStatusLine(
+        ctx: ctx,
+        statusLine: state.statusLine!,
+      ),
+    _buildAssetImagesWorkbenchImageField(state: state, callbacks: callbacks),
+    _buildAssetImagesWorkbenchCreateForm(state: state, callbacks: callbacks),
+    _buildAssetImagesWorkbenchPatchForm(state: state, callbacks: callbacks),
+    _buildAssetImagesWorkbenchPreview(state: state),
+  ];
+  return _interleaveAssetImagesWorkbenchSections(sections);
+}
+
+List<Widget> _interleaveAssetImagesWorkbenchSections(List<Widget> sections) {
+  final visibleSections = sections
+      .where((section) => section is! SizedBox || section.height != 0)
+      .toList();
+  if (visibleSections.isEmpty) {
+    return const <Widget>[];
+  }
+  final spacedSections = <Widget>[visibleSections.first];
+  for (final section in visibleSections.skip(1)) {
+    spacedSections
+      ..add(const SizedBox(height: _assetImagesWorkbenchSectionSpacing))
+      ..add(section);
+  }
+  return spacedSections;
+}
+
+Widget _buildAssetImagesWorkbenchStatusLine({
+  required BuildContext ctx,
+  required String statusLine,
+}) {
+  return Text(statusLine, style: Theme.of(ctx).textTheme.bodySmall);
+}
+
 Widget _buildAssetImagesWorkbenchAssetField({
   required AssetImagesWorkbenchDialogState state,
   required AssetImagesWorkbenchDialogCallbacks callbacks,

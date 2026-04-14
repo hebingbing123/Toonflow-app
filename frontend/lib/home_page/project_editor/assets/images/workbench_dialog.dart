@@ -15,42 +15,12 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchDialog on _HomePageState {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildAssetImagesWorkbenchAssetField(
-              state: state,
-              callbacks: callbacks,
-            ),
-            const SizedBox(height: 8),
-            _buildAssetImagesWorkbenchDiagnosisCard(
-              dialogCtx: dialogCtx,
-              state: state,
-              callbacks: callbacks,
-            ),
-            const SizedBox(height: 8),
-            _buildAssetImagesWorkbenchToolbar(
-              state: state,
-              callbacks: callbacks,
-            ),
-            if (state.statusLine != null) ...[
-              const SizedBox(height: 8),
-              Text(state.statusLine!, style: Theme.of(ctx).textTheme.bodySmall),
-            ],
-            const SizedBox(height: 8),
-            _buildAssetImagesWorkbenchImageField(
-              state: state,
-              callbacks: callbacks,
-            ),
-            const SizedBox(height: 8),
-            _buildAssetImagesWorkbenchCreateForm(
-              state: state,
-              callbacks: callbacks,
-            ),
-            _buildAssetImagesWorkbenchPatchForm(
-              state: state,
-              callbacks: callbacks,
-            ),
-            _buildAssetImagesWorkbenchPreview(state: state),
-          ],
+          children: _buildAssetImagesWorkbenchBodySections(
+            ctx: ctx,
+            dialogCtx: dialogCtx,
+            state: state,
+            callbacks: callbacks,
+          ),
         ),
       ),
       actions: [
