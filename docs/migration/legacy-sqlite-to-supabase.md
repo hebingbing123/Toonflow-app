@@ -11,7 +11,7 @@
 
 ## 源库表清单（Knex `initDB`）
 
-以下表名来自 `src/lib/initDB.ts`，迁移时需映射到 PG schema（建议 `public` 下新表名或带 `legacy_` 前缀 staging，再归一到目标模型）：
+以下表名来自 `src/lib/initDB.ts`，迁移时需映射到 PG schema（建议 `public` 下新表名或带 `import_` 前缀 staging，再归一到目标模型）：
 
 - `o_user`, `o_project`, `o_artStyle`, `o_agentDeploy`, `o_setting`, `o_tasks`, `o_prompt`
 - `o_novel`, `o_event`, `o_eventChapter`, `o_outline`, `o_outlineNovel`, `o_script`
