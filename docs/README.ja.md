@@ -25,9 +25,8 @@
 
 <div align="center">
 
-<img src="./logo.png" alt="Toonflow Logo" height="120"/>
 
-# Toonflow
+# OpenFlow
 
   <p align="center">
     <b>
@@ -57,7 +56,7 @@
 
 # 🌐 多言語対応
 
-Toonflowは以下の言語インターフェースに対応しています：
+OpenFlowは以下の言語インターフェースに対応しています：
 
 | 言語 | Language |
 |------|----------|
@@ -73,7 +72,7 @@ Toonflowは以下の言語インターフェースに対応しています：
 
 # 🌟 主な機能
 
-ToonflowはAI短編漫画/ドラマ制作ツールで、小説をAIが自動的に脚本化し、AI生成画像・映像と組み合わせて高効率な短編ドラマ制作を実現します。Toonflowにより、テキストから映像までの流れを簡単に完結でき、短編ドラマ制作がよりスマート＆便利になります。
+OpenFlowはAI短編漫画/ドラマ制作ツールで、小説をAIが自動的に脚本化し、AI生成画像・映像と組み合わせて高効率な短編ドラマ制作を実現します。OpenFlowにより、テキストから映像までの流れを簡単に完結でき、短編ドラマ制作がよりスマート＆便利になります。
 
 - ✅ **キャラクター生成**  
    元の小説テキストを自動分析し、外見・性格・身分など詳細なキャラクター設定をスマートに識別・生成。脚本・作画の基盤を提供します。
@@ -101,9 +100,8 @@ ToonflowはAI短編漫画/ドラマ制作ツールで、小説をAIが自動的�
 ## 📺 動画チュートリアル
 
 https://www.bilibili.com/video/BV1na6wB6Ea2
-[![Toonflow 8分でAI動画をクイックスタート](./videoCover.png)](https://www.bilibili.com/video/BV1na6wB6Ea2)
 
-**Toonflow 8分クイックスタートAI動画**
+**OpenFlow 8分クイックスタートAI動画**
 👉 [クリックして見る](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
 
 📱 スマホWeChatでQRコードをスキャンして視聴

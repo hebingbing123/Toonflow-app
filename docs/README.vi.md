@@ -25,9 +25,8 @@
 
 <div align="center">
 
-<img src="./logo.png" alt="Toonflow Logo" height="120"/>
 
-# Toonflow
+# OpenFlow
 
   <p align="center">
     <b>
@@ -57,7 +56,7 @@
 
 # 🌐 Hỗ trợ đa ngôn ngữ
 
-Toonflow hỗ trợ các ngôn ngữ giao diện sau:
+OpenFlow hỗ trợ các ngôn ngữ giao diện sau:
 
 | Ngôn ngữ | Language |
 |-----------|----------|
@@ -73,7 +72,7 @@ Toonflow hỗ trợ các ngôn ngữ giao diện sau:
 
 # 🌟 Tính năng chính
 
-Toonflow là công cụ AI tạo phim truyện tranh ngắn, tận dụng công nghệ AI để chuyển tự động tiểu thuyết thành kịch bản, kết hợp hình ảnh, video AI để sáng tác phim ngắn hiệu quả. Với Toonflow, bạn dễ dàng hoàn thành toàn bộ quy trình từ văn bản tới hình ảnh, khiến chế tác phim ngắn trở nên thông minh và tiện lợi hơn bao giờ hết.
+OpenFlow là công cụ AI tạo phim truyện tranh ngắn, tận dụng công nghệ AI để chuyển tự động tiểu thuyết thành kịch bản, kết hợp hình ảnh, video AI để sáng tác phim ngắn hiệu quả. Với OpenFlow, bạn dễ dàng hoàn thành toàn bộ quy trình từ văn bản tới hình ảnh, khiến chế tác phim ngắn trở nên thông minh và tiện lợi hơn bao giờ hết.
 
 - ✅ **Tạo nhân vật**  
    Phân tích tự động văn bản tiểu thuyết gốc, nhận diện thông minh và xây dựng thiết lập nhân vật, gồm ngoại hình, tính cách, thân phận,... cung cấp nền tảng chắc chắn cho sáng tác kịch bản và hình ảnh sau này.
@@ -101,9 +100,8 @@ Toonflow là công cụ AI tạo phim truyện tranh ngắn, tận dụng công 
 ## 📺 Video hướng dẫn
 
 https://www.bilibili.com/video/BV1na6wB6Ea2
-[![Toonflow 8 phút nhanh chóng làm chủ AI Video](./videoCover.png)](https://www.bilibili.com/video/BV1na6wB6Ea2)
 
-**Toonflow 8 phút nhanh chóng bắt đầu với AI Video**
+**OpenFlow 8 phút nhanh chóng bắt đầu với AI Video**
 👉 [Click xem tại đây](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
 
 📱 Quét mã QR trên WeChat để xem trên điện thoại

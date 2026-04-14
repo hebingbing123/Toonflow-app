@@ -25,9 +25,8 @@
 
 <div align="center">
 
-<img src="./logo.png" alt="Toonflow Logo" height="120"/>
 
-# Toonflow
+# OpenFlow
 
   <p align="center">
     <b>
@@ -57,7 +56,7 @@
 
 # 🌐 多語言支援
 
-Toonflow 支援以下語言介面：
+OpenFlow 支援以下語言介面：
 
 | 語言 | Language |
 |------|----------|
@@ -73,7 +72,7 @@ Toonflow 支援以下語言介面：
 
 # 🌟 主要功能
 
-Toonflow 是一款AI短劇漫畫工具，利用AI自動將小說轉換為劇本，並用AI生成圖片、視頻，助力高效短劇製作。有了Toonflow，您可輕鬆完成從文本到圖片的全流程操作，讓短劇製作更智能、更便捷。
+OpenFlow 是一款AI短劇漫畫工具，利用AI自動將小說轉換為劇本，並用AI生成圖片、視頻，助力高效短劇製作。有了OpenFlow，您可輕鬆完成從文本到圖片的全流程操作，讓短劇製作更智能、更便捷。
 
 - ✅ **人物生成**  
   自動解析原小說文本，智能識別並生成人物設定，包括外貌、性格、身份等，為後續劇本和視覺創作提供穩固基礎。
@@ -101,9 +100,8 @@ Toonflow 是一款AI短劇漫畫工具，利用AI自動將小說轉換為劇本�
 ## 📺 視頻教程
 
 https://www.bilibili.com/video/BV1na6wB6Ea2
-[![Toonflow 8分鐘快速上手AI視頻](./videoCover.png)](https://www.bilibili.com/video/BV1na6wB6Ea2)
 
-**Toonflow 8分鐘快速上手AI視頻**
+**OpenFlow 8分鐘快速上手AI視頻**
 👉 [點此觀看](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
 
 📱 用手機微信掃碼觀看

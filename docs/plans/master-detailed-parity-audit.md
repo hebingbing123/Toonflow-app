@@ -12,8 +12,8 @@
 - 当前分支 `backend/src/**/*`
 - 当前分支 `frontend/lib/**/*`
 - 合并 OpenAPI：`GET /api/v1/openapi.yaml` 或 `backend/` 下 `cargo run --bin export-openapi`（源：`shell.rs` + 已提交 utoipa stubs / 域 `OpenApi`，**不含**后端 `openapi_paths_index.yaml`）
-- [`docs/websocket-events.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/websocket-events.md)
-- [`docs/plans/electron-node-parity.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/electron-node-parity.md)
+- [`docs/websocket-events.md`](../websocket-events.md)
+- [`docs/plans/electron-node-parity.md`](./electron-node-parity.md)
 
 结论原则：
 
@@ -85,10 +85,10 @@
 
 证据：
 
-- 主入口 [`frontend/lib/home_page.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page.dart) 仍是单页 `HomePage` + 多个 `*_probe.dart` / `system_probes_*` / `skills_harness_*` 组合。
-- 已新增 [`frontend/lib/home_page/agent_workspaces_section.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page/agent_workspaces_section.dart) 与对应 controller，并在本轮升级为双工作区任务化卡片（script / production 分栏、任务提示词模板、`get_flowData` 快捷键、`run_sub_agent_*` 下拉触发、最近 WS 事件摘要）；但整体仍属“最小工作台”而非完整产品 IA。
+- 主入口 [`frontend/lib/home_page.dart`](../../frontend/lib/home_page.dart) 仍是单页 `HomePage` + 多个 `*_probe.dart` / `system_probes_*` / `skills_harness_*` 组合。
+- 已新增 [`frontend/lib/home_page/agent_workspaces_section.dart`](../../frontend/lib/home_page/agent_workspaces_section.dart) 与对应 controller，并在本轮升级为双工作区任务化卡片（script / production 分栏、任务提示词模板、`get_flowData` 快捷键、`run_sub_agent_*` 下拉触发、最近 WS 事件摘要）；但整体仍属“最小工作台”而非完整产品 IA。
 - Agent workspaces 已补 `run_sub_agent_*` / `run_supervision_agent` 的工具直调入口（WS attach + `harness.tool.invoke`），可在 Flutter 侧直接触发 script/production 子 Agent 编排；但仍未形成完整业务信息架构与结果回写 UX。
-- `script-agent` 在 Flutter 侧只有 API probe 与状态码探针，见 [`frontend/lib/rust_api/script_agent.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/rust_api/script_agent.dart) 与 [`frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart`](/Users/clive/Documents/source/cousor/Toonflow-app/frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart)。
+- `script-agent` 在 Flutter 侧只有 API probe 与状态码探针，见 [`frontend/lib/rust_api/script_agent.dart`](../../frontend/lib/rust_api/script_agent.dart) 与 [`frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart`](../../frontend/lib/home_page/system_probes_models_catalog_settings_probe.dart)。
 - 目前没有发现与旧 `scriptAgent` / `productionAgent` 对应的完整终端用户聊天工作区、上下文工作区、执行过程 UI。
 
 这意味着：
@@ -244,8 +244,8 @@
 
 目标：让“已完成”描述重新可信，避免以后再漏。
 
-- 更新 [`docs/plans/electron-node-parity.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/electron-node-parity.md)
-- 更新 [`docs/plans/harness-rust-flutter.md`](/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/harness-rust-flutter.md)
+- 更新 [`docs/plans/electron-node-parity.md`](./electron-node-parity.md)
+- 更新 [`docs/plans/harness-rust-flutter.md`](./harness-rust-flutter.md)
 - 为新增契约补 smoke / pg / frontend 验证
 - 对 script agent / production agent 做端到端验收清单
 

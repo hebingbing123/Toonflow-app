@@ -25,9 +25,8 @@
 
 <div align="center">
 
-<img src="./logo.png" alt="Toonflow Logo" height="120"/>
 
-# Toonflow
+# OpenFlow
 
   <p align="center">
     <b>
@@ -57,7 +56,7 @@
 
 # 🌐 Multilingual Support
 
-Toonflow supports the following interface languages:
+OpenFlow supports the following interface languages:
 
 | Language | Native Name |
 |----------|-------------|
@@ -73,7 +72,7 @@ Toonflow supports the following interface languages:
 
 # �🌟 Main Features
 
-Toonflow is an AI short drama comic tool that leverages AI technology to automatically convert novels into scripts, and uses AI-generated images and videos for efficient short drama creation. With Toonflow, you can easily complete the entire process from text to images, making short drama production more intelligent and convenient.
+OpenFlow is an AI short drama comic tool that leverages AI technology to automatically convert novels into scripts, and uses AI-generated images and videos for efficient short drama creation. With OpenFlow, you can easily complete the entire process from text to images, making short drama production more intelligent and convenient.
 
 - ✅ **Character Generation**  
    Automatically analyzes the original novel text, intelligently identifies and generates character settings, including appearance, personality, identity, etc., providing a reliable foundation for subsequent script and visual creation.
@@ -101,9 +100,8 @@ Toonflow is an AI short drama comic tool that leverages AI technology to automat
 ## 📺 Video Tutorial
 
 https://www.bilibili.com/video/BV1na6wB6Ea2
-[![Toonflow 8-Minute Quick Start AI Video](./videoCover.png)](https://www.bilibili.com/video/BV1na6wB6Ea2)
 
-**Toonflow 8-Minute Quick Start AI Video**
+**OpenFlow 8-Minute Quick Start AI Video**
 👉 [Click to watch](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
 
 📱 Scan with WeChat on your phone to watch
