@@ -1,5 +1,73 @@
 part of '../../../../home_page.dart';
 
+class _AssetImagesWorkbenchDialogDeps {
+  _AssetImagesWorkbenchDialogDeps._({
+    required this.session,
+    required this.createControllers,
+    required this.patchControllers,
+    required this.controller,
+  });
+
+  factory _AssetImagesWorkbenchDialogDeps.build({
+    required String token,
+    required ProjectRow project,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required List<bool> assetsBusy,
+    required Future<void> Function() reloadAssetsAndStats,
+    required List<AssetRow> assets,
+    required int? preferredAssetNumericId,
+  }) {
+    final session = AssetImagesWorkbenchSession.initialize(
+      assets: assets,
+      preferredAssetNumericId: preferredAssetNumericId,
+    );
+    final createControllers = AssetImagesWorkbenchFormControllers();
+    final patchControllers = AssetImagesWorkbenchFormControllers();
+    final runtime = session.buildRuntime();
+    return _AssetImagesWorkbenchDialogDeps._(
+      session: session,
+      createControllers: createControllers,
+      patchControllers: patchControllers,
+      controller: AssetImagesWorkbenchController(
+        token: token,
+        projectId: project.id,
+        runtime: runtime,
+        currentAssetNumericId: () => session.selectedAssetNumericId,
+        onAssetNumericIdChanged: (value) =>
+            session.selectedAssetNumericId = value,
+        createControllers: createControllers,
+        patchControllers: patchControllers,
+        ctx: ctx,
+        setDialogState: setDialogState,
+        assetsBusy: assetsBusy,
+        onBusyMutationChanged: (busy) => session.busyMutation = busy,
+        reloadAssetsAndStats: reloadAssetsAndStats,
+      ),
+    );
+  }
+
+  final AssetImagesWorkbenchSession session;
+  final AssetImagesWorkbenchFormControllers createControllers;
+  final AssetImagesWorkbenchFormControllers patchControllers;
+  final AssetImagesWorkbenchController controller;
+
+  AssetImagesWorkbenchDialogState captureDialogState({
+    required List<AssetRow> assets,
+  }) {
+    return session.captureDialogState(
+      assets: assets,
+      createControllers: createControllers,
+      patchControllers: patchControllers,
+    );
+  }
+
+  void dispose() {
+    createControllers.dispose();
+    patchControllers.dispose();
+  }
+}
+
 extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
   /// Keep the dialog entry focused on orchestration while helpers own the
   /// image-list state sync, loading, and mutation branches.
@@ -20,27 +88,15 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
       ).showSnackBar(const SnackBar(content: Text('请先创建资产再管理图片')));
       return;
     }
-    final session = AssetImagesWorkbenchSession.initialize(
-      assets: assets,
-      preferredAssetNumericId: preferredAssetNumericId,
-    );
-
-    final createControllers = AssetImagesWorkbenchFormControllers();
-    final patchControllers = AssetImagesWorkbenchFormControllers();
-    final runtime = session.buildRuntime();
-    final controller = AssetImagesWorkbenchController(
+    final deps = _AssetImagesWorkbenchDialogDeps.build(
       token: token,
-      projectId: p.id,
-      runtime: runtime,
-      currentAssetNumericId: () => session.selectedAssetNumericId,
-      onAssetNumericIdChanged: (value) => session.selectedAssetNumericId = value,
-      createControllers: createControllers,
-      patchControllers: patchControllers,
+      project: p,
       ctx: ctx,
       setDialogState: setDialogState,
       assetsBusy: assetsBusy,
-      onBusyMutationChanged: (busy) => session.busyMutation = busy,
       reloadAssetsAndStats: reloadAssetsAndStats,
+      assets: assets,
+      preferredAssetNumericId: preferredAssetNumericId,
     );
 
     try {
@@ -49,31 +105,30 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
-              if (!session.initialLoadTriggered) {
-                session.initialLoadTriggered = true;
-                controller.scheduleInitialLoad(
+              if (!deps.session.initialLoadTriggered) {
+                deps.session.initialLoadTriggered = true;
+                deps.controller.scheduleInitialLoad(
                   dialogCtx: dialogCtx,
                   setState: setState,
                 );
               }
-              final dialogState = session.captureDialogState(
+              final dialogState = deps.captureDialogState(
                 assets: assets,
-                createControllers: createControllers,
-                patchControllers: patchControllers,
               );
               return _buildAssetImagesWorkbenchDialog(
                 ctx: ctx,
                 dialogCtx: dialogCtx,
                 state: dialogState,
-                callbacks: controller.buildDialogCallbacks(setState: setState),
+                callbacks: deps.controller.buildDialogCallbacks(
+                  setState: setState,
+                ),
               );
             },
           );
         },
       );
     } finally {
-      createControllers.dispose();
-      patchControllers.dispose();
+      deps.dispose();
     }
   }
 }
