@@ -53,7 +53,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy paged rows", body = ref("LegacyAssetsBatchGenerationDataResponse"), content_type = "application/json"),
+        (status = 200, description = "Paged rows", body = ref("LegacyAssetsBatchGenerationDataResponse"), content_type = "application/json"),
         (status = 400, description = "Invalid body fields", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -135,7 +135,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy material data", body = ref("LegacyAssetsGetMaterialDataResponse"), content_type = "application/json"),
+        (status = 200, description = "Material data", body = ref("LegacyAssetsGetMaterialDataResponse"), content_type = "application/json"),
         (status = 400, description = "Malformed body (must be empty JSON object)", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -156,7 +156,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy paged parent + child rows", body = ref("LegacyAssetsGetAssetsApiResponse"), content_type = "application/json"),
+        (status = 200, description = "Paged parent + child rows", body = ref("LegacyAssetsGetAssetsApiResponse"), content_type = "application/json"),
         (status = 400, description = "Invalid type, page, or limit", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),

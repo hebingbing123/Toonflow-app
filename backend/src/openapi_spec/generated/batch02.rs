@@ -168,7 +168,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_delete_script_by_project_and_legacy_v1() {}
+    pub(crate) fn op_delete_script_by_project_v1() {}
 
     #[utoipa::path(
         get,
@@ -184,7 +184,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_get_script_by_project_and_legacy_v1() {}
+    pub(crate) fn op_get_script_by_project_v1() {}
 
     #[utoipa::path(
         patch,
@@ -205,7 +205,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_patch_script_by_project_and_legacy_v1() {}
+    pub(crate) fn op_patch_script_by_project_v1() {}
 
     #[utoipa::path(
         delete,
@@ -255,7 +255,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_list_storyboards_by_project_and_script_legacy_v1() {}
+    pub(crate) fn op_list_storyboards_by_project_and_script_v1() {}
 
     #[utoipa::path(
         post,
@@ -276,7 +276,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_create_storyboard_under_project_and_script_legacy_v1() {}
+    pub(crate) fn op_create_storyboard_under_project_and_script_v1() {}
 
     #[utoipa::path(
         get,
@@ -308,7 +308,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_delete_storyboard_by_project_and_legacy_v1() {}
+    pub(crate) fn op_delete_storyboard_by_project_v1() {}
 
     #[utoipa::path(
         get,
@@ -324,7 +324,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_get_storyboard_by_project_and_legacy_v1() {}
+    pub(crate) fn op_get_storyboard_by_project_v1() {}
 
     #[utoipa::path(
         patch,
@@ -345,7 +345,7 @@ mod stubs {
     )
     )]
     #[allow(dead_code)]
-    pub(crate) fn op_patch_storyboard_by_project_and_legacy_v1() {}
+    pub(crate) fn op_patch_storyboard_by_project_v1() {}
 
     #[utoipa::path(
         post,
@@ -358,7 +358,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy success envelope `{ code, data, message }` (`code` is JSON number 200)", body = serde_json::Value, content_type = "application/json"),
+        (status = 200, description = "Success envelope `{ code, data, message }` (`code` is JSON number 200)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid body (e.g. non-positive **`projectId`**)", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project not found for this user (unknown **`projectId`**)", body = ref("ErrorBody"), content_type = "application/json"),
@@ -379,7 +379,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy success envelope (`data` often `null`)", body = serde_json::Value, content_type = "application/json"),
+        (status = 200, description = "Success envelope (`data` often `null`)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Unknown JSON fields, invalid body, or empty script **`name`**", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project not found for this user", body = ref("ErrorBody"), content_type = "application/json"),
@@ -401,7 +401,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Legacy success envelope (`data` is the string **`更新成功`**)", body = serde_json::Value, content_type = "application/json"),
+        (status = 200, description = "Success envelope (`data` is the string **`更新成功`**)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Unknown JSON fields or invalid body (e.g. non-positive **`id`**)", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Plan row not found for this user", body = ref("ErrorBody"), content_type = "application/json"),
@@ -529,17 +529,17 @@ mod stubs {
     stubs::op_create_script_under_project_by_project_id_v1,
     stubs::op_post_scripts_batch_add_by_project_id_v1,
     stubs::op_post_scripts_get_script_api_by_project_id_v1,
-    stubs::op_delete_script_by_project_and_legacy_v1,
-    stubs::op_get_script_by_project_and_legacy_v1,
-    stubs::op_patch_script_by_project_and_legacy_v1,
+    stubs::op_delete_script_by_project_v1,
+    stubs::op_get_script_by_project_v1,
+    stubs::op_patch_script_by_project_v1,
     stubs::op_unlink_script_asset_by_project_id_v1,
     stubs::op_link_script_asset_by_project_id_v1,
-    stubs::op_list_storyboards_by_project_and_script_legacy_v1,
-    stubs::op_create_storyboard_under_project_and_script_legacy_v1,
+    stubs::op_list_storyboards_by_project_and_script_v1,
+    stubs::op_create_storyboard_under_project_and_script_v1,
     stubs::op_get_project_stats_by_project_id_v1,
-    stubs::op_delete_storyboard_by_project_and_legacy_v1,
-    stubs::op_get_storyboard_by_project_and_legacy_v1,
-    stubs::op_patch_storyboard_by_project_and_legacy_v1,
+    stubs::op_delete_storyboard_by_project_v1,
+    stubs::op_get_storyboard_by_project_v1,
+    stubs::op_patch_storyboard_by_project_v1,
     stubs::op_post_script_agent_get_plan_data_v1,
     stubs::op_post_script_agent_set_plan_data_v1,
     stubs::op_post_script_agent_update_data_v1,

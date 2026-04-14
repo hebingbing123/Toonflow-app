@@ -239,7 +239,7 @@ mod stubs {
         path = "/api/v1/project/add-director-manual",
         operation_id = "postProjectAddDirectorManualV1",
         tag = "projects",
-        summary = "Legacy Electron — create director manual folder",
+        summary = "Create director manual folder",
     request_body(
             content = ref("LegacyDirectorManualAddBody"),
             content_type = "application/json",
@@ -258,7 +258,7 @@ mod stubs {
         path = "/api/v1/project/add-visual-manual",
         operation_id = "postProjectAddVisualManualV1",
         tag = "projects",
-        summary = "Legacy Electron — create visual manual (art_skills folder)",
+        summary = "Create visual manual (art_skills folder)",
     request_body(
             content = ref("LegacyVisualManualAddBody"),
             content_type = "application/json",
@@ -277,7 +277,7 @@ mod stubs {
         path = "/api/v1/project/delete-director-manual",
         operation_id = "postProjectDeleteDirectorManualV1",
         tag = "projects",
-        summary = "Legacy Electron — delete director manual folder",
+        summary = "Delete director manual folder",
     request_body(
             content = ref("LegacyDirectorManualDeleteBody"),
             content_type = "application/json",
@@ -296,7 +296,7 @@ mod stubs {
         path = "/api/v1/project/delete-visual-manual",
         operation_id = "postProjectDeleteVisualManualV1",
         tag = "projects",
-        summary = "Legacy Electron — delete visual manual folder",
+        summary = "Delete visual manual folder",
     request_body(
             content = ref("LegacyDirectorManualDeleteBody"),
             content_type = "application/json",
@@ -315,7 +315,7 @@ mod stubs {
         path = "/api/v1/project/edit-director-manual",
         operation_id = "postProjectEditDirectorManualV1",
         tag = "projects",
-        summary = "Legacy Electron — update director manual folder",
+        summary = "Update director manual folder",
     request_body(
             content = ref("LegacyDirectorManualEditBody"),
             content_type = "application/json",
@@ -334,7 +334,7 @@ mod stubs {
         path = "/api/v1/project/edit-visual-manual",
         operation_id = "postProjectEditVisualManualV1",
         tag = "projects",
-        summary = "Legacy Electron — update visual manual folder",
+        summary = "Update visual manual folder",
     request_body(
             content = ref("LegacyVisualManualEditBody"),
             content_type = "application/json",
@@ -353,7 +353,7 @@ mod stubs {
         path = "/api/v1/project/query-director-manual",
         operation_id = "postProjectQueryDirectorManualV1",
         tag = "projects",
-        summary = "Legacy Electron — list director manuals (story_skills)",
+        summary = "List director manuals (story_skills)",
     request_body(
             content = ref("LegacyTasksEmptyBody"),
             content_type = "application/json",
