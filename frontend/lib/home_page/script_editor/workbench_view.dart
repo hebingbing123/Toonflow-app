@@ -1,17 +1,71 @@
-part of '../../home_page.dart';
+import 'package:flutter/material.dart';
+
+import '../../rust_api.dart';
+import 'support.dart';
+
+class ScriptWorkbenchPanelViewModel {
+  const ScriptWorkbenchPanelViewModel({
+    required this.contextLine,
+    required this.loadingContext,
+    required this.runningAction,
+    required this.scriptContext,
+    required this.extractStateRow,
+    required this.exportLine,
+    required this.extractStateLine,
+    required this.extractAssetsLine,
+    required this.diagnosis,
+    required this.relatedAssets,
+    required this.errorReason,
+    required this.recommendedActionLabel,
+    required this.recommendedAction,
+  });
+
+  final String? contextLine;
+  final bool loadingContext;
+  final bool runningAction;
+  final ScriptWorkbenchDetailRow? scriptContext;
+  final ScriptExtractStatePollRow? extractStateRow;
+  final String? exportLine;
+  final String? extractStateLine;
+  final String? extractAssetsLine;
+  final ScriptWorkbenchDiagnosis diagnosis;
+  final List<ScriptRelatedAssetBrief> relatedAssets;
+  final String errorReason;
+  final String recommendedActionLabel;
+  final VoidCallback? recommendedAction;
+}
+
+class ScriptWorkbenchPanelViewCallbacks {
+  const ScriptWorkbenchPanelViewCallbacks({
+    required this.onRefreshWorkbench,
+    required this.onExportCurrentScript,
+    required this.onPollExtractState,
+    required this.onStartExtractAssets,
+    required this.onOpenEditImageWorkbench,
+  });
+
+  final VoidCallback? onRefreshWorkbench;
+  final VoidCallback? onExportCurrentScript;
+  final VoidCallback? onPollExtractState;
+  final VoidCallback? onStartExtractAssets;
+  final VoidCallback? onOpenEditImageWorkbench;
+}
 
 /// 脚本工作台视图，承载建议卡片、状态摘要与动作入口布局。
-extension _ScriptWorkbenchPanelView on _ScriptWorkbenchPanelState {
-  Widget _buildScriptWorkbenchPanelView({
-    required BuildContext context,
-    required ThemeData theme,
-    required Color outline,
-    required ScriptWorkbenchDiagnosis diagnosis,
-    required List<ScriptRelatedAssetBrief> relatedAssets,
-    required String errorReason,
-    required VoidCallback? recommendedAction,
-    required String recommendedActionLabel,
-  }) {
+class ScriptWorkbenchPanelView extends StatelessWidget {
+  const ScriptWorkbenchPanelView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final ScriptWorkbenchPanelViewModel model;
+  final ScriptWorkbenchPanelViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -25,15 +79,13 @@ extension _ScriptWorkbenchPanelView on _ScriptWorkbenchPanelState {
             children: [
               Expanded(child: Text('脚本工作台', style: theme.textTheme.titleSmall)),
               TextButton(
-                onPressed: _loadingContext || _runningAction
-                    ? null
-                    : _refreshWorkbench,
-                child: Text(_loadingContext ? '同步中…' : '同步工作台'),
+                onPressed: callbacks.onRefreshWorkbench,
+                child: Text(model.loadingContext ? '同步中…' : '同步工作台'),
               ),
             ],
           ),
           Text(
-            _contextLine ??
+            model.contextLine ??
                 '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。',
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
@@ -50,37 +102,40 @@ extension _ScriptWorkbenchPanelView on _ScriptWorkbenchPanelState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(diagnosis.summary, style: theme.textTheme.titleSmall),
+                Text(
+                  model.diagnosis.summary,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  diagnosis.detail,
+                  model.diagnosis.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.tonal(
-                  onPressed: recommendedAction,
-                  child: Text(recommendedActionLabel),
+                  onPressed: model.recommendedAction,
+                  child: Text(model.recommendedActionLabel),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          if (_loadingContext)
+          if (model.loadingContext)
             const LinearProgressIndicator(minHeight: 2)
           else ...[
             Text(
-              _scriptContext == null
+              model.scriptContext == null
                   ? '还没有当前剧本的上下文快照。'
-                  : '关联素材：${summarizeRelatedScriptAssets(relatedAssets)}',
+                  : '关联素材：${summarizeRelatedScriptAssets(model.relatedAssets)}',
               style: theme.textTheme.bodySmall,
             ),
-            if (_scriptContext != null) ...[
+            if (model.scriptContext != null) ...[
               const SizedBox(height: 6),
               Text(
-                '提取状态：${_scriptContext?.extractState ?? 0}'
-                '${errorReason.isEmpty ? '' : ' · $errorReason'}',
+                '提取状态：${model.scriptContext?.extractState ?? 0}'
+                '${model.errorReason.isEmpty ? '' : ' · ${model.errorReason}'}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: errorReason.isEmpty
+                  color: model.errorReason.isEmpty
                       ? outline
                       : theme.colorScheme.error,
                 ),
@@ -93,48 +148,40 @@ extension _ScriptWorkbenchPanelView on _ScriptWorkbenchPanelState {
             runSpacing: 8,
             children: [
               FilledButton.tonal(
-                onPressed: _runningAction
-                    ? null
-                    : () => _runAction(_exportCurrentScript),
+                onPressed: callbacks.onExportCurrentScript,
                 child: const Text('导出当前剧本 ZIP'),
               ),
               TextButton(
-                onPressed: _runningAction
-                    ? null
-                    : () => _runAction(_pollExtractState),
+                onPressed: callbacks.onPollExtractState,
                 child: const Text('轮询提取状态'),
               ),
               TextButton(
-                onPressed: _runningAction
-                    ? null
-                    : () => _runAction(_startExtractAssets),
+                onPressed: callbacks.onStartExtractAssets,
                 child: const Text('提取当前剧本素材'),
               ),
               TextButton(
-                onPressed: _runningAction
-                    ? null
-                    : () => _runAction(_openEditImageWorkbench),
+                onPressed: callbacks.onOpenEditImageWorkbench,
                 child: const Text('编辑图片工作台'),
               ),
             ],
           ),
-          if (_exportLine != null) ...[
+          if (model.exportLine != null) ...[
             const SizedBox(height: 8),
-            Text(_exportLine!, style: theme.textTheme.bodySmall),
+            Text(model.exportLine!, style: theme.textTheme.bodySmall),
           ],
-          if (_extractStateLine != null) ...[
+          if (model.extractStateLine != null) ...[
             const SizedBox(height: 8),
-            Text(_extractStateLine!, style: theme.textTheme.bodySmall),
+            Text(model.extractStateLine!, style: theme.textTheme.bodySmall),
           ],
-          if (_extractAssetsLine != null) ...[
+          if (model.extractAssetsLine != null) ...[
             const SizedBox(height: 8),
-            Text(_extractAssetsLine!, style: theme.textTheme.bodySmall),
+            Text(model.extractAssetsLine!, style: theme.textTheme.bodySmall),
           ],
-          if (_extractStateRow != null &&
-              (_extractStateRow!.errorReason ?? '').trim().isNotEmpty) ...[
+          if (model.extractStateRow != null &&
+              (model.extractStateRow!.errorReason ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              '最近提取错误：${_extractStateRow!.errorReason!.trim()}',
+              '最近提取错误：${model.extractStateRow!.errorReason!.trim()}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
               ),

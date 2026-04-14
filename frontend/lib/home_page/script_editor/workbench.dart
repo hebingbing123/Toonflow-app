@@ -185,8 +185,6 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
     final relatedAssets = _scriptContext?.relatedAssets ?? const [];
     final errorReason = (_scriptContext?.errorReason ?? '').trim();
     final diagnosis = diagnoseScriptWorkbench(
@@ -234,15 +232,39 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
           diagnosis.recommendedAction,
         );
     }
-    return _buildScriptWorkbenchPanelView(
-      context: context,
-      theme: theme,
-      outline: outline,
-      diagnosis: diagnosis,
-      relatedAssets: relatedAssets,
-      errorReason: errorReason,
-      recommendedAction: recommendedAction,
-      recommendedActionLabel: recommendedActionLabel,
+    return ScriptWorkbenchPanelView(
+      model: ScriptWorkbenchPanelViewModel(
+        contextLine: _contextLine,
+        loadingContext: _loadingContext,
+        runningAction: _runningAction,
+        scriptContext: _scriptContext,
+        extractStateRow: _extractStateRow,
+        exportLine: _exportLine,
+        extractStateLine: _extractStateLine,
+        extractAssetsLine: _extractAssetsLine,
+        diagnosis: diagnosis,
+        relatedAssets: relatedAssets,
+        errorReason: errorReason,
+        recommendedActionLabel: recommendedActionLabel,
+        recommendedAction: recommendedAction,
+      ),
+      callbacks: ScriptWorkbenchPanelViewCallbacks(
+        onRefreshWorkbench: _loadingContext || _runningAction
+            ? null
+            : _refreshWorkbench,
+        onExportCurrentScript: _runningAction
+            ? null
+            : () => _runAction(_exportCurrentScript),
+        onPollExtractState: _runningAction
+            ? null
+            : () => _runAction(_pollExtractState),
+        onStartExtractAssets: _runningAction
+            ? null
+            : () => _runAction(_startExtractAssets),
+        onOpenEditImageWorkbench: _runningAction
+            ? null
+            : () => _runAction(_openEditImageWorkbench),
+      ),
     );
   }
 }
