@@ -7,94 +7,6 @@ use utoipa::{PartialSchema, ToSchema};
 
 use super::inline::legacy_pick;
 
-pub struct ProductionFlowAssetDerivativeItem;
-impl PartialSchema for ProductionFlowAssetDerivativeItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowAssetDerivativeItem")
-    }
-}
-impl ToSchema for ProductionFlowAssetDerivativeItem {}
-
-pub struct ProductionFlowAssetItem;
-impl PartialSchema for ProductionFlowAssetItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowAssetItem")
-    }
-}
-impl ToSchema for ProductionFlowAssetItem {}
-
-pub struct ProductionFlowStoryboardItem;
-impl PartialSchema for ProductionFlowStoryboardItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionFlowStoryboardItem")
-    }
-}
-impl ToSchema for ProductionFlowStoryboardItem {}
-
-pub struct ProductionStoryboardBatchAddInfoItem;
-impl PartialSchema for ProductionStoryboardBatchAddInfoItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionStoryboardBatchAddInfoItem")
-    }
-}
-impl ToSchema for ProductionStoryboardBatchAddInfoItem {}
-
-pub struct ProductionStoryboardBatchGenerateImageItem;
-impl PartialSchema for ProductionStoryboardBatchGenerateImageItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionStoryboardBatchGenerateImageItem")
-    }
-}
-impl ToSchema for ProductionStoryboardBatchGenerateImageItem {}
-
-pub struct ProductionStoryboardBundleItem;
-impl PartialSchema for ProductionStoryboardBundleItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionStoryboardBundleItem")
-    }
-}
-impl ToSchema for ProductionStoryboardBundleItem {}
-
-pub struct ProductionWorkbenchGenerateVideoUploadItem;
-impl PartialSchema for ProductionWorkbenchGenerateVideoUploadItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProductionWorkbenchGenerateVideoUploadItem")
-    }
-}
-impl ToSchema for ProductionWorkbenchGenerateVideoUploadItem {}
-
-pub struct ProjectRow;
-impl PartialSchema for ProjectRow {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ProjectRow")
-    }
-}
-impl ToSchema for ProjectRow {}
-
-pub struct ReadyResponse;
-impl PartialSchema for ReadyResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ReadyResponse")
-    }
-}
-impl ToSchema for ReadyResponse {}
-
-pub struct ScriptAgentTypeV1;
-impl PartialSchema for ScriptAgentTypeV1 {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ScriptAgentTypeV1")
-    }
-}
-impl ToSchema for ScriptAgentTypeV1 {}
-
-pub struct ScriptBrief;
-impl PartialSchema for ScriptBrief {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ScriptBrief")
-    }
-}
-impl ToSchema for ScriptBrief {}
-
 pub struct ScriptRow;
 impl PartialSchema for ScriptRow {
     fn schema() -> RefOr<Schema> {
@@ -135,14 +47,6 @@ impl PartialSchema for UpdateScriptAgentScriptRow {
 }
 impl ToSchema for UpdateScriptAgentScriptRow {}
 
-pub struct UsageSummaryResponse;
-impl PartialSchema for UsageSummaryResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("UsageSummaryResponse")
-    }
-}
-impl ToSchema for UsageSummaryResponse {}
-
 pub struct VendorConfigEntry;
 impl PartialSchema for VendorConfigEntry {
     fn schema() -> RefOr<Schema> {
@@ -166,14 +70,6 @@ impl PartialSchema for VendorSummaryItem {
     }
 }
 impl ToSchema for VendorSummaryItem {}
-
-pub struct VersionResponse;
-impl PartialSchema for VersionResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("VersionResponse")
-    }
-}
-impl ToSchema for VersionResponse {}
 
 pub struct VideoItem;
 impl PartialSchema for VideoItem {
@@ -202,27 +98,14 @@ impl ToSchema for VisualManualStyle {}
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
-    c = c.schema_from::<ProductionFlowAssetDerivativeItem>();
-    c = c.schema_from::<ProductionFlowAssetItem>();
-    c = c.schema_from::<ProductionFlowStoryboardItem>();
-    c = c.schema_from::<ProductionStoryboardBatchAddInfoItem>();
-    c = c.schema_from::<ProductionStoryboardBatchGenerateImageItem>();
-    c = c.schema_from::<ProductionStoryboardBundleItem>();
-    c = c.schema_from::<ProductionWorkbenchGenerateVideoUploadItem>();
-    c = c.schema_from::<ProjectRow>();
-    c = c.schema_from::<ReadyResponse>();
-    c = c.schema_from::<ScriptAgentTypeV1>();
-    c = c.schema_from::<ScriptBrief>();
     c = c.schema_from::<ScriptRow>();
     c = c.schema_from::<SetScriptAgentPlanData>();
     c = c.schema_from::<SetScriptAgentPlanScriptRow>();
     c = c.schema_from::<UpdateScriptAgentDataPayload>();
     c = c.schema_from::<UpdateScriptAgentScriptRow>();
-    c = c.schema_from::<UsageSummaryResponse>();
     c = c.schema_from::<VendorConfigEntry>();
     c = c.schema_from::<VendorMutationResponse>();
     c = c.schema_from::<VendorSummaryItem>();
-    c = c.schema_from::<VersionResponse>();
     c = c.schema_from::<VideoItem>();
     c = c.schema_from::<VisualManualEntry>();
     c = c.schema_from::<VisualManualStyle>();

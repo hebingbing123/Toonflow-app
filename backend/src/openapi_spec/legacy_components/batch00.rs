@@ -71,30 +71,6 @@ impl PartialSchema for BatchPolishAssetsItem {
 }
 impl ToSchema for BatchPolishAssetsItem {}
 
-pub struct BillingWebhookEventItem;
-impl PartialSchema for BillingWebhookEventItem {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("BillingWebhookEventItem")
-    }
-}
-impl ToSchema for BillingWebhookEventItem {}
-
-pub struct BillingWebhookEventsResponse;
-impl PartialSchema for BillingWebhookEventsResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("BillingWebhookEventsResponse")
-    }
-}
-impl ToSchema for BillingWebhookEventsResponse {}
-
-pub struct BillingWebhookResponse;
-impl PartialSchema for BillingWebhookResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("BillingWebhookResponse")
-    }
-}
-impl ToSchema for BillingWebhookResponse {}
-
 pub struct CornerScapeAssetItem;
 impl PartialSchema for CornerScapeAssetItem {
     fn schema() -> RefOr<Schema> {
@@ -110,38 +86,6 @@ impl PartialSchema for CornerScapeHistoryImage {
     }
 }
 impl ToSchema for CornerScapeHistoryImage {}
-
-pub struct ErrorBody;
-impl PartialSchema for ErrorBody {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("ErrorBody")
-    }
-}
-impl ToSchema for ErrorBody {}
-
-pub struct HarnessToolInfo;
-impl PartialSchema for HarnessToolInfo {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("HarnessToolInfo")
-    }
-}
-impl ToSchema for HarnessToolInfo {}
-
-pub struct HarnessToolsResponse;
-impl PartialSchema for HarnessToolsResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("HarnessToolsResponse")
-    }
-}
-impl ToSchema for HarnessToolsResponse {}
-
-pub struct HealthResponse;
-impl PartialSchema for HealthResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("HealthResponse")
-    }
-}
-impl ToSchema for HealthResponse {}
 
 pub struct JobRow;
 impl PartialSchema for JobRow {
@@ -279,22 +223,6 @@ impl PartialSchema for LegacyScriptsGetScriptApiItem {
 }
 impl ToSchema for LegacyScriptsGetScriptApiItem {}
 
-pub struct MeResponse;
-impl PartialSchema for MeResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("MeResponse")
-    }
-}
-impl ToSchema for MeResponse {}
-
-pub struct MemoryConfig;
-impl PartialSchema for MemoryConfig {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("MemoryConfig")
-    }
-}
-impl ToSchema for MemoryConfig {}
-
 pub struct MemoryMarkdownBlock;
 impl PartialSchema for MemoryMarkdownBlock {
     fn schema() -> RefOr<Schema> {
@@ -318,14 +246,6 @@ impl PartialSchema for NovelRow {
     }
 }
 impl ToSchema for NovelRow {}
-
-pub struct PingResponse;
-impl PartialSchema for PingResponse {
-    fn schema() -> RefOr<Schema> {
-        legacy_pick("PingResponse")
-    }
-}
-impl ToSchema for PingResponse {}
 
 pub struct ProductionAssetDataItem;
 impl PartialSchema for ProductionAssetDataItem {
@@ -367,6 +287,86 @@ impl PartialSchema for ProductionExportImageShotRef {
 }
 impl ToSchema for ProductionExportImageShotRef {}
 
+pub struct ProductionFlowAssetDerivativeItem;
+impl PartialSchema for ProductionFlowAssetDerivativeItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowAssetDerivativeItem")
+    }
+}
+impl ToSchema for ProductionFlowAssetDerivativeItem {}
+
+pub struct ProductionFlowAssetItem;
+impl PartialSchema for ProductionFlowAssetItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowAssetItem")
+    }
+}
+impl ToSchema for ProductionFlowAssetItem {}
+
+pub struct ProductionFlowStoryboardItem;
+impl PartialSchema for ProductionFlowStoryboardItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionFlowStoryboardItem")
+    }
+}
+impl ToSchema for ProductionFlowStoryboardItem {}
+
+pub struct ProductionStoryboardBatchAddInfoItem;
+impl PartialSchema for ProductionStoryboardBatchAddInfoItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionStoryboardBatchAddInfoItem")
+    }
+}
+impl ToSchema for ProductionStoryboardBatchAddInfoItem {}
+
+pub struct ProductionStoryboardBatchGenerateImageItem;
+impl PartialSchema for ProductionStoryboardBatchGenerateImageItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionStoryboardBatchGenerateImageItem")
+    }
+}
+impl ToSchema for ProductionStoryboardBatchGenerateImageItem {}
+
+pub struct ProductionStoryboardBundleItem;
+impl PartialSchema for ProductionStoryboardBundleItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionStoryboardBundleItem")
+    }
+}
+impl ToSchema for ProductionStoryboardBundleItem {}
+
+pub struct ProductionWorkbenchGenerateVideoUploadItem;
+impl PartialSchema for ProductionWorkbenchGenerateVideoUploadItem {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProductionWorkbenchGenerateVideoUploadItem")
+    }
+}
+impl ToSchema for ProductionWorkbenchGenerateVideoUploadItem {}
+
+pub struct ProjectRow;
+impl PartialSchema for ProjectRow {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ProjectRow")
+    }
+}
+impl ToSchema for ProjectRow {}
+
+pub struct ScriptAgentTypeV1;
+impl PartialSchema for ScriptAgentTypeV1 {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ScriptAgentTypeV1")
+    }
+}
+impl ToSchema for ScriptAgentTypeV1 {}
+
+pub struct ScriptBrief;
+impl PartialSchema for ScriptBrief {
+    fn schema() -> RefOr<Schema> {
+        legacy_pick("ScriptBrief")
+    }
+}
+impl ToSchema for ScriptBrief {}
+
 use utoipa::openapi::schema::ComponentsBuilder;
 
 pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
@@ -378,15 +378,8 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<BatchAddScriptItem>();
     c = c.schema_from::<BatchGenerateImageItem>();
     c = c.schema_from::<BatchPolishAssetsItem>();
-    c = c.schema_from::<BillingWebhookEventItem>();
-    c = c.schema_from::<BillingWebhookEventsResponse>();
-    c = c.schema_from::<BillingWebhookResponse>();
     c = c.schema_from::<CornerScapeAssetItem>();
     c = c.schema_from::<CornerScapeHistoryImage>();
-    c = c.schema_from::<ErrorBody>();
-    c = c.schema_from::<HarnessToolInfo>();
-    c = c.schema_from::<HarnessToolsResponse>();
-    c = c.schema_from::<HealthResponse>();
     c = c.schema_from::<JobRow>();
     c = c.schema_from::<LegacyAssetsBatchGenerationDataItem>();
     c = c.schema_from::<LegacyAssetsGetAssetsApiChildItem>();
@@ -404,16 +397,23 @@ pub(super) fn register_schemas(mut c: ComponentsBuilder) -> ComponentsBuilder {
     c = c.schema_from::<LegacyNovelIndexItem>();
     c = c.schema_from::<LegacyScriptRelatedAssetBrief>();
     c = c.schema_from::<LegacyScriptsGetScriptApiItem>();
-    c = c.schema_from::<MeResponse>();
-    c = c.schema_from::<MemoryConfig>();
     c = c.schema_from::<MemoryMarkdownBlock>();
     c = c.schema_from::<NovelEventWithChapters>();
     c = c.schema_from::<NovelRow>();
-    c = c.schema_from::<PingResponse>();
     c = c.schema_from::<ProductionAssetDataItem>();
     c = c.schema_from::<ProductionAssetImageStatus>();
     c = c.schema_from::<ProductionEditImageFlowStep>();
     c = c.schema_from::<ProductionEditImageFlowStepInput>();
     c = c.schema_from::<ProductionExportImageShotRef>();
+    c = c.schema_from::<ProductionFlowAssetDerivativeItem>();
+    c = c.schema_from::<ProductionFlowAssetItem>();
+    c = c.schema_from::<ProductionFlowStoryboardItem>();
+    c = c.schema_from::<ProductionStoryboardBatchAddInfoItem>();
+    c = c.schema_from::<ProductionStoryboardBatchGenerateImageItem>();
+    c = c.schema_from::<ProductionStoryboardBundleItem>();
+    c = c.schema_from::<ProductionWorkbenchGenerateVideoUploadItem>();
+    c = c.schema_from::<ProjectRow>();
+    c = c.schema_from::<ScriptAgentTypeV1>();
+    c = c.schema_from::<ScriptBrief>();
     c
 }

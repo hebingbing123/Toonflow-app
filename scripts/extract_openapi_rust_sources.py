@@ -44,6 +44,19 @@ RUST_OWNED_SCHEMA_KEYS = frozenset(
         "ExtractArtStylePromptBody",
         "ExtractArtStylePromptResponse",
         "PatchArtStyleBody",
+        "HealthResponse",
+        "PingResponse",
+        "VersionResponse",
+        "ReadyResponse",
+        "MeResponse",
+        "MemoryConfig",
+        "ErrorBody",
+        "BillingWebhookResponse",
+        "BillingWebhookEventItem",
+        "BillingWebhookEventsResponse",
+        "HarnessToolInfo",
+        "HarnessToolsResponse",
+        "UsageSummaryResponse",
     }
 )
 
