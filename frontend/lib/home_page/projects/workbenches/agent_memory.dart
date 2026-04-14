@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
-
-part 'agent_memory_view.dart';
+import 'agent_memory_view.dart';
 
 class ProjectsAgentMemoryWorkbenchDialog extends StatefulWidget {
   const ProjectsAgentMemoryWorkbenchDialog({
@@ -227,6 +226,30 @@ class _ProjectsAgentMemoryWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    return _buildProjectsAgentMemoryWorkbenchDialogView(context);
+    return ProjectsAgentMemoryWorkbenchDialogView(
+      model: ProjectsAgentMemoryWorkbenchDialogViewModel(
+        projects: _projects,
+        memoryRows: _memoryRows,
+        memorySummary: _memorySummary,
+        statusLine: _statusLine,
+        loadingProjects: _loadingProjects,
+        loadingMemory: _loadingMemory,
+        appendingMemory: _appendingMemory,
+        clearingMemory: _clearingMemory,
+        projectIdCtrl: _projectIdCtrl,
+        agentTypeCtrl: _agentTypeCtrl,
+        episodesIdCtrl: _episodesIdCtrl,
+        appendContentCtrl: _appendContentCtrl,
+        appendRoleCtrl: _appendRoleCtrl,
+        clearTypeCtrl: _clearTypeCtrl,
+      ),
+      callbacks: ProjectsAgentMemoryWorkbenchDialogViewCallbacks(
+        onReloadProjects: _reloadProjects,
+        onQueryMemory: _queryMemory,
+        onAppendMemory: _appendMemory,
+        onClearMemory: _clearMemory,
+        onClose: () => Navigator.of(context).pop(),
+      ),
+    );
   }
 }

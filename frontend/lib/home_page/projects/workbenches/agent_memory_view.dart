@@ -1,9 +1,70 @@
-part of 'agent_memory.dart';
+import 'package:flutter/material.dart';
+
+import '../../../rust_api.dart';
+
+class ProjectsAgentMemoryWorkbenchDialogViewModel {
+  const ProjectsAgentMemoryWorkbenchDialogViewModel({
+    required this.projects,
+    required this.memoryRows,
+    required this.memorySummary,
+    required this.statusLine,
+    required this.loadingProjects,
+    required this.loadingMemory,
+    required this.appendingMemory,
+    required this.clearingMemory,
+    required this.projectIdCtrl,
+    required this.agentTypeCtrl,
+    required this.episodesIdCtrl,
+    required this.appendContentCtrl,
+    required this.appendRoleCtrl,
+    required this.clearTypeCtrl,
+  });
+
+  final List<ProjectRow> projects;
+  final List<dynamic> memoryRows;
+  final String? memorySummary;
+  final String? statusLine;
+  final bool loadingProjects;
+  final bool loadingMemory;
+  final bool appendingMemory;
+  final bool clearingMemory;
+  final TextEditingController projectIdCtrl;
+  final TextEditingController agentTypeCtrl;
+  final TextEditingController episodesIdCtrl;
+  final TextEditingController appendContentCtrl;
+  final TextEditingController appendRoleCtrl;
+  final TextEditingController clearTypeCtrl;
+}
+
+class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
+  const ProjectsAgentMemoryWorkbenchDialogViewCallbacks({
+    required this.onReloadProjects,
+    required this.onQueryMemory,
+    required this.onAppendMemory,
+    required this.onClearMemory,
+    required this.onClose,
+  });
+
+  final Future<void> Function() onReloadProjects;
+  final Future<void> Function() onQueryMemory;
+  final Future<void> Function() onAppendMemory;
+  final Future<void> Function() onClearMemory;
+  final VoidCallback onClose;
+}
 
 /// Agent 记忆工作台视图，承载查询结果、追加与清理表单布局。
-extension _ProjectsAgentMemoryWorkbenchDialogView
-    on _ProjectsAgentMemoryWorkbenchDialogState {
-  Widget _buildProjectsAgentMemoryWorkbenchDialogView(BuildContext context) {
+class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
+  const ProjectsAgentMemoryWorkbenchDialogView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final ProjectsAgentMemoryWorkbenchDialogViewModel model;
+  final ProjectsAgentMemoryWorkbenchDialogViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
       title: const Text('Agent 记忆工作台'),
@@ -26,19 +87,23 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                 runSpacing: 8,
                 children: [
                   FilledButton.tonal(
-                    onPressed: _loadingProjects ? null : _reloadProjects,
-                    child: Text(_loadingProjects ? '…' : '刷新项目列表'),
+                    onPressed: model.loadingProjects
+                        ? null
+                        : callbacks.onReloadProjects,
+                    child: Text(model.loadingProjects ? '…' : '刷新项目列表'),
                   ),
                   FilledButton.tonal(
-                    onPressed: _loadingMemory ? null : _queryMemory,
-                    child: Text(_loadingMemory ? '…' : '查询记忆'),
+                    onPressed: model.loadingMemory
+                        ? null
+                        : callbacks.onQueryMemory,
+                    child: Text(model.loadingMemory ? '…' : '查询记忆'),
                   ),
                 ],
               ),
-              if (_projects.isNotEmpty) ...[
+              if (model.projects.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '项目 ${_projects.length} 个 · ${_projects.take(4).map((p) => '#${p.numericId} ${p.name ?? "未命名项目"}').join(', ')}${_projects.length > 4 ? '…' : ''}',
+                  '项目 ${model.projects.length} 个 · ${model.projects.take(4).map((p) => '#${p.numericId} ${p.name ?? "未命名项目"}').join(', ')}${model.projects.length > 4 ? '…' : ''}',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -49,7 +114,7 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _projectIdCtrl,
+                      controller: model.projectIdCtrl,
                       decoration: const InputDecoration(
                         labelText: '项目 numeric ID',
                       ),
@@ -58,7 +123,7 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
-                      controller: _agentTypeCtrl,
+                      controller: model.agentTypeCtrl,
                       decoration: const InputDecoration(
                         labelText: 'agent type',
                       ),
@@ -68,25 +133,25 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _episodesIdCtrl,
+                controller: model.episodesIdCtrl,
                 decoration: const InputDecoration(labelText: 'episodes id（可空）'),
               ),
-              if (_memorySummary != null) ...[
+              if (model.memorySummary != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  _memorySummary!,
+                  model.memorySummary!,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
-              if (_memoryRows.isNotEmpty) ...[
+              if (model.memoryRows.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '${_memoryRows.length} 条记忆',
+                  '${model.memoryRows.length} 条记忆',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                ..._memoryRows.take(8).map((row) {
+                ...model.memoryRows.take(8).map((row) {
                   final map = row is Map
                       ? Map<String, dynamic>.from(row)
                       : <String, dynamic>{};
@@ -113,22 +178,24 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _appendRoleCtrl,
+                      controller: model.appendRoleCtrl,
                       decoration: const InputDecoration(labelText: 'role'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: FilledButton.tonal(
-                      onPressed: _appendingMemory ? null : _appendMemory,
-                      child: Text(_appendingMemory ? '…' : '追加记忆'),
+                      onPressed: model.appendingMemory
+                          ? null
+                          : callbacks.onAppendMemory,
+                      child: Text(model.appendingMemory ? '…' : '追加记忆'),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _appendContentCtrl,
+                controller: model.appendContentCtrl,
                 minLines: 3,
                 maxLines: 5,
                 decoration: const InputDecoration(labelText: '记忆内容'),
@@ -140,7 +207,7 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _clearTypeCtrl,
+                      controller: model.clearTypeCtrl,
                       decoration: const InputDecoration(
                         labelText: 'clear type',
                         helperText: 'all / message / summary',
@@ -150,16 +217,18 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
                   const SizedBox(width: 8),
                   Expanded(
                     child: FilledButton.tonal(
-                      onPressed: _clearingMemory ? null : _clearMemory,
-                      child: Text(_clearingMemory ? '…' : '执行清理'),
+                      onPressed: model.clearingMemory
+                          ? null
+                          : callbacks.onClearMemory,
+                      child: Text(model.clearingMemory ? '…' : '执行清理'),
                     ),
                   ),
                 ],
               ),
-              if (_statusLine != null) ...[
+              if (model.statusLine != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  _statusLine!,
+                  model.statusLine!,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -170,10 +239,7 @@ extension _ProjectsAgentMemoryWorkbenchDialogView
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
+        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
       ],
     );
   }
