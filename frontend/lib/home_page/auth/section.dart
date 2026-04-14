@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../config.dart';
-
-part 'section_view.dart';
+import 'section_view.dart';
 
 class AuthSection extends StatelessWidget {
   const AuthSection({
@@ -99,6 +97,54 @@ class AuthSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildAuthSectionView(context);
+    return AuthSectionView(
+      model: AuthSectionViewModel(
+        signedIn: signedIn,
+        session: session,
+        emailController: emailController,
+        passwordController: passwordController,
+        loadingMe: loadingMe,
+        loadingDevSwitchProbe: loadingDevSwitchProbe,
+        loadingMemoryConfigProbe: loadingMemoryConfigProbe,
+        loadingAboutProbe: loadingAboutProbe,
+        loadingUsageSummary: loadingUsageSummary,
+        loadingPromptsProbe: loadingPromptsProbe,
+        loadingVisualManualProbe: loadingVisualManualProbe,
+        loadingDirectorManualProbe: loadingDirectorManualProbe,
+        loadingSkillsBinaryProbe: loadingSkillsBinaryProbe,
+        loadingModelsCatalog: loadingModelsCatalog,
+        loadingTextModelDefault: loadingTextModelDefault,
+        loadingModelDetail: loadingModelDetail,
+        meBody: meBody,
+        devSwitchProbeBody: devSwitchProbeBody,
+        memoryConfigProbeBody: memoryConfigProbeBody,
+        aboutProbeBody: aboutProbeBody,
+        usageSummaryBody: usageSummaryBody,
+        promptsProbeBody: promptsProbeBody,
+        visualManualProbeBody: visualManualProbeBody,
+        directorManualProbeBody: directorManualProbeBody,
+        skillsBinaryProbeBody: skillsBinaryProbeBody,
+        modelsCatalogBody: modelsCatalogBody,
+        textModelDefaultBody: textModelDefaultBody,
+        modelDetailBody: modelDetailBody,
+      ),
+      callbacks: AuthSectionViewCallbacks(
+        onSignIn: onSignIn,
+        onSignUp: onSignUp,
+        onSignOut: onSignOut,
+        onCallMe: onCallMe,
+        onCallDevSwitchProbe: onCallDevSwitchProbe,
+        onCallMemoryConfigProbe: onCallMemoryConfigProbe,
+        onCallAboutProbe: onCallAboutProbe,
+        onCallUsageSummary: onCallUsageSummary,
+        onCallPromptsProbe: onCallPromptsProbe,
+        onCallVisualManualProbe: onCallVisualManualProbe,
+        onCallDirectorManualProbe: onCallDirectorManualProbe,
+        onCallSkillsBinaryProbe: onCallSkillsBinaryProbe,
+        onCallModelsCatalog: onCallModelsCatalog,
+        onCallTextModelDefault: onCallTextModelDefault,
+        onCallModelDetail: onCallModelDetail,
+      ),
+    );
   }
 }

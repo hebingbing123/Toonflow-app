@@ -1,8 +1,119 @@
-part of 'section.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../config.dart';
+
+class AuthSectionViewModel {
+  const AuthSectionViewModel({
+    required this.signedIn,
+    required this.session,
+    required this.emailController,
+    required this.passwordController,
+    required this.loadingMe,
+    required this.loadingDevSwitchProbe,
+    required this.loadingMemoryConfigProbe,
+    required this.loadingAboutProbe,
+    required this.loadingUsageSummary,
+    required this.loadingPromptsProbe,
+    required this.loadingVisualManualProbe,
+    required this.loadingDirectorManualProbe,
+    required this.loadingSkillsBinaryProbe,
+    required this.loadingModelsCatalog,
+    required this.loadingTextModelDefault,
+    required this.loadingModelDetail,
+    required this.meBody,
+    required this.devSwitchProbeBody,
+    required this.memoryConfigProbeBody,
+    required this.aboutProbeBody,
+    required this.usageSummaryBody,
+    required this.promptsProbeBody,
+    required this.visualManualProbeBody,
+    required this.directorManualProbeBody,
+    required this.skillsBinaryProbeBody,
+    required this.modelsCatalogBody,
+    required this.textModelDefaultBody,
+    required this.modelDetailBody,
+  });
+
+  final bool signedIn;
+  final Session? session;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool loadingMe;
+  final bool loadingDevSwitchProbe;
+  final bool loadingMemoryConfigProbe;
+  final bool loadingAboutProbe;
+  final bool loadingUsageSummary;
+  final bool loadingPromptsProbe;
+  final bool loadingVisualManualProbe;
+  final bool loadingDirectorManualProbe;
+  final bool loadingSkillsBinaryProbe;
+  final bool loadingModelsCatalog;
+  final bool loadingTextModelDefault;
+  final bool loadingModelDetail;
+  final String? meBody;
+  final String? devSwitchProbeBody;
+  final String? memoryConfigProbeBody;
+  final String? aboutProbeBody;
+  final String? usageSummaryBody;
+  final String? promptsProbeBody;
+  final String? visualManualProbeBody;
+  final String? directorManualProbeBody;
+  final String? skillsBinaryProbeBody;
+  final String? modelsCatalogBody;
+  final String? textModelDefaultBody;
+  final String? modelDetailBody;
+}
+
+class AuthSectionViewCallbacks {
+  const AuthSectionViewCallbacks({
+    required this.onSignIn,
+    required this.onSignUp,
+    required this.onSignOut,
+    required this.onCallMe,
+    required this.onCallDevSwitchProbe,
+    required this.onCallMemoryConfigProbe,
+    required this.onCallAboutProbe,
+    required this.onCallUsageSummary,
+    required this.onCallPromptsProbe,
+    required this.onCallVisualManualProbe,
+    required this.onCallDirectorManualProbe,
+    required this.onCallSkillsBinaryProbe,
+    required this.onCallModelsCatalog,
+    required this.onCallTextModelDefault,
+    required this.onCallModelDetail,
+  });
+
+  final VoidCallback? onSignIn;
+  final VoidCallback? onSignUp;
+  final VoidCallback? onSignOut;
+  final VoidCallback? onCallMe;
+  final VoidCallback? onCallDevSwitchProbe;
+  final VoidCallback? onCallMemoryConfigProbe;
+  final VoidCallback? onCallAboutProbe;
+  final VoidCallback? onCallUsageSummary;
+  final VoidCallback? onCallPromptsProbe;
+  final VoidCallback? onCallVisualManualProbe;
+  final VoidCallback? onCallDirectorManualProbe;
+  final VoidCallback? onCallSkillsBinaryProbe;
+  final VoidCallback? onCallModelsCatalog;
+  final VoidCallback? onCallTextModelDefault;
+  final VoidCallback? onCallModelDetail;
+}
 
 /// Auth section view shell. Keeps the section file focused on wiring inputs and callbacks.
-extension _AuthSectionView on AuthSection {
-  Widget _buildAuthSectionView(BuildContext context) {
+class AuthSectionView extends StatelessWidget {
+  const AuthSectionView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final AuthSectionViewModel model;
+  final AuthSectionViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -18,14 +129,14 @@ extension _AuthSectionView on AuthSection {
           )
         else ...[
           TextField(
-            controller: emailController,
+            controller: model.emailController,
             decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
           ),
           const SizedBox(height: 8),
           TextField(
-            controller: passwordController,
+            controller: model.passwordController,
             decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             autofillHints: const [AutofillHints.password],
@@ -35,133 +146,154 @@ extension _AuthSectionView on AuthSection {
             spacing: 8,
             runSpacing: 8,
             children: [
-              FilledButton(onPressed: onSignIn, child: const Text('登录')),
-              OutlinedButton(onPressed: onSignUp, child: const Text('注册')),
-              if (signedIn)
-                TextButton(onPressed: onSignOut, child: const Text('退出')),
+              FilledButton(
+                onPressed: callbacks.onSignIn,
+                child: const Text('登录'),
+              ),
+              OutlinedButton(
+                onPressed: callbacks.onSignUp,
+                child: const Text('注册'),
+              ),
+              if (model.signedIn)
+                TextButton(
+                  onPressed: callbacks.onSignOut,
+                  child: const Text('退出'),
+                ),
             ],
           ),
-          if (signedIn) ...[
+          if (model.signedIn) ...[
             const SizedBox(height: 12),
-            Text('已登录 user: ${session?.user.id ?? ''}'),
+            Text('已登录 user: ${model.session?.user.id ?? ''}'),
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingMe ? null : onCallMe,
-              child: Text(loadingMe ? '请求中…' : 'GET /api/v1/me (Bearer)'),
+              onPressed: model.loadingMe ? null : callbacks.onCallMe,
+              child: Text(model.loadingMe ? '请求中…' : 'GET /api/v1/me (Bearer)'),
             ),
-            if (meBody != null) ...[
+            if (model.meBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('/me: $meBody'),
+              SelectableText('/me: ${model.meBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingDevSwitchProbe ? null : onCallDevSwitchProbe,
+              onPressed: model.loadingDevSwitchProbe
+                  ? null
+                  : callbacks.onCallDevSwitchProbe,
               child: Text(
-                loadingDevSwitchProbe
+                model.loadingDevSwitchProbe
                     ? '请求中…'
                     : 'GET+PUT /api/v1/settings/dev/switch-ai-tool',
               ),
             ),
-            if (devSwitchProbeBody != null) ...[
+            if (model.devSwitchProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('dev switch: $devSwitchProbeBody'),
+              SelectableText('dev switch: ${model.devSwitchProbeBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingMemoryConfigProbe
+              onPressed: model.loadingMemoryConfigProbe
                   ? null
-                  : onCallMemoryConfigProbe,
+                  : callbacks.onCallMemoryConfigProbe,
               child: Text(
-                loadingMemoryConfigProbe
+                model.loadingMemoryConfigProbe
                     ? '请求中…'
                     : 'memory-config GET+POST + clear-agent-memories',
               ),
             ),
-            if (memoryConfigProbeBody != null) ...[
+            if (model.memoryConfigProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('memory-config: $memoryConfigProbeBody'),
+              SelectableText('memory-config: ${model.memoryConfigProbeBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingAboutProbe ? null : onCallAboutProbe,
+              onPressed: model.loadingAboutProbe
+                  ? null
+                  : callbacks.onCallAboutProbe,
               child: Text(
-                loadingAboutProbe
+                model.loadingAboutProbe
                     ? '请求中…'
                     : 'POST …/settings/about/check-update + download-app',
               ),
             ),
-            if (aboutProbeBody != null) ...[
+            if (model.aboutProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('about: $aboutProbeBody'),
+              SelectableText('about: ${model.aboutProbeBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingUsageSummary ? null : onCallUsageSummary,
+              onPressed: model.loadingUsageSummary
+                  ? null
+                  : callbacks.onCallUsageSummary,
               child: Text(
-                loadingUsageSummary ? '请求中…' : 'GET /api/v1/usage/summary',
+                model.loadingUsageSummary
+                    ? '请求中…'
+                    : 'GET /api/v1/usage/summary',
               ),
             ),
-            if (usageSummaryBody != null) ...[
+            if (model.usageSummaryBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('usage: $usageSummaryBody'),
+              SelectableText('usage: ${model.usageSummaryBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingPromptsProbe ? null : onCallPromptsProbe,
+              onPressed: model.loadingPromptsProbe
+                  ? null
+                  : callbacks.onCallPromptsProbe,
               child: Text(
-                loadingPromptsProbe
+                model.loadingPromptsProbe
                     ? '请求中…'
                     : 'GET /api/v1/prompts + GET/1 + PATCH/1',
               ),
             ),
-            if (promptsProbeBody != null) ...[
+            if (model.promptsProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('prompts: $promptsProbeBody'),
+              SelectableText('prompts: ${model.promptsProbeBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingVisualManualProbe
+              onPressed: model.loadingVisualManualProbe
                   ? null
-                  : onCallVisualManualProbe,
+                  : callbacks.onCallVisualManualProbe,
               child: Text(
-                loadingVisualManualProbe
+                model.loadingVisualManualProbe
                     ? '请求中…'
                     : 'GET+POST /api/v1/visual-manual',
               ),
             ),
-            if (visualManualProbeBody != null) ...[
+            if (model.visualManualProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('visual-manual: $visualManualProbeBody'),
+              SelectableText('visual-manual: ${model.visualManualProbeBody}'),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingDirectorManualProbe
+              onPressed: model.loadingDirectorManualProbe
                   ? null
-                  : onCallDirectorManualProbe,
+                  : callbacks.onCallDirectorManualProbe,
               child: Text(
-                loadingDirectorManualProbe
+                model.loadingDirectorManualProbe
                     ? '请求中…'
                     : 'POST …/project/query-director-manual',
               ),
             ),
-            if (directorManualProbeBody != null) ...[
+            if (model.directorManualProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('director-manual: $directorManualProbeBody'),
+              SelectableText(
+                'director-manual: ${model.directorManualProbeBody}',
+              ),
             ],
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: loadingSkillsBinaryProbe
+              onPressed: model.loadingSkillsBinaryProbe
                   ? null
-                  : onCallSkillsBinaryProbe,
+                  : callbacks.onCallSkillsBinaryProbe,
               child: Text(
-                loadingSkillsBinaryProbe
+                model.loadingSkillsBinaryProbe
                     ? '请求中…'
                     : 'GET /api/v1/skills/binary (_smoke PNG)',
               ),
             ),
-            if (skillsBinaryProbeBody != null) ...[
+            if (model.skillsBinaryProbeBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('skills/binary: $skillsBinaryProbeBody'),
+              SelectableText('skills/binary: ${model.skillsBinaryProbeBody}'),
             ],
             const SizedBox(height: 8),
             Wrap(
@@ -169,44 +301,48 @@ extension _AuthSectionView on AuthSection {
               runSpacing: 8,
               children: [
                 FilledButton.tonal(
-                  onPressed: loadingModelsCatalog ? null : onCallModelsCatalog,
+                  onPressed: model.loadingModelsCatalog
+                      ? null
+                      : callbacks.onCallModelsCatalog,
                   child: Text(
-                    loadingModelsCatalog
+                    model.loadingModelsCatalog
                         ? '请求中…'
                         : 'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen',
                   ),
                 ),
                 FilledButton.tonal(
-                  onPressed: loadingTextModelDefault
+                  onPressed: model.loadingTextModelDefault
                       ? null
-                      : onCallTextModelDefault,
+                      : callbacks.onCallTextModelDefault,
                   child: Text(
-                    loadingTextModelDefault
+                    model.loadingTextModelDefault
                         ? '请求中…'
                         : 'GET+PATCH /api/v1/models/text-default',
                   ),
                 ),
                 FilledButton.tonal(
-                  onPressed: loadingModelDetail ? null : onCallModelDetail,
+                  onPressed: model.loadingModelDetail
+                      ? null
+                      : callbacks.onCallModelDetail,
                   child: Text(
-                    loadingModelDetail
+                    model.loadingModelDetail
                         ? '请求中…'
                         : 'GET /api/v1/models/detail (1:gpt-4o-mini)',
                   ),
                 ),
               ],
             ),
-            if (modelsCatalogBody != null) ...[
+            if (model.modelsCatalogBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('models: $modelsCatalogBody'),
+              SelectableText('models: ${model.modelsCatalogBody}'),
             ],
-            if (textModelDefaultBody != null) ...[
+            if (model.textModelDefaultBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('text-default: $textModelDefaultBody'),
+              SelectableText('text-default: ${model.textModelDefaultBody}'),
             ],
-            if (modelDetailBody != null) ...[
+            if (model.modelDetailBody != null) ...[
               const SizedBox(height: 8),
-              SelectableText('model detail: $modelDetailBody'),
+              SelectableText('model detail: ${model.modelDetailBody}'),
             ],
           ],
         ],
