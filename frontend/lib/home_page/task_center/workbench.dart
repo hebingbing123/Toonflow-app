@@ -272,41 +272,54 @@ class _TaskCenterWorkbenchDialogState
     final jobSummary = _jobs.isEmpty
         ? (_taskSummary ?? '当前没有任务记录')
         : summarizeTaskJobs(_jobs);
-    return _buildTaskCenterWorkbenchDialogView(
-      context: context,
-      projectSummary: projectSummary,
-      jobSummary: jobSummary,
-      pageCtrl: _pageCtrl,
-      limitCtrl: _limitCtrl,
-      stateCtrl: _stateCtrl,
-      taskClassCtrl: _taskClassCtrl,
-      projectIdCtrl: _projectIdCtrl,
-      numericTaskIdCtrl: _numericTaskIdCtrl,
-      uuidCtrl: _uuidCtrl,
-      categories: _categories,
-      jobs: _jobs,
-      categoriesSummary: _categoriesSummary,
-      numericIdTaskDetailText: _numericIdTaskDetailText,
-      uuidDetails: _uuidDetails,
-      statusLine: _statusLine,
-      loadingProjects: _loadingProjects,
-      loadingCategories: _loadingCategories,
-      loadingTasks: _loadingTasks,
-      loadingNumericIdTaskDetail: _loadingNumericIdTaskDetail,
-      loadingUuidDetails: _loadingUuidDetails,
-      onLoadProjects: _loadProjects,
-      onLoadCategories: _loadCategories,
-      onLoadTasks: _loadTasks,
-      onLoadNumericIdTaskDetail: _loadNumericIdTaskDetail,
-      onLoadUuidDetails: _loadUuidDetails,
-      onPickCategory: (value) => setState(() => _taskClassCtrl.text = value),
-      onPickJob: (job) {
-        setState(() {
-          _numericTaskIdCtrl.text = job.numericTaskId.toString();
-          _uuidCtrl.text = job.id;
-        });
-      },
-      onClose: () => Navigator.of(context).pop(),
+    return TaskCenterWorkbenchDialogView(
+      model: TaskCenterWorkbenchDialogViewModel(
+        projectSummary: projectSummary,
+        jobSummary: jobSummary,
+        pageCtrl: _pageCtrl,
+        limitCtrl: _limitCtrl,
+        stateCtrl: _stateCtrl,
+        taskClassCtrl: _taskClassCtrl,
+        projectIdCtrl: _projectIdCtrl,
+        numericTaskIdCtrl: _numericTaskIdCtrl,
+        uuidCtrl: _uuidCtrl,
+        categories: _categories,
+        jobs: _jobs,
+        categoriesSummary: _categoriesSummary,
+        numericIdTaskDetailText: _numericIdTaskDetailText,
+        uuidDetails: _uuidDetails,
+        statusLine: _statusLine,
+        loadingProjects: _loadingProjects,
+        loadingCategories: _loadingCategories,
+        loadingTasks: _loadingTasks,
+        loadingNumericIdTaskDetail: _loadingNumericIdTaskDetail,
+        loadingUuidDetails: _loadingUuidDetails,
+      ),
+      callbacks: TaskCenterWorkbenchDialogViewCallbacks(
+        onLoadProjects: () {
+          _loadProjects();
+        },
+        onLoadCategories: () {
+          _loadCategories();
+        },
+        onLoadTasks: () {
+          _loadTasks();
+        },
+        onLoadNumericIdTaskDetail: () {
+          _loadNumericIdTaskDetail();
+        },
+        onLoadUuidDetails: () {
+          _loadUuidDetails();
+        },
+        onPickCategory: (value) => setState(() => _taskClassCtrl.text = value),
+        onPickJob: (job) {
+          setState(() {
+            _numericTaskIdCtrl.text = job.numericTaskId.toString();
+            _uuidCtrl.text = job.id;
+          });
+        },
+        onClose: () => Navigator.of(context).pop(),
+      ),
     );
   }
 }
