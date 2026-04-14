@@ -210,11 +210,6 @@ def rust_ident(operation_id: str) -> str:
     return f"op_{base}"
 
 
-def normalize_operation_id(operation_id: str) -> str:
-    """Drop transitional old-wording suffix from operation ids."""
-    return operation_id.replace("Le" "gacyV1", "V1")
-
-
 def rust_str(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
@@ -234,8 +229,6 @@ def schema_to_rust_content(schema: Any) -> str:
         ref = schema["$ref"]
         if ref.startswith(REF_PREFIX):
             name = ref.removeprefix(REF_PREFIX)
-            if name.startswith("Le" "gacy"):
-                return "serde_json::Value"
             return f'ref("{name}")'
     return "serde_json::Value"
 
@@ -399,9 +392,7 @@ def main() -> None:
                 raise SystemExit(f"missing operationId for {method.upper()} {path}")
             if oid in SKIP_OPERATION_IDS:
                 continue
-            op2 = dict(op)
-            op2["operationId"] = normalize_operation_id(oid)
-            ops.append((path, method, op2))
+            ops.append((path, method, dict(op)))
 
     ops.sort(key=lambda t: (t[0], t[1], t[2].get("operationId", "")))
 
