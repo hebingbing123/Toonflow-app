@@ -1,23 +1,57 @@
 part of '../../../../home_page.dart';
 
-void _setAssetImagesReloadFailure({
+Future<void> _runAssetImagesLoadFlow({
   required StateSetter setState,
-  required AssetImagesWorkbenchRuntime runtime,
-  required Object error,
-}) {
-  setState(() {
-    runtime.clearSelection(
-      images: null,
-      selectedId: null,
-      preview: null,
-      statusLine: buildAssetImagesWorkbenchFailureNotice(
-        actionSummary: '读取当前资产图片列表失败。',
-        recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
-        error: error,
-        fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
-      ),
-    );
-  });
+  required VoidCallback beginStateUpdate,
+  required Future<void> Function() action,
+  required void Function(Object error) onErrorStateUpdate,
+  required VoidCallback endStateUpdate,
+}) async {
+  setState(beginStateUpdate);
+  try {
+    await action();
+  } catch (error) {
+    setState(() => onErrorStateUpdate(error));
+  } finally {
+    setState(endStateUpdate);
+  }
+}
+
+void _setAssetImagesPreviewLoading(AssetImagesWorkbenchRuntime runtime) {
+  runtime.onPreviewLoadingChanged(true);
+  runtime.onPreviewBytesChanged(null);
+}
+
+void _setAssetImagesPreviewFailure(
+  AssetImagesWorkbenchRuntime runtime,
+  Object error,
+) {
+  runtime.onStatusChanged(
+    buildAssetImagesWorkbenchFailureNotice(
+      actionSummary: '读取当前图片预览失败。',
+      recommendedAction:
+          AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
+      error: error,
+      fallbackDetail: '建议先确认 file_path 或切换到其他图片后重试。',
+    ),
+  );
+}
+
+void _setAssetImagesReloadFailure(
+  AssetImagesWorkbenchRuntime runtime,
+  Object error,
+) {
+  runtime.clearSelection(
+    images: null,
+    selectedId: null,
+    preview: null,
+    statusLine: buildAssetImagesWorkbenchFailureNotice(
+      actionSummary: '读取当前资产图片列表失败。',
+      recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
+      error: error,
+      fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
+    ),
+  );
 }
 
 Future<void> loadAssetImagePreview({
@@ -41,40 +75,29 @@ Future<void> loadAssetImagePreview({
     );
     return;
   }
-  setState(() {
-    scope.runtime.onPreviewLoadingChanged(true);
-    scope.runtime.onPreviewBytesChanged(null);
-  });
-  try {
-    final bytes = await fetchProjectAssetImageFileByProjectIds(
-      scope.token,
-      scope.projectId,
-      assetNumericId,
-      image.id,
-    );
-    applyAssetImagePreviewState(
-      setState: setState,
-      runtime: scope.runtime,
-      imagesResponse: scope.runtime.imagesResponse(),
-      selectedImageId: selectedImageId,
-      previewBytes: bytes,
-      actionSummary: '已读取当前图片预览。',
-    );
-  } on RustApiException catch (e) {
-    setState(() {
-      scope.runtime.onStatusChanged(
-        buildAssetImagesWorkbenchFailureNotice(
-          actionSummary: '读取当前图片预览失败。',
-          recommendedAction:
-              AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
-          error: e,
-          fallbackDetail: '建议先确认 file_path 或切换到其他图片后重试。',
-        ),
+  await _runAssetImagesLoadFlow(
+    setState: setState,
+    beginStateUpdate: () => _setAssetImagesPreviewLoading(scope.runtime),
+    action: () async {
+      final bytes = await fetchProjectAssetImageFileByProjectIds(
+        scope.token,
+        scope.projectId,
+        assetNumericId,
+        image.id,
       );
-    });
-  } finally {
-    setState(() => scope.runtime.onPreviewLoadingChanged(false));
-  }
+      applyAssetImagePreviewState(
+        setState: setState,
+        runtime: scope.runtime,
+        imagesResponse: scope.runtime.imagesResponse(),
+        selectedImageId: selectedImageId,
+        previewBytes: bytes,
+        actionSummary: '已读取当前图片预览。',
+      );
+    },
+    onErrorStateUpdate: (error) =>
+        _setAssetImagesPreviewFailure(scope.runtime, error),
+    endStateUpdate: () => scope.runtime.onPreviewLoadingChanged(false),
+  );
 }
 
 Future<void> reloadAssetImages({
@@ -82,37 +105,35 @@ Future<void> reloadAssetImages({
   required int assetNumericId,
   required StateSetter setState,
 }) async {
-  setState(() {
-    scope.runtime.onListLoadingChanged(true);
-    scope.runtime.onStatusChanged(null);
-  });
-  try {
-    final response = await fetchProjectAssetImagesByProjectIds(
-      scope.token,
-      scope.projectId,
-      assetNumericId,
-    );
-    final nextSelectedImageId = applyReloadedAssetImagesState(
-      setState: setState,
-      runtime: scope.runtime,
-      response: response,
-      patchControllers: scope.patchControllers,
-    );
-    await loadAssetImagePreview(
-      scope: scope,
-      assetNumericId: assetNumericId,
-      selectedImageId: nextSelectedImageId,
-      setState: setState,
-    );
-  } catch (e) {
-    _setAssetImagesReloadFailure(
-      setState: setState,
-      runtime: scope.runtime,
-      error: e,
-    );
-  } finally {
-    setState(() => scope.runtime.onListLoadingChanged(false));
-  }
+  await _runAssetImagesLoadFlow(
+    setState: setState,
+    beginStateUpdate: () {
+      scope.runtime.onListLoadingChanged(true);
+      scope.runtime.onStatusChanged(null);
+    },
+    action: () async {
+      final response = await fetchProjectAssetImagesByProjectIds(
+        scope.token,
+        scope.projectId,
+        assetNumericId,
+      );
+      final nextSelectedImageId = applyReloadedAssetImagesState(
+        setState: setState,
+        runtime: scope.runtime,
+        response: response,
+        patchControllers: scope.patchControllers,
+      );
+      await loadAssetImagePreview(
+        scope: scope,
+        assetNumericId: assetNumericId,
+        selectedImageId: nextSelectedImageId,
+        setState: setState,
+      );
+    },
+    onErrorStateUpdate: (error) =>
+        _setAssetImagesReloadFailure(scope.runtime, error),
+    endStateUpdate: () => scope.runtime.onListLoadingChanged(false),
+  );
 }
 
 Future<void> runAssetImagesRecommendedAction({
