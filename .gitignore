@@ -36,7 +36,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 build/*
 
-# Legacy Electron+Node runtime (removed from repo; ignore if still present locally)
+# Electron+Node runtime (removed from repo; ignore if still present locally)
 data/serve/
 
 upload/*

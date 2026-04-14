@@ -131,11 +131,11 @@ When `OPENAI_API_KEY` or `LLM_API_KEY` is configured, the server streams an Open
 
 If the API key is missing, respond with **`error.occurred`** (`code`: `llm_not_configured`). Upstream failures use `code`: `llm_error`.
 
-## Channels vs legacy Socket.IO namespaces
+## Channels vs previous Socket.IO namespaces
 
-Legacy Node stack used Socket.IO namespaces:
+Previous Node stack used Socket.IO namespaces:
 
-| Legacy namespace | Purpose |
+| Previous namespace | Purpose |
 |------------------|---------|
 | `/api/socket/scriptAgent` | 剧本 / 统筹 Agent |
 | `/api/socket/productionAgent` | 视频策划 Agent |
@@ -149,21 +149,21 @@ Legacy Node stack used Socket.IO namespaces:
 
 `payload` should carry `isolation_key`, `project_id`, and for production `script_id` where applicable (mirrors handshake `auth` fields today).
 
-## Client → server (legacy names → target `type`)
+## Client → server (previous names → target `type`)
 
-| Legacy Socket.IO event | Target `type` | Notes |
+| Previous Socket.IO event | Target `type` | Notes |
 |------------------------|---------------|--------|
 | (Harness) | `harness.tool.invoke` | `payload.name`, optional `payload.arguments` — `echo` returns arguments; `isolated.echo` same JSON semantics as `echo` via process isolation; `skills.read` requires `arguments.path` (relative to `data/skills`) and returns `{ path, content }`; script tools: `get_planData`, `get_script_content`, `get_novel_text`, `get_novel_events`, `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent`; production tools: `get_flowData` (`arguments.key` + optional `scriptId`), `add_deriveAsset` (parent `assetsId` must be `app_script_asset`-linked for active `scriptId`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`; `wasm.probe` runs embedded WASM (wasmi) |
 | (Harness agent) | `harness.agent.run` | `payload.content` plus optional `max_tool_rounds` — LLM-driven multi-step tool loop; requires attach + API key (see § above) |
 | `chat` | `agent.chat.send` | `payload.content` (string) |
 | `stop` | `agent.run.cancel` | Abort current generation |
-| `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; legacy used ack callback — use `request_id` + optional `session.ack` server message |
+| `updateContext` | `agent.context.update` | Production only; `isolation_key`, `project_id`, `script_id`; previous implementation used ack callback — use `request_id` + optional `session.ack` server message |
 
-## Server → client (legacy names → target `type`)
+## Server → client (previous names → target `type`)
 
-Legacy emits arbitrary Socket.IO event names. Map to `domain.action`:
+Previous implementation emits arbitrary Socket.IO event names. Map to `domain.action`:
 
-| Legacy event | Target `type` | Payload notes |
+| Previous event | Target `type` | Payload notes |
 |--------------|---------------|---------------|
 | `message` | `chat.message.created` | New message shell: `id`, `role`, `name`, `status`, `datetime`, `content` array |
 | `message:update` | `chat.message.updated` | `id`, `status`, optional `ext` (e.g. `error`) |
@@ -186,7 +186,7 @@ Align `code` / `message` semantics with `the exported OpenAPI document` `ErrorBo
 
 Configure **one** `location` (or equivalent) for `/api/v1/` so HTTP and `Upgrade: websocket` both reach the Rust service.
 
-## Reference implementation (legacy)
+## Reference implementation (previous)
 
 - Namespaces: `src/socket/index.ts`
 - Handlers: `src/socket/routes/scriptAgent.ts`, `src/socket/routes/productionAgent.ts`

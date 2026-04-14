@@ -157,7 +157,7 @@ mod stubs {
     #[utoipa::path(
         delete,
         path = "/api/v1/projects/{project_id}/scripts/{script_numeric_id}",
-        operation_id = "deleteScriptByProjectAndLegacyV1",
+        operation_id = "deleteScriptByProjectV1",
         tag = "scripts",
         summary = "Delete script (scoped to project UUID)",
     responses(
@@ -173,7 +173,7 @@ mod stubs {
     #[utoipa::path(
         get,
         path = "/api/v1/projects/{project_id}/scripts/{script_numeric_id}",
-        operation_id = "getScriptByProjectAndLegacyV1",
+        operation_id = "getScriptByProjectV1",
         tag = "scripts",
         summary = "Script by project UUID + script numeric id",
     responses(
@@ -189,7 +189,7 @@ mod stubs {
     #[utoipa::path(
         patch,
         path = "/api/v1/projects/{project_id}/scripts/{script_numeric_id}",
-        operation_id = "patchScriptByProjectAndLegacyV1",
+        operation_id = "patchScriptByProjectV1",
         tag = "scripts",
         summary = "Partially update script (scoped to project UUID)",
     request_body(
@@ -244,7 +244,7 @@ mod stubs {
     #[utoipa::path(
         get,
         path = "/api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards",
-        operation_id = "listStoryboardsByProjectAndScriptLegacyV1",
+        operation_id = "listStoryboardsByProjectAndScriptV1",
         tag = "storyboards",
         summary = "List storyboards for a script (by project UUID + script numeric id)",
     responses(
@@ -260,7 +260,7 @@ mod stubs {
     #[utoipa::path(
         post,
         path = "/api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards",
-        operation_id = "createStoryboardUnderProjectAndScriptLegacyV1",
+        operation_id = "createStoryboardUnderProjectAndScriptV1",
         tag = "storyboards",
         summary = "Create storyboard under a script (by project UUID + script numeric id)",
     request_body(
@@ -297,7 +297,7 @@ mod stubs {
     #[utoipa::path(
         delete,
         path = "/api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}",
-        operation_id = "deleteStoryboardByProjectAndLegacyV1",
+        operation_id = "deleteStoryboardByProjectV1",
         tag = "storyboards",
         summary = "Delete storyboard (scoped to project UUID)",
     responses(
@@ -313,7 +313,7 @@ mod stubs {
     #[utoipa::path(
         get,
         path = "/api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}",
-        operation_id = "getStoryboardByProjectAndLegacyV1",
+        operation_id = "getStoryboardByProjectV1",
         tag = "storyboards",
         summary = "Storyboard by numeric id (scoped to project UUID)",
     responses(
@@ -329,7 +329,7 @@ mod stubs {
     #[utoipa::path(
         patch,
         path = "/api/v1/projects/{project_id}/storyboards/{storyboard_numeric_id}",
-        operation_id = "patchStoryboardByProjectAndLegacyV1",
+        operation_id = "patchStoryboardByProjectV1",
         tag = "storyboards",
         summary = "Partially update storyboard (scoped to project UUID)",
     request_body(

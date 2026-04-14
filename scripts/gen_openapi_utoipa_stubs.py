@@ -210,6 +210,11 @@ def rust_ident(operation_id: str) -> str:
     return f"op_{base}"
 
 
+def normalize_operation_id(operation_id: str) -> str:
+    """Drop transitional legacy wording from operation ids."""
+    return operation_id.replace("LegacyV1", "V1")
+
+
 def rust_str(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
@@ -229,6 +234,8 @@ def schema_to_rust_content(schema: Any) -> str:
         ref = schema["$ref"]
         if ref.startswith(REF_PREFIX):
             name = ref.removeprefix(REF_PREFIX)
+            if name.startswith("Legacy"):
+                return "serde_json::Value"
             return f'ref("{name}")'
     return "serde_json::Value"
 
@@ -392,7 +399,9 @@ def main() -> None:
                 raise SystemExit(f"missing operationId for {method.upper()} {path}")
             if oid in SKIP_OPERATION_IDS:
                 continue
-            ops.append((path, method, op))
+            op2 = dict(op)
+            op2["operationId"] = normalize_operation_id(oid)
+            ops.append((path, method, op2))
 
     ops.sort(key=lambda t: (t[0], t[1], t[2].get("operationId", "")))
 

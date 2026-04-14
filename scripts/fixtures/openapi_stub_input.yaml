@@ -533,7 +533,7 @@ paths:
       description: 'Bearer JWT. Effective value from env **`TOONFLOW_SWITCH_AI_DEV_TOOL`**: trimmed **`"1"`** → **`"1"`**,
         anything else (unset included) → **`"0"`**.
 
-        Legacy **`GET /api/setting/dev/getSwitchAiDevTool`** returned the same digit string inside the old success envelope.
+        **`GET /api/setting/dev/getSwitchAiDevTool`** returned the same digit string inside the old success envelope.
 
         '
       security:
@@ -688,7 +688,7 @@ paths:
         **`agent_type`**, and optional **`episodes_id`** — identical to **`POST /api/v1/agents/memory/clear`** with **`clearType:
         all`**.
 
-        Legacy **`POST /api/setting/memoryConfig/delAllMemory`** wiped the entire SQLite **`memories`** table with no body;
+        **`POST /api/setting/memoryConfig/delAllMemory`** wiped the entire SQLite **`memories`** table with no body;
         the Rust API requires **`projectId`** and **`agentType`** for multi-tenant safety.
 
         '
@@ -1185,7 +1185,7 @@ paths:
     post:
       tags:
       - settings
-      summary: Legacy wipe all local tables (not supported)
+      summary: Wipe all local tables (not supported)
       operationId: postSettingsDangerDeleteAllDataV1
       description: 'Bearer JWT. Body must be **`{}`** (no extra keys). Replaces Electron-era **`POST /api/other/deleteAllData`**
         intent; returns **501** **`not_implemented`** — no SQLite **`initDB(..., true)`** equivalent on the hosted API.
@@ -1231,7 +1231,7 @@ paths:
     post:
       tags:
       - settings
-      summary: Legacy drop all SQLite tables and re-init (not supported)
+      summary: Drop all SQLite tables and re-init (not supported)
       operationId: postSettingsDangerClearDatabaseV1
       description: 'Bearer JWT. Body must be **`{}`**. Replaces Electron-era **`GET /api/setting/dbConfig/clearData`** (verb
         changed to **POST** for SaaS); returns **501** **`not_implemented`**.
@@ -1963,7 +1963,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — list director manuals (story_skills)
+      summary: list director manuals (story_skills)
       operationId: postProjectQueryDirectorManualV1
       description: 'Parity with **`POST /api/project/queryDirectorManual`**. Body **`{}`**. Each row includes **`directorManual`**
         (folder key), **`name`** (README first line), **`image`** (relative paths under **`data/skills`**, e.g. **`story_skills/{key}/images/a.png`**),
@@ -2001,7 +2001,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — create director manual folder
+      summary: create director manual folder
       operationId: postProjectAddDirectorManualV1
       description: 'Parity with **`POST /api/project/addDirectorManual`**. Writes Markdown slots and optional base64 images
         under **`data/skills/story_skills/{directorManual}`**. **`name`** and **`directorManual`** must not contain path separators
@@ -2039,7 +2039,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — update director manual folder
+      summary: update director manual folder
       operationId: postProjectEditDirectorManualV1
       description: 'Parity with **`POST /api/project/editDirectorlManual`**. **`README`** body is stored as **`{name}\\n{data}`**
         (same as Electron). Folder must already exist.
@@ -2076,7 +2076,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — delete director manual folder
+      summary: delete director manual folder
       operationId: postProjectDeleteDirectorManualV1
       description: 'Parity with **`POST /api/project/deleteDirectorManual`**. **`name`** is the folder under **`story_skills`**.
         Returns **`200`** with **`message`** even when the folder is already absent (matches best-effort Electron behavior
@@ -2114,7 +2114,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — create visual manual (art_skills folder)
+      summary: create visual manual (art_skills folder)
       operationId: postProjectAddVisualManualV1
       description: 'Parity with **`POST /api/project/addVisualManual`**. Creates **`data/skills/art_skills/{stylePath}`**
         with the same Markdown slots as **`GET /api/v1/visual-manual`** and optional base64 or http **`images`**.
@@ -2151,7 +2151,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — update visual manual folder
+      summary: update visual manual folder
       operationId: postProjectEditVisualManualV1
       description: 'Parity with **`POST /api/project/editVisualManual`**. **`README`** is stored as **`{name}\\n{data}`**.
         Folder must exist under **`art_skills`**.
@@ -2188,7 +2188,7 @@ paths:
     post:
       tags:
       - projects
-      summary: Legacy Electron — delete visual manual folder
+      summary: delete visual manual folder
       operationId: postProjectDeleteVisualManualV1
       description: 'Parity with **`POST /api/project/deleteVisualManual`**. **`name`** is the folder under **`art_skills`**.
         Returns **`200`** with **`message`** after best-effort removal.
@@ -3131,7 +3131,7 @@ paths:
               $ref: '#/components/schemas/LegacyAssetsGetAssetsApiBody'
       responses:
         '200':
-          description: Legacy paged parent + child rows
+          description: Paged parent + child rows
           content:
             application/json:
               schema:
@@ -3193,7 +3193,7 @@ paths:
               $ref: '#/components/schemas/LegacyAssetsGetMaterialDataBody'
       responses:
         '200':
-          description: Legacy material data
+          description: Material data
           content:
             application/json:
               schema:
@@ -3314,7 +3314,7 @@ paths:
               $ref: '#/components/schemas/LegacyAssetsBatchGenerationDataBody'
       responses:
         '200':
-          description: Legacy paged rows
+          description: Paged rows
           content:
             application/json:
               schema:
@@ -5027,7 +5027,7 @@ paths:
               $ref: '#/components/schemas/GetScriptAgentPlanBody'
       responses:
         '200':
-          description: Legacy success envelope `{ code, data, message }` (`code` is JSON number 200)
+          description: Success envelope `{ code, data, message }` (`code` is JSON number 200)
           content:
             application/json:
               schema:
@@ -5078,7 +5078,7 @@ paths:
               $ref: '#/components/schemas/SetScriptAgentPlanBody'
       responses:
         '200':
-          description: Legacy success envelope (`data` often `null`)
+          description: Success envelope (`data` often `null`)
           content:
             application/json:
               schema:
@@ -5134,7 +5134,7 @@ paths:
               $ref: '#/components/schemas/UpdateScriptAgentDataBody'
       responses:
         '200':
-          description: Legacy success envelope (`data` is the string **`更新成功`**)
+          description: Success envelope (`data` is the string **`更新成功`**)
           content:
             application/json:
               schema:
@@ -8090,7 +8090,7 @@ paths:
       description: 'Returns sorted distinct **`kind`** strings from **`app_generation_job`** for **`owner_user_id = JWT sub`**,
         excluding empty **`kind`**.
 
-        Empty array when the user has no jobs. (Legacy Node **`getTaskCategories`** grouped **`o_tasks.taskClass`**; MVP uses
+        Empty array when the user has no jobs. (Node **`getTaskCategories`** grouped **`o_tasks.taskClass`**; MVP uses
         the job table as source of truth.)
 
         '
