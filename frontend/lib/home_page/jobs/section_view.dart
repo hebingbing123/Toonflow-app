@@ -1,8 +1,85 @@
-part of 'section.dart';
+import 'package:flutter/material.dart';
 
-/// Jobs section view shell. Keeps the section file focused on dependencies and callbacks.
-extension _JobsSectionView on JobsSection {
-  Widget _buildJobsSectionView(BuildContext context) {
+import '../../rust_api.dart';
+
+class JobsSectionViewModel {
+  const JobsSectionViewModel({
+    required this.loadingJobs,
+    required this.loadingJobKinds,
+    required this.loadingJobKindSummary,
+    required this.loadingJobStatusSummary,
+    required this.creatingJob,
+    required this.loadingJobById,
+    required this.jobIdController,
+    required this.jobs,
+    required this.jobByIdLine,
+    required this.jobKindsLine,
+    required this.jobKindSummaryLine,
+    required this.jobStatusSummaryLine,
+    required this.cancellingJobId,
+    required this.retryingJobId,
+  });
+
+  final bool loadingJobs;
+  final bool loadingJobKinds;
+  final bool loadingJobKindSummary;
+  final bool loadingJobStatusSummary;
+  final bool creatingJob;
+  final bool loadingJobById;
+  final TextEditingController jobIdController;
+  final List<JobRow>? jobs;
+  final String? jobByIdLine;
+  final String? jobKindsLine;
+  final String? jobKindSummaryLine;
+  final String? jobStatusSummaryLine;
+  final String? cancellingJobId;
+  final String? retryingJobId;
+}
+
+class JobsSectionViewCallbacks {
+  const JobsSectionViewCallbacks({
+    required this.onJobIdChanged,
+    required this.onLoadJobs,
+    required this.onLoadJobsKindFlutterProbe,
+    required this.onLoadJobsStatusFailed,
+    required this.onLoadJobsKindProbeStatusQueued,
+    required this.onLoadJobKinds,
+    required this.onLoadJobKindSummary,
+    required this.onLoadJobStatusSummary,
+    required this.onCreateProbeJob,
+    required this.onFetchJobById,
+    required this.onSelectJob,
+    required this.onRetryFailedJob,
+    required this.onCancelQueuedJob,
+  });
+
+  final ValueChanged<String> onJobIdChanged;
+  final VoidCallback? onLoadJobs;
+  final VoidCallback? onLoadJobsKindFlutterProbe;
+  final VoidCallback? onLoadJobsStatusFailed;
+  final VoidCallback? onLoadJobsKindProbeStatusQueued;
+  final VoidCallback? onLoadJobKinds;
+  final VoidCallback? onLoadJobKindSummary;
+  final VoidCallback? onLoadJobStatusSummary;
+  final VoidCallback? onCreateProbeJob;
+  final VoidCallback? onFetchJobById;
+  final ValueChanged<JobRow> onSelectJob;
+  final ValueChanged<JobRow> onRetryFailedJob;
+  final ValueChanged<JobRow> onCancelQueuedJob;
+}
+
+class JobsSectionView extends StatelessWidget {
+  const JobsSectionView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final JobsSectionViewModel model;
+  final JobsSectionViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,26 +99,32 @@ extension _JobsSectionView on JobsSection {
           runSpacing: 8,
           children: [
             FilledButton.tonal(
-              onPressed: loadingJobs ? null : onLoadJobs,
-              child: Text(loadingJobs ? '…' : '加载作业列表'),
+              onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+              child: Text(model.loadingJobs ? '…' : '加载作业列表'),
             ),
             FilledButton.tonal(
-              onPressed: loadingJobs ? null : onLoadJobsStatusFailed,
+              onPressed: model.loadingJobs
+                  ? null
+                  : callbacks.onLoadJobsStatusFailed,
               child: const Text('查看失败作业'),
             ),
             FilledButton.tonal(
-              onPressed: loadingJobKinds ? null : onLoadJobKinds,
-              child: Text(loadingJobKinds ? '…' : '加载作业类型'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingJobKindSummary ? null : onLoadJobKindSummary,
-              child: Text(loadingJobKindSummary ? '…' : '查看类型汇总'),
-            ),
-            FilledButton.tonal(
-              onPressed: loadingJobStatusSummary
+              onPressed: model.loadingJobKinds
                   ? null
-                  : onLoadJobStatusSummary,
-              child: Text(loadingJobStatusSummary ? '…' : '查看状态汇总'),
+                  : callbacks.onLoadJobKinds,
+              child: Text(model.loadingJobKinds ? '…' : '加载作业类型'),
+            ),
+            FilledButton.tonal(
+              onPressed: model.loadingJobKindSummary
+                  ? null
+                  : callbacks.onLoadJobKindSummary,
+              child: Text(model.loadingJobKindSummary ? '…' : '查看类型汇总'),
+            ),
+            FilledButton.tonal(
+              onPressed: model.loadingJobStatusSummary
+                  ? null
+                  : callbacks.onLoadJobStatusSummary,
+              child: Text(model.loadingJobStatusSummary ? '…' : '查看状态汇总'),
             ),
           ],
         ),
@@ -72,18 +155,22 @@ extension _JobsSectionView on JobsSection {
               runSpacing: 8,
               children: [
                 FilledButton.tonal(
-                  onPressed: loadingJobs ? null : onLoadJobsKindFlutterProbe,
+                  onPressed: model.loadingJobs
+                      ? null
+                      : callbacks.onLoadJobsKindFlutterProbe,
                   child: const Text('按 flutter.probe 查看'),
                 ),
                 FilledButton.tonal(
-                  onPressed: loadingJobs
+                  onPressed: model.loadingJobs
                       ? null
-                      : onLoadJobsKindProbeStatusQueued,
+                      : callbacks.onLoadJobsKindProbeStatusQueued,
                   child: const Text('查看 flutter.probe 排队中'),
                 ),
                 FilledButton.tonal(
-                  onPressed: creatingJob ? null : onCreateProbeJob,
-                  child: Text(creatingJob ? '…' : '创建 probe 作业'),
+                  onPressed: model.creatingJob
+                      ? null
+                      : callbacks.onCreateProbeJob,
+                  child: Text(model.creatingJob ? '…' : '创建 probe 作业'),
                 ),
               ],
             ),
@@ -91,43 +178,45 @@ extension _JobsSectionView on JobsSection {
         ),
         const SizedBox(height: 8),
         TextField(
-          controller: jobIdController,
-          onChanged: onJobIdChanged,
+          controller: model.jobIdController,
+          onChanged: callbacks.onJobIdChanged,
           decoration: const InputDecoration(labelText: '作业 ID（点下方列表可自动填入）'),
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: (loadingJobById || jobIdController.text.trim().isEmpty)
+          onPressed:
+              (model.loadingJobById ||
+                  model.jobIdController.text.trim().isEmpty)
               ? null
-              : onFetchJobById,
-          child: Text(loadingJobById ? '…' : '查看作业详情'),
+              : callbacks.onFetchJobById,
+          child: Text(model.loadingJobById ? '…' : '查看作业详情'),
         ),
-        if (jobByIdLine != null) ...[
+        if (model.jobByIdLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            '作业详情：$jobByIdLine',
+            '作业详情：${model.jobByIdLine}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
-        if (jobKindsLine != null) ...[
+        if (model.jobKindsLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('作业类型：$jobKindsLine'),
+          SelectableText('作业类型：${model.jobKindsLine}'),
         ],
-        if (jobKindSummaryLine != null) ...[
+        if (model.jobKindSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('类型汇总：$jobKindSummaryLine'),
+          SelectableText('类型汇总：${model.jobKindSummaryLine}'),
         ],
-        if (jobStatusSummaryLine != null) ...[
+        if (model.jobStatusSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('状态汇总：$jobStatusSummaryLine'),
+          SelectableText('状态汇总：${model.jobStatusSummaryLine}'),
         ],
-        if (jobs != null) ...[
+        if (model.jobs != null) ...[
           const SizedBox(height: 8),
           Text(
-            '${jobs!.length} 条作业',
+            '${model.jobs!.length} 条作业',
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          ...jobs!
+          ...model.jobs!
               .take(8)
               .map(
                 (job) => ListTile(
@@ -141,7 +230,7 @@ extension _JobsSectionView on JobsSection {
                         'claimed_by=${job.claimedBy}',
                     ].join(' · '),
                   ),
-                  onTap: () => onSelectJob(job),
+                  onTap: () => callbacks.onSelectJob(job),
                   trailing:
                       (job.status == 'failed' ||
                           job.status == 'queued' ||
@@ -151,21 +240,21 @@ extension _JobsSectionView on JobsSection {
                           children: [
                             if (job.status == 'failed')
                               TextButton(
-                                onPressed: retryingJobId == job.id
+                                onPressed: model.retryingJobId == job.id
                                     ? null
-                                    : () => onRetryFailedJob(job),
+                                    : () => callbacks.onRetryFailedJob(job),
                                 child: Text(
-                                  retryingJobId == job.id ? '…' : '重试',
+                                  model.retryingJobId == job.id ? '…' : '重试',
                                 ),
                               ),
                             if (job.status == 'queued' ||
                                 job.status == 'running')
                               TextButton(
-                                onPressed: cancellingJobId == job.id
+                                onPressed: model.cancellingJobId == job.id
                                     ? null
-                                    : () => onCancelQueuedJob(job),
+                                    : () => callbacks.onCancelQueuedJob(job),
                                 child: Text(
-                                  cancellingJobId == job.id ? '…' : '取消',
+                                  model.cancellingJobId == job.id ? '…' : '取消',
                                 ),
                               ),
                           ],

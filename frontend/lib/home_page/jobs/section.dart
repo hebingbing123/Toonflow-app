@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../rust_api.dart';
-
-part 'section_view.dart';
+import 'section_view.dart';
 
 class JobsSection extends StatelessWidget {
   const JobsSection({
@@ -65,6 +64,38 @@ class JobsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildJobsSectionView(context);
+    return JobsSectionView(
+      model: JobsSectionViewModel(
+        loadingJobs: loadingJobs,
+        loadingJobKinds: loadingJobKinds,
+        loadingJobKindSummary: loadingJobKindSummary,
+        loadingJobStatusSummary: loadingJobStatusSummary,
+        creatingJob: creatingJob,
+        loadingJobById: loadingJobById,
+        jobIdController: jobIdController,
+        jobs: jobs,
+        jobByIdLine: jobByIdLine,
+        jobKindsLine: jobKindsLine,
+        jobKindSummaryLine: jobKindSummaryLine,
+        jobStatusSummaryLine: jobStatusSummaryLine,
+        cancellingJobId: cancellingJobId,
+        retryingJobId: retryingJobId,
+      ),
+      callbacks: JobsSectionViewCallbacks(
+        onJobIdChanged: onJobIdChanged,
+        onLoadJobs: onLoadJobs,
+        onLoadJobsKindFlutterProbe: onLoadJobsKindFlutterProbe,
+        onLoadJobsStatusFailed: onLoadJobsStatusFailed,
+        onLoadJobsKindProbeStatusQueued: onLoadJobsKindProbeStatusQueued,
+        onLoadJobKinds: onLoadJobKinds,
+        onLoadJobKindSummary: onLoadJobKindSummary,
+        onLoadJobStatusSummary: onLoadJobStatusSummary,
+        onCreateProbeJob: onCreateProbeJob,
+        onFetchJobById: onFetchJobById,
+        onSelectJob: onSelectJob,
+        onRetryFailedJob: onRetryFailedJob,
+        onCancelQueuedJob: onCancelQueuedJob,
+      ),
+    );
   }
 }
