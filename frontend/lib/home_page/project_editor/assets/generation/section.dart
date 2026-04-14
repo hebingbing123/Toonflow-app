@@ -47,7 +47,7 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     await showDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
-        return _AssetGenerationWorkbenchDialog(
+        return AssetGenerationWorkbenchDialog(
           token: token,
           project: p,
           scriptList: scriptList,
