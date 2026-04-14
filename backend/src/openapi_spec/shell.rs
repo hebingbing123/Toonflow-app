@@ -42,7 +42,7 @@ pub(super) fn openapi_shell() -> OpenApi {
         ),
         tag(
             "production",
-            "Legacy Electron production workbench parity over Postgres-backed storyboards, assets, edit-image flow, and video workbench routes",
+            "Production workbench over Postgres-backed storyboards, assets, edit-image flow, and video routes",
         ),
         tag(
             "novels",

@@ -145,7 +145,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK (may be an empty data array)", body = ref("LegacyScriptsGetScriptApiResponse"), content_type = "application/json"),
+        (status = 200, description = "OK (may be an empty data array)", body = serde_json::Value, content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project not found or not owned", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 503, description = "Auth not configured or database error", body = ref("ErrorBody"), content_type = "application/json")

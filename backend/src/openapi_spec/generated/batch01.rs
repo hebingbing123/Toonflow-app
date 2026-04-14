@@ -8,11 +8,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — create one project asset (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsAddAssetsBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Asset created", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Asset created", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid type, name, or describe", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -29,11 +29,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — batch delete assets by numeric ids (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsBatchDeleteBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Assets deleted", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Assets deleted", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid id array", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
@@ -49,11 +49,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — paged asset listing for batch generation picker (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsBatchGenerationDataBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Paged rows", body = ref("LegacyAssetsBatchGenerationDataResponse"), content_type = "application/json"),
+        (status = 200, description = "Paged rows", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid body fields", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -70,11 +70,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — delete one asset by numeric id (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsDeleteBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Asset deleted (or already absent)", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Asset deleted (or already absent)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid id", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
@@ -90,11 +90,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — delete one image by numeric image id (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsDeleteBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Image deleted", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Image deleted", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid id", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
@@ -110,11 +110,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — load one asset image bundle by stable asset numeric id (project UUID)",
     request_body(
-            content = ref("LegacyAssetsGetImageBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK", body = ref("LegacyAssetsGetImageResponse"), content_type = "application/json"),
+        (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid assetsId", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -131,11 +131,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — get clip assets and generated videos (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsGetMaterialDataBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Material data", body = ref("LegacyAssetsGetMaterialDataResponse"), content_type = "application/json"),
+        (status = 200, description = "Material data", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Malformed body (must be empty JSON object)", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -152,11 +152,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — paged parent assets with nested children (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsGetAssetsApiBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Paged parent + child rows", body = ref("LegacyAssetsGetAssetsApiResponse"), content_type = "application/json"),
+        (status = 200, description = "Paged parent + child rows", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid type, page, or limit", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -173,7 +173,7 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — poll selected image completion by asset ids (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsPollingImageAssetsBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
@@ -194,7 +194,7 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — poll prompt-generate completion by asset ids (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsPollingPromptAssetsBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
@@ -215,11 +215,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — save selected image and prompt for an asset (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsSaveAssetsBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Asset image selection saved", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Asset image selection saved", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid id, type, imageId, or base64", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -236,11 +236,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — update asset name/describe and optional prompt remark (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsUpdateAssetsBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Asset updated", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Asset updated", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid id, name, or describe", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID or asset numeric id not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -257,11 +257,11 @@ mod stubs {
         tag = "assets",
         summary = "Workbench — upload one clip asset with inline base64 (by project UUID)",
     request_body(
-            content = ref("LegacyAssetsUploadClipBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Clip uploaded", body = ref("LegacyAssetsUploadClipResponse"), content_type = "application/json"),
+        (status = 200, description = "Clip uploaded", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid type, name, or base64Data", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project UUID not found for caller", body = ref("ErrorBody"), content_type = "application/json"),
@@ -506,7 +506,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Trigger accepted", body = ref("LegacyNovelOkMessageResponse"), content_type = "application/json"),
+        (status = 200, description = "Trigger accepted", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid body, empty novelIds, invalid concurrentCount, or no matching chapters", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Project not found or not owned", body = ref("ErrorBody"), content_type = "application/json"),

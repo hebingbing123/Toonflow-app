@@ -181,7 +181,7 @@ mod stubs {
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "Cancel acknowledged (`{ message: \"取消成功\" }`)", body = ref("LegacyAssetsMutationResponse"), content_type = "application/json"),
+        (status = 200, description = "Cancel acknowledged (`{ message: \"取消成功\" }`)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid `id` or malformed JSON", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 503, description = "Auth not configured, database error, or `DATABASE_URL` unset", body = ref("ErrorBody"), content_type = "application/json")
@@ -241,11 +241,11 @@ mod stubs {
         tag = "projects",
         summary = "Create director manual folder",
     request_body(
-            content = ref("LegacyDirectorManualAddBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK (empty JSON object)", body = ref("LegacyEmptyObjectResponse"), content_type = "application/json"),
+        (status = 200, description = "OK (empty JSON object)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid name, duplicate folder, oversized slot, or bad image payload", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -260,11 +260,11 @@ mod stubs {
         tag = "projects",
         summary = "Create visual manual (art_skills folder)",
     request_body(
-            content = ref("LegacyVisualManualAddBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK (empty JSON object)", body = ref("LegacyEmptyObjectResponse"), content_type = "application/json"),
+        (status = 200, description = "OK (empty JSON object)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid name, duplicate folder, oversized slot, or bad image payload", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -279,11 +279,11 @@ mod stubs {
         tag = "projects",
         summary = "Delete director manual folder",
     request_body(
-            content = ref("LegacyDirectorManualDeleteBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK", body = ref("LegacyDirectorManualDeleteResponse"), content_type = "application/json"),
+        (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid folder name", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -298,11 +298,11 @@ mod stubs {
         tag = "projects",
         summary = "Delete visual manual folder",
     request_body(
-            content = ref("LegacyDirectorManualDeleteBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK", body = ref("LegacyDirectorManualDeleteResponse"), content_type = "application/json"),
+        (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid folder name", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -317,11 +317,11 @@ mod stubs {
         tag = "projects",
         summary = "Update director manual folder",
     request_body(
-            content = ref("LegacyDirectorManualEditBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK (empty JSON object)", body = ref("LegacyEmptyObjectResponse"), content_type = "application/json"),
+        (status = 200, description = "OK (empty JSON object)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid name, missing folder, oversized slot, or bad image payload", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -336,11 +336,11 @@ mod stubs {
         tag = "projects",
         summary = "Update visual manual folder",
     request_body(
-            content = ref("LegacyVisualManualEditBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK (empty JSON object)", body = ref("LegacyEmptyObjectResponse"), content_type = "application/json"),
+        (status = 200, description = "OK (empty JSON object)", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Invalid name, missing folder, oversized slot, or bad image payload", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )
@@ -355,11 +355,11 @@ mod stubs {
         tag = "projects",
         summary = "List director manuals (story_skills)",
     request_body(
-            content = ref("LegacyTasksEmptyBody"),
+            content = serde_json::Value,
             content_type = "application/json",
         ),
     responses(
-        (status = 200, description = "OK", body = ref("LegacyDirectorManualListResponse"), content_type = "application/json"),
+        (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
         (status = 400, description = "Bundled **`story_skills`** tree missing or unreadable", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
     )

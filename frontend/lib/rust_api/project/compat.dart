@@ -1,6 +1,6 @@
 part of '../index.dart';
 
-/// Legacy project compatibility adapters layered over the v1 project REST API.
+/// Project compatibility adapters layered over the v1 project REST API.
 /// Compat **`getSingleProject`**: lists owned projects and filters by **`numeric_id`** (no HTTP **`/general/*`**).
 Future<List<ProjectRow>> postGeneralGetSingleProject(
   String accessToken,
