@@ -6,19 +6,11 @@
   <a href="https://gitee.com/HBAI-Ltd/Toonflow-app">
     <img src="https://img.shields.io/badge/Gitee-C71D23?style=flat-square&logo=gitee&logoColor=white" alt="Gitee" />
   </a>
-  &nbsp;|&nbsp;
-  <a href="https://gitcode.com/HBAI-Ltd/Toonflow-app">
-  </a>
 </p>
 
 <p align="center">
-  <strong>简体中文</strong> | 
-  <a href="./docs/README.zhtw.md">繁體中文</a> | 
-  <a href="./docs/README.en.md">English</a> | 
-  <a href="./docs/README.th.md">ไทย</a> | 
-  <a href="./docs/README.vi.md">Tiếng Việt</a> | 
-  <a href="./docs/README.ja.md">日本語</a> | 
-  <a href="./docs/README.ru.md">Русский</a>
+  <strong>简体中文</strong> |
+  <a href="./docs/README.en.md">English</a>
 </p>
 
 <div align="center">
@@ -142,9 +134,6 @@ OpenFlow v1.0.8 是面向短剧生产的 AI 工作台，围绕“策划 → 编�
 https://www.bilibili.com/video/BV1na6wB6Ea2
 **OpenFlow 8 分钟快速上手 AI 视频**
 👉 [点击观看](https://www.bilibili.com/video/BV1na6wB6Ea2/?share_source=copy_web&vd_source=5b718c25439a901a34c7bc0c1d35b38e)
-
-📱 手机微信扫码观看
-
 
 ---
 
@@ -278,9 +267,6 @@ package.json             # yarn lint / yarn refactor:check
 
 # 👨‍👩‍👧‍👦 微信交流群
 
-拉群小助手:
-
-
 ---
 
 # 💌 联系我们
@@ -344,8 +330,6 @@ OpenFlow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 <table>
   <tr>
-    <td>
-    </td>
     <td>
       <b>算能云</b> 提供算力赞助
       <a href="https://www.sophnet.com/">[官网]</a>
