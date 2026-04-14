@@ -1,60 +1,118 @@
-part of 'section.dart';
+import 'package:flutter/material.dart';
 
-/// Overview section view shell. Keeps probe inputs and callbacks in the section file.
-extension _OverviewSectionView on OverviewSection {
-  Widget _buildOverviewSectionView(BuildContext context) {
+class OverviewSectionViewModel {
+  const OverviewSectionViewModel({
+    required this.apiBaseUrl,
+    required this.loadingHealth,
+    required this.loadingHealthRoot,
+    required this.loadingPing,
+    required this.loadingVersion,
+    required this.loadingReady,
+    required this.healthBody,
+    required this.healthRootBody,
+    required this.pingBody,
+    required this.versionBody,
+    required this.readyBody,
+  });
+
+  final String apiBaseUrl;
+  final bool loadingHealth;
+  final bool loadingHealthRoot;
+  final bool loadingPing;
+  final bool loadingVersion;
+  final bool loadingReady;
+  final String? healthBody;
+  final String? healthRootBody;
+  final String? pingBody;
+  final String? versionBody;
+  final String? readyBody;
+}
+
+class OverviewSectionViewCallbacks {
+  const OverviewSectionViewCallbacks({
+    required this.onPingHealth,
+    required this.onPingHealthRoot,
+    required this.onPingPing,
+    required this.onPingVersion,
+    required this.onPingReady,
+  });
+
+  final VoidCallback? onPingHealth;
+  final VoidCallback? onPingHealthRoot;
+  final VoidCallback? onPingPing;
+  final VoidCallback? onPingVersion;
+  final VoidCallback? onPingReady;
+}
+
+class OverviewSectionView extends StatelessWidget {
+  const OverviewSectionView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final OverviewSectionViewModel model;
+  final OverviewSectionViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('API: $apiBaseUrl', style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          'API: ${model.apiBaseUrl}',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             FilledButton(
-              onPressed: loadingHealth ? null : onPingHealth,
-              child: Text(loadingHealth ? '请求中…' : 'GET /api/v1/health'),
+              onPressed: model.loadingHealth ? null : callbacks.onPingHealth,
+              child: Text(model.loadingHealth ? '请求中…' : 'GET /api/v1/health'),
             ),
             FilledButton.tonal(
-              onPressed: loadingHealthRoot ? null : onPingHealthRoot,
-              child: Text(loadingHealthRoot ? '请求中…' : 'GET /health'),
+              onPressed: model.loadingHealthRoot
+                  ? null
+                  : callbacks.onPingHealthRoot,
+              child: Text(model.loadingHealthRoot ? '请求中…' : 'GET /health'),
             ),
             FilledButton.tonal(
-              onPressed: loadingPing ? null : onPingPing,
-              child: Text(loadingPing ? '请求中…' : 'GET /api/v1/ping'),
+              onPressed: model.loadingPing ? null : callbacks.onPingPing,
+              child: Text(model.loadingPing ? '请求中…' : 'GET /api/v1/ping'),
             ),
           ],
         ),
-        if (healthBody != null) ...[
+        if (model.healthBody != null) ...[
           const SizedBox(height: 8),
-          Text('health (v1): $healthBody'),
+          Text('health (v1): ${model.healthBody}'),
         ],
-        if (healthRootBody != null) ...[
+        if (model.healthRootBody != null) ...[
           const SizedBox(height: 8),
-          Text('health (root): $healthRootBody'),
+          Text('health (root): ${model.healthRootBody}'),
         ],
-        if (pingBody != null) ...[
+        if (model.pingBody != null) ...[
           const SizedBox(height: 8),
-          Text('ping: $pingBody'),
-        ],
-        const SizedBox(height: 12),
-        FilledButton.tonal(
-          onPressed: loadingVersion ? null : onPingVersion,
-          child: Text(loadingVersion ? '请求中…' : 'GET /api/v1/version'),
-        ),
-        if (versionBody != null) ...[
-          const SizedBox(height: 8),
-          Text('version: $versionBody'),
+          Text('ping: ${model.pingBody}'),
         ],
         const SizedBox(height: 12),
         FilledButton.tonal(
-          onPressed: loadingReady ? null : onPingReady,
-          child: Text(loadingReady ? '请求中…' : 'GET /api/v1/ready'),
+          onPressed: model.loadingVersion ? null : callbacks.onPingVersion,
+          child: Text(model.loadingVersion ? '请求中…' : 'GET /api/v1/version'),
         ),
-        if (readyBody != null) ...[
+        if (model.versionBody != null) ...[
           const SizedBox(height: 8),
-          Text('ready: $readyBody'),
+          Text('version: ${model.versionBody}'),
+        ],
+        const SizedBox(height: 12),
+        FilledButton.tonal(
+          onPressed: model.loadingReady ? null : callbacks.onPingReady,
+          child: Text(model.loadingReady ? '请求中…' : 'GET /api/v1/ready'),
+        ),
+        if (model.readyBody != null) ...[
+          const SizedBox(height: 8),
+          Text('ready: ${model.readyBody}'),
         ],
       ],
     );

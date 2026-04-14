@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-part 'section_view.dart';
+import 'section_view.dart';
 
 class OverviewSection extends StatelessWidget {
   const OverviewSection({
@@ -42,6 +41,27 @@ class OverviewSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildOverviewSectionView(context);
+    return OverviewSectionView(
+      model: OverviewSectionViewModel(
+        apiBaseUrl: apiBaseUrl,
+        loadingHealth: loadingHealth,
+        loadingHealthRoot: loadingHealthRoot,
+        loadingPing: loadingPing,
+        loadingVersion: loadingVersion,
+        loadingReady: loadingReady,
+        healthBody: healthBody,
+        healthRootBody: healthRootBody,
+        pingBody: pingBody,
+        versionBody: versionBody,
+        readyBody: readyBody,
+      ),
+      callbacks: OverviewSectionViewCallbacks(
+        onPingHealth: onPingHealth,
+        onPingHealthRoot: onPingHealthRoot,
+        onPingPing: onPingPing,
+        onPingVersion: onPingVersion,
+        onPingReady: onPingReady,
+      ),
+    );
   }
 }
