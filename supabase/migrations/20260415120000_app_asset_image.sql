@@ -1,4 +1,4 @@
--- Per-asset image history (legacy **`o_image`** rows linked by **`assetsId`** to parent **`o_assets`**).
+-- Per-asset image history (历史 **`o_image`** rows linked by **`assetsId`** to parent **`o_assets`**).
 
 CREATE TABLE IF NOT EXISTS public.app_asset_image (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -38,4 +38,4 @@ WITH CHECK (
   )
 );
 
-COMMENT ON TABLE public.app_asset_image IS 'Image history rows per app_asset; corner-scape lists rows with state 已完成 (legacy o_image parity)';
+COMMENT ON TABLE public.app_asset_image IS 'Image history rows per app_asset; corner-scape lists rows with state 已完成 (历史 o_image parity)';

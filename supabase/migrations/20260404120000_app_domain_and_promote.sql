@@ -1,4 +1,4 @@
--- Normalized app tables (UUID PK, Supabase Auth). Legacy integer ids kept for idempotent promote.
+-- Normalized app tables (UUID PK, Supabase Auth). 旧版 integer ids kept for idempotent promote.
 -- Requires legacy_staging.snapshot populated (e.g. toonflow-sqlite-import) and optional legacy_user_map rows.
 
 CREATE TABLE IF NOT EXISTS public.legacy_user_map (
@@ -85,7 +85,7 @@ WITH
 
 COMMENT ON TABLE public.legacy_user_map IS 'Maps old o_user.id (int) to auth.users.id; required for owner_user_id on promote';
 COMMENT ON TABLE public.app_project IS 'Projects; promoted from o_project + legacy_staging';
-COMMENT ON TABLE public.app_script IS 'Scripts; promoted from o_script; FK to app_project by legacy project id';
+COMMENT ON TABLE public.app_script IS 'Scripts; promoted from o_script; FK to app_project by 历史 project id';
 
 -- Idempotent promote from JSONB snapshots (matches Knex column names in SQLite export).
 CREATE OR REPLACE FUNCTION public.promote_legacy_from_staging ()
@@ -207,4 +207,4 @@ $$;
 REVOKE ALL ON FUNCTION public.promote_legacy_from_staging () FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.promote_legacy_from_staging () TO service_role;
 
-COMMENT ON FUNCTION public.promote_legacy_from_staging IS 'Upsert app_project from o_project snapshots and app_script from o_script; run after legacy import; service_role only';
+COMMENT ON FUNCTION public.promote_legacy_from_staging IS 'Upsert app_project from o_project snapshots and app_script from o_script; run after 历史 import; service_role only';

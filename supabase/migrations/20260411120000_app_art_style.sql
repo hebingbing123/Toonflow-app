@@ -1,4 +1,4 @@
--- User-scoped art style presets (legacy **`o_artStyle`**: id, name, fileUrl, label, prompt).
+-- User-scoped art style presets (历史 **`o_artStyle`**: id, name, fileUrl, label, prompt).
 
 CREATE TABLE IF NOT EXISTS public.app_art_style (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),

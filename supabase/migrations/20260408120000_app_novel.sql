@@ -1,4 +1,4 @@
--- Novel chapters per project (legacy **`o_novel`**); events / outline links are separate milestones.
+-- Novel chapters per project (历史 **`o_novel`**); events / outline links are separate milestones.
 
 CREATE TABLE IF NOT EXISTS public.app_novel (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -49,4 +49,4 @@ WITH
     )
   );
 
-COMMENT ON TABLE public.app_novel IS 'Novel source chapters per project; legacy o_novel parity (subset without event pipeline)';
+COMMENT ON TABLE public.app_novel IS 'Novel source chapters per project; 历史 o_novel parity (subset without event pipeline)';

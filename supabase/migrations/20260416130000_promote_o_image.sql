@@ -1,6 +1,6 @@
 -- Extend **`promote_legacy_from_staging`**: upsert **`app_asset_image`** from **`o_image`** snapshots (**`assetsId`** → **`app_asset.legacy_id`**).
 -- **`legacy_image_id`** stores SQLite **`o_image.id`** for idempotent re-runs (**`ON CONFLICT`**).
--- **`sort_index`** is 0-based order by legacy image id within each asset.
+-- **`sort_index`** is 0-based order by 历史 image id within each asset.
 
 ALTER TABLE public.app_asset_image
 ADD COLUMN IF NOT EXISTS legacy_image_id INTEGER;

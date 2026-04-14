@@ -1,5 +1,5 @@
 -- Per-user prompt templates (parity with SQLite **`o_prompt`** + **`/api/setting/promptManage/*`**).
--- **`legacy_id`** 1–3 matches legacy **`o_prompt.id`** for stable **`PATCH`** paths.
+-- **`legacy_id`** 1–3 matches 历史 **`o_prompt.id`** for stable **`PATCH`** paths.
 CREATE TABLE IF NOT EXISTS public.app_user_prompt (
   owner_user_id UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   legacy_id SMALLINT NOT NULL,

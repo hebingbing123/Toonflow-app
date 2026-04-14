@@ -1,4 +1,4 @@
--- Video tracks and video generation jobs (legacy **`o_video`**, **`o_videoTrack`**).
+-- Video tracks and video generation jobs (历史 **`o_video`**, **`o_videoTrack`**).
 
 -- Video master table
 CREATE TABLE IF NOT EXISTS public.app_video (
@@ -101,6 +101,6 @@ WITH
     )
   );
 
-COMMENT ON TABLE public.app_video IS 'Generated videos per project/script; legacy o_video parity';
+COMMENT ON TABLE public.app_video IS 'Generated videos per project/script; 历史 o_video parity';
 
-COMMENT ON TABLE public.app_video_track IS 'Video timeline segments; legacy o_videoTrack parity';
+COMMENT ON TABLE public.app_video_track IS 'Video timeline segments; 历史 o_videoTrack parity';

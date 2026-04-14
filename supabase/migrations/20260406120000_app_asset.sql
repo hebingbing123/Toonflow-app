@@ -1,5 +1,5 @@
 -- Script-linked assets (role / tool / scene) per project; junction to app_script.
--- Rust API parity with legacy o_assets + o_scriptAssets (integer legacy_id on assets).
+-- Rust API parity with 历史 o_assets + o_scriptAssets (integer legacy_id on assets).
 
 CREATE TABLE IF NOT EXISTS public.app_asset (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),

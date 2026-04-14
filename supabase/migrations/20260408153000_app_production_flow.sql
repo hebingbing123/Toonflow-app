@@ -1,4 +1,4 @@
--- Persist production-agent flow JSON (legacy o_agentWorkData for productionAgent).
+-- Persist production-agent flow JSON (历史 o_agentWorkData for productionAgent).
 
 CREATE TABLE IF NOT EXISTS public.app_production_flow (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -42,4 +42,4 @@ WITH
     )
   );
 
-COMMENT ON TABLE public.app_production_flow IS 'Per project/script production flow JSON; legacy o_agentWorkData parity for productionAgent';
+COMMENT ON TABLE public.app_production_flow IS 'Per project/script production flow JSON; 历史 o_agentWorkData parity for productionAgent';

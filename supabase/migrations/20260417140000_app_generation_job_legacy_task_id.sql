@@ -28,4 +28,4 @@ ON public.app_generation_job (legacy_task_id);
 ALTER SEQUENCE public.app_generation_job_legacy_task_id_seq
 OWNED BY public.app_generation_job.legacy_task_id;
 
-COMMENT ON COLUMN public.app_generation_job.legacy_task_id IS 'Monotonic bigint task id for legacy task-center compatibility; distinct from UUID primary key.';
+COMMENT ON COLUMN public.app_generation_job.legacy_task_id IS 'Monotonic bigint task id for 历史 task-center compatibility; distinct from UUID primary key.';

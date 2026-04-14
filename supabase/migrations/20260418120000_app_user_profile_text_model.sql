@@ -1,4 +1,4 @@
--- Per-user preferred text model (§12 / parity with legacy o_setting.textModel).
+-- Per-user preferred text model (§12 / parity with 历史 o_setting.textModel).
 -- Stores a composite id matching GET /api/v1/models/detail?model_id= format: "{vendor_id}:{model_name}".
 -- NULL means "use server default (TOONFLOW_DEFAULT_TEXT_MODEL_ID or first catalog text model)".
 

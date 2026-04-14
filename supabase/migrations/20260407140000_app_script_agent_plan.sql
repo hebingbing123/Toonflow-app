@@ -1,4 +1,4 @@
--- Script agent plan draft (legacy **`o_agentWorkData`** for **`scriptAgent`**); scripts of record remain **`app_script`**.
+-- Script agent plan draft (历史 **`o_agentWorkData`** for **`scriptAgent`**); scripts of record remain **`app_script`**.
 
 CREATE TABLE IF NOT EXISTS public.app_script_agent_plan (
   id BIGSERIAL PRIMARY KEY,

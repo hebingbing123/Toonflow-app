@@ -1,4 +1,4 @@
--- Novel events and event-chapter relationships (legacy **`o_event`** and **`o_eventChapter`**).
+-- Novel events and event-chapter relationships (历史 **`o_event`** and **`o_eventChapter`**).
 
 -- Event master table
 CREATE TABLE IF NOT EXISTS public.app_novel_event (
@@ -92,6 +92,6 @@ WITH
     )
   );
 
-COMMENT ON TABLE public.app_novel_event IS 'Novel events (outline items) per project; legacy o_event parity';
+COMMENT ON TABLE public.app_novel_event IS 'Novel events (outline items) per project; 历史 o_event parity';
 
-COMMENT ON TABLE public.app_novel_event_chapter IS 'Junction: events <-> novel chapters; legacy o_eventChapter parity';
+COMMENT ON TABLE public.app_novel_event_chapter IS 'Junction: events <-> novel chapters; 历史 o_eventChapter parity';
