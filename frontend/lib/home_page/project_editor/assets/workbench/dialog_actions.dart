@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of 'dialog_support.dart';
 
 AssetRow? findAssetByNumericId(List<AssetRow> assets, int? numericId) {
   if (numericId == null) {

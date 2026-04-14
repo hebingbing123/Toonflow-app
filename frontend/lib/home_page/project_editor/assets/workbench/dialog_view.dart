@@ -1,4 +1,4 @@
-part of '../../../../home_page.dart';
+part of 'dialog_support.dart';
 
 AlertDialog buildProjectAssetsWorkbenchDialog({
   required BuildContext dialogCtx,
