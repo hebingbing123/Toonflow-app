@@ -69,7 +69,7 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 
 **素材出图任务（`app_generation_job`）**：**`asset.generate.image`** / **`asset.generate.batch`** worker 使用同一密钥调用 **`POST {OPENAI_BASE_URL}/v1/images/generations`**（`response_format: url`）。未设置 **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** 时，将供应商临时 **`url`** 写入 **`app_asset_image.file_path`**（**`state`** = **`已完成`**）。设置该目录后，worker 会下载 PNG（体大小上限约 **32 MB**）到 **`{dir}/{user_uuid}/{image_row_id}.png`**，**`file_path`** 设为 **`GET /api/v1/projects/{project_uuid}/assets/{al}/images/{id}/file`** 路径（**`project_uuid`** = **`app_project.id`**），**`metadata.storage`** = **`local`**，**`metadata.provider_url`** 保留原链接；**`GET …/images/{id}/file`** 在 **`https?`** **`file_path`** 时 **307** 跳转，在 **`local`** 时返回 **`image/png`**。请求体里的 **`model`** 若不含 **`dall-e-2`** / **`dall-e-3`** 子串，则回退到环境变量 **`TOONFLOW_IMAGE_MODEL`**（默认 **`dall-e-3`**）。**`asset.polish.*`** 仍走 **`chat/completions`**。Enqueue 时的 **`base64`** 提示尚未参与生图；对象存储/CDN 仍见 **`electron-node-parity.md`**。
 
-**HTTP 接口文档（浏览器）**：`GET http://127.0.0.1:8666/api/v1/docs` — Swagger UI **Standalone**；默认折叠 tag、带 **Filter**；`info.description` 仅一行摘要，细节见各 operation 与仓库 **`docs/plans/electron-node-parity.md`**。契约由 **`shell.rs` + 嵌入 legacy schemas + 路径索引 + utoipa** 合并生成，改 handler 注解或 shell/嵌入 JSON 后需重新 `cargo run` 查看。
+**HTTP 接口文档（浏览器）**：`GET http://127.0.0.1:8666/api/v1/docs` — Swagger UI **Standalone**；默认折叠 tag、带 **Filter**；`info.description` 仅一行摘要，细节见各 operation 与仓库 **`docs/plans/electron-node-parity.md`**。契约由 **`shell.rs` + 路径索引 + utoipa** 合并生成，改 handler 注解或 shell/路径桩后需重新 `cargo run` 查看。
 
 健康检查：
 
