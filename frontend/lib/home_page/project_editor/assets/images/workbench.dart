@@ -112,15 +112,74 @@ extension _HomePageProjectEditorAssetsImagesWorkbench on _HomePageState {
                   setState: setState,
                 );
               }
-              final dialogState = deps.captureDialogState(
-                assets: assets,
+              final dialogState = deps.captureDialogState(assets: assets);
+              final callbacks = deps.controller.buildDialogCallbacks(
+                setState: setState,
               );
-              return _buildAssetImagesWorkbenchDialog(
-                ctx: ctx,
-                dialogCtx: dialogCtx,
-                state: dialogState,
-                callbacks: deps.controller.buildDialogCallbacks(
-                  setState: setState,
+              final recommendedActionDisabled =
+                  dialogState.loadingList ||
+                  dialogState.loadingPreview ||
+                  dialogState.busyMutation;
+              final mutationDisabled = dialogState.busyMutation;
+              return AssetImagesWorkbenchDialogView(
+                model: AssetImagesWorkbenchDialogViewModel(
+                  assets: dialogState.assets,
+                  imageItems: dialogState.imageItems,
+                  selectedAssetNumericId: dialogState.selectedAssetNumericId,
+                  selectedImageId: dialogState.selectedImageId,
+                  diagnosis: dialogState.diagnosis,
+                  loadingList: dialogState.loadingList,
+                  loadingPreview: dialogState.loadingPreview,
+                  busyMutation: dialogState.busyMutation,
+                  statusLine: dialogState.statusLine,
+                  previewBytes: dialogState.previewBytes,
+                  createFilePathController:
+                      dialogState.createControllers.filePathCtrl,
+                  createStateController:
+                      dialogState.createControllers.stateCtrl,
+                  createSortController: dialogState.createControllers.sortCtrl,
+                  patchFilePathController:
+                      dialogState.patchControllers.filePathCtrl,
+                  patchStateController: dialogState.patchControllers.stateCtrl,
+                  patchSortController: dialogState.patchControllers.sortCtrl,
+                ),
+                callbacks: AssetImagesWorkbenchDialogViewCallbacks(
+                  onAssetChanged: (value) {
+                    callbacks.onAssetChanged(value);
+                  },
+                  onRecommendedAction: recommendedActionDisabled
+                      ? null
+                      : () {
+                          callbacks.onRecommendedAction();
+                        },
+                  onReloadImages: dialogState.loadingList || mutationDisabled
+                      ? null
+                      : () {
+                          callbacks.onReloadImages();
+                        },
+                  onLoadPreview: dialogState.loadingPreview || mutationDisabled
+                      ? null
+                      : () {
+                          callbacks.onLoadPreview();
+                        },
+                  onImageChanged: (value) {
+                    callbacks.onImageChanged?.call(value);
+                  },
+                  onCreateImage: mutationDisabled
+                      ? null
+                      : () {
+                          callbacks.onCreateImage();
+                        },
+                  onPatchImage: mutationDisabled
+                      ? null
+                      : () {
+                          callbacks.onPatchImage();
+                        },
+                  onDeleteImage: mutationDisabled
+                      ? null
+                      : () {
+                          callbacks.onDeleteImage();
+                        },
                 ),
               );
             },
