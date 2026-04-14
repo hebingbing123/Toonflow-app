@@ -1,8 +1,72 @@
-part of '../section.dart';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+
+import '../../../rust_api.dart';
+
+class ArtStylesWorkbenchDialogViewModel {
+  const ArtStylesWorkbenchDialogViewModel({
+    required this.rows,
+    required this.selected,
+    required this.coverBytes,
+    required this.statusLine,
+    required this.busy,
+    required this.loadingCover,
+    required this.nameCtrl,
+    required this.labelCtrl,
+    required this.promptCtrl,
+    required this.fileUrlCtrl,
+    required this.extractImagesCtrl,
+  });
+
+  final List<ArtStyleRow> rows;
+  final ArtStyleRow? selected;
+  final Uint8List? coverBytes;
+  final String? statusLine;
+  final bool busy;
+  final bool loadingCover;
+  final TextEditingController nameCtrl;
+  final TextEditingController labelCtrl;
+  final TextEditingController promptCtrl;
+  final TextEditingController fileUrlCtrl;
+  final TextEditingController extractImagesCtrl;
+}
+
+class ArtStylesWorkbenchDialogViewCallbacks {
+  const ArtStylesWorkbenchDialogViewCallbacks({
+    required this.onReloadRows,
+    required this.onLoadCover,
+    required this.onCreateStyle,
+    required this.onSaveSelected,
+    required this.onDeleteSelected,
+    required this.onExtractPrompt,
+    required this.onApplySelection,
+    required this.onClose,
+  });
+
+  final Future<void> Function({int? preferredNumericId}) onReloadRows;
+  final Future<void> Function() onLoadCover;
+  final Future<void> Function() onCreateStyle;
+  final Future<void> Function() onSaveSelected;
+  final Future<void> Function() onDeleteSelected;
+  final Future<void> Function() onExtractPrompt;
+  final void Function(ArtStyleRow row, {bool loadCover}) onApplySelection;
+  final VoidCallback onClose;
+}
 
 /// 画风工作台视图，承载表单、列表选择与封面预览布局。
-extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
-  Widget _buildArtStylesWorkbenchDialogView(BuildContext context) {
+class ArtStylesWorkbenchDialogView extends StatelessWidget {
+  const ArtStylesWorkbenchDialogView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final ArtStylesWorkbenchDialogViewModel model;
+  final ArtStylesWorkbenchDialogViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
       title: const Text('画风工作台'),
@@ -25,39 +89,42 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
                 runSpacing: 8,
                 children: [
                   FilledButton.tonal(
-                    onPressed: _busy ? null : _reloadRows,
-                    child: Text(_busy ? '处理中…' : '刷新列表'),
+                    onPressed: model.busy ? null : callbacks.onReloadRows,
+                    child: Text(model.busy ? '处理中…' : '刷新列表'),
                   ),
                   FilledButton.tonal(
-                    onPressed: _busy || _loadingCover || _selected == null
+                    onPressed:
+                        model.busy ||
+                            model.loadingCover ||
+                            model.selected == null
                         ? null
-                        : _loadCover,
-                    child: Text(_loadingCover ? '读取中…' : '查看封面'),
+                        : callbacks.onLoadCover,
+                    child: Text(model.loadingCover ? '读取中…' : '查看封面'),
                   ),
                   FilledButton(
-                    onPressed: _busy ? null : _createStyle,
+                    onPressed: model.busy ? null : callbacks.onCreateStyle,
                     child: const Text('新建画风'),
                   ),
                   FilledButton(
-                    onPressed: _busy || _selected == null
+                    onPressed: model.busy || model.selected == null
                         ? null
-                        : _saveSelected,
+                        : callbacks.onSaveSelected,
                     child: const Text('保存当前画风'),
                   ),
                   FilledButton.tonal(
-                    onPressed: _busy || _selected == null
+                    onPressed: model.busy || model.selected == null
                         ? null
-                        : _deleteSelected,
+                        : callbacks.onDeleteSelected,
                     child: const Text('删除当前画风'),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              if (_rows.isNotEmpty)
+              if (model.rows.isNotEmpty)
                 DropdownButtonFormField<int>(
-                  initialValue: _selected?.numericId,
+                  initialValue: model.selected?.numericId,
                   decoration: const InputDecoration(labelText: '当前画风'),
-                  items: _rows
+                  items: model.rows
                       .map(
                         (row) => DropdownMenuItem<int>(
                           value: row.numericId,
@@ -68,14 +135,14 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
                         ),
                       )
                       .toList(),
-                  onChanged: _busy
+                  onChanged: model.busy
                       ? null
                       : (value) {
                           if (value == null) return;
-                          final row = _rows.firstWhere(
+                          final row = model.rows.firstWhere(
                             (element) => element.numericId == value,
                           );
-                          _applySelection(row);
+                          callbacks.onApplySelection(row, loadCover: true);
                         },
                 )
               else
@@ -87,17 +154,17 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
                 ),
               const SizedBox(height: 12),
               TextField(
-                controller: _nameCtrl,
+                controller: model.nameCtrl,
                 decoration: const InputDecoration(labelText: '名称'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _labelCtrl,
+                controller: model.labelCtrl,
                 decoration: const InputDecoration(labelText: '标签'),
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _fileUrlCtrl,
+                controller: model.fileUrlCtrl,
                 minLines: 2,
                 maxLines: 3,
                 decoration: const InputDecoration(
@@ -107,7 +174,7 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _promptCtrl,
+                controller: model.promptCtrl,
                 minLines: 3,
                 maxLines: 5,
                 decoration: const InputDecoration(labelText: 'Prompt'),
@@ -116,7 +183,7 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
               Text('Prompt 抽取', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 4),
               TextField(
-                controller: _extractImagesCtrl,
+                controller: model.extractImagesCtrl,
                 minLines: 3,
                 maxLines: 5,
                 decoration: const InputDecoration(
@@ -128,12 +195,12 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
               Align(
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonal(
-                  onPressed: _busy ? null : _extractPrompt,
+                  onPressed: model.busy ? null : callbacks.onExtractPrompt,
                   child: const Text('抽取 Prompt 到编辑区'),
                 ),
               ),
               const SizedBox(height: 12),
-              if (_coverBytes != null)
+              if (model.coverBytes != null)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -145,26 +212,23 @@ extension _ArtStylesWorkbenchDialogView on _ArtStylesWorkbenchDialogState {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.memory(
-                        _coverBytes!,
+                        model.coverBytes!,
                         height: 180,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ],
                 ),
-              if (_statusLine != null) ...[
+              if (model.statusLine != null) ...[
                 const SizedBox(height: 12),
-                SelectableText(_statusLine!),
+                SelectableText(model.statusLine!),
               ],
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
+        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
       ],
     );
   }

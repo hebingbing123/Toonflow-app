@@ -311,6 +311,30 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildArtStylesWorkbenchDialogView(context);
+    return ArtStylesWorkbenchDialogView(
+      model: ArtStylesWorkbenchDialogViewModel(
+        rows: _rows,
+        selected: _selected,
+        coverBytes: _coverBytes,
+        statusLine: _statusLine,
+        busy: _busy,
+        loadingCover: _loadingCover,
+        nameCtrl: _nameCtrl,
+        labelCtrl: _labelCtrl,
+        promptCtrl: _promptCtrl,
+        fileUrlCtrl: _fileUrlCtrl,
+        extractImagesCtrl: _extractImagesCtrl,
+      ),
+      callbacks: ArtStylesWorkbenchDialogViewCallbacks(
+        onReloadRows: _reloadRows,
+        onLoadCover: _loadCover,
+        onCreateStyle: _createStyle,
+        onSaveSelected: _saveSelected,
+        onDeleteSelected: _deleteSelected,
+        onExtractPrompt: _extractPrompt,
+        onApplySelection: _applySelection,
+        onClose: () => Navigator.of(context).pop(),
+      ),
+    );
   }
 }

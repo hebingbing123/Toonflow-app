@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'previews.dart';
 import 'workbenches/agent_memory.dart';
+import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../../rust_api.dart';
 
 part 'workbenches/art_styles.dart';
-part 'workbenches/art_styles_view.dart';
 
 class ProjectsSection extends StatelessWidget {
   const ProjectsSection({
