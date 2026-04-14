@@ -1,8 +1,10 @@
-part of '../../../home_page.dart';
+import 'package:flutter/material.dart';
 
-/// Renders the assets overview, script filter, and workbench entry actions.
-class _ProjectAssetsOverviewPanel extends StatelessWidget {
-  const _ProjectAssetsOverviewPanel({
+import '../../../rust_api.dart';
+import 'support.dart';
+
+class ProjectAssetsOverviewViewModel {
+  const ProjectAssetsOverviewViewModel({
     required this.scriptList,
     required this.visibleAssets,
     required this.assetsForScript,
@@ -10,9 +12,6 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
     required this.assetsLoading,
     required this.assetsScriptFilterLoading,
     required this.assetsBusy,
-    required this.onFilterChanged,
-    required this.onRefresh,
-    required this.onOpenWorkbench,
   });
 
   final List<ScriptBrief> scriptList;
@@ -22,9 +21,30 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
   final bool assetsLoading;
   final bool assetsScriptFilterLoading;
   final bool assetsBusy;
-  final ValueChanged<int?> onFilterChanged;
-  final Future<void> Function() onRefresh;
-  final VoidCallback onOpenWorkbench;
+}
+
+class ProjectAssetsOverviewViewCallbacks {
+  const ProjectAssetsOverviewViewCallbacks({
+    required this.onFilterChanged,
+    required this.onRefresh,
+    required this.onOpenWorkbench,
+  });
+
+  final ValueChanged<int?>? onFilterChanged;
+  final Future<void> Function()? onRefresh;
+  final VoidCallback? onOpenWorkbench;
+}
+
+/// Renders the assets overview, script filter, and workbench entry actions.
+class ProjectAssetsOverviewView extends StatelessWidget {
+  const ProjectAssetsOverviewView({
+    super.key,
+    required this.model,
+    required this.callbacks,
+  });
+
+  final ProjectAssetsOverviewViewModel model;
+  final ProjectAssetsOverviewViewCallbacks callbacks;
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +55,20 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(summarizeProjectAssetRows(visibleAssets), style: bodySmall),
-        if (filterScriptNumericId != null) ...[
+        Text(summarizeProjectAssetRows(model.visibleAssets), style: bodySmall),
+        if (model.filterScriptNumericId != null) ...[
           const SizedBox(height: 6),
-          if (assetsScriptFilterLoading)
+          if (model.assetsScriptFilterLoading)
             Text(
               '正在按剧本筛选资产…',
               style: bodySmall?.copyWith(color: outline),
             )
-          else if (assetsForScript != null)
+          else if (model.assetsForScript != null)
             Text(
-              summarizeScriptScopedAssets(filterScriptNumericId, assetsForScript!),
+              summarizeScriptScopedAssets(
+                model.filterScriptNumericId,
+                model.assetsForScript!,
+              ),
               style: bodySmall,
             )
           else
@@ -54,11 +77,11 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
               style: bodySmall?.copyWith(color: outline),
             ),
         ],
-        if (scriptList.isNotEmpty)
+        if (model.scriptList.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: DropdownButton<int?>(
-              value: filterScriptNumericId,
+              value: model.filterScriptNumericId,
               isExpanded: true,
               hint: const Text('按剧本筛选资产列表'),
               items: [
@@ -66,7 +89,7 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
                   value: null,
                   child: Text('（全部，不按剧本筛选）'),
                 ),
-                ...scriptList.map(
+                ...model.scriptList.map(
                   (script) => DropdownMenuItem<int?>(
                     value: script.numericId,
                     child: Text(
@@ -77,18 +100,24 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
                 ),
               ],
               onChanged:
-                  assetsBusy || assetsLoading || assetsScriptFilterLoading
+                  model.assetsBusy ||
+                      model.assetsLoading ||
+                      model.assetsScriptFilterLoading ||
+                      callbacks.onFilterChanged == null
                   ? null
-                  : (value) => onFilterChanged(value),
+                  : (value) => callbacks.onFilterChanged!(value),
             ),
           ),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: assetsLoading || assetsScriptFilterLoading
+            onPressed:
+                    model.assetsLoading ||
+                        model.assetsScriptFilterLoading ||
+                        callbacks.onRefresh == null
                 ? null
-                : () => onRefresh(),
-            child: Text(assetsLoading ? '刷新资产…' : '刷新资产'),
+                : () => callbacks.onRefresh!(),
+            child: Text(model.assetsLoading ? '刷新资产…' : '刷新资产'),
           ),
         ),
         const SizedBox(height: 8),
@@ -116,9 +145,11 @@ class _ProjectAssetsOverviewPanel extends StatelessWidget {
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed:
-                    assetsBusy || assetsLoading || assetsScriptFilterLoading
+                    model.assetsBusy ||
+                        model.assetsLoading ||
+                        model.assetsScriptFilterLoading
                     ? null
-                    : onOpenWorkbench,
+                    : callbacks.onOpenWorkbench,
                 child: const Text('打开资产主工作台'),
               ),
             ],

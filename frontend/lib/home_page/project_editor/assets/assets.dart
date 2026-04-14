@@ -22,49 +22,53 @@ extension _HomePageProjectEditorAssets on _HomePageState {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (assetsRef[0] != null)
-          _ProjectAssetsOverviewPanel(
-            scriptList: scriptList,
-            visibleAssets: visibleAssets,
-            assetsForScript: assetsForScript,
-            filterScriptNumericId: assetsFilterScriptNumericId[0],
-            assetsLoading: assetsLoading[0],
-            assetsScriptFilterLoading: assetsScriptFilterLoading[0],
-            assetsBusy: assetsBusy[0],
-            onFilterChanged: (value) async {
-              setDialogState(() => assetsScriptFilterLoading[0] = true);
-              assetsFilterScriptNumericId[0] = value;
-              if (value == null) {
-                assetsForScriptRef[0] = null;
-              }
-              try {
-                await reloadAssetsAndStats();
-              } finally {
-                if (ctx.mounted) {
-                  setDialogState(() => assetsScriptFilterLoading[0] = false);
-                }
-              }
-            },
-            onRefresh: () async {
-              setDialogState(() => assetsLoading[0] = true);
-              try {
-                await reloadAssetsAndStats();
-              } finally {
-                if (ctx.mounted) {
-                  setDialogState(() => assetsLoading[0] = false);
-                }
-              }
-            },
-            onOpenWorkbench: () => _openAssetWorkbenchDialog(
-              ctx: ctx,
-              setDialogState: setDialogState,
-              token: token,
-              p: p,
+          ProjectAssetsOverviewView(
+            model: ProjectAssetsOverviewViewModel(
               scriptList: scriptList,
-              assetsRef: assetsRef,
-              assetsForScriptRef: assetsForScriptRef,
-              assetsFilterScriptNumericId: assetsFilterScriptNumericId,
-              assetsBusy: assetsBusy,
-              reloadAssetsAndStats: reloadAssetsAndStats,
+              visibleAssets: visibleAssets,
+              assetsForScript: assetsForScript,
+              filterScriptNumericId: assetsFilterScriptNumericId[0],
+              assetsLoading: assetsLoading[0],
+              assetsScriptFilterLoading: assetsScriptFilterLoading[0],
+              assetsBusy: assetsBusy[0],
+            ),
+            callbacks: ProjectAssetsOverviewViewCallbacks(
+              onFilterChanged: (value) async {
+                setDialogState(() => assetsScriptFilterLoading[0] = true);
+                assetsFilterScriptNumericId[0] = value;
+                if (value == null) {
+                  assetsForScriptRef[0] = null;
+                }
+                try {
+                  await reloadAssetsAndStats();
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => assetsScriptFilterLoading[0] = false);
+                  }
+                }
+              },
+              onRefresh: () async {
+                setDialogState(() => assetsLoading[0] = true);
+                try {
+                  await reloadAssetsAndStats();
+                } finally {
+                  if (ctx.mounted) {
+                    setDialogState(() => assetsLoading[0] = false);
+                  }
+                }
+              },
+              onOpenWorkbench: () => _openAssetWorkbenchDialog(
+                ctx: ctx,
+                setDialogState: setDialogState,
+                token: token,
+                p: p,
+                scriptList: scriptList,
+                assetsRef: assetsRef,
+                assetsForScriptRef: assetsForScriptRef,
+                assetsFilterScriptNumericId: assetsFilterScriptNumericId,
+                assetsBusy: assetsBusy,
+                reloadAssetsAndStats: reloadAssetsAndStats,
+              ),
             ),
           )
         else
