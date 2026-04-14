@@ -165,26 +165,17 @@ Widget _buildAssetImagesWorkbenchCreateForm({
   required AssetImagesWorkbenchDialogState state,
   required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      TextField(
-        controller: state.createControllers.filePathCtrl,
-        decoration: const InputDecoration(labelText: '新增 file_path（可选）'),
-      ),
-      const SizedBox(height: 8),
-      _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: state.createControllers.stateCtrl,
-        sortCtrl: state.createControllers.sortCtrl,
-        stateLabel: '新增 state（可选）',
-        sortLabel: '新增 sort_index（可选）',
-      ),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton(
-          onPressed: state.busyMutation ? null : callbacks.onCreateImage,
-          child: const Text('新增图片'),
-        ),
+  return _buildAssetImagesWorkbenchMutationForm(
+    filePathCtrl: state.createControllers.filePathCtrl,
+    stateCtrl: state.createControllers.stateCtrl,
+    sortCtrl: state.createControllers.sortCtrl,
+    filePathLabel: '新增 file_path（可选）',
+    stateLabel: '新增 state（可选）',
+    sortLabel: '新增 sort_index（可选）',
+    actions: [
+      _AssetImagesWorkbenchMutationAction(
+        label: '新增图片',
+        onPressed: state.busyMutation ? null : callbacks.onCreateImage,
       ),
     ],
   );
@@ -194,33 +185,73 @@ Widget _buildAssetImagesWorkbenchPatchForm({
   required AssetImagesWorkbenchDialogState state,
   required AssetImagesWorkbenchDialogCallbacks callbacks,
 }) {
+  return _buildAssetImagesWorkbenchMutationForm(
+    filePathCtrl: state.patchControllers.filePathCtrl,
+    stateCtrl: state.patchControllers.stateCtrl,
+    sortCtrl: state.patchControllers.sortCtrl,
+    filePathLabel: '编辑 file_path（可置空）',
+    stateLabel: '编辑 state（可置空）',
+    sortLabel: '编辑 sort_index（可选）',
+    actions: [
+      _AssetImagesWorkbenchMutationAction(
+        label: '保存当前图片',
+        onPressed: state.busyMutation ? null : callbacks.onPatchImage,
+      ),
+      _AssetImagesWorkbenchMutationAction(
+        label: '删除当前图片',
+        onPressed: state.busyMutation ? null : callbacks.onDeleteImage,
+      ),
+    ],
+  );
+}
+
+class _AssetImagesWorkbenchMutationAction {
+  const _AssetImagesWorkbenchMutationAction({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Future<void> Function()? onPressed;
+}
+
+Widget _buildAssetImagesWorkbenchMutationForm({
+  required TextEditingController filePathCtrl,
+  required TextEditingController stateCtrl,
+  required TextEditingController sortCtrl,
+  required String filePathLabel,
+  required String stateLabel,
+  required String sortLabel,
+  required List<_AssetImagesWorkbenchMutationAction> actions,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       TextField(
-        controller: state.patchControllers.filePathCtrl,
-        decoration: const InputDecoration(labelText: '编辑 file_path（可置空）'),
+        controller: filePathCtrl,
+        decoration: InputDecoration(labelText: filePathLabel),
       ),
       const SizedBox(height: 8),
       _buildAssetImagesWorkbenchStateSortRow(
-        stateCtrl: state.patchControllers.stateCtrl,
-        sortCtrl: state.patchControllers.sortCtrl,
-        stateLabel: '编辑 state（可置空）',
-        sortLabel: '编辑 sort_index（可选）',
+        stateCtrl: stateCtrl,
+        sortCtrl: sortCtrl,
+        stateLabel: stateLabel,
+        sortLabel: sortLabel,
       ),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          TextButton(
-            onPressed: state.busyMutation ? null : callbacks.onPatchImage,
-            child: const Text('保存当前图片'),
-          ),
-          TextButton(
-            onPressed: state.busyMutation ? null : callbacks.onDeleteImage,
-            child: const Text('删除当前图片'),
-          ),
-        ],
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: actions
+              .map(
+                (action) => TextButton(
+                  onPressed: action.onPressed,
+                  child: Text(action.label),
+                ),
+              )
+              .toList(),
+        ),
       ),
     ],
   );
