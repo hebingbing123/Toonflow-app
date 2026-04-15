@@ -22,8 +22,8 @@ use crate::state::AppState;
 use super::crud::{
     resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
 };
-use super::metadata_cover_numeric_image_id;
 use super::models::*;
+use super::utils::metadata_cover_numeric_image_id;
 
 pub(super) async fn list_project_asset_images_for_project(
     State(state): State<AppState>,

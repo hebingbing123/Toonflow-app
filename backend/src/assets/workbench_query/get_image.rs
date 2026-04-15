@@ -12,8 +12,8 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::crud::ensure_owned_project_numeric_id;
-use super::super::metadata_cover_numeric_image_id;
 use super::super::models::*;
+use super::super::utils::metadata_cover_numeric_image_id;
 
 async fn run_get_image(
     pool: &sqlx::PgPool,

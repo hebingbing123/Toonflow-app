@@ -15,10 +15,11 @@ use crate::state::AppState;
 
 use super::crud::ensure_owned_project_pk;
 use super::models::*;
-use super::{
-    merge_workbench_asset_metadata, normalize_upload_clip_data_uri, resolve_owned_asset_metadata,
-    ADV_LOCK_ASSET_IMAGE_NUMERIC, ADV_LOCK_ASSET_NUMERIC,
+use super::utils::{
+    merge_workbench_asset_metadata, normalize_optional_trimmed_text,
+    normalize_upload_clip_data_uri, resolve_owned_asset_metadata, ADV_LOCK_ASSET_IMAGE_NUMERIC,
 };
+use super::ADV_LOCK_ASSET_NUMERIC;
 
 pub(super) async fn post_project_workbench_add_assets(
     State(state): State<AppState>,
@@ -69,8 +70,8 @@ pub(super) async fn post_project_workbench_add_assets(
     let now_ms = chrono::Utc::now().timestamp_millis();
     let metadata = merge_workbench_asset_metadata(
         Value::Object(Default::default()),
-        Some(super::normalize_optional_trimmed_text(body.prompt)),
-        Some(super::normalize_optional_trimmed_text(body.remark)),
+        Some(normalize_optional_trimmed_text(body.prompt)),
+        Some(normalize_optional_trimmed_text(body.remark)),
         None,
     );
 
@@ -131,8 +132,8 @@ pub(super) async fn post_project_workbench_update_assets(
     let current = resolve_owned_asset_metadata(pool, uid, body.id).await?;
     let metadata = merge_workbench_asset_metadata(
         current.metadata.0,
-        Some(super::normalize_optional_trimmed_text(body.prompt)),
-        Some(super::normalize_optional_trimmed_text(body.remark)),
+        Some(normalize_optional_trimmed_text(body.prompt)),
+        Some(normalize_optional_trimmed_text(body.remark)),
         None,
     );
 
@@ -269,7 +270,7 @@ pub(super) async fn post_project_workbench_save_assets(
 
     let metadata = merge_workbench_asset_metadata(
         current.metadata.0,
-        Some(super::normalize_optional_trimmed_text(body.prompt)),
+        Some(normalize_optional_trimmed_text(body.prompt)),
         None,
         Some(image_patch),
     );

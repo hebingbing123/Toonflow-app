@@ -13,9 +13,8 @@ use crate::state::AppState;
 
 use super::super::crud::ensure_owned_project_pk;
 use super::super::models::*;
-use super::super::{
-    normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_NUMERIC, ADV_LOCK_ASSET_NUMERIC,
-};
+use super::super::utils::{normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_NUMERIC};
+use super::super::ADV_LOCK_ASSET_NUMERIC;
 
 pub(crate) async fn post_project_workbench_upload_clip(
     State(state): State<AppState>,

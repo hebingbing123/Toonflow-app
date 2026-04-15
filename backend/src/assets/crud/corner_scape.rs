@@ -14,7 +14,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::models::*;
-use super::super::normalize_corner_types_filter;
+use super::super::utils::normalize_corner_types_filter;
 use super::resolve::ensure_owned_project_pk;
 
 async fn list_corner_scape_assets_inner(

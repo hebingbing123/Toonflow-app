@@ -13,7 +13,7 @@ use crate::state::AppState;
 
 use super::super::crud::ensure_owned_project_numeric_id;
 use super::super::models::*;
-use super::super::{normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
+use super::super::utils::{normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
 
 async fn run_batch_generation_data(
     pool: &sqlx::PgPool,

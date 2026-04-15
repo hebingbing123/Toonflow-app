@@ -15,7 +15,7 @@ use crate::state::AppState;
 
 use super::super::crud::ensure_owned_project_numeric_id;
 use super::super::models::*;
-use super::super::MAX_ASSET_LIST_LIMIT;
+use super::super::utils::MAX_ASSET_LIST_LIMIT;
 
 async fn run_get_assets_api(
     pool: &sqlx::PgPool,
