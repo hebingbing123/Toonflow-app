@@ -12,6 +12,7 @@ export 'harness/index.dart';
 export 'production.dart';
 export 'quality/index.dart';
 export 'skills/index.dart';
+export 'system/index.dart';
 
 part 'catalog/art_styles.dart';
 part 'assets/api.dart';
@@ -52,7 +53,6 @@ part 'settings/vendor_credentials.dart';
 part 'settings/vendors_mutations.dart';
 part 'system/auth.dart';
 part 'scripts/storyboards_api.dart';
-part 'system/status.dart';
 part 'system/usage.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
