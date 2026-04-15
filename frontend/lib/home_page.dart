@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
+import 'home_page/project_editor/assets/clip_upload_launcher.dart';
 import 'home_page/project_editor/assets/section_builder.dart';
 import 'home_page/project_editor/novels/events/section_builder.dart';
 import 'home_page/project_editor/novels/workbench_section_builder.dart';
