@@ -66,10 +66,7 @@ pub(super) async fn post_generate_assets(
     }
     let image_base64 = normalize_optional_base64(body.base64.as_deref(), "base64")?;
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
     ensure_asset_numerics_exist_in_owned_project(
@@ -129,10 +126,7 @@ pub(super) async fn post_polish_assets_prompt(
         )));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
     ensure_asset_numerics_exist_in_owned_project(
@@ -230,10 +224,7 @@ pub(super) async fn post_batch_generate_image_assets(
         }));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
 
@@ -336,10 +327,7 @@ pub(super) async fn post_batch_polish_assets_prompt(
         }));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
     let polish_ids: Vec<i32> = body.items.iter().map(|it| it.assets_id).collect();
