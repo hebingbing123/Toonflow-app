@@ -1,4 +1,9 @@
-part of '../../production.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../config.dart';
+import '../../core.dart';
 
 /// OpenAPI **`VideoItem`** — video in workbench list.
 class VideoItem {

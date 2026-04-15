@@ -1,4 +1,10 @@
-part of '../../production.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../config.dart';
+import '../../core.dart';
+import 'tracks.dart';
 
 /// OpenAPI **`GenerateVideoPromptResponse`**.
 class GenerateVideoPromptResponse {
