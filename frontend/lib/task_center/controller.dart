@@ -1,81 +1,110 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'package:flutter/material.dart';
 
-part of '../../home_page.dart';
+import '../rust_api.dart';
 
-extension _HomePageTaskCenterController on _HomePageState {
-  Future<void> _loadTaskProjects() async {
-    final token = _session?.accessToken;
+typedef TaskCenterAccessTokenProvider = String? Function();
+typedef TaskCenterErrorSink = void Function(String? error);
+
+class TaskCenterController extends ChangeNotifier {
+  TaskCenterController({
+    required TaskCenterAccessTokenProvider accessTokenProvider,
+    required TaskCenterErrorSink onErrorChanged,
+  }) : _accessTokenProvider = accessTokenProvider,
+       _onErrorChanged = onErrorChanged;
+
+  final TaskCenterAccessTokenProvider _accessTokenProvider;
+  final TaskCenterErrorSink _onErrorChanged;
+
+  bool loadingTaskProjects = false;
+  bool loadingTaskCategories = false;
+  bool loadingTaskApi = false;
+  bool loadingTaskDetailsByNumericId = false;
+  bool loadingTaskDetailsUuid = false;
+  List<TaskCenterProjectItem>? taskProjects;
+  List<JobRow>? taskApiJobs;
+  String? taskCategoriesLine;
+  String? taskApiSummaryLine;
+  String? taskDetailNumericIdLine;
+  String? taskDetailUuidLine;
+  final TextEditingController taskDetailJobIdController =
+      TextEditingController();
+
+  void reset() {
+    loadingTaskProjects = false;
+    loadingTaskCategories = false;
+    loadingTaskApi = false;
+    loadingTaskDetailsByNumericId = false;
+    loadingTaskDetailsUuid = false;
+    taskProjects = null;
+    taskApiJobs = null;
+    taskCategoriesLine = null;
+    taskApiSummaryLine = null;
+    taskDetailNumericIdLine = null;
+    taskDetailUuidLine = null;
+    taskDetailJobIdController.clear();
+    notifyListeners();
+  }
+
+  void selectTaskJob(JobRow job) {
+    taskDetailJobIdController.text = job.id;
+    notifyListeners();
+  }
+
+  void notifyJobIdChanged() {
+    notifyListeners();
+  }
+
+  Future<void> loadTaskProjects() async {
+    final token = _accessTokenProvider();
     if (token == null) return;
-    setState(() {
-      _loadingTaskProjects = true;
-      _error = null;
-      _taskProjects = null;
-    });
+    loadingTaskProjects = true;
+    _onErrorChanged(null);
+    taskProjects = null;
+    notifyListeners();
     try {
-      final rows = await postTasksGetProject(token);
-      if (!mounted) return;
-      setState(() {
-        _taskProjects = rows;
-        _loadingTaskProjects = false;
-      });
+      taskProjects = await postTasksGetProject(token);
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskProjects = false;
-      });
+      _onErrorChanged(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskProjects = false;
-      });
+      _onErrorChanged(e.toString());
+    } finally {
+      loadingTaskProjects = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _loadTaskCategories() async {
-    final token = _session?.accessToken;
+  Future<void> loadTaskCategories() async {
+    final token = _accessTokenProvider();
     if (token == null) return;
-    setState(() {
-      _loadingTaskCategories = true;
-      _error = null;
-      _taskCategoriesLine = null;
-    });
+    loadingTaskCategories = true;
+    _onErrorChanged(null);
+    taskCategoriesLine = null;
+    notifyListeners();
     try {
       final rows = await postTasksGetTaskCategories(token);
-      if (!mounted) return;
-      setState(() {
-        _taskCategoriesLine = rows.isEmpty
-            ? '(empty)'
-            : rows.map((r) => r.taskClass).join(', ');
-        _loadingTaskCategories = false;
-      });
+      taskCategoriesLine = rows.isEmpty
+          ? '(empty)'
+          : rows.map((row) => row.taskClass).join(', ');
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskCategories = false;
-      });
+      _onErrorChanged(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskCategories = false;
-      });
+      _onErrorChanged(e.toString());
+    } finally {
+      loadingTaskCategories = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _loadTaskApi() async {
-    final token = _session?.accessToken;
+  Future<void> loadTaskApi() async {
+    final token = _accessTokenProvider();
     if (token == null) return;
-    setState(() {
-      _loadingTaskApi = true;
-      _error = null;
-      _taskApiJobs = null;
-      _taskApiSummaryLine = null;
-    });
+    loadingTaskApi = true;
+    _onErrorChanged(null);
+    taskApiJobs = null;
+    taskApiSummaryLine = null;
+    notifyListeners();
     try {
-      final projects = _taskProjects ?? await postTasksGetProject(token);
+      final projects = taskProjects ?? await postTasksGetProject(token);
       final projectId = projects.isEmpty ? null : projects.first.numericId;
       final rows = await postTasksGetTaskApi(
         token,
@@ -83,86 +112,67 @@ extension _HomePageTaskCenterController on _HomePageState {
         limit: 10,
         projectId: projectId,
       );
-      if (!mounted) return;
       final sample = rows.data
           .take(3)
-          .map((j) => '${j.kind}:${j.status}')
+          .map((job) => '${job.kind}:${job.status}')
           .join(', ');
-      setState(() {
-        _taskProjects = projects;
-        _taskApiJobs = rows.data;
-        _taskApiSummaryLine =
-            'page=1 limit=10'
-            '${projectId == null ? '' : ' projectId=$projectId'}'
-            ' · total=${rows.total} · page_rows=${rows.data.length}'
-            '${sample.isEmpty ? '' : ' · sample: $sample'}';
-        _loadingTaskApi = false;
-      });
+      taskProjects = projects;
+      taskApiJobs = rows.data;
+      taskApiSummaryLine =
+          'page=1 limit=10'
+          '${projectId == null ? '' : ' projectId=$projectId'}'
+          ' · total=${rows.total} · page_rows=${rows.data.length}'
+          '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskApi = false;
-      });
+      _onErrorChanged(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskApi = false;
-      });
+      _onErrorChanged(e.toString());
+    } finally {
+      loadingTaskApi = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _probeTaskDetailByNumericId() async {
-    final token = _session?.accessToken;
+  Future<void> probeTaskDetailByNumericId() async {
+    final token = _accessTokenProvider();
     if (token == null) return;
-    setState(() {
-      _loadingTaskDetailsByNumericId = true;
-      _error = null;
-      _taskDetailNumericIdLine = null;
-    });
+    loadingTaskDetailsByNumericId = true;
+    _onErrorChanged(null);
+    taskDetailNumericIdLine = null;
+    notifyListeners();
     try {
-      final jobs = _taskApiJobs ?? (await postTasksGetTaskApi(token, page: 1, limit: 10)).data;
+      final jobs =
+          taskApiJobs ??
+          (await postTasksGetTaskApi(token, page: 1, limit: 10)).data;
       final target = jobs.isEmpty ? null : jobs.first;
       if (target == null) {
         throw StateError('no task rows available yet; run get-task-api first');
       }
       final row = await postTasksTaskDetails(token, target.numericTaskId);
-      if (!mounted) return;
-      setState(() {
-        _taskApiJobs = jobs;
-        _taskDetailNumericIdLine =
-            'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
-        _loadingTaskDetailsByNumericId = false;
-      });
+      taskApiJobs = jobs;
+      taskDetailNumericIdLine =
+          'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskDetailsByNumericId = false;
-      });
+      _onErrorChanged(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskDetailsByNumericId = false;
-      });
+      _onErrorChanged(e.toString());
+    } finally {
+      loadingTaskDetailsByNumericId = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _probeTaskDetailUuid() async {
-    final token = _session?.accessToken;
+  Future<void> probeTaskDetailUuid() async {
+    final token = _accessTokenProvider();
     if (token == null) return;
-    final jobId = _taskDetailJobIdCtrl.text.trim();
+    final jobId = taskDetailJobIdController.text.trim();
     if (jobId.isEmpty) return;
-    setState(() {
-      _loadingTaskDetailsUuid = true;
-      _error = null;
-      _taskDetailUuidLine = null;
-    });
+    loadingTaskDetailsUuid = true;
+    _onErrorChanged(null);
+    taskDetailUuidLine = null;
+    notifyListeners();
     try {
       final row = await postTasksTaskDetailsByJobId(token, jobId);
-      if (!mounted) return;
       final parts = <String>[row.kind, row.status, 'updated ${row.updatedAt}'];
       if (row.claimedBy != null && row.claimedBy!.isNotEmpty) {
         parts.add('claimed_by=${row.claimedBy}');
@@ -170,22 +180,20 @@ extension _HomePageTaskCenterController on _HomePageState {
       if (row.errorMessage != null && row.errorMessage!.isNotEmpty) {
         parts.add('error=${row.errorMessage}');
       }
-      setState(() {
-        _taskDetailUuidLine = parts.join(' · ');
-        _loadingTaskDetailsUuid = false;
-      });
+      taskDetailUuidLine = parts.join(' · ');
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskDetailsUuid = false;
-      });
+      _onErrorChanged(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingTaskDetailsUuid = false;
-      });
+      _onErrorChanged(e.toString());
+    } finally {
+      loadingTaskDetailsUuid = false;
+      notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    taskDetailJobIdController.dispose();
+    super.dispose();
   }
 }

@@ -35,6 +35,7 @@ import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
+import 'task_center/controller.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';
@@ -62,7 +63,6 @@ part 'project_editor/assets/dialogs/delete.dart';
 part 'project_editor/assets/dialogs/filter.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
-part 'task_center/controller.dart';
 part 'agent_workspaces/controller/constants.dart';
 part 'agent_workspaces/controller/utils.dart';
 part 'agent_workspaces/controller/script.dart';
@@ -195,18 +195,10 @@ class _HomePageState extends State<HomePage> {
     onErrorChanged: _setSharedError,
   );
 
-  bool _loadingTaskProjects = false;
-  bool _loadingTaskCategories = false;
-  bool _loadingTaskApi = false;
-  bool _loadingTaskDetailsByNumericId = false;
-  bool _loadingTaskDetailsUuid = false;
-  List<TaskCenterProjectItem>? _taskProjects;
-  List<JobRow>? _taskApiJobs;
-  String? _taskCategoriesLine;
-  String? _taskApiSummaryLine;
-  String? _taskDetailNumericIdLine;
-  String? _taskDetailUuidLine;
-  final _taskDetailJobIdCtrl = TextEditingController();
+  late final TaskCenterController _taskCenterController = TaskCenterController(
+    accessTokenProvider: () => _session?.accessToken,
+    onErrorChanged: _setSharedError,
+  );
 
   late final QualityReviewsController _qualityReviewsController =
       QualityReviewsController(
@@ -263,6 +255,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _overviewController.addListener(_handleOverviewChanged);
+    _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     if (kSupabaseConfigured) {
       _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
@@ -281,17 +274,23 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleTaskCenterChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _authSub?.cancel();
     _overviewController.removeListener(_handleOverviewChanged);
+    _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _email.dispose();
     _password.dispose();
     _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
-    _taskDetailJobIdCtrl.dispose();
+    _taskCenterController.dispose();
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();

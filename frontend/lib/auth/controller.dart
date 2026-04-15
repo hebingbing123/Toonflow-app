@@ -36,18 +36,13 @@ extension _HomePageAuthSessionController on _HomePageState {
     await _skillsHarnessController.closeChannel();
     setState(() {
       _wsLog.clear();
-      _taskProjects = null;
-      _taskApiJobs = null;
-      _taskCategoriesLine = null;
-      _taskApiSummaryLine = null;
-      _taskDetailNumericIdLine = null;
-      _taskDetailUuidLine = null;
       _usageSummaryBody = null;
     });
     _overviewController.reset();
     _skillsHarnessController.reset();
     _projectsController.reset();
     _jobsController.reset();
+    _taskCenterController.reset();
     _qualityReviewsController.reset();
   }
 }

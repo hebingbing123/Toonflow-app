@@ -16,7 +16,9 @@ use crate::scope;
 use crate::state::AppState;
 
 use super::super::models::*;
-use super::super::{normalize_list_asset_type_filter, normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
+use super::super::utils::{
+    normalize_list_asset_type_filter, normalize_name_ilike, MAX_ASSET_LIST_LIMIT,
+};
 use super::resolve::ensure_owned_project_pk;
 
 async fn count_project_assets_filtered(
