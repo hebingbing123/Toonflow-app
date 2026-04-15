@@ -33,6 +33,7 @@ import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
+import 'skills_harness/controller.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';
@@ -66,7 +67,6 @@ part 'agent_workspaces/controller/utils.dart';
 part 'agent_workspaces/controller/script.dart';
 part 'agent_workspaces/controller/production.dart';
 part 'agent_workspaces/controller/writeback.dart';
-part 'skills_harness/controller.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
@@ -77,8 +77,6 @@ part 'system_probes/models_catalog/production_probe.dart';
 part 'system_probes/account/settings.dart';
 part 'system_probes/account/profile.dart';
 part 'system_probes/content.dart';
-part 'skills_harness/websocket.dart';
-part 'skills_harness/files.dart';
 part 'auth/controller.dart';
 part 'overview/controller.dart';
 part 'shell/build_sections.dart';
@@ -123,8 +121,6 @@ class _HomePageState extends State<HomePage> {
   final _password = TextEditingController();
 
   StreamSubscription<AuthState>? _authSub;
-  WebSocketChannel? _ws;
-  StreamSubscription<dynamic>? _wsSub;
 
   String? _healthBody;
   String? _healthRootBody;
@@ -161,12 +157,6 @@ class _HomePageState extends State<HomePage> {
   bool _loadingModelsCatalog = false;
   bool _loadingTextModelDefault = false;
   bool _loadingModelDetail = false;
-  bool _loadingWs = false;
-  bool _loadingWsHarness = false;
-  bool _loadingWsIsolatedEcho = false;
-  bool _loadingWsWasmProbe = false;
-  bool _loadingWsHarnessAgent = false;
-  bool _loadingWsSkillsRead = false;
   bool _loadingScriptWorkspaceRun = false;
   bool _loadingProductionWorkspaceRun = false;
   bool _loadingProductionFlowProbe = false;
@@ -176,7 +166,6 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptResultWriteback = false;
   bool _loadingScriptPlanResultWriteback = false;
   bool _loadingProductionResultWriteback = false;
-  final List<String> _wsLog = [];
   String _workspaceAssistantText = '';
   String? _workspaceLastToolResultLine;
   String? _workspaceLastToolName;
@@ -235,24 +224,29 @@ class _HomePageState extends State<HomePage> {
         onErrorChanged: _setSharedError,
       );
 
-  final _skillPathCtrl = TextEditingController(
-    text: 'script_execution_script.md',
-  );
-  final _skillContentCtrl = TextEditingController(text: '# flutter probe\n');
-
-  bool _loadingHarnessTools = false;
-  bool _loadingSkillsSummary = false;
-  bool _loadingSkillList = false;
-  bool _loadingSkillPreview = false;
-  bool _loadingSkillPut = false;
-  bool _loadingSkillPost = false;
-  bool _loadingSkillDelete = false;
-  String? _harnessToolsLine;
-  String? _skillsAggregateLine;
-  String? _skillsListSummary;
-  String? _skillMutationLine;
   _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
   _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
+
+  late final SkillsHarnessController _skillsHarnessController =
+      SkillsHarnessController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+        onWsMessage: _handleHarnessWsMessage,
+        onWsLifecycleSettled: _resetWorkspaceWsOperationFlags,
+      );
+
+  bool get _loadingWs => _skillsHarnessController.loadingWs;
+  bool get _loadingWsHarness => _skillsHarnessController.loadingWsHarness;
+  bool get _loadingWsIsolatedEcho =>
+      _skillsHarnessController.loadingWsIsolatedEcho;
+  bool get _loadingWsWasmProbe => _skillsHarnessController.loadingWsWasmProbe;
+  bool get _loadingWsHarnessAgent =>
+      _skillsHarnessController.loadingWsHarnessAgent;
+  bool get _loadingWsSkillsRead => _skillsHarnessController.loadingWsSkillsRead;
+  List<String> get _wsLog => _skillsHarnessController.wsLog;
+
+  Future<WebSocketChannel?> _openHarnessChannel(String token) =>
+      _skillsHarnessController.openHarnessChannel(token);
 
   void _setSharedError(String? error) {
     if (!mounted) return;
@@ -264,6 +258,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     if (kSupabaseConfigured) {
       _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
         if (mounted) setState(() {});
@@ -271,19 +266,22 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _handleSkillsHarnessChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _authSub?.cancel();
-    _wsSub?.cancel();
-    _ws?.sink.close();
+    _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _email.dispose();
     _password.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
     _taskDetailJobIdCtrl.dispose();
     _qualityReviewsController.dispose();
-    _skillPathCtrl.dispose();
-    _skillContentCtrl.dispose();
+    _skillsHarnessController.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();
     _agentWorkspaceScriptIdCtrl.dispose();
     _scriptWorkspacePromptCtrl.dispose();

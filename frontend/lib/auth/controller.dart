@@ -33,10 +33,7 @@ extension _HomePageAuthSessionController on _HomePageState {
 
   Future<void> _signOut() async {
     await Supabase.instance.client.auth.signOut();
-    _wsSub?.cancel();
-    _ws?.sink.close();
-    _ws = null;
-    _wsSub = null;
+    await _skillsHarnessController.closeChannel();
     setState(() {
       _wsLog.clear();
       _taskProjects = null;
@@ -48,10 +45,8 @@ extension _HomePageAuthSessionController on _HomePageState {
       _usageSummaryBody = null;
       _versionBody = null;
       _readyBody = null;
-      _harnessToolsLine = null;
-      _skillsAggregateLine = null;
-      _skillsListSummary = null;
     });
+    _skillsHarnessController.reset();
     _projectsController.reset();
     _jobsController.reset();
     _qualityReviewsController.reset();

@@ -1,101 +1,206 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'dart:async';
+import 'dart:convert';
 
-part of '../../home_page.dart';
+import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-extension _HomePageSkillsHarnessController on _HomePageState {
-  Future<void> _loadHarnessTools() async {
-    final token = _session?.accessToken;
+import '../config.dart';
+import '../rust_api.dart';
+
+part 'files.dart';
+part 'websocket.dart';
+
+typedef SkillsHarnessAccessTokenProvider = String? Function();
+typedef SkillsHarnessErrorSink = void Function(String? error);
+typedef SkillsHarnessWsMessageHandler = void Function(String raw);
+typedef SkillsHarnessWsLifecycleHandler = void Function();
+
+class SkillsHarnessController extends ChangeNotifier {
+  SkillsHarnessController({
+    required SkillsHarnessAccessTokenProvider accessTokenProvider,
+    required SkillsHarnessErrorSink onErrorChanged,
+    required SkillsHarnessWsMessageHandler onWsMessage,
+    required SkillsHarnessWsLifecycleHandler onWsLifecycleSettled,
+  }) : _accessTokenProvider = accessTokenProvider,
+       _onErrorChanged = onErrorChanged,
+       _onWsMessage = onWsMessage,
+       _onWsLifecycleSettled = onWsLifecycleSettled;
+
+  final SkillsHarnessAccessTokenProvider _accessTokenProvider;
+  final SkillsHarnessErrorSink _onErrorChanged;
+  final SkillsHarnessWsMessageHandler _onWsMessage;
+  final SkillsHarnessWsLifecycleHandler _onWsLifecycleSettled;
+
+  final TextEditingController skillPathController = TextEditingController(
+    text: 'script_execution_script.md',
+  );
+  final TextEditingController skillContentController = TextEditingController(
+    text: '# flutter probe\n',
+  );
+
+  WebSocketChannel? _ws;
+  StreamSubscription<dynamic>? _wsSub;
+
+  bool loadingHarnessTools = false;
+  bool loadingSkillsSummary = false;
+  bool loadingSkillList = false;
+  bool loadingSkillPreview = false;
+  bool loadingSkillPut = false;
+  bool loadingSkillPost = false;
+  bool loadingSkillDelete = false;
+  bool loadingWs = false;
+  bool loadingWsHarness = false;
+  bool loadingWsIsolatedEcho = false;
+  bool loadingWsWasmProbe = false;
+  bool loadingWsHarnessAgent = false;
+  bool loadingWsSkillsRead = false;
+  final List<String> wsLog = [];
+  String? harnessToolsLine;
+  String? skillsAggregateLine;
+  String? skillsListSummary;
+  String? skillMutationLine;
+
+  String? get _accessToken => _accessTokenProvider();
+
+  bool get wsProbesBusy =>
+      loadingWs ||
+      loadingWsHarness ||
+      loadingWsIsolatedEcho ||
+      loadingWsWasmProbe ||
+      loadingWsHarnessAgent ||
+      loadingWsSkillsRead;
+
+  void reset() {
+    resetWsBusyFlags();
+    wsLog.clear();
+    harnessToolsLine = null;
+    skillsAggregateLine = null;
+    skillsListSummary = null;
+    skillMutationLine = null;
+    notifyListeners();
+  }
+
+  void resetWsBusyFlags() {
+    loadingWs = false;
+    loadingWsHarness = false;
+    loadingWsIsolatedEcho = false;
+    loadingWsWasmProbe = false;
+    loadingWsHarnessAgent = false;
+    loadingWsSkillsRead = false;
+  }
+
+  void clearToolProbeFlags() {
+    loadingWsHarness = false;
+    loadingWsIsolatedEcho = false;
+    loadingWsWasmProbe = false;
+    loadingWsSkillsRead = false;
+    notifyListeners();
+  }
+
+  void clearAgentProbeFlags() {
+    loadingWs = false;
+    loadingWsHarnessAgent = false;
+    notifyListeners();
+  }
+
+  void appendWsLog(String raw) {
+    const maxChars = 12000;
+    final line = raw.length > maxChars
+        ? '${raw.substring(0, maxChars)}… (+${raw.length - maxChars} chars)'
+        : raw;
+    _onWsMessage(raw);
+    wsLog.insert(0, line);
+    if (wsLog.length > 16) {
+      wsLog.removeLast();
+    }
+    notifyListeners();
+  }
+
+  void _setError(String? error) {
+    _onErrorChanged(error);
+  }
+
+  void _publish() {
+    notifyListeners();
+  }
+
+  Future<void> loadHarnessTools() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingHarnessTools = true;
-      _error = null;
-      _harnessToolsLine = null;
-    });
+    loadingHarnessTools = true;
+    _setError(null);
+    harnessToolsLine = null;
+    _publish();
     try {
       final r = await fetchHarnessTools(token);
-      if (!mounted) return;
-      setState(() {
-        _harnessToolsLine = r.tools
-            .map((t) => '${t.name}: ${t.description}')
-            .join('\n');
-        _loadingHarnessTools = false;
-      });
+      harnessToolsLine = r.tools
+          .map((t) => '${t.name}: ${t.description}')
+          .join('\n');
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHarnessTools = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHarnessTools = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingHarnessTools = false;
+      _publish();
     }
   }
 
-  Future<void> _loadSkillsAggregate() async {
-    final token = _session?.accessToken;
+  Future<void> loadSkillsAggregate() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingSkillsSummary = true;
-      _error = null;
-      _skillsAggregateLine = null;
-    });
+    loadingSkillsSummary = true;
+    _setError(null);
+    skillsAggregateLine = null;
+    _publish();
     try {
-      final s = await fetchSkillsSummary(token);
-      if (!mounted) return;
-      setState(() {
-        _skillsAggregateLine =
-            '${s.markdownFileCount} md files, ${s.totalBytes} bytes total';
-        _loadingSkillsSummary = false;
-      });
+      final summary = await fetchSkillsSummary(token);
+      skillsAggregateLine =
+          '${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillsSummary = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillsSummary = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingSkillsSummary = false;
+      _publish();
     }
   }
 
-  Future<void> _loadSkillList() async {
-    final token = _session?.accessToken;
+  Future<void> loadSkillList() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingSkillList = true;
-      _error = null;
-      _skillsListSummary = null;
-    });
+    loadingSkillList = true;
+    _setError(null);
+    skillsListSummary = null;
+    _publish();
     try {
       final list = await fetchSkills(token);
-      if (!mounted) return;
       final sample = list.take(5).map((m) => m.path).join(', ');
-      setState(() {
-        _skillsListSummary =
-            '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
-        _loadingSkillList = false;
-      });
+      skillsListSummary =
+          '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillList = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillList = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingSkillList = false;
+      _publish();
     }
   }
 
+  Future<void> closeChannel() async {
+    await _wsSub?.cancel();
+    await _ws?.sink.close();
+    _ws = null;
+    _wsSub = null;
+  }
+
+  @override
+  void dispose() {
+    unawaited(closeChannel());
+    skillPathController.dispose();
+    skillContentController.dispose();
+    super.dispose();
+  }
 }

@@ -7,12 +7,7 @@ extension _HomePageRuntimeHelpers on _HomePageState {
       kSupabaseConfigured ? Supabase.instance.client.auth.currentSession : null;
 
   bool get _wsProbesBusy =>
-      _loadingWs ||
-      _loadingWsHarness ||
-      _loadingWsIsolatedEcho ||
-      _loadingWsWasmProbe ||
-      _loadingWsHarnessAgent ||
-      _loadingWsSkillsRead ||
+      _skillsHarnessController.wsProbesBusy ||
       _loadingScriptWorkspaceRun ||
       _loadingProductionWorkspaceRun ||
       _loadingScriptDomainProbe ||
@@ -32,20 +27,11 @@ extension _HomePageRuntimeHelpers on _HomePageState {
     _loadingProductionSubAgentRun = false;
   }
 
-  void _appendWsLog(String raw) {
-    const maxChars = 12000;
-    final line = raw.length > maxChars
-        ? '${raw.substring(0, maxChars)}… (+${raw.length - maxChars} chars)'
-        : raw;
+  void _handleHarnessWsMessage(String raw) {
     final decoded = _tryDecodeWsJson(raw);
-    if (!mounted) return;
-    setState(() {
-      if (decoded != null) {
-        _ingestWorkspaceWsEvent(decoded);
-      }
-      _wsLog.insert(0, line);
-      if (_wsLog.length > 16) _wsLog.removeLast();
-    });
+    if (decoded != null) {
+      _ingestWorkspaceWsEvent(decoded);
+    }
   }
 
   Map<String, dynamic>? _tryDecodeWsJson(String raw) {
@@ -65,22 +51,18 @@ extension _HomePageRuntimeHelpers on _HomePageState {
   void _ingestWorkspaceWsEvent(Map<String, dynamic> event) {
     final resolution = resolveWorkspaceWsEvent(event);
     if (resolution.clearAllOperations) {
-      _resetWsBusyFlags();
+      _skillsHarnessController.resetWsBusyFlags();
       _resetWorkspaceWsOperationFlags();
     } else {
       if (resolution.clearToolOperations) {
-        _loadingWsHarness = false;
-        _loadingWsIsolatedEcho = false;
-        _loadingWsWasmProbe = false;
-        _loadingWsSkillsRead = false;
+        _skillsHarnessController.clearToolProbeFlags();
         _loadingScriptDomainProbe = false;
         _loadingProductionFlowProbe = false;
         _loadingScriptSubAgentRun = false;
         _loadingProductionSubAgentRun = false;
       }
       if (resolution.clearAgentOperations) {
-        _loadingWs = false;
-        _loadingWsHarnessAgent = false;
+        _skillsHarnessController.clearAgentProbeFlags();
         _loadingScriptWorkspaceRun = false;
         _loadingProductionWorkspaceRun = false;
       }
@@ -139,7 +121,9 @@ extension _HomePageRuntimeHelpers on _HomePageState {
         if (name == 'get_planData') {
           _workspaceScriptPlanWritebackCandidate =
               _extractScriptPlanDataFromToolResult(result);
-          _workspaceScriptPlanRowId = _extractScriptPlanRowIdFromToolResult(result);
+          _workspaceScriptPlanRowId = _extractScriptPlanRowIdFromToolResult(
+            result,
+          );
         }
         final encoded = jsonEncode(result);
         final summary = encoded.length > 320

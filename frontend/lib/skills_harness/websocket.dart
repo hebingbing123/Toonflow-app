@@ -1,68 +1,46 @@
-// ignore_for_file: invalid_use_of_protected_member
+part of 'controller.dart';
 
-part of '../../home_page.dart';
-
-extension _HomePageSkillsHarnessWebSocket on _HomePageState {
-  void _resetWsBusyFlags() {
-    _loadingWs = false;
-    _loadingWsHarness = false;
-    _loadingWsIsolatedEcho = false;
-    _loadingWsWasmProbe = false;
-    _loadingWsHarnessAgent = false;
-    _loadingWsSkillsRead = false;
-  }
-
-  Future<WebSocketChannel?> _openHarnessChannel(String token) async {
-    _wsSub?.cancel();
+extension SkillsHarnessWebSocketController on SkillsHarnessController {
+  Future<WebSocketChannel?> openHarnessChannel(String token) async {
+    await _wsSub?.cancel();
     await _ws?.sink.close();
-
     try {
       final uri = rustWebSocketUri(kApiBaseUrl, accessToken: token);
       final channel = WebSocketChannel.connect(uri);
       _ws = channel;
       _wsSub = channel.stream.listen(
-        (message) => _appendWsLog(message.toString()),
+        (message) => appendWsLog(message.toString()),
         onError: (Object e) {
-          if (mounted) {
-            setState(() {
-              _error = 'ws: $e';
-              _resetWsBusyFlags();
-              _resetWorkspaceWsOperationFlags();
-            });
-          }
+          _setError('ws: $e');
+          resetWsBusyFlags();
+          _onWsLifecycleSettled();
+          _publish();
         },
         onDone: () {
-          if (mounted) {
-            setState(() {
-              _resetWsBusyFlags();
-              _resetWorkspaceWsOperationFlags();
-            });
-          }
+          resetWsBusyFlags();
+          _onWsLifecycleSettled();
+          _publish();
         },
       );
       return channel;
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _resetWsBusyFlags();
-        });
-      }
+      _setError(e.toString());
+      resetWsBusyFlags();
+      _publish();
       return null;
     }
   }
 
-  Future<void> _testWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWs = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWs = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final channel = await _openHarnessChannel(token);
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(
@@ -81,17 +59,16 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
     );
   }
 
-  Future<void> _testHarnessToolWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testHarnessToolWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWsHarness = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWsHarness = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final channel = await _openHarnessChannel(token);
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(
@@ -110,17 +87,16 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
     );
   }
 
-  Future<void> _testHarnessIsolatedEchoWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testHarnessIsolatedEchoWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWsIsolatedEcho = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWsIsolatedEcho = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final channel = await _openHarnessChannel(token);
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(
@@ -139,20 +115,19 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
     );
   }
 
-  Future<void> _testHarnessSkillsReadWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testHarnessSkillsReadWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWsSkillsRead = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWsSkillsRead = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final path = _skillPathCtrl.text.trim().isEmpty
+    final path = skillPathController.text.trim().isEmpty
         ? 'script_execution_script.md'
-        : _skillPathCtrl.text.trim();
-    final channel = await _openHarnessChannel(token);
+        : skillPathController.text.trim();
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(
@@ -167,17 +142,16 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
     );
   }
 
-  Future<void> _testHarnessWasmProbeWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testHarnessWasmProbeWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWsWasmProbe = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWsWasmProbe = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final channel = await _openHarnessChannel(token);
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(
@@ -189,17 +163,16 @@ extension _HomePageSkillsHarnessWebSocket on _HomePageState {
     );
   }
 
-  Future<void> _testHarnessAgentRunWebSocket() async {
-    final token = _session?.accessToken;
+  Future<void> testHarnessAgentRunWebSocket() async {
+    final token = _accessToken;
     if (token == null) return;
 
-    setState(() {
-      _loadingWsHarnessAgent = true;
-      _wsLog.clear();
-      _error = null;
-    });
+    loadingWsHarnessAgent = true;
+    wsLog.clear();
+    _setError(null);
+    _publish();
 
-    final channel = await _openHarnessChannel(token);
+    final channel = await openHarnessChannel(token);
     if (channel == null) return;
 
     channel.sink.add(

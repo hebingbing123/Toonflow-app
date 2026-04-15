@@ -1,21 +1,19 @@
-// ignore_for_file: invalid_use_of_protected_member
+part of 'controller.dart';
 
-part of '../../home_page.dart';
-
-extension _HomePageSkillsHarnessFiles on _HomePageState {
-  Future<void> _previewSkillFile() async {
-    final token = _session?.accessToken;
+extension SkillsHarnessFileController on SkillsHarnessController {
+  Future<void> previewSkillFile(BuildContext context) async {
+    final token = _accessToken;
     if (token == null) return;
-    final path = _skillPathCtrl.text.trim();
+    final path = skillPathController.text.trim();
     if (path.isEmpty) return;
-    setState(() {
-      _loadingSkillPreview = true;
-      _error = null;
-    });
+    loadingSkillPreview = true;
+    _setError(null);
+    _publish();
     try {
       final r = await fetchSkillContent(token, path);
-      if (!mounted) return;
-      setState(() => _loadingSkillPreview = false);
+      loadingSkillPreview = false;
+      _publish();
+      if (!context.mounted) return;
       final text = r.content.length > 12000
           ? '${r.content.substring(0, 12000)}…\n\n(truncated)'
           : r.content;
@@ -38,115 +36,98 @@ extension _HomePageSkillsHarnessFiles on _HomePageState {
         ),
       );
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPreview = false;
-      });
+      _setError(e.toString());
+      loadingSkillPreview = false;
+      _publish();
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPreview = false;
-      });
+      _setError(e.toString());
+      loadingSkillPreview = false;
+      _publish();
     }
   }
 
-  Future<void> _putSkillProbe() async {
-    final token = _session?.accessToken;
+  Future<void> putSkillProbe() async {
+    final token = _accessToken;
     if (token == null) return;
-    final path = _skillPathCtrl.text.trim();
+    final path = skillPathController.text.trim();
     if (path.isEmpty) return;
-    setState(() {
-      _loadingSkillPut = true;
-      _error = null;
-      _skillMutationLine = null;
-    });
+    loadingSkillPut = true;
+    _setError(null);
+    skillMutationLine = null;
+    _publish();
     try {
-      final r = await saveSkillContent(token, path, _skillContentCtrl.text);
-      if (!mounted) return;
-      setState(() {
-        _loadingSkillPut = false;
-        _skillMutationLine =
-            'PUT 200: ${r.path} (${r.content.length} chars written)';
-      });
+      final r = await saveSkillContent(
+        token,
+        path,
+        skillContentController.text,
+      );
+      loadingSkillPut = false;
+      skillMutationLine =
+          'PUT 200: ${r.path} (${r.content.length} chars written)';
+      _publish();
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPut = false;
-      });
+      _setError(e.toString());
+      loadingSkillPut = false;
+      _publish();
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPut = false;
-      });
+      _setError(e.toString());
+      loadingSkillPut = false;
+      _publish();
     }
   }
 
-  Future<void> _postSkillProbe() async {
-    final token = _session?.accessToken;
+  Future<void> postSkillProbe() async {
+    final token = _accessToken;
     if (token == null) return;
-    final path = _skillPathCtrl.text.trim();
+    final path = skillPathController.text.trim();
     if (path.isEmpty) return;
-    setState(() {
-      _loadingSkillPost = true;
-      _error = null;
-      _skillMutationLine = null;
-    });
+    loadingSkillPost = true;
+    _setError(null);
+    skillMutationLine = null;
+    _publish();
     try {
-      final r = await createSkillContent(token, path, _skillContentCtrl.text);
-      if (!mounted) return;
-      setState(() {
-        _loadingSkillPost = false;
-        _skillMutationLine =
-            'POST 201: ${r.path} (${r.content.length} chars written)';
-      });
+      final r = await createSkillContent(
+        token,
+        path,
+        skillContentController.text,
+      );
+      loadingSkillPost = false;
+      skillMutationLine =
+          'POST 201: ${r.path} (${r.content.length} chars written)';
+      _publish();
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPost = false;
-      });
+      _setError(e.toString());
+      loadingSkillPost = false;
+      _publish();
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillPost = false;
-      });
+      _setError(e.toString());
+      loadingSkillPost = false;
+      _publish();
     }
   }
 
-  Future<void> _deleteSkillProbe() async {
-    final token = _session?.accessToken;
+  Future<void> deleteSkillProbe() async {
+    final token = _accessToken;
     if (token == null) return;
-    final path = _skillPathCtrl.text.trim();
+    final path = skillPathController.text.trim();
     if (path.isEmpty) return;
-    setState(() {
-      _loadingSkillDelete = true;
-      _error = null;
-      _skillMutationLine = null;
-    });
+    loadingSkillDelete = true;
+    _setError(null);
+    skillMutationLine = null;
+    _publish();
     try {
       await deleteSkillContent(token, path);
-      if (!mounted) return;
-      setState(() {
-        _loadingSkillDelete = false;
-        _skillMutationLine = 'DELETE 204: $path';
-      });
+      loadingSkillDelete = false;
+      skillMutationLine = 'DELETE 204: $path';
+      _publish();
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillDelete = false;
-      });
+      _setError(e.toString());
+      loadingSkillDelete = false;
+      _publish();
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingSkillDelete = false;
-      });
+      _setError(e.toString());
+      loadingSkillDelete = false;
+      _publish();
     }
   }
 }
