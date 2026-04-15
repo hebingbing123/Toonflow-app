@@ -7,8 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
-import 'home_page/project_editor/novels/support.dart';
 import 'home_page/project_editor/novels/events/section_builder.dart';
+import 'home_page/project_editor/novels/workbench_section_builder.dart';
 import 'home_page/project_editor/assets/generation/section_launcher.dart';
 import 'home_page/project_editor/assets/images/workbench_launcher.dart';
 import 'home_page/project_editor/assets/overview.dart';
