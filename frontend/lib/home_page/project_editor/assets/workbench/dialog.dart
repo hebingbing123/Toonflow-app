@@ -128,11 +128,11 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
           ),
       onOpenHistoryWorkbench:
           (dialogCtx, preferredAssetNumericId) =>
-              _openCornerScapeWorkbenchDialog(
+              openCornerScapeWorkbenchDialog(
         ctx: dialogCtx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         assetsBusy: assetsBusy,
         preferredAssetNumericId: preferredAssetNumericId,
       ),
