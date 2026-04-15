@@ -1,5 +1,3 @@
-part of '../../production.dart';
-
 /// OpenAPI **`ImageFlowStep`**.
 class ImageFlowStepV1 {
   const ImageFlowStepV1({
