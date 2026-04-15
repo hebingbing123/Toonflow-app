@@ -43,7 +43,6 @@ part 'home_page/project_editor/assets/compatibility/images_workbench_actions.dar
 part 'home_page/project_editor/assets/compatibility/crud_primary.dart';
 part 'home_page/project_editor/assets/compatibility/crud_query.dart';
 part 'home_page/project_editor/assets/compatibility/relations.dart';
-part 'home_page/project_editor/assets/generation/section.dart';
 part 'home_page/project_editor/assets/images/workbench.dart';
 part 'home_page/project_editor/assets/workbench/dialog.dart';
 part 'home_page/project_editor/novels/compatibility/actions.dart';

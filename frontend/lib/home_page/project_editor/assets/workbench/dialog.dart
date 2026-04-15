@@ -113,11 +113,11 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
       ),
       onOpenGenerationWorkbench:
           (dialogCtx, preferredAssetNumericId) =>
-          _openAssetGenerationWorkbenchDialog(
+          openAssetGenerationWorkbenchDialog(
             ctx: dialogCtx,
             setDialogState: setDialogState,
             token: token,
-            p: p,
+            project: p,
             scriptList: scriptList,
             assetsRef: assetsRef,
             assetsForScriptRef: assetsForScriptRef,
