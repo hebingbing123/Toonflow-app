@@ -83,10 +83,7 @@ pub(crate) async fn get_memory_config(
     headers: HeaderMap,
 ) -> Result<Json<MemoryConfig>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let defaults = state.memory_config.read().await.clone();
     let cfg = load_memory_config(pool, uid, defaults).await?;
     Ok(Json(cfg))
@@ -112,10 +109,7 @@ pub(crate) async fn post_memory_config(
     Json(body): Json<MemoryConfig>,
 ) -> Result<Json<MemoryConfigSavedResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     save_memory_config(pool, uid, &body).await?;
     Ok(Json(MemoryConfigSavedResponse {
         message: "保存设置成功",
@@ -151,10 +145,7 @@ pub(crate) async fn post_clear_agent_memories_type_field_alias(
     Json(body): Json<ClearAgentMemoriesSettingsBody>,
 ) -> Result<Json<ClearMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let agent_type = agent_memory::parse_agent_type(&body.agent_type)?;
     agent_memory::ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "clear");

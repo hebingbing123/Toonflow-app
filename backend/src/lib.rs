@@ -15,7 +15,6 @@ pub mod manuals;
 pub mod metering;
 pub mod narrative;
 pub mod production;
-pub mod production_flow;
 pub mod projects;
 pub mod prompting;
 pub mod scope;

@@ -42,10 +42,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
         ));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
         .await

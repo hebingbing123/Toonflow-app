@@ -1,6 +1,6 @@
 //! 用户归属下的项目 / 剧本解析，供 **HTTP 与 Harness** 共用（见 `docs/plans/backend-domain-layer-review.md` §4.1）。
 //!
-//! 与 [`crate::production_flow::resolve_owned_production_scope`] 的关系：后者额外返回 `script_content`；
+//! 与 [`crate::production::flow_data::resolve_owned_production_scope`] 的关系：后者额外返回 `script_content`；
 //! 本模块解析 **UUID 级的 `project_id` / `script_id`**；REST 常见 **`project_id` = `app_project.id`** 时用
 //! [`owned_script_in_project`]，Electron 风格 **numeric project id** 时用 [`owned_script_scope`]；
 //! 分镜按 **numeric_id** 落在项目下时用 [`owned_storyboard_in_project`]；

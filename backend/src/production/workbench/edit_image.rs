@@ -301,11 +301,8 @@ pub(in crate::production) async fn post_edit_image_upload_image(
     }
     let normalized = normalize_upload_image_data_uri(&body.base64_data)?;
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    crate::production_flow::resolve_owned_production_scope(
+    let pool = state.require_pool()?;
+    crate::production::flow_data::resolve_owned_production_scope(
         pool,
         uid,
         body.project_id,
@@ -373,12 +370,9 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
-    crate::production_flow::resolve_owned_production_scope(
+    crate::production::flow_data::resolve_owned_production_scope(
         pool,
         uid,
         body.project_id,

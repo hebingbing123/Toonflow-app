@@ -1,16 +1,8 @@
-//! 项目 REST 路由（`POST /api/v1/projects/*`）。
-//!
-//! 项目 CRUD 和遗留项目端点的处理器。
-
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
-    routing::get,
-    Json, Router,
+    Json,
 };
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
@@ -18,167 +10,19 @@ use crate::error::ApiError;
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
-#[derive(Debug, FromRow, Serialize)]
-pub struct ProjectRow {
-    pub id: Uuid,
-    #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "numeric_id")]
-    pub numeric_id: i32,
-    pub name: Option<String>,
-    pub intro: Option<String>,
-    pub project_type: Option<String>,
-    pub image_model: Option<String>,
-    pub image_quality: Option<String>,
-    pub video_model: Option<String>,
-    pub art_style: Option<String>,
-    pub director_manual: Option<String>,
-    pub mode: Option<String>,
-    pub video_ratio: Option<String>,
-    pub create_time_ms: Option<i64>,
-}
+use super::common::{merge_text_patch, trim_opt, ADV_LOCK_PROJECT_NUMERIC_ID};
+use super::types::{
+    CreateProjectBody, ListProjectsQuery, PatchProjectBody, ProjectDetailResponse, ProjectRow,
+    ProjectStatsResponse, ProjectsSummaryResponse, ScriptBrief,
+};
 
-#[derive(Debug, FromRow, Serialize)]
-struct ScriptBrief {
-    #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "numeric_id")]
-    numeric_id: i32,
-    name: Option<String>,
-    extract_state: Option<i32>,
-}
-
-#[derive(Serialize)]
-struct ProjectDetailResponse {
-    project: ProjectRow,
-    scripts: Vec<ScriptBrief>,
-}
-
-/// Per-project counts for dashboards; aligns with Electron-era **`generalStatistics`** shape.
-/// **`role_count`** counts **`app_asset`** rows with **`asset_type = 'role'`**; **`novel_count`** counts **`app_novel`** rows; **`video_count`** remains **`0`** until video rows exist in Postgres.
-#[derive(Serialize)]
-struct ProjectStatsResponse {
-    script_count: i64,
-    storyboard_count: i64,
-    role_count: i64,
-    novel_count: i64,
-    video_count: i64,
-}
-
-/// Aggregate counts for **`owner_user_id = JWT sub`** across all owned projects (single query).
-#[derive(Serialize)]
-struct ProjectsSummaryResponse {
-    project_count: i64,
-    script_count: i64,
-    storyboard_count: i64,
-    novel_count: i64,
-    /// Same rule as per-project **`GET …/stats`**: **`app_asset`** with **`asset_type = 'role'`**.
-    role_count: i64,
-    art_style_count: i64,
-    asset_count: i64,
-    /// Same as per-project **`GET …/stats`**: **`0`** until video rows exist in Postgres.
-    video_count: i64,
-}
-
-#[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-struct PatchProjectBody {
-    #[serde(default)]
-    name: Option<Value>,
-    #[serde(default)]
-    intro: Option<Value>,
-    #[serde(default)]
-    project_type: Option<Value>,
-    #[serde(default)]
-    image_model: Option<Value>,
-    #[serde(default)]
-    image_quality: Option<Value>,
-    #[serde(default)]
-    video_model: Option<Value>,
-    #[serde(default)]
-    art_style: Option<Value>,
-    #[serde(default)]
-    director_manual: Option<Value>,
-    #[serde(default)]
-    mode: Option<Value>,
-    #[serde(default)]
-    video_ratio: Option<Value>,
-}
-
-/// JSON body for `POST /api/v1/projects` (snake_case; all fields optional).
-#[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-struct CreateProjectBody {
-    #[serde(default)]
-    name: Option<String>,
-    #[serde(default)]
-    intro: Option<String>,
-    #[serde(default)]
-    project_type: Option<String>,
-    #[serde(default)]
-    image_model: Option<String>,
-    #[serde(default)]
-    image_quality: Option<String>,
-    #[serde(default)]
-    video_model: Option<String>,
-    #[serde(default)]
-    art_style: Option<String>,
-    #[serde(default)]
-    director_manual: Option<String>,
-    #[serde(default)]
-    mode: Option<String>,
-    #[serde(default)]
-    video_ratio: Option<String>,
-}
-
-/// Stable key for `pg_advisory_xact_lock` when allocating `app_project.numeric_id` (global uniqueness).
-const ADV_LOCK_PROJECT_NUMERIC_ID: i64 = 884_422_001;
-
-fn trim_opt(s: Option<String>) -> Option<String> {
-    s.and_then(|v| {
-        let t = v.trim();
-        if t.is_empty() {
-            None
-        } else {
-            Some(t.to_owned())
-        }
-    })
-}
-
-pub fn router() -> Router<AppState> {
-    Router::new()
-        .route("/api/v1/projects/summary", get(projects_summary))
-        .route("/api/v1/projects", get(list_projects).post(create_project))
-        .route(
-            "/api/v1/projects/{project_id}/stats",
-            get(project_stats_by_id),
-        )
-        .route(
-            "/api/v1/projects/{project_id}",
-            get(get_project_by_id)
-                .patch(patch_project_by_id)
-                .delete(delete_project_by_id),
-        )
-}
-
-/// Query parameters for `GET /api/v1/projects` pagination.
-#[derive(Debug, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-struct ListProjectsQuery {
-    #[serde(default)]
-    limit: Option<i64>,
-    #[serde(default)]
-    offset: Option<i64>,
-}
-
-async fn create_project(
+pub(super) async fn create_project(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<CreateProjectBody>,
 ) -> Result<(StatusCode, Json<ProjectRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let mut tx = pool
         .begin()
@@ -240,16 +84,13 @@ async fn create_project(
     Ok((StatusCode::CREATED, Json(row)))
 }
 
-async fn list_projects(
+pub(super) async fn list_projects(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(query): Query<ListProjectsQuery>,
 ) -> Result<Json<Vec<ProjectRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let limit = query.limit.unwrap_or(20).clamp(1, 100);
     let offset = query.offset.unwrap_or(0).max(0);
@@ -274,15 +115,12 @@ async fn list_projects(
     Ok(Json(rows))
 }
 
-async fn projects_summary(
+pub(super) async fn projects_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<ProjectsSummaryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let row: (i64, i64, i64, i64, i64, i64, i64) = sqlx::query_as(
         r#"
@@ -317,7 +155,6 @@ async fn projects_summary(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    // Count succeeded video jobs across all user projects.
     let video_count: i64 = sqlx::query_scalar(
         r#"
         SELECT COUNT(*)::bigint
@@ -344,16 +181,13 @@ async fn projects_summary(
     }))
 }
 
-async fn get_project_by_id(
+pub(super) async fn get_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<ProjectDetailResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
@@ -387,16 +221,13 @@ async fn get_project_by_id(
     Ok(Json(ProjectDetailResponse { project, scripts }))
 }
 
-async fn project_stats_by_id(
+pub(super) async fn project_stats_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<ProjectStatsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let row: Option<(Uuid,)> = sqlx::query_as(
         r#"
@@ -489,17 +320,14 @@ async fn project_stats_by_id(
     }))
 }
 
-async fn patch_project_by_id(
+pub(super) async fn patch_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<PatchProjectBody>,
 ) -> Result<Json<ProjectRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let intro_patch = parse_optional_text_field(body.intro, "intro")?;
@@ -589,16 +417,13 @@ async fn patch_project_by_id(
     Ok(Json(row))
 }
 
-async fn delete_project_by_id(
+pub(super) async fn delete_project_by_id(
     State(state): State<AppState>,
     Path(project_id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let mut tx = pool
         .begin()
@@ -664,16 +489,9 @@ async fn delete_project_by_id(
     Ok(StatusCode::NO_CONTENT)
 }
 
-fn merge_text_patch(current: &Option<String>, patch: FieldPatch<String>) -> Option<String> {
-    match patch {
-        FieldPatch::Absent => current.clone(),
-        FieldPatch::Set(v) => v,
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::super::types::{CreateProjectBody, PatchProjectBody};
 
     #[test]
     fn patch_project_body_rejects_unknown_fields() {

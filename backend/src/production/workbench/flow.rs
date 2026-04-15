@@ -13,7 +13,9 @@ use serde_json::{Map, Value};
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::production_flow::{load_owned_production_flow_json, resolve_owned_production_scope};
+use crate::production::flow_data::{
+    load_owned_production_flow_json, resolve_owned_production_scope,
+};
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -67,10 +69,7 @@ pub(crate) async fn post_get_flow_data(
         ));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let flow =
         load_owned_production_flow_json(pool, uid, body.project_id, body.episodes_id).await?;
     Ok(JsonResponse(flow))

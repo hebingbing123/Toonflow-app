@@ -11,6 +11,7 @@ use std::sync::Arc;
 use sqlx::PgPool;
 use tokio::sync::RwLock;
 
+use crate::error::ApiError;
 use crate::llm::LlmConfig;
 
 pub use memory_config::MemoryConfig;
@@ -39,5 +40,11 @@ pub struct AppState {
 impl AppState {
     pub async fn from_env() -> Result<Self, sqlx::Error> {
         from_env::load().await
+    }
+
+    pub fn require_pool(&self) -> Result<&PgPool, ApiError> {
+        self.pool
+            .as_ref()
+            .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))
     }
 }

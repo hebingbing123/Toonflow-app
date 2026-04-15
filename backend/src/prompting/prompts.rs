@@ -122,10 +122,7 @@ pub(crate) async fn list_prompts(
     headers: HeaderMap,
 ) -> Result<Json<Vec<PromptTemplateJson>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let rows: Vec<UserPromptRow> = sqlx::query_as(
         r#"
@@ -172,10 +169,7 @@ pub(crate) async fn get_prompt(
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let def = slot_by_numeric_id(numeric_id).ok_or(ApiError::NotFound)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let row: Option<UserPromptRow> = sqlx::query_as(
         r#"
@@ -219,10 +213,7 @@ pub(crate) async fn patch_prompt(
 ) -> Result<Json<PromptTemplateJson>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let def = slot_by_numeric_id(numeric_id).ok_or(ApiError::NotFound)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     sqlx::query(
         r#"

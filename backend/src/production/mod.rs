@@ -10,6 +10,7 @@ use sqlx::FromRow;
 
 use crate::state::AppState;
 
+pub(crate) mod flow_data;
 mod openapi;
 mod workbench;
 

@@ -47,7 +47,7 @@ pub(super) async fn invoke_get_flow_data(
     let project_numeric_id = project_numeric_from_ctx(ctx)?;
     let script_numeric_id = script_numeric_id_from_args_or_ctx(ctx, arguments)?;
 
-    let flow = crate::production_flow::load_owned_production_flow_json(
+    let flow = crate::production::flow_data::load_owned_production_flow_json(
         pool,
         ctx.user_id,
         project_numeric_id,
