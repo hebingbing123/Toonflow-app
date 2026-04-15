@@ -42,14 +42,11 @@ part 'project/manuals_director.dart';
 part 'project/manuals_visual.dart';
 part 'project/rest.dart';
 part 'project/compat.dart';
-part 'scripts/api.dart';
-part 'scripts/storyboards_models.dart';
 part 'settings/about_danger.dart';
 part 'settings/agent_deploy.dart';
 part 'settings/memory_config_api.dart';
 part 'settings/vendor_credentials.dart';
 part 'settings/vendors_mutations.dart';
-part 'scripts/storyboards_api.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

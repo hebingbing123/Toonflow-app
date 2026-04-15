@@ -1,4 +1,11 @@
-part of '../index.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'storyboards_models.dart';
 
 /// Script CRUD, export, and extraction endpoints.
 /// `POST /api/v1/projects/{project_id}/scripts/get-script-api` — script list + **`relatedAssets`**.

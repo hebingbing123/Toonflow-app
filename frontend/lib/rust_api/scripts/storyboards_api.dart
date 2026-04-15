@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'storyboards_models.dart';
 
 /// Storyboard CRUD endpoints scoped under project scripts.
 /// `GET /api/v1/projects/{project_id}/scripts/{script_numeric_id}/storyboards`.
