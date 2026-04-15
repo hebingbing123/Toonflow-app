@@ -29,6 +29,7 @@ import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
 import 'jobs/controller.dart';
+import 'projects/controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
@@ -58,7 +59,6 @@ part 'project_editor/assets/dialogs/delete.dart';
 part 'project_editor/assets/dialogs/filter.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
-part 'projects/controller.dart';
 part 'task_center/controller.dart';
 part 'agent_workspaces/controller/constants.dart';
 part 'agent_workspaces/controller/utils.dart';
@@ -144,7 +144,6 @@ class _HomePageState extends State<HomePage> {
   String? _modelsCatalogBody;
   String? _textModelDefaultBody;
   String? _modelDetailBody;
-  String? _agentMemoryBody;
   String? _error;
   bool _loadingHealth = false;
   bool _loadingHealthRoot = false;
@@ -163,7 +162,6 @@ class _HomePageState extends State<HomePage> {
   bool _loadingModelsCatalog = false;
   bool _loadingTextModelDefault = false;
   bool _loadingModelDetail = false;
-  bool _loadingAgentMemory = false;
   bool _loadingWs = false;
   bool _loadingWsHarness = false;
   bool _loadingWsIsolatedEcho = false;
@@ -209,14 +207,10 @@ class _HomePageState extends State<HomePage> {
     text: 'run_sub_agent_director_plan',
   );
 
-  bool _loadingProjects = false;
-  bool _loadingProjectsSummary = false;
-  bool _loadingArtStyles = false;
-  bool _creatingProject = false;
-  List<ProjectRow>? _projects;
-  List<ArtStyleRow>? _artStyles;
-  String? _projectsSummaryLine;
-  String? _artStylesLine;
+  late final ProjectsController _projectsController = ProjectsController(
+    accessTokenProvider: () => _session?.accessToken,
+    onErrorChanged: _setSharedError,
+  );
 
   late final JobsController _jobsController = JobsController(
     accessTokenProvider: () => _session?.accessToken,
@@ -291,6 +285,7 @@ class _HomePageState extends State<HomePage> {
     _ws?.sink.close();
     _email.dispose();
     _password.dispose();
+    _projectsController.dispose();
     _jobsController.dispose();
     _taskDetailJobIdCtrl.dispose();
     _qualityReviewIdCtrl.dispose();

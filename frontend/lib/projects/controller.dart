@@ -1,56 +1,93 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'package:flutter/material.dart';
 
-part of '../../home_page.dart';
+import '../../rust_api.dart';
 
-extension _HomePageProjectsController on _HomePageState {
-  Future<void> _createEmptyProject() async {
-    final token = _session?.accessToken;
-    if (token == null) return;
-    setState(() {
-      _creatingProject = true;
-      _error = null;
-    });
-    try {
-      await createProject(token);
-      if (!mounted) return;
-      await _loadProjects();
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已创建项目')));
-    } on RustApiException catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _creatingProject = false);
-    }
+typedef ProjectsAccessTokenProvider = String? Function();
+typedef ProjectsErrorSink = void Function(String? error);
+
+class ProjectsController extends ChangeNotifier {
+  ProjectsController({
+    required ProjectsAccessTokenProvider accessTokenProvider,
+    required ProjectsErrorSink onErrorChanged,
+  }) : _accessTokenProvider = accessTokenProvider,
+       _onErrorChanged = onErrorChanged;
+
+  final ProjectsAccessTokenProvider _accessTokenProvider;
+  final ProjectsErrorSink _onErrorChanged;
+
+  bool loadingProjects = false;
+  bool loadingProjectsSummary = false;
+  bool loadingArtStyles = false;
+  bool creatingProject = false;
+  bool loadingAgentMemory = false;
+  List<ProjectRow>? projects;
+  List<ArtStyleRow>? artStyles;
+  String? projectsSummaryLine;
+  String? artStylesLine;
+  String? agentMemoryBody;
+
+  String? get _accessToken => _accessTokenProvider();
+
+  void _setError(String? error) {
+    _onErrorChanged(error);
   }
 
-  Future<void> _probeAgentMemory() async {
-    final token = _session?.accessToken;
+  void reset() {
+    loadingProjects = false;
+    loadingProjectsSummary = false;
+    loadingArtStyles = false;
+    creatingProject = false;
+    loadingAgentMemory = false;
+    projects = null;
+    artStyles = null;
+    projectsSummaryLine = null;
+    artStylesLine = null;
+    agentMemoryBody = null;
+    notifyListeners();
+  }
+
+  Future<bool> createEmptyProject() async {
+    final token = _accessToken;
+    if (token == null) return false;
+    creatingProject = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      await createProject(token);
+      await loadProjects();
+      return true;
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      creatingProject = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  Future<void> probeAgentMemory() async {
+    final token = _accessToken;
     if (token == null) return;
-    final projects = _projects;
-    if (projects == null || projects.isEmpty) {
-      setState(
-        () => _error =
-            'Load projects first (agent memory needs a project numeric ID).',
+    final currentProjects = projects;
+    if (currentProjects == null || currentProjects.isEmpty) {
+      _setError(
+        'Load projects first (agent memory needs a project numeric ID).',
       );
       return;
     }
-    final numericId = projects.first.numericId;
-    setState(() {
-      _loadingAgentMemory = true;
-      _error = null;
-      _agentMemoryBody = null;
-    });
+    final numericId = currentProjects.first.numericId;
+    loadingAgentMemory = true;
+    agentMemoryBody = null;
+    _setError(null);
+    notifyListeners();
     try {
       final rows = await queryAgentMemory(
         token,
         projectId: numericId,
         agentType: 'scriptAgent',
       );
-      if (!mounted) return;
       var appendBit = '';
       try {
         final id = await appendAgentMemory(
@@ -64,101 +101,70 @@ extension _HomePageProjectsController on _HomePageState {
       } on RustApiException catch (e) {
         appendBit = ' · append -> ${e.statusCode}';
       }
-      setState(() {
-        _agentMemoryBody =
-            '${rows.length} message(s) for project $numericId$appendBit';
-        _loadingAgentMemory = false;
-      });
+      agentMemoryBody =
+          '${rows.length} message(s) for project $numericId$appendBit';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingAgentMemory = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingAgentMemory = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingAgentMemory = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _loadProjects() async {
-    final token = _session?.accessToken;
+  Future<void> loadProjects() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingProjects = true;
-      _error = null;
-      _projects = null;
-    });
+    loadingProjects = true;
+    projects = null;
+    _setError(null);
+    notifyListeners();
     try {
-      final list = await fetchProjects(token);
-      if (!mounted) return;
-      setState(() {
-        _projects = list;
-        _loadingProjects = false;
-      });
+      projects = await fetchProjects(token);
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingProjects = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingProjects = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingProjects = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _loadProjectsSummary() async {
-    final token = _session?.accessToken;
+  Future<void> loadProjectsSummary() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingProjectsSummary = true;
-      _error = null;
-      _projectsSummaryLine = null;
-    });
+    loadingProjectsSummary = true;
+    projectsSummaryLine = null;
+    _setError(null);
+    notifyListeners();
     try {
-      final s = await fetchProjectsSummary(token);
-      if (!mounted) return;
-      setState(() {
-        _projectsSummaryLine =
-            'projects=${s.projectCount} scripts=${s.scriptCount} storyboards=${s.storyboardCount} novels=${s.novelCount} roles=${s.roleCount} art_styles=${s.artStyleCount} assets=${s.assetCount} videos=${s.videoCount}';
-        _loadingProjectsSummary = false;
-      });
+      final summary = await fetchProjectsSummary(token);
+      projectsSummaryLine =
+          'projects=${summary.projectCount} scripts=${summary.scriptCount} storyboards=${summary.storyboardCount} novels=${summary.novelCount} roles=${summary.roleCount} art_styles=${summary.artStyleCount} assets=${summary.assetCount} videos=${summary.videoCount}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingProjectsSummary = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingProjectsSummary = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingProjectsSummary = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _loadArtStyles() async {
-    final token = _session?.accessToken;
+  Future<void> loadArtStyles() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _loadingArtStyles = true;
-      _error = null;
-      _artStyles = null;
-      _artStylesLine = null;
-    });
+    loadingArtStyles = true;
+    artStyles = null;
+    artStylesLine = null;
+    _setError(null);
+    notifyListeners();
     try {
-      final r = await fetchArtStyles(token);
-      if (!mounted) return;
+      final response = await fetchArtStyles(token);
       var line =
-          'total=${r.total} · ${r.items.take(5).map((s) => '#${s.numericId}:${s.name}').join(', ')}${r.items.length > 5 ? '…' : ''}';
+          'total=${response.total} · ${response.items.take(5).map((style) => '#${style.numericId}:${style.name}').join(', ')}${response.items.length > 5 ? '…' : ''}';
       try {
         final probeName =
             '[flutter probe art-style] ${DateTime.now().toIso8601String()}';
@@ -174,23 +180,15 @@ extension _HomePageProjectsController on _HomePageState {
       } on RustApiException catch (e) {
         line += ' · crud -> ${e.statusCode}';
       }
-      setState(() {
-        _artStyles = r.items;
-        _artStylesLine = line;
-        _loadingArtStyles = false;
-      });
+      artStyles = response.items;
+      artStylesLine = line;
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingArtStyles = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingArtStyles = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingArtStyles = false;
+      notifyListeners();
     }
   }
 }

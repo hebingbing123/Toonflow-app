@@ -231,22 +231,8 @@ extension _HomePageBuildSections on _HomePageState {
     if (_productWorkspacePane == _ProductWorkspacePane.projects)
       ProjectsSection(
         accessToken: _session?.accessToken,
-        loadingProjects: _loadingProjects,
-        loadingProjectsSummary: _loadingProjectsSummary,
-        loadingArtStyles: _loadingArtStyles,
-        creatingProject: _creatingProject,
-        loadingAgentMemory: _loadingAgentMemory,
-        projects: _projects,
-        artStyles: _artStyles,
-        projectsSummaryLine: _projectsSummaryLine,
-        artStylesLine: _artStylesLine,
-        agentMemoryBody: _agentMemoryBody,
-        onLoadProjects: _loadProjects,
-        onLoadProjectsSummary: _loadProjectsSummary,
-        onLoadArtStyles: _loadArtStyles,
-        onCreateEmptyProject: _createEmptyProject,
+        controller: _projectsController,
         onOpenProjectDetail: _openProjectDetail,
-        onProbeAgentMemory: _probeAgentMemory,
       ),
     if (_productWorkspacePane == _ProductWorkspacePane.scriptWorkspace)
       _buildAgentWorkspacePane(

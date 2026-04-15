@@ -762,7 +762,7 @@ extension _HomePageProjectEditorDialog on _HomePageState {
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   if (!mounted) return;
-                  await _loadProjects();
+                  await _projectsController.loadProjects();
                   if (!mounted) return;
                   ScaffoldMessenger.of(
                     context,
@@ -798,7 +798,7 @@ extension _HomePageProjectEditorDialog on _HomePageState {
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   if (!mounted) return;
-                  await _loadProjects();
+                  await _projectsController.loadProjects();
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);

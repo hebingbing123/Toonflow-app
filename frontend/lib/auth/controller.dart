@@ -39,8 +39,6 @@ extension _HomePageAuthSessionController on _HomePageState {
     _wsSub = null;
     setState(() {
       _wsLog.clear();
-      _projects = null;
-      _creatingProject = false;
       _taskProjects = null;
       _taskApiJobs = null;
       _taskCategoriesLine = null;
@@ -48,13 +46,13 @@ extension _HomePageAuthSessionController on _HomePageState {
       _taskDetailNumericIdLine = null;
       _taskDetailUuidLine = null;
       _usageSummaryBody = null;
-      _agentMemoryBody = null;
       _versionBody = null;
       _readyBody = null;
       _harnessToolsLine = null;
       _skillsAggregateLine = null;
       _skillsListSummary = null;
     });
+    _projectsController.reset();
     _jobsController.reset();
   }
 }
