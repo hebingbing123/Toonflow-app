@@ -14,56 +14,18 @@ extension _HomePageProjectEditorAssetsGenerationWorkbench on _HomePageState {
     required Future<void> Function() reloadAssetsAndStats,
     int? preferredAssetNumericId,
   }) async {
-    List<AssetRow> visibleAssets() {
-      final filtered = assetsFilterScriptNumericId[0] == null
-          ? null
-          : assetsForScriptRef[0];
-      return (filtered ?? assetsRef[0])?.items ?? const <AssetRow>[];
-    }
-
-    final seededAssets = visibleAssets();
-    if (seededAssets.isEmpty) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('请先加载资产列表再打开出图工作台')));
-      return;
-    }
-    if (scriptList.isEmpty) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('请先创建剧本再发起资产出图')));
-      return;
-    }
-
-    final initialFocusedAssetNumericId = chooseInitialAssetNumericId(
-      seededAssets,
-      preferredNumericId: preferredAssetNumericId,
-    );
-    final initialSelectedIds = chooseVisibleAssetSelection(
-      seededAssets,
-      preferredNumericId: initialFocusedAssetNumericId,
-    );
-
-    await showDialog<void>(
-      context: ctx,
-      builder: (dialogCtx) {
-        return AssetGenerationWorkbenchDialog(
-          token: token,
-          project: p,
-          scriptList: scriptList,
-          visibleAssets: visibleAssets,
-          assetsFilterScriptNumericId: assetsFilterScriptNumericId,
-          initialSelectedIds: initialSelectedIds,
-          initialFocusedAssetNumericId: initialFocusedAssetNumericId,
-          initialScriptNumericId:
-              assetsFilterScriptNumericId[0] ?? scriptList.first.numericId,
-          onMutationStart: () => setDialogState(() => assetsBusy[0] = true),
-          onMutationEnd: () {
-            if (ctx.mounted) setDialogState(() => assetsBusy[0] = false);
-          },
-          reloadAssetsAndStats: reloadAssetsAndStats,
-        );
-      },
+    await openAssetGenerationWorkbenchDialog(
+      ctx: ctx,
+      setDialogState: setDialogState,
+      token: token,
+      project: p,
+      scriptList: scriptList,
+      assetsRef: assetsRef,
+      assetsForScriptRef: assetsForScriptRef,
+      assetsFilterScriptNumericId: assetsFilterScriptNumericId,
+      assetsBusy: assetsBusy,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+      preferredAssetNumericId: preferredAssetNumericId,
     );
   }
 }
