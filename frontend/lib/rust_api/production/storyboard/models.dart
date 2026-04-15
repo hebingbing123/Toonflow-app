@@ -1,5 +1,3 @@
-part of '../../production.dart';
-
 /// OpenAPI **`ProductionStoryboardItem`**.
 class ProductionStoryboardItemV1 {
   const ProductionStoryboardItemV1({

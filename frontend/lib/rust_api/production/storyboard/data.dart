@@ -1,4 +1,10 @@
-part of '../../production.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../config.dart';
+import '../../core.dart';
+import 'models.dart';
 
 /// `POST /api/v1/production/storyboard/add` — OpenAPI `postStoryboardAddV1`.
 Future<StoryboardAddResponse> postStoryboardAddV1(

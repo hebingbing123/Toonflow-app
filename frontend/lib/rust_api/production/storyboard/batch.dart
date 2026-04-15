@@ -1,4 +1,9 @@
-part of '../../production.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../config.dart';
+import '../../core.dart';
 
 /// OpenAPI **`BatchGenerateImageItem`** — single item for batch image generation.
 class BatchGenerateImageItem {
