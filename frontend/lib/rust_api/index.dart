@@ -7,6 +7,7 @@ import '../config.dart';
 import 'core.dart';
 
 export 'core.dart';
+export 'harness/index.dart';
 export 'production.dart';
 export 'quality/index.dart';
 export 'skills/index.dart';
@@ -24,7 +25,6 @@ part 'assets/models/workbench_data.dart';
 part 'assets/models/polling.dart';
 part 'assets/generate.dart';
 part 'shared_kernel/models.dart';
-part 'harness/api.dart';
 part 'jobs/api.dart';
 part 'jobs/task_center.dart';
 part 'catalog/api.dart';
