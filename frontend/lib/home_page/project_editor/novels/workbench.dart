@@ -23,14 +23,21 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
       assetsBusy: assetsBusy,
       assetsLoading: assetsLoading,
       assetsScriptFilterLoading: assetsScriptFilterLoading,
-      openWorkbench: () => _openNovelWorkbenchDialog(
+      openWorkbench: () => openNovelWorkbenchDialog(
         ctx: ctx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         novelsRef: novelsRef,
         novelsBusy: novelsBusy,
         reloadAssetsAndStats: reloadAssetsAndStats,
+        parseNumericIdList: parseNumericIdList,
+        buildPreviewSection: _buildNovelWorkbenchPreviewSection,
+        buildSearchSection: _buildNovelWorkbenchSearchSection,
+        buildCreateSection: _buildNovelWorkbenchCreateSection,
+        buildEditSection: _buildNovelWorkbenchEditSection,
+        buildDeleteSection: _buildNovelWorkbenchDeleteSection,
+        buildSnapshotSection: _buildNovelWorkbenchSnapshotSection,
       ),
       refreshNovels: () async {
         setDialogState(() => novelsLoading[0] = true);
@@ -68,41 +75,5 @@ extension _HomePageProjectEditorNovelsWorkbench on _HomePageState {
         }
       },
     );
-  }
-
-  Future<void> _openNovelWorkbenchDialog({
-    required BuildContext ctx,
-    required StateSetter setDialogState,
-    required String token,
-    required ProjectRow p,
-    required List<ListNovelsResponse?> novelsRef,
-    required List<bool> novelsBusy,
-    required Future<void> Function() reloadAssetsAndStats,
-  }) async {
-    await openNovelWorkbenchDialog(
-      ctx: ctx,
-      setDialogState: setDialogState,
-      token: token,
-      project: p,
-      novelsRef: novelsRef,
-      novelsBusy: novelsBusy,
-      reloadAssetsAndStats: reloadAssetsAndStats,
-      parseNumericIdList: _parseNumericIdList,
-      buildPreviewSection: _buildNovelWorkbenchPreviewSection,
-      buildSearchSection: _buildNovelWorkbenchSearchSection,
-      buildCreateSection: _buildNovelWorkbenchCreateSection,
-      buildEditSection: _buildNovelWorkbenchEditSection,
-      buildDeleteSection: _buildNovelWorkbenchDeleteSection,
-      buildSnapshotSection: _buildNovelWorkbenchSnapshotSection,
-    );
-  }
-
-  List<int> _parseNumericIdList(String raw) {
-    return raw
-        .split(',')
-        .map((part) => part.trim())
-        .where((part) => part.isNotEmpty)
-        .map(int.parse)
-        .toList();
   }
 }

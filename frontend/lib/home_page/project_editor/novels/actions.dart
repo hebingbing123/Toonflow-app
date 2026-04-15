@@ -136,7 +136,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final ids = _parseNumericIdList(generateIdsCtrl.text);
+    final ids = parseNumericIdList(generateIdsCtrl.text);
     if (ids.isEmpty) {
       throw const FormatException('至少提供一个章节 ID');
     }
@@ -185,7 +185,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required TextEditingController numericIdsCtrl,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final ids = _parseNumericIdList(numericIdsCtrl.text);
+    final ids = parseNumericIdList(numericIdsCtrl.text);
     if (ids.isEmpty) {
       throw const FormatException('至少提供一个章节 ID');
     }
@@ -207,7 +207,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final ids = _parseNumericIdList(batchDeleteIdsCtrl.text);
+    final ids = parseNumericIdList(batchDeleteIdsCtrl.text);
     if (ids.isEmpty) {
       throw const FormatException('至少提供一个章节 ID');
     }

@@ -28,3 +28,25 @@ String summarizeNovelEventRows(
   final suffix = items.length > maxItems ? '…' : '';
   return '事件 ${items.length} 条 · $visible$suffix';
 }
+
+List<int> parseNumericIdList(String raw) {
+  return raw
+      .split(',')
+      .map((part) => part.trim())
+      .where((part) => part.isNotEmpty)
+      .map(int.parse)
+      .toList();
+}
+
+List<int> chapterIndexesToNumericIds({
+  required List<NovelRow> chapters,
+  required List<int> indexes,
+}) {
+  if (chapters.isEmpty || indexes.isEmpty) {
+    return const <int>[];
+  }
+  final byIndex = <int, int>{
+    for (final chapter in chapters) chapter.chapterIndex: chapter.numericId,
+  };
+  return indexes.map((index) => byIndex[index]).whereType<int>().toList();
+}

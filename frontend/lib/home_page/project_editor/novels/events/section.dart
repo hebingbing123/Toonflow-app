@@ -34,8 +34,8 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
         novelEventsRef: novelEventsRef,
         novelsBusy: novelsBusy,
         novelEventsLoading: novelEventsLoading,
-        parseNumericIdList: _parseNumericIdList,
-        chapterIndexesToNumericIds: _chapterIndexesToNumericIds,
+        parseNumericIdList: parseNumericIdList,
+        chapterIndexesToNumericIds: chapterIndexesToNumericIds,
       ),
       refreshEvents: () async {
         setDialogState(() => novelEventsLoading[0] = true);
@@ -59,16 +59,4 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
     );
   }
 
-  List<int> _chapterIndexesToNumericIds({
-    required List<NovelRow> chapters,
-    required List<int> indexes,
-  }) {
-    if (chapters.isEmpty || indexes.isEmpty) {
-      return const <int>[];
-    }
-    final byIndex = <int, int>{
-      for (final chapter in chapters) chapter.chapterIndex: chapter.numericId,
-    };
-    return indexes.map((index) => byIndex[index]).whereType<int>().toList();
-  }
 }
