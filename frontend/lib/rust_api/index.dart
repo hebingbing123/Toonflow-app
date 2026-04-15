@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import 'core.dart';
-import 'project/index.dart' as project_api;
 
 export 'core.dart';
 export 'agents/index.dart';
 export 'catalog/index.dart';
 export 'harness/index.dart';
 export 'jobs/index.dart';
+export 'novels/index.dart';
 export 'production.dart';
 export 'project/index.dart';
 export 'quality/index.dart';
@@ -31,12 +31,6 @@ part 'assets/models/images.dart';
 part 'assets/models/workbench_data.dart';
 part 'assets/models/polling.dart';
 part 'assets/generate.dart';
-part 'novels/models.dart';
-part 'novels/events_models.dart';
-part 'novels/crud.dart';
-part 'novels/workbench_http.dart';
-part 'novels/rest_api.dart';
-part 'novels/events.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

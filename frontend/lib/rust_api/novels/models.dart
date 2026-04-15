@@ -1,5 +1,3 @@
-part of '../index.dart';
-
 class NovelRow {
   NovelRow({
     required this.id,

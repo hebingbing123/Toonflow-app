@@ -1,4 +1,11 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import '../project/index.dart' as project_api;
+import 'events_models.dart';
 
 /// `GET /api/v1/projects/{project_id}/novel-events` — paginated events list with chapter associations.
 Future<ListNovelEventsResponse> fetchProjectNovelEventsByProjectId(

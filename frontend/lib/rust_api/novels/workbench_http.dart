@@ -1,4 +1,12 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import '../project/index.dart' as project_api;
+import 'models.dart';
+import 'rest_api.dart';
 
 /// Compat: full novel rows via **`GET /api/v1/projects/{uuid}/novels`** (workbench **`getNovelData`**).
 Future<List<NovelRow>> fetchNovelWorkbenchFullRows(

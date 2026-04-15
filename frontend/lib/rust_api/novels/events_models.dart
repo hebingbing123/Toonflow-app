@@ -1,5 +1,3 @@
-part of '../index.dart';
-
 /// One **`app_novel_event`** row with associated chapter indexes.
 class NovelEventRow {
   const NovelEventRow({
