@@ -14,6 +14,7 @@ import 'home_page/project_editor/assets/generation/dialog.dart';
 import 'home_page/project_editor/assets/images/workbench_dialog_view.dart';
 import 'home_page/project_editor/assets/images/workbench_support.dart';
 import 'home_page/project_editor/assets/overview.dart';
+import 'home_page/project_editor/assets/corner_scape_support.dart';
 import 'home_page/project_editor/assets/corner_scape_view.dart';
 import 'home_page/project_editor/assets/workbench/dialog_support.dart';
 import 'home_page/project_editor/novels/events/workbench_view.dart';
