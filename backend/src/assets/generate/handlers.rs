@@ -1,25 +1,10 @@
-//! 遗留 `/api/assetsGenerate/*` 资产生成端点。
-//!
-//! 处理单图生成、提示词优化、批量生成和批量优化请求，
-//! 将任务加入 `app_generation_job` 队列由后台 Worker 执行。
-//!
-//! 端点：
-//! - `POST …/generate` — 单图生成
-//! - `POST …/polish-prompt` — 单条提示词优化
-//! - `POST …/batch-generate` — 批量图片生成
-//! - `POST …/batch-polish` — 批量提示词优化
-//! - `POST …/cancel-generate` — 取消生成任务
-
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
-    routing::post,
-    Json as JsonResponse, Router,
+    Json as JsonResponse,
 };
-use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -27,213 +12,21 @@ use crate::jobs::{
     enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE,
     JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
 };
-use crate::scope;
 use crate::state::AppState;
 
-#[derive(Debug, Deserialize)]
-enum AssetGenKind {
-    #[serde(rename = "role")]
-    Role,
-    #[serde(rename = "scene")]
-    Scene,
-    #[serde(rename = "tool")]
-    Tool,
-    #[serde(rename = "storyboard")]
-    Storyboard,
-}
+use super::common::{
+    asset_type_str, ensure_asset_numerics_exist_in_owned_project,
+    ensure_batch_asset_items_linked_to_script, normalize_optional_base64,
+    resolve_owned_project_uuid, trim_non_empty, trim_non_empty_str, MAX_ASSET_TYPE_LEN,
+    MAX_BATCH_ITEMS, MAX_CONCURRENT_COUNT, MAX_DESCRIBE_LEN, MAX_MODEL_LEN, MAX_NAME_LEN,
+    MAX_PROMPT_LEN, MAX_RESOLUTION_LEN,
+};
+use super::types::{
+    BatchGenerateImageAssetsBody, BatchPolishAssetsPromptBody, CancelGenerateBody,
+    GenerateAssetsBody, PolishAssetsPromptBody,
+};
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct GenerateAssetsBody {
-    project_id: i32,
-    model: String,
-    resolution: String,
-    id: i32,
-    #[serde(rename = "type")]
-    asset_type: AssetGenKind,
-    name: String,
-    prompt: String,
-    #[serde(default)]
-    base64: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct PolishAssetsPromptBody {
-    assets_id: i32,
-    project_id: i32,
-    #[serde(rename = "type")]
-    asset_type: String,
-    name: String,
-    describe: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BatchGenItem {
-    id: i32,
-    #[serde(rename = "type")]
-    asset_type: AssetGenKind,
-    name: String,
-    prompt: String,
-    #[serde(default)]
-    base64: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BatchGenerateImageAssetsBody {
-    project_id: i32,
-    model: String,
-    resolution: String,
-    /// When set, every **`items[].id`** must be an **`app_asset.numeric_id`** linked to this script
-    /// (**`app_script_asset`**) under the same owned **`project_id`** (numeric).
-    #[serde(default)]
-    script_id: Option<i32>,
-    #[serde(default)]
-    concurrent_count: Option<i32>,
-    items: Vec<BatchGenItem>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BatchPolishItem {
-    assets_id: i32,
-    #[serde(rename = "type")]
-    asset_type: String,
-    name: String,
-    describe: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BatchPolishAssetsPromptBody {
-    project_id: i32,
-    #[serde(default)]
-    concurrent_count: Option<i32>,
-    items: Vec<BatchPolishItem>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct CancelGenerateBody {
-    id: i32,
-}
-
-fn asset_type_str(k: &AssetGenKind) -> &'static str {
-    match k {
-        AssetGenKind::Role => "role",
-        AssetGenKind::Scene => "scene",
-        AssetGenKind::Tool => "tool",
-        AssetGenKind::Storyboard => "storyboard",
-    }
-}
-
-fn trim_non_empty_str(s: &str, field: &'static str) -> Result<String, ApiError> {
-    let t = s.trim();
-    if t.is_empty() {
-        return Err(ApiError::BadRequest(format!("{field} must be non-empty")));
-    }
-    Ok(t.to_owned())
-}
-
-fn trim_non_empty(s: String, field: &'static str) -> Result<String, ApiError> {
-    trim_non_empty_str(&s, field)
-}
-
-fn normalize_optional_base64(
-    input: Option<&str>,
-    field: &'static str,
-) -> Result<Option<String>, ApiError> {
-    let Some(raw) = input else {
-        return Ok(None);
-    };
-    let trimmed = raw.trim();
-    if trimmed.is_empty() {
-        return Ok(None);
-    }
-    if trimmed.len() > MAX_BASE64_HINT_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "{field} must be at most {MAX_BASE64_HINT_LEN} chars"
-        )));
-    }
-    if trimmed.starts_with("data:") {
-        return Ok(Some(trimmed.to_owned()));
-    }
-    Ok(Some(format!("data:image/jpeg;base64,{trimmed}")))
-}
-
-const MAX_MODEL_LEN: usize = 512;
-const MAX_RESOLUTION_LEN: usize = 128;
-const MAX_NAME_LEN: usize = 512;
-const MAX_PROMPT_LEN: usize = 48_000;
-const MAX_BASE64_HINT_LEN: usize = 24_000_000;
-const MAX_ASSET_TYPE_LEN: usize = 64;
-const MAX_DESCRIBE_LEN: usize = 48_000;
-/// Large batch calls can send many rows; cap payload size.
-const MAX_BATCH_ITEMS: usize = 50;
-const MAX_CONCURRENT_COUNT: i32 = 20;
-
-async fn resolve_owned_project_uuid(
-    pool: &PgPool,
-    uid: Uuid,
-    project_numeric_id: i32,
-) -> Result<Uuid, ApiError> {
-    if project_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-    let id: Option<Uuid> = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE numeric_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_numeric_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    id.ok_or(ApiError::NotFound)
-}
-
-/// Returns **404** when any `numeric_id` is missing from this owned project (defense before enqueue).
-async fn ensure_asset_numerics_exist_in_owned_project(
-    pool: &PgPool,
-    uid: Uuid,
-    project_uuid: Uuid,
-    asset_numeric_ids: &[i32],
-) -> Result<(), ApiError> {
-    if asset_numeric_ids.is_empty() {
-        return Ok(());
-    }
-    let mut uniq: Vec<i32> = asset_numeric_ids.to_vec();
-    uniq.sort_unstable();
-    uniq.dedup();
-
-    let cnt: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(DISTINCT a.numeric_id)::bigint
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = ANY($3::int4[])
-        "#,
-    )
-    .bind(project_uuid)
-    .bind(uid)
-    .bind(&uniq)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if cnt != uniq.len() as i64 {
-        return Err(ApiError::NotFound);
-    }
-    Ok(())
-}
-
-async fn post_generate_assets(
+pub(super) async fn post_generate_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<GenerateAssetsBody>,
@@ -305,7 +98,7 @@ async fn post_generate_assets(
     Ok(JsonResponse(row))
 }
 
-async fn post_polish_assets_prompt(
+pub(super) async fn post_polish_assets_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<PolishAssetsPromptBody>,
@@ -363,47 +156,7 @@ async fn post_polish_assets_prompt(
     Ok(JsonResponse(row))
 }
 
-async fn ensure_batch_asset_items_linked_to_script(
-    pool: &PgPool,
-    uid: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
-    asset_numeric_ids: &[i32],
-) -> Result<(), ApiError> {
-    let scope_row = scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
-
-    let mut uniq: Vec<i32> = asset_numeric_ids.to_vec();
-    uniq.sort_unstable();
-    uniq.dedup();
-
-    let linked: i64 = sqlx::query_scalar(
-        r#"
-        SELECT COUNT(DISTINCT a.numeric_id)::bigint
-        FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        INNER JOIN app_script_asset sa ON sa.asset_id = a.id AND sa.script_id = $3
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
-          AND a.numeric_id = ANY($4::int4[])
-        "#,
-    )
-    .bind(uid)
-    .bind(project_numeric_id)
-    .bind(scope_row.script_id)
-    .bind(&uniq)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if linked != uniq.len() as i64 {
-        return Err(ApiError::NotFound);
-    }
-    Ok(())
-}
-
-async fn post_batch_generate_image_assets(
+pub(super) async fn post_batch_generate_image_assets(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchGenerateImageAssetsBody>,
@@ -520,7 +273,7 @@ async fn post_batch_generate_image_assets(
     Ok(JsonResponse(row))
 }
 
-async fn post_batch_polish_assets_prompt(
+pub(super) async fn post_batch_polish_assets_prompt(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<BatchPolishAssetsPromptBody>,
@@ -603,7 +356,7 @@ async fn post_batch_polish_assets_prompt(
     Ok(JsonResponse(row))
 }
 
-async fn post_cancel_generate(
+pub(super) async fn post_cancel_generate(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<CancelGenerateBody>,
@@ -613,7 +366,7 @@ async fn post_cancel_generate(
         return Err(ApiError::BadRequest("id must be positive".into()));
     }
 
-    let pool = state
+    let pool: &PgPool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
@@ -696,80 +449,4 @@ async fn post_cancel_generate(
     }
 
     Ok(JsonResponse(json!({ "message": "取消成功" })))
-}
-
-pub fn router() -> Router<AppState> {
-    Router::new()
-        .route(
-            "/api/v1/assets-generate/generate",
-            post(post_generate_assets),
-        )
-        .route(
-            "/api/v1/assets-generate/polish-prompt",
-            post(post_polish_assets_prompt),
-        )
-        .route(
-            "/api/v1/assets-generate/batch-generate",
-            post(post_batch_generate_image_assets),
-        )
-        .route(
-            "/api/v1/assets-generate/batch-polish",
-            post(post_batch_polish_assets_prompt),
-        )
-        .route(
-            "/api/v1/assets-generate/cancel-generate",
-            post(post_cancel_generate),
-        )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{normalize_optional_base64, MAX_BASE64_HINT_LEN};
-    use crate::error::ApiError;
-
-    #[test]
-    fn normalize_base64_none_or_blank_to_none() {
-        assert_eq!(
-            normalize_optional_base64(None, "base64").expect("none"),
-            None
-        );
-        assert_eq!(
-            normalize_optional_base64(Some("  "), "base64").expect("blank"),
-            None
-        );
-    }
-
-    #[test]
-    fn normalize_base64_raw_to_data_uri() {
-        let got = normalize_optional_base64(Some("  QUJDRA== "), "base64").expect("raw");
-        assert_eq!(got.as_deref(), Some("data:image/jpeg;base64,QUJDRA=="));
-    }
-
-    #[test]
-    fn normalize_base64_keeps_data_uri() {
-        let src = "data:image/png;base64,AA==";
-        let got = normalize_optional_base64(Some(src), "base64").expect("uri");
-        assert_eq!(got.as_deref(), Some(src));
-    }
-
-    #[test]
-    fn normalize_base64_rejects_over_limit() {
-        let oversized = "A".repeat(MAX_BASE64_HINT_LEN + 1);
-        let err = normalize_optional_base64(Some(&oversized), "base64").expect_err("oversized");
-        match err {
-            ApiError::BadRequest(msg) => assert!(
-                msg.contains(&format!("at most {MAX_BASE64_HINT_LEN} chars")),
-                "msg={msg}"
-            ),
-            other => panic!("expected bad_request, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn normalize_base64_accepts_exact_limit() {
-        let exact = "A".repeat(MAX_BASE64_HINT_LEN);
-        let got = normalize_optional_base64(Some(&exact), "base64").expect("exact");
-        let expected = format!("data:image/jpeg;base64,{exact}");
-        assert_eq!(got.as_deref(), Some(expected.as_str()));
-    }
 }
