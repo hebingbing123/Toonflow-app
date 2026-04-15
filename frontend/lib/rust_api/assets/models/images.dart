@@ -1,5 +1,3 @@
-part of '../../index.dart';
-
 /// OpenAPI **`AssetImageRow`** — response from **`POST …/assets/{aid}/images`** (and list items share these fields).
 class AssetImageRow {
   const AssetImageRow({

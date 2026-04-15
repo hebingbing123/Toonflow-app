@@ -1,5 +1,3 @@
-part of '../../index.dart';
-
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/material-data`** response **`data`**.
 class WorkbenchAssetMaterialDataItem {
   const WorkbenchAssetMaterialDataItem({

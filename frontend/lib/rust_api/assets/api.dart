@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'models/corner_scape.dart';
 
 /// `POST /api/v1/projects/{project_id}/assets/corner-scape` — see `listCornerScapeAssetsByProjectIdV1`.
 Future<CornerScapeResponse> fetchCornerScapeAssetsByProjectId(

@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'models/core.dart';
 
 /// `GET /api/v1/projects/{project_id}/assets` — see `listProjectAssetsByProjectIdV1`.
 Future<ListAssetsResponse> fetchProjectAssetsByProjectId(

@@ -1,5 +1,3 @@
-part of '../../index.dart';
-
 /// One row in workbench **`POST …/projects/{project_id}/assets/workbench/polling-image-assets`** response.
 class WorkbenchAssetPollingImageItem {
   const WorkbenchAssetPollingImageItem({

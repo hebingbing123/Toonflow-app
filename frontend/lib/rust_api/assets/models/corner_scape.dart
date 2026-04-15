@@ -1,5 +1,3 @@
-part of '../../index.dart';
-
 /// One **`app_asset_image`** row in **`POST …/assets/corner-scape`** — OpenAPI **`CornerScapeHistoryImage`**.
 class CornerScapeHistoryImage {
   const CornerScapeHistoryImage({

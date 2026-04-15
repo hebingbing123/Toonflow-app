@@ -1,4 +1,12 @@
-part of '../index.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'models/corner_scape.dart';
+import 'models/images.dart';
 
 /// `GET /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images` — see `listProjectAssetImagesByProjectIdV1`.
 Future<ListAssetImagesResponse> fetchProjectAssetImagesByProjectIds(

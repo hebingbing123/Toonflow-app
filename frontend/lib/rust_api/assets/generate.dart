@@ -1,4 +1,8 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
 
 /// `POST /api/v1/assets-generate/generate` — OpenAPI `postAssetsGenerateV1`.
 /// **200** = **`queued`** **`JobRow`** (**`asset.generate.image`**); worker **`succeeded`** inserts

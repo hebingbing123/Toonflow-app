@@ -1,5 +1,3 @@
-part of '../../index.dart';
-
 /// Row from **`GET …/projects/{project_id}/assets`** — OpenAPI **`AssetRow`**.
 class AssetRow {
   const AssetRow({
