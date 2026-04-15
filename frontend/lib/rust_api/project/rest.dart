@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'overview.dart';
 
 /// Primary project REST endpoints and summary payloads.
 /// `GET /api/v1/projects` — projects owned by the JWT subject. See `listProjectsV1`.

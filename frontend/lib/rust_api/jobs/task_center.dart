@@ -48,7 +48,7 @@ class TaskCenterGetTaskApiResult {
 Future<List<TaskCenterProjectItem>> postTasksGetProject(
   String accessToken,
 ) async {
-  final rows = await _fetchAllProjectsPaged(accessToken);
+  final rows = await project_api.fetchAllProjectsPaged(accessToken);
   final out = <TaskCenterProjectItem>[];
   for (final r in rows) {
     final n = r.name?.trim() ?? '';

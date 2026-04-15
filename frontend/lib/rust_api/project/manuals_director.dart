@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'manuals.dart';
 
 /// `POST /api/v1/project/query-director-manual` — body `{}`; bundled **`story_skills`** rows.
 Future<DirectorManualListResponse> postProjectQueryDirectorManual(
@@ -53,7 +59,7 @@ Future<void> postProjectAddDirectorManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectEmptyObjectResponse(res);
+  expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/edit-director-manual`.
@@ -84,7 +90,7 @@ Future<void> postProjectEditDirectorManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectEmptyObjectResponse(res);
+  expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/delete-director-manual` — [folderName] is folder under **`story_skills`**.

@@ -1,4 +1,8 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../core.dart';
 
 /// OpenAPI **`DirectorManualDataSlot`** (also used for visual manual POST bodies).
 class DirectorManualDataSlot {
@@ -79,7 +83,7 @@ class DirectorManualListResponse {
   }
 }
 
-void _expectEmptyObjectResponse(http.Response res) {
+void expectEmptyObjectResponse(http.Response res) {
   if (res.statusCode != 200) {
     throw RustApiException(res.body, statusCode: res.statusCode);
   }

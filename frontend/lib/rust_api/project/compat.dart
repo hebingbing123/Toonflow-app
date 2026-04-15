@@ -1,4 +1,11 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'overview.dart';
+import 'rest.dart';
 
 /// Project compatibility adapters layered over the v1 project REST API.
 /// Compat **`getSingleProject`**: lists owned projects and filters by **`numeric_id`** (no HTTP **`/general/*`**).
@@ -6,7 +13,7 @@ Future<List<ProjectRow>> postGeneralGetSingleProject(
   String accessToken,
   int numericId,
 ) async {
-  final rows = await _fetchAllProjectsPaged(accessToken);
+  final rows = await fetchAllProjectsPaged(accessToken);
   return rows.where((r) => r.numericId == numericId).toList();
 }
 
@@ -28,7 +35,7 @@ Future<String> postGeneralUpdateProject(
   if (numericId == null || numericId <= 0) {
     throw RustApiException('invalid id', statusCode: 400);
   }
-  final projectId = await _projectIdForNumericId(accessToken, numericId);
+  final projectId = await projectIdForNumericId(accessToken, numericId);
 
   final patch = <String, dynamic>{};
   if (body.containsKey('intro')) {
@@ -66,7 +73,7 @@ String _effectiveProjectMode(String sqliteTypeHint, String mode) {
   return sqliteTypeHint.trim();
 }
 
-Future<List<ProjectRow>> _fetchAllProjectsPaged(String accessToken) async {
+Future<List<ProjectRow>> fetchAllProjectsPaged(String accessToken) async {
   final out = <ProjectRow>[];
   var offset = 0;
   const page = 100;
@@ -96,11 +103,11 @@ Future<List<ProjectRow>> _fetchAllProjectsPaged(String accessToken) async {
   return out;
 }
 
-Future<String> _projectIdForNumericId(
+Future<String> projectIdForNumericId(
   String accessToken,
   int numericId,
 ) async {
-  final rows = await _fetchAllProjectsPaged(accessToken);
+  final rows = await fetchAllProjectsPaged(accessToken);
   for (final r in rows) {
     if (r.numericId == numericId) {
       return r.id;
@@ -111,7 +118,7 @@ Future<String> _projectIdForNumericId(
 
 /// Same rows as **`GET /api/v1/projects`** (paged), formerly **`POST /api/v1/project/get-project`**.
 Future<List<ProjectRow>> postProjectGetProject(String accessToken) async {
-  return _fetchAllProjectsPaged(accessToken);
+  return fetchAllProjectsPaged(accessToken);
 }
 
 /// [numericId] is `app_project` numeric id column. Uses **`DELETE /api/v1/projects/{project_id}`**.
@@ -119,7 +126,7 @@ Future<String> postProjectDeleteProject(
   String accessToken,
   int numericId,
 ) async {
-  final id = await _projectIdForNumericId(accessToken, numericId);
+  final id = await projectIdForNumericId(accessToken, numericId);
   await deleteProjectByProjectId(accessToken, id);
   return '删除项目成功';
 }
@@ -174,7 +181,7 @@ Future<String> postProjectEditProject(
   required String projectType,
   required String mode,
 }) async {
-  final projectId = await _projectIdForNumericId(accessToken, id);
+  final projectId = await projectIdForNumericId(accessToken, id);
   final modeOut = _effectiveProjectMode(type, mode);
   await updateProjectByProjectId(
     accessToken,

@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'manuals.dart';
 
 /// `POST /api/v1/project/add-visual-manual`.
 Future<void> postProjectAddVisualManual(
@@ -28,7 +34,7 @@ Future<void> postProjectAddVisualManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectEmptyObjectResponse(res);
+  expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/edit-visual-manual`.
@@ -59,7 +65,7 @@ Future<void> postProjectEditVisualManual(
   if (res.statusCode == 400) {
     throw RustApiException(res.body, statusCode: 400);
   }
-  _expectEmptyObjectResponse(res);
+  expectEmptyObjectResponse(res);
 }
 
 /// `POST /api/v1/project/delete-visual-manual` — [folderName] is folder under **`art_skills`**.

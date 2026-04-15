@@ -5,7 +5,10 @@ Future<List<NovelRow>> fetchNovelWorkbenchFullRows(
   String accessToken,
   int projectNumericId,
 ) async {
-  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectId = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items;
 }
@@ -15,7 +18,10 @@ Future<List<NovelWorkbenchIndexItem>> fetchNovelWorkbenchIndex(
   String accessToken,
   int projectNumericId,
 ) async {
-  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectId = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   final res = await fetchProjectNovelsByProjectId(accessToken, projectId);
   return res.items
       .map(
@@ -76,7 +82,10 @@ Future<String> postNovelEventsGenerateEvents(
   required List<int> novelIds,
   int concurrentCount = 5,
 }) async {
-  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectId = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/projects/$projectId/novel-events/generate-events',
   );
@@ -111,7 +120,10 @@ Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
   required int limit,
   String? search,
 }) async {
-  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectId = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   final res = await fetchProjectNovelsByProjectId(
     accessToken,
     projectId,
@@ -145,7 +157,10 @@ Future<String> appendNovelsUnderProject(
   if (data.isEmpty) {
     return '新增原文成功';
   }
-  final projectId = await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectId = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   for (final item in data) {
     await createProjectNovelUnderProject(
       accessToken,
@@ -166,7 +181,7 @@ Future<String> _deleteNovelByNumericIdScanningProjects(
   if (novelNumericId <= 0) {
     throw RustApiException('id must be positive', statusCode: 400);
   }
-  final projects = await _fetchAllProjectsPaged(accessToken);
+  final projects = await project_api.fetchAllProjectsPaged(accessToken);
   for (final p in projects) {
     try {
       await deleteProjectNovelByProjectIds(accessToken, p.id, novelNumericId);
@@ -209,7 +224,7 @@ Future<String> _patchNovelByNumericIdScanningProjects(
   if (idx == null) {
     throw RustApiException('invalid index', statusCode: 400);
   }
-  final projects = await _fetchAllProjectsPaged(accessToken);
+  final projects = await project_api.fetchAllProjectsPaged(accessToken);
   final body = <String, dynamic>{
     'chapter_index': idx,
     'reel': reel,

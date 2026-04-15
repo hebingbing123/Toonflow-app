@@ -178,8 +178,10 @@ Future<NovelEventsPageResponse> fetchNovelEventsPaged(
   required int limit,
   String? search,
 }) async {
-  final projectUuid =
-      await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectUuid = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   final rows = await fetchProjectNovelEventsByProjectId(
     accessToken,
     projectUuid,
@@ -207,8 +209,10 @@ Future<String> batchDeleteNovelEvents(
   int projectNumericId,
   List<int> numericIds,
 ) async {
-  final projectUuid =
-      await _projectIdForNumericId(accessToken, projectNumericId);
+  final projectUuid = await project_api.projectIdForNumericId(
+    accessToken,
+    projectNumericId,
+  );
   return postProjectNovelEventsBatchDeleteByProjectId(
     accessToken,
     projectUuid,
