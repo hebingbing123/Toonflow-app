@@ -100,10 +100,7 @@ pub(in crate::production) async fn post_workbench_get_video_list(
         ));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);

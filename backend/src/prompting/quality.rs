@@ -232,10 +232,7 @@ pub(crate) async fn create_review(
 ) -> Result<Json<QualityReview>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
     validate_create_review_body(&body)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let source = body.source.as_deref().unwrap_or("manual");
     let is_bad_case = body.is_bad_case.unwrap_or(false);
@@ -302,10 +299,7 @@ pub(crate) async fn list_reviews(
 ) -> Result<Json<Vec<QualityReview>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
     validate_list_reviews_query(&query)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let limit = query.limit.unwrap_or(100).clamp(1, 500);
     let offset = query.offset.unwrap_or(0).max(0);
@@ -365,10 +359,7 @@ pub(crate) async fn get_review(
     Path(id): Path<Uuid>,
 ) -> Result<Json<QualityReview>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let review = sqlx::query_as::<_, QualityReview>(
         "SELECT * FROM app_quality_review WHERE id = $1 AND user_id = $2",
@@ -401,10 +392,7 @@ pub(crate) async fn get_stats(
     headers: HeaderMap,
 ) -> Result<Json<Vec<QualityStatsResponse>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let stats = sqlx::query_as::<_, QualityStatsResponse>(
         r#"
@@ -447,10 +435,7 @@ pub(crate) async fn get_stage_pass_rate(
     headers: HeaderMap,
 ) -> Result<Json<Vec<StagePassRateItem>>, ApiError> {
     let user_id = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let items = sqlx::query_as::<_, StagePassRateItem>(
         r#"

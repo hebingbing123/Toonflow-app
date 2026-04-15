@@ -315,10 +315,7 @@ async fn list_art_styles(
     headers: HeaderMap,
 ) -> Result<Json<ListArtStylesResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let total: i64 = sqlx::query_scalar(
         r#"SELECT COUNT(*)::bigint FROM app_art_style WHERE owner_user_id = $1"#,
@@ -352,10 +349,7 @@ async fn create_art_style(
     Json(body): Json<CreateArtStyleBody>,
 ) -> Result<(StatusCode, Json<ArtStyleRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let name = body.name.trim().to_string();
     if name.is_empty() {
@@ -436,10 +430,7 @@ async fn get_art_style_by_numeric_id(
     headers: HeaderMap,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     if numeric_id <= 0 {
         return Err(ApiError::BadRequest("numeric_id must be positive".into()));
@@ -469,10 +460,7 @@ async fn patch_art_style_by_numeric_id(
     Json(body): Json<PatchArtStyleBody>,
 ) -> Result<Json<ArtStyleRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     if numeric_id <= 0 {
         return Err(ApiError::BadRequest("numeric_id must be positive".into()));
@@ -585,10 +573,7 @@ async fn delete_art_style_by_numeric_id(
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     if numeric_id <= 0 {
         return Err(ApiError::BadRequest("numeric_id must be positive".into()));
@@ -623,10 +608,7 @@ async fn get_art_style_cover_by_numeric_id(
         return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let row = sqlx::query_as::<_, ArtStyleFileUrlRow>(
         r#"

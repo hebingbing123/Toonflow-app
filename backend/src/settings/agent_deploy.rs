@@ -226,10 +226,7 @@ pub(crate) async fn post_deploy_agent_model(
     Json(body): Json<DeployAgentModelBody>,
 ) -> Result<Json<AgentDeploySavedResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let item = static_agent_deploy_item_by_id(body.id).ok_or_else(|| {
         ApiError::BadRequest(format!(
             "agent deploy row {} is not a built-in option",

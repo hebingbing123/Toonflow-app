@@ -333,10 +333,7 @@ pub(crate) async fn patch_text_model_default(
         }
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let model_id_to_store = body.model_id.as_deref().map(str::trim).map(str::to_string);
 

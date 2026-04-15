@@ -78,10 +78,7 @@ async fn post_billing_webhook(
     let secret = verify::billing_secret()?;
     verify::verify_signature(&secret, &body, &headers)?;
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let v: Value = serde_json::from_slice(&body)
         .map_err(|_| ApiError::BadRequest("body must be valid JSON".into()))?;
@@ -308,10 +305,7 @@ async fn list_billing_webhook_events(
         }
     }
     let sort = parse_sort(q.sort.as_deref())?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let mut count_qb = QueryBuilder::new(
         r#"
