@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// Binary fetch helpers for skill assets under `data/skills`.
 /// Builds `GET /api/v1/skills/binary?path=` — OpenAPI `getSkillBinaryV1` (JWT on the request).

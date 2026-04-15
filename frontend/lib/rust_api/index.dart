@@ -9,6 +9,7 @@ import 'core.dart';
 export 'core.dart';
 export 'production.dart';
 export 'quality/index.dart';
+export 'skills/index.dart';
 
 part 'catalog/art_styles.dart';
 part 'agents/memory.dart';
@@ -44,8 +45,6 @@ part 'project/compat.dart';
 part 'scripts/api.dart';
 part 'scripts/storyboards_models.dart';
 part 'scripts/agent.dart';
-part 'skills/binary.dart';
-part 'skills/api.dart';
 part 'settings/about_danger.dart';
 part 'settings/agent_deploy.dart';
 part 'settings/memory_config_api.dart';
