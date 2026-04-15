@@ -91,11 +91,11 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
         scriptList: scriptList,
         assetsBusy: assetsBusy,
       ),
-      onUploadClip: (dialogCtx) => _openClipUploadDialog(
+      onUploadClip: (dialogCtx) => openProjectAssetClipUploadDialog(
         ctx: dialogCtx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         assetsBusy: assetsBusy,
         reloadAssetsAndStats: reloadAssetsAndStats,
       ),
