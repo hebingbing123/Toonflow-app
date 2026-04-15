@@ -52,8 +52,6 @@ part 'home_page/project_editor/novels/sections/search.dart';
 part 'home_page/project_editor/novels/sections/create.dart';
 part 'home_page/project_editor/novels/sections/edit.dart';
 part 'home_page/project_editor/novels/sections/delete_snapshot.dart';
-part 'home_page/project_editor/novels/sections.dart';
-part 'home_page/project_editor/novels/novels.dart';
 part 'home_page/project_editor/assets/assets.dart';
 part 'home_page/project_editor/assets/dialogs/create_edit.dart';
 part 'home_page/project_editor/assets/dialogs/delete.dart';

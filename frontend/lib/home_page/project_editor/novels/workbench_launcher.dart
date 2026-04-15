@@ -12,11 +12,6 @@ Future<void> openNovelWorkbenchDialog({
   required Future<void> Function() reloadAssetsAndStats,
   required List<int> Function(String raw) parseNumericIdList,
   required Widget Function({
-    required BuildContext context,
-    required List<NovelRow> previewRows,
-  })
-  buildPreviewSection,
-  required Widget Function({
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -180,10 +175,40 @@ Future<void> openNovelWorkbenchDialog({
                         style: Theme.of(dialogCtx).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 8),
-                      buildPreviewSection(
-                        context: dialogCtx,
-                        previewRows: previewRows,
-                      ),
+                      if (previewRows.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(
+                                dialogCtx,
+                              ).colorScheme.outlineVariant,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '当前章节预览',
+                                style: Theme.of(dialogCtx).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              ...previewRows.map(
+                                (row) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Text(
+                                    '#${row.numericId} · ${row.chapter} · 事件状态 ${row.eventState}',
+                                    style: Theme.of(
+                                      dialogCtx,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       const SizedBox(height: 12),
                       buildSearchSection(
                         ctx: ctx,
