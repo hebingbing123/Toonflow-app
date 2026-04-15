@@ -1,4 +1,11 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import '../project/index.dart' as project_api;
+import 'api.dart';
 
 /// Task-center compatibility adapters layered over jobs and projects endpoints.
 class TaskCenterProjectItem {
