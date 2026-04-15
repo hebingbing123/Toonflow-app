@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import 'vendors_mutations.dart';
 
 /// OpenAPI `VendorCredentialResponse` — encrypted vendor credential metadata only.
 class VendorCredentialResponseV1 {
@@ -35,6 +41,16 @@ Future<VendorCredentialResponseV1> _decodeVendorCredentialResponse(
   }
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return VendorCredentialResponseV1.fromJson(map);
+}
+
+Future<VendorMutationResponseV1> _decodeVendorCredentialMutationResponse(
+  http.Response res,
+) async {
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return VendorMutationResponseV1.fromJson(map);
 }
 
 /// `POST /api/v1/settings/vendors/credential` — OpenAPI `storeVendorCredentialV1`.
@@ -88,5 +104,5 @@ Future<VendorMutationResponseV1> deleteSettingsVendorCredentialV1(
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));
-  return _decodeVendorMutationResponse(res);
+  return _decodeVendorCredentialMutationResponse(res);
 }

@@ -13,6 +13,7 @@ export 'harness/index.dart';
 export 'production.dart';
 export 'project/visual_manual.dart';
 export 'quality/index.dart';
+export 'settings/index.dart';
 export 'shared_kernel/index.dart';
 export 'skills/index.dart';
 export 'scripts/index.dart';
@@ -42,11 +43,6 @@ part 'project/manuals_director.dart';
 part 'project/manuals_visual.dart';
 part 'project/rest.dart';
 part 'project/compat.dart';
-part 'settings/about_danger.dart';
-part 'settings/agent_deploy.dart';
-part 'settings/memory_config_api.dart';
-part 'settings/vendor_credentials.dart';
-part 'settings/vendors_mutations.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

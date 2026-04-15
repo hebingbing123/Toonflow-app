@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// OpenAPI **`MemoryConfig`** — prior **`getMemory`** / **`sureMemory`** (**camelCase**).
 class MemoryConfigV1 {
@@ -113,8 +118,10 @@ Future<int> postSettingsClearAgentMemoriesV1(
   final body = <String, dynamic>{
     'projectId': projectId,
     'agentType': agentType,
-    'episodesId': ?episodesId,
   };
+  if (episodesId != null) {
+    body['episodesId'] = episodesId;
+  }
   final res = await http
       .post(
         uri,

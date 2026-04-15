@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// `POST /api/v1/settings/danger/delete-all-data` — OpenAPI `postSettingsDangerDeleteAllDataV1` (typically **501**).
 Future<int> postSettingsDangerDeleteAllDataV1(String accessToken) async {

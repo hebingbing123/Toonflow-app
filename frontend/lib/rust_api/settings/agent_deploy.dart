@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// OpenAPI **`AgentDeployListItem`** — prior **`o_agentDeploy`** row shape (**camelCase**).
 class AgentDeployListItemV1 {

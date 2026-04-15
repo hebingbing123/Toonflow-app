@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// `POST /api/v1/settings/vendors/model-test` — OpenAPI `postSettingsVendorModelTestV1`.
 /// **200** = **`queued`** **`JobRow`** (**`settings.vendor.model_test`**); **429**/**503** as elsewhere.
