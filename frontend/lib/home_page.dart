@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
 import 'home_page/project_editor/assets/clip_upload_launcher.dart';
+import 'home_page/project_editor/assets/upload_edit_image_launcher.dart';
 import 'home_page/project_editor/assets/section_builder.dart';
 import 'home_page/project_editor/novels/events/section_builder.dart';
 import 'home_page/project_editor/novels/workbench_section_builder.dart';
@@ -65,7 +66,6 @@ part 'home_page/project_editor/assets/dialogs/create_edit.dart';
 part 'home_page/project_editor/assets/dialogs/delete.dart';
 part 'home_page/project_editor/assets/dialogs/link.dart';
 part 'home_page/project_editor/assets/dialogs/filter.dart';
-part 'home_page/project_editor/assets/dialogs/upload_edit_image.dart';
 part 'home_page/project_editor/dialog/basics.dart';
 part 'home_page/project_editor/dialog/state.dart';
 part 'home_page/project_editor/dialog/actions.dart';

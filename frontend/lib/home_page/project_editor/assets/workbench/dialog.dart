@@ -83,11 +83,11 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
         reloadAssetsAndStats: reloadAssetsAndStats,
         unlink: true,
       ),
-      onUploadEditImage: (dialogCtx) => _openEditImageUploadDialog(
+      onUploadEditImage: (dialogCtx) => openProjectAssetEditImageUploadDialog(
         ctx: dialogCtx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         scriptList: scriptList,
         assetsBusy: assetsBusy,
       ),
