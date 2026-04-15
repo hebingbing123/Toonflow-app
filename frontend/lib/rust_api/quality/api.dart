@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../core.dart';
+import 'index.dart';
 
 /// Quality review REST queries and mutations.
 Future<List<QualityReview>> fetchQualityReviews(
@@ -32,7 +37,7 @@ Future<List<QualityReview>> fetchQualityReviews(
 
   final res = await http
       .get(
-        _qualityUri(
+        qualityUri(
           '/api/v1/quality/reviews',
           queryParameters: query.isEmpty ? null : query,
         ),
@@ -54,7 +59,7 @@ Future<QualityReview> createQualityReview(
 ) async {
   final res = await http
       .post(
-        _qualityUri('/api/v1/quality/reviews'),
+        qualityUri('/api/v1/quality/reviews'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
@@ -75,7 +80,7 @@ Future<QualityReview> fetchQualityReviewById(
 ) async {
   final res = await http
       .get(
-        _qualityUri('/api/v1/quality/reviews/$reviewId'),
+        qualityUri('/api/v1/quality/reviews/$reviewId'),
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));

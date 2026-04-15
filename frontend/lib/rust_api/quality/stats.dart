@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../core.dart';
+import 'models.dart';
 
 /// Quality review aggregate statistics and trend queries.
 class QualityStatsRow {
@@ -68,7 +73,7 @@ class StagePassRateRow {
 Future<List<QualityStatsRow>> fetchQualityStats(String accessToken) async {
   final res = await http
       .get(
-        _qualityUri('/api/v1/quality/stats'),
+        qualityUri('/api/v1/quality/stats'),
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));
@@ -86,7 +91,7 @@ Future<List<StagePassRateRow>> fetchQualityStagePassRate(
 ) async {
   final res = await http
       .get(
-        _qualityUri('/api/v1/quality/stage-pass-rate'),
+        qualityUri('/api/v1/quality/stage-pass-rate'),
         headers: {'Authorization': 'Bearer $accessToken'},
       )
       .timeout(const Duration(seconds: 15));

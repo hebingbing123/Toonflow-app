@@ -8,6 +8,7 @@ import 'core.dart';
 
 export 'core.dart';
 export 'production.dart';
+export 'quality/index.dart';
 
 part 'catalog/art_styles.dart';
 part 'agents/memory.dart';
@@ -40,9 +41,6 @@ part 'project/visual_manual.dart';
 part 'system/prompts.dart';
 part 'project/rest.dart';
 part 'project/compat.dart';
-part 'quality/models.dart';
-part 'quality/api.dart';
-part 'quality/stats.dart';
 part 'scripts/api.dart';
 part 'scripts/storyboards_models.dart';
 part 'scripts/agent.dart';

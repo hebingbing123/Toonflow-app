@@ -1,4 +1,4 @@
-part of '../index.dart';
+import '../../config.dart';
 
 /// Quality review domain models and payload builders.
 class QualityReview {
@@ -57,7 +57,8 @@ class QualityReview {
   final String? badCaseCategory;
 
   factory QualityReview.fromJson(Map<String, dynamic> json) {
-    int? asInt(String key) => json[key] == null ? null : (json[key] as num).toInt();
+    int? asInt(String key) =>
+        json[key] == null ? null : (json[key] as num).toInt();
 
     return QualityReview(
       id: json['id'] as String,
@@ -167,9 +168,8 @@ class CreateQualityReviewBody {
   }
 }
 
-Uri _qualityUri(
-  String path, {
-  Map<String, String>? queryParameters,
-}) {
-  return Uri.parse('$kApiBaseUrl$path').replace(queryParameters: queryParameters);
+Uri qualityUri(String path, {Map<String, String>? queryParameters}) {
+  return Uri.parse(
+    '$kApiBaseUrl$path',
+  ).replace(queryParameters: queryParameters);
 }
