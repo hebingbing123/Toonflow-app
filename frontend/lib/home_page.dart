@@ -65,7 +65,6 @@ part 'home_page/project_editor/dialog/actions.dart';
 part 'home_page/project_editor/dialog/content.dart';
 part 'home_page/project_editor/scripts/probe/actions.dart';
 part 'home_page/project_editor/scripts/dialogs/batch_add.dart';
-part 'home_page/project_editor/scripts/section.dart';
 part 'home_page/projects/controller.dart';
 part 'home_page/jobs/list.dart';
 part 'home_page/jobs/summary.dart';

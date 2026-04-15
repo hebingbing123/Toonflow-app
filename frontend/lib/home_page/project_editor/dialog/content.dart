@@ -61,17 +61,66 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                 dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
           ),
           const SizedBox(height: 12),
-          _buildProjectScriptsSection(
+          buildProjectScriptsSection(
             ctx: ctx,
             setDialogState: setDialogState,
             token: token,
-            p: p,
+            project: p,
             saving: dialogState.saving,
-            scriptProbeBusy: dialogState.scriptProbeBusy,
             scriptTaskBusy: dialogState.scriptTaskBusy,
             scriptTaskLine: dialogState.scriptTaskLine,
             scriptList: scriptList,
             statsRef: dialogState.statsRef,
+            probeActions: _buildProjectScriptsProbeActions(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              saving: dialogState.saving,
+              scriptProbeBusy: dialogState.scriptProbeBusy,
+              scriptList: scriptList,
+            ),
+            openWorkbench: () => openProjectScriptsWorkbenchDialog(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              project: p,
+              saving: dialogState.saving,
+              scriptTaskBusy: dialogState.scriptTaskBusy,
+              scriptTaskLine: dialogState.scriptTaskLine,
+              scriptList: scriptList,
+              statsRef: dialogState.statsRef,
+            ),
+            openBatchAddDialog: () => _openBatchAddScriptsDialog(
+              ctx: ctx,
+              setDialogState: setDialogState,
+              token: token,
+              p: p,
+              saving: dialogState.saving,
+              scriptTaskLine: dialogState.scriptTaskLine,
+              scriptList: scriptList,
+              statsRef: dialogState.statsRef,
+            ),
+            openScriptEditor: (script) => _openScriptEditor(
+              token,
+              script.numericId,
+              projectId: p.id,
+              projectNumericId: p.numericId,
+              onScriptTreeMutated: () async {
+                final d = await fetchProjectByProjectId(token, p.id);
+                if (!ctx.mounted) return;
+                scriptList
+                  ..clear()
+                  ..addAll(d.scripts);
+                try {
+                  dialogState.statsRef[0] = await fetchProjectStatsByProjectId(
+                    token,
+                    p.id,
+                  );
+                } catch (_) {}
+                setDialogState(() {});
+              },
+            ),
           ),
         ],
       ),
