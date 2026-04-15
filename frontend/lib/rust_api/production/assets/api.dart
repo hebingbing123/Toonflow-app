@@ -1,4 +1,10 @@
-part of '../../production.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../../config.dart';
+import '../../core.dart';
+import 'models.dart';
 
 /// `POST /api/v1/production/assets/batch-generate-assets-image` — OpenAPI `postAssetsBatchGenerateAssetsImageV1`.
 Future<BatchGenerateAssetsImageResponseV1>

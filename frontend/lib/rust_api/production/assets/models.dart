@@ -1,4 +1,4 @@
-part of '../../production.dart';
+import '../../core.dart';
 
 class BatchGenerateAssetsImageResponseV1 {
   const BatchGenerateAssetsImageResponseV1({
