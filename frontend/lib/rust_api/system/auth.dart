@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// Authenticated identity and developer-tool preference endpoints.
 /// `GET /api/v1/me` — Bearer; see `meV1` / OpenAPI `MeResponse`.

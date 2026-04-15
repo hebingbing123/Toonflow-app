@@ -51,7 +51,6 @@ part 'settings/agent_deploy.dart';
 part 'settings/memory_config_api.dart';
 part 'settings/vendor_credentials.dart';
 part 'settings/vendors_mutations.dart';
-part 'system/auth.dart';
 part 'scripts/storyboards_api.dart';
 part 'system/usage.dart';
 
