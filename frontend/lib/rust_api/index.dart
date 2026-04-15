@@ -7,13 +7,13 @@ import '../config.dart';
 import 'core.dart';
 
 export 'core.dart';
+export 'agents/index.dart';
 export 'harness/index.dart';
 export 'production.dart';
 export 'quality/index.dart';
 export 'skills/index.dart';
 
 part 'catalog/art_styles.dart';
-part 'agents/memory.dart';
 part 'assets/api.dart';
 part 'assets/crud.dart';
 part 'assets/images.dart';

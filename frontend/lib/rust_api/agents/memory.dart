@@ -1,4 +1,9 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// Agent memory query, append, and clear endpoints.
 /// `POST /api/v1/agents/memory/query` — camelCase body; see `queryAgentMemoryV1`.
