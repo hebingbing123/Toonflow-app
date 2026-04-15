@@ -26,16 +26,56 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           decoration: const InputDecoration(labelText: 'Intro (empty = clear)'),
         ),
         const SizedBox(height: 8),
-        _buildProjectHttpProbeActions(
-          ctx: ctx,
-          setDialogState: setDialogState,
-          token: token,
-          p: p,
-          detail: detail,
-          introCtrl: introCtrl,
-          generalProbeBusy: dialogState.generalProbeBusy,
-          tasksProbeBusy: dialogState.tasksProbeBusy,
-          projectProbeBusy: dialogState.projectProbeBusy,
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          title: const Text('兼容性检查'),
+          subtitle: Text(
+            '旧 general / project / tasks 接口回归入口，默认折叠',
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+              color: Theme.of(ctx).colorScheme.outline,
+            ),
+          ),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 0,
+                children: [
+                  ..._buildProjectGeneralProbeActions(
+                    ctx: ctx,
+                    setDialogState: setDialogState,
+                    token: token,
+                    p: p,
+                    detail: detail,
+                    introCtrl: introCtrl,
+                    generalProbeBusy: dialogState.generalProbeBusy,
+                    tasksProbeBusy: dialogState.tasksProbeBusy,
+                    projectProbeBusy: dialogState.projectProbeBusy,
+                  ),
+                  ..._buildProjectProjectProbeActions(
+                    ctx: ctx,
+                    setDialogState: setDialogState,
+                    token: token,
+                    detail: detail,
+                    generalProbeBusy: dialogState.generalProbeBusy,
+                    tasksProbeBusy: dialogState.tasksProbeBusy,
+                    projectProbeBusy: dialogState.projectProbeBusy,
+                  ),
+                  ..._buildProjectTasksProbeActions(
+                    ctx: ctx,
+                    setDialogState: setDialogState,
+                    token: token,
+                    p: p,
+                    generalProbeBusy: dialogState.generalProbeBusy,
+                    tasksProbeBusy: dialogState.tasksProbeBusy,
+                    projectProbeBusy: dialogState.projectProbeBusy,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         if (dialogState.statsRef[0] != null)
