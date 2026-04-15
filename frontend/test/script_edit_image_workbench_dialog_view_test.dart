@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/script_editor/edit_image/workbench_view.dart';
+import 'package:openflow_app/script_editor/edit_image/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
 ScriptEditImageWorkbenchDialogViewModel buildModel({

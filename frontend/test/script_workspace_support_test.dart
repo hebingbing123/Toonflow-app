@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/agent_workspaces/contexts/script/support.dart';
+import 'package:openflow_app/agent_workspaces/contexts/script/support.dart';
 
 void main() {
   test('extractScriptWorkspaceNovelIds reads numeric ids from items', () {

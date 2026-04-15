@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/script_editor/storyboards/workbench_view.dart';
-import 'package:openflow_app/home_page/storyboard_editor/support/diagnosis.dart';
+import 'package:openflow_app/script_editor/storyboards/workbench_view.dart';
+import 'package:openflow_app/storyboard_editor/support/diagnosis.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void noop() {}

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/storyboard_editor/support.dart';
+import 'package:openflow_app/storyboard_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/projects/workbenches/agent_memory_view.dart';
+import 'package:openflow_app/projects/workbenches/agent_memory_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
 ProjectRow buildProject({required int numericId, required String name}) {

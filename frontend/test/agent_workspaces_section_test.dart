@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/agent_workspaces/controls.dart';
-import 'package:openflow_app/home_page/agent_workspaces/section.dart';
+import 'package:openflow_app/agent_workspaces/controls.dart';
+import 'package:openflow_app/agent_workspaces/section.dart';
 
 void main() {
   testWidgets('Agent workspace pane switching keeps core content visible', (

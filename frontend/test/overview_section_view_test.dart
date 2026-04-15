@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/overview/section_view.dart';
+import 'package:openflow_app/overview/section_view.dart';
 
 void noop() {}
 

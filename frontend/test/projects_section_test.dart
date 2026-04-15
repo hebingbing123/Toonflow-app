@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/projects/section.dart';
+import 'package:openflow_app/projects/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {

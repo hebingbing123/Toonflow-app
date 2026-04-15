@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openflow_app/home_page/projects/workbenches/creative_manuals.dart';
+import 'package:openflow_app/projects/workbenches/creative_manuals.dart';
 
 void main() {
   testWidgets('creative manuals workbench renders seeded defaults', (
