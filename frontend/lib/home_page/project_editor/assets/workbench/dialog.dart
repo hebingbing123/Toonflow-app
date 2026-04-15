@@ -61,22 +61,22 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
         assetsFilterScriptNumericId: assetsFilterScriptNumericId,
         assetsBusy: assetsBusy,
       ),
-      onLinkAsset: (dialogCtx) => _openScriptAssetLinkDialog(
+      onLinkAsset: (dialogCtx) => openProjectAssetLinkDialog(
         ctx: dialogCtx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         scriptList: scriptList,
         assetsRef: assetsRef,
         assetsBusy: assetsBusy,
         reloadAssetsAndStats: reloadAssetsAndStats,
         unlink: false,
       ),
-      onUnlinkAsset: (dialogCtx) => _openScriptAssetLinkDialog(
+      onUnlinkAsset: (dialogCtx) => openProjectAssetLinkDialog(
         ctx: dialogCtx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         scriptList: scriptList,
         assetsRef: assetsRef,
         assetsBusy: assetsBusy,
