@@ -43,9 +43,8 @@ extension _HomePageAuthSessionController on _HomePageState {
       _taskDetailNumericIdLine = null;
       _taskDetailUuidLine = null;
       _usageSummaryBody = null;
-      _versionBody = null;
-      _readyBody = null;
     });
+    _overviewController.reset();
     _skillsHarnessController.reset();
     _projectsController.reset();
     _jobsController.reset();

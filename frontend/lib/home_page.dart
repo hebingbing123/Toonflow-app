@@ -34,6 +34,7 @@ import 'quality_reviews/controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'skills_harness/controller.dart';
+import 'overview/controller.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';
@@ -78,7 +79,6 @@ part 'system_probes/account/settings.dart';
 part 'system_probes/account/profile.dart';
 part 'system_probes/content.dart';
 part 'auth/controller.dart';
-part 'overview/controller.dart';
 part 'shell/build_sections.dart';
 part 'shell/runtime_helpers.dart';
 part 'script_editor/editor.dart';
@@ -122,11 +122,6 @@ class _HomePageState extends State<HomePage> {
 
   StreamSubscription<AuthState>? _authSub;
 
-  String? _healthBody;
-  String? _healthRootBody;
-  String? _pingBody;
-  String? _versionBody;
-  String? _readyBody;
   String? _meBody;
   String? _devSwitchProbeBody;
   String? _memoryConfigProbeBody;
@@ -140,11 +135,6 @@ class _HomePageState extends State<HomePage> {
   String? _textModelDefaultBody;
   String? _modelDetailBody;
   String? _error;
-  bool _loadingHealth = false;
-  bool _loadingHealthRoot = false;
-  bool _loadingPing = false;
-  bool _loadingVersion = false;
-  bool _loadingReady = false;
   bool _loadingMe = false;
   bool _loadingDevSwitchProbe = false;
   bool _loadingMemoryConfigProbe = false;
@@ -224,6 +214,10 @@ class _HomePageState extends State<HomePage> {
         onErrorChanged: _setSharedError,
       );
 
+  late final OverviewController _overviewController = OverviewController(
+    onErrorChanged: _setSharedError,
+  );
+
   _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
   _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
 
@@ -244,6 +238,16 @@ class _HomePageState extends State<HomePage> {
       _skillsHarnessController.loadingWsHarnessAgent;
   bool get _loadingWsSkillsRead => _skillsHarnessController.loadingWsSkillsRead;
   List<String> get _wsLog => _skillsHarnessController.wsLog;
+  bool get _loadingHealth => _overviewController.loadingHealth;
+  bool get _loadingHealthRoot => _overviewController.loadingHealthRoot;
+  bool get _loadingPing => _overviewController.loadingPing;
+  bool get _loadingVersion => _overviewController.loadingVersion;
+  bool get _loadingReady => _overviewController.loadingReady;
+  String? get _healthBody => _overviewController.healthBody;
+  String? get _healthRootBody => _overviewController.healthRootBody;
+  String? get _pingBody => _overviewController.pingBody;
+  String? get _versionBody => _overviewController.versionBody;
+  String? get _readyBody => _overviewController.readyBody;
 
   Future<WebSocketChannel?> _openHarnessChannel(String token) =>
       _skillsHarnessController.openHarnessChannel(token);
@@ -258,6 +262,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _overviewController.addListener(_handleOverviewChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     if (kSupabaseConfigured) {
       _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
@@ -271,12 +276,19 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleOverviewChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _authSub?.cancel();
+    _overviewController.removeListener(_handleOverviewChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _email.dispose();
     _password.dispose();
+    _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
     _taskDetailJobIdCtrl.dispose();

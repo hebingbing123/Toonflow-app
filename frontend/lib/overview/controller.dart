@@ -1,149 +1,138 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'package:flutter/material.dart';
 
-part of '../../home_page.dart';
+import '../rust_api.dart';
 
-extension _HomePageOverviewController on _HomePageState {
-  Future<void> _pingHealth() async {
-    setState(() {
-      _loadingHealth = true;
-      _error = null;
-      _healthBody = null;
-    });
+typedef OverviewErrorSink = void Function(String? error);
+
+class OverviewController extends ChangeNotifier {
+  OverviewController({required OverviewErrorSink onErrorChanged})
+    : _onErrorChanged = onErrorChanged;
+
+  final OverviewErrorSink _onErrorChanged;
+
+  bool loadingHealth = false;
+  bool loadingHealthRoot = false;
+  bool loadingPing = false;
+  bool loadingVersion = false;
+  bool loadingReady = false;
+  String? healthBody;
+  String? healthRootBody;
+  String? pingBody;
+  String? versionBody;
+  String? readyBody;
+
+  void reset() {
+    loadingHealth = false;
+    loadingHealthRoot = false;
+    loadingPing = false;
+    loadingVersion = false;
+    loadingReady = false;
+    healthBody = null;
+    healthRootBody = null;
+    pingBody = null;
+    versionBody = null;
+    readyBody = null;
+    notifyListeners();
+  }
+
+  void _setError(String? error) {
+    _onErrorChanged(error);
+  }
+
+  Future<void> pingHealth() async {
+    loadingHealth = true;
+    _setError(null);
+    healthBody = null;
+    notifyListeners();
     try {
-      final h = await fetchHealthV1();
-      if (!mounted) return;
-      setState(() {
-        _healthBody = 'status=${h.status} service=${h.service}';
-        _loadingHealth = false;
-      });
+      final response = await fetchHealthV1();
+      healthBody = 'status=${response.status} service=${response.service}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHealth = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHealth = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingHealth = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _pingHealthRoot() async {
-    setState(() {
-      _loadingHealthRoot = true;
-      _error = null;
-      _healthRootBody = null;
-    });
+  Future<void> pingHealthRoot() async {
+    loadingHealthRoot = true;
+    _setError(null);
+    healthRootBody = null;
+    notifyListeners();
     try {
-      final h = await fetchHealthRoot();
-      if (!mounted) return;
-      setState(() {
-        _healthRootBody = 'status=${h.status} service=${h.service}';
-        _loadingHealthRoot = false;
-      });
+      final response = await fetchHealthRoot();
+      healthRootBody = 'status=${response.status} service=${response.service}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHealthRoot = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingHealthRoot = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingHealthRoot = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _pingPing() async {
-    setState(() {
-      _loadingPing = true;
-      _error = null;
-      _pingBody = null;
-    });
+  Future<void> pingPing() async {
+    loadingPing = true;
+    _setError(null);
+    pingBody = null;
+    notifyListeners();
     try {
-      final p = await fetchPingV1();
-      if (!mounted) return;
-      setState(() {
-        _pingBody = 'ok=${p.ok}';
-        _loadingPing = false;
-      });
+      final response = await fetchPingV1();
+      pingBody = 'ok=${response.ok}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingPing = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingPing = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingPing = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _pingVersion() async {
-    setState(() {
-      _loadingVersion = true;
-      _error = null;
-      _versionBody = null;
-    });
+  Future<void> pingVersion() async {
+    loadingVersion = true;
+    _setError(null);
+    versionBody = null;
+    notifyListeners();
     try {
-      final v = await fetchVersionV1();
-      if (!mounted) return;
-      final parts = <String>['service=${v.service}', 'version=${v.version}'];
-      if (v.gitSha != null && v.gitSha!.isNotEmpty) {
-        parts.add('git_sha=${v.gitSha}');
+      final response = await fetchVersionV1();
+      final parts = <String>[
+        'service=${response.service}',
+        'version=${response.version}',
+      ];
+      if (response.gitSha != null && response.gitSha!.isNotEmpty) {
+        parts.add('git_sha=${response.gitSha}');
       }
-      setState(() {
-        _versionBody = parts.join(' · ');
-        _loadingVersion = false;
-      });
+      versionBody = parts.join(' · ');
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingVersion = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingVersion = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingVersion = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _pingReady() async {
-    setState(() {
-      _loadingReady = true;
-      _error = null;
-      _readyBody = null;
-    });
+  Future<void> pingReady() async {
+    loadingReady = true;
+    _setError(null);
+    readyBody = null;
+    notifyListeners();
     try {
-      final r = await fetchReadyV1();
-      if (!mounted) return;
-      setState(() {
-        _readyBody = 'status=${r.status}, database=${r.database}';
-        _loadingReady = false;
-      });
+      final response = await fetchReadyV1();
+      readyBody = 'status=${response.status}, database=${response.database}';
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingReady = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingReady = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingReady = false;
+      notifyListeners();
     }
   }
 }

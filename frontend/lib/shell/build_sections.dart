@@ -35,11 +35,11 @@ extension _HomePageBuildSections on _HomePageState {
     pingBody: _pingBody,
     versionBody: _versionBody,
     readyBody: _readyBody,
-    onPingHealth: _pingHealth,
-    onPingHealthRoot: _pingHealthRoot,
-    onPingPing: _pingPing,
-    onPingVersion: _pingVersion,
-    onPingReady: _pingReady,
+    onPingHealth: _overviewController.pingHealth,
+    onPingHealthRoot: _overviewController.pingHealthRoot,
+    onPingPing: _overviewController.pingPing,
+    onPingVersion: _overviewController.pingVersion,
+    onPingReady: _overviewController.pingReady,
   );
 
   Widget _buildAuthSection(Session? session, bool signedIn) => AuthSection(
