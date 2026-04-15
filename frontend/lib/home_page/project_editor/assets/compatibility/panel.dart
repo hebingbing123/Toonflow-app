@@ -1,8 +1,11 @@
-part of '../../../../home_page.dart';
+import 'package:flutter/material.dart';
+
+import '../../../../rust_api.dart';
 
 /// Renders collapsed asset probe actions for project editor diagnostics.
-class _ProjectAssetsCompatibilityPanel extends StatelessWidget {
-  const _ProjectAssetsCompatibilityPanel({
+class ProjectAssetsCompatibilityPanel extends StatelessWidget {
+  const ProjectAssetsCompatibilityPanel({
+    super.key,
     required this.ctx,
     required this.setDialogState,
     required this.token,
