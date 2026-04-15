@@ -101,16 +101,16 @@ extension _HomePageProjectEditorAssetsWorkbench on _HomePageState {
       ),
       onOpenImagesWorkbench:
           (dialogCtx, preferredAssetNumericId) =>
-              _openAssetImagesWorkbenchDialog(
-        ctx: dialogCtx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        assetsRef: assetsRef,
-        assetsBusy: assetsBusy,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        preferredAssetNumericId: preferredAssetNumericId,
-      ),
+              openAssetImagesWorkbenchDialog(
+                ctx: dialogCtx,
+                setDialogState: setDialogState,
+                token: token,
+                project: p,
+                assetsRef: assetsRef,
+                assetsBusy: assetsBusy,
+                reloadAssetsAndStats: reloadAssetsAndStats,
+                preferredAssetNumericId: preferredAssetNumericId,
+              ),
       onOpenGenerationWorkbench:
           (dialogCtx, preferredAssetNumericId) =>
           openAssetGenerationWorkbenchDialog(

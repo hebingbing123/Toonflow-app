@@ -25,15 +25,17 @@ extension _HomePageProjectEditorNovelEventsWorkbench on _HomePageState {
       assetsBusy: assetsBusy,
       assetsLoading: assetsLoading,
       assetsScriptFilterLoading: assetsScriptFilterLoading,
-      openWorkbench: () => _openNovelEventsWorkbenchDialog(
+      openWorkbench: () => openNovelEventsWorkbenchDialog(
         ctx: ctx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         novelsRef: novelsRef,
         novelEventsRef: novelEventsRef,
         novelsBusy: novelsBusy,
         novelEventsLoading: novelEventsLoading,
+        parseNumericIdList: _parseNumericIdList,
+        chapterIndexesToNumericIds: _chapterIndexesToNumericIds,
       ),
       refreshEvents: () async {
         setDialogState(() => novelEventsLoading[0] = true);
