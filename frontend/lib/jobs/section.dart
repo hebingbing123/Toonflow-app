@@ -1,100 +1,49 @@
 import 'package:flutter/material.dart';
-import '../../rust_api.dart';
+import 'controller.dart';
 import 'section_view.dart';
 
 class JobsSection extends StatelessWidget {
-  const JobsSection({
-    super.key,
-    required this.loadingJobs,
-    required this.loadingJobKinds,
-    required this.loadingJobKindSummary,
-    required this.loadingJobStatusSummary,
-    required this.creatingJob,
-    required this.loadingJobById,
-    required this.jobIdController,
-    required this.jobs,
-    required this.jobByIdLine,
-    required this.jobKindsLine,
-    required this.jobKindSummaryLine,
-    required this.jobStatusSummaryLine,
-    required this.cancellingJobId,
-    required this.retryingJobId,
-    required this.onJobIdChanged,
-    required this.onLoadJobs,
-    required this.onLoadJobsKindFlutterProbe,
-    required this.onLoadJobsStatusFailed,
-    required this.onLoadJobsKindProbeStatusQueued,
-    required this.onLoadJobKinds,
-    required this.onLoadJobKindSummary,
-    required this.onLoadJobStatusSummary,
-    required this.onCreateProbeJob,
-    required this.onFetchJobById,
-    required this.onSelectJob,
-    required this.onRetryFailedJob,
-    required this.onCancelQueuedJob,
-  });
+  const JobsSection({super.key, required this.controller});
 
-  final bool loadingJobs;
-  final bool loadingJobKinds;
-  final bool loadingJobKindSummary;
-  final bool loadingJobStatusSummary;
-  final bool creatingJob;
-  final bool loadingJobById;
-  final TextEditingController jobIdController;
-  final List<JobRow>? jobs;
-  final String? jobByIdLine;
-  final String? jobKindsLine;
-  final String? jobKindSummaryLine;
-  final String? jobStatusSummaryLine;
-  final String? cancellingJobId;
-  final String? retryingJobId;
-  final ValueChanged<String> onJobIdChanged;
-  final VoidCallback onLoadJobs;
-  final VoidCallback onLoadJobsKindFlutterProbe;
-  final VoidCallback onLoadJobsStatusFailed;
-  final VoidCallback onLoadJobsKindProbeStatusQueued;
-  final VoidCallback onLoadJobKinds;
-  final VoidCallback onLoadJobKindSummary;
-  final VoidCallback onLoadJobStatusSummary;
-  final VoidCallback onCreateProbeJob;
-  final VoidCallback onFetchJobById;
-  final ValueChanged<JobRow> onSelectJob;
-  final ValueChanged<JobRow> onRetryFailedJob;
-  final ValueChanged<JobRow> onCancelQueuedJob;
+  final JobsController controller;
 
   @override
   Widget build(BuildContext context) {
-    return JobsSectionView(
-      model: JobsSectionViewModel(
-        loadingJobs: loadingJobs,
-        loadingJobKinds: loadingJobKinds,
-        loadingJobKindSummary: loadingJobKindSummary,
-        loadingJobStatusSummary: loadingJobStatusSummary,
-        creatingJob: creatingJob,
-        loadingJobById: loadingJobById,
-        jobIdController: jobIdController,
-        jobs: jobs,
-        jobByIdLine: jobByIdLine,
-        jobKindsLine: jobKindsLine,
-        jobKindSummaryLine: jobKindSummaryLine,
-        jobStatusSummaryLine: jobStatusSummaryLine,
-        cancellingJobId: cancellingJobId,
-        retryingJobId: retryingJobId,
-      ),
-      callbacks: JobsSectionViewCallbacks(
-        onJobIdChanged: onJobIdChanged,
-        onLoadJobs: onLoadJobs,
-        onLoadJobsKindFlutterProbe: onLoadJobsKindFlutterProbe,
-        onLoadJobsStatusFailed: onLoadJobsStatusFailed,
-        onLoadJobsKindProbeStatusQueued: onLoadJobsKindProbeStatusQueued,
-        onLoadJobKinds: onLoadJobKinds,
-        onLoadJobKindSummary: onLoadJobKindSummary,
-        onLoadJobStatusSummary: onLoadJobStatusSummary,
-        onCreateProbeJob: onCreateProbeJob,
-        onFetchJobById: onFetchJobById,
-        onSelectJob: onSelectJob,
-        onRetryFailedJob: onRetryFailedJob,
-        onCancelQueuedJob: onCancelQueuedJob,
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) => JobsSectionView(
+        model: JobsSectionViewModel(
+          loadingJobs: controller.loadingJobs,
+          loadingJobKinds: controller.loadingJobKinds,
+          loadingJobKindSummary: controller.loadingJobKindSummary,
+          loadingJobStatusSummary: controller.loadingJobStatusSummary,
+          creatingJob: controller.creatingJob,
+          loadingJobById: controller.loadingJobById,
+          jobIdController: controller.jobIdController,
+          jobs: controller.jobs,
+          jobByIdLine: controller.jobByIdLine,
+          jobKindsLine: controller.jobKindsLine,
+          jobKindSummaryLine: controller.jobKindSummaryLine,
+          jobStatusSummaryLine: controller.jobStatusSummaryLine,
+          cancellingJobId: controller.cancellingJobId,
+          retryingJobId: controller.retryingJobId,
+        ),
+        callbacks: JobsSectionViewCallbacks(
+          onJobIdChanged: controller.onJobIdChanged,
+          onLoadJobs: controller.loadJobs,
+          onLoadJobsKindFlutterProbe: controller.loadJobsKindFlutterProbe,
+          onLoadJobsStatusFailed: controller.loadJobsStatusFailed,
+          onLoadJobsKindProbeStatusQueued:
+              controller.loadJobsKindProbeStatusQueued,
+          onLoadJobKinds: controller.loadJobKinds,
+          onLoadJobKindSummary: controller.loadJobKindSummary,
+          onLoadJobStatusSummary: controller.loadJobStatusSummary,
+          onCreateProbeJob: controller.createProbeJob,
+          onFetchJobById: controller.fetchJobById,
+          onSelectJob: controller.selectJob,
+          onRetryFailedJob: controller.retryFailedJob,
+          onCancelQueuedJob: controller.cancelQueuedJob,
+        ),
       ),
     );
   }

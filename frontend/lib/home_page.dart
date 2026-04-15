@@ -28,6 +28,7 @@ import 'script_editor/storyboards/workbench_view.dart';
 import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
+import 'jobs/controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
@@ -58,10 +59,6 @@ part 'project_editor/assets/dialogs/filter.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
 part 'projects/controller.dart';
-part 'jobs/list.dart';
-part 'jobs/summary.dart';
-part 'jobs/actions.dart';
-part 'jobs/controller.dart';
 part 'task_center/controller.dart';
 part 'agent_workspaces/controller/constants.dart';
 part 'agent_workspaces/controller/utils.dart';
@@ -221,20 +218,10 @@ class _HomePageState extends State<HomePage> {
   String? _projectsSummaryLine;
   String? _artStylesLine;
 
-  bool _loadingJobs = false;
-  bool _loadingJobKinds = false;
-  bool _loadingJobKindSummary = false;
-  bool _loadingJobStatusSummary = false;
-  bool _creatingJob = false;
-  String? _cancellingJobId;
-  String? _retryingJobId;
-  List<JobRow>? _jobs;
-  String? _jobKindsLine;
-  String? _jobKindSummaryLine;
-  String? _jobStatusSummaryLine;
-  bool _loadingJobById = false;
-  String? _jobByIdLine;
-  final _jobIdCtrl = TextEditingController();
+  late final JobsController _jobsController = JobsController(
+    accessTokenProvider: () => _session?.accessToken,
+    onErrorChanged: _setSharedError,
+  );
 
   bool _loadingTaskProjects = false;
   bool _loadingTaskCategories = false;
@@ -280,6 +267,13 @@ class _HomePageState extends State<HomePage> {
   _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
   _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
 
+  void _setSharedError(String? error) {
+    if (!mounted) return;
+    setState(() {
+      _error = error;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -297,7 +291,7 @@ class _HomePageState extends State<HomePage> {
     _ws?.sink.close();
     _email.dispose();
     _password.dispose();
-    _jobIdCtrl.dispose();
+    _jobsController.dispose();
     _taskDetailJobIdCtrl.dispose();
     _qualityReviewIdCtrl.dispose();
     _skillPathCtrl.dispose();

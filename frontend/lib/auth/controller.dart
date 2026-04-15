@@ -41,8 +41,6 @@ extension _HomePageAuthSessionController on _HomePageState {
       _wsLog.clear();
       _projects = null;
       _creatingProject = false;
-      _jobs = null;
-      _jobByIdLine = null;
       _taskProjects = null;
       _taskApiJobs = null;
       _taskCategoriesLine = null;
@@ -57,5 +55,6 @@ extension _HomePageAuthSessionController on _HomePageState {
       _skillsAggregateLine = null;
       _skillsListSummary = null;
     });
+    _jobsController.reset();
   }
 }
