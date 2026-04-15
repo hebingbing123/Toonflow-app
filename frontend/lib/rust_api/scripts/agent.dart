@@ -1,4 +1,8 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
 
 /// Script-agent plan persistence endpoints.
 /// `POST /api/v1/script-agent/get-plan-data` — OpenAPI `postScriptAgentGetPlanDataV1` (**200**/**404**/**503**).

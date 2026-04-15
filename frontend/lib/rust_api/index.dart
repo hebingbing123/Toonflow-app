@@ -12,6 +12,7 @@ export 'harness/index.dart';
 export 'production.dart';
 export 'quality/index.dart';
 export 'skills/index.dart';
+export 'scripts/index.dart';
 export 'system/index.dart';
 
 part 'catalog/art_styles.dart';
@@ -45,7 +46,6 @@ part 'project/rest.dart';
 part 'project/compat.dart';
 part 'scripts/api.dart';
 part 'scripts/storyboards_models.dart';
-part 'scripts/agent.dart';
 part 'settings/about_danger.dart';
 part 'settings/agent_deploy.dart';
 part 'settings/memory_config_api.dart';
