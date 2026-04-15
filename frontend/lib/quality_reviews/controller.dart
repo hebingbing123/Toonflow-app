@@ -1,65 +1,109 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'package:flutter/material.dart';
 
-part of '../../home_page.dart';
+import '../../rust_api.dart';
 
-extension _HomePageQualityReviewsController on _HomePageState {
+typedef QualityReviewsAccessTokenProvider = String? Function();
+typedef QualityReviewsErrorSink = void Function(String? error);
+
+class QualityReviewsController extends ChangeNotifier {
+  QualityReviewsController({
+    required QualityReviewsAccessTokenProvider accessTokenProvider,
+    required QualityReviewsErrorSink onErrorChanged,
+  }) : _accessTokenProvider = accessTokenProvider,
+       _onErrorChanged = onErrorChanged;
+
+  final QualityReviewsAccessTokenProvider _accessTokenProvider;
+  final QualityReviewsErrorSink _onErrorChanged;
+
+  final TextEditingController qualityReviewIdController =
+      TextEditingController();
+
+  bool loadingQualityReviews = false;
+  bool loadingQualityBadCases = false;
+  bool loadingQualityStats = false;
+  bool loadingQualityStagePassRate = false;
+  bool creatingQualityReview = false;
+  bool loadingQualityReviewById = false;
+  String? qualityStatsLine;
+  String? qualityStagePassRateLine;
+  String? qualityReviewByIdLine;
+  List<QualityReview>? qualityReviews;
+
+  String? get _accessToken => _accessTokenProvider();
+
+  void _setError(String? error) {
+    _onErrorChanged(error);
+  }
+
+  void onQualityReviewIdChanged(String _) {
+    notifyListeners();
+  }
+
+  void selectQualityReview(QualityReview review) {
+    qualityReviewIdController.text = review.id;
+    notifyListeners();
+  }
+
+  void reset() {
+    loadingQualityReviews = false;
+    loadingQualityBadCases = false;
+    loadingQualityStats = false;
+    loadingQualityStagePassRate = false;
+    creatingQualityReview = false;
+    loadingQualityReviewById = false;
+    qualityStatsLine = null;
+    qualityStagePassRateLine = null;
+    qualityReviewByIdLine = null;
+    qualityReviews = null;
+    qualityReviewIdController.clear();
+    notifyListeners();
+  }
+
+  Future<void> loadQualityReviews() async {
+    await _loadQualityReviews();
+  }
+
+  Future<void> loadQualityBadCases() async {
+    await _loadQualityReviews(onlyBadCases: true);
+  }
+
   Future<void> _loadQualityReviews({bool onlyBadCases = false}) async {
-    final token = _session?.accessToken;
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      if (onlyBadCases) {
-        _loadingQualityBadCases = true;
-      } else {
-        _loadingQualityReviews = true;
-      }
-      _error = null;
-      _qualityReviews = null;
-    });
+    if (onlyBadCases) {
+      loadingQualityBadCases = true;
+    } else {
+      loadingQualityReviews = true;
+    }
+    qualityReviews = null;
+    _setError(null);
+    notifyListeners();
     try {
-      final rows = await fetchQualityReviews(
+      qualityReviews = await fetchQualityReviews(
         token,
         isBadCase: onlyBadCases ? true : null,
         limit: 20,
       );
-      if (!mounted) return;
-      setState(() {
-        _qualityReviews = rows;
-        if (onlyBadCases) {
-          _loadingQualityBadCases = false;
-        } else {
-          _loadingQualityReviews = false;
-        }
-      });
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        if (onlyBadCases) {
-          _loadingQualityBadCases = false;
-        } else {
-          _loadingQualityReviews = false;
-        }
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        if (onlyBadCases) {
-          _loadingQualityBadCases = false;
-        } else {
-          _loadingQualityReviews = false;
-        }
-      });
+      _setError(e.toString());
+    } finally {
+      if (onlyBadCases) {
+        loadingQualityBadCases = false;
+      } else {
+        loadingQualityReviews = false;
+      }
+      notifyListeners();
     }
   }
 
-  Future<void> _createQualityReviewProbe() async {
-    final token = _session?.accessToken;
+  Future<void> createQualityReviewProbe() async {
+    final token = _accessToken;
     if (token == null) return;
-    setState(() {
-      _creatingQualityReview = true;
-      _error = null;
-    });
+    creatingQualityReview = true;
+    _setError(null);
+    notifyListeners();
     try {
       final created = await createQualityReview(
         token,
@@ -76,65 +120,110 @@ extension _HomePageQualityReviewsController on _HomePageState {
           isBadCase: false,
         ),
       );
-      if (!mounted) return;
-      setState(() {
-        _creatingQualityReview = false;
-        _qualityReviewIdCtrl.text = created.id;
-        _qualityReviewByIdLine =
-            '${created.id} · ${created.targetType} · ${created.source} · score=${created.overallScore ?? "n/a"}';
-      });
-      await _loadQualityReviews();
+      qualityReviewIdController.text = created.id;
+      qualityReviewByIdLine =
+          '${created.id} · ${created.targetType} · ${created.source} · score=${created.overallScore ?? "n/a"}';
+      creatingQualityReview = false;
+      notifyListeners();
+      await loadQualityReviews();
+      return;
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _creatingQualityReview = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _creatingQualityReview = false;
-      });
+      _setError(e.toString());
+    } finally {
+      creatingQualityReview = false;
+      notifyListeners();
     }
   }
 
-  Future<void> _fetchQualityReviewById() async {
-    final token = _session?.accessToken;
+  Future<void> fetchSelectedQualityReview() async {
+    final token = _accessToken;
     if (token == null) return;
-    final id = _qualityReviewIdCtrl.text.trim();
+    final id = qualityReviewIdController.text.trim();
     if (id.isEmpty) return;
-    setState(() {
-      _loadingQualityReviewById = true;
-      _error = null;
-      _qualityReviewByIdLine = null;
-    });
+    loadingQualityReviewById = true;
+    qualityReviewByIdLine = null;
+    _setError(null);
+    notifyListeners();
     try {
       final row = await fetchQualityReviewById(token, id);
-      if (!mounted) return;
-      setState(() {
-        _qualityReviewByIdLine = [
-          row.id,
-          row.targetType,
-          row.source,
-          if (row.overallScore != null) 'score=${row.overallScore}',
-          if (row.passed != null) 'passed=${row.passed}',
-          if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
-        ].join(' · ');
-        _loadingQualityReviewById = false;
-      });
+      qualityReviewByIdLine = [
+        row.id,
+        row.targetType,
+        row.source,
+        if (row.overallScore != null) 'score=${row.overallScore}',
+        if (row.passed != null) 'passed=${row.passed}',
+        if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
+      ].join(' · ');
     } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingQualityReviewById = false;
-      });
+      _setError(e.toString());
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _loadingQualityReviewById = false;
-      });
+      _setError(e.toString());
+    } finally {
+      loadingQualityReviewById = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> loadQualityStats() async {
+    final token = _accessToken;
+    if (token == null) return;
+    loadingQualityStats = true;
+    qualityStatsLine = null;
+    _setError(null);
+    notifyListeners();
+    try {
+      final rows = await fetchQualityStats(token);
+      qualityStatsLine = rows.isEmpty
+          ? '(empty)'
+          : rows
+                .map(
+                  (row) =>
+                      '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}%, avg=${row.avgOverallScore.toStringAsFixed(1)}',
+                )
+                .join(' | ');
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingQualityStats = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadQualityStagePassRate() async {
+    final token = _accessToken;
+    if (token == null) return;
+    loadingQualityStagePassRate = true;
+    qualityStagePassRateLine = null;
+    _setError(null);
+    notifyListeners();
+    try {
+      final rows = await fetchQualityStagePassRate(token);
+      qualityStagePassRateLine = rows.isEmpty
+          ? '(empty)'
+          : rows
+                .take(6)
+                .map(
+                  (row) =>
+                      '${row.reviewDate.substring(0, 10)} ${row.targetType}: pass=${row.passRatePercent?.toStringAsFixed(1) ?? "n/a"}%, total=${row.totalReviews}',
+                )
+                .join(' | ');
+    } on RustApiException catch (e) {
+      _setError(e.toString());
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      loadingQualityStagePassRate = false;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    qualityReviewIdController.dispose();
+    super.dispose();
   }
 }

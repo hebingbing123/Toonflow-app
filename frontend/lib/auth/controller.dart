@@ -54,5 +54,6 @@ extension _HomePageAuthSessionController on _HomePageState {
     });
     _projectsController.reset();
     _jobsController.reset();
+    _qualityReviewsController.reset();
   }
 }

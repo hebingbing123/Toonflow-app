@@ -281,26 +281,7 @@ extension _HomePageBuildSections on _HomePageState {
     if (_productWorkspacePane == _ProductWorkspacePane.quality)
       QualityReviewsSection(
         accessToken: _session?.accessToken,
-        loadingQualityReviews: _loadingQualityReviews,
-        loadingQualityBadCases: _loadingQualityBadCases,
-        loadingQualityStats: _loadingQualityStats,
-        loadingQualityStagePassRate: _loadingQualityStagePassRate,
-        creatingQualityReview: _creatingQualityReview,
-        loadingQualityReviewById: _loadingQualityReviewById,
-        qualityReviewIdController: _qualityReviewIdCtrl,
-        qualityReviews: _qualityReviews,
-        qualityStatsLine: _qualityStatsLine,
-        qualityStagePassRateLine: _qualityStagePassRateLine,
-        qualityReviewByIdLine: _qualityReviewByIdLine,
-        onQualityReviewIdChanged: (_) => setState(() {}),
-        onLoadQualityReviews: _loadQualityReviews,
-        onLoadQualityBadCases: () => _loadQualityReviews(onlyBadCases: true),
-        onLoadQualityStats: _loadQualityStats,
-        onLoadQualityStagePassRate: _loadQualityStagePassRate,
-        onCreateQualityReviewProbe: _createQualityReviewProbe,
-        onFetchQualityReviewById: _fetchQualityReviewById,
-        onSelectQualityReview: (review) =>
-            setState(() => _qualityReviewIdCtrl.text = review.id),
+        controller: _qualityReviewsController,
       ),
   ];
 

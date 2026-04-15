@@ -1,47 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
+
+QualityReviewsController buildController({
+  List<QualityReview>? qualityReviews,
+  String? qualityStatsLine,
+  String? qualityStagePassRateLine,
+  String? qualityReviewByIdLine,
+}) {
+  final controller = QualityReviewsController(
+    accessTokenProvider: () => 'token',
+    onErrorChanged: (_) {},
+  );
+  controller.qualityReviews = qualityReviews;
+  controller.qualityStatsLine = qualityStatsLine;
+  controller.qualityStagePassRateLine = qualityStagePassRateLine;
+  controller.qualityReviewByIdLine = qualityReviewByIdLine;
+  return controller;
+}
 
 void main() {
   testWidgets('quality section exposes workbench entry and summary', (
     WidgetTester tester,
   ) async {
+    final controller = buildController(
+      qualityReviews: const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'output',
+          source: 'manual',
+          overallScore: 82,
+          isBadCase: false,
+        ),
+      ],
+      qualityStatsLine: 'output: total=1, pass=100%',
+      qualityStagePassRateLine: '2026-04-10 output:100%',
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: QualityReviewsSection(
             accessToken: 'token',
-            loadingQualityReviews: false,
-            loadingQualityBadCases: false,
-            loadingQualityStats: false,
-            loadingQualityStagePassRate: false,
-            creatingQualityReview: false,
-            loadingQualityReviewById: false,
-            qualityReviewIdController: TextEditingController(),
-            qualityReviews: const [
-              QualityReview(
-                id: 'r1',
-                createdAt: '2026-04-10T00:00:00Z',
-                updatedAt: '2026-04-10T00:00:00Z',
-                userId: 'u1',
-                targetType: 'output',
-                source: 'manual',
-                overallScore: 82,
-                isBadCase: false,
-              ),
-            ],
-            qualityStatsLine: 'output: total=1, pass=100%',
-            qualityStagePassRateLine: '2026-04-10 output:100%',
-            qualityReviewByIdLine: null,
-            onQualityReviewIdChanged: (_) {},
-            onLoadQualityReviews: () {},
-            onLoadQualityBadCases: () {},
-            onLoadQualityStats: () {},
-            onLoadQualityStagePassRate: () {},
-            onCreateQualityReviewProbe: () {},
-            onFetchQualityReviewById: () {},
-            onSelectQualityReview: (_) {},
+            controller: controller,
           ),
         ),
       ),
@@ -49,49 +54,37 @@ void main() {
 
     expect(find.text('打开质量工作台'), findsOneWidget);
     expect(find.text('评审 1 条 · output:manual:82'), findsOneWidget);
+    controller.dispose();
   });
 
   testWidgets('quality workbench dialog shows seeded controls', (
     WidgetTester tester,
   ) async {
-    final reviewIdController = TextEditingController();
-    addTearDown(reviewIdController.dispose);
+    final controller = buildController(
+      qualityReviews: const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'output',
+          source: 'manual',
+          overallScore: 82,
+          isBadCase: false,
+        ),
+      ],
+      qualityStatsLine: 'output: total=1, pass=100%',
+      qualityStagePassRateLine: '2026-04-10 output:100%',
+      qualityReviewByIdLine: 'r1 · output · manual',
+    );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: QualityReviewsSection(
             accessToken: 'token',
-            loadingQualityReviews: false,
-            loadingQualityBadCases: false,
-            loadingQualityStats: false,
-            loadingQualityStagePassRate: false,
-            creatingQualityReview: false,
-            loadingQualityReviewById: false,
-            qualityReviewIdController: reviewIdController,
-            qualityReviews: const [
-              QualityReview(
-                id: 'r1',
-                createdAt: '2026-04-10T00:00:00Z',
-                updatedAt: '2026-04-10T00:00:00Z',
-                userId: 'u1',
-                targetType: 'output',
-                source: 'manual',
-                overallScore: 82,
-                isBadCase: false,
-              ),
-            ],
-            qualityStatsLine: 'output: total=1, pass=100%',
-            qualityStagePassRateLine: '2026-04-10 output:100%',
-            qualityReviewByIdLine: 'r1 · output · manual',
-            onQualityReviewIdChanged: (_) {},
-            onLoadQualityReviews: () {},
-            onLoadQualityBadCases: () {},
-            onLoadQualityStats: () {},
-            onLoadQualityStagePassRate: () {},
-            onCreateQualityReviewProbe: () {},
-            onFetchQualityReviewById: () {},
-            onSelectQualityReview: (_) {},
+            controller: controller,
           ),
         ),
       ),

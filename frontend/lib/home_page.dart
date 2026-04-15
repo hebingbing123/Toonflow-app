@@ -30,6 +30,7 @@ import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
+import 'quality_reviews/controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'rust_api.dart';
@@ -69,8 +70,6 @@ part 'skills_harness/controller.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
-part 'quality_reviews/summary.dart';
-part 'quality_reviews/controller.dart';
 part 'system_probes/controller.dart';
 part 'system_probes/models_catalog/catalog.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
@@ -230,17 +229,11 @@ class _HomePageState extends State<HomePage> {
   String? _taskDetailUuidLine;
   final _taskDetailJobIdCtrl = TextEditingController();
 
-  bool _loadingQualityReviews = false;
-  bool _loadingQualityBadCases = false;
-  bool _loadingQualityStats = false;
-  bool _loadingQualityStagePassRate = false;
-  bool _creatingQualityReview = false;
-  bool _loadingQualityReviewById = false;
-  String? _qualityStatsLine;
-  String? _qualityStagePassRateLine;
-  String? _qualityReviewByIdLine;
-  List<QualityReview>? _qualityReviews;
-  final _qualityReviewIdCtrl = TextEditingController();
+  late final QualityReviewsController _qualityReviewsController =
+      QualityReviewsController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+      );
 
   final _skillPathCtrl = TextEditingController(
     text: 'script_execution_script.md',
@@ -288,7 +281,7 @@ class _HomePageState extends State<HomePage> {
     _projectsController.dispose();
     _jobsController.dispose();
     _taskDetailJobIdCtrl.dispose();
-    _qualityReviewIdCtrl.dispose();
+    _qualityReviewsController.dispose();
     _skillPathCtrl.dispose();
     _skillContentCtrl.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();
