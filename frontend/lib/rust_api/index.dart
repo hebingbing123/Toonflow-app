@@ -8,14 +8,16 @@ import 'core.dart';
 
 export 'core.dart';
 export 'agents/index.dart';
+export 'catalog/index.dart';
 export 'harness/index.dart';
 export 'production.dart';
+export 'project/visual_manual.dart';
 export 'quality/index.dart';
+export 'shared_kernel/index.dart';
 export 'skills/index.dart';
 export 'scripts/index.dart';
 export 'system/index.dart';
 
-part 'catalog/art_styles.dart';
 part 'assets/api.dart';
 part 'assets/crud.dart';
 part 'assets/images.dart';
@@ -26,10 +28,8 @@ part 'assets/models/images.dart';
 part 'assets/models/workbench_data.dart';
 part 'assets/models/polling.dart';
 part 'assets/generate.dart';
-part 'shared_kernel/models.dart';
 part 'jobs/api.dart';
 part 'jobs/task_center.dart';
-part 'catalog/api.dart';
 part 'novels/models.dart';
 part 'novels/events_models.dart';
 part 'novels/crud.dart';
@@ -40,8 +40,6 @@ part 'project/overview.dart';
 part 'project/manuals.dart';
 part 'project/manuals_director.dart';
 part 'project/manuals_visual.dart';
-part 'project/visual_manual.dart';
-part 'system/prompts.dart';
 part 'project/rest.dart';
 part 'project/compat.dart';
 part 'scripts/api.dart';
@@ -52,7 +50,6 @@ part 'settings/memory_config_api.dart';
 part 'settings/vendor_credentials.dart';
 part 'settings/vendors_mutations.dart';
 part 'scripts/storyboards_api.dart';
-part 'system/usage.dart';
 
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1` (implemented in Rust; returns **200** or **503** without DB).
 

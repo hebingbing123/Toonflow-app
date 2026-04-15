@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import '../shared_kernel/index.dart';
 
 /// Model and vendor catalog query endpoints.
 /// `GET /api/v1/models?type=…` — Bearer; see `listModelsV1`.

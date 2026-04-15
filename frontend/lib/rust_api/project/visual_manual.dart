@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
+import '../shared_kernel/index.dart';
 
 /// Visual manual fetch endpoints grouped under the project creative-manual subdomain.
 /// `GET /api/v1/visual-manual` — OpenAPI `getVisualManualV1`.

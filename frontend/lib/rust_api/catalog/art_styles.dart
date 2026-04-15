@@ -1,4 +1,10 @@
-part of '../index.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
+
+import '../../config.dart';
+import '../core.dart';
 
 /// Art-style catalog models and CRUD/extraction endpoints.
 /// One row from **`GET /api/v1/art-styles`** (`ArtStyleRow` in OpenAPI).
@@ -182,7 +188,10 @@ Future<ArtStyleRow> patchArtStyleByNumericId(
 }
 
 /// `DELETE /api/v1/art-styles/numeric/{numeric_id}` — OpenAPI `deleteArtStyleByNumericIdV1` (**204**).
-Future<void> deleteArtStyleByNumericId(String accessToken, int numericId) async {
+Future<void> deleteArtStyleByNumericId(
+  String accessToken,
+  int numericId,
+) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/art-styles/numeric/$numericId');
   final res = await http
       .delete(uri, headers: {'Authorization': 'Bearer $accessToken'})
