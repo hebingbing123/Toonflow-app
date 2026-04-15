@@ -32,11 +32,11 @@ extension _HomePageProjectEditorScripts on _HomePageState {
         scriptProbeBusy: scriptProbeBusy,
         scriptList: scriptList,
       ),
-      openWorkbench: () => _openProjectScriptsWorkbenchDialog(
+      openWorkbench: () => openProjectScriptsWorkbenchDialog(
         ctx: ctx,
         setDialogState: setDialogState,
         token: token,
-        p: p,
+        project: p,
         saving: saving,
         scriptTaskBusy: scriptTaskBusy,
         scriptTaskLine: scriptTaskLine,
