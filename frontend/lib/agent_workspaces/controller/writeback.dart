@@ -7,9 +7,11 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectNumericId = _parsePositiveInt(
-      _agentWorkspaceProjectIdCtrl.text,
+      _workspaceInputController.projectIdController.text,
     );
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
     final toolCandidate = _workspaceOutputController.scriptWritebackCandidate
         ?.trim();
     final assistantText = _workspaceOutputController.assistantText.trim();
@@ -64,7 +66,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
   Future<void> _writeBackScriptPlanWorkspaceResult() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
     final candidate = _workspaceOutputController.scriptPlanWritebackCandidate;
     if (projectId == null || candidate == null) {
       setState(() => _error = 'project_id 与 planData 回写源必须有效');
@@ -194,9 +198,14 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
   Future<void> _writeBackProductionFlowResult() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final flowKey = _productionFlowKeyCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
+    final flowKey = _workspaceInputController.productionFlowKeyController.text
+        .trim();
     final toolName = _workspaceOutputController.lastToolName;
     final result = _workspaceOutputController.lastToolResultData;
     if (projectId == null ||

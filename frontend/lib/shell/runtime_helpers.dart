@@ -95,7 +95,8 @@ extension _HomePageRuntimeHelpers on _HomePageState {
         _workspaceOutputController.recordToolResult(
           name,
           result,
-          currentFlowKey: _productionFlowKeyCtrl.text,
+          currentFlowKey:
+              _workspaceInputController.productionFlowKeyController.text,
         );
       }
       return;

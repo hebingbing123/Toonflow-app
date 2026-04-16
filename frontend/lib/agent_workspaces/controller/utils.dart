@@ -14,10 +14,9 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
   }
 
   void _applySuggestedProductionFlowKey() {
-    final suggested = _workspaceOutputController.suggestedFlowKey?.trim();
-    if (suggested == null || suggested.isEmpty) {
-      return;
-    }
-    setState(() => _productionFlowKeyCtrl.text = suggested);
+    _workspaceInputController.applySuggestedProductionFlowKey(
+      _workspaceOutputController.suggestedFlowKey,
+    );
+    setState(() {});
   }
 }

@@ -6,8 +6,10 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
   Future<void> _runScriptWorkspaceAgent() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final prompt = _scriptWorkspacePromptCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final prompt = _workspaceInputController.scriptPromptController.text.trim();
     if (projectId == null || prompt.isEmpty) {
       setState(() => _error = 'project_id 与 prompt 必须有效');
       return;
@@ -44,8 +46,12 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
   Future<void> _probeScriptDomainTool(String toolName, String rawArgs) async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
     if (projectId == null || toolName.trim().isEmpty) {
       setState(() => _error = 'project_id/tool 必须有效');
       return;
@@ -107,10 +113,15 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
   Future<void> _runScriptSubAgentTool() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final prompt = _scriptWorkspacePromptCtrl.text.trim();
-    final toolName = _scriptSubAgentToolCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
+    final prompt = _workspaceInputController.scriptPromptController.text.trim();
+    final toolName = _workspaceInputController.scriptSubAgentToolController.text
+        .trim();
     if (projectId == null || prompt.isEmpty || toolName.isEmpty) {
       setState(() => _error = 'project_id/prompt/tool 必须有效');
       return;

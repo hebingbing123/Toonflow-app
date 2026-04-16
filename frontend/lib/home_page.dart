@@ -28,6 +28,7 @@ import 'script_editor/storyboards/workbench_view.dart';
 import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
+import 'agent_workspaces/input_controller.dart';
 import 'agent_workspaces/runtime_output_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
@@ -116,24 +117,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptResultWriteback = false;
   bool _loadingScriptPlanResultWriteback = false;
   bool _loadingProductionResultWriteback = false;
-  final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
-  final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
-  final _scriptWorkspacePromptCtrl = TextEditingController(
-    text: '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
-  );
-  final _scriptDomainArgsCtrl = TextEditingController(text: '{}');
-  final _productionWorkspacePromptCtrl = TextEditingController(
-    text: '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
-  );
-  final _productionFlowKeyCtrl = TextEditingController(text: 'assets');
-  final _productionDomainToolCtrl = TextEditingController(text: 'get_flowData');
-  final _productionDomainArgsCtrl = TextEditingController(text: '{}');
-  final _scriptSubAgentToolCtrl = TextEditingController(
-    text: 'run_sub_agent_storySkeleton',
-  );
-  final _productionSubAgentToolCtrl = TextEditingController(
-    text: 'run_sub_agent_director_plan',
-  );
+  final _workspaceInputController = WorkspaceInputController();
 
   late final ProjectsController _projectsController = ProjectsController(
     accessTokenProvider: () => _session?.accessToken,
@@ -328,16 +312,7 @@ class _HomePageState extends State<HomePage> {
     _skillsHarnessController.dispose();
     _shellNavigationController.dispose();
     _workspaceOutputController.dispose();
-    _agentWorkspaceProjectIdCtrl.dispose();
-    _agentWorkspaceScriptIdCtrl.dispose();
-    _scriptWorkspacePromptCtrl.dispose();
-    _scriptDomainArgsCtrl.dispose();
-    _productionWorkspacePromptCtrl.dispose();
-    _productionFlowKeyCtrl.dispose();
-    _productionDomainToolCtrl.dispose();
-    _productionDomainArgsCtrl.dispose();
-    _scriptSubAgentToolCtrl.dispose();
-    _productionSubAgentToolCtrl.dispose();
+    _workspaceInputController.dispose();
     super.dispose();
   }
 

@@ -184,14 +184,18 @@ extension _HomePageBuildSections on _HomePageState {
       showPaneSelector: false,
       sectionTitle: sectionTitle,
       sectionDescription: sectionDescription,
-      projectIdController: _agentWorkspaceProjectIdCtrl,
-      scriptIdController: _agentWorkspaceScriptIdCtrl,
-      scriptPromptController: _scriptWorkspacePromptCtrl,
-      scriptDomainArgsController: _scriptDomainArgsCtrl,
-      productionPromptController: _productionWorkspacePromptCtrl,
-      flowKeyController: _productionFlowKeyCtrl,
-      productionDomainToolController: _productionDomainToolCtrl,
-      productionDomainArgsController: _productionDomainArgsCtrl,
+      projectIdController: _workspaceInputController.projectIdController,
+      scriptIdController: _workspaceInputController.scriptIdController,
+      scriptPromptController: _workspaceInputController.scriptPromptController,
+      scriptDomainArgsController:
+          _workspaceInputController.scriptDomainArgsController,
+      productionPromptController:
+          _workspaceInputController.productionPromptController,
+      flowKeyController: _workspaceInputController.productionFlowKeyController,
+      productionDomainToolController:
+          _workspaceInputController.productionDomainToolController,
+      productionDomainArgsController:
+          _workspaceInputController.productionDomainArgsController,
       loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
       loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,
       loadingScriptDomainProbe: _loadingScriptDomainProbe,
@@ -221,8 +225,10 @@ extension _HomePageBuildSections on _HomePageState {
       onRunProductionWorkspace: _runProductionWorkspaceAgent,
       onProbeScriptDomainTool: _probeScriptDomainTool,
       onProbeProductionDomainTool: _probeProductionDomainTool,
-      scriptSubAgentToolController: _scriptSubAgentToolCtrl,
-      productionSubAgentToolController: _productionSubAgentToolCtrl,
+      scriptSubAgentToolController:
+          _workspaceInputController.scriptSubAgentToolController,
+      productionSubAgentToolController:
+          _workspaceInputController.productionSubAgentToolController,
       onRunScriptSubAgentTool: _runScriptSubAgentTool,
       onRunProductionSubAgentTool: _runProductionSubAgentTool,
       onWriteBackScriptResult: _writeBackScriptWorkspaceResult,

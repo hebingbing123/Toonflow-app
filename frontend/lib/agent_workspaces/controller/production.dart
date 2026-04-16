@@ -6,9 +6,14 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
   Future<void> _runProductionWorkspaceAgent() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final prompt = _productionWorkspacePromptCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
+    final prompt = _workspaceInputController.productionPromptController.text
+        .trim();
     if (projectId == null || scriptId == null || prompt.isEmpty) {
       setState(() => _error = 'project_id/script_id/prompt 必须有效');
       return;
@@ -46,15 +51,25 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
   Future<void> _probeProductionDomainTool() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final toolName = _productionDomainToolCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
+    final toolName = _workspaceInputController
+        .productionDomainToolController
+        .text
+        .trim();
     if (projectId == null || scriptId == null || toolName.isEmpty) {
       setState(() => _error = 'project_id/script_id/tool 必须有效');
       return;
     }
 
-    final argsRaw = _productionDomainArgsCtrl.text.trim();
+    final argsRaw = _workspaceInputController
+        .productionDomainArgsController
+        .text
+        .trim();
     final Map<String, dynamic> args;
     if (argsRaw.isEmpty) {
       args = <String, dynamic>{};
@@ -73,7 +88,8 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
     }
 
     if (toolName == 'get_flowData') {
-      final key = _productionFlowKeyCtrl.text.trim();
+      final key = _workspaceInputController.productionFlowKeyController.text
+          .trim();
       if (key.isEmpty) {
         setState(() => _error = 'get_flowData 需要有效 key');
         return;
@@ -114,10 +130,18 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
   Future<void> _runProductionSubAgentTool() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final prompt = _productionWorkspacePromptCtrl.text.trim();
-    final toolName = _productionSubAgentToolCtrl.text.trim();
+    final projectId = _parsePositiveInt(
+      _workspaceInputController.projectIdController.text,
+    );
+    final scriptId = _parsePositiveInt(
+      _workspaceInputController.scriptIdController.text,
+    );
+    final prompt = _workspaceInputController.productionPromptController.text
+        .trim();
+    final toolName = _workspaceInputController
+        .productionSubAgentToolController
+        .text
+        .trim();
     if (projectId == null ||
         scriptId == null ||
         prompt.isEmpty ||
