@@ -230,16 +230,19 @@ extension _HomePageBuildSections on _HomePageState {
           _workspaceOutputController.lastToolResultData,
       workspaceSuggestedFlowKey: _workspaceOutputController.suggestedFlowKey,
       workspaceWritebackLine: _workspaceOutputController.writebackLine,
-      onRunScriptWorkspace: _runScriptWorkspaceAgent,
-      onRunProductionWorkspace: _runProductionWorkspaceAgent,
-      onProbeScriptDomainTool: _probeScriptDomainTool,
-      onProbeProductionDomainTool: _probeProductionDomainTool,
+      onRunScriptWorkspace: _workspaceRunController.runScriptWorkspaceAgent,
+      onRunProductionWorkspace:
+          _workspaceRunController.runProductionWorkspaceAgent,
+      onProbeScriptDomainTool: _workspaceRunController.probeScriptDomainTool,
+      onProbeProductionDomainTool:
+          _workspaceRunController.probeProductionDomainTool,
       scriptSubAgentToolController:
           _workspaceInputController.scriptSubAgentToolController,
       productionSubAgentToolController:
           _workspaceInputController.productionSubAgentToolController,
-      onRunScriptSubAgentTool: _runScriptSubAgentTool,
-      onRunProductionSubAgentTool: _runProductionSubAgentTool,
+      onRunScriptSubAgentTool: _workspaceRunController.runScriptSubAgentTool,
+      onRunProductionSubAgentTool:
+          _workspaceRunController.runProductionSubAgentTool,
       onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
       onWriteBackScriptPlanResult: _writeBackScriptPlanWorkspaceResult,
       onWriteBackScriptPlanViaUpdateData: _writeBackScriptPlanViaUpdateData,

@@ -30,6 +30,7 @@ import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
 import 'agent_workspaces/input_controller.dart';
 import 'agent_workspaces/operation_controller.dart';
+import 'agent_workspaces/run_controller.dart';
 import 'agent_workspaces/runtime_output_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
@@ -73,8 +74,6 @@ part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
 part 'agent_workspaces/controller/constants.dart';
 part 'agent_workspaces/controller/utils.dart';
-part 'agent_workspaces/controller/script.dart';
-part 'agent_workspaces/controller/production.dart';
 part 'agent_workspaces/controller/writeback.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
@@ -111,6 +110,16 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   final _workspaceInputController = WorkspaceInputController();
   final _workspaceOperationController = WorkspaceOperationController();
+  late final WorkspaceRunController _workspaceRunController =
+      WorkspaceRunController(
+        inputController: _workspaceInputController,
+        operationController: _workspaceOperationController,
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+        clearWsLog: _skillsHarnessController.wsLog.clear,
+        resetWorkspaceOutputs: _resetWorkspaceOutputs,
+        requestSender: _sendWorkspaceHarnessMessages,
+      );
 
   late final ProjectsController _projectsController = ProjectsController(
     accessTokenProvider: () => _session?.accessToken,
@@ -198,6 +207,20 @@ class _HomePageState extends State<HomePage> {
 
   Future<WebSocketChannel?> _openHarnessChannel(String token) =>
       _skillsHarnessController.openHarnessChannel(token);
+
+  Future<bool> _sendWorkspaceHarnessMessages(
+    String token,
+    List<Map<String, dynamic>> messages,
+  ) async {
+    final channel = await _openHarnessChannel(token);
+    if (channel == null) {
+      return false;
+    }
+    for (final message in messages) {
+      channel.sink.add(jsonEncode(message));
+    }
+    return true;
+  }
 
   void _setSharedError(String? error) {
     if (!mounted) return;
