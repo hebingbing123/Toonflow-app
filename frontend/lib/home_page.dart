@@ -73,7 +73,6 @@ part 'project_editor/assets/dialogs/delete.dart';
 part 'project_editor/assets/dialogs/filter.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
-part 'agent_workspaces/controller/utils.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
@@ -116,7 +115,9 @@ class _HomePageState extends State<HomePage> {
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
         clearWsLog: _skillsHarnessController.wsLog.clear,
-        resetWorkspaceOutputs: _resetWorkspaceOutputs,
+        resetWorkspaceOutputs: () {
+          _workspaceOutputController.reset();
+        },
         requestSender: _sendWorkspaceHarnessMessages,
       );
 

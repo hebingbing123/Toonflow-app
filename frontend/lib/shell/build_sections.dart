@@ -251,7 +251,11 @@ extension _HomePageBuildSections on _HomePageState {
           _workspaceWritebackController.writeBackScriptPlanViaUpdateData,
       onWriteBackProductionFlowResult:
           _workspaceWritebackController.writeBackProductionFlowResult,
-      onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
+      onApplySuggestedFlowKey: () {
+        _workspaceInputController.applySuggestedProductionFlowKey(
+          _workspaceOutputController.suggestedFlowKey,
+        );
+      },
     );
   }
 
