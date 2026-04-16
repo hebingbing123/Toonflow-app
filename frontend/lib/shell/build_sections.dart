@@ -243,10 +243,14 @@ extension _HomePageBuildSections on _HomePageState {
       onRunScriptSubAgentTool: _workspaceRunController.runScriptSubAgentTool,
       onRunProductionSubAgentTool:
           _workspaceRunController.runProductionSubAgentTool,
-      onWriteBackScriptResult: _writeBackScriptWorkspaceResult,
-      onWriteBackScriptPlanResult: _writeBackScriptPlanWorkspaceResult,
-      onWriteBackScriptPlanViaUpdateData: _writeBackScriptPlanViaUpdateData,
-      onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
+      onWriteBackScriptResult:
+          _workspaceWritebackController.writeBackScriptWorkspaceResult,
+      onWriteBackScriptPlanResult:
+          _workspaceWritebackController.writeBackScriptPlanWorkspaceResult,
+      onWriteBackScriptPlanViaUpdateData:
+          _workspaceWritebackController.writeBackScriptPlanViaUpdateData,
+      onWriteBackProductionFlowResult:
+          _workspaceWritebackController.writeBackProductionFlowResult,
       onApplySuggestedFlowKey: _applySuggestedProductionFlowKey,
     );
   }

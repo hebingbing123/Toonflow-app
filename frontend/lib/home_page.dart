@@ -32,6 +32,7 @@ import 'agent_workspaces/input_controller.dart';
 import 'agent_workspaces/operation_controller.dart';
 import 'agent_workspaces/run_controller.dart';
 import 'agent_workspaces/runtime_output_controller.dart';
+import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
@@ -72,9 +73,7 @@ part 'project_editor/assets/dialogs/delete.dart';
 part 'project_editor/assets/dialogs/filter.dart';
 part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
-part 'agent_workspaces/controller/constants.dart';
 part 'agent_workspaces/controller/utils.dart';
-part 'agent_workspaces/controller/writeback.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
@@ -176,6 +175,14 @@ class _HomePageState extends State<HomePage> {
       ShellNavigationController();
   late final WorkspaceOutputController _workspaceOutputController =
       WorkspaceOutputController();
+  late final WorkspaceWritebackController _workspaceWritebackController =
+      WorkspaceWritebackController(
+        inputController: _workspaceInputController,
+        outputController: _workspaceOutputController,
+        operationController: _workspaceOperationController,
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+      );
 
   late final SkillsHarnessController _skillsHarnessController =
       SkillsHarnessController(

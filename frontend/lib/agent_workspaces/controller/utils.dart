@@ -3,12 +3,6 @@
 part of '../../../home_page.dart';
 
 extension _HomePageAgentWorkspacesController on _HomePageState {
-  int? _parsePositiveInt(String raw) {
-    final value = int.tryParse(raw.trim());
-    if (value == null || value <= 0) return null;
-    return value;
-  }
-
   void _resetWorkspaceOutputs() {
     _workspaceOutputController.reset();
   }
