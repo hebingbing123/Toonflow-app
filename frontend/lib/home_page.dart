@@ -32,6 +32,7 @@ import 'auth/controller.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
+import 'shell/navigation_controller.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'skills_harness/controller.dart';
@@ -101,18 +102,6 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
-}
-
-enum _HomeSectionMode { product, debug }
-
-enum _ProductWorkspacePane {
-  projects,
-  scriptWorkspace,
-  productionWorkspace,
-  workspaceActivity,
-  tasks,
-  jobs,
-  quality,
 }
 
 class _HomePageState extends State<HomePage> {
@@ -206,8 +195,8 @@ class _HomePageState extends State<HomePage> {
     onSignedOut: _handleSignedOut,
   );
 
-  _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
-  _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
+  late final ShellNavigationController _shellNavigationController =
+      ShellNavigationController();
 
   late final SkillsHarnessController _skillsHarnessController =
       SkillsHarnessController(
@@ -257,6 +246,7 @@ class _HomePageState extends State<HomePage> {
     _overviewController.addListener(_handleOverviewChanged);
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
+    _shellNavigationController.addListener(_handleShellNavigationChanged);
     if (kSupabaseConfigured) {
       _authController.attachAuthListener();
     }
@@ -292,6 +282,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleShellNavigationChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   void _handleTaskCenterChanged() {
     if (!mounted) return;
     setState(() {});
@@ -319,6 +314,7 @@ class _HomePageState extends State<HomePage> {
     _overviewController.removeListener(_handleOverviewChanged);
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
+    _shellNavigationController.removeListener(_handleShellNavigationChanged);
     _authController.dispose();
     _accountProbesController.dispose();
     _contentProbesController.dispose();
@@ -329,6 +325,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.dispose();
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();
+    _shellNavigationController.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();
     _agentWorkspaceScriptIdCtrl.dispose();
     _scriptWorkspacePromptCtrl.dispose();

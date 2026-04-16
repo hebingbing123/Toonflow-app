@@ -13,7 +13,7 @@ extension _HomePageBuildSections on _HomePageState {
     if (signedIn) {
       widgets.add(_buildWorkspaceModeSection(context));
       widgets.addAll(
-        _homeSectionMode == _HomeSectionMode.product
+        _shellNavigationController.isProductMode
             ? _buildProductSections(context)
             : _buildDebugSections(),
       );
@@ -90,8 +90,10 @@ extension _HomePageBuildSections on _HomePageState {
   );
 
   Widget _buildWorkspaceModeSection(BuildContext context) {
-    final selected = <_HomeSectionMode>{_homeSectionMode};
-    final isProduct = _homeSectionMode == _HomeSectionMode.product;
+    final selected = <HomeSectionMode>{
+      _shellNavigationController.homeSectionMode,
+    };
+    final isProduct = _shellNavigationController.isProductMode;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -99,24 +101,21 @@ extension _HomePageBuildSections on _HomePageState {
         children: <Widget>[
           Text('Workspace mode', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          SegmentedButton<_HomeSectionMode>(
-            segments: const <ButtonSegment<_HomeSectionMode>>[
-              ButtonSegment<_HomeSectionMode>(
-                value: _HomeSectionMode.product,
+          SegmentedButton<HomeSectionMode>(
+            segments: const <ButtonSegment<HomeSectionMode>>[
+              ButtonSegment<HomeSectionMode>(
+                value: HomeSectionMode.product,
                 label: Text('Product workspace'),
               ),
-              ButtonSegment<_HomeSectionMode>(
-                value: _HomeSectionMode.debug,
+              ButtonSegment<HomeSectionMode>(
+                value: HomeSectionMode.debug,
                 label: Text('Ops and debug'),
               ),
             ],
             selected: selected,
             onSelectionChanged: (selection) {
               final nextMode = selection.firstOrNull;
-              if (nextMode == null || nextMode == _homeSectionMode) {
-                return;
-              }
-              setState(() => _homeSectionMode = nextMode);
+              _shellNavigationController.selectHomeSectionMode(nextMode);
             },
           ),
           const SizedBox(height: 8),
@@ -132,14 +131,14 @@ extension _HomePageBuildSections on _HomePageState {
   }
 
   Widget _buildProductPaneSelector(BuildContext context) {
-    final paneEntries = <(_ProductWorkspacePane, String)>[
-      (_ProductWorkspacePane.projects, '项目'),
-      (_ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
-      (_ProductWorkspacePane.productionWorkspace, '制作工作区'),
-      (_ProductWorkspacePane.workspaceActivity, '工作区动态'),
-      (_ProductWorkspacePane.tasks, '任务中心'),
-      (_ProductWorkspacePane.jobs, '任务作业'),
-      (_ProductWorkspacePane.quality, '质量评审'),
+    final paneEntries = <(ProductWorkspacePane, String)>[
+      (ProductWorkspacePane.projects, '项目'),
+      (ProductWorkspacePane.scriptWorkspace, '脚本工作区'),
+      (ProductWorkspacePane.productionWorkspace, '制作工作区'),
+      (ProductWorkspacePane.workspaceActivity, '工作区动态'),
+      (ProductWorkspacePane.tasks, '任务中心'),
+      (ProductWorkspacePane.jobs, '任务作业'),
+      (ProductWorkspacePane.quality, '质量评审'),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -156,12 +155,15 @@ extension _HomePageBuildSections on _HomePageState {
                   final pane = entry.$1;
                   return ChoiceChip(
                     label: Text(entry.$2),
-                    selected: _productWorkspacePane == pane,
+                    selected:
+                        _shellNavigationController.productWorkspacePane == pane,
                     onSelected: (selected) {
-                      if (!selected || pane == _productWorkspacePane) {
+                      if (!selected) {
                         return;
                       }
-                      setState(() => _productWorkspacePane = pane);
+                      _shellNavigationController.selectProductWorkspacePane(
+                        pane,
+                      );
                     },
                   );
                 })
@@ -229,31 +231,36 @@ extension _HomePageBuildSections on _HomePageState {
 
   List<Widget> _buildProductSections(BuildContext context) => [
     _buildProductPaneSelector(context),
-    if (_productWorkspacePane == _ProductWorkspacePane.projects)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.projects)
       ProjectsSection(
         accessToken: _session?.accessToken,
         controller: _projectsController,
         onOpenProjectDetail: _openProjectDetail,
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.scriptWorkspace)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.scriptWorkspace)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.script,
         sectionTitle: '剧本工作区',
         sectionDescription: '专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。',
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.productionWorkspace)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.productionWorkspace)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.production,
         sectionTitle: '制作工作区',
         sectionDescription: '专注 production Agent 工作流：flow 数据读取、资产/分镜工具执行与安全回写。',
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.workspaceActivity)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.workspaceActivity)
       _buildAgentWorkspacePane(
         initialPane: AgentWorkspacePane.activity,
         sectionTitle: '执行动态',
         sectionDescription: '集中查看最近 WS 事件、工具回执与回写状态，作为统一执行日志面板。',
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.tasks)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.tasks)
       TaskCenterSection(
         accessToken: _session?.accessToken,
         loadingTaskProjects: _taskCenterController.loadingTaskProjects,
@@ -280,9 +287,11 @@ extension _HomePageBuildSections on _HomePageState {
         onProbeTaskDetailUuid: _taskCenterController.probeTaskDetailUuid,
         onSelectTaskJob: _taskCenterController.selectTaskJob,
       ),
-    if (_productWorkspacePane == _ProductWorkspacePane.jobs)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.jobs)
       JobsSection(controller: _jobsController),
-    if (_productWorkspacePane == _ProductWorkspacePane.quality)
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.quality)
       QualityReviewsSection(
         accessToken: _session?.accessToken,
         controller: _qualityReviewsController,
