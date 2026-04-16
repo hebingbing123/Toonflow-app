@@ -333,7 +333,7 @@ extension _HomePageBuildSections on _HomePageState {
       loadingSkillPut: _skillsHarnessController.loadingSkillPut,
       loadingSkillPost: _skillsHarnessController.loadingSkillPost,
       loadingSkillDelete: _skillsHarnessController.loadingSkillDelete,
-      wsProbesBusy: _wsProbesBusy,
+      wsProbesBusy: _workspaceWsEventController.wsProbesBusy,
       loadingWs: _loadingWs,
       loadingWsHarness: _loadingWsHarness,
       loadingWsIsolatedEcho: _loadingWsIsolatedEcho,

@@ -32,6 +32,7 @@ import 'agent_workspaces/input_controller.dart';
 import 'agent_workspaces/operation_controller.dart';
 import 'agent_workspaces/run_controller.dart';
 import 'agent_workspaces/runtime_output_controller.dart';
+import 'agent_workspaces/ws_event_controller.dart';
 import 'agent_workspaces/writeback_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
@@ -39,7 +40,6 @@ import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/navigation_controller.dart';
 import 'shell/sections.dart';
-import 'shell/workspace_ws_event_resolution.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
 import 'system_probes/account/controller.dart';
@@ -175,6 +175,22 @@ class _HomePageState extends State<HomePage> {
       ShellNavigationController();
   late final WorkspaceOutputController _workspaceOutputController =
       WorkspaceOutputController();
+  late final WorkspaceWsEventController _workspaceWsEventController =
+      WorkspaceWsEventController(
+        skillsHarnessBusyProvider: () => _skillsHarnessController.wsProbesBusy,
+        resetSkillsHarnessBusyFlags: () {
+          _skillsHarnessController.resetWsBusyFlags();
+        },
+        clearSkillsHarnessToolProbeFlags: () {
+          _skillsHarnessController.clearToolProbeFlags();
+        },
+        clearSkillsHarnessAgentProbeFlags: () {
+          _skillsHarnessController.clearAgentProbeFlags();
+        },
+        operationController: _workspaceOperationController,
+        outputController: _workspaceOutputController,
+        inputController: _workspaceInputController,
+      );
   late final WorkspaceWritebackController _workspaceWritebackController =
       WorkspaceWritebackController(
         inputController: _workspaceInputController,
@@ -188,8 +204,12 @@ class _HomePageState extends State<HomePage> {
       SkillsHarnessController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
-        onWsMessage: _handleHarnessWsMessage,
-        onWsLifecycleSettled: _resetWorkspaceWsOperationFlags,
+        onWsMessage: (raw) {
+          _workspaceWsEventController.handleRawMessage(raw);
+        },
+        onWsLifecycleSettled: () {
+          _workspaceWsEventController.resetWsOperationFlags();
+        },
       );
 
   bool get _loadingWs => _skillsHarnessController.loadingWs;
