@@ -1,23 +1,11 @@
-//! 用户范围的 `app_art_style` REST（遗留 `o_artStyle` 列表/获取/创建/更新/删除子集）。
-
-use std::path::{Path as FsPath, PathBuf};
-
 use axum::{
-    body::Body,
     extract::{Path, State},
-    http::{header, HeaderMap, StatusCode},
-    response::{IntoResponse, Response},
+    http::HeaderMap,
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
-use base64::Engine;
-use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::FromRow;
-use tokio::fs;
-use utoipa::OpenApi;
-use utoipa::ToSchema;
-use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -25,99 +13,17 @@ use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::llm::chat_completion_assistant_text;
 use crate::state::AppState;
 
-const ADV_LOCK_ART_STYLE_NUMERIC: i64 = 884_422_008;
-const MAX_ART_STYLE_LIST: i64 = 500;
-const MAX_EXTRACT_IMAGES: usize = 16;
-/// Per-image cap for **`data:`** / URL strings (Electron-era **`extractStylePrompt`** had no limit).
-const MAX_IMAGE_ENTRY_BYTES: usize = 20 * 1024 * 1024;
-const MAX_ART_STYLE_COVER_INPUT_CHARS: usize = 20 * 1024 * 1024;
-const MAX_ART_STYLE_COVER_BYTES: usize = 15 * 1024 * 1024;
+use super::cover::{
+    art_style_cover_api_path, delete_local_art_style_cover_files, parse_uploaded_cover,
+    persist_local_art_style_cover, serve_cover_by_numeric_id,
+};
+use super::types::{
+    ArtStyleRow, CreateArtStyleBody, ExtractArtStylePromptBody, ExtractArtStylePromptResponse,
+    ListArtStylesResponse, PatchArtStyleBody, ADV_LOCK_ART_STYLE_NUMERIC,
+    EXTRACT_STYLE_SYSTEM_PROMPT, MAX_ART_STYLE_LIST, MAX_EXTRACT_IMAGES, MAX_IMAGE_ENTRY_BYTES,
+};
 
-/// System prompt aligned with Electron-era **`src/routes/artStyle/extractStylePrompt.ts`**.
-const EXTRACT_STYLE_SYSTEM_PROMPT: &str = r#"请根据以下图片数据，提取出图片的画风提示词，用于生成图片时指定风格，要求简洁且具有艺术性,只需要画风提示词，不需要其他内容："比如：`(画风：2D动漫风格,2d animation style)`,`(画风：照片级真人超写实,photorealistic, lifelike, ultra detailed)`，`(画风：3D国创,Chinese 3D animation style)`等,如果图片风格无法描述，可以返回`无法描述`,多张图片时，只输出一个综合的画风提示词，要求包含所有图片的共同风格特征，输出格式必须严格按照示例中的格式，必须包含`画风`二字，且必须使用括号括起来，括号内必须包含中文和英文的画风描述，并用逗号分隔，英文部分需要翻译成地道的英文提示词"#;
-
-#[derive(Debug, FromRow, Serialize, ToSchema)]
-#[schema(
-    title = "ArtStyleRow",
-    description = "One **`app_art_style`** row (Electron-era **`o_artStyle`** subset)."
-)]
-pub struct ArtStyleRow {
-    pub id: Uuid,
-    #[serde(rename = "numeric_id")]
-    #[sqlx(rename = "numeric_id")]
-    pub numeric_id: i32,
-    pub name: String,
-    #[schema(nullable = true)]
-    pub file_url: Option<String>,
-    #[schema(nullable = true)]
-    pub label: Option<String>,
-    #[schema(nullable = true)]
-    pub prompt: Option<String>,
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct ListArtStylesResponse {
-    pub items: Vec<ArtStyleRow>,
-    pub total: i64,
-}
-
-#[derive(Debug, Deserialize, Default, ToSchema)]
-#[serde(deny_unknown_fields)]
-pub struct CreateArtStyleBody {
-    pub name: String,
-    #[serde(default)]
-    #[schema(nullable = true)]
-    pub file_url: Option<String>,
-    #[serde(default)]
-    #[schema(nullable = true)]
-    pub label: Option<String>,
-    #[serde(default)]
-    #[schema(nullable = true)]
-    pub prompt: Option<String>,
-}
-
-#[derive(Debug, Deserialize, ToSchema)]
-#[serde(deny_unknown_fields)]
-pub struct ExtractArtStylePromptBody {
-    #[schema(min_items = 1, max_items = 16)]
-    pub images: Vec<String>,
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct ExtractArtStylePromptResponse {
-    pub text: String,
-}
-
-#[derive(Debug, Deserialize, Default, ToSchema)]
-#[serde(deny_unknown_fields)]
-pub struct PatchArtStyleBody {
-    #[serde(default)]
-    #[schema(nullable = true, value_type = Object)]
-    pub name: Option<Value>,
-    #[serde(default)]
-    #[schema(nullable = true, value_type = Object)]
-    pub file_url: Option<Value>,
-    #[serde(default)]
-    #[schema(nullable = true, value_type = Object)]
-    pub label: Option<Value>,
-    #[serde(default)]
-    #[schema(nullable = true, value_type = Object)]
-    pub prompt: Option<Value>,
-}
-
-/// OpenAPI component schemas for art-style REST (`ref("ArtStyleRow")`, etc.).
-#[derive(OpenApi)]
-#[openapi(components(schemas(
-    ArtStyleRow,
-    ListArtStylesResponse,
-    CreateArtStyleBody,
-    ExtractArtStylePromptBody,
-    ExtractArtStylePromptResponse,
-    PatchArtStyleBody,
-)))]
-pub struct ArtStyleSchemasOpenApi;
-
-pub fn router() -> Router<AppState> {
+pub(super) fn router() -> Router<AppState> {
     Router::new()
         .route(
             "/api/v1/art-styles/extract-prompt",
@@ -137,127 +43,6 @@ pub fn router() -> Router<AppState> {
             "/api/v1/art-styles/numeric/{numeric_id}/cover",
             get(get_art_style_cover_by_numeric_id),
         )
-}
-
-fn trim_opt(s: Option<String>) -> Option<String> {
-    s.map(|v| v.trim().to_owned()).filter(|s| !s.is_empty())
-}
-
-#[derive(Debug, Clone)]
-struct LocalArtStyleCover {
-    bytes: Vec<u8>,
-    ext: &'static str,
-}
-
-#[derive(Debug, FromRow)]
-struct ArtStyleFileUrlRow {
-    file_url: Option<String>,
-}
-
-fn is_http_url(s: &str) -> bool {
-    s.starts_with("http://") || s.starts_with("https://")
-}
-
-fn art_style_cover_api_path(numeric_id: i32) -> String {
-    format!("/api/v1/art-styles/numeric/{numeric_id}/cover")
-}
-
-fn parse_uploaded_cover(raw: &str) -> Result<Option<LocalArtStyleCover>, ApiError> {
-    let trimmed = raw.trim();
-    if trimmed.is_empty() || is_http_url(trimmed) || trimmed.starts_with('/') {
-        return Ok(None);
-    }
-    if trimmed.len() > MAX_ART_STYLE_COVER_INPUT_CHARS {
-        return Err(ApiError::BadRequest(format!(
-            "art style file_url exceeds max length ({MAX_ART_STYLE_COVER_INPUT_CHARS} chars)"
-        )));
-    }
-
-    let (mime, b64) = match trimmed.strip_prefix("data:") {
-        Some(rest) => {
-            let (meta, b64) = rest.split_once(";base64,").ok_or_else(|| {
-                ApiError::BadRequest("art style file_url data URI must be base64".into())
-            })?;
-            let mime = match meta.trim().to_ascii_lowercase().as_str() {
-                "image/png" => "image/png",
-                "image/jpeg" | "image/jpg" => "image/jpeg",
-                "image/webp" => "image/webp",
-                _ => return Err(ApiError::BadRequest(
-                    "art style file_url must be png/jpeg/webp data URI, http(s) URL, or API path"
-                        .into(),
-                )),
-            };
-            (mime, b64.trim())
-        }
-        None => ("image/jpeg", trimmed),
-    };
-
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(b64.as_bytes())
-        .map_err(|_| ApiError::BadRequest("art style file_url is not valid base64".into()))?;
-    if bytes.is_empty() {
-        return Err(ApiError::BadRequest(
-            "art style file_url decoded to empty image".into(),
-        ));
-    }
-    if bytes.len() > MAX_ART_STYLE_COVER_BYTES {
-        return Err(ApiError::BadRequest(format!(
-            "art style cover exceeds max decoded size ({MAX_ART_STYLE_COVER_BYTES} bytes)"
-        )));
-    }
-
-    let ext = match mime {
-        "image/png" => "png",
-        "image/webp" => "webp",
-        _ => "jpg",
-    };
-    Ok(Some(LocalArtStyleCover { bytes, ext }))
-}
-
-fn art_style_cover_file_path(
-    root: &FsPath,
-    owner_user_id: Uuid,
-    numeric_id: i32,
-    ext: &str,
-) -> PathBuf {
-    root.join(owner_user_id.to_string())
-        .join(format!("{numeric_id}.{ext}"))
-}
-
-fn existing_art_style_cover_paths(
-    root: &FsPath,
-    owner_user_id: Uuid,
-    numeric_id: i32,
-) -> [PathBuf; 3] {
-    [
-        art_style_cover_file_path(root, owner_user_id, numeric_id, "png"),
-        art_style_cover_file_path(root, owner_user_id, numeric_id, "jpg"),
-        art_style_cover_file_path(root, owner_user_id, numeric_id, "webp"),
-    ]
-}
-
-async fn delete_local_art_style_cover_files(root: &FsPath, owner_user_id: Uuid, numeric_id: i32) {
-    for path in existing_art_style_cover_paths(root, owner_user_id, numeric_id) {
-        let _ = fs::remove_file(path).await;
-    }
-}
-
-async fn persist_local_art_style_cover(
-    root: &FsPath,
-    owner_user_id: Uuid,
-    numeric_id: i32,
-    cover: &LocalArtStyleCover,
-) -> Result<(), ApiError> {
-    let dir = root.join(owner_user_id.to_string());
-    fs::create_dir_all(&dir)
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("art style cover mkdir failed: {e}")))?;
-    delete_local_art_style_cover_files(root, owner_user_id, numeric_id).await;
-    let path = art_style_cover_file_path(root, owner_user_id, numeric_id, cover.ext);
-    fs::write(&path, &cover.bytes)
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("art style cover write failed: {e}")))?;
-    Ok(())
 }
 
 async fn extract_style_prompt(
@@ -341,6 +126,10 @@ async fn list_art_styles(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(ListArtStylesResponse { items, total }))
+}
+
+fn trim_opt(s: Option<String>) -> Option<String> {
+    s.map(|v| v.trim().to_owned()).filter(|s| !s.is_empty())
 }
 
 async fn create_art_style(
@@ -602,118 +391,11 @@ async fn get_art_style_cover_by_numeric_id(
     State(state): State<AppState>,
     Path(numeric_id): Path<i32>,
     headers: HeaderMap,
-) -> Result<Response, ApiError> {
+) -> Result<axum::response::Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if numeric_id <= 0 {
         return Err(ApiError::BadRequest("numeric_id must be positive".into()));
     }
 
-    let pool = state.require_pool()?;
-
-    let row = sqlx::query_as::<_, ArtStyleFileUrlRow>(
-        r#"
-        SELECT file_url
-        FROM app_art_style
-        WHERE owner_user_id = $1 AND numeric_id = $2
-        "#,
-    )
-    .bind(uid)
-    .bind(numeric_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    if row.file_url.as_deref() != Some(art_style_cover_api_path(numeric_id).as_str()) {
-        return Err(ApiError::NotFound);
-    }
-
-    let Some(root) = state.local_art_style_cover_dir.as_deref() else {
-        return Err(ApiError::DatabaseError(
-            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot serve local art style covers"
-                .into(),
-        ));
-    };
-
-    for (ext, mime) in [
-        ("png", "image/png"),
-        ("jpg", "image/jpeg"),
-        ("webp", "image/webp"),
-    ] {
-        let path = art_style_cover_file_path(root, uid, numeric_id, ext);
-        match fs::read(&path).await {
-            Ok(bytes) => {
-                return Ok((
-                    StatusCode::OK,
-                    [
-                        (header::CONTENT_TYPE, mime),
-                        (header::CACHE_CONTROL, "private, max-age=300"),
-                    ],
-                    Body::from(bytes),
-                )
-                    .into_response())
-            }
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => continue,
-            Err(err) => {
-                return Err(ApiError::DatabaseError(format!(
-                    "art style cover read failed: {err}"
-                )))
-            }
-        }
-    }
-
-    Err(ApiError::NotFound)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn create_art_style_body_accepts_minimal() {
-        let j = serde_json::json!({ "name": "test" });
-        let b: CreateArtStyleBody = serde_json::from_value(j).unwrap();
-        assert_eq!(b.name, "test");
-    }
-
-    #[test]
-    fn patch_art_style_body_rejects_unknown_fields() {
-        let j = serde_json::json!({ "name": "x", "extra": 1 });
-        assert!(serde_json::from_value::<PatchArtStyleBody>(j).is_err());
-    }
-
-    #[test]
-    fn extract_art_style_prompt_body_accepts_images() {
-        let j = serde_json::json!({ "images": ["https://example.com/a.png"] });
-        let b: ExtractArtStylePromptBody = serde_json::from_value(j).unwrap();
-        assert_eq!(b.images.len(), 1);
-    }
-
-    #[test]
-    fn extract_art_style_prompt_body_rejects_unknown_fields() {
-        let j = serde_json::json!({ "images": [], "extra": 1 });
-        assert!(serde_json::from_value::<ExtractArtStylePromptBody>(j).is_err());
-    }
-
-    #[test]
-    fn parse_uploaded_cover_accepts_png_data_uri() {
-        let parsed = parse_uploaded_cover("data:image/png;base64,AA==")
-            .expect("parse")
-            .expect("cover");
-        assert_eq!(parsed.ext, "png");
-        assert_eq!(parsed.bytes, vec![0]);
-    }
-
-    #[test]
-    fn parse_uploaded_cover_treats_http_url_as_passthrough() {
-        assert!(parse_uploaded_cover("https://example.com/cover.png")
-            .expect("parse")
-            .is_none());
-    }
-
-    #[test]
-    fn parse_uploaded_cover_rejects_non_image_data_uri() {
-        let err = parse_uploaded_cover("data:text/plain;base64,AA==").expect_err("bad mime");
-        assert!(matches!(err, ApiError::BadRequest(_)));
-    }
+    serve_cover_by_numeric_id(&state, uid, numeric_id).await
 }
