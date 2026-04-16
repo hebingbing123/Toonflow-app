@@ -36,6 +36,7 @@ import 'shell/sections.dart';
 import 'shell/workspace_ws_event_resolution.dart';
 import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
+import 'system_probes/account/controller.dart';
 import 'task_center/controller.dart';
 import 'rust_api.dart';
 
@@ -76,8 +77,6 @@ part 'system_probes/controller.dart';
 part 'system_probes/models_catalog/catalog.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
 part 'system_probes/models_catalog/production_probe.dart';
-part 'system_probes/account/settings.dart';
-part 'system_probes/account/profile.dart';
 part 'system_probes/content.dart';
 part 'shell/build_sections.dart';
 part 'shell/runtime_helpers.dart';
@@ -117,11 +116,6 @@ enum _ProductWorkspacePane {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _meBody;
-  String? _devSwitchProbeBody;
-  String? _memoryConfigProbeBody;
-  String? _aboutProbeBody;
-  String? _usageSummaryBody;
   String? _promptsProbeBody;
   String? _visualManualProbeBody;
   String? _directorManualProbeBody;
@@ -130,11 +124,6 @@ class _HomePageState extends State<HomePage> {
   String? _textModelDefaultBody;
   String? _modelDetailBody;
   String? _error;
-  bool _loadingMe = false;
-  bool _loadingDevSwitchProbe = false;
-  bool _loadingMemoryConfigProbe = false;
-  bool _loadingAboutProbe = false;
-  bool _loadingUsageSummary = false;
   bool _loadingPromptsProbe = false;
   bool _loadingVisualManualProbe = false;
   bool _loadingDirectorManualProbe = false;
@@ -205,6 +194,12 @@ class _HomePageState extends State<HomePage> {
     onErrorChanged: _setSharedError,
   );
 
+  late final AccountProbesController _accountProbesController =
+      AccountProbesController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+      );
+
   late final AuthController _authController = AuthController(
     onErrorChanged: _setSharedError,
     onSignedOut: _handleSignedOut,
@@ -255,6 +250,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _authController.addListener(_handleAuthChanged);
+    _accountProbesController.addListener(_handleAccountProbesChanged);
     _overviewController.addListener(_handleOverviewChanged);
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
@@ -264,6 +260,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleAuthChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void _handleAccountProbesChanged() {
     if (!mounted) return;
     setState(() {});
   }
@@ -285,10 +286,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _handleSignedOut() async {
     await _skillsHarnessController.closeChannel();
-    if (!mounted) return;
-    setState(() {
-      _usageSummaryBody = null;
-    });
+    _accountProbesController.reset();
     _overviewController.reset();
     _skillsHarnessController.reset();
     _projectsController.reset();
@@ -300,10 +298,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _authController.removeListener(_handleAuthChanged);
+    _accountProbesController.removeListener(_handleAccountProbesChanged);
     _overviewController.removeListener(_handleOverviewChanged);
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _authController.dispose();
+    _accountProbesController.dispose();
     _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
