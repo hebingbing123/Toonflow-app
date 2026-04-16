@@ -1,192 +1,25 @@
-//! 脚本代理模块：遗留 `/api/scriptAgent/*`。
-//!
-//! Postgres `app_script_agent_plan` + `app_script` 同步。
-//! 形状匹配旧的 `validateFields` 请求体；成功的 JSON 遵循 `{ code, data, message }`（在适用处）。
-
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
     routing::post,
     Json as JsonResponse, Router,
 };
-use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-/// Same advisory lock family as [`crate::scripting::scripts`] for allocating **`app_script.numeric_id`**.
-const ADV_LOCK_SCRIPT_NUMERIC_ID: i64 = 884_422_002;
-const MAX_PLAN_SCRIPT_ROWS: usize = 200;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-enum ScriptAgentKind {
-    #[serde(rename = "scriptAgent")]
-    ScriptAgent,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct GetScriptAgentPlanBody {
-    project_id: i32,
-    agent_type: ScriptAgentKind,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct SetPlanScriptRow {
-    name: String,
-    content: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct SetScriptAgentPlanData {
-    story_skeleton: String,
-    adaptation_strategy: String,
-    #[serde(default)]
-    script: Vec<SetPlanScriptRow>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct SetScriptAgentPlanBody {
-    project_id: i32,
-    agent_type: ScriptAgentKind,
-    data: SetScriptAgentPlanData,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct UpdateScriptRow {
-    id: i32,
-    content: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct UpdateScriptAgentDataPayload {
-    story_skeleton: String,
-    adaptation_strategy: String,
-    script: Vec<UpdateScriptRow>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct UpdateScriptAgentDataBody {
-    id: i64,
-    data: UpdateScriptAgentDataPayload,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct CodeDataEnvelope<T: Serialize> {
-    code: i32,
-    data: T,
-    message: &'static str,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct PlanFlatData {
-    story_skeleton: String,
-    adaptation_strategy: String,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct PlanDataWithId {
-    data: Value,
-    id: i64,
-}
-
-fn is_unique_violation(e: &sqlx::Error) -> bool {
-    match e {
-        sqlx::Error::Database(db) => db.code().map(|c| c == "23505").unwrap_or(false),
-        _ => false,
-    }
-}
-
-fn trim_opt(s: &str) -> Option<String> {
-    let t = s.trim();
-    if t.is_empty() {
-        None
-    } else {
-        Some(t.to_owned())
-    }
-}
-
-async fn resolve_owned_project_uuid(
-    pool: &PgPool,
-    uid: Uuid,
-    project_numeric_id: i32,
-) -> Result<Uuid, ApiError> {
-    if project_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-    let id: Option<Uuid> = sqlx::query_scalar(
-        r#"
-        SELECT id FROM app_project
-        WHERE numeric_id = $1 AND owner_user_id = $2
-        "#,
-    )
-    .bind(project_numeric_id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    id.ok_or(ApiError::NotFound)
-}
-
-async fn select_plan_row(
-    pool: &PgPool,
-    uid: Uuid,
-    project_uuid: Uuid,
-) -> Result<Option<(i64, Value)>, ApiError> {
-    let row: Option<(i64, Value)> = sqlx::query_as(
-        r#"
-        SELECT id, plan_data
-        FROM app_script_agent_plan
-        WHERE owner_user_id = $1 AND project_id = $2 AND agent_key = 'scriptAgent'
-        "#,
-    )
-    .bind(uid)
-    .bind(project_uuid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(row)
-}
-
-async fn scripts_json_for_project(pool: &PgPool, project_uuid: Uuid) -> Result<Value, ApiError> {
-    let rows: Vec<(i32, Option<String>, Option<String>)> = sqlx::query_as(
-        r#"
-        SELECT numeric_id, name, content
-        FROM app_script
-        WHERE project_id = $1
-        ORDER BY numeric_id ASC
-        "#,
-    )
-    .bind(project_uuid)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let arr: Vec<Value> = rows
-        .into_iter()
-        .map(|(id, name, content)| {
-            json!({
-                "id": id,
-                "name": name.unwrap_or_default(),
-                "content": content.unwrap_or_default(),
-            })
-        })
-        .collect();
-    Ok(Value::Array(arr))
-}
+use super::storage::{
+    is_unique_violation, resolve_owned_project_uuid, scripts_json_for_project, select_plan_row,
+    trim_opt,
+};
+use super::types::{
+    CodeDataEnvelope, GetScriptAgentPlanBody, PlanDataWithId, PlanFlatData, ScriptAgentKind,
+    SetScriptAgentPlanBody, UpdateScriptAgentDataBody, ADV_LOCK_SCRIPT_NUMERIC_ID,
+    MAX_PLAN_SCRIPT_ROWS,
+};
 
 async fn post_get_plan_data(
     State(state): State<AppState>,
@@ -458,7 +291,7 @@ async fn post_update_data(
     })?))
 }
 
-pub fn router() -> Router<AppState> {
+pub(crate) fn router() -> Router<AppState> {
     Router::new()
         .route(
             "/api/v1/script-agent/get-plan-data",
