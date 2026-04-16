@@ -38,6 +38,7 @@ import 'skills_harness/controller.dart';
 import 'overview/controller.dart';
 import 'system_probes/account/controller.dart';
 import 'system_probes/content/controller.dart';
+import 'system_probes/models_catalog/controller.dart';
 import 'task_center/controller.dart';
 import 'rust_api.dart';
 
@@ -75,7 +76,6 @@ part 'script_editor/storyboards/dialogs/add.dart';
 part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
 part 'system_probes/controller.dart';
-part 'system_probes/models_catalog/catalog.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
 part 'system_probes/models_catalog/production_probe.dart';
 part 'shell/build_sections.dart';
@@ -116,9 +116,7 @@ enum _ProductWorkspacePane {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _modelsCatalogBody;
   String? _error;
-  bool _loadingModelsCatalog = false;
   bool _loadingScriptWorkspaceRun = false;
   bool _loadingProductionWorkspaceRun = false;
   bool _loadingProductionFlowProbe = false;
@@ -194,6 +192,15 @@ class _HomePageState extends State<HomePage> {
         onErrorChanged: _setSharedError,
       );
 
+  late final ModelsCatalogController _modelsCatalogController =
+      ModelsCatalogController(
+        accessTokenProvider: () => _session?.accessToken,
+        onErrorChanged: _setSharedError,
+        runSettingsAndAssetsProbes: _runModelsCatalogSettingsAndAssetsProbes,
+        runProductionProbes: _runModelsCatalogProductionProbes,
+        formatProbeStatusMap: _formatProbeStatusMap,
+      );
+
   late final AuthController _authController = AuthController(
     onErrorChanged: _setSharedError,
     onSignedOut: _handleSignedOut,
@@ -246,6 +253,7 @@ class _HomePageState extends State<HomePage> {
     _authController.addListener(_handleAuthChanged);
     _accountProbesController.addListener(_handleAccountProbesChanged);
     _contentProbesController.addListener(_handleContentProbesChanged);
+    _modelsCatalogController.addListener(_handleModelsCatalogChanged);
     _overviewController.addListener(_handleOverviewChanged);
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
@@ -269,6 +277,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleModelsCatalogChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   void _handleSkillsHarnessChanged() {
     if (!mounted) return;
     setState(() {});
@@ -288,6 +301,7 @@ class _HomePageState extends State<HomePage> {
     await _skillsHarnessController.closeChannel();
     _accountProbesController.reset();
     _contentProbesController.reset();
+    _modelsCatalogController.reset();
     _overviewController.reset();
     _skillsHarnessController.reset();
     _projectsController.reset();
@@ -301,12 +315,14 @@ class _HomePageState extends State<HomePage> {
     _authController.removeListener(_handleAuthChanged);
     _accountProbesController.removeListener(_handleAccountProbesChanged);
     _contentProbesController.removeListener(_handleContentProbesChanged);
+    _modelsCatalogController.removeListener(_handleModelsCatalogChanged);
     _overviewController.removeListener(_handleOverviewChanged);
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _authController.dispose();
     _accountProbesController.dispose();
     _contentProbesController.dispose();
+    _modelsCatalogController.dispose();
     _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();

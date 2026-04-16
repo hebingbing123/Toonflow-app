@@ -57,7 +57,7 @@ extension _HomePageBuildSections on _HomePageState {
     loadingDirectorManualProbe:
         _contentProbesController.loadingDirectorManualProbe,
     loadingSkillsBinaryProbe: _contentProbesController.loadingSkillsBinaryProbe,
-    loadingModelsCatalog: _loadingModelsCatalog,
+    loadingModelsCatalog: _modelsCatalogController.loadingModelsCatalog,
     loadingTextModelDefault: _contentProbesController.loadingTextModelDefault,
     loadingModelDetail: _contentProbesController.loadingModelDetail,
     meBody: _accountProbesController.meBody,
@@ -69,7 +69,7 @@ extension _HomePageBuildSections on _HomePageState {
     visualManualProbeBody: _contentProbesController.visualManualProbeBody,
     directorManualProbeBody: _contentProbesController.directorManualProbeBody,
     skillsBinaryProbeBody: _contentProbesController.skillsBinaryProbeBody,
-    modelsCatalogBody: _modelsCatalogBody,
+    modelsCatalogBody: _modelsCatalogController.modelsCatalogBody,
     textModelDefaultBody: _contentProbesController.textModelDefaultBody,
     modelDetailBody: _contentProbesController.modelDetailBody,
     onSignIn: _authController.signIn,
@@ -84,7 +84,7 @@ extension _HomePageBuildSections on _HomePageState {
     onCallVisualManualProbe: _contentProbesController.callVisualManualProbe,
     onCallDirectorManualProbe: _contentProbesController.callDirectorManualProbe,
     onCallSkillsBinaryProbe: _contentProbesController.callSkillsBinaryProbe,
-    onCallModelsCatalog: _callModelsCatalog,
+    onCallModelsCatalog: _modelsCatalogController.callModelsCatalog,
     onCallTextModelDefault: _contentProbesController.callTextModelDefault,
     onCallModelDetail: _contentProbesController.callModelDetail,
   );
