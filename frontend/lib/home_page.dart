@@ -28,6 +28,7 @@ import 'script_editor/storyboards/workbench_view.dart';
 import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
+import 'auth/controller.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
@@ -78,7 +79,6 @@ part 'system_probes/models_catalog/production_probe.dart';
 part 'system_probes/account/settings.dart';
 part 'system_probes/account/profile.dart';
 part 'system_probes/content.dart';
-part 'auth/controller.dart';
 part 'shell/build_sections.dart';
 part 'shell/runtime_helpers.dart';
 part 'script_editor/editor.dart';
@@ -117,11 +117,6 @@ enum _ProductWorkspacePane {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-
-  StreamSubscription<AuthState>? _authSub;
-
   String? _meBody;
   String? _devSwitchProbeBody;
   String? _memoryConfigProbeBody;
@@ -210,6 +205,11 @@ class _HomePageState extends State<HomePage> {
     onErrorChanged: _setSharedError,
   );
 
+  late final AuthController _authController = AuthController(
+    onErrorChanged: _setSharedError,
+    onSignedOut: _handleSignedOut,
+  );
+
   _HomeSectionMode _homeSectionMode = _HomeSectionMode.product;
   _ProductWorkspacePane _productWorkspacePane = _ProductWorkspacePane.projects;
 
@@ -254,14 +254,18 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _authController.addListener(_handleAuthChanged);
     _overviewController.addListener(_handleOverviewChanged);
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     if (kSupabaseConfigured) {
-      _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
-        if (mounted) setState(() {});
-      });
+      _authController.attachAuthListener();
     }
+  }
+
+  void _handleAuthChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _handleSkillsHarnessChanged() {
@@ -279,14 +283,27 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  Future<void> _handleSignedOut() async {
+    await _skillsHarnessController.closeChannel();
+    if (!mounted) return;
+    setState(() {
+      _usageSummaryBody = null;
+    });
+    _overviewController.reset();
+    _skillsHarnessController.reset();
+    _projectsController.reset();
+    _jobsController.reset();
+    _taskCenterController.reset();
+    _qualityReviewsController.reset();
+  }
+
   @override
   void dispose() {
-    _authSub?.cancel();
+    _authController.removeListener(_handleAuthChanged);
     _overviewController.removeListener(_handleOverviewChanged);
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
-    _email.dispose();
-    _password.dispose();
+    _authController.dispose();
     _overviewController.dispose();
     _projectsController.dispose();
     _jobsController.dispose();
@@ -308,7 +325,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final session = _session;
+    final session = _authController.session;
 
     return Scaffold(
       appBar: AppBar(title: const Text('OpenFlow')),

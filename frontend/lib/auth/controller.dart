@@ -1,48 +1,72 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'dart:async';
 
-part of '../../home_page.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-extension _HomePageAuthSessionController on _HomePageState {
-  Future<void> _signIn() async {
-    setState(() => _error = null);
+import '../config.dart';
+
+class AuthController extends ChangeNotifier {
+  AuthController({required this.onErrorChanged, required this.onSignedOut});
+
+  final void Function(String? error) onErrorChanged;
+  final Future<void> Function() onSignedOut;
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  StreamSubscription<AuthState>? _authSub;
+
+  Session? get session =>
+      kSupabaseConfigured ? Supabase.instance.client.auth.currentSession : null;
+  bool get signedIn => session != null;
+
+  void attachAuthListener() {
+    if (!kSupabaseConfigured) return;
+    _authSub?.cancel();
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
+      notifyListeners();
+    });
+  }
+
+  Future<void> signIn() async {
+    onErrorChanged(null);
     try {
       await Supabase.instance.client.auth.signInWithPassword(
-        email: _email.text.trim(),
-        password: _password.text,
+        email: emailController.text.trim(),
+        password: passwordController.text,
       );
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } catch (e) {
-      setState(() => _error = e.toString());
+    } on AuthException catch (error) {
+      onErrorChanged(error.message);
+    } catch (error) {
+      onErrorChanged(error.toString());
     }
   }
 
-  Future<void> _signUp() async {
-    setState(() => _error = null);
+  Future<void> signUp() async {
+    onErrorChanged(null);
     try {
       await Supabase.instance.client.auth.signUp(
-        email: _email.text.trim(),
-        password: _password.text,
+        email: emailController.text.trim(),
+        password: passwordController.text,
       );
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } catch (e) {
-      setState(() => _error = e.toString());
+    } on AuthException catch (error) {
+      onErrorChanged(error.message);
+    } catch (error) {
+      onErrorChanged(error.toString());
     }
   }
 
-  Future<void> _signOut() async {
+  Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
-    await _skillsHarnessController.closeChannel();
-    setState(() {
-      _wsLog.clear();
-      _usageSummaryBody = null;
-    });
-    _overviewController.reset();
-    _skillsHarnessController.reset();
-    _projectsController.reset();
-    _jobsController.reset();
-    _taskCenterController.reset();
-    _qualityReviewsController.reset();
+    await onSignedOut();
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
