@@ -27,9 +27,12 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     }
 
     setState(() {
-      _loadingScriptResultWriteback = true;
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptResultWriteback,
+      true,
+    );
     _workspaceOutputController.clearWritebackLine();
 
     try {
@@ -57,9 +60,10 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     } catch (error) {
       _setErrorFromException(error);
     } finally {
-      if (mounted) {
-        setState(() => _loadingScriptResultWriteback = false);
-      }
+      _workspaceOperationController.setLoading(
+        WorkspaceOperation.scriptResultWriteback,
+        false,
+      );
     }
   }
 
@@ -90,9 +94,12 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
         : const <Map<String, dynamic>>[];
 
     setState(() {
-      _loadingScriptPlanResultWriteback = true;
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptPlanResultWriteback,
+      true,
+    );
     _workspaceOutputController.clearWritebackLine();
 
     try {
@@ -116,9 +123,10 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     } catch (error) {
       _setErrorFromException(error);
     } finally {
-      if (mounted) {
-        setState(() => _loadingScriptPlanResultWriteback = false);
-      }
+      _workspaceOperationController.setLoading(
+        WorkspaceOperation.scriptPlanResultWriteback,
+        false,
+      );
     }
   }
 
@@ -163,9 +171,12 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     }
 
     setState(() {
-      _loadingScriptPlanResultWriteback = true;
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptPlanResultWriteback,
+      true,
+    );
     _workspaceOutputController.clearWritebackLine();
 
     try {
@@ -189,9 +200,10 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     } catch (error) {
       _setErrorFromException(error);
     } finally {
-      if (mounted) {
-        setState(() => _loadingScriptPlanResultWriteback = false);
-      }
+      _workspaceOperationController.setLoading(
+        WorkspaceOperation.scriptPlanResultWriteback,
+        false,
+      );
     }
   }
 
@@ -256,9 +268,12 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     }
 
     setState(() {
-      _loadingProductionResultWriteback = true;
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.productionResultWriteback,
+      true,
+    );
     _workspaceOutputController.clearWritebackLine();
 
     try {
@@ -288,9 +303,10 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     } catch (error) {
       _setErrorFromException(error);
     } finally {
-      if (mounted) {
-        setState(() => _loadingProductionResultWriteback = false);
-      }
+      _workspaceOperationController.setLoading(
+        WorkspaceOperation.productionResultWriteback,
+        false,
+      );
     }
   }
 }

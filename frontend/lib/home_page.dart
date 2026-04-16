@@ -29,6 +29,7 @@ import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
 import 'agent_workspaces/input_controller.dart';
+import 'agent_workspaces/operation_controller.dart';
 import 'agent_workspaces/runtime_output_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
@@ -108,16 +109,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _error;
-  bool _loadingScriptWorkspaceRun = false;
-  bool _loadingProductionWorkspaceRun = false;
-  bool _loadingProductionFlowProbe = false;
-  bool _loadingScriptDomainProbe = false;
-  bool _loadingScriptSubAgentRun = false;
-  bool _loadingProductionSubAgentRun = false;
-  bool _loadingScriptResultWriteback = false;
-  bool _loadingScriptPlanResultWriteback = false;
-  bool _loadingProductionResultWriteback = false;
   final _workspaceInputController = WorkspaceInputController();
+  final _workspaceOperationController = WorkspaceOperationController();
 
   late final ProjectsController _projectsController = ProjectsController(
     accessTokenProvider: () => _session?.accessToken,
@@ -224,6 +217,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     _shellNavigationController.addListener(_handleShellNavigationChanged);
+    _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
     _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
     if (kSupabaseConfigured) {
       _authController.attachAuthListener();
@@ -275,6 +269,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleWorkspaceOperationChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   Future<void> _handleSignedOut() async {
     await _skillsHarnessController.closeChannel();
     _accountProbesController.reset();
@@ -287,6 +286,7 @@ class _HomePageState extends State<HomePage> {
     _jobsController.reset();
     _taskCenterController.reset();
     _qualityReviewsController.reset();
+    _workspaceOperationController.reset();
   }
 
   @override
@@ -299,6 +299,9 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _shellNavigationController.removeListener(_handleShellNavigationChanged);
+    _workspaceOperationController.removeListener(
+      _handleWorkspaceOperationChanged,
+    );
     _workspaceOutputController.removeListener(_handleWorkspaceOutputChanged);
     _authController.dispose();
     _accountProbesController.dispose();
@@ -311,6 +314,7 @@ class _HomePageState extends State<HomePage> {
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();
     _shellNavigationController.dispose();
+    _workspaceOperationController.dispose();
     _workspaceOutputController.dispose();
     _workspaceInputController.dispose();
     super.dispose();

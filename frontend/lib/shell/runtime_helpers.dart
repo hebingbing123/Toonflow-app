@@ -8,23 +8,10 @@ extension _HomePageRuntimeHelpers on _HomePageState {
 
   bool get _wsProbesBusy =>
       _skillsHarnessController.wsProbesBusy ||
-      _loadingScriptWorkspaceRun ||
-      _loadingProductionWorkspaceRun ||
-      _loadingScriptDomainProbe ||
-      _loadingProductionFlowProbe ||
-      _loadingScriptSubAgentRun ||
-      _loadingProductionSubAgentRun ||
-      _loadingScriptResultWriteback ||
-      _loadingScriptPlanResultWriteback ||
-      _loadingProductionResultWriteback;
+      _workspaceOperationController.hasPendingWork;
 
   void _resetWorkspaceWsOperationFlags() {
-    _loadingScriptWorkspaceRun = false;
-    _loadingProductionWorkspaceRun = false;
-    _loadingScriptDomainProbe = false;
-    _loadingProductionFlowProbe = false;
-    _loadingScriptSubAgentRun = false;
-    _loadingProductionSubAgentRun = false;
+    _workspaceOperationController.resetWsOperations();
   }
 
   void _handleHarnessWsMessage(String raw) {
@@ -52,19 +39,15 @@ extension _HomePageRuntimeHelpers on _HomePageState {
     final resolution = resolveWorkspaceWsEvent(event);
     if (resolution.clearAllOperations) {
       _skillsHarnessController.resetWsBusyFlags();
-      _resetWorkspaceWsOperationFlags();
+      _workspaceOperationController.resetWsOperations();
     } else {
       if (resolution.clearToolOperations) {
         _skillsHarnessController.clearToolProbeFlags();
-        _loadingScriptDomainProbe = false;
-        _loadingProductionFlowProbe = false;
-        _loadingScriptSubAgentRun = false;
-        _loadingProductionSubAgentRun = false;
+        _workspaceOperationController.clearToolOperations();
       }
       if (resolution.clearAgentOperations) {
         _skillsHarnessController.clearAgentProbeFlags();
-        _loadingScriptWorkspaceRun = false;
-        _loadingProductionWorkspaceRun = false;
+        _workspaceOperationController.clearAgentOperations();
       }
     }
 

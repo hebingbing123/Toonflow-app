@@ -20,11 +20,14 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingProductionWorkspaceRun = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.productionWorkspaceRun,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;
@@ -99,11 +102,14 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingProductionFlowProbe = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.productionFlowProbe,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;
@@ -151,11 +157,14 @@ extension _HomePageAgentWorkspacesProductionRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingProductionSubAgentRun = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.productionSubAgentRun,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;

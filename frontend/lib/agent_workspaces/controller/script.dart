@@ -16,11 +16,14 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingScriptWorkspaceRun = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptWorkspaceRun,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;
@@ -83,11 +86,14 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingScriptDomainProbe = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptDomainProbe,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;
@@ -128,11 +134,14 @@ extension _HomePageAgentWorkspacesScriptRunController on _HomePageState {
     }
 
     setState(() {
-      _loadingScriptSubAgentRun = true;
       _wsLog.clear();
       _resetWorkspaceOutputs();
       _error = null;
     });
+    _workspaceOperationController.setLoading(
+      WorkspaceOperation.scriptSubAgentRun,
+      true,
+    );
 
     final channel = await _openHarnessChannel(token);
     if (channel == null) return;

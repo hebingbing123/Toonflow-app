@@ -196,15 +196,24 @@ extension _HomePageBuildSections on _HomePageState {
           _workspaceInputController.productionDomainToolController,
       productionDomainArgsController:
           _workspaceInputController.productionDomainArgsController,
-      loadingScriptWorkspaceRun: _loadingScriptWorkspaceRun,
-      loadingProductionWorkspaceRun: _loadingProductionWorkspaceRun,
-      loadingScriptDomainProbe: _loadingScriptDomainProbe,
-      loadingProductionFlowProbe: _loadingProductionFlowProbe,
-      loadingScriptSubAgentRun: _loadingScriptSubAgentRun,
-      loadingProductionSubAgentRun: _loadingProductionSubAgentRun,
-      loadingScriptResultWriteback: _loadingScriptResultWriteback,
-      loadingScriptPlanResultWriteback: _loadingScriptPlanResultWriteback,
-      loadingProductionResultWriteback: _loadingProductionResultWriteback,
+      loadingScriptWorkspaceRun:
+          _workspaceOperationController.loadingScriptWorkspaceRun,
+      loadingProductionWorkspaceRun:
+          _workspaceOperationController.loadingProductionWorkspaceRun,
+      loadingScriptDomainProbe:
+          _workspaceOperationController.loadingScriptDomainProbe,
+      loadingProductionFlowProbe:
+          _workspaceOperationController.loadingProductionFlowProbe,
+      loadingScriptSubAgentRun:
+          _workspaceOperationController.loadingScriptSubAgentRun,
+      loadingProductionSubAgentRun:
+          _workspaceOperationController.loadingProductionSubAgentRun,
+      loadingScriptResultWriteback:
+          _workspaceOperationController.loadingScriptResultWriteback,
+      loadingScriptPlanResultWriteback:
+          _workspaceOperationController.loadingScriptPlanResultWriteback,
+      loadingProductionResultWriteback:
+          _workspaceOperationController.loadingProductionResultWriteback,
       wsLog: _wsLog,
       workspaceAssistantText: _workspaceOutputController.assistantText,
       workspaceScriptWritebackCandidate:
