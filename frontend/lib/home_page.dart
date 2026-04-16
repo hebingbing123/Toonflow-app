@@ -28,6 +28,7 @@ import 'script_editor/storyboards/workbench_view.dart';
 import 'script_editor/support.dart';
 import 'storyboard_editor/support.dart';
 import 'agent_workspaces/controls.dart';
+import 'agent_workspaces/runtime_output_controller.dart';
 import 'auth/controller.dart';
 import 'jobs/controller.dart';
 import 'projects/controller.dart';
@@ -115,16 +116,6 @@ class _HomePageState extends State<HomePage> {
   bool _loadingScriptResultWriteback = false;
   bool _loadingScriptPlanResultWriteback = false;
   bool _loadingProductionResultWriteback = false;
-  String _workspaceAssistantText = '';
-  String? _workspaceLastToolResultLine;
-  String? _workspaceLastToolName;
-  Object? _workspaceLastToolResultData;
-  String? _workspaceSuggestedFlowKey;
-  String? _workspaceScriptWritebackCandidate;
-  Map<String, dynamic>? _workspaceScriptPlanWritebackCandidate;
-  int? _workspaceScriptPlanRowId;
-  String? _workspaceScriptWritebackSource;
-  String? _workspaceWritebackLine;
   final _agentWorkspaceProjectIdCtrl = TextEditingController(text: '1');
   final _agentWorkspaceScriptIdCtrl = TextEditingController(text: '1');
   final _scriptWorkspacePromptCtrl = TextEditingController(
@@ -197,6 +188,8 @@ class _HomePageState extends State<HomePage> {
 
   late final ShellNavigationController _shellNavigationController =
       ShellNavigationController();
+  late final WorkspaceOutputController _workspaceOutputController =
+      WorkspaceOutputController();
 
   late final SkillsHarnessController _skillsHarnessController =
       SkillsHarnessController(
@@ -247,6 +240,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.addListener(_handleTaskCenterChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     _shellNavigationController.addListener(_handleShellNavigationChanged);
+    _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
     if (kSupabaseConfigured) {
       _authController.attachAuthListener();
     }
@@ -292,6 +286,11 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleWorkspaceOutputChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   Future<void> _handleSignedOut() async {
     await _skillsHarnessController.closeChannel();
     _accountProbesController.reset();
@@ -299,6 +298,7 @@ class _HomePageState extends State<HomePage> {
     _modelsCatalogController.reset();
     _overviewController.reset();
     _skillsHarnessController.reset();
+    _workspaceOutputController.reset();
     _projectsController.reset();
     _jobsController.reset();
     _taskCenterController.reset();
@@ -315,6 +315,7 @@ class _HomePageState extends State<HomePage> {
     _taskCenterController.removeListener(_handleTaskCenterChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _shellNavigationController.removeListener(_handleShellNavigationChanged);
+    _workspaceOutputController.removeListener(_handleWorkspaceOutputChanged);
     _authController.dispose();
     _accountProbesController.dispose();
     _contentProbesController.dispose();
@@ -326,6 +327,7 @@ class _HomePageState extends State<HomePage> {
     _qualityReviewsController.dispose();
     _skillsHarnessController.dispose();
     _shellNavigationController.dispose();
+    _workspaceOutputController.dispose();
     _agentWorkspaceProjectIdCtrl.dispose();
     _agentWorkspaceScriptIdCtrl.dispose();
     _scriptWorkspacePromptCtrl.dispose();

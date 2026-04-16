@@ -202,17 +202,21 @@ extension _HomePageBuildSections on _HomePageState {
       loadingScriptPlanResultWriteback: _loadingScriptPlanResultWriteback,
       loadingProductionResultWriteback: _loadingProductionResultWriteback,
       wsLog: _wsLog,
-      workspaceAssistantText: _workspaceAssistantText,
-      workspaceScriptWritebackCandidate: _workspaceScriptWritebackCandidate,
+      workspaceAssistantText: _workspaceOutputController.assistantText,
+      workspaceScriptWritebackCandidate:
+          _workspaceOutputController.scriptWritebackCandidate,
       workspaceScriptPlanWritebackCandidate:
-          _workspaceScriptPlanWritebackCandidate,
-      workspaceScriptPlanRowId: _workspaceScriptPlanRowId,
-      workspaceScriptWritebackSource: _workspaceScriptWritebackSource,
-      workspaceLastToolResultLine: _workspaceLastToolResultLine,
-      workspaceLastToolName: _workspaceLastToolName,
-      workspaceLastToolResultData: _workspaceLastToolResultData,
-      workspaceSuggestedFlowKey: _workspaceSuggestedFlowKey,
-      workspaceWritebackLine: _workspaceWritebackLine,
+          _workspaceOutputController.scriptPlanWritebackCandidate,
+      workspaceScriptPlanRowId: _workspaceOutputController.scriptPlanRowId,
+      workspaceScriptWritebackSource:
+          _workspaceOutputController.scriptWritebackSource,
+      workspaceLastToolResultLine:
+          _workspaceOutputController.lastToolResultLine,
+      workspaceLastToolName: _workspaceOutputController.lastToolName,
+      workspaceLastToolResultData:
+          _workspaceOutputController.lastToolResultData,
+      workspaceSuggestedFlowKey: _workspaceOutputController.suggestedFlowKey,
+      workspaceWritebackLine: _workspaceOutputController.writebackLine,
       onRunScriptWorkspace: _runScriptWorkspaceAgent,
       onRunProductionWorkspace: _runProductionWorkspaceAgent,
       onProbeScriptDomainTool: _probeScriptDomainTool,

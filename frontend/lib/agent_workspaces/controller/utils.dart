@@ -10,24 +10,14 @@ extension _HomePageAgentWorkspacesController on _HomePageState {
   }
 
   void _resetWorkspaceOutputs() {
-    _workspaceAssistantText = '';
-    _workspaceLastToolResultLine = null;
-    _workspaceLastToolName = null;
-    _workspaceLastToolResultData = null;
-    _workspaceSuggestedFlowKey = null;
-    _workspaceScriptWritebackCandidate = null;
-    _workspaceScriptPlanWritebackCandidate = null;
-    _workspaceScriptPlanRowId = null;
-    _workspaceScriptWritebackSource = null;
-    _workspaceWritebackLine = null;
+    _workspaceOutputController.reset();
   }
 
   void _applySuggestedProductionFlowKey() {
-    final suggested = _workspaceSuggestedFlowKey?.trim();
+    final suggested = _workspaceOutputController.suggestedFlowKey?.trim();
     if (suggested == null || suggested.isEmpty) {
       return;
     }
     setState(() => _productionFlowKeyCtrl.text = suggested);
   }
-
 }

@@ -6,14 +6,18 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
   Future<void> _writeBackScriptWorkspaceResult() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final projectNumericId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
+    final projectNumericId = _parsePositiveInt(
+      _agentWorkspaceProjectIdCtrl.text,
+    );
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
-    final toolCandidate = _workspaceScriptWritebackCandidate?.trim();
-    final assistantText = _workspaceAssistantText.trim();
+    final toolCandidate = _workspaceOutputController.scriptWritebackCandidate
+        ?.trim();
+    final assistantText = _workspaceOutputController.assistantText.trim();
     final useToolCandidate = toolCandidate != null && toolCandidate.isNotEmpty;
     final content = useToolCandidate ? toolCandidate : assistantText;
     final source = useToolCandidate
-        ? (_workspaceScriptWritebackSource ?? 'tool:get_script_content')
+        ? (_workspaceOutputController.scriptWritebackSource ??
+              'tool:get_script_content')
         : 'assistant stream';
     if (projectNumericId == null || scriptId == null || content.isEmpty) {
       setState(() => _error = 'project_id/script_id 与可回写结果必须有效');
@@ -22,12 +26,15 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
 
     setState(() {
       _loadingScriptResultWriteback = true;
-      _workspaceWritebackLine = null;
       _error = null;
     });
+    _workspaceOutputController.clearWritebackLine();
 
     try {
-      final projects = await postGeneralGetSingleProject(token, projectNumericId);
+      final projects = await postGeneralGetSingleProject(
+        token,
+        projectNumericId,
+      );
       if (projects.isEmpty) {
         if (!mounted) return;
         setState(() => _error = '未找到项目');
@@ -41,11 +48,10 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
         <String, dynamic>{'content': content},
       );
       if (!mounted) return;
-      setState(() {
-        final updatedLen = updated.content?.length ?? 0;
-        _workspaceWritebackLine =
-            '写回成功：script ${updated.numericId} 已更新，source=$source，content 长度 $updatedLen。';
-      });
+      final updatedLen = updated.content?.length ?? 0;
+      _workspaceOutputController.setWritebackLine(
+        '写回成功：script ${updated.numericId} 已更新，source=$source，content 长度 $updatedLen。',
+      );
     } catch (error) {
       _setErrorFromException(error);
     } finally {
@@ -59,7 +65,7 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     final token = _session?.accessToken;
     if (token == null) return;
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
-    final candidate = _workspaceScriptPlanWritebackCandidate;
+    final candidate = _workspaceOutputController.scriptPlanWritebackCandidate;
     if (projectId == null || candidate == null) {
       setState(() => _error = 'project_id 与 planData 回写源必须有效');
       return;
@@ -81,9 +87,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
 
     setState(() {
       _loadingScriptPlanResultWriteback = true;
-      _workspaceWritebackLine = null;
       _error = null;
     });
+    _workspaceOutputController.clearWritebackLine();
 
     try {
       final status = await postScriptAgentSetPlanDataV1(
@@ -100,10 +106,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
         );
       }
       if (!mounted) return;
-      setState(() {
-        _workspaceWritebackLine =
-            '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。';
-      });
+      _workspaceOutputController.setWritebackLine(
+        '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。',
+      );
     } catch (error) {
       _setErrorFromException(error);
     } finally {
@@ -117,8 +122,8 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
   Future<void> _writeBackScriptPlanViaUpdateData() async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final planRowId = _workspaceScriptPlanRowId;
-    final candidate = _workspaceScriptPlanWritebackCandidate;
+    final planRowId = _workspaceOutputController.scriptPlanRowId;
+    final candidate = _workspaceOutputController.scriptPlanWritebackCandidate;
     if (planRowId == null || candidate == null) {
       setState(
         () => _error = '需要 planId 与 planData：请先拉取 get_planData（含 plan 行 id）',
@@ -155,9 +160,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
 
     setState(() {
       _loadingScriptPlanResultWriteback = true;
-      _workspaceWritebackLine = null;
       _error = null;
     });
+    _workspaceOutputController.clearWritebackLine();
 
     try {
       final status = await postScriptAgentUpdateDataV1(
@@ -174,10 +179,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
         );
       }
       if (!mounted) return;
-      setState(() {
-        _workspaceWritebackLine =
-            '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=${scriptRows.length}）。';
-      });
+      _workspaceOutputController.setWritebackLine(
+        '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=${scriptRows.length}）。',
+      );
     } catch (error) {
       _setErrorFromException(error);
     } finally {
@@ -193,8 +197,8 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     final projectId = _parsePositiveInt(_agentWorkspaceProjectIdCtrl.text);
     final scriptId = _parsePositiveInt(_agentWorkspaceScriptIdCtrl.text);
     final flowKey = _productionFlowKeyCtrl.text.trim();
-    final toolName = _workspaceLastToolName;
-    final result = _workspaceLastToolResultData;
+    final toolName = _workspaceOutputController.lastToolName;
+    final result = _workspaceOutputController.lastToolResultData;
     if (projectId == null ||
         scriptId == null ||
         flowKey.isEmpty ||
@@ -213,9 +217,8 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
     if (toolName != 'get_flowData' &&
         _HomePageAgentWorkspacesControllerConstants._coreProductionFlowKeys
             .contains(flowKey)) {
-      final refreshableKey =
-          _HomePageAgentWorkspacesControllerConstants._toolRefreshableCoreFlowKey[
-              toolName];
+      final refreshableKey = _HomePageAgentWorkspacesControllerConstants
+          ._toolRefreshableCoreFlowKey[toolName];
       if (refreshableKey == flowKey) {
         try {
           final latestFlow = await fetchProductionFlowDataV1(
@@ -245,9 +248,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
 
     setState(() {
       _loadingProductionResultWriteback = true;
-      _workspaceWritebackLine = null;
       _error = null;
     });
+    _workspaceOutputController.clearWritebackLine();
 
     try {
       final fullFlow = await fetchProductionFlowDataV1(
@@ -270,10 +273,9 @@ extension _HomePageAgentWorkspacesWritebackController on _HomePageState {
         );
       }
       if (!mounted) return;
-      setState(() {
-        _workspaceWritebackLine =
-            '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$writebackSource）。';
-      });
+      _workspaceOutputController.setWritebackLine(
+        '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$writebackSource）。',
+      );
     } catch (error) {
       _setErrorFromException(error);
     } finally {
