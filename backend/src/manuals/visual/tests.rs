@@ -1,6 +1,6 @@
 //! manuals/visual 单元测试。
 
-use super::*;
+use super::storage::load_visual_manual;
 
 #[test]
 fn load_visual_manual_smoke() {
