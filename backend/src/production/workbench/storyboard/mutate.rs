@@ -6,28 +6,12 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use super::common::{
-    remove_owned_storyboard_frame, require_pool, update_owned_storyboard_image_url,
-    update_owned_storyboard_info,
+    normalize_storyboard_image_url, normalize_storyboard_prompt, remove_owned_storyboard_frame,
+    require_pool, update_owned_storyboard_image_url, update_owned_storyboard_info,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
-
-fn normalize_storyboard_prompt(prompt: &str) -> Result<String, ApiError> {
-    let prompt = prompt.trim();
-    if prompt.is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
-    Ok(prompt.to_string())
-}
-
-fn normalize_storyboard_image_url(image_url: &str) -> Result<String, ApiError> {
-    let image_url = image_url.trim();
-    if image_url.is_empty() {
-        return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
-    }
-    Ok(image_url.to_string())
-}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -210,7 +194,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
 
 #[cfg(test)]
 mod tests {
-    use super::{normalize_storyboard_image_url, normalize_storyboard_prompt};
+    use super::super::common::{normalize_storyboard_image_url, normalize_storyboard_prompt};
     use crate::error::ApiError;
 
     #[test]

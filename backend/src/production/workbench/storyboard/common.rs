@@ -43,6 +43,22 @@ pub(super) fn require_positive_scope_ids(
     Ok(())
 }
 
+pub(super) fn normalize_storyboard_prompt(prompt: &str) -> Result<String, ApiError> {
+    let prompt = prompt.trim();
+    if prompt.is_empty() {
+        return Err(ApiError::BadRequest("prompt must not be empty".into()));
+    }
+    Ok(prompt.to_string())
+}
+
+pub(super) fn normalize_storyboard_image_url(image_url: &str) -> Result<String, ApiError> {
+    let image_url = image_url.trim();
+    if image_url.is_empty() {
+        return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
+    }
+    Ok(image_url.to_string())
+}
+
 async fn resolve_owned_script_id(
     pool: &sqlx::PgPool,
     uid: Uuid,
@@ -395,7 +411,11 @@ pub(super) async fn insert_owned_storyboards_with_next_numeric_ids(
 
 #[cfg(test)]
 mod tests {
-    use super::storyboard_numeric_ids_from_base;
+    use super::{
+        normalize_storyboard_image_url, normalize_storyboard_prompt,
+        storyboard_numeric_ids_from_base,
+    };
+    use crate::error::ApiError;
 
     #[test]
     fn storyboard_numeric_ids_from_base_starts_after_base_id() {
@@ -405,5 +425,36 @@ mod tests {
     #[test]
     fn storyboard_numeric_ids_from_base_allows_empty_batch() {
         assert!(storyboard_numeric_ids_from_base(9, 0).is_empty());
+    }
+
+    #[test]
+    fn normalize_storyboard_prompt_trims_value() {
+        let prompt = normalize_storyboard_prompt("  opening frame  ").unwrap();
+        assert_eq!(prompt, "opening frame");
+    }
+
+    #[test]
+    fn normalize_storyboard_prompt_rejects_blank_value() {
+        let err = normalize_storyboard_prompt("   ").unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "prompt must not be empty"
+        ));
+    }
+
+    #[test]
+    fn normalize_storyboard_image_url_trims_value() {
+        let image_url =
+            normalize_storyboard_image_url("  https://example.com/frame.png  ").unwrap();
+        assert_eq!(image_url, "https://example.com/frame.png");
+    }
+
+    #[test]
+    fn normalize_storyboard_image_url_rejects_blank_value() {
+        let err = normalize_storyboard_image_url(" ").unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "imageUrl must not be empty"
+        ));
     }
 }

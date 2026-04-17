@@ -6,7 +6,8 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use super::common::{
-    insert_owned_storyboards_with_next_numeric_ids, require_pool, StoryboardInsertDraft,
+    insert_owned_storyboards_with_next_numeric_ids, normalize_storyboard_prompt, require_pool,
+    StoryboardInsertDraft,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -18,13 +19,8 @@ fn prepare_storyboard_insert(
     prompt: &str,
     duration: Option<i32>,
 ) -> Result<StoryboardInsertDraft, ApiError> {
-    let prompt = prompt.trim();
-    if prompt.is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
-
     Ok(StoryboardInsertDraft {
-        prompt: prompt.to_string(),
+        prompt: normalize_storyboard_prompt(prompt)?,
         duration: duration.unwrap_or(DEFAULT_STORYBOARD_DURATION),
     })
 }
