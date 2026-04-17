@@ -144,6 +144,28 @@ pub(super) async fn list_storyboard_items_by_script(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
+pub(super) async fn fetch_owned_storyboard_item(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+) -> Result<ProductionStoryboardItem, ApiError> {
+    let storyboard_uuid =
+        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
+    fetch_storyboard_item(pool, storyboard_uuid).await
+}
+
+pub(super) async fn list_owned_storyboard_items_by_script(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+) -> Result<Vec<ProductionStoryboardItem>, ApiError> {
+    let script_uuid = require_owned_script_id(pool, uid, project_id, script_id).await?;
+    list_storyboard_items_by_script(pool, script_uuid).await
+}
+
 pub(super) async fn update_storyboard_info(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,
