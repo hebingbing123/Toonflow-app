@@ -39,6 +39,26 @@ fn json_i32(obj: &Map<String, Value>, key: &str) -> Option<i32> {
         .and_then(|v| i32::try_from(v).ok())
 }
 
+fn ordered_storyboard_numeric_ids(data: &Value) -> Result<Option<Vec<i32>>, ApiError> {
+    let object = data
+        .as_object()
+        .ok_or_else(|| ApiError::BadRequest("data must be a JSON object".into()))?;
+
+    Ok(object
+        .get("storyboard")
+        .and_then(Value::as_array)
+        .and_then(|storyboards| {
+            storyboards
+                .iter()
+                .map(|item| {
+                    item.as_object()
+                        .and_then(|obj| json_i32(obj, "id"))
+                        .filter(|id| *id > 0)
+                })
+                .collect::<Option<Vec<_>>>()
+        }))
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/production/get-flow-data",
@@ -104,41 +124,28 @@ pub(crate) async fn post_save_flow_data(
             "projectId and episodesId must be positive integers".into(),
         ));
     }
-    if body.data.as_object().is_none() {
-        return Err(ApiError::BadRequest("data must be a JSON object".into()));
-    }
+    let ordered_storyboard_ids = ordered_storyboard_numeric_ids(&body.data)?;
 
     let pool = state.require_pool()?;
     let (project_id, script_id, _) =
         resolve_owned_production_scope(pool, uid, body.project_id, body.episodes_id).await?;
 
-    if let Some(storyboards) = body.data.get("storyboard").and_then(Value::as_array) {
-        let ordered_ids = storyboards
-            .iter()
-            .map(|item| {
-                item.as_object()
-                    .and_then(|obj| json_i32(obj, "id"))
-                    .filter(|id| *id > 0)
-            })
-            .collect::<Option<Vec<_>>>();
-
-        if let Some(ordered_ids) = ordered_ids {
-            for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {
-                sqlx::query(
-                    r#"
-                    UPDATE app_storyboard
-                    SET sb_index = $3, updated_at = NOW()
-                    WHERE script_id = $1
-                      AND numeric_id = $2
-                    "#,
-                )
-                .bind(script_id)
-                .bind(storyboard_numeric_id)
-                .bind(index as i32)
-                .execute(pool)
-                .await
-                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-            }
+    if let Some(ordered_ids) = ordered_storyboard_ids {
+        for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {
+            sqlx::query(
+                r#"
+                UPDATE app_storyboard
+                SET sb_index = $3, updated_at = NOW()
+                WHERE script_id = $1
+                  AND numeric_id = $2
+                "#,
+            )
+            .bind(script_id)
+            .bind(storyboard_numeric_id)
+            .bind(index as i32)
+            .execute(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
         }
     }
 
@@ -163,7 +170,7 @@ pub(crate) async fn post_save_flow_data(
 
 #[cfg(test)]
 mod tests {
-    use super::{GetFlowDataBody, SaveFlowDataBody};
+    use super::{ordered_storyboard_numeric_ids, GetFlowDataBody, SaveFlowDataBody};
 
     #[test]
     fn get_flow_data_body_rejects_unknown_fields() {
@@ -195,5 +202,41 @@ mod tests {
         assert_eq!(b.project_id, 1);
         assert_eq!(b.episodes_id, 5);
         assert!(b.data.is_object());
+    }
+
+    #[test]
+    fn ordered_storyboard_numeric_ids_rejects_non_object() {
+        let err = ordered_storyboard_numeric_ids(&serde_json::json!([])).expect_err("non-object");
+        match err {
+            crate::error::ApiError::BadRequest(msg) => {
+                assert!(msg.contains("JSON object"));
+            }
+            other => panic!("unexpected error: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn ordered_storyboard_numeric_ids_returns_none_without_storyboard_array() {
+        let got = ordered_storyboard_numeric_ids(&serde_json::json!({"key":"value"}))
+            .expect("object should parse");
+        assert_eq!(got, None);
+    }
+
+    #[test]
+    fn ordered_storyboard_numeric_ids_extracts_positive_ids_in_order() {
+        let got = ordered_storyboard_numeric_ids(&serde_json::json!({
+            "storyboard": [{"id": 9}, {"id": 2}, {"id": 7}]
+        }))
+        .expect("valid storyboard ids");
+        assert_eq!(got, Some(vec![9, 2, 7]));
+    }
+
+    #[test]
+    fn ordered_storyboard_numeric_ids_returns_none_when_any_id_is_invalid() {
+        let got = ordered_storyboard_numeric_ids(&serde_json::json!({
+            "storyboard": [{"id": 9}, {"id": 0}, {"id": 7}]
+        }))
+        .expect("object should parse");
+        assert_eq!(got, None);
     }
 }
