@@ -5,7 +5,10 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::{require_pool, require_positive_scope_ids, resolve_owned_storyboard_id};
+use super::common::{
+    remove_storyboard_frame, require_pool, require_positive_scope_ids, resolve_owned_storyboard_id,
+    update_storyboard_image_url, update_storyboard_info,
+};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -81,23 +84,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     )
     .await?;
 
-    let updated = sqlx::query(
-        r#"
-        UPDATE app_storyboard
-        SET prompt = $2, duration = $3, updated_at = NOW()
-        WHERE id = $1
-        "#,
-    )
-    .bind(storyboard_uuid)
-    .bind(prompt)
-    .bind(body.duration)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if updated.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
+    update_storyboard_info(pool, storyboard_uuid, &prompt, body.duration).await?;
 
     Ok(JsonResponse(EditStoryboardInfoResponse {
         storyboard_id: body.storyboard_id,
@@ -156,21 +143,7 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     )
     .await?;
 
-    let updated = sqlx::query(
-        r#"
-        UPDATE app_storyboard
-        SET file_path = NULL, state = NULL, updated_at = NOW()
-        WHERE id = $1
-        "#,
-    )
-    .bind(storyboard_uuid)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if updated.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
+    remove_storyboard_frame(pool, storyboard_uuid).await?;
 
     Ok(JsonResponse(RemoveFrameResponse {
         storyboard_id: body.storyboard_id,
@@ -232,22 +205,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
     )
     .await?;
 
-    let updated = sqlx::query(
-        r#"
-        UPDATE app_storyboard
-        SET file_path = $2, state = '已完成', updated_at = NOW()
-        WHERE id = $1
-        "#,
-    )
-    .bind(storyboard_uuid)
-    .bind(&image_url)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if updated.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
+    update_storyboard_image_url(pool, storyboard_uuid, &image_url).await?;
 
     Ok(JsonResponse(UpdateStoryboardUrlResponse {
         storyboard_id: body.storyboard_id,
