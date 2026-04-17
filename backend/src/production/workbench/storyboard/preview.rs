@@ -5,7 +5,10 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::{require_pool, require_positive_scope_ids, resolve_owned_storyboard_id};
+use super::common::{
+    fetch_storyboard_preview_data, require_pool, require_positive_scope_ids,
+    resolve_owned_storyboard_id,
+};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -62,20 +65,15 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     )
     .await?;
 
-    let file_path: Option<String> =
-        sqlx::query_scalar(r#"SELECT file_path FROM app_storyboard WHERE id = $1"#)
-            .bind(storyboard_uuid)
-            .fetch_one(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let preview = fetch_storyboard_preview_data(pool, storyboard_uuid).await?;
 
-    if file_path.is_none() {
+    if preview.file_path.is_none() {
         return Err(ApiError::NotFound);
     }
 
     Ok(JsonResponse(DownPreviewImageResponse {
         storyboard_id: body.storyboard_id,
-        preview_url: file_path,
+        preview_url: preview.file_path,
         message: "Preview image URL retrieved",
     }))
 }
@@ -132,16 +130,11 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     )
     .await?;
 
-    let (file_path, prompt): (Option<String>, Option<String>) =
-        sqlx::query_as(r#"SELECT file_path, prompt FROM app_storyboard WHERE id = $1"#)
-            .bind(storyboard_uuid)
-            .fetch_one(pool)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let preview = fetch_storyboard_preview_data(pool, storyboard_uuid).await?;
 
     Ok(JsonResponse(PreviewImageResponse {
         storyboard_id: body.storyboard_id,
-        image_url: file_path,
-        prompt,
+        image_url: preview.file_path,
+        prompt: preview.prompt,
     }))
 }

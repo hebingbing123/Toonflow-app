@@ -6,6 +6,12 @@ use crate::production::workbench::storyboard_ops::ProductionStoryboardItem;
 use crate::scope;
 use crate::state::AppState;
 
+#[derive(Debug)]
+pub(super) struct StoryboardPreviewData {
+    pub(super) file_path: Option<String>,
+    pub(super) prompt: Option<String>,
+}
+
 pub(super) fn require_pool(state: &AppState) -> Result<&sqlx::PgPool, ApiError> {
     workbench_common::require_pool(state)
 }
@@ -183,4 +189,18 @@ pub(super) async fn update_storyboard_image_url(
     }
 
     Ok(())
+}
+
+pub(super) async fn fetch_storyboard_preview_data(
+    pool: &sqlx::PgPool,
+    storyboard_id: Uuid,
+) -> Result<StoryboardPreviewData, ApiError> {
+    let (file_path, prompt): (Option<String>, Option<String>) =
+        sqlx::query_as(r#"SELECT file_path, prompt FROM app_storyboard WHERE id = $1"#)
+            .bind(storyboard_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(StoryboardPreviewData { file_path, prompt })
 }
