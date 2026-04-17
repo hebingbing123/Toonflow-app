@@ -382,6 +382,17 @@ pub(super) async fn insert_storyboards_with_next_numeric_ids(
     Ok(storyboard_ids)
 }
 
+pub(super) async fn insert_owned_storyboards_with_next_numeric_ids(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    drafts: &[StoryboardInsertDraft],
+) -> Result<Vec<i32>, ApiError> {
+    let script_uuid = require_owned_script_id(pool, uid, project_id, script_id).await?;
+    insert_storyboards_with_next_numeric_ids(pool, script_uuid, script_id, drafts).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::storyboard_numeric_ids_from_base;
