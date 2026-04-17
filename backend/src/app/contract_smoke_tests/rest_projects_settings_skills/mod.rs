@@ -1,3 +1,4 @@
 mod general;
 mod projects;
-mod settings_skills;
+mod settings;
+mod skills_harness_jobs;
