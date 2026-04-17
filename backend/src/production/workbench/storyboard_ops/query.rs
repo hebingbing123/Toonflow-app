@@ -5,7 +5,10 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{ensure_owned_storyboards, require_pool, require_positive_project_script_ids};
+use super::common::{
+    ensure_owned_storyboards, normalize_storyboard_ids, require_pool,
+    require_positive_project_script_ids, validate_storyboard_ids,
+};
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
@@ -39,12 +42,7 @@ pub(in crate::production) async fn post_get_production_data(
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_project_script_ids(body.project_id, body.script_id)?;
-    if body.ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
-    }
-    if body.ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest("ids must be positive integers".into()));
-    }
+    validate_storyboard_ids(&body.ids)?;
 
     let pool = require_pool(&state)?;
     let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
@@ -103,22 +101,14 @@ pub(in crate::production) async fn post_storyboard_polling_image(
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_project_script_ids(body.project_id, body.script_id)?;
-    if body.ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
-    }
-    if body.ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest("ids must be positive integers".into()));
-    }
+    let normalized_ids = normalize_storyboard_ids(&body.ids)?;
 
     let pool = require_pool(&state)?;
     let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
         .await
         .map_err(|e| e.into_api_error())?;
 
-    let mut uniq = body.ids.clone();
-    uniq.sort_unstable();
-    uniq.dedup();
-    ensure_owned_storyboards(pool, scope_row.script_id, &uniq).await?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
 
     Ok(StatusCode::OK.into_response())
 }

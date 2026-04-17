@@ -9,6 +9,24 @@ pub(super) fn require_positive_project_script_ids(
     workbench_common::require_positive_project_script(project_id, script_id)
 }
 
+pub(super) fn validate_storyboard_ids(storyboard_ids: &[i32]) -> Result<(), ApiError> {
+    if storyboard_ids.is_empty() {
+        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
+    }
+    if storyboard_ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest("ids must be positive integers".into()));
+    }
+    Ok(())
+}
+
+pub(super) fn normalize_storyboard_ids(storyboard_ids: &[i32]) -> Result<Vec<i32>, ApiError> {
+    validate_storyboard_ids(storyboard_ids)?;
+    let mut uniq = storyboard_ids.to_vec();
+    uniq.sort_unstable();
+    uniq.dedup();
+    Ok(uniq)
+}
+
 pub(super) fn require_pool(state: &AppState) -> Result<&sqlx::PgPool, ApiError> {
     workbench_common::require_pool(state)
 }
@@ -36,4 +54,32 @@ pub(super) async fn ensure_owned_storyboards(
         return Err(ApiError::NotFound);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{normalize_storyboard_ids, validate_storyboard_ids};
+    use crate::error::ApiError;
+
+    #[test]
+    fn validate_storyboard_ids_rejects_empty_input() {
+        let err = validate_storyboard_ids(&[]).unwrap_err();
+        assert!(
+            matches!(err, ApiError::BadRequest(message) if message == "ids must be a non-empty array")
+        );
+    }
+
+    #[test]
+    fn validate_storyboard_ids_rejects_non_positive_values() {
+        let err = validate_storyboard_ids(&[1, 0, 3]).unwrap_err();
+        assert!(
+            matches!(err, ApiError::BadRequest(message) if message == "ids must be positive integers")
+        );
+    }
+
+    #[test]
+    fn normalize_storyboard_ids_sorts_and_deduplicates() {
+        let ids = normalize_storyboard_ids(&[4, 2, 4, 1, 2]).unwrap();
+        assert_eq!(ids, vec![1, 2, 4]);
+    }
 }
