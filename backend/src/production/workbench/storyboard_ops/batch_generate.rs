@@ -4,7 +4,10 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{ensure_owned_storyboards, require_pool, require_positive_project_script_ids};
+use super::common::{
+    ensure_owned_storyboards, normalize_storyboard_ids, require_pool,
+    require_positive_project_script_ids,
+};
 use super::types::{BatchGenerateImageBody, BatchGenerateImageResponse};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -46,17 +49,8 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
         .await
         .map_err(|e| e.into_api_error())?;
 
-    if body.items.iter().any(|i| i.storyboard_id <= 0) {
-        return Err(ApiError::BadRequest(
-            "each item.storyboardId must be a positive integer".into(),
-        ));
-    }
-
-    let mut uniq: Vec<i32> = body.items.iter().map(|i| i.storyboard_id).collect();
-    uniq.sort_unstable();
-    uniq.dedup();
-
-    ensure_owned_storyboards(pool, scope_row.script_id, &uniq).await?;
+    let normalized_ids = normalize_batch_generate_storyboard_ids(&body.items)?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
     let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
@@ -80,4 +74,69 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
 
     let total = enqueued.len();
     Ok(JsonResponse(BatchGenerateImageResponse { enqueued, total }))
+}
+
+fn normalize_batch_generate_storyboard_ids(
+    items: &[super::types::BatchGenerateImageItem],
+) -> Result<Vec<i32>, ApiError> {
+    let storyboard_ids: Vec<i32> = items.iter().map(|item| item.storyboard_id).collect();
+    if storyboard_ids.iter().any(|id| *id <= 0) {
+        return Err(ApiError::BadRequest(
+            "each item.storyboardId must be a positive integer".into(),
+        ));
+    }
+
+    normalize_storyboard_ids(&storyboard_ids)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_batch_generate_storyboard_ids;
+    use crate::error::ApiError;
+    use crate::production::workbench::storyboard_ops::types::BatchGenerateImageItem;
+
+    #[test]
+    fn normalize_batch_generate_storyboard_ids_rejects_non_positive_values() {
+        let err = normalize_batch_generate_storyboard_ids(&[BatchGenerateImageItem {
+            storyboard_id: 0,
+            prompt: "prompt".into(),
+            negative_prompt: None,
+            model: None,
+            resolution: None,
+        }])
+        .unwrap_err();
+        assert!(
+            matches!(err, ApiError::BadRequest(message) if message == "each item.storyboardId must be a positive integer")
+        );
+    }
+
+    #[test]
+    fn normalize_batch_generate_storyboard_ids_sorts_and_deduplicates() {
+        let ids = normalize_batch_generate_storyboard_ids(&[
+            BatchGenerateImageItem {
+                storyboard_id: 4,
+                prompt: "four".into(),
+                negative_prompt: None,
+                model: None,
+                resolution: None,
+            },
+            BatchGenerateImageItem {
+                storyboard_id: 2,
+                prompt: "two".into(),
+                negative_prompt: None,
+                model: None,
+                resolution: None,
+            },
+            BatchGenerateImageItem {
+                storyboard_id: 4,
+                prompt: "duplicate".into(),
+                negative_prompt: None,
+                model: None,
+                resolution: None,
+            },
+        ])
+        .unwrap();
+
+        assert_eq!(ids, vec![2, 4]);
+    }
 }
