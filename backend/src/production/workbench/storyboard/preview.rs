@@ -3,28 +3,15 @@ use axum::{
     http::HeaderMap,
     Json as JsonResponse,
 };
-use serde::{Deserialize, Serialize};
 
-use super::common::{fetch_owned_storyboard_preview_data, require_pool};
+use super::common::{
+    build_down_preview_image_response, build_preview_image_response,
+    fetch_owned_storyboard_preview_data, require_pool, DownPreviewImageResponse,
+    PreviewImageResponse, StoryboardScopeBody,
+};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct DownPreviewImageBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct DownPreviewImageResponse {
-    storyboard_id: i32,
-    preview_url: Option<String>,
-    message: &'static str,
-}
 
 #[utoipa::path(
     post,
@@ -47,7 +34,7 @@ pub(in crate::production) struct DownPreviewImageResponse {
 pub(in crate::production) async fn post_storyboard_down_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<DownPreviewImageBody>,
+    Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<DownPreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
@@ -61,31 +48,10 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     )
     .await?;
 
-    if preview.file_path.is_none() {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(JsonResponse(DownPreviewImageResponse {
-        storyboard_id: body.storyboard_id,
-        preview_url: preview.file_path,
-        message: "Preview image URL retrieved",
-    }))
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct PreviewImageBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct PreviewImageResponse {
-    storyboard_id: i32,
-    image_url: Option<String>,
-    prompt: Option<String>,
+    Ok(JsonResponse(build_down_preview_image_response(
+        body.storyboard_id,
+        preview,
+    )?))
 }
 
 #[utoipa::path(
@@ -109,7 +75,7 @@ pub(in crate::production) struct PreviewImageResponse {
 pub(in crate::production) async fn post_storyboard_preview_image(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<PreviewImageBody>,
+    Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<PreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
@@ -123,9 +89,8 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     )
     .await?;
 
-    Ok(JsonResponse(PreviewImageResponse {
-        storyboard_id: body.storyboard_id,
-        image_url: preview.file_path,
-        prompt: preview.prompt,
-    }))
+    Ok(JsonResponse(build_preview_image_response(
+        body.storyboard_id,
+        preview,
+    )))
 }

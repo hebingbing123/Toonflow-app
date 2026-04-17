@@ -3,23 +3,16 @@ use axum::{
     http::HeaderMap,
     Json as JsonResponse,
 };
-use serde::Deserialize;
 
 use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use super::common::{
-    fetch_owned_storyboard_item, list_owned_storyboard_items_by_script, require_pool,
+    build_storyboard_data_response, fetch_owned_storyboard_item,
+    list_owned_storyboard_items_by_script, require_pool, StoryboardScopeBody,
+    StoryboardScriptScopeBody,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct GetStoryboardDataBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-}
 
 #[utoipa::path(
     post,
@@ -42,7 +35,7 @@ pub(in crate::production) struct GetStoryboardDataBody {
 pub(in crate::production) async fn post_storyboard_get_data(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<GetStoryboardDataBody>,
+    Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<ProductionStoryboardItem>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
@@ -57,13 +50,6 @@ pub(in crate::production) async fn post_storyboard_get_data(
     .await?;
 
     Ok(JsonResponse(row))
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct GetStoryboardDataByProjectBody {
-    project_id: i32,
-    script_id: i32,
 }
 
 #[utoipa::path(
@@ -87,7 +73,7 @@ pub(in crate::production) struct GetStoryboardDataByProjectBody {
 pub(in crate::production) async fn post_get_storyboard_data(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<GetStoryboardDataByProjectBody>,
+    Json(body): Json<StoryboardScriptScopeBody>,
 ) -> Result<JsonResponse<ProductionGetProductionDataResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
 
@@ -95,7 +81,5 @@ pub(in crate::production) async fn post_get_storyboard_data(
     let rows =
         list_owned_storyboard_items_by_script(pool, uid, body.project_id, body.script_id).await?;
 
-    Ok(JsonResponse(ProductionGetProductionDataResponse {
-        data: rows,
-    }))
+    Ok(JsonResponse(build_storyboard_data_response(rows)))
 }
