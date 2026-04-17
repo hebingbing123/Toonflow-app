@@ -6,11 +6,14 @@ use axum::{
 use std::io::{Cursor, Write};
 use zip::write::FileOptions;
 
-use super::common::{ensure_owned_storyboards, require_pool, require_positive_project_script_ids};
+use super::common::{
+    ensure_owned_storyboards, normalize_storyboard_ids, require_pool,
+    require_positive_project_script_ids,
+};
 use super::export_source::{
     infer_export_extension, parse_storyboard_export_source, StoryboardExportSource,
 };
-use super::types::{ExportImageBody, ExportImageSourceRow};
+use super::types::{ExportImageBody, ExportImageShotRef, ExportImageSourceRow};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::scope;
@@ -41,34 +44,14 @@ pub(in crate::production) async fn post_export_image(
 ) -> Result<Response, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_project_script_ids(body.project_id, body.script_id)?;
-    if body.shot_id.is_empty() {
-        return Err(ApiError::BadRequest(
-            "shotId must be a non-empty array".into(),
-        ));
-    }
-
-    let mut uniq = Vec::with_capacity(body.shot_id.len());
-    for s in body.shot_id {
-        let t = s.id.trim();
-        let parsed: i32 = t
-            .parse()
-            .map_err(|_| ApiError::BadRequest("shotId.id must be a positive integer".into()))?;
-        if parsed <= 0 {
-            return Err(ApiError::BadRequest(
-                "shotId.id must be a positive integer".into(),
-            ));
-        }
-        uniq.push(parsed);
-    }
+    let normalized_ids = normalize_export_shot_ids(&body.shot_id)?;
 
     let pool = require_pool(&state)?;
     let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
         .await
         .map_err(|e| e.into_api_error())?;
 
-    uniq.sort_unstable();
-    uniq.dedup();
-    ensure_owned_storyboards(pool, scope_row.script_id, &uniq).await?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"
@@ -80,7 +63,7 @@ pub(in crate::production) async fn post_export_image(
         "#,
     )
     .bind(scope_row.script_id)
-    .bind(&uniq)
+    .bind(&normalized_ids)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -111,6 +94,32 @@ pub(in crate::production) async fn post_export_image(
         axum::body::Body::from(zip_bytes),
     )
         .into_response())
+}
+
+fn normalize_export_shot_ids(shot_ids: &[ExportImageShotRef]) -> Result<Vec<i32>, ApiError> {
+    if shot_ids.is_empty() {
+        return Err(ApiError::BadRequest(
+            "shotId must be a non-empty array".into(),
+        ));
+    }
+
+    let storyboard_ids = shot_ids
+        .iter()
+        .map(|shot| {
+            let trimmed = shot.id.trim();
+            let parsed: i32 = trimmed
+                .parse()
+                .map_err(|_| ApiError::BadRequest("shotId.id must be a positive integer".into()))?;
+            if parsed <= 0 {
+                return Err(ApiError::BadRequest(
+                    "shotId.id must be a positive integer".into(),
+                ));
+            }
+            Ok(parsed)
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    normalize_storyboard_ids(&storyboard_ids)
 }
 
 async fn build_storyboard_export_zip(
@@ -223,5 +232,40 @@ async fn fetch_storyboard_export_bytes(
                 bytes,
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_export_shot_ids;
+    use crate::error::ApiError;
+    use crate::production::workbench::storyboard_ops::types::ExportImageShotRef;
+
+    #[test]
+    fn normalize_export_shot_ids_rejects_empty_input() {
+        let err = normalize_export_shot_ids(&[]).unwrap_err();
+        assert!(
+            matches!(err, ApiError::BadRequest(message) if message == "shotId must be a non-empty array")
+        );
+    }
+
+    #[test]
+    fn normalize_export_shot_ids_rejects_non_positive_values() {
+        let err = normalize_export_shot_ids(&[ExportImageShotRef { id: "0".into() }]).unwrap_err();
+        assert!(
+            matches!(err, ApiError::BadRequest(message) if message == "shotId.id must be a positive integer")
+        );
+    }
+
+    #[test]
+    fn normalize_export_shot_ids_trims_sorts_and_deduplicates() {
+        let ids = normalize_export_shot_ids(&[
+            ExportImageShotRef { id: " 4 ".into() },
+            ExportImageShotRef { id: "2".into() },
+            ExportImageShotRef { id: "4".into() },
+        ])
+        .unwrap();
+
+        assert_eq!(ids, vec![2, 4]);
     }
 }
