@@ -5,59 +5,26 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::{require_pool, require_positive_project_script, resolve_owned_script_id};
+use super::common::{
+    insert_storyboards_with_next_numeric_ids, require_pool, require_positive_project_script,
+    resolve_owned_script_id, StoryboardInsertDraft,
+};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::narrative::storyboards::ADV_LOCK_STORYBOARD_NUMERIC_ID;
 use crate::state::AppState;
 
 const DEFAULT_STORYBOARD_DURATION: i32 = 5;
 
-async fn insert_storyboard_row(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    script_uuid: uuid::Uuid,
-    numeric_script_id: i32,
-    numeric_id: i32,
-    prompt: &str,
-    duration: i32,
-) -> Result<(), ApiError> {
-    sqlx::query(
-        r#"
-        INSERT INTO app_storyboard (
-            script_id, numeric_id, numeric_script_id, prompt, duration,
-            state, sb_index, created_at, updated_at
-        )
-        VALUES ($1, $2, $3, $4, $5, '草稿', $6, NOW(), NOW())
-        "#,
-    )
-    .bind(script_uuid)
-    .bind(numeric_id)
-    .bind(numeric_script_id)
-    .bind(prompt)
-    .bind(duration)
-    .bind(numeric_id)
-    .execute(&mut **tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(())
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct PreparedStoryboardInsert {
-    prompt: String,
-    duration: i32,
-}
-
 fn prepare_storyboard_insert(
     prompt: &str,
     duration: Option<i32>,
-) -> Result<PreparedStoryboardInsert, ApiError> {
+) -> Result<StoryboardInsertDraft, ApiError> {
     let prompt = prompt.trim();
     if prompt.is_empty() {
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
     }
 
-    Ok(PreparedStoryboardInsert {
+    Ok(StoryboardInsertDraft {
         prompt: prompt.to_string(),
         duration: duration.unwrap_or(DEFAULT_STORYBOARD_DURATION),
     })
@@ -65,7 +32,7 @@ fn prepare_storyboard_insert(
 
 fn prepare_batch_storyboard_inserts(
     storyboards: &[StoryboardInfoInput],
-) -> Result<Vec<PreparedStoryboardInsert>, ApiError> {
+) -> Result<Vec<StoryboardInsertDraft>, ApiError> {
     if storyboards.is_empty() {
         return Err(ApiError::BadRequest("storyboards must not be empty".into()));
     }
@@ -125,44 +92,16 @@ pub(in crate::production) async fn post_storyboard_add(
 
     let pool = require_pool(&state)?;
     let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_STORYBOARD_NUMERIC_ID)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let next_id: i32 = sqlx::query_scalar(
-        r#"
-        SELECT COALESCE(MAX(numeric_id), 0) + 1
-        FROM app_storyboard
-        "#,
-    )
-    .fetch_one(&mut *tx)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    insert_storyboard_row(
-        &mut tx,
-        script_uuid,
-        body.script_id,
-        next_id,
-        &prepared.prompt,
-        prepared.duration,
-    )
-    .await?;
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let storyboard_ids =
+        insert_storyboards_with_next_numeric_ids(pool, script_uuid, body.script_id, &[prepared])
+            .await?;
+    let storyboard_id = storyboard_ids
+        .into_iter()
+        .next()
+        .ok_or(ApiError::Internal)?;
 
     Ok(JsonResponse(AddStoryboardResponse {
-        storyboard_id: next_id,
+        storyboard_id,
         message: "Storyboard added",
     }))
 }
@@ -219,43 +158,13 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
 
     let pool = require_pool(&state)?;
     let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
-
-    let mut tx = pool
-        .begin()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    sqlx::query("SELECT pg_advisory_xact_lock($1)")
-        .bind(ADV_LOCK_STORYBOARD_NUMERIC_ID)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let base_id: i32 =
-        sqlx::query_scalar(r#"SELECT COALESCE(MAX(numeric_id), 0) FROM app_storyboard"#)
-            .fetch_one(&mut *tx)
-            .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let mut storyboard_ids = Vec::with_capacity(prepared_storyboards.len());
-    for (idx, sb) in prepared_storyboards.iter().enumerate() {
-        let next_id = base_id + idx as i32 + 1;
-        insert_storyboard_row(
-            &mut tx,
-            script_uuid,
-            body.script_id,
-            next_id,
-            &sb.prompt,
-            sb.duration,
-        )
-        .await?;
-
-        storyboard_ids.push(next_id);
-    }
-
-    tx.commit()
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let storyboard_ids = insert_storyboards_with_next_numeric_ids(
+        pool,
+        script_uuid,
+        body.script_id,
+        &prepared_storyboards,
+    )
+    .await?;
 
     Ok(JsonResponse(BatchAddInfoResponse {
         added: storyboard_ids.len(),
@@ -266,8 +175,8 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
 #[cfg(test)]
 mod tests {
     use super::{
-        prepare_batch_storyboard_inserts, prepare_storyboard_insert, PreparedStoryboardInsert,
-        StoryboardInfoInput, DEFAULT_STORYBOARD_DURATION,
+        prepare_batch_storyboard_inserts, prepare_storyboard_insert, StoryboardInfoInput,
+        StoryboardInsertDraft, DEFAULT_STORYBOARD_DURATION,
     };
     use crate::error::ApiError;
 
@@ -276,7 +185,7 @@ mod tests {
         let prepared = prepare_storyboard_insert("  opening shot  ", None).unwrap();
         assert_eq!(
             prepared,
-            PreparedStoryboardInsert {
+            StoryboardInsertDraft {
                 prompt: "opening shot".to_string(),
                 duration: DEFAULT_STORYBOARD_DURATION,
             }
@@ -318,11 +227,11 @@ mod tests {
         assert_eq!(
             prepared,
             vec![
-                PreparedStoryboardInsert {
+                StoryboardInsertDraft {
                     prompt: "first".to_string(),
                     duration: DEFAULT_STORYBOARD_DURATION,
                 },
-                PreparedStoryboardInsert {
+                StoryboardInsertDraft {
                     prompt: "second".to_string(),
                     duration: 8,
                 },
