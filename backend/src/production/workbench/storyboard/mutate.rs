@@ -6,8 +6,8 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use super::common::{
-    remove_storyboard_frame, require_owned_storyboard_id, require_pool,
-    update_storyboard_image_url, update_storyboard_info,
+    remove_owned_storyboard_frame, require_pool, update_owned_storyboard_image_url,
+    update_owned_storyboard_info,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -74,16 +74,16 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     let prompt = normalize_storyboard_prompt(&body.prompt)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = require_owned_storyboard_id(
+    update_owned_storyboard_info(
         pool,
         uid,
         body.project_id,
         body.script_id,
         body.storyboard_id,
+        &prompt,
+        body.duration,
     )
     .await?;
-
-    update_storyboard_info(pool, storyboard_uuid, &prompt, body.duration).await?;
 
     Ok(JsonResponse(EditStoryboardInfoResponse {
         storyboard_id: body.storyboard_id,
@@ -132,7 +132,7 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     let uid = require_user_uuid(&state, &headers)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = require_owned_storyboard_id(
+    remove_owned_storyboard_frame(
         pool,
         uid,
         body.project_id,
@@ -140,8 +140,6 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
         body.storyboard_id,
     )
     .await?;
-
-    remove_storyboard_frame(pool, storyboard_uuid).await?;
 
     Ok(JsonResponse(RemoveFrameResponse {
         storyboard_id: body.storyboard_id,
@@ -193,16 +191,15 @@ pub(in crate::production) async fn post_storyboard_update_url(
     let image_url = normalize_storyboard_image_url(&body.image_url)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = require_owned_storyboard_id(
+    update_owned_storyboard_image_url(
         pool,
         uid,
         body.project_id,
         body.script_id,
         body.storyboard_id,
+        &image_url,
     )
     .await?;
-
-    update_storyboard_image_url(pool, storyboard_uuid, &image_url).await?;
 
     Ok(JsonResponse(UpdateStoryboardUrlResponse {
         storyboard_id: body.storyboard_id,

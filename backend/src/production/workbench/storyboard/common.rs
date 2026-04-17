@@ -193,6 +193,20 @@ pub(super) async fn update_storyboard_info(
     Ok(())
 }
 
+pub(super) async fn update_owned_storyboard_info(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+    prompt: &str,
+    duration: Option<i32>,
+) -> Result<(), ApiError> {
+    let storyboard_uuid =
+        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
+    update_storyboard_info(pool, storyboard_uuid, prompt, duration).await
+}
+
 pub(super) async fn remove_storyboard_frame(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,
@@ -214,6 +228,18 @@ pub(super) async fn remove_storyboard_frame(
     }
 
     Ok(())
+}
+
+pub(super) async fn remove_owned_storyboard_frame(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+) -> Result<(), ApiError> {
+    let storyboard_uuid =
+        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
+    remove_storyboard_frame(pool, storyboard_uuid).await
 }
 
 pub(super) async fn update_storyboard_image_url(
@@ -239,6 +265,19 @@ pub(super) async fn update_storyboard_image_url(
     }
 
     Ok(())
+}
+
+pub(super) async fn update_owned_storyboard_image_url(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+    image_url: &str,
+) -> Result<(), ApiError> {
+    let storyboard_uuid =
+        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
+    update_storyboard_image_url(pool, storyboard_uuid, image_url).await
 }
 
 pub(super) async fn fetch_storyboard_preview_data(
