@@ -2,6 +2,7 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::production::workbench::common as workbench_common;
+use crate::production::workbench::storyboard_ops::ProductionStoryboardItem;
 use crate::scope;
 use crate::state::AppState;
 
@@ -53,4 +54,58 @@ pub(super) async fn resolve_owned_storyboard_id(
             .await
             .map_err(|e| e.into_api_error())?;
     Ok(sb.storyboard_id)
+}
+
+pub(super) async fn fetch_storyboard_item(
+    pool: &sqlx::PgPool,
+    storyboard_id: Uuid,
+) -> Result<ProductionStoryboardItem, ApiError> {
+    sqlx::query_as::<_, ProductionStoryboardItem>(
+        r#"
+        SELECT
+          sb.numeric_id AS id,
+          sb.numeric_script_id AS script_id,
+          sb.prompt,
+          sb.file_path AS url,
+          sb.duration,
+          sb.state,
+          sb.track_id,
+          sb.flow_id,
+          sb.sb_index
+        FROM app_storyboard sb
+        WHERE sb.id = $1
+        "#,
+    )
+    .bind(storyboard_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
+
+pub(super) async fn list_storyboard_items_by_script(
+    pool: &sqlx::PgPool,
+    script_id: Uuid,
+) -> Result<Vec<ProductionStoryboardItem>, ApiError> {
+    sqlx::query_as::<_, ProductionStoryboardItem>(
+        r#"
+        SELECT
+          sb.numeric_id AS id,
+          sb.numeric_script_id AS script_id,
+          sb.prompt,
+          sb.file_path AS url,
+          sb.duration,
+          sb.state,
+          sb.track_id,
+          sb.flow_id,
+          sb.sb_index
+        FROM app_storyboard sb
+        WHERE sb.script_id = $1
+        ORDER BY sb.sb_index ASC
+        "#,
+    )
+    .bind(script_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }

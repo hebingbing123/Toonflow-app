@@ -7,8 +7,9 @@ use serde::Deserialize;
 
 use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use super::common::{
-    require_pool, require_positive_project_script, require_positive_scope_ids,
-    resolve_owned_script_id, resolve_owned_storyboard_id,
+    fetch_storyboard_item, list_storyboard_items_by_script, require_pool,
+    require_positive_project_script, require_positive_scope_ids, resolve_owned_script_id,
+    resolve_owned_storyboard_id,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -57,28 +58,7 @@ pub(in crate::production) async fn post_storyboard_get_data(
         body.storyboard_id,
     )
     .await?;
-
-    let row = sqlx::query_as::<_, ProductionStoryboardItem>(
-        r#"
-        SELECT
-          sb.numeric_id AS id,
-          sb.numeric_script_id AS script_id,
-          sb.prompt,
-          sb.file_path AS url,
-          sb.duration,
-          sb.state,
-          sb.track_id,
-          sb.flow_id,
-          sb.sb_index
-        FROM app_storyboard sb
-        WHERE sb.id = $1
-        "#,
-    )
-    .bind(storyboard_uuid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
+    let row = fetch_storyboard_item(pool, storyboard_uuid).await?;
 
     Ok(JsonResponse(row))
 }
@@ -118,28 +98,7 @@ pub(in crate::production) async fn post_get_storyboard_data(
 
     let pool = require_pool(&state)?;
     let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
-
-    let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
-        r#"
-        SELECT
-          sb.numeric_id AS id,
-          sb.numeric_script_id AS script_id,
-          sb.prompt,
-          sb.file_path AS url,
-          sb.duration,
-          sb.state,
-          sb.track_id,
-          sb.flow_id,
-          sb.sb_index
-        FROM app_storyboard sb
-        WHERE sb.script_id = $1
-        ORDER BY sb.sb_index ASC
-        "#,
-    )
-    .bind(script_uuid)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let rows = list_storyboard_items_by_script(pool, script_uuid).await?;
 
     Ok(JsonResponse(ProductionGetProductionDataResponse {
         data: rows,
