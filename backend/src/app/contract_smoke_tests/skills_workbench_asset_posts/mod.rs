@@ -1,4 +1,5 @@
-mod assets_workbench;
+mod assets_workbench_mutations;
+mod assets_workbench_queries;
 mod project_assets_novels;
 mod projects_art_styles;
 mod skills;
