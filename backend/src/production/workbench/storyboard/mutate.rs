@@ -10,6 +10,22 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
+fn normalize_storyboard_prompt(prompt: &str) -> Result<String, ApiError> {
+    let prompt = prompt.trim();
+    if prompt.is_empty() {
+        return Err(ApiError::BadRequest("prompt must not be empty".into()));
+    }
+    Ok(prompt.to_string())
+}
+
+fn normalize_storyboard_image_url(image_url: &str) -> Result<String, ApiError> {
+    let image_url = image_url.trim();
+    if image_url.is_empty() {
+        return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
+    }
+    Ok(image_url.to_string())
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct EditStoryboardInfoBody {
@@ -53,9 +69,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
 ) -> Result<JsonResponse<EditStoryboardInfoResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
-    if body.prompt.trim().is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
+    let prompt = normalize_storyboard_prompt(&body.prompt)?;
 
     let pool = require_pool(&state)?;
     let storyboard_uuid = resolve_owned_storyboard_id(
@@ -75,7 +89,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
         "#,
     )
     .bind(storyboard_uuid)
-    .bind(body.prompt.trim())
+    .bind(prompt)
     .bind(body.duration)
     .execute(pool)
     .await
@@ -206,9 +220,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
 ) -> Result<JsonResponse<UpdateStoryboardUrlResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
-    if body.image_url.trim().is_empty() {
-        return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
-    }
+    let image_url = normalize_storyboard_image_url(&body.image_url)?;
 
     let pool = require_pool(&state)?;
     let storyboard_uuid = resolve_owned_storyboard_id(
@@ -228,7 +240,7 @@ pub(in crate::production) async fn post_storyboard_update_url(
         "#,
     )
     .bind(storyboard_uuid)
-    .bind(body.image_url.trim())
+    .bind(&image_url)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -239,7 +251,44 @@ pub(in crate::production) async fn post_storyboard_update_url(
 
     Ok(JsonResponse(UpdateStoryboardUrlResponse {
         storyboard_id: body.storyboard_id,
-        image_url: body.image_url.trim().to_string(),
+        image_url,
         message: "Storyboard image URL updated",
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{normalize_storyboard_image_url, normalize_storyboard_prompt};
+    use crate::error::ApiError;
+
+    #[test]
+    fn normalize_storyboard_prompt_trims_value() {
+        let prompt = normalize_storyboard_prompt("  opening frame  ").unwrap();
+        assert_eq!(prompt, "opening frame");
+    }
+
+    #[test]
+    fn normalize_storyboard_prompt_rejects_blank_value() {
+        let err = normalize_storyboard_prompt("   ").unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "prompt must not be empty"
+        ));
+    }
+
+    #[test]
+    fn normalize_storyboard_image_url_trims_value() {
+        let image_url =
+            normalize_storyboard_image_url("  https://example.com/frame.png  ").unwrap();
+        assert_eq!(image_url, "https://example.com/frame.png");
+    }
+
+    #[test]
+    fn normalize_storyboard_image_url_rejects_blank_value() {
+        let err = normalize_storyboard_image_url(" ").unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "imageUrl must not be empty"
+        ));
+    }
 }
