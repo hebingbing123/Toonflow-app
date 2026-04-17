@@ -11,6 +11,8 @@ use crate::error::ApiError;
 use crate::narrative::storyboards::ADV_LOCK_STORYBOARD_NUMERIC_ID;
 use crate::state::AppState;
 
+const DEFAULT_STORYBOARD_DURATION: i32 = 5;
+
 async fn insert_storyboard_row(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     script_uuid: uuid::Uuid,
@@ -38,6 +40,43 @@ async fn insert_storyboard_row(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(())
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct PreparedStoryboardInsert {
+    prompt: String,
+    duration: i32,
+}
+
+fn prepare_storyboard_insert(
+    prompt: &str,
+    duration: Option<i32>,
+) -> Result<PreparedStoryboardInsert, ApiError> {
+    let prompt = prompt.trim();
+    if prompt.is_empty() {
+        return Err(ApiError::BadRequest("prompt must not be empty".into()));
+    }
+
+    Ok(PreparedStoryboardInsert {
+        prompt: prompt.to_string(),
+        duration: duration.unwrap_or(DEFAULT_STORYBOARD_DURATION),
+    })
+}
+
+fn prepare_batch_storyboard_inserts(
+    storyboards: &[StoryboardInfoInput],
+) -> Result<Vec<PreparedStoryboardInsert>, ApiError> {
+    if storyboards.is_empty() {
+        return Err(ApiError::BadRequest("storyboards must not be empty".into()));
+    }
+
+    storyboards
+        .iter()
+        .map(|storyboard| {
+            prepare_storyboard_insert(&storyboard.prompt, storyboard.duration)
+                .map_err(|_| ApiError::BadRequest("storyboards[*].prompt must not be empty".into()))
+        })
+        .collect()
 }
 
 #[derive(Debug, Deserialize)]
@@ -82,9 +121,7 @@ pub(in crate::production) async fn post_storyboard_add(
 ) -> Result<JsonResponse<AddStoryboardResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_project_script(body.project_id, body.script_id)?;
-    if body.prompt.trim().is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
+    let prepared = prepare_storyboard_insert(&body.prompt, body.duration)?;
 
     let pool = require_pool(&state)?;
     let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
@@ -115,8 +152,8 @@ pub(in crate::production) async fn post_storyboard_add(
         script_uuid,
         body.script_id,
         next_id,
-        body.prompt.trim(),
-        body.duration.unwrap_or(5),
+        &prepared.prompt,
+        prepared.duration,
     )
     .await?;
 
@@ -178,18 +215,7 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
 ) -> Result<JsonResponse<BatchAddInfoResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     require_positive_project_script(body.project_id, body.script_id)?;
-    if body.storyboards.is_empty() {
-        return Err(ApiError::BadRequest("storyboards must not be empty".into()));
-    }
-    if body
-        .storyboards
-        .iter()
-        .any(|sb| sb.prompt.trim().is_empty())
-    {
-        return Err(ApiError::BadRequest(
-            "storyboards[*].prompt must not be empty".into(),
-        ));
-    }
+    let prepared_storyboards = prepare_batch_storyboard_inserts(&body.storyboards)?;
 
     let pool = require_pool(&state)?;
     let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
@@ -211,16 +237,16 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let mut storyboard_ids = Vec::with_capacity(body.storyboards.len());
-    for (idx, sb) in body.storyboards.iter().enumerate() {
+    let mut storyboard_ids = Vec::with_capacity(prepared_storyboards.len());
+    for (idx, sb) in prepared_storyboards.iter().enumerate() {
         let next_id = base_id + idx as i32 + 1;
         insert_storyboard_row(
             &mut tx,
             script_uuid,
             body.script_id,
             next_id,
-            sb.prompt.trim(),
-            sb.duration.unwrap_or(5),
+            &sb.prompt,
+            sb.duration,
         )
         .await?;
 
@@ -235,4 +261,86 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
         added: storyboard_ids.len(),
         storyboard_ids,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        prepare_batch_storyboard_inserts, prepare_storyboard_insert, PreparedStoryboardInsert,
+        StoryboardInfoInput, DEFAULT_STORYBOARD_DURATION,
+    };
+    use crate::error::ApiError;
+
+    #[test]
+    fn prepare_storyboard_insert_trims_prompt_and_defaults_duration() {
+        let prepared = prepare_storyboard_insert("  opening shot  ", None).unwrap();
+        assert_eq!(
+            prepared,
+            PreparedStoryboardInsert {
+                prompt: "opening shot".to_string(),
+                duration: DEFAULT_STORYBOARD_DURATION,
+            }
+        );
+    }
+
+    #[test]
+    fn prepare_storyboard_insert_rejects_blank_prompt() {
+        let err = prepare_storyboard_insert("   ", Some(3)).unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "prompt must not be empty"
+        ));
+    }
+
+    #[test]
+    fn prepare_batch_storyboard_inserts_rejects_empty_list() {
+        let err = prepare_batch_storyboard_inserts(&[]).unwrap_err();
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "storyboards must not be empty"
+        ));
+    }
+
+    #[test]
+    fn prepare_batch_storyboard_inserts_normalizes_each_item() {
+        let prepared = prepare_batch_storyboard_inserts(&[
+            StoryboardInfoInput {
+                prompt: "  first  ".to_string(),
+                duration: None,
+            },
+            StoryboardInfoInput {
+                prompt: "second".to_string(),
+                duration: Some(8),
+            },
+        ])
+        .unwrap();
+
+        assert_eq!(
+            prepared,
+            vec![
+                PreparedStoryboardInsert {
+                    prompt: "first".to_string(),
+                    duration: DEFAULT_STORYBOARD_DURATION,
+                },
+                PreparedStoryboardInsert {
+                    prompt: "second".to_string(),
+                    duration: 8,
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn prepare_batch_storyboard_inserts_relabels_blank_prompt_error() {
+        let err = prepare_batch_storyboard_inserts(&[StoryboardInfoInput {
+            prompt: " ".to_string(),
+            duration: Some(2),
+        }])
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            ApiError::BadRequest(message) if message == "storyboards[*].prompt must not be empty"
+        ));
+    }
 }
