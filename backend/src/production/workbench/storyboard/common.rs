@@ -233,6 +233,18 @@ pub(super) async fn fetch_storyboard_preview_data(
     Ok(StoryboardPreviewData { file_path, prompt })
 }
 
+pub(super) async fn fetch_owned_storyboard_preview_data(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+) -> Result<StoryboardPreviewData, ApiError> {
+    let storyboard_uuid =
+        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
+    fetch_storyboard_preview_data(pool, storyboard_uuid).await
+}
+
 async fn insert_storyboard_row(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     script_uuid: Uuid,

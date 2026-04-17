@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::{fetch_storyboard_preview_data, require_owned_storyboard_id, require_pool};
+use super::common::{fetch_owned_storyboard_preview_data, require_pool};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -52,7 +52,7 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     let uid = require_user_uuid(&state, &headers)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = require_owned_storyboard_id(
+    let preview = fetch_owned_storyboard_preview_data(
         pool,
         uid,
         body.project_id,
@@ -60,8 +60,6 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
         body.storyboard_id,
     )
     .await?;
-
-    let preview = fetch_storyboard_preview_data(pool, storyboard_uuid).await?;
 
     if preview.file_path.is_none() {
         return Err(ApiError::NotFound);
@@ -116,7 +114,7 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     let uid = require_user_uuid(&state, &headers)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = require_owned_storyboard_id(
+    let preview = fetch_owned_storyboard_preview_data(
         pool,
         uid,
         body.project_id,
@@ -124,8 +122,6 @@ pub(in crate::production) async fn post_storyboard_preview_image(
         body.storyboard_id,
     )
     .await?;
-
-    let preview = fetch_storyboard_preview_data(pool, storyboard_uuid).await?;
 
     Ok(JsonResponse(PreviewImageResponse {
         storyboard_id: body.storyboard_id,
