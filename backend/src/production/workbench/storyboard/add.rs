@@ -6,8 +6,8 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use super::common::{
-    insert_storyboards_with_next_numeric_ids, require_pool, require_positive_project_script,
-    resolve_owned_script_id, StoryboardInsertDraft,
+    insert_storyboards_with_next_numeric_ids, require_owned_script_id, require_pool,
+    StoryboardInsertDraft,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -87,11 +87,10 @@ pub(in crate::production) async fn post_storyboard_add(
     Json(body): Json<AddStoryboardBody>,
 ) -> Result<JsonResponse<AddStoryboardResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script(body.project_id, body.script_id)?;
     let prepared = prepare_storyboard_insert(&body.prompt, body.duration)?;
 
     let pool = require_pool(&state)?;
-    let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
+    let script_uuid = require_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
     let storyboard_ids =
         insert_storyboards_with_next_numeric_ids(pool, script_uuid, body.script_id, &[prepared])
             .await?;
@@ -153,11 +152,10 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
     Json(body): Json<BatchAddInfoBody>,
 ) -> Result<JsonResponse<BatchAddInfoResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script(body.project_id, body.script_id)?;
     let prepared_storyboards = prepare_batch_storyboard_inserts(&body.storyboards)?;
 
     let pool = require_pool(&state)?;
-    let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
+    let script_uuid = require_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
     let storyboard_ids = insert_storyboards_with_next_numeric_ids(
         pool,
         script_uuid,

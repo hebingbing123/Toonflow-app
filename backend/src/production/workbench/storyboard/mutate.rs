@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use super::common::{
-    remove_storyboard_frame, require_pool, require_positive_scope_ids, resolve_owned_storyboard_id,
+    remove_storyboard_frame, require_owned_storyboard_id, require_pool,
     update_storyboard_image_url, update_storyboard_info,
 };
 use crate::auth::require_user_uuid;
@@ -71,11 +71,10 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     Json(body): Json<EditStoryboardInfoBody>,
 ) -> Result<JsonResponse<EditStoryboardInfoResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     let prompt = normalize_storyboard_prompt(&body.prompt)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,
@@ -131,10 +130,9 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     Json(body): Json<RemoveFrameBody>,
 ) -> Result<JsonResponse<RemoveFrameResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,
@@ -192,11 +190,10 @@ pub(in crate::production) async fn post_storyboard_update_url(
     Json(body): Json<UpdateStoryboardUrlBody>,
 ) -> Result<JsonResponse<UpdateStoryboardUrlResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     let image_url = normalize_storyboard_image_url(&body.image_url)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,

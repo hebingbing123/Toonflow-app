@@ -7,9 +7,8 @@ use serde::Deserialize;
 
 use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use super::common::{
-    fetch_storyboard_item, list_storyboard_items_by_script, require_pool,
-    require_positive_project_script, require_positive_scope_ids, resolve_owned_script_id,
-    resolve_owned_storyboard_id,
+    fetch_storyboard_item, list_storyboard_items_by_script, require_owned_script_id,
+    require_owned_storyboard_id, require_pool,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -47,10 +46,9 @@ pub(in crate::production) async fn post_storyboard_get_data(
     Json(body): Json<GetStoryboardDataBody>,
 ) -> Result<JsonResponse<ProductionStoryboardItem>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,
@@ -94,10 +92,9 @@ pub(in crate::production) async fn post_get_storyboard_data(
     Json(body): Json<GetStoryboardDataByProjectBody>,
 ) -> Result<JsonResponse<ProductionGetProductionDataResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script(body.project_id, body.script_id)?;
 
     let pool = require_pool(&state)?;
-    let script_uuid = resolve_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
+    let script_uuid = require_owned_script_id(pool, uid, body.project_id, body.script_id).await?;
     let rows = list_storyboard_items_by_script(pool, script_uuid).await?;
 
     Ok(JsonResponse(ProductionGetProductionDataResponse {

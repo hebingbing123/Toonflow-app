@@ -5,10 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::{
-    fetch_storyboard_preview_data, require_pool, require_positive_scope_ids,
-    resolve_owned_storyboard_id,
-};
+use super::common::{fetch_storyboard_preview_data, require_owned_storyboard_id, require_pool};
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
@@ -53,10 +50,9 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     Json(body): Json<DownPreviewImageBody>,
 ) -> Result<JsonResponse<DownPreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,
@@ -118,10 +114,9 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     Json(body): Json<PreviewImageBody>,
 ) -> Result<JsonResponse<PreviewImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
     let pool = require_pool(&state)?;
-    let storyboard_uuid = resolve_owned_storyboard_id(
+    let storyboard_uuid = require_owned_storyboard_id(
         pool,
         uid,
         body.project_id,

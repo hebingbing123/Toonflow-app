@@ -43,7 +43,7 @@ pub(super) fn require_positive_scope_ids(
     Ok(())
 }
 
-pub(super) async fn resolve_owned_script_id(
+async fn resolve_owned_script_id(
     pool: &sqlx::PgPool,
     uid: Uuid,
     project_id: i32,
@@ -55,7 +55,7 @@ pub(super) async fn resolve_owned_script_id(
     Ok(scope_row.script_id)
 }
 
-pub(super) async fn resolve_owned_storyboard_id(
+async fn resolve_owned_storyboard_id(
     pool: &sqlx::PgPool,
     uid: Uuid,
     project_id: i32,
@@ -67,6 +67,27 @@ pub(super) async fn resolve_owned_storyboard_id(
             .await
             .map_err(|e| e.into_api_error())?;
     Ok(sb.storyboard_id)
+}
+
+pub(super) async fn require_owned_script_id(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+) -> Result<Uuid, ApiError> {
+    require_positive_project_script(project_id, script_id)?;
+    resolve_owned_script_id(pool, uid, project_id, script_id).await
+}
+
+pub(super) async fn require_owned_storyboard_id(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: i32,
+) -> Result<Uuid, ApiError> {
+    require_positive_scope_ids(project_id, script_id, storyboard_id)?;
+    resolve_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await
 }
 
 pub(super) async fn fetch_storyboard_item(
