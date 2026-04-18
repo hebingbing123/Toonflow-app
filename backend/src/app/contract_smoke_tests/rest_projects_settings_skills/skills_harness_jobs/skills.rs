@@ -1,4 +1,4 @@
-use super::super::helpers::*;
+use super::super::super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
 
@@ -119,7 +119,7 @@ async fn skill_content_post_get_delete_roundtrip() {
     assert_eq!(gstatus, StatusCode::OK, "gv={gv}");
     assert_eq!(gv["content"], "smoke_post_body");
 
-    let (dstatus, dv) = delete_json_bearer(&uri, &token).await;
+    let (dstatus, dv): (_, serde_json::Value) = delete_json_bearer(&uri, &token).await;
     assert_eq!(dstatus, StatusCode::NO_CONTENT, "dv={dv}");
     assert!(dv.is_null());
 
@@ -153,35 +153,4 @@ async fn skill_content_delete_not_found_with_jwt() {
     .await;
     assert_eq!(status, StatusCode::NOT_FOUND);
     assert_eq!(v["code"], "not_found");
-}
-
-#[tokio::test]
-async fn harness_tools_unauthorized_without_bearer() {
-    let (status, v) = get_json("/api/v1/harness/tools").await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn job_by_id_unauthorized_without_bearer() {
-    let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}");
-    let (status, v) = get_json(&uri).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn job_cancel_unauthorized_without_bearer() {
-    let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/cancel");
-    let (status, v) = post_empty_no_bearer(&uri).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
-}
-
-#[tokio::test]
-async fn job_retry_unauthorized_without_bearer() {
-    let uri = format!("/api/v1/jobs/{NIL_JOB_UUID}/retry");
-    let (status, v) = post_empty_no_bearer(&uri).await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED);
-    assert_eq!(v["code"], "unauthorized");
 }
