@@ -2,12 +2,9 @@ use super::super::super::helpers::*;
 use axum::body::Body;
 use axum::extract::ConnectInfo;
 use axum::http::header;
-use axum::http::HeaderValue;
 use axum::http::Method;
 use axum::http::Request;
 use axum::http::StatusCode;
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
 
 /// **`POST /api/v1/webhooks/billing`** uses HMAC, not Bearer. Without **`BILLING_WEBHOOK_SECRET`** → **503** `webhook_not_configured`; with secret set but no/invalid **`X-Toonflow-Signature`** → **401** `invalid_webhook_signature` (before Postgres).
 #[tokio::test]
@@ -30,9 +27,8 @@ async fn billing_webhook_smoke_rejects_without_valid_hmac() {
 #[tokio::test]
 async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
     let _lock = billing_webhook_test_lock().await;
-    let prev = std::env::var_os("BILLING_WEBHOOK_SECRET");
     const SM_SECRET: &str = "contract-smoke-billing-hmac-secret-bytes!!";
-    std::env::set_var("BILLING_WEBHOOK_SECRET", SM_SECRET);
+    let prev = super::set_billing_webhook_secret(SM_SECRET);
 
     let body_json = r#"{"id":"evt_contract_smoke_billing_no_db"}"#;
     let body = body_json.as_bytes();
@@ -40,13 +36,7 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(1_700_000_000);
-    let ts_str = ts.to_string();
-    let mut mac = Hmac::<Sha256>::new_from_slice(SM_SECRET.as_bytes()).expect("hmac key");
-    mac.update(ts_str.as_bytes());
-    mac.update(b".");
-    mac.update(body);
-    let sig = hex::encode(mac.finalize().into_bytes());
-    let sig_hdr = HeaderValue::from_str(&format!("sha256={sig}")).expect("signature header");
+    let (sig_hdr, ts_str) = super::toonflow_hmac_headers(SM_SECRET, ts, body);
 
     let (status, v) = oneshot_json_state(
         smoke_state(),
@@ -62,10 +52,7 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
     )
     .await;
 
-    match &prev {
-        Some(p) => std::env::set_var("BILLING_WEBHOOK_SECRET", p),
-        None => std::env::remove_var("BILLING_WEBHOOK_SECRET"),
-    }
+    super::restore_env_var("BILLING_WEBHOOK_SECRET", prev);
 
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
