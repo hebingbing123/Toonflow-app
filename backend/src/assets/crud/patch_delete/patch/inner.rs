@@ -1,27 +1,20 @@
-//! `PATCH` project asset by stable numeric ids.
+//! `PATCH` project asset by stable numeric ids — domain logic.
 
-use axum::{
-    extract::{Path, State},
-    http::HeaderMap,
-    Json,
-};
+use axum::Json;
 use sqlx::{types::Json as SqlxJson, PgPool};
 use uuid::Uuid;
 
-use crate::auth::require_user_uuid;
+use crate::assets::models::{AssetPatchCurrent, AssetRow, PatchAssetBody};
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
-use crate::state::AppState;
 
-use super::super::super::models::*;
-use super::super::resolve::ensure_owned_project_pk;
-use super::helpers::{
+use super::super::helpers::{
     cover_numeric_image_exists_for_asset, merge_metadata_image_id, parse_asset_type_patch,
 };
 
-async fn patch_project_asset_inner(
+pub(super) async fn patch_project_asset_inner(
     pool: &PgPool,
     uid: Uuid,
     project_id: Uuid,
@@ -157,19 +150,4 @@ async fn patch_project_asset_inner(
     .ok_or(ApiError::NotFound)?;
 
     Ok(Json(row))
-}
-
-pub(crate) async fn patch_project_asset_for_project(
-    State(state): State<AppState>,
-    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
-    headers: HeaderMap,
-    Json(body): Json<PatchAssetBody>,
-) -> Result<Json<AssetRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
-    patch_project_asset_inner(pool, uid, project_id, asset_numeric_id, body).await
 }
