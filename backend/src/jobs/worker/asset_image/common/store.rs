@@ -1,7 +1,6 @@
-use std::path::Path;
+//! 生成图并写入 `app_asset_image`（及脚本侧校验）。
 
-use futures_util::StreamExt;
-use serde_json::{json, Value};
+use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -10,78 +9,13 @@ use crate::assets::{
     resolve_owned_script_linked_asset_row_for_job,
 };
 use crate::jobs::worker::common::JobRunError;
-use crate::llm::{images_generation_or_edit_url, LlmConfig};
+use crate::llm::images_generation_or_edit_url;
 
-/// Cap for `images/generations` URL download when persisting under local asset dir.
-const MAX_DOWNLOADED_ASSET_IMAGE_BYTES: u64 = 32 * 1024 * 1024;
-
-pub(super) async fn download_image_bytes_capped(
-    client: &reqwest::Client,
-    url: &str,
-) -> Result<Vec<u8>, JobRunError> {
-    let resp = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| JobRunError::Failed(e.to_string()))?;
-    if !resp.status().is_success() {
-        return Err(JobRunError::Failed(format!(
-            "image download HTTP {}",
-            resp.status()
-        )));
-    }
-    let max = MAX_DOWNLOADED_ASSET_IMAGE_BYTES as usize;
-    if let Some(cl) = resp.content_length() {
-        if cl > max as u64 {
-            return Err(JobRunError::Failed("image Content-Length too large".into()));
-        }
-    }
-    let mut stream = resp.bytes_stream();
-    let mut out = Vec::new();
-    while let Some(item) = stream.next().await {
-        let chunk = item.map_err(|e| JobRunError::Failed(e.to_string()))?;
-        if out.len().saturating_add(chunk.len()) > max {
-            return Err(JobRunError::Failed("image body too large".into()));
-        }
-        out.extend_from_slice(&chunk);
-    }
-    Ok(out)
-}
-
-pub(super) fn combine_image_prompt(name: &str, body: &str) -> String {
-    let n = name.trim();
-    let b = body.trim();
-    match (n.is_empty(), b.is_empty()) {
-        (true, true) => String::new(),
-        (true, false) => b.to_string(),
-        (false, true) => n.to_string(),
-        (false, false) => format!("{n}\n{b}"),
-    }
-}
-
-pub(super) fn payload_json_i32(value: &Value, field: &'static str) -> Result<i32, JobRunError> {
-    value
-        .get(field)
-        .and_then(|x| x.as_i64())
-        .and_then(|n| i32::try_from(n).ok())
-        .ok_or_else(|| JobRunError::Failed(format!("payload missing or invalid {field}")))
-}
-
-pub(super) struct AssetImageGenCtx<'a> {
-    pub(super) cfg: &'a LlmConfig,
-    pub(super) http_client: &'a reqwest::Client,
-    pub(super) pool: &'a PgPool,
-    pub(super) job_id: Uuid,
-    pub(super) owner: Uuid,
-    pub(super) request_model: &'a str,
-    pub(super) image_model: &'a str,
-    pub(super) size: &'a str,
-    /// When set, worker downloads the provider URL and writes `{dir}/{owner}/{id}.png`.
-    pub(super) local_asset_image_dir: Option<&'a Path>,
-}
+use super::download::download_image_bytes_capped;
+use super::payload::{combine_image_prompt, AssetImageGenCtx};
 
 /// Persist a generated image for a resolved `app_asset.id` (must belong to `ctx.owner`).
-pub(super) async fn generate_and_store_asset_image_for_row(
+pub(crate) async fn generate_and_store_asset_image_for_row(
     ctx: &AssetImageGenCtx<'_>,
     asset_id: Uuid,
     asset_numeric_id: i32,
@@ -190,7 +124,7 @@ pub(super) async fn generate_and_store_asset_image_for_row(
     }))
 }
 
-pub(super) async fn generate_and_store_asset_image(
+pub(crate) async fn generate_and_store_asset_image(
     ctx: &AssetImageGenCtx<'_>,
     project_numeric_id: i32,
     asset_numeric_id: i32,
@@ -217,7 +151,7 @@ pub(super) async fn generate_and_store_asset_image(
     .await
 }
 
-pub(super) async fn ensure_script_scoped_asset_exists(
+pub(crate) async fn ensure_script_scoped_asset_exists(
     pool: &PgPool,
     owner_user_id: Uuid,
     project_numeric_id: i32,

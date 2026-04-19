@@ -99,7 +99,7 @@ async fn run_asset_generate_batch_items(
             .ok_or_else(|| JobRunError::Failed("item missing prompt".into()))?;
         let image_base64 = item.get("image_base64").and_then(|x| x.as_str());
 
-        let one = generate_and_store_asset_image(
+        let one: serde_json::Value = generate_and_store_asset_image(
             &ctx,
             project_numeric_id,
             asset_numeric_id,
