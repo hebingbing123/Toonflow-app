@@ -17,17 +17,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::harness::observe;
-use crate::llm::{
-    chat_completion_assistant_text, images_generation_url, resolve_openai_image_model,
-    resolve_openai_image_size, LlmConfig,
-};
 use crate::metering::usage;
 use crate::state::AppState;
-use crate::vendor::catalog::lookup_vendor_catalog;
-use crate::vendor::credential::decrypt;
-use crate::vendor::video::{
-    VideoGenerationRequest, VideoGenerationStatus, VideoProvider, VideoProviderClient,
-};
 
 use super::{
     envelope_generation_job_updated, JobRow, JOB_KIND_ASSET_GENERATE_BATCH,
