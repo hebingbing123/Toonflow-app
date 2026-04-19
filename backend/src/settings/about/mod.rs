@@ -47,11 +47,12 @@ mod tests {
     use chrono::Utc;
 
     use super::download::{DownloadAppAcceptedResponse, DownloadAppBody};
-    use super::update::{
-        resolve_check_update_response, CheckUpdateBody, CheckUpdateSource, ReleaseVersion,
+    use super::update::constants::{
         ENV_UPDATE_ATOMGIT_URL, ENV_UPDATE_GITEE_URL, ENV_UPDATE_GITHUB_URL,
         ENV_UPDATE_LATEST_VERSION, ENV_UPDATE_TIME, ENV_UPDATE_TOONFLOW_URL, PKG_VERSION,
     };
+    use super::update::resolve::resolve_check_update_response;
+    use super::update::types::{CheckUpdateBody, CheckUpdateSource, ReleaseVersion};
     use super::SETTINGS_ABOUT_ENV_TEST_MUTEX;
 
     fn env_lock() -> tokio::sync::MutexGuard<'static, ()> {
