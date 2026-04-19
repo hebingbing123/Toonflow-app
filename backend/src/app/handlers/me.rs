@@ -1,75 +1,17 @@
-//! 核心 HTTP 处理器。
-//!
-//! 由 [`super::router::build_router`] 挂载，提供健康检查、版本信息、
-//! 就绪状态和用户信息服务。
-
-use crate::auth::require_claims;
-use crate::error::ApiError;
-use crate::state::{AppState, MemoryConfig};
+//! `GET /api/v1/me` — JWT sub + `app_user_profile` 等。
 
 use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::Json;
 use chrono::{DateTime, Utc};
-use serde::Serialize;
 use sqlx::FromRow;
-use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Serialize, ToSchema)]
-pub(crate) struct HealthResponse {
-    pub status: &'static str,
-    pub service: &'static str,
-}
+use crate::auth::require_claims;
+use crate::error::ApiError;
+use crate::state::{AppState, MemoryConfig};
 
-/// Minimal JSON probe; replaces Electron-era **`GET /api/test/test`** (`"ok"` plain text).
-#[derive(Serialize, ToSchema)]
-pub(crate) struct PingResponse {
-    pub ok: bool,
-}
-
-#[derive(Serialize, ToSchema)]
-pub(crate) struct VersionResponse {
-    pub service: &'static str,
-    pub version: &'static str,
-    /// Present when the binary was built with env **`TOONFLOW_GIT_SHA`** set (compile-time `option_env!`).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub git_sha: Option<&'static str>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub(crate) struct ReadyResponse {
-    pub status: &'static str,
-    pub database: &'static str,
-}
-
-#[derive(Serialize, ToSchema)]
-pub(crate) struct MeResponse {
-    pub sub: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub email: Option<String>,
-    /// From `app_user_profile` when connected; defaults to `free` when no row.
-    pub plan_tier: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub billing_currency: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub billing_provider: Option<String>,
-    /// Current subscription status derived from billing webhook profile updates.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub subscription_status: Option<String>,
-    /// Period end timestamp of current paid subscription cycle.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub subscription_current_period_end_at: Option<DateTime<Utc>>,
-    /// Effective daily job quota for this user (null = unlimited, e.g. enterprise).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub daily_job_quota: Option<i64>,
-    /// Number of generation jobs created today (UTC natural day). Present when DB is connected.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub jobs_today: Option<i64>,
-    /// User memory/RAG configuration from `app_user_profile.memory_config` (or server defaults).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub memory_config: Option<MemoryConfig>,
-}
+use super::types::MeResponse;
 
 #[derive(FromRow)]
 struct UserProfileRow {
@@ -80,82 +22,6 @@ struct UserProfileRow {
     subscription_current_period_end_at: Option<DateTime<Utc>>,
     daily_job_quota: Option<i64>,
     memory_config: Option<sqlx::types::Json<MemoryConfig>>,
-}
-
-#[utoipa::path(
-    get,
-    path = "/health",
-    operation_id = "healthRoot",
-    tag = "system",
-    summary = "Liveness (unversioned)",
-    responses((status = 200, description = "OK", body = HealthResponse))
-)]
-pub(crate) async fn health() -> Json<HealthResponse> {
-    Json(HealthResponse {
-        status: "ok",
-        service: "toonflow-server",
-    })
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/v1/ping",
-    operation_id = "pingV1",
-    tag = "system",
-    summary = "Minimal connectivity probe (Electron `/api/test/test` parity)",
-    description = "Public, no auth, no database. Replaces Electron-era **`GET /api/test/test`** which returned plain text **`ok`**; this route returns JSON **`{\"ok\":true}`** for versioned API clients.",
-    responses((status = 200, description = "OK", body = PingResponse))
-)]
-pub(crate) async fn ping() -> Json<PingResponse> {
-    Json(PingResponse { ok: true })
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/v1/version",
-    operation_id = "versionV1",
-    tag = "system",
-    summary = "Server semantic version (from Cargo package)",
-    description = "Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.\nWhen the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).",
-    responses((status = 200, description = "OK", body = VersionResponse))
-)]
-pub(crate) async fn version() -> Json<VersionResponse> {
-    Json(VersionResponse {
-        service: "toonflow-server",
-        version: env!("CARGO_PKG_VERSION"),
-        git_sha: option_env!("TOONFLOW_GIT_SHA"),
-    })
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/v1/ready",
-    operation_id = "readyV1",
-    tag = "system",
-    summary = "Readiness (optional database ping)",
-    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200).",
-    responses(
-        (status = 200, description = "OK", body = ReadyResponse),
-        (status = 503, description = "Database unreachable", body = crate::error::ErrorBody)
-    )
-)]
-pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyResponse>, ApiError> {
-    match &state.pool {
-        None => Ok(Json(ReadyResponse {
-            status: "ok",
-            database: "not_configured",
-        })),
-        Some(pool) => {
-            sqlx::query_scalar::<_, i32>("SELECT 1")
-                .fetch_one(pool)
-                .await
-                .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-            Ok(Json(ReadyResponse {
-                status: "ok",
-                database: "connected",
-            }))
-        }
-    }
 }
 
 #[utoipa::path(
