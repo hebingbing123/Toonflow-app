@@ -15,158 +15,16 @@
 //! 如果两个请求头都不存在 → `InvalidWebhookSignature`。
 
 use axum::http::HeaderMap;
-use hmac::{Hmac, Mac};
+use hmac::Hmac;
 use sha2::Sha256;
-use subtle::ConstantTimeEq;
 
-use crate::error::ApiError;
+mod secret;
+mod stripe;
+mod toonflow;
 
 pub(crate) type HmacSha256 = Hmac<Sha256>;
 
-/// Default Stripe / Toonflow timestamp tolerance in seconds.
-const DEFAULT_STRIPE_TOLERANCE_SECS: u64 = 300;
-
-pub(crate) fn billing_secret() -> Result<Vec<u8>, ApiError> {
-    std::env::var("BILLING_WEBHOOK_SECRET")
-        .ok()
-        .filter(|s| !s.trim().is_empty())
-        .map(|s| s.into_bytes())
-        .ok_or(ApiError::WebhookNotConfigured)
-}
-
-fn stripe_tolerance_secs() -> u64 {
-    std::env::var("BILLING_STRIPE_TOLERANCE_SECS")
-        .ok()
-        .and_then(|s| s.trim().parse::<u64>().ok())
-        .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)
-}
-
-fn toonflow_tolerance_secs() -> u64 {
-    std::env::var("BILLING_TOONFLOW_TOLERANCE_SECS")
-        .ok()
-        .and_then(|s| s.trim().parse::<u64>().ok())
-        .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)
-}
-
-fn now_unix_secs() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
-}
-
-/// Verify `X-Toonflow-Signature: sha256=<hex>` with mandatory timestamped MAC.
-fn verify_toonflow_signature(
-    secret: &[u8],
-    body: &[u8],
-    headers: &HeaderMap,
-) -> Result<(), ApiError> {
-    let raw = headers
-        .get("x-toonflow-signature")
-        .and_then(|v| v.to_str().ok())
-        .ok_or(ApiError::InvalidWebhookSignature)?;
-
-    let hex_part = raw
-        .trim()
-        .strip_prefix("sha256=")
-        .ok_or(ApiError::InvalidWebhookSignature)?;
-
-    let expected_bytes =
-        hex::decode(hex_part.trim()).map_err(|_| ApiError::InvalidWebhookSignature)?;
-
-    let expected: [u8; 32] = expected_bytes
-        .as_slice()
-        .try_into()
-        .map_err(|_| ApiError::InvalidWebhookSignature)?;
-
-    let ts_str = headers
-        .get("x-toonflow-timestamp")
-        .and_then(|v| v.to_str().ok())
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .ok_or(ApiError::InvalidWebhookSignature)?;
-
-    let ts: u64 = ts_str
-        .parse()
-        .map_err(|_| ApiError::InvalidWebhookSignature)?;
-    if now_unix_secs().abs_diff(ts) > toonflow_tolerance_secs() {
-        return Err(ApiError::InvalidWebhookSignature);
-    }
-    let mut mac =
-        HmacSha256::new_from_slice(secret).map_err(|_| ApiError::InvalidWebhookSignature)?;
-    mac.update(ts_str.as_bytes());
-    mac.update(b".");
-    mac.update(body);
-    let computed = mac.finalize().into_bytes();
-    if !bool::from(computed.ct_eq(&expected)) {
-        return Err(ApiError::InvalidWebhookSignature);
-    }
-    Ok(())
-}
-
-/// Core Stripe verification with an explicit `now` timestamp (enables deterministic tests).
-///
-/// Format: `t=<unix_ts>,v1=<hex>[,v1=<hex>...]`
-/// Signed payload: `"<unix_ts>.<raw_body>"`.
-fn verify_stripe_signature_at(
-    secret: &[u8],
-    body: &[u8],
-    headers: &HeaderMap,
-    now: u64,
-) -> Result<(), ApiError> {
-    let raw = headers
-        .get("stripe-signature")
-        .and_then(|v| v.to_str().ok())
-        .ok_or(ApiError::InvalidWebhookSignature)?;
-
-    let mut timestamp_str: Option<&str> = None;
-    let mut v1_sigs: Vec<&str> = Vec::new();
-
-    for part in raw.split(',') {
-        let part = part.trim();
-        if let Some(t) = part.strip_prefix("t=") {
-            timestamp_str = Some(t.trim());
-        } else if let Some(sig) = part.strip_prefix("v1=") {
-            v1_sigs.push(sig.trim());
-        }
-    }
-
-    let ts_str = timestamp_str.ok_or(ApiError::InvalidWebhookSignature)?;
-    let ts: u64 = ts_str
-        .parse()
-        .map_err(|_| ApiError::InvalidWebhookSignature)?;
-
-    let diff = now.abs_diff(ts);
-    if diff > stripe_tolerance_secs() {
-        return Err(ApiError::InvalidWebhookSignature);
-    }
-
-    if v1_sigs.is_empty() {
-        return Err(ApiError::InvalidWebhookSignature);
-    }
-
-    let mut mac =
-        HmacSha256::new_from_slice(secret).map_err(|_| ApiError::InvalidWebhookSignature)?;
-    mac.update(ts_str.as_bytes());
-    mac.update(b".");
-    mac.update(body);
-    let computed = mac.finalize().into_bytes();
-
-    // Accept if any v1 signature matches (Stripe sends multiple during key rotation).
-    for sig_hex in &v1_sigs {
-        let Ok(sig_bytes) = hex::decode(sig_hex) else {
-            continue;
-        };
-        let Ok(sig_arr): Result<[u8; 32], _> = sig_bytes.as_slice().try_into() else {
-            continue;
-        };
-        if bool::from(computed.ct_eq(&sig_arr)) {
-            return Ok(());
-        }
-    }
-
-    Err(ApiError::InvalidWebhookSignature)
-}
+pub(crate) use secret::billing_secret;
 
 /// Verify the webhook signature using whichever scheme header is present.
 ///
@@ -175,16 +33,22 @@ pub(crate) fn verify_signature(
     secret: &[u8],
     body: &[u8],
     headers: &HeaderMap,
-) -> Result<(), ApiError> {
+) -> Result<(), crate::error::ApiError> {
     if headers.contains_key("stripe-signature") {
-        return verify_stripe_signature_at(secret, body, headers, now_unix_secs());
+        return stripe::verify_stripe_signature_at(secret, body, headers, secret::now_unix_secs());
     }
-    verify_toonflow_signature(secret, body, headers)
+    toonflow::verify_toonflow_signature(secret, body, headers)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use axum::http::HeaderMap;
+    use hmac::Mac;
+
+    use super::secret::{now_unix_secs, DEFAULT_STRIPE_TOLERANCE_SECS};
+    use super::stripe::verify_stripe_signature_at;
+    use super::verify_signature;
+    use super::HmacSha256;
 
     fn make_toonflow_timestamped_header(secret: &[u8], body: &[u8], ts: u64) -> HeaderMap {
         let ts_str = ts.to_string();
