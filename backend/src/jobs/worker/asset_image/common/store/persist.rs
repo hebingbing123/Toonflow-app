@@ -1,18 +1,14 @@
 //! 生成图并写入 `app_asset_image`（及脚本侧校验）。
 
 use serde_json::json;
-use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::{
-    next_asset_image_sort_index, resolve_asset_id_for_job,
-    resolve_owned_script_linked_asset_row_for_job,
-};
+use crate::assets::next_asset_image_sort_index;
 use crate::jobs::worker::common::JobRunError;
 use crate::llm::images_generation_or_edit_url;
 
-use super::download::download_image_bytes_capped;
-use super::payload::{combine_image_prompt, AssetImageGenCtx};
+use super::super::download::download_image_bytes_capped;
+use super::super::payload::{combine_image_prompt, AssetImageGenCtx};
 
 /// Persist a generated image for a resolved `app_asset.id` (must belong to `ctx.owner`).
 pub(crate) async fn generate_and_store_asset_image_for_row(
@@ -122,55 +118,4 @@ pub(crate) async fn generate_and_store_asset_image_for_row(
         "revised_prompt": revised,
         "has_reference_image": image_base64.is_some(),
     }))
-}
-
-pub(crate) async fn generate_and_store_asset_image(
-    ctx: &AssetImageGenCtx<'_>,
-    project_numeric_id: i32,
-    asset_numeric_id: i32,
-    name: &str,
-    prompt: &str,
-    image_base64: Option<&str>,
-) -> Result<serde_json::Value, JobRunError> {
-    let asset_id =
-        resolve_asset_id_for_job(ctx.pool, ctx.owner, project_numeric_id, asset_numeric_id)
-            .await
-            .map_err(|e| JobRunError::Failed(e.to_string()))?
-            .ok_or_else(|| {
-                JobRunError::Failed("asset not found for project or not owned".into())
-            })?;
-
-    generate_and_store_asset_image_for_row(
-        ctx,
-        asset_id,
-        asset_numeric_id,
-        name,
-        prompt,
-        image_base64,
-    )
-    .await
-}
-
-pub(crate) async fn ensure_script_scoped_asset_exists(
-    pool: &PgPool,
-    owner_user_id: Uuid,
-    project_numeric_id: i32,
-    script_numeric_id: i32,
-    asset_numeric_id: i32,
-) -> Result<(), JobRunError> {
-    resolve_owned_script_linked_asset_row_for_job(
-        pool,
-        owner_user_id,
-        project_numeric_id,
-        script_numeric_id,
-        asset_numeric_id,
-    )
-    .await
-    .map_err(|e| JobRunError::Failed(e.to_string()))?
-    .ok_or_else(|| {
-        JobRunError::Failed(
-            "asset.generate.batch items: asset not linked to script (script_id in payload)".into(),
-        )
-    })?;
-    Ok(())
 }
