@@ -1,7 +1,10 @@
 //! prompting/quality 单元测试。
 
-use super::*;
+use crate::error::ApiError;
 use serde_json::json;
+
+use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
+use super::validate::{validate_create_review_body, validate_list_reviews_query};
 
 #[test]
 fn create_quality_review_body_accepts_valid() {
