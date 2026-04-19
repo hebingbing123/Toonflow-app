@@ -1,31 +1,13 @@
-//! 父子资产树：COUNT、父行、子行与组装。
-
-use std::collections::HashMap;
-
+use crate::assets::models::*;
 use crate::error::ApiError;
 
-use super::super::super::models::*;
-use super::super::super::utils::MAX_ASSET_LIST_LIMIT;
-
-pub(super) async fn run_get_assets_api(
+pub(super) async fn count_nested_assets(
     pool: &sqlx::PgPool,
     uid: uuid::Uuid,
     project_numeric_id: i32,
-    body: &WorkbenchNestedAssetsBody,
-) -> Result<WorkbenchGetAssetsApiResponse, ApiError> {
-    let asset_type = body.asset_type.trim().to_lowercase();
-    let page = body.page.unwrap_or(1);
-    let limit = body.limit.unwrap_or(10);
-    let limit = i64::from(limit).min(MAX_ASSET_LIST_LIMIT);
-    let offset = i64::from(page - 1) * limit;
-
-    let name_pattern = body
-        .name
-        .as_deref()
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .map(|s| format!("%{s}%"));
-
+    asset_type: &str,
+    name_pattern: Option<&str>,
+) -> Result<i64, ApiError> {
     let total: i64 = sqlx::query_scalar(
         r#"
         SELECT COUNT(*)::BIGINT
@@ -46,12 +28,23 @@ pub(super) async fn run_get_assets_api(
     )
     .bind(uid)
     .bind(project_numeric_id)
-    .bind(&asset_type)
-    .bind(name_pattern.as_deref())
+    .bind(asset_type)
+    .bind(name_pattern)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(total)
+}
 
+pub(super) async fn fetch_parent_rows(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_numeric_id: i32,
+    asset_type: &str,
+    name_pattern: Option<&str>,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<WorkbenchGetAssetsApiDbRow>, ApiError> {
     let parents: Vec<WorkbenchGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
@@ -102,14 +95,23 @@ pub(super) async fn run_get_assets_api(
     )
     .bind(uid)
     .bind(project_numeric_id)
-    .bind(&asset_type)
-    .bind(name_pattern.as_deref())
+    .bind(asset_type)
+    .bind(name_pattern)
     .bind(limit)
     .bind(offset)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(parents)
+}
 
+pub(super) async fn fetch_child_rows(
+    pool: &sqlx::PgPool,
+    uid: uuid::Uuid,
+    project_numeric_id: i32,
+    asset_type: &str,
+    name_pattern: Option<&str>,
+) -> Result<Vec<WorkbenchGetAssetsApiDbRow>, ApiError> {
     let children: Vec<WorkbenchGetAssetsApiDbRow> = sqlx::query_as(
         r#"
         SELECT
@@ -159,47 +161,10 @@ pub(super) async fn run_get_assets_api(
     )
     .bind(uid)
     .bind(project_numeric_id)
-    .bind(&asset_type)
-    .bind(name_pattern.as_deref())
+    .bind(asset_type)
+    .bind(name_pattern)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let mut child_map: HashMap<i32, Vec<WorkbenchGetAssetsApiChildItem>> = HashMap::new();
-    for row in children {
-        let child = WorkbenchGetAssetsApiChildItem {
-            id: row.id,
-            project_id: row.project_id.unwrap_or(project_numeric_id),
-            asset_type: row.asset_type,
-            name: row.name,
-            assets_id: row.assets_id,
-            image_id: row.image_id,
-            src: row.file_path.clone(),
-            file_path: row.file_path,
-            state: row.state,
-            error_reason: row.error_reason,
-        };
-        if let Some(parent_id) = child.assets_id {
-            child_map.entry(parent_id).or_default().push(child);
-        }
-    }
-
-    let data = parents
-        .into_iter()
-        .map(|row| WorkbenchGetAssetsApiParentItem {
-            id: row.id,
-            project_id: row.project_id.unwrap_or(project_numeric_id),
-            asset_type: row.asset_type,
-            name: row.name,
-            assets_id: row.assets_id,
-            image_id: row.image_id,
-            src: row.file_path.clone(),
-            file_path: row.file_path,
-            state: row.state,
-            error_reason: row.error_reason,
-            son_assets: child_map.remove(&row.id).unwrap_or_default(),
-        })
-        .collect();
-
-    Ok(WorkbenchGetAssetsApiResponse { data, total })
+    Ok(children)
 }
