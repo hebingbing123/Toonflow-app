@@ -1,57 +1,19 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Json, State},
     http::HeaderMap,
-    Json,
 };
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::cover::{
+use super::super::super::cover::{
     art_style_cover_api_path, parse_uploaded_cover, persist_local_art_style_cover,
-    serve_cover_by_numeric_id,
 };
-use super::super::types::{
-    ArtStyleRow, CreateArtStyleBody, ListArtStylesResponse, ADV_LOCK_ART_STYLE_NUMERIC,
-    MAX_ART_STYLE_LIST,
-};
-use super::common::{require_positive_numeric_id, trim_opt};
+use super::super::super::types::{ArtStyleRow, CreateArtStyleBody, ADV_LOCK_ART_STYLE_NUMERIC};
+use super::super::common::trim_opt;
 
-pub(super) async fn list_art_styles(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> Result<Json<ListArtStylesResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-
-    let total: i64 = sqlx::query_scalar(
-        r#"SELECT COUNT(*)::bigint FROM app_art_style WHERE owner_user_id = $1"#,
-    )
-    .bind(uid)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    let items = sqlx::query_as::<_, ArtStyleRow>(
-        r#"
-        SELECT id, numeric_id, name, file_url, label, prompt
-        FROM app_art_style
-        WHERE owner_user_id = $1
-        ORDER BY numeric_id ASC
-        LIMIT $2
-        "#,
-    )
-    .bind(uid)
-    .bind(MAX_ART_STYLE_LIST)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    Ok(Json(ListArtStylesResponse { items, total }))
-}
-
-pub(super) async fn create_art_style(
+pub(crate) async fn create_art_style(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(body): Json<CreateArtStyleBody>,
@@ -130,42 +92,4 @@ pub(super) async fn create_art_style(
     }
 
     Ok((axum::http::StatusCode::CREATED, Json(row)))
-}
-
-pub(super) async fn get_art_style_by_numeric_id(
-    State(state): State<AppState>,
-    Path(numeric_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<Json<ArtStyleRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-
-    require_positive_numeric_id(numeric_id)?;
-
-    let row = sqlx::query_as::<_, ArtStyleRow>(
-        r#"
-        SELECT id, numeric_id, name, file_url, label, prompt
-        FROM app_art_style
-        WHERE owner_user_id = $1 AND numeric_id = $2
-        "#,
-    )
-    .bind(uid)
-    .bind(numeric_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-
-    Ok(Json(row))
-}
-
-pub(super) async fn get_art_style_cover_by_numeric_id(
-    State(state): State<AppState>,
-    Path(numeric_id): Path<i32>,
-    headers: HeaderMap,
-) -> Result<axum::response::Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    require_positive_numeric_id(numeric_id)?;
-
-    serve_cover_by_numeric_id(&state, uid, numeric_id).await
 }
