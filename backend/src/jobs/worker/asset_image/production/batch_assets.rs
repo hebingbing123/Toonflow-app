@@ -7,7 +7,9 @@ use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size, LlmConfig};
 use crate::state::AppState;
 
-use super::super::common::{generate_and_store_asset_image_for_row, payload_json_i32, AssetImageGenCtx};
+use super::super::common::{
+    generate_and_store_asset_image_for_row, payload_json_i32, AssetImageGenCtx,
+};
 
 pub(crate) async fn run_production_assets_batch_generate(
     state: &AppState,
