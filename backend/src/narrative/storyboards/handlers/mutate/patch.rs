@@ -1,22 +1,18 @@
-use axum::{
-    extract::{Path, State},
-    http::{HeaderMap, StatusCode},
-    Json,
-};
+//! 分镜行 JSON Patch 合并与 UPDATE。
+
+use axum::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
-use crate::state::AppState;
 
-use super::super::dto::{PatchStoryboardBody, StoryboardRow};
-use super::common::{fetch_storyboard_row, resolve_owned_storyboard_id};
+use super::super::super::dto::{PatchStoryboardBody, StoryboardRow};
+use super::super::common::{fetch_storyboard_row, resolve_owned_storyboard_id};
 
-async fn patch_storyboard_row(
+pub(super) async fn patch_storyboard_row(
     pool: &PgPool,
     uid: Uuid,
     numeric_id: i32,
@@ -130,54 +126,4 @@ async fn patch_storyboard_row(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Json(row))
-}
-
-pub(in crate::narrative::storyboards) async fn patch_by_numeric_id_for_project(
-    State(state): State<AppState>,
-    Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
-    headers: HeaderMap,
-    Json(body): Json<PatchStoryboardBody>,
-) -> Result<Json<StoryboardRow>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    patch_storyboard_row(pool, uid, storyboard_numeric_id, body, project_id).await
-}
-
-async fn delete_storyboard_row(
-    pool: &PgPool,
-    uid: Uuid,
-    numeric_id: i32,
-    project_id: Uuid,
-) -> Result<StatusCode, ApiError> {
-    let storyboard_id = resolve_owned_storyboard_id(pool, uid, project_id, numeric_id).await?;
-
-    let res = sqlx::query(r#"DELETE FROM app_storyboard WHERE id = $1"#)
-        .bind(storyboard_id)
-        .execute(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if res.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(StatusCode::NO_CONTENT)
-}
-
-pub(in crate::narrative::storyboards) async fn delete_by_numeric_id_for_project(
-    State(state): State<AppState>,
-    Path((project_id, storyboard_numeric_id)): Path<(Uuid, i32)>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    delete_storyboard_row(pool, uid, storyboard_numeric_id, project_id).await
 }

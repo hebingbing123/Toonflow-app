@@ -1,36 +1,18 @@
+//! 工作台添加 / 删除视频轨。
+
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
     Json as JsonResponse,
 };
-use serde::{Deserialize, Serialize};
 
+use super::super::common::require_owned_script_scope;
+use super::types::{AddTrackBody, AddTrackResponse, DeleteTrackBody, DeleteTrackResponse};
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::common::require_owned_script_scope;
-
 /// Serializes `GREATEST(MAX storyboard.track_id, MAX app_video_track.numeric_id)+1` allocation for a script/project pair.
 const ADV_LOCK_WORKBENCH_TRACK_SLOT: i64 = 884_422_009;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct AddTrackBody {
-    project_id: i32,
-    script_id: i32,
-    track_name: String,
-    #[serde(default)]
-    #[allow(dead_code)]
-    track_type: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct AddTrackResponse {
-    track_id: i32,
-    track_name: String,
-    message: &'static str,
-}
 
 #[utoipa::path(
     post,
@@ -125,21 +107,6 @@ pub(in crate::production) async fn post_workbench_add_track(
     }))
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct DeleteTrackBody {
-    project_id: i32,
-    script_id: i32,
-    track_id: i32,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct DeleteTrackResponse {
-    track_id: i32,
-    message: &'static str,
-}
-
 #[utoipa::path(
     post,
     path = "/api/v1/production/workbench/delete-track",
@@ -163,7 +130,7 @@ pub(in crate::production) async fn post_workbench_delete_track(
     headers: HeaderMap,
     Json(body): Json<DeleteTrackBody>,
 ) -> Result<JsonResponse<DeleteTrackResponse>, ApiError> {
-    super::common::validate_positive_id("trackId", body.track_id)?;
+    super::super::common::validate_positive_id("trackId", body.track_id)?;
     let (_uid, pool, scope_row) =
         require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
 

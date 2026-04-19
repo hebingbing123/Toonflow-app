@@ -1,35 +1,22 @@
+//! 分镜编辑、删帧、更新图片 URL。
+
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
     Json as JsonResponse,
 };
-use serde::{Deserialize, Serialize};
 
-use super::common::{
+use super::super::common::{
     normalize_storyboard_image_url, normalize_storyboard_prompt, remove_owned_storyboard_frame,
     require_pool, update_owned_storyboard_image_url, update_owned_storyboard_info,
+};
+use super::types::{
+    EditStoryboardInfoBody, EditStoryboardInfoResponse, RemoveFrameBody, RemoveFrameResponse,
+    UpdateStoryboardUrlBody, UpdateStoryboardUrlResponse,
 };
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct EditStoryboardInfoBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-    prompt: String,
-    #[serde(default)]
-    duration: Option<i32>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct EditStoryboardInfoResponse {
-    storyboard_id: i32,
-    message: &'static str,
-}
 
 #[utoipa::path(
     post,
@@ -75,21 +62,6 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     }))
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct RemoveFrameBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct RemoveFrameResponse {
-    storyboard_id: i32,
-    message: &'static str,
-}
-
 #[utoipa::path(
     post,
     path = "/api/v1/production/storyboard/remove-frame",
@@ -129,23 +101,6 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
         storyboard_id: body.storyboard_id,
         message: "Frame removed from storyboard",
     }))
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(in crate::production) struct UpdateStoryboardUrlBody {
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-    image_url: String,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(in crate::production) struct UpdateStoryboardUrlResponse {
-    storyboard_id: i32,
-    image_url: String,
-    message: &'static str,
 }
 
 #[utoipa::path(
@@ -190,41 +145,4 @@ pub(in crate::production) async fn post_storyboard_update_url(
         image_url,
         message: "Storyboard image URL updated",
     }))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::super::common::{normalize_storyboard_image_url, normalize_storyboard_prompt};
-    use crate::error::ApiError;
-
-    #[test]
-    fn normalize_storyboard_prompt_trims_value() {
-        let prompt = normalize_storyboard_prompt("  opening frame  ").unwrap();
-        assert_eq!(prompt, "opening frame");
-    }
-
-    #[test]
-    fn normalize_storyboard_prompt_rejects_blank_value() {
-        let err = normalize_storyboard_prompt("   ").unwrap_err();
-        assert!(matches!(
-            err,
-            ApiError::BadRequest(message) if message == "prompt must not be empty"
-        ));
-    }
-
-    #[test]
-    fn normalize_storyboard_image_url_trims_value() {
-        let image_url =
-            normalize_storyboard_image_url("  https://example.com/frame.png  ").unwrap();
-        assert_eq!(image_url, "https://example.com/frame.png");
-    }
-
-    #[test]
-    fn normalize_storyboard_image_url_rejects_blank_value() {
-        let err = normalize_storyboard_image_url(" ").unwrap_err();
-        assert!(matches!(
-            err,
-            ApiError::BadRequest(message) if message == "imageUrl must not be empty"
-        ));
-    }
 }
