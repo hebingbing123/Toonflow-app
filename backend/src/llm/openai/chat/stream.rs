@@ -1,87 +1,13 @@
 use futures_util::StreamExt;
-use serde_json::{json, Value};
+use serde_json::json;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
-use super::super::envelope::envelope;
-use super::config::LlmConfig;
+use crate::llm::envelope::envelope;
 
-/// Parses `choices[0].message.content` from a non-streaming chat completion JSON body.
-pub(crate) fn parse_assistant_content(v: &Value) -> Result<String, String> {
-    let choice0 = v
-        .get("choices")
-        .and_then(|c| c.as_array())
-        .and_then(|a| a.first())
-        .ok_or_else(|| "missing choices[0]".to_string())?;
-    let content = choice0
-        .get("message")
-        .and_then(|m| m.get("content"))
-        .ok_or_else(|| "missing message.content".to_string())?;
-    match content {
-        Value::String(s) => {
-            let t = s.trim().to_owned();
-            if t.is_empty() {
-                Err("empty assistant content".into())
-            } else {
-                Ok(t)
-            }
-        }
-        Value::Array(parts) => {
-            let mut out = String::new();
-            for p in parts {
-                if p.get("type").and_then(|t| t.as_str()) == Some("text") {
-                    if let Some(t) = p.get("text").and_then(|x| x.as_str()) {
-                        out.push_str(t);
-                    }
-                }
-            }
-            let t = out.trim().to_owned();
-            if t.is_empty() {
-                Err("empty text content in message.parts".into())
-            } else {
-                Ok(t)
-            }
-        }
-        Value::Null => Err("message.content is null".into()),
-        _ => Err(format!("unexpected message.content type: {content}")),
-    }
-}
-
-/// Non-streaming chat completion; returns trimmed assistant text (no tools).
-pub async fn chat_completion_assistant_text(
-    cfg: &LlmConfig,
-    client: &reqwest::Client,
-    messages: Vec<Value>,
-) -> Result<String, String> {
-    let url = format!("{}/chat/completions", cfg.base_url);
-    let body = json!({
-        "model": cfg.model,
-        "stream": false,
-        "messages": messages,
-    });
-    let response = client
-        .post(&url)
-        .header("Authorization", format!("Bearer {}", cfg.api_key))
-        .header("Content-Type", "application/json")
-        .json(&body)
-        .send()
-        .await
-        .map_err(|e| format!("llm request: {e}"))?;
-    if !response.status().is_success() {
-        let status = response.status();
-        let text = response
-            .text()
-            .await
-            .unwrap_or_else(|_| "(empty body)".into());
-        return Err(format!("llm HTTP {status}: {text}"));
-    }
-    let v: Value = response
-        .json()
-        .await
-        .map_err(|e| format!("llm json: {e}"))?;
-    parse_assistant_content(&v)
-}
+use super::super::config::LlmConfig;
+use super::parse::parse_sse_data_line;
 
 /// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
 pub async fn stream_chat_turn(
@@ -201,21 +127,4 @@ pub async fn stream_chat_turn(
     ));
 
     Ok(())
-}
-
-/// Returns `None` for ignorable lines; `Some(\"\")` for `[DONE]`; `Some(text)` for token delta.
-pub(crate) fn parse_sse_data_line(line: &str) -> Option<String> {
-    let data = line.strip_prefix("data:")?.trim();
-    if data == "[DONE]" {
-        return Some(String::new());
-    }
-    let v: Value = serde_json::from_str(data).ok()?;
-    let choice0 = v.get("choices")?.as_array()?.first()?;
-    let delta = choice0.get("delta")?;
-    let content = delta.get("content")?;
-    match content {
-        Value::String(s) => Some(s.clone()),
-        Value::Null => Some(String::new()),
-        _ => Some(content.to_string()),
-    }
 }
