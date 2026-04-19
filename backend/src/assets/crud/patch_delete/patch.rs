@@ -1,11 +1,10 @@
-//! `PATCH` / `DELETE` project asset by stable numeric ids.
+//! `PATCH` project asset by stable numeric ids.
 
 use axum::{
     extract::{Path, State},
-    http::{HeaderMap, StatusCode},
+    http::HeaderMap,
     Json,
 };
-use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
 use uuid::Uuid;
 
@@ -16,66 +15,11 @@ use crate::http_kit::json_patch::{
 };
 use crate::state::AppState;
 
-use super::super::models::*;
-use super::resolve::ensure_owned_project_pk;
-
-fn parse_asset_type_patch(v: Option<Value>) -> Result<FieldPatch<String>, ApiError> {
-    let p = parse_optional_text_field(v, "asset_type")?;
-    match &p {
-        FieldPatch::Absent => Ok(FieldPatch::Absent),
-        FieldPatch::Set(None) => Err(ApiError::BadRequest(
-            "asset_type cannot be null; omit or set role|tool|scene".into(),
-        )),
-        FieldPatch::Set(Some(s)) => {
-            let t = s.trim().to_lowercase();
-            if t != "role" && t != "tool" && t != "scene" {
-                return Err(ApiError::BadRequest(
-                    "asset_type must be role, tool, or scene".into(),
-                ));
-            }
-            Ok(FieldPatch::Set(Some(t)))
-        }
-    }
-}
-
-fn merge_metadata_image_id(mut meta: Value, patch: &FieldPatch<i32>) -> Value {
-    if !meta.is_object() {
-        meta = Value::Object(Default::default());
-    }
-    if let Some(obj) = meta.as_object_mut() {
-        match patch {
-            FieldPatch::Absent => {}
-            FieldPatch::Set(None) => {
-                obj.remove("imageId");
-            }
-            FieldPatch::Set(Some(n)) => {
-                obj.insert("imageId".into(), serde_json::json!(n));
-            }
-        }
-    }
-    meta
-}
-
-async fn cover_numeric_image_exists_for_asset(
-    pool: &PgPool,
-    asset_id: Uuid,
-    numeric_image_id: i32,
-) -> Result<bool, ApiError> {
-    let ok: bool = sqlx::query_scalar(
-        r#"
-        SELECT EXISTS (
-          SELECT 1 FROM app_asset_image
-          WHERE asset_id = $1 AND numeric_image_id = $2
-        )
-        "#,
-    )
-    .bind(asset_id)
-    .bind(numeric_image_id)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(ok)
-}
+use super::super::super::models::*;
+use super::super::resolve::ensure_owned_project_pk;
+use super::helpers::{
+    cover_numeric_image_exists_for_asset, merge_metadata_image_id, parse_asset_type_patch,
+};
 
 async fn patch_project_asset_inner(
     pool: &PgPool,
@@ -228,52 +172,4 @@ pub(crate) async fn patch_project_asset_for_project(
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     patch_project_asset_inner(pool, uid, project_id, asset_numeric_id, body).await
-}
-
-async fn delete_project_asset_inner(
-    pool: &PgPool,
-    uid: Uuid,
-    project_id: Uuid,
-    asset_numeric_id: i32,
-) -> Result<StatusCode, ApiError> {
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
-
-    let res = sqlx::query(
-        r#"
-        DELETE FROM app_asset a
-        USING app_project p
-        WHERE a.project_id = p.id
-          AND p.id = $1
-          AND p.owner_user_id = $2
-          AND a.numeric_id = $3
-        "#,
-    )
-    .bind(project_id)
-    .bind(uid)
-    .bind(asset_numeric_id)
-    .execute(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-    if res.rows_affected() == 0 {
-        return Err(ApiError::NotFound);
-    }
-
-    Ok(StatusCode::NO_CONTENT)
-}
-
-pub(crate) async fn delete_project_asset_for_project(
-    State(state): State<AppState>,
-    Path((project_id, asset_numeric_id)): Path<(Uuid, i32)>,
-    headers: HeaderMap,
-) -> Result<StatusCode, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
-    delete_project_asset_inner(pool, uid, project_id, asset_numeric_id).await
 }
