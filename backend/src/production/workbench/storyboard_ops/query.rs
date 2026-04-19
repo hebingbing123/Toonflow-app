@@ -5,16 +5,12 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{
-    ensure_owned_storyboards, normalize_storyboard_ids, require_pool,
-    require_positive_project_script_ids, validate_storyboard_ids,
-};
+use super::common::{ensure_owned_storyboards, normalize_storyboard_ids, validate_storyboard_ids};
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::scope;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -40,14 +36,11 @@ pub(in crate::production) async fn post_get_production_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script_ids(body.project_id, body.script_id)?;
     validate_storyboard_ids(&body.ids)?;
 
-    let pool = require_pool(&state)?;
-    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
@@ -99,14 +92,11 @@ pub(in crate::production) async fn post_storyboard_polling_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script_ids(body.project_id, body.script_id)?;
     let normalized_ids = normalize_storyboard_ids(&body.ids)?;
 
-    let pool = require_pool(&state)?;
-    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
 

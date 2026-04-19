@@ -1,13 +1,4 @@
 use crate::error::ApiError;
-use crate::production::workbench::common as workbench_common;
-use crate::state::AppState;
-
-pub(super) fn require_positive_project_script_ids(
-    project_id: i32,
-    script_id: i32,
-) -> Result<(), ApiError> {
-    workbench_common::require_positive_project_script(project_id, script_id)
-}
 
 pub(super) fn validate_storyboard_ids(storyboard_ids: &[i32]) -> Result<(), ApiError> {
     if storyboard_ids.is_empty() {
@@ -25,10 +16,6 @@ pub(super) fn normalize_storyboard_ids(storyboard_ids: &[i32]) -> Result<Vec<i32
     uniq.sort_unstable();
     uniq.dedup();
     Ok(uniq)
-}
-
-pub(super) fn require_pool(state: &AppState) -> Result<&sqlx::PgPool, ApiError> {
-    workbench_common::require_pool(state)
 }
 
 pub(super) async fn ensure_owned_storyboards(

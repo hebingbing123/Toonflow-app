@@ -5,9 +5,8 @@ use axum::{
 };
 
 use super::WorkbenchGenerateVideoBody;
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::scope;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -33,18 +32,13 @@ pub(in crate::production) async fn post_workbench_generate_video(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
     if body.project_id <= 0 || body.script_id <= 0 || body.track_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId/scriptId/trackId must be positive integers".into(),
         ));
     }
 
-    let pool = state.require_pool()?;
-
-    scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id).await?;
 
     Ok(axum::http::StatusCode::OK.into_response())
 }

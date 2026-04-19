@@ -6,15 +6,12 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use super::super::common::{
-    ensure_owned_storyboards, require_pool, require_positive_project_script_ids,
-};
+use super::super::common::ensure_owned_storyboards;
 use super::super::types::{ExportImageBody, ExportImageSourceRow};
 use super::shot_ids::normalize_export_shot_ids;
 use super::zip_export::build_storyboard_export_zip;
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::scope;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -40,14 +37,11 @@ pub(in crate::production) async fn post_export_image(
     headers: HeaderMap,
     Json(body): Json<ExportImageBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    require_positive_project_script_ids(body.project_id, body.script_id)?;
     let normalized_ids = normalize_export_shot_ids(&body.shot_id)?;
 
-    let pool = require_pool(&state)?;
-    let scope_row = scope::owned_script_scope(pool, uid, body.project_id, body.script_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let (uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
 
