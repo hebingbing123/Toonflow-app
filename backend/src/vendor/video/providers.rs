@@ -1,8 +1,8 @@
 use serde_json::json;
 
-use super::{
+use super::client::VideoProviderClient;
+use super::types::{
     VideoGenerationRequest, VideoGenerationResponse, VideoGenerationStatus, VideoProvider,
-    VideoProviderClient,
 };
 
 impl VideoProviderClient {
