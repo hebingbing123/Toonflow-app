@@ -1,6 +1,4 @@
-//! 制作流程管理模块。
-//!
-//! 加载和保存制作流程 JSON 数据。
+//! 制作流程加载与保存 HTTP 处理器。
 
 use axum::{
     extract::{Json, State},
@@ -8,8 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json as JsonResponse,
 };
-use serde::Deserialize;
-use serde_json::{Map, Value};
+use serde_json::Value;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
@@ -18,46 +15,8 @@ use crate::production::flow_data::{
 };
 use crate::state::AppState;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct GetFlowDataBody {
-    project_id: i32,
-    episodes_id: i32,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct SaveFlowDataBody {
-    project_id: i32,
-    episodes_id: i32,
-    data: Value,
-}
-
-fn json_i32(obj: &Map<String, Value>, key: &str) -> Option<i32> {
-    obj.get(key)
-        .and_then(Value::as_i64)
-        .and_then(|v| i32::try_from(v).ok())
-}
-
-fn ordered_storyboard_numeric_ids(data: &Value) -> Result<Option<Vec<i32>>, ApiError> {
-    let object = data
-        .as_object()
-        .ok_or_else(|| ApiError::BadRequest("data must be a JSON object".into()))?;
-
-    Ok(object
-        .get("storyboard")
-        .and_then(Value::as_array)
-        .and_then(|storyboards| {
-            storyboards
-                .iter()
-                .map(|item| {
-                    item.as_object()
-                        .and_then(|obj| json_i32(obj, "id"))
-                        .filter(|id| *id > 0)
-                })
-                .collect::<Option<Vec<_>>>()
-        }))
-}
+use super::storyboard_order::ordered_storyboard_numeric_ids;
+use super::types::{GetFlowDataBody, SaveFlowDataBody};
 
 #[utoipa::path(
     post,
@@ -166,77 +125,4 @@ pub(crate) async fn post_save_flow_data(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(axum::http::StatusCode::OK.into_response())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{ordered_storyboard_numeric_ids, GetFlowDataBody, SaveFlowDataBody};
-
-    #[test]
-    fn get_flow_data_body_rejects_unknown_fields() {
-        let err =
-            serde_json::from_str::<GetFlowDataBody>(r#"{"projectId":1,"episodesId":5,"extra":1}"#);
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn get_flow_data_body_accepts_valid() {
-        let b: GetFlowDataBody = serde_json::from_str(r#"{"projectId":1,"episodesId":5}"#).unwrap();
-        assert_eq!(b.project_id, 1);
-        assert_eq!(b.episodes_id, 5);
-    }
-
-    #[test]
-    fn save_flow_data_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<SaveFlowDataBody>(
-            r#"{"projectId":1,"episodesId":5,"data":{},"extra":1}"#,
-        );
-        assert!(err.is_err());
-    }
-
-    #[test]
-    fn save_flow_data_body_accepts_valid() {
-        let b: SaveFlowDataBody =
-            serde_json::from_str(r#"{"projectId":1,"episodesId":5,"data":{"key":"value"}}"#)
-                .unwrap();
-        assert_eq!(b.project_id, 1);
-        assert_eq!(b.episodes_id, 5);
-        assert!(b.data.is_object());
-    }
-
-    #[test]
-    fn ordered_storyboard_numeric_ids_rejects_non_object() {
-        let err = ordered_storyboard_numeric_ids(&serde_json::json!([])).expect_err("non-object");
-        match err {
-            crate::error::ApiError::BadRequest(msg) => {
-                assert!(msg.contains("JSON object"));
-            }
-            other => panic!("unexpected error: {other:?}"),
-        }
-    }
-
-    #[test]
-    fn ordered_storyboard_numeric_ids_returns_none_without_storyboard_array() {
-        let got = ordered_storyboard_numeric_ids(&serde_json::json!({"key":"value"}))
-            .expect("object should parse");
-        assert_eq!(got, None);
-    }
-
-    #[test]
-    fn ordered_storyboard_numeric_ids_extracts_positive_ids_in_order() {
-        let got = ordered_storyboard_numeric_ids(&serde_json::json!({
-            "storyboard": [{"id": 9}, {"id": 2}, {"id": 7}]
-        }))
-        .expect("valid storyboard ids");
-        assert_eq!(got, Some(vec![9, 2, 7]));
-    }
-
-    #[test]
-    fn ordered_storyboard_numeric_ids_returns_none_when_any_id_is_invalid() {
-        let got = ordered_storyboard_numeric_ids(&serde_json::json!({
-            "storyboard": [{"id": 9}, {"id": 0}, {"id": 7}]
-        }))
-        .expect("object should parse");
-        assert_eq!(got, None);
-    }
 }
