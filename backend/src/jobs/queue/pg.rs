@@ -1,0 +1,118 @@
+use async_trait::async_trait;
+use sqlx::{PgPool, Row};
+use uuid::Uuid;
+
+use super::types::{JobPayload, Queue, QueueStats, QueuedJob};
+
+pub struct PgQueue {
+    pool: PgPool,
+}
+
+impl PgQueue {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+}
+
+#[async_trait]
+impl Queue for PgQueue {
+    async fn enqueue(&self, payload: JobPayload) -> anyhow::Result<Uuid> {
+        let id = Uuid::new_v4();
+        sqlx::query(
+            r#"
+            INSERT INTO app_generation_job (id, user_id, kind, payload, status, priority, created_at)
+            VALUES ($1, $2, $3, $4, 'queued', $5, now())
+            "#
+        )
+        .bind(id)
+        .bind(payload.user_id)
+        .bind(payload.kind)
+        .bind(payload.payload)
+        .bind(payload.priority.unwrap_or(0))
+        .execute(&self.pool)
+        .await?;
+        Ok(id)
+    }
+
+    async fn dequeue(&self, _timeout_secs: u64) -> anyhow::Result<Option<QueuedJob>> {
+        // Use FOR UPDATE SKIP LOCKED for efficient concurrent dequeuing
+        let row = sqlx::query(
+            r#"
+            UPDATE app_generation_job
+            SET status = 'running', updated_at = now()
+            WHERE id = (
+                SELECT id FROM app_generation_job
+                WHERE status = 'queued'
+                ORDER BY priority DESC, created_at ASC
+                FOR UPDATE SKIP LOCKED
+                LIMIT 1
+            )
+            RETURNING id, kind, user_id, payload
+            "#,
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.map(|r| QueuedJob {
+            id: r.get("id"),
+            kind: r.get("kind"),
+            user_id: r.get("user_id"),
+            payload: r.get("payload"),
+        }))
+    }
+
+    async fn complete(&self, job_id: Uuid) -> anyhow::Result<()> {
+        sqlx::query(
+            r#"
+            UPDATE app_generation_job
+            SET status = 'completed', updated_at = now(), finished_at = now()
+            WHERE id = $1
+            "#,
+        )
+        .bind(job_id)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    async fn fail(&self, job_id: Uuid, error: String) -> anyhow::Result<()> {
+        sqlx::query(
+            r#"
+            UPDATE app_generation_job
+            SET status = CASE 
+                WHEN retry_count >= 3 THEN 'dead'
+                ELSE 'failed'
+            END,
+            retry_count = retry_count + 1,
+            last_error = $2,
+            updated_at = now()
+            WHERE id = $1
+            "#,
+        )
+        .bind(job_id)
+        .bind(error)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    async fn stats(&self) -> anyhow::Result<QueueStats> {
+        let row = sqlx::query(
+            r#"
+            SELECT 
+                COUNT(*) FILTER (WHERE status = 'queued') as pending,
+                COUNT(*) FILTER (WHERE status = 'running') as running,
+                COUNT(*) FILTER (WHERE status = 'dead') as dead
+            FROM app_generation_job
+            "#,
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(QueueStats {
+            pending: row.get("pending"),
+            running: row.get("running"),
+            dead: row.get("dead"),
+        })
+    }
+}
