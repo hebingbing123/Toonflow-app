@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::super::{VideoItem, WorkbenchGenerateVideoBody};
+use crate::production::{VideoItem, WorkbenchGenerateVideoBody};
 
 pub(crate) mod generate;
 pub(crate) mod list;
