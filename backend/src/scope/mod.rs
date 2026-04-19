@@ -12,6 +12,8 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
+pub mod http;
+
 /// 当前用户拥有下的项目与剧本（`app_project` / `app_script` 行）。
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct OwnedScriptScope {

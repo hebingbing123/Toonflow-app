@@ -7,12 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH};
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
-use super::common::{
-    ensure_assets_linked_to_script, normalize_asset_ids, require_owned_script_scope,
-    validate_project_and_script_ids,
-};
+use super::common::{ensure_assets_linked_to_script, normalize_asset_ids};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -56,10 +54,10 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     headers: HeaderMap,
     Json(body): Json<BatchGenerateAssetsImageBody>,
 ) -> Result<JsonResponse<BatchGenerateAssetsImageResponse>, ApiError> {
-    validate_project_and_script_ids(body.project_id, body.script_id)?;
     let uniq = normalize_asset_ids(&body.asset_ids)?;
     let (uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
     ensure_assets_linked_to_script(pool, uid, body.project_id, scope_row.script_id, &uniq).await?;
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
@@ -125,10 +123,10 @@ pub(in crate::production) async fn post_assets_delete_derivative(
     headers: HeaderMap,
     Json(body): Json<DeleteAssetsDerivativeBody>,
 ) -> Result<JsonResponse<DeleteAssetsDerivativeResponse>, ApiError> {
-    validate_project_and_script_ids(body.project_id, body.script_id)?;
     let uniq = normalize_asset_ids(&body.asset_ids)?;
     let (uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
     ensure_assets_linked_to_script(pool, uid, body.project_id, scope_row.script_id, &uniq).await?;
 
     let result = sqlx::query(

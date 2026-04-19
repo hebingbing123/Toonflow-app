@@ -5,10 +5,10 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::require_owned_script_scope;
 use crate::error::ApiError;
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::VideoItem;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -51,7 +51,8 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     Json(body): Json<GetGenerateDataBody>,
 ) -> Result<JsonResponse<GetGenerateDataResponse>, ApiError> {
     let (uid, pool, scope) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let generated_videos = sqlx::query_as::<_, VideoItem>(
         r#"

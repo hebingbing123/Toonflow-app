@@ -6,9 +6,10 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
-use super::common::{require_owned_script_scope, validate_positive_id};
+use super::common::validate_positive_id;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -50,7 +51,8 @@ pub(in crate::production) async fn post_workbench_delete_video(
 ) -> Result<JsonResponse<DeleteVideoResponse>, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
     let (_uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let updated = sqlx::query(
         r#"
@@ -122,7 +124,8 @@ pub(in crate::production) async fn post_workbench_select_video(
     }
 
     let (_uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let updated = sqlx::query(
         r#"

@@ -7,8 +7,8 @@ use axum::{
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::common::{require_owned_script_scope, validate_project_and_script_ids};
 use super::types::{AssetDataItem, AssetsDataResponse, GetAssetsDataBody};
+use crate::scope::http::require_owned_numeric_script_scope;
 
 #[utoipa::path(
     post,
@@ -33,9 +33,9 @@ pub(in crate::production) async fn post_assets_get_data(
     headers: HeaderMap,
     Json(body): Json<GetAssetsDataBody>,
 ) -> Result<JsonResponse<AssetsDataResponse>, ApiError> {
-    validate_project_and_script_ids(body.project_id, body.script_id)?;
     let (_uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);

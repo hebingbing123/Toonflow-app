@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::common::{require_owned_script_scope, validate_project_and_script_ids};
+use crate::scope::http::require_owned_numeric_script_scope;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -50,7 +50,6 @@ pub(in crate::production) async fn post_assets_update_url(
     headers: HeaderMap,
     Json(body): Json<UpdateAssetsUrlBody>,
 ) -> Result<JsonResponse<UpdateAssetsUrlResponse>, ApiError> {
-    validate_project_and_script_ids(body.project_id, body.script_id)?;
     if body.asset_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId, scriptId, and assetId must be positive integers".into(),
@@ -61,7 +60,8 @@ pub(in crate::production) async fn post_assets_update_url(
     }
 
     let (uid, pool, scope_row) =
-        require_owned_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     let image_id = sqlx::query_scalar::<_, uuid::Uuid>(
         r#"
