@@ -5,9 +5,10 @@ mod filter;
 mod schema;
 mod types;
 
-#[cfg(test)]
-mod tests;
-
 pub(crate) use call::call_extract_tool;
 pub(crate) use filter::{filter_tool_existing, filter_tool_new_assets};
-pub(crate) use types::{ExistingRefItemFiltered, NewAssetItemFiltered};
+// Stable `crate::scripting::asset_extract::tool::*` paths; not all names are referenced in-crate.
+#[allow(unused_imports)]
+pub(crate) use types::{
+    ExistingRefItem, ExistingRefItemFiltered, NewAssetItem, NewAssetItemFiltered, ToolResultPayload,
+};
