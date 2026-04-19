@@ -1,5 +1,3 @@
-//! 组合域路由、速率限制、中间件和 CORS。
-
 use crate::assets;
 use crate::billing;
 use crate::harness;
@@ -28,8 +26,8 @@ use axum::{
 
 use crate::harness::ws::upgrade::ws_upgrade;
 
-use super::handlers;
-use super::openapi;
+use super::super::handlers;
+use super::super::openapi;
 
 pub fn build_router(state: AppState) -> Router {
     let cors = tower_http::cors::CorsLayer::new()
