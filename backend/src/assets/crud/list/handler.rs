@@ -1,0 +1,31 @@
+//! `GET …/assets` HTTP 处理器。
+
+use axum::{
+    extract::{Path, Query, State},
+    http::HeaderMap,
+    Json,
+};
+use uuid::Uuid;
+
+use crate::auth::require_user_uuid;
+use crate::error::ApiError;
+use crate::state::AppState;
+
+use super::super::super::models::*;
+use super::super::resolve::ensure_owned_project_pk;
+use super::inner::list_project_assets_inner;
+
+pub(crate) async fn list_project_assets_for_project(
+    State(state): State<AppState>,
+    Path(project_id): Path<Uuid>,
+    Query(query): Query<ListAssetsQuery>,
+    headers: HeaderMap,
+) -> Result<Json<ListAssetsResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    ensure_owned_project_pk(pool, uid, project_id).await?;
+    list_project_assets_inner(pool, uid, project_id, query).await
+}
