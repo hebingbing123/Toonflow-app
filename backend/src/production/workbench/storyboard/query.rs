@@ -6,12 +6,12 @@ use axum::{
 
 use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use super::common::{
-    build_storyboard_data_response, fetch_owned_storyboard_item,
-    list_owned_storyboard_items_by_script, require_pool, StoryboardScopeBody,
+    build_storyboard_data_response, fetch_storyboard_item, list_storyboard_items_by_script,
+    require_positive_scope_ids, storyboard_uuid_for_script_numeric, StoryboardScopeBody,
     StoryboardScriptScopeBody,
 };
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -37,17 +37,15 @@ pub(in crate::production) async fn post_storyboard_get_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<ProductionStoryboardItem>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
-    let pool = require_pool(&state)?;
-    let row = fetch_owned_storyboard_item(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    let row = fetch_storyboard_item(pool, sb_uuid).await?;
 
     Ok(JsonResponse(row))
 }
@@ -75,11 +73,11 @@ pub(in crate::production) async fn post_get_storyboard_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardScriptScopeBody>,
 ) -> Result<JsonResponse<ProductionGetProductionDataResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
-    let pool = require_pool(&state)?;
-    let rows =
-        list_owned_storyboard_items_by_script(pool, uid, body.project_id, body.script_id).await?;
+    let rows = list_storyboard_items_by_script(pool, scope_row.script_id).await?;
 
     Ok(JsonResponse(build_storyboard_data_response(rows)))
 }

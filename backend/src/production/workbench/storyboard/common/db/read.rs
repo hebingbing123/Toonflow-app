@@ -3,7 +3,6 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::production::workbench::storyboard_ops::ProductionStoryboardItem;
 
-use super::super::scope::{require_owned_script_id, require_owned_storyboard_id};
 use super::super::types::StoryboardPreviewData;
 
 pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_item(
@@ -27,6 +26,26 @@ pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_item(
         "#,
     )
     .bind(storyboard_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)
+}
+
+/// 在已校验 **用户拥有该 `script_id`（`app_script.id`）** 的前提下，按 numeric 分镜 id 解析主键。
+pub(in crate::production::workbench::storyboard) async fn storyboard_uuid_for_script_numeric(
+    pool: &sqlx::PgPool,
+    script_id: Uuid,
+    storyboard_numeric_id: i32,
+) -> Result<Uuid, ApiError> {
+    sqlx::query_scalar::<_, Uuid>(
+        r#"
+        SELECT id FROM app_storyboard
+        WHERE script_id = $1 AND numeric_id = $2
+        "#,
+    )
+    .bind(script_id)
+    .bind(storyboard_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
@@ -60,28 +79,6 @@ pub(in crate::production::workbench::storyboard) async fn list_storyboard_items_
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
-pub(in crate::production::workbench::storyboard) async fn fetch_owned_storyboard_item(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-) -> Result<ProductionStoryboardItem, ApiError> {
-    let storyboard_uuid =
-        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
-    fetch_storyboard_item(pool, storyboard_uuid).await
-}
-
-pub(in crate::production::workbench::storyboard) async fn list_owned_storyboard_items_by_script(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-) -> Result<Vec<ProductionStoryboardItem>, ApiError> {
-    let script_uuid = require_owned_script_id(pool, uid, project_id, script_id).await?;
-    list_storyboard_items_by_script(pool, script_uuid).await
-}
-
 pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_preview_data(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,
@@ -94,16 +91,4 @@ pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_previ
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(StoryboardPreviewData { file_path, prompt })
-}
-
-pub(in crate::production::workbench::storyboard) async fn fetch_owned_storyboard_preview_data(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-) -> Result<StoryboardPreviewData, ApiError> {
-    let storyboard_uuid =
-        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
-    fetch_storyboard_preview_data(pool, storyboard_uuid).await
 }

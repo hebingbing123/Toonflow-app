@@ -3,19 +3,7 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::scope;
 
-use super::normalize::{require_positive_project_script, require_positive_scope_ids};
-
-async fn resolve_owned_script_id(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-) -> Result<Uuid, ApiError> {
-    let scope_row = scope::owned_script_scope(pool, uid, project_id, script_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
-    Ok(scope_row.script_id)
-}
+use super::normalize::require_positive_scope_ids;
 
 async fn resolve_owned_storyboard_id(
     pool: &sqlx::PgPool,
@@ -29,16 +17,6 @@ async fn resolve_owned_storyboard_id(
             .await
             .map_err(|e| e.into_api_error())?;
     Ok(sb.storyboard_id)
-}
-
-pub(in crate::production::workbench::storyboard) async fn require_owned_script_id(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-) -> Result<Uuid, ApiError> {
-    require_positive_project_script(project_id, script_id)?;
-    resolve_owned_script_id(pool, uid, project_id, script_id).await
 }
 
 pub(in crate::production::workbench::storyboard) async fn require_owned_storyboard_id(

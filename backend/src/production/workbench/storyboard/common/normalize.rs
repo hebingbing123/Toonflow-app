@@ -1,12 +1,5 @@
 use crate::error::ApiError;
 
-pub(in crate::production::workbench::storyboard) fn require_positive_project_script(
-    project_id: i32,
-    script_id: i32,
-) -> Result<(), ApiError> {
-    crate::production::workbench::common::require_positive_project_script(project_id, script_id)
-}
-
 pub(in crate::production::workbench::storyboard) fn require_positive_scope_ids(
     project_id: i32,
     script_id: i32,

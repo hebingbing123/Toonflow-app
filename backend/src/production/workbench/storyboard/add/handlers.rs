@@ -6,13 +6,13 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::super::common::{insert_owned_storyboards_with_next_numeric_ids, require_pool};
+use super::super::common::insert_storyboards_with_next_numeric_ids;
 use super::prepare::{prepare_batch_storyboard_inserts, prepare_storyboard_insert};
 use super::types::{
     AddStoryboardBody, AddStoryboardResponse, BatchAddInfoBody, BatchAddInfoResponse,
 };
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -38,14 +38,14 @@ pub(in crate::production) async fn post_storyboard_add(
     headers: HeaderMap,
     Json(body): Json<AddStoryboardBody>,
 ) -> Result<JsonResponse<AddStoryboardResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
     let prepared = prepare_storyboard_insert(&body.prompt, body.duration)?;
 
-    let pool = require_pool(&state)?;
-    let storyboard_ids = insert_owned_storyboards_with_next_numeric_ids(
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let storyboard_ids = insert_storyboards_with_next_numeric_ids(
         pool,
-        uid,
-        body.project_id,
+        scope_row.script_id,
         body.script_id,
         &[prepared],
     )
@@ -84,14 +84,14 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
     headers: HeaderMap,
     Json(body): Json<BatchAddInfoBody>,
 ) -> Result<JsonResponse<BatchAddInfoResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
     let prepared_storyboards = prepare_batch_storyboard_inserts(&body.storyboards)?;
 
-    let pool = require_pool(&state)?;
-    let storyboard_ids = insert_owned_storyboards_with_next_numeric_ids(
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let storyboard_ids = insert_storyboards_with_next_numeric_ids(
         pool,
-        uid,
-        body.project_id,
+        scope_row.script_id,
         body.script_id,
         &prepared_storyboards,
     )

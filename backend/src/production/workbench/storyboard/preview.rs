@@ -5,12 +5,12 @@ use axum::{
 };
 
 use super::common::{
-    build_down_preview_image_response, build_preview_image_response,
-    fetch_owned_storyboard_preview_data, require_pool, DownPreviewImageResponse,
+    build_down_preview_image_response, build_preview_image_response, fetch_storyboard_preview_data,
+    require_positive_scope_ids, storyboard_uuid_for_script_numeric, DownPreviewImageResponse,
     PreviewImageResponse, StoryboardScopeBody,
 };
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -36,17 +36,15 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<DownPreviewImageResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
-    let pool = require_pool(&state)?;
-    let preview = fetch_owned_storyboard_preview_data(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    let preview = fetch_storyboard_preview_data(pool, sb_uuid).await?;
 
     Ok(JsonResponse(build_down_preview_image_response(
         body.storyboard_id,
@@ -77,17 +75,15 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<PreviewImageResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
-    let pool = require_pool(&state)?;
-    let preview = fetch_owned_storyboard_preview_data(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    let preview = fetch_storyboard_preview_data(pool, sb_uuid).await?;
 
     Ok(JsonResponse(build_preview_image_response(
         body.storyboard_id,

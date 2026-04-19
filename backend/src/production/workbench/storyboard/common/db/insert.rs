@@ -4,7 +4,6 @@ use crate::error::ApiError;
 use crate::narrative::storyboards::ADV_LOCK_STORYBOARD_NUMERIC_ID;
 
 use super::super::ids::storyboard_numeric_ids_from_base;
-use super::super::scope::require_owned_script_id;
 use super::super::types::StoryboardInsertDraft;
 
 async fn insert_storyboard_row(
@@ -75,15 +74,4 @@ pub(in crate::production::workbench::storyboard) async fn insert_storyboards_wit
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(storyboard_ids)
-}
-
-pub(in crate::production::workbench::storyboard) async fn insert_owned_storyboards_with_next_numeric_ids(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    drafts: &[StoryboardInsertDraft],
-) -> Result<Vec<i32>, ApiError> {
-    let script_uuid = require_owned_script_id(pool, uid, project_id, script_id).await?;
-    insert_storyboards_with_next_numeric_ids(pool, script_uuid, script_id, drafts).await
 }
