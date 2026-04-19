@@ -1,10 +1,9 @@
-//! llm/openai 单元测试。
-
 use std::sync::{Arc, Mutex};
 
-use super::*;
 use axum::{body::Bytes, extract::State, http::HeaderMap, routing::post, Json, Router};
 use serde_json::{json, Value};
+
+use super::super::*;
 
 #[derive(Clone, Default)]
 struct TestImagesApiState {
@@ -56,90 +55,6 @@ async fn spawn_test_images_api() -> (
         server.await.expect("serve");
     });
     (format!("http://{addr}/v1"), state, tx)
-}
-
-#[test]
-fn sse_parses_delta() {
-    let line = r#"data: {"choices":[{"delta":{"content":"Hi"}}]}"#;
-    assert_eq!(parse_sse_data_line(line).as_deref(), Some("Hi"));
-}
-
-#[test]
-fn sse_done() {
-    let line = "data: [DONE]";
-    assert_eq!(parse_sse_data_line(line).as_deref(), Some(""));
-}
-
-#[test]
-fn parses_assistant_string_content() {
-    let v = json!({"choices":[{"message":{"content":"  hello  "}}]});
-    assert_eq!(parse_assistant_content(&v).unwrap(), "hello");
-}
-
-#[test]
-fn parses_assistant_text_parts() {
-    let v = json!({"choices":[{"message":{"content":[
-        {"type":"text","text":"ab"},
-        {"type":"text","text":" cd "}
-    ]}}]});
-    assert_eq!(parse_assistant_content(&v).unwrap(), "ab cd");
-}
-
-#[test]
-fn image_size_maps_dalle3() {
-    assert_eq!(
-        resolve_openai_image_size("dall-e-3", "1792x1024"),
-        "1792x1024"
-    );
-    assert_eq!(
-        resolve_openai_image_size("dall-e-3", "1024 × 1792"),
-        "1024x1792"
-    );
-    assert_eq!(
-        resolve_openai_image_size("dall-e-3", "unknown"),
-        "1024x1024"
-    );
-}
-
-#[test]
-fn image_size_maps_dalle2() {
-    assert_eq!(resolve_openai_image_size("dall-e-2", "512x512"), "512x512");
-    assert_eq!(resolve_openai_image_size("dall-e-2", "bad"), "1024x1024");
-}
-
-#[test]
-fn image_model_from_catalog_string() {
-    assert_eq!(
-        resolve_openai_image_model("1:dall-e-3").as_str(),
-        "dall-e-3"
-    );
-    assert_eq!(resolve_openai_image_model("dall-e-2").as_str(), "dall-e-2");
-    assert_eq!(
-        resolve_openai_image_model("unknown-catalog-id").as_str(),
-        "dall-e-3"
-    );
-}
-
-#[test]
-fn parse_reference_image_upload_accepts_raw_base64() {
-    let parsed = parse_reference_image_upload("AA==").expect("parse raw");
-    assert_eq!(parsed.mime, "image/jpeg");
-    assert_eq!(parsed.file_name, "reference.jpg");
-    assert_eq!(parsed.bytes, vec![0u8]);
-}
-
-#[test]
-fn parse_reference_image_upload_accepts_data_uri_png() {
-    let parsed = parse_reference_image_upload("data:image/png;base64,AA==").expect("png uri");
-    assert_eq!(parsed.mime, "image/png");
-    assert_eq!(parsed.file_name, "reference.png");
-    assert_eq!(parsed.bytes, vec![0u8]);
-}
-
-#[test]
-fn parse_reference_image_upload_rejects_non_image_mime() {
-    let err = parse_reference_image_upload("data:text/plain;base64,AA==").expect_err("bad mime");
-    assert!(err.contains("unsupported reference image mime"));
 }
 
 #[tokio::test]
