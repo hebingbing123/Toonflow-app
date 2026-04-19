@@ -47,7 +47,7 @@ pub fn router() -> Router<AppState> {
 
 #[cfg(test)]
 mod tests {
-    use super::export_poll::{build_scripts_zip, zip_entry_name};
+    use super::export_poll::helpers::{build_scripts_zip, zip_entry_name};
     use super::types::{
         BatchAddScriptDataBody, CreateScriptBody, ExportScriptsBody, PatchScriptBody,
     };
