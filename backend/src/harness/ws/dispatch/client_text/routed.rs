@@ -1,5 +1,3 @@
-//! 入站文本帧：解析信封并按 `type` 分发。
-
 use axum::extract::ws::WebSocket;
 use serde_json::json;
 use tokio::sync::mpsc::UnboundedSender;
@@ -7,83 +5,27 @@ use tokio_util::sync::CancellationToken;
 
 use crate::harness::wire::{ChatSendPayload, HarnessAgentRunPayload};
 use crate::harness::ws::agent::{self, HarnessAgentWsParams};
-use crate::harness::ws::auth::{self, WsConnectionSession};
+use crate::harness::ws::auth::WsConnectionSession;
 use crate::harness::ws::channel::WsAgentChannel;
 use crate::harness::ws::chat::{self, ChatTurnWsParams};
 use crate::harness::ws::outbound::{send_envelope, send_error};
 use crate::harness::ws::session::{self, WsSessionBindState};
 use crate::harness::ws::tool;
-use crate::harness::{observe, HarnessContext};
+use crate::harness::HarnessContext;
 use crate::state::AppState;
 
-use super::envelope::ClientEnvelope;
+use super::super::envelope::ClientEnvelope;
 
-pub(crate) async fn dispatch_client_text(
-    text: String,
-    session: &mut Option<WsConnectionSession>,
-    secret: &[u8],
+pub(super) async fn dispatch_authenticated(
+    env: ClientEnvelope,
+    sess: &mut WsConnectionSession,
+    ctx: &HarnessContext,
     state: &AppState,
     socket: &mut WebSocket,
     out_tx: &UnboundedSender<String>,
 ) {
-    let Ok(env): Result<ClientEnvelope, _> = serde_json::from_str(&text) else {
-        let _ = send_error(socket, "invalid_json", "expected UTF-8 JSON envelope", None).await;
-        return;
-    };
-
-    if env.schema_version != 1 {
-        let _ = send_error(
-            socket,
-            "unsupported_schema",
-            "only schema_version 1 is supported",
-            env.request_id.as_deref(),
-        )
-        .await;
-        return;
-    }
-
-    if session.is_none() {
-        if env.msg_type != "session.auth" {
-            let _ = send_error(
-                socket,
-                "unauthorized",
-                "send session.auth or use ?access_token=",
-                env.request_id.as_deref(),
-            )
-            .await;
-            return;
-        }
-
-        if let Some(s) = auth::try_session_auth(
-            socket,
-            secret,
-            state,
-            out_tx,
-            &env.payload,
-            env.request_id.as_deref(),
-        )
-        .await
-        {
-            *session = Some(s);
-        }
-        return;
-    }
-
-    let Some(sess) = session.as_mut() else {
-        return;
-    };
-
     let project_numeric_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
     let script_numeric_id = sess.script_id.and_then(|v| i32::try_from(v).ok());
-    let ctx = HarnessContext::with_runtime_scope(
-        sess.user_id,
-        state.pool.clone(),
-        project_numeric_id,
-        script_numeric_id,
-        state.llm.clone(),
-        Some(state.http_client.clone()),
-    );
-    observe::ws_frame(&ctx, &env.msg_type);
 
     match env.msg_type.as_str() {
         "agent.script.attach" => {
@@ -136,7 +78,7 @@ pub(crate) async fn dispatch_client_text(
         "harness.tool.invoke" => {
             tool::handle_harness_tool_invoke(
                 socket,
-                &ctx,
+                ctx,
                 env.schema_version,
                 &env.payload,
                 env.request_id.as_deref(),
