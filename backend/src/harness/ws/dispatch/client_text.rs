@@ -1,8 +1,7 @@
-//! 认证的 WebSocket JSON 信封解析 + 路由到 Harness 处理器。
+//! 入站文本帧：解析信封并按 `type` 分发。
 
 use axum::extract::ws::WebSocket;
-use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::json;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 
@@ -17,14 +16,7 @@ use crate::harness::ws::tool;
 use crate::harness::{observe, HarnessContext};
 use crate::state::AppState;
 
-#[derive(Debug, Deserialize)]
-pub(crate) struct ClientEnvelope {
-    #[serde(rename = "type")]
-    pub msg_type: String,
-    pub schema_version: i32,
-    pub payload: Value,
-    pub request_id: Option<String>,
-}
+use super::envelope::ClientEnvelope;
 
 pub(crate) async fn dispatch_client_text(
     text: String,
@@ -295,18 +287,5 @@ pub(crate) async fn dispatch_client_text(
             )
             .await;
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn envelope_roundtrip() {
-        let raw = r#"{"type":"session.auth","schema_version":1,"payload":{"access_token":"x"}}"#;
-        let e: ClientEnvelope = serde_json::from_str(raw).unwrap();
-        assert_eq!(e.msg_type, "session.auth");
-        assert_eq!(e.schema_version, 1);
     }
 }
