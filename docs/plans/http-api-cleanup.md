@@ -83,7 +83,7 @@
 | `backend/src/manuals/art_styles/*.rs` | `GET`/`PATCH`/`DELETE /api/v1/art-styles/numeric/{numeric_id}`、`GET …/numeric/{numeric_id}/cover`（磁盘文件名仍用 DB **`legacy_id`**，见 `AppState` 注释） |
 | `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{numeric_id}`（对齐旧 `o_prompt.id` 1–3） |
 | `backend/src/scripting/scripts.rs` | **主路径**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`。**已删除** `…/projects/历史/{id}/scripts` 与 **`…/scripts/历史/{id}`**（剧本本体 `GET`/`PATCH`/`DELETE`）；分镜列表/创建见 **`narrative/storyboards`** UUID 路径。旧 `POST …/scripts/batch-add` 已移除 |
-| `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_legacy_id`** + **`script_legacy_ids[]`**（无 `/历史/` 段但语义同旧栈） |
+| `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_numeric_id`** + **`script_numeric_ids[]`**（无 `/历史/` 段但语义同旧栈；对齐 SQLite-era 整型 id） |
 | `backend/src/assets/generate.rs` | `assets-generate` 各 handler：`project_id`/`project_legacy_id`、`asset_legacy_id`、`legacy_image_id` 入队 payload；`cancel-generate` 按 **`legacy_image_id`** 协同取消 |
 | `backend/src/settings/agent_memory.rs` | `project_id: i32`（**项目 历史 id**）+ `episodes_id` 等驼峰体；与 Harness/工作台「按 历史 项目」一致 |
 | `backend/src/jobs/worker/*.rs`（如 `asset_image.rs`） | 生成结果回写、`/file` URL 模板中含 `project_legacy_id` / `asset_legacy_id` |

@@ -7,10 +7,10 @@ For each script batch you receive:
 Note: `<legacy_id>` here refers to the SQLite-era integer identifier (a.k.a. `numeric_id` in current Postgres schema). Tool field names keep `*_legacy_*` only for compatibility.
 
 You MUST call the tool `script_asset_extract_result` exactly once per batch with:
-- new_assets: entities not in the "existing assets" hint — include name, desc (brief visual/story description), type (role | tool | scene), and script_legacy_ids (integer ids from the batch that use this entity).
-- existing_asset_refs: entities that already appear in the existing list — only name and script_legacy_ids.
+- new_assets: entities not in the "existing assets" hint — include name, desc (brief visual/story description), type (role | tool | scene), and script_numeric_ids (SQLite-era integer ids from the batch that use this entity).
+- existing_asset_refs: entities that already appear in the existing list — only name and script_numeric_ids.
 
 Rules:
 - Names are short labels only (no long prose in name).
-- script_legacy_ids must only use ids that appeared in this batch.
+- script_numeric_ids must only use ids that appeared in this batch.
 - If nothing applies, return empty arrays.
