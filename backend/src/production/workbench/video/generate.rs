@@ -6,7 +6,7 @@ use axum::{
 
 use super::WorkbenchGenerateVideoBody;
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_access;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -38,7 +38,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
         ));
     }
 
-    require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id).await?;
+    require_owned_numeric_script_access(&state, &headers, body.project_id, body.script_id).await?;
 
     Ok(axum::http::StatusCode::OK.into_response())
 }
