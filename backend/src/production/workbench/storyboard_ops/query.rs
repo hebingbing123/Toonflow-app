@@ -5,7 +5,7 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{require_owned_normalized_storyboards_scope, validate_storyboard_ids};
+use super::common::{require_owned_normalized_storyboards_access, validate_storyboard_ids};
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
@@ -92,7 +92,7 @@ pub(in crate::production) async fn post_storyboard_polling_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    let (_uid, _pool, _script_id, _normalized_ids) = require_owned_normalized_storyboards_scope(
+    require_owned_normalized_storyboards_access(
         &state,
         &headers,
         body.project_id,

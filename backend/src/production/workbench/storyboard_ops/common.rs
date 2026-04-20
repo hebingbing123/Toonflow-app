@@ -63,6 +63,42 @@ pub(super) async fn require_owned_normalized_storyboards_scope<'a>(
     Ok((uid, pool, script_uuid, normalized_ids))
 }
 
+pub(super) async fn require_owned_normalized_storyboards_access(
+    state: &AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(), ApiError> {
+    let (_uid, _pool, _script_uuid, _normalized_ids) = require_owned_normalized_storyboards_scope(
+        state,
+        headers,
+        project_id,
+        script_id,
+        storyboard_ids,
+    )
+    .await?;
+    Ok(())
+}
+
+pub(super) async fn require_owned_normalized_storyboards_user_pool<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool), ApiError> {
+    let (uid, pool, _script_uuid, _normalized_ids) = require_owned_normalized_storyboards_scope(
+        state,
+        headers,
+        project_id,
+        script_id,
+        storyboard_ids,
+    )
+    .await?;
+    Ok((uid, pool))
+}
+
 #[cfg(test)]
 mod tests {
     use super::{normalize_storyboard_ids, validate_storyboard_ids};

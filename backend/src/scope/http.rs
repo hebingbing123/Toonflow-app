@@ -106,6 +106,23 @@ pub async fn require_owned_numeric_script_scope_ids<'a>(
     Ok((uid, pool, scope_row.script_id))
 }
 
+/// 与 [`require_owned_numeric_script_scope`] 相同，但仅返回常用的 `uid + pool`。
+pub async fn require_owned_numeric_script_scope_user_pool<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<(Uuid, &'a PgPool), ApiError> {
+    let (uid, pool, _script_id) = require_owned_numeric_script_scope_ids(
+        state,
+        headers,
+        project_numeric_id,
+        script_numeric_id,
+    )
+    .await?;
+    Ok((uid, pool))
+}
+
 /// 与 [`require_owned_numeric_script_scope`] 相同，但仅用于校验 scope 存在性（不返回值）。
 pub async fn require_owned_numeric_script_access(
     state: &AppState,

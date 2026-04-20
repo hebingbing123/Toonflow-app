@@ -4,7 +4,7 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{normalize_storyboard_ids, require_owned_normalized_storyboards_scope};
+use super::common::{normalize_storyboard_ids, require_owned_normalized_storyboards_user_pool};
 use super::types::{BatchGenerateImageBody, BatchGenerateImageResponse};
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
@@ -38,7 +38,7 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
     }
 
     let normalized_ids = normalize_batch_generate_storyboard_ids(&body.items)?;
-    let (uid, pool, _script_id, _confirmed_ids) = require_owned_normalized_storyboards_scope(
+    let (uid, pool) = require_owned_normalized_storyboards_user_pool(
         &state,
         &headers,
         body.project_id,

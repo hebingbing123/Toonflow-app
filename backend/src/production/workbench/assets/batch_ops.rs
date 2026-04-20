@@ -9,7 +9,9 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH};
 use crate::state::AppState;
 
-use super::common::require_owned_normalized_assets_scope;
+use super::common::{
+    require_owned_normalized_assets_scope, require_owned_normalized_assets_user_pool,
+};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -53,7 +55,7 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     headers: HeaderMap,
     Json(body): Json<BatchGenerateAssetsImageBody>,
 ) -> Result<JsonResponse<BatchGenerateAssetsImageResponse>, ApiError> {
-    let (uid, pool, _script_id, _uniq) = require_owned_normalized_assets_scope(
+    let (uid, pool) = require_owned_normalized_assets_user_pool(
         &state,
         &headers,
         body.project_id,

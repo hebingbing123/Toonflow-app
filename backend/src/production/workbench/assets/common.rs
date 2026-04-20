@@ -68,3 +68,16 @@ pub(super) async fn require_owned_normalized_assets_scope<'a>(
     ensure_assets_linked_to_script(pool, uid, project_id, script_uuid, &uniq).await?;
     Ok((uid, pool, script_uuid, uniq))
 }
+
+pub(super) async fn require_owned_normalized_assets_user_pool<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    asset_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool), ApiError> {
+    let (uid, pool, _script_uuid, _uniq) =
+        require_owned_normalized_assets_scope(state, headers, project_id, script_id, asset_ids)
+            .await?;
+    Ok((uid, pool))
+}
