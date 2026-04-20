@@ -56,6 +56,8 @@ isProject: false
 
 **资产 workbench（旧 Electron `/api/assets` 兼容面）**：已**不再**注册顶层 **`POST /api/v1/assets/*`**；与旧栈对齐的读写在 **`POST /api/v1/projects/{project_id}/assets/workbench/*`**（**`project_id`** = **`app_project.id`**，UUID）。详见 parity 表中 **`/api/assets/*`** 一行；Rust 实现为 **`backend/src/assets/workbench_write.rs`** 与 **`workbench_query/`**。HTTP 收敛清单与后续阶段见 **[`http-api-cleanup.md`](./http-api-cleanup.md)**。
 
+**命名与迁移历史约定**：新文档与新实现优先使用 **historical/import-era** 术语；`supabase/migrations` 中历史 `legacy_*` 名称不做回写改历史，统一通过前向迁移收敛当前 schema。见 **[`database-migration-history-policy.md`](./database-migration-history-policy.md)**。
+
 ## 0. 目标架构（已确认）
 
 你希望最终形态为：

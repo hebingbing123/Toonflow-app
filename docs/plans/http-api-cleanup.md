@@ -4,6 +4,8 @@
 
 ## 术语（避免混谈）
 
+> 术语约定：文档中新提法优先使用 **historical/import-era**；已发布迁移文件中的 `legacy_*` 名称视为历史审计轨迹，不做回写修改。见 `docs/plans/database-migration-history-policy.md`。
+
 | 概念 | 含义 | 收敛难度 |
 |------|------|----------|
 | **HTTP 源码目录曾带 `历史` 字样** | ~~`narrative::历史`~~（已删）；制作域已更名为 **`production`**；资产工作台实现已迁至 **`assets/workbench_write`**、**`assets/workbench_query`** | 中：OpenAPI 路径参数名仍常见 `*_legacy_id`（DB 列语义） |
