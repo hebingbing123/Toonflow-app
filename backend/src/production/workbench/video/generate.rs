@@ -32,9 +32,9 @@ pub(in crate::production) async fn post_workbench_generate_video(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
 ) -> Result<Response, ApiError> {
-    if body.project_id <= 0 || body.script_id <= 0 || body.track_id <= 0 {
+    if body.track_id <= 0 {
         return Err(ApiError::BadRequest(
-            "projectId/scriptId/trackId must be positive integers".into(),
+            "trackId must be a positive integer".into(),
         ));
     }
 
