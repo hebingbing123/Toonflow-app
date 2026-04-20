@@ -9,6 +9,11 @@ use crate::error::ApiError;
 use crate::scope::{self, OwnedScriptScope};
 use crate::state::AppState;
 
+/// 仅校验 Bearer 并返回当前用户 UUID（不触发任何 DB scope 查询）。
+pub fn require_authenticated_user(state: &AppState, headers: &HeaderMap) -> Result<Uuid, ApiError> {
+    require_user_uuid(state, headers)
+}
+
 /// 当前用户 + DB 下，按 **numeric `project_id`** 解析项目主键（`app_project.id`）。
 pub async fn require_owned_numeric_project_scope<'a>(
     state: &'a AppState,

@@ -4,8 +4,8 @@ use axum::{
     Json as JsonResponse,
 };
 
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_authenticated_user;
 use crate::state::AppState;
 
 use super::types::{UpdateImageFlowBody, UpdateImageFlowResponse};
@@ -33,7 +33,7 @@ pub(in crate::production) async fn post_edit_image_update_image_flow(
     headers: HeaderMap,
     Json(body): Json<UpdateImageFlowBody>,
 ) -> Result<JsonResponse<UpdateImageFlowResponse>, ApiError> {
-    let _uid = require_user_uuid(&state, &headers)?;
+    let _uid = require_authenticated_user(&state, &headers)?;
 
     Ok(JsonResponse(UpdateImageFlowResponse {
         flow_id: body.flow_id,

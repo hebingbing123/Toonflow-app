@@ -8,11 +8,11 @@ use axum::{
 };
 use serde_json::Value;
 
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::production::flow_data::{
     load_owned_production_flow_json, resolve_owned_production_scope,
 };
+use crate::scope::http::require_authenticated_user;
 use crate::state::AppState;
 
 use super::storyboard_order::ordered_storyboard_numeric_ids;
@@ -41,7 +41,7 @@ pub(crate) async fn post_get_flow_data(
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    let uid = require_authenticated_user(&state, &headers)?;
     if body.project_id <= 0 || body.episodes_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId and episodesId must be positive integers".into(),
@@ -77,7 +77,7 @@ pub(crate) async fn post_save_flow_data(
     headers: HeaderMap,
     Json(body): Json<SaveFlowDataBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    let uid = require_authenticated_user(&state, &headers)?;
     if body.project_id <= 0 || body.episodes_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId and episodesId must be positive integers".into(),
