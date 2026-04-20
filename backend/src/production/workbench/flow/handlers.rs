@@ -39,12 +39,6 @@ pub(crate) async fn post_get_flow_data(
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    if body.project_id <= 0 || body.episodes_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId and episodesId must be positive integers".into(),
-        ));
-    }
-
     let (_uid, pool, project_id, script_id, script_content) =
         require_owned_numeric_production_episodes_scope(
             &state,
@@ -81,11 +75,6 @@ pub(crate) async fn post_save_flow_data(
     headers: HeaderMap,
     Json(body): Json<SaveFlowDataBody>,
 ) -> Result<Response, ApiError> {
-    if body.project_id <= 0 || body.episodes_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId and episodesId must be positive integers".into(),
-        ));
-    }
     let ordered_storyboard_ids = ordered_storyboard_numeric_ids(&body.data)?;
 
     let (_uid, pool, project_id, script_id, _script_content) =
