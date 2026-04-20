@@ -1,7 +1,10 @@
+use axum::http::HeaderMap;
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
+use crate::state::AppState;
 
 pub(super) fn normalize_asset_ids(asset_ids: &[i32]) -> Result<Vec<i32>, ApiError> {
     if asset_ids.is_empty() {
@@ -50,4 +53,18 @@ pub(super) async fn ensure_assets_linked_to_script(
     }
 
     Ok(())
+}
+
+pub(super) async fn require_owned_normalized_assets_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    asset_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool, Uuid, Vec<i32>), ApiError> {
+    let uniq = normalize_asset_ids(asset_ids)?;
+    let (uid, pool, scope_row) =
+        require_owned_numeric_script_scope(state, headers, project_id, script_id).await?;
+    ensure_assets_linked_to_script(pool, uid, project_id, scope_row.script_id, &uniq).await?;
+    Ok((uid, pool, scope_row.script_id, uniq))
 }
