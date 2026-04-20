@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
 use crate::scope::http::require_authenticated;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_access;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -53,9 +53,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     headers: HeaderMap,
     Json(body): Json<GenerateVideoPromptBody>,
 ) -> Result<JsonResponse<GenerateVideoPromptResponse>, ApiError> {
-    let (_uid, _pool, _scope) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    require_owned_numeric_script_access(&state, &headers, body.project_id, body.script_id).await?;
 
     let prompt = if let Some(desc) = body.description {
         format!(
