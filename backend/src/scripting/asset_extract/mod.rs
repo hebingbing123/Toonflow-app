@@ -54,11 +54,6 @@ async fn start_script_asset_extract(
     Json(body): Json<ExtractAssetsBody>,
 ) -> Result<Json<ExtractAcceptedResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
     if body.project_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
@@ -83,6 +78,12 @@ async fn start_script_asset_extract(
         )));
     }
     let group_size = body.group_size.clamp(1, MAX_GROUP_SIZE);
+
+    let pool = state
+        .pool
+        .as_ref()
+        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let cfg = state.llm.as_ref().ok_or(ApiError::LlmNotConfigured)?;
 
     let pool = pool.clone();
     let cfg = cfg.clone();
