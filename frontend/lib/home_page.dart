@@ -49,6 +49,7 @@ import 'task_center/controller.dart';
 import 'rust_api.dart';
 
 part 'project_editor/editor.dart';
+part 'project_editor/editor_dialog.dart';
 part 'project_editor/http_probes/general_probe.dart';
 part 'project_editor/http_probes/project_probe.dart';
 part 'project_editor/http_probes/tasks_probe.dart';
