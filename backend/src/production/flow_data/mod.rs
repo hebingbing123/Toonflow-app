@@ -28,7 +28,7 @@ pub(crate) async fn resolve_owned_production_scope(
     Ok((scope.project_id, scope.script_id, script_content))
 }
 
-async fn load_production_flow_json(
+pub(crate) async fn load_production_flow_json_by_scope(
     pool: &sqlx::PgPool,
     project_id: Uuid,
     script_id: Uuid,
@@ -56,5 +56,5 @@ pub(crate) async fn load_owned_production_flow_json(
 ) -> Result<Value, ApiError> {
     let (project_id, script_id, script_content) =
         resolve_owned_production_scope(pool, uid, project_numeric_id, script_numeric_id).await?;
-    load_production_flow_json(pool, project_id, script_id, script_content).await
+    load_production_flow_json_by_scope(pool, project_id, script_id, script_content).await
 }

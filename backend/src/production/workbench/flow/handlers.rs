@@ -9,7 +9,7 @@ use axum::{
 use serde_json::Value;
 
 use crate::error::ApiError;
-use crate::production::flow_data::load_owned_production_flow_json;
+use crate::production::flow_data::load_production_flow_json_by_scope;
 use crate::scope::http::require_owned_numeric_production_episodes_scope;
 use crate::state::AppState;
 
@@ -45,7 +45,7 @@ pub(crate) async fn post_get_flow_data(
         ));
     }
 
-    let (uid, pool, _project_id, _script_id, _script_content) =
+    let (_uid, pool, project_id, script_id, script_content) =
         require_owned_numeric_production_episodes_scope(
             &state,
             &headers,
@@ -54,7 +54,7 @@ pub(crate) async fn post_get_flow_data(
         )
         .await?;
     let flow =
-        load_owned_production_flow_json(pool, uid, body.project_id, body.episodes_id).await?;
+        load_production_flow_json_by_scope(pool, project_id, script_id, script_content).await?;
     Ok(JsonResponse(flow))
 }
 
