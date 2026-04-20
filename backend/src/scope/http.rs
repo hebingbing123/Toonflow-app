@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::production::flow_data;
 use crate::scope::{self, OwnedScriptScope};
 use crate::state::AppState;
 
@@ -53,4 +54,27 @@ pub async fn require_owned_numeric_script_scope<'a>(
         .await
         .map_err(|e| e.into_api_error())?;
     Ok((uid, pool, scope_row))
+}
+
+/// 当前用户 + DB 下，按 **numeric `project_id` / `script_id`** 解析 production flow scope。
+///
+/// 返回 `(uid, pool, project_uuid, script_uuid, script_content)`，用于复用
+/// `resolve_owned_production_scope` 逻辑，避免 handler 重复拼装。
+pub async fn require_owned_numeric_production_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<(Uuid, &'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
+    let uid = require_user_uuid(state, headers)?;
+    if project_numeric_id <= 0 || script_numeric_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId and episodesId must be positive integers".into(),
+        ));
+    }
+    let pool = state.require_pool()?;
+    let (project_id, script_id, script_content) =
+        flow_data::resolve_owned_production_scope(pool, uid, project_numeric_id, script_numeric_id)
+            .await?;
+    Ok((uid, pool, project_id, script_id, script_content))
 }

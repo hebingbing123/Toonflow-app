@@ -9,10 +9,8 @@ use axum::{
 use serde_json::Value;
 
 use crate::error::ApiError;
-use crate::production::flow_data::{
-    load_owned_production_flow_json, resolve_owned_production_scope,
-};
-use crate::scope::http::require_authenticated_user;
+use crate::production::flow_data::load_owned_production_flow_json;
+use crate::scope::http::require_owned_numeric_production_scope;
 use crate::state::AppState;
 
 use super::storyboard_order::ordered_storyboard_numeric_ids;
@@ -41,14 +39,15 @@ pub(crate) async fn post_get_flow_data(
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    let uid = require_authenticated_user(&state, &headers)?;
     if body.project_id <= 0 || body.episodes_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId and episodesId must be positive integers".into(),
         ));
     }
 
-    let pool = state.require_pool()?;
+    let (uid, pool, _project_id, _script_id, _script_content) =
+        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.episodes_id)
+            .await?;
     let flow =
         load_owned_production_flow_json(pool, uid, body.project_id, body.episodes_id).await?;
     Ok(JsonResponse(flow))
@@ -77,7 +76,6 @@ pub(crate) async fn post_save_flow_data(
     headers: HeaderMap,
     Json(body): Json<SaveFlowDataBody>,
 ) -> Result<Response, ApiError> {
-    let uid = require_authenticated_user(&state, &headers)?;
     if body.project_id <= 0 || body.episodes_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId and episodesId must be positive integers".into(),
@@ -85,9 +83,9 @@ pub(crate) async fn post_save_flow_data(
     }
     let ordered_storyboard_ids = ordered_storyboard_numeric_ids(&body.data)?;
 
-    let pool = state.require_pool()?;
-    let (project_id, script_id, _) =
-        resolve_owned_production_scope(pool, uid, body.project_id, body.episodes_id).await?;
+    let (_uid, pool, project_id, script_id, _script_content) =
+        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.episodes_id)
+            .await?;
 
     if let Some(ordered_ids) = ordered_storyboard_ids {
         for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {

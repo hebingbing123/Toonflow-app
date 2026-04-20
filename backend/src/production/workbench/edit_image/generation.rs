@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_production_scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -57,17 +57,9 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
     if body.prompt.trim().is_empty() {
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
     }
-    let (uid, pool, _scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (uid, pool, _project_id, _script_id, _script_content) =
+        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.script_id)
             .await?;
-
-    crate::production::flow_data::resolve_owned_production_scope(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-    )
-    .await?;
 
     let payload = serde_json::json!({
         "source": "production.edit-image.generate-flow",
