@@ -20,10 +20,7 @@ pub(super) async fn post_update_data(
     if body.id <= 0 {
         return Err(ApiError::BadRequest("id must be positive".into()));
     }
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let payload = json!({
         "storySkeleton": body.data.story_skeleton,

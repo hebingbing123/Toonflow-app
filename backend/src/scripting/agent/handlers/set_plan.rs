@@ -31,10 +31,7 @@ pub(super) async fn post_set_plan_data(
             "data.script must have at most {MAX_PLAN_SCRIPT_ROWS} rows"
         )));
     }
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     let mut tx = pool
         .begin()

@@ -31,12 +31,11 @@ pub(crate) async fn append_memory(
     Json(body): Json<AppendMemoryBody>,
 ) -> Result<Json<AppendMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-    let agent_type = parse_agent_type(&body.agent_type)?;
-
     if body.content.trim().is_empty() {
         return Err(ApiError::BadRequest("content must be non-empty".into()));
     }
+    let agent_type = parse_agent_type(&body.agent_type)?;
+    let pool = state.require_pool()?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "append");

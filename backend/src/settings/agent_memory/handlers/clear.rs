@@ -28,8 +28,8 @@ pub(crate) async fn clear_memory(
     Json(body): Json<ClearMemoryBody>,
 ) -> Result<Json<ClearMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
     let agent_type = parse_agent_type(&body.agent_type)?;
+    let pool = state.require_pool()?;
 
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "clear");

@@ -91,17 +91,20 @@ pub(crate) async fn post_batch_generate_image_assets(
             "image_base64": image_base64,
         }));
     }
+    if body
+        .script_id
+        .is_some_and(|script_numeric_id| script_numeric_id <= 0)
+    {
+        return Err(ApiError::BadRequest(
+            "scriptId must be positive when provided".into(),
+        ));
+    }
 
     let pool = state.require_pool()?;
 
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
 
     if let Some(script_numeric_id) = body.script_id {
-        if script_numeric_id <= 0 {
-            return Err(ApiError::BadRequest(
-                "scriptId must be positive when provided".into(),
-            ));
-        }
         let asset_ids: Vec<i32> = body.items.iter().map(|it| it.id).collect();
         ensure_batch_asset_items_linked_to_script(
             pool,
