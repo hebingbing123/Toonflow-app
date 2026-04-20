@@ -3,6 +3,53 @@
 mod stubs {
     #[utoipa::path(
         get,
+        path = "/api/v1/skills",
+        operation_id = "listSkillsV1",
+        tag = "skills",
+        summary = "List Markdown skills (relative paths under `data/skills`)",
+    responses(
+        (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
+        (status = 400, description = "Skills directory missing or invalid", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
+    #[allow(dead_code)]
+    pub(crate) fn op_list_skills_v1() {}
+
+    #[utoipa::path(
+        get,
+        path = "/api/v1/skills/binary",
+        operation_id = "getSkillBinaryV1",
+        tag = "skills",
+        summary = "Read one bundled image under `data/skills` (binary)",
+    responses(
+        (status = 200, description = "OK — body is raw image bytes", body = serde_json::Value, content_type = "application/json"),
+        (status = 400, description = "Path unsafe, disallowed extension, skills dir missing, or file too large", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "File not found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
+    #[allow(dead_code)]
+    pub(crate) fn op_get_skill_binary_v1() {}
+
+    #[utoipa::path(
+        delete,
+        path = "/api/v1/skills/content",
+        operation_id = "deleteSkillContentV1",
+        tag = "skills",
+        summary = "Delete one skill file",
+    responses(
+        (status = 204, description = "File removed (empty body)"),
+        (status = 400, description = "Unsafe path, empty path, skills dir missing, or path is not a file", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
+        (status = 404, description = "File not found", body = ref("ErrorBody"), content_type = "application/json")
+    )
+    )]
+    #[allow(dead_code)]
+    pub(crate) fn op_delete_skill_content_v1() {}
+
+    #[utoipa::path(
+        get,
         path = "/api/v1/skills/content",
         operation_id = "getSkillContentV1",
         tag = "skills",
@@ -107,6 +154,9 @@ mod stubs {
 }
 #[derive(utoipa::OpenApi)]
 #[openapi(paths(
+    stubs::op_list_skills_v1,
+    stubs::op_get_skill_binary_v1,
+    stubs::op_delete_skill_content_v1,
     stubs::op_get_skill_content_v1,
     stubs::op_post_skill_content_v1,
     stubs::op_put_skill_content_v1,
@@ -114,4 +164,4 @@ mod stubs {
     stubs::op_get_visual_manual_v1,
     stubs::op_post_visual_manual_v1
 ))]
-pub struct ApiDocBatch03;
+pub struct ApiDocSkills00;

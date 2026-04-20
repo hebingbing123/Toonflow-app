@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inject #[utoipa::path(...)] before each production workbench handler listed in production/mod.rs.
 
-Uses committed `openapi_spec/generated/batch*.rs` stubs for operation_id. Request/response bodies documented as serde_json::Value
+Uses committed `openapi_spec/generated/*.rs` stubs for operation_id. Request/response bodies documented as serde_json::Value
 (actual handlers may return axum::Response — OpenAPI still shows JSON object schema).
 """
 

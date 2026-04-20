@@ -2,7 +2,7 @@
 """
 Inject #[utoipa::path(...)] before handler functions based on .route("...", METHOD(handler)) in the same file.
 
-- Parses committed `openapi_spec/generated/batch*.rs` stubs for operationId per (path, method).
+- Parses committed `openapi_spec/generated/*.rs` stubs for operationId per (path, method).
 - For a given --rs-file, finds .route("PATH", METHOD(fn)) and METHOD1(fn1).METHOD2(fn2) chains.
 - Inserts utoipa blocks before `async fn FN` (must live in the same .rs file as the router).
 - Appends #[derive(OpenApi)] struct at end (--api-struct Name --tag tag).
@@ -159,7 +159,7 @@ def inject_file(path: Path, ops: dict[tuple[str, str], str], tag: str, api_struc
         oid = ops.get((api_path, meth))
         if not oid:
             raise SystemExit(
-                f"no operationId for {meth.upper()} {api_path} in openapi_spec/generated batch stubs"
+                f"no operationId for {meth.upper()} {api_path} in openapi_spec/generated part stubs"
             )
         block_tpl = BLOCK_GET if meth == "get" else BLOCK_WRITE
         block = block_tpl.format(meth=meth, path=api_path, oid=oid, tag=tag)
