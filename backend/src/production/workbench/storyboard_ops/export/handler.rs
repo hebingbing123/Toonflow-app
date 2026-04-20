@@ -6,12 +6,11 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use super::super::common::ensure_owned_storyboards;
+use super::super::common::require_owned_normalized_storyboards_scope;
 use super::super::types::{ExportImageBody, ExportImageSourceRow};
 use super::shot_ids::normalize_export_shot_ids;
 use super::zip_export::build_storyboard_export_zip;
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -39,11 +38,14 @@ pub(in crate::production) async fn post_export_image(
 ) -> Result<Response, ApiError> {
     let normalized_ids = normalize_export_shot_ids(&body.shot_id)?;
 
-    let (uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
-
-    ensure_owned_storyboards(pool, script_id, &normalized_ids).await?;
+    let (uid, pool, script_id, _confirmed_ids) = require_owned_normalized_storyboards_scope(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+        &normalized_ids,
+    )
+    .await?;
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"

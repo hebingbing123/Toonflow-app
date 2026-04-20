@@ -1,4 +1,10 @@
+use axum::http::HeaderMap;
+use sqlx::PgPool;
+use uuid::Uuid;
+
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope_ids;
+use crate::state::AppState;
 
 pub(super) fn validate_storyboard_ids(storyboard_ids: &[i32]) -> Result<(), ApiError> {
     if storyboard_ids.is_empty() {
@@ -41,6 +47,20 @@ pub(super) async fn ensure_owned_storyboards(
         return Err(ApiError::NotFound);
     }
     Ok(())
+}
+
+pub(super) async fn require_owned_normalized_storyboards_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool, Uuid, Vec<i32>), ApiError> {
+    let normalized_ids = normalize_storyboard_ids(storyboard_ids)?;
+    let (uid, pool, script_uuid) =
+        require_owned_numeric_script_scope_ids(state, headers, project_id, script_id).await?;
+    ensure_owned_storyboards(pool, script_uuid, &normalized_ids).await?;
+    Ok((uid, pool, script_uuid, normalized_ids))
 }
 
 #[cfg(test)]
