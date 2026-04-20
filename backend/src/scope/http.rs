@@ -48,6 +48,17 @@ pub async fn require_owned_numeric_project_scope<'a>(
     Ok((uid, pool, project_id))
 }
 
+/// 与 [`require_owned_numeric_project_scope`] 相同，但仅返回 handler 常用的 `pool + project_id`。
+pub async fn require_owned_numeric_project_scope_id<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+) -> Result<(&'a PgPool, Uuid), ApiError> {
+    let (_uid, pool, project_id) =
+        require_owned_numeric_project_scope(state, headers, project_numeric_id).await?;
+    Ok((pool, project_id))
+}
+
 /// 当前用户 + DB 下，按 **numeric `project_id` / `script_id`** 解析 [`OwnedScriptScope`]。
 ///
 /// 与分散在 `production/workbench/*/common` 的旧实现等价：先校验正整数，再查库。
@@ -162,4 +173,22 @@ pub async fn require_owned_numeric_production_episodes_scope<'a>(
         "episodesId",
     )
     .await
+}
+
+/// 与 [`require_owned_numeric_production_episodes_scope`] 相同，但仅返回 `pool + project/script scope`。
+pub async fn require_owned_numeric_production_episodes_scope_row<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    episodes_numeric_id: i32,
+) -> Result<(&'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
+    let (_uid, pool, project_id, script_id, script_content) =
+        require_owned_numeric_production_episodes_scope(
+            state,
+            headers,
+            project_numeric_id,
+            episodes_numeric_id,
+        )
+        .await?;
+    Ok((pool, project_id, script_id, script_content))
 }

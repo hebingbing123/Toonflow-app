@@ -6,7 +6,7 @@ use axum::{
 
 use super::{VideoListBody, VideoListResponse};
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_project_scope;
+use crate::scope::http::require_owned_numeric_project_scope_id;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -32,8 +32,8 @@ pub(in crate::production) async fn post_workbench_get_video_list(
     headers: HeaderMap,
     Json(body): Json<VideoListBody>,
 ) -> Result<JsonResponse<VideoListResponse>, ApiError> {
-    let (_uid, pool, project_id) =
-        require_owned_numeric_project_scope(&state, &headers, body.project_id).await?;
+    let (pool, project_id) =
+        require_owned_numeric_project_scope_id(&state, &headers, body.project_id).await?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);

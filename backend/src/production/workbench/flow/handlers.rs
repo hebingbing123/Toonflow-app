@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use crate::error::ApiError;
 use crate::production::flow_data::load_production_flow_json_by_scope;
-use crate::scope::http::require_owned_numeric_production_episodes_scope;
+use crate::scope::http::require_owned_numeric_production_episodes_scope_row;
 use crate::state::AppState;
 
 use super::storyboard_order::ordered_storyboard_numeric_ids;
@@ -39,8 +39,8 @@ pub(crate) async fn post_get_flow_data(
     headers: HeaderMap,
     Json(body): Json<GetFlowDataBody>,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    let (_uid, pool, project_id, script_id, script_content) =
-        require_owned_numeric_production_episodes_scope(
+    let (pool, project_id, script_id, script_content) =
+        require_owned_numeric_production_episodes_scope_row(
             &state,
             &headers,
             body.project_id,
@@ -77,8 +77,8 @@ pub(crate) async fn post_save_flow_data(
 ) -> Result<Response, ApiError> {
     let ordered_storyboard_ids = ordered_storyboard_numeric_ids(&body.data)?;
 
-    let (_uid, pool, project_id, script_id, _script_content) =
-        require_owned_numeric_production_episodes_scope(
+    let (pool, project_id, script_id, _script_content) =
+        require_owned_numeric_production_episodes_scope_row(
             &state,
             &headers,
             body.project_id,
