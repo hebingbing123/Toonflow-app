@@ -4,11 +4,10 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{ensure_owned_storyboards, normalize_storyboard_ids};
+use super::common::{normalize_storyboard_ids, require_owned_normalized_storyboards_scope};
 use super::types::{BatchGenerateImageBody, BatchGenerateImageResponse};
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
-use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -38,12 +37,15 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
         return Err(ApiError::BadRequest("items must not be empty".into()));
     }
 
-    let (uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
-
     let normalized_ids = normalize_batch_generate_storyboard_ids(&body.items)?;
-    ensure_owned_storyboards(pool, script_id, &normalized_ids).await?;
+    let (uid, pool, _script_id, _confirmed_ids) = require_owned_normalized_storyboards_scope(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+        &normalized_ids,
+    )
+    .await?;
 
     let default_model = body.model.as_deref().unwrap_or("dall-e-3");
     let default_resolution = body.resolution.as_deref().unwrap_or("1024x1024");
