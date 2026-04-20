@@ -6,8 +6,8 @@ use axum::{
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 
-use super::common::require_numeric_scope;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -83,10 +83,11 @@ pub(in crate::production) async fn post_edit_image_upload_image(
     headers: HeaderMap,
     Json(body): Json<EditImageUploadImageBody>,
 ) -> Result<JsonResponse<EditImageUploadImageResponse>, ApiError> {
-    let uid = require_numeric_scope(&state, &headers, body.project_id, body.script_id)?;
     let normalized = normalize_upload_image_data_uri(&body.base64_data)?;
+    let (uid, pool, _scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
-    let pool = state.require_pool()?;
     crate::production::flow_data::resolve_owned_production_scope(
         pool,
         uid,

@@ -5,9 +5,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::common::require_numeric_scope;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -51,15 +51,15 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
     headers: HeaderMap,
     Json(body): Json<GenerateFlowImageBody>,
 ) -> Result<JsonResponse<GenerateFlowImageResponse>, ApiError> {
-    let uid = require_numeric_scope(&state, &headers, body.project_id, body.script_id)?;
     if body.flow_id.trim().is_empty() {
         return Err(ApiError::BadRequest("flowId must not be empty".into()));
     }
     if body.prompt.trim().is_empty() {
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
     }
-
-    let pool = state.require_pool()?;
+    let (uid, pool, _scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
 
     crate::production::flow_data::resolve_owned_production_scope(
         pool,
