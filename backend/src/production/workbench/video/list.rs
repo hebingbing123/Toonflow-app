@@ -5,8 +5,8 @@ use axum::{
 };
 
 use super::{VideoListBody, VideoListResponse};
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_project_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -32,14 +32,8 @@ pub(in crate::production) async fn post_workbench_get_video_list(
     headers: HeaderMap,
     Json(body): Json<VideoListBody>,
 ) -> Result<JsonResponse<VideoListResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId must be a positive integer".into(),
-        ));
-    }
-
-    let pool = state.require_pool()?;
+    let (_uid, pool, project_id) =
+        require_owned_numeric_project_scope(&state, &headers, body.project_id).await?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);
@@ -57,18 +51,15 @@ pub(in crate::production) async fn post_workbench_get_video_list(
           sb.created_at
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE sc.project_id = $1
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
-          AND ($3::int4 IS NULL OR sb.track_id = $3)
+          AND ($2::int4 IS NULL OR sb.track_id = $2)
         ORDER BY sb.created_at DESC
-        LIMIT $4 OFFSET $5
+        LIMIT $3 OFFSET $4
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
+    .bind(project_id)
     .bind(body.track_id)
     .bind(limit)
     .bind(offset)
@@ -81,16 +72,13 @@ pub(in crate::production) async fn post_workbench_get_video_list(
         SELECT COUNT(*)
         FROM app_storyboard sb
         INNER JOIN app_script sc ON sc.id = sb.script_id
-        INNER JOIN app_project p ON p.id = sc.project_id
-        WHERE p.owner_user_id = $1
-          AND p.numeric_id = $2
+        WHERE sc.project_id = $1
           AND sb.file_path IS NOT NULL
           AND (sb.file_path LIKE '%.mp4' OR sb.file_path LIKE '%.mov' OR sb.file_path LIKE '%.webm')
-          AND ($3::int4 IS NULL OR sb.track_id = $3)
+          AND ($2::int4 IS NULL OR sb.track_id = $2)
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
+    .bind(project_id)
     .bind(body.track_id)
     .fetch_one(pool)
     .await

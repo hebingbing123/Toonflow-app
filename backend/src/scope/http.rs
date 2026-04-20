@@ -9,6 +9,25 @@ use crate::error::ApiError;
 use crate::scope::{self, OwnedScriptScope};
 use crate::state::AppState;
 
+/// 当前用户 + DB 下，按 **numeric `project_id`** 解析项目主键（`app_project.id`）。
+pub async fn require_owned_numeric_project_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+) -> Result<(Uuid, &'a PgPool, Uuid), ApiError> {
+    let uid = require_user_uuid(state, headers)?;
+    if project_numeric_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId must be a positive integer".into(),
+        ));
+    }
+    let pool = state.require_pool()?;
+    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+    Ok((uid, pool, project_id))
+}
+
 /// 当前用户 + DB 下，按 **numeric `project_id` / `script_id`** 解析 [`OwnedScriptScope`]。
 ///
 /// 与分散在 `production/workbench/*/common` 的旧实现等价：先校验正整数，再查库。
