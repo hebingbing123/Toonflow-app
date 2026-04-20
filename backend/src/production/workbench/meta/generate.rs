@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
-use crate::scope::http::require_authenticated_user;
+use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
@@ -106,7 +106,7 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<JsonResponse<VideoModelDetailResponse>, ApiError> {
-    let _uid = require_authenticated_user(&state, &headers)?;
+    require_authenticated(&state, &headers)?;
 
     Ok(JsonResponse(VideoModelDetailResponse {
         model_id: "gen-2".to_string(),

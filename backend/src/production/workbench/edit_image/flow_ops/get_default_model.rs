@@ -1,7 +1,7 @@
 use axum::{extract::State, http::HeaderMap, Json as JsonResponse};
 
 use crate::error::ApiError;
-use crate::scope::http::require_authenticated_user;
+use crate::scope::http::require_authenticated;
 use crate::state::AppState;
 
 use super::types::ImageDefaultModelResponse;
@@ -28,7 +28,7 @@ pub(in crate::production) async fn post_edit_image_get_image_default_model(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<JsonResponse<ImageDefaultModelResponse>, ApiError> {
-    let _uid = require_authenticated_user(&state, &headers)?;
+    require_authenticated(&state, &headers)?;
 
     Ok(JsonResponse(ImageDefaultModelResponse {
         model: "dall-e-3".to_string(),

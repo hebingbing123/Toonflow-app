@@ -24,6 +24,12 @@ pub fn require_authenticated_user(state: &AppState, headers: &HeaderMap) -> Resu
     require_user_uuid(state, headers)
 }
 
+/// 仅校验 Bearer，忽略用户 id（适用于只需要鉴权、不使用 uid 的 handler）。
+pub fn require_authenticated(state: &AppState, headers: &HeaderMap) -> Result<(), ApiError> {
+    require_user_uuid(state, headers)?;
+    Ok(())
+}
+
 /// 当前用户 + DB 下，按 **numeric `project_id`** 解析项目主键（`app_project.id`）。
 pub async fn require_owned_numeric_project_scope<'a>(
     state: &'a AppState,
