@@ -32,26 +32,6 @@ pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_item(
     .ok_or(ApiError::NotFound)
 }
 
-/// 在已校验 **用户拥有该 `script_id`（`app_script.id`）** 的前提下，按 numeric 分镜 id 解析主键。
-pub(in crate::production::workbench::storyboard) async fn storyboard_uuid_for_script_numeric(
-    pool: &sqlx::PgPool,
-    script_id: Uuid,
-    storyboard_numeric_id: i32,
-) -> Result<Uuid, ApiError> {
-    sqlx::query_scalar::<_, Uuid>(
-        r#"
-        SELECT id FROM app_storyboard
-        WHERE script_id = $1 AND numeric_id = $2
-        "#,
-    )
-    .bind(script_id)
-    .bind(storyboard_numeric_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)
-}
-
 pub(in crate::production::workbench::storyboard) async fn list_storyboard_items_by_script(
     pool: &sqlx::PgPool,
     script_id: Uuid,

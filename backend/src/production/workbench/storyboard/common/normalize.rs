@@ -1,18 +1,5 @@
 use crate::error::ApiError;
 
-pub(in crate::production::workbench::storyboard) fn require_positive_scope_ids(
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-) -> Result<(), ApiError> {
-    if project_id <= 0 || script_id <= 0 || storyboard_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId, scriptId, and storyboardId must be positive integers".into(),
-        ));
-    }
-    Ok(())
-}
-
 pub(in crate::production::workbench::storyboard) fn normalize_storyboard_prompt(
     prompt: &str,
 ) -> Result<String, ApiError> {

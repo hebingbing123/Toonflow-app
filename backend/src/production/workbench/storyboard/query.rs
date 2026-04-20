@@ -7,11 +7,12 @@ use axum::{
 use super::super::storyboard_ops::{ProductionGetProductionDataResponse, ProductionStoryboardItem};
 use super::common::{
     build_storyboard_data_response, fetch_storyboard_item, list_storyboard_items_by_script,
-    require_positive_scope_ids, storyboard_uuid_for_script_numeric, StoryboardScopeBody,
-    StoryboardScriptScopeBody,
+    StoryboardScopeBody, StoryboardScriptScopeBody,
 };
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::{
+    require_owned_numeric_script_scope, require_owned_numeric_storyboard_scope,
+};
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -37,14 +38,14 @@ pub(in crate::production) async fn post_storyboard_get_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<ProductionStoryboardItem>, ApiError> {
-    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
-
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
-            .await?;
-
-    let sb_uuid =
-        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
     let row = fetch_storyboard_item(pool, sb_uuid).await?;
 
     Ok(JsonResponse(row))

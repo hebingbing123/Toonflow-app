@@ -6,12 +6,10 @@ mod types;
 
 pub(super) use db::{
     fetch_storyboard_item, fetch_storyboard_preview_data, insert_storyboards_with_next_numeric_ids,
-    list_storyboard_items_by_script, remove_storyboard_frame, storyboard_uuid_for_script_numeric,
-    update_storyboard_image_url, update_storyboard_info,
+    list_storyboard_items_by_script, remove_storyboard_frame, update_storyboard_image_url,
+    update_storyboard_info,
 };
-pub(super) use normalize::{
-    normalize_storyboard_image_url, normalize_storyboard_prompt, require_positive_scope_ids,
-};
+pub(super) use normalize::{normalize_storyboard_image_url, normalize_storyboard_prompt};
 pub(super) use responses::{
     build_down_preview_image_response, build_preview_image_response, build_storyboard_data_response,
 };

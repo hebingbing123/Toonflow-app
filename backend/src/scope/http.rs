@@ -69,6 +69,32 @@ pub async fn require_owned_numeric_script_scope<'a>(
     Ok((uid, pool, scope_row))
 }
 
+/// 当前用户 + DB 下，按 **numeric `project_id` / `script_id` / `storyboard_id`** 解析分镜主键（`app_storyboard.id`）。
+pub async fn require_owned_numeric_storyboard_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<(&'a PgPool, Uuid), ApiError> {
+    if project_numeric_id <= 0 || script_numeric_id <= 0 || storyboard_numeric_id <= 0 {
+        return Err(ApiError::BadRequest(
+            "projectId, scriptId, and storyboardId must be positive integers".into(),
+        ));
+    }
+    let (uid, pool) = require_authenticated_pool(state, headers)?;
+    let storyboard_row = scope::owned_storyboard_in_script_scope(
+        pool,
+        uid,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_numeric_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?;
+    Ok((pool, storyboard_row.storyboard_id))
+}
+
 async fn require_owned_numeric_production_scope_inner<'a>(
     state: &'a AppState,
     headers: &HeaderMap,
