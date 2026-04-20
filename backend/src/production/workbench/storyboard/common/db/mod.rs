@@ -8,5 +8,5 @@ pub(in crate::production::workbench::storyboard) use read::{
     storyboard_uuid_for_script_numeric,
 };
 pub(in crate::production::workbench::storyboard) use write::{
-    remove_owned_storyboard_frame, update_owned_storyboard_image_url, update_owned_storyboard_info,
+    remove_storyboard_frame, update_storyboard_image_url, update_storyboard_info,
 };

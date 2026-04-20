@@ -2,14 +2,12 @@ mod db;
 mod ids;
 mod normalize;
 mod responses;
-mod scope;
 mod types;
 
 pub(super) use db::{
     fetch_storyboard_item, fetch_storyboard_preview_data, insert_storyboards_with_next_numeric_ids,
-    list_storyboard_items_by_script, remove_owned_storyboard_frame,
-    storyboard_uuid_for_script_numeric, update_owned_storyboard_image_url,
-    update_owned_storyboard_info,
+    list_storyboard_items_by_script, remove_storyboard_frame, storyboard_uuid_for_script_numeric,
+    update_storyboard_image_url, update_storyboard_info,
 };
 pub(super) use normalize::{
     normalize_storyboard_image_url, normalize_storyboard_prompt, require_positive_scope_ids,
@@ -21,14 +19,6 @@ pub(super) use types::{
     DownPreviewImageResponse, PreviewImageResponse, StoryboardInsertDraft, StoryboardScopeBody,
     StoryboardScriptScopeBody,
 };
-
-use crate::error::ApiError;
-use crate::production::workbench::common as workbench_common;
-use crate::state::AppState;
-
-pub(super) fn require_pool(state: &AppState) -> Result<&sqlx::PgPool, ApiError> {
-    workbench_common::require_pool(state)
-}
 
 #[cfg(test)]
 mod tests {

@@ -7,15 +7,16 @@ use axum::{
 };
 
 use super::super::common::{
-    normalize_storyboard_image_url, normalize_storyboard_prompt, remove_owned_storyboard_frame,
-    require_pool, update_owned_storyboard_image_url, update_owned_storyboard_info,
+    normalize_storyboard_image_url, normalize_storyboard_prompt, remove_storyboard_frame,
+    require_positive_scope_ids, storyboard_uuid_for_script_numeric, update_storyboard_image_url,
+    update_storyboard_info,
 };
 use super::types::{
     EditStoryboardInfoBody, EditStoryboardInfoResponse, RemoveFrameBody, RemoveFrameResponse,
     UpdateStoryboardUrlBody, UpdateStoryboardUrlResponse,
 };
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -41,20 +42,15 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     headers: HeaderMap,
     Json(body): Json<EditStoryboardInfoBody>,
 ) -> Result<JsonResponse<EditStoryboardInfoResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     let prompt = normalize_storyboard_prompt(&body.prompt)?;
 
-    let pool = require_pool(&state)?;
-    update_owned_storyboard_info(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-        &prompt,
-        body.duration,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    update_storyboard_info(pool, sb_uuid, &prompt, body.duration).await?;
 
     Ok(JsonResponse(EditStoryboardInfoResponse {
         storyboard_id: body.storyboard_id,
@@ -85,17 +81,14 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     headers: HeaderMap,
     Json(body): Json<RemoveFrameBody>,
 ) -> Result<JsonResponse<RemoveFrameResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
 
-    let pool = require_pool(&state)?;
-    remove_owned_storyboard_frame(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    remove_storyboard_frame(pool, sb_uuid).await?;
 
     Ok(JsonResponse(RemoveFrameResponse {
         storyboard_id: body.storyboard_id,
@@ -126,19 +119,15 @@ pub(in crate::production) async fn post_storyboard_update_url(
     headers: HeaderMap,
     Json(body): Json<UpdateStoryboardUrlBody>,
 ) -> Result<JsonResponse<UpdateStoryboardUrlResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
+    require_positive_scope_ids(body.project_id, body.script_id, body.storyboard_id)?;
     let image_url = normalize_storyboard_image_url(&body.image_url)?;
 
-    let pool = require_pool(&state)?;
-    update_owned_storyboard_image_url(
-        pool,
-        uid,
-        body.project_id,
-        body.script_id,
-        body.storyboard_id,
-        &image_url,
-    )
-    .await?;
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+            .await?;
+    let sb_uuid =
+        storyboard_uuid_for_script_numeric(pool, scope_row.script_id, body.storyboard_id).await?;
+    update_storyboard_image_url(pool, sb_uuid, &image_url).await?;
 
     Ok(JsonResponse(UpdateStoryboardUrlResponse {
         storyboard_id: body.storyboard_id,

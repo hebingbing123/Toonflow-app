@@ -2,8 +2,6 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 
-use super::super::scope::require_owned_storyboard_id;
-
 pub(in crate::production::workbench::storyboard) async fn update_storyboard_info(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,
@@ -31,20 +29,6 @@ pub(in crate::production::workbench::storyboard) async fn update_storyboard_info
     Ok(())
 }
 
-pub(in crate::production::workbench::storyboard) async fn update_owned_storyboard_info(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-    prompt: &str,
-    duration: Option<i32>,
-) -> Result<(), ApiError> {
-    let storyboard_uuid =
-        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
-    update_storyboard_info(pool, storyboard_uuid, prompt, duration).await
-}
-
 pub(in crate::production::workbench::storyboard) async fn remove_storyboard_frame(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,
@@ -66,18 +50,6 @@ pub(in crate::production::workbench::storyboard) async fn remove_storyboard_fram
     }
 
     Ok(())
-}
-
-pub(in crate::production::workbench::storyboard) async fn remove_owned_storyboard_frame(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-) -> Result<(), ApiError> {
-    let storyboard_uuid =
-        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
-    remove_storyboard_frame(pool, storyboard_uuid).await
 }
 
 pub(in crate::production::workbench::storyboard) async fn update_storyboard_image_url(
@@ -103,17 +75,4 @@ pub(in crate::production::workbench::storyboard) async fn update_storyboard_imag
     }
 
     Ok(())
-}
-
-pub(in crate::production::workbench::storyboard) async fn update_owned_storyboard_image_url(
-    pool: &sqlx::PgPool,
-    uid: Uuid,
-    project_id: i32,
-    script_id: i32,
-    storyboard_id: i32,
-    image_url: &str,
-) -> Result<(), ApiError> {
-    let storyboard_uuid =
-        require_owned_storyboard_id(pool, uid, project_id, script_id, storyboard_id).await?;
-    update_storyboard_image_url(pool, storyboard_uuid, image_url).await
 }
