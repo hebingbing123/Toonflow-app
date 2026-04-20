@@ -11,7 +11,7 @@ use super::common::{
 };
 use crate::error::ApiError;
 use crate::scope::http::{
-    require_owned_numeric_script_scope, require_owned_numeric_storyboard_scope,
+    require_owned_numeric_script_scope_row, require_owned_numeric_storyboard_scope,
 };
 use crate::state::AppState;
 
@@ -74,8 +74,8 @@ pub(in crate::production) async fn post_get_storyboard_data(
     headers: HeaderMap,
     Json(body): Json<StoryboardScriptScopeBody>,
 ) -> Result<JsonResponse<ProductionGetProductionDataResponse>, ApiError> {
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let rows = list_storyboard_items_by_script(pool, scope_row.script_id).await?;

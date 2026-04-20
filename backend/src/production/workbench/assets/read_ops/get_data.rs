@@ -33,7 +33,7 @@ pub(in crate::production) async fn post_assets_get_data(
     headers: HeaderMap,
     Json(body): Json<GetAssetsDataBody>,
 ) -> Result<JsonResponse<AssetsDataResponse>, ApiError> {
-    let (_uid, pool, scope_row) =
+    let (uid, pool, scope_row) =
         require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
             .await?;
 
@@ -64,7 +64,7 @@ pub(in crate::production) async fn post_assets_get_data(
         LIMIT $5 OFFSET $6
         "#,
     )
-    .bind(_uid)
+    .bind(uid)
     .bind(body.project_id)
     .bind(scope_row.script_id)
     .bind(asset_type)
@@ -85,7 +85,7 @@ pub(in crate::production) async fn post_assets_get_data(
           AND ($4::text IS NULL OR a.asset_type = $4)
         "#,
     )
-    .bind(_uid)
+    .bind(uid)
     .bind(body.project_id)
     .bind(scope_row.script_id)
     .bind(asset_type)

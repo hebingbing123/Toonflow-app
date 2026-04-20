@@ -8,7 +8,7 @@ use axum::{
 
 use super::super::types::{AddTrackBody, AddTrackResponse};
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_row;
 use crate::state::AppState;
 
 /// Serializes `GREATEST(MAX storyboard.track_id, MAX app_video_track.numeric_id)+1` allocation for a script/project pair.
@@ -41,8 +41,8 @@ pub(in crate::production) async fn post_workbench_add_track(
         return Err(ApiError::BadRequest("trackName must not be empty".into()));
     }
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
     let project_uuid = scope_row.project_id;
     let script_uuid = scope_row.script_id;

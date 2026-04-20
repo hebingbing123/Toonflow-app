@@ -12,7 +12,7 @@ use super::types::{
     AddStoryboardBody, AddStoryboardResponse, BatchAddInfoBody, BatchAddInfoResponse,
 };
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_row;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -40,8 +40,8 @@ pub(in crate::production) async fn post_storyboard_add(
 ) -> Result<JsonResponse<AddStoryboardResponse>, ApiError> {
     let prepared = prepare_storyboard_insert(&body.prompt, body.duration)?;
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
     let storyboard_ids = insert_storyboards_with_next_numeric_ids(
         pool,
@@ -86,8 +86,8 @@ pub(in crate::production) async fn post_storyboard_batch_add_info(
 ) -> Result<JsonResponse<BatchAddInfoResponse>, ApiError> {
     let prepared_storyboards = prepare_batch_storyboard_inserts(&body.storyboards)?;
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
     let storyboard_ids = insert_storyboards_with_next_numeric_ids(
         pool,

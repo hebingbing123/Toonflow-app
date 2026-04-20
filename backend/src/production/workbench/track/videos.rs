@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_row;
 use crate::state::AppState;
 
 use super::common::validate_positive_id;
@@ -50,8 +50,8 @@ pub(in crate::production) async fn post_workbench_delete_video(
     Json(body): Json<DeleteVideoBody>,
 ) -> Result<JsonResponse<DeleteVideoResponse>, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let updated = sqlx::query(
@@ -123,8 +123,8 @@ pub(in crate::production) async fn post_workbench_select_video(
         return Err(ApiError::BadRequest("videoUrl must not be empty".into()));
     }
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let updated = sqlx::query(

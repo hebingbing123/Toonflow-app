@@ -10,7 +10,7 @@ use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_row;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -38,8 +38,8 @@ pub(in crate::production) async fn post_get_production_data(
 ) -> Result<Response, ApiError> {
     validate_storyboard_ids(&body.ids)?;
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let rows = sqlx::query_as::<_, ProductionStoryboardItem>(
@@ -94,8 +94,8 @@ pub(in crate::production) async fn post_storyboard_polling_image(
 ) -> Result<Response, ApiError> {
     let normalized_ids = normalize_storyboard_ids(&body.ids)?;
 
-    let (_uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (pool, scope_row) =
+        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;

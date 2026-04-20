@@ -69,6 +69,19 @@ pub async fn require_owned_numeric_script_scope<'a>(
     Ok((uid, pool, scope_row))
 }
 
+/// 与 [`require_owned_numeric_script_scope`] 相同，但仅返回 handler 实际常用的 `pool + scope`。
+pub async fn require_owned_numeric_script_scope_row<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<(&'a PgPool, OwnedScriptScope), ApiError> {
+    let (_uid, pool, scope_row) =
+        require_owned_numeric_script_scope(state, headers, project_numeric_id, script_numeric_id)
+            .await?;
+    Ok((pool, scope_row))
+}
+
 /// 当前用户 + DB 下，按 **numeric `project_id` / `script_id` / `storyboard_id`** 解析分镜主键（`app_storyboard.id`）。
 pub async fn require_owned_numeric_storyboard_scope<'a>(
     state: &'a AppState,
