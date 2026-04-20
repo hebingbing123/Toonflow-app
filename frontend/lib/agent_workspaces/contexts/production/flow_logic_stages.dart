@@ -1,5 +1,46 @@
 part of 'flow_logic.dart';
 
+List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
+  required String? toolName,
+  required String? suggestedFlowKey,
+  required Object? result,
+}) {
+  final normalizedTool = toolName?.trim() ?? '';
+  final normalizedKey = suggestedFlowKey?.trim() ?? '';
+  final flowSnapshot = _resolveProductionWorkspaceFlowSnapshot(
+    toolName: toolName,
+    suggestedFlowKey: suggestedFlowKey,
+    result: result,
+  );
+  final activeKey = _resolveProductionStageActiveKey(
+    toolName: normalizedTool,
+    suggestedFlowKey: normalizedKey,
+  );
+
+  return <ProductionWorkspaceStage>[
+    _buildScriptPlanStage(
+      activeKey: activeKey,
+      flowSnapshot: flowSnapshot,
+      toolName: normalizedTool,
+    ),
+    _buildAssetsStage(
+      activeKey: activeKey,
+      flowSnapshot: flowSnapshot,
+      toolName: normalizedTool,
+    ),
+    _buildStoryboardTableStage(
+      activeKey: activeKey,
+      flowSnapshot: flowSnapshot,
+      toolName: normalizedTool,
+    ),
+    _buildStoryboardStage(
+      activeKey: activeKey,
+      flowSnapshot: flowSnapshot,
+      toolName: normalizedTool,
+    ),
+  ];
+}
+
 Map<String, Object?> _resolveProductionWorkspaceFlowSnapshot({
   required String? toolName,
   required String? suggestedFlowKey,
@@ -269,4 +310,3 @@ ProductionWorkspaceStage _buildStoryboardStage({
     domainTool: 'get_flowData',
   );
 }
-
