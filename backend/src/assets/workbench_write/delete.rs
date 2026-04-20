@@ -23,10 +23,7 @@ pub(crate) async fn post_project_workbench_del_assets(
         return Err(ApiError::BadRequest("id must be positive".into()));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 
@@ -66,10 +63,7 @@ pub(crate) async fn post_project_workbench_batch_delete_assets(
         return Err(ApiError::BadRequest("id entries must be positive".into()));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 
@@ -106,10 +100,7 @@ pub(crate) async fn post_project_workbench_del_image(
         return Err(ApiError::BadRequest("id must be positive".into()));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 

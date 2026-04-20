@@ -86,10 +86,7 @@ pub(crate) async fn post_project_workbench_image_bundle(
     if body.assets_id <= 0 {
         return Err(ApiError::BadRequest("assetsId must be positive".into()));
     }
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
     let out = run_get_image(pool, uid, project_numeric_id, body.assets_id).await?;
     Ok(Json(out))

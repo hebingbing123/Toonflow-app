@@ -53,10 +53,7 @@ pub(crate) async fn list_novel_events_for_project(
     Query(query): Query<ListNovelEventsQuery>,
 ) -> Result<JsonResponse<ListNovelEventsResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     list_novel_events_core(pool, uid, project_id, query).await
 }

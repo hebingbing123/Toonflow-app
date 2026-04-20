@@ -95,10 +95,7 @@ pub(crate) async fn post_project_workbench_batch_generation_data(
             "limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"
         )));
     }
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
     let out = run_batch_generation_data(pool, uid, project_numeric_id, &body).await?;
     Ok(Json(out))

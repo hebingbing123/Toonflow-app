@@ -41,10 +41,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
 
     let file_path = normalize_upload_clip_data_uri(&body.base64_data)?;
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 

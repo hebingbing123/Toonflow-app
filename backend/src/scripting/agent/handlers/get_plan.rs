@@ -23,10 +23,7 @@ pub(super) async fn post_get_plan_data(
 ) -> Result<JsonResponse<Value>, ApiError> {
     let _ = matches!(body.agent_type, ScriptAgentKind::ScriptAgent);
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     let project_uuid = resolve_owned_project_uuid(pool, uid, body.project_id).await?;
 
     fn wrap_plan_with_scripts(

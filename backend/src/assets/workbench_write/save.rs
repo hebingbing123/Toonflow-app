@@ -39,10 +39,7 @@ pub(crate) async fn post_project_workbench_save_assets(
         ));
     }
 
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
 
     ensure_owned_project_pk(pool, uid, project_id).await?;
 

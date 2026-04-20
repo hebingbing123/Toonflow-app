@@ -99,10 +99,7 @@ pub(crate) async fn post_project_workbench_polling_prompt_assets(
 ) -> Result<Json<Vec<WorkbenchPollingPromptAssetsItem>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     validate_polling_ids(&body.ids)?;
-    let pool = state
-        .pool
-        .as_ref()
-        .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+    let pool = state.require_pool()?;
     ensure_owned_project_pk(pool, uid, project_id).await?;
     let rows = run_polling_prompt_assets(pool, uid, project_id, &body.ids).await?;
     Ok(Json(rows))
