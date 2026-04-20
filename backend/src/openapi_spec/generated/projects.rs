@@ -270,4 +270,4 @@ mod stubs {
     stubs::op_patch_project_by_project_id_v1,
     stubs::op_get_project_stats_by_project_id_v1
 ))]
-pub struct ApiDocProjects00;
+pub struct ApiDocProjects;

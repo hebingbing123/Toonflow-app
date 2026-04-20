@@ -123,4 +123,4 @@ mod stubs {
     stubs::op_delete_project_novel_event_by_project_id_v1,
     stubs::op_update_project_novel_event_by_project_id_v1
 ))]
-pub struct ApiDocNovelEvents00;
+pub struct ApiDocNovelEvents;

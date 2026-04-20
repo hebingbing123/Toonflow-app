@@ -256,4 +256,4 @@ mod stubs {
     stubs::op_start_script_asset_extract_v1,
     stubs::op_poll_script_extract_state_v1
 ))]
-pub struct ApiDocScripts00;
+pub struct ApiDocScripts;

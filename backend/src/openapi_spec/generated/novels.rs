@@ -100,4 +100,4 @@ mod stubs {
     stubs::op_get_project_novel_by_project_id_v1,
     stubs::op_patch_project_novel_by_project_id_v1
 ))]
-pub struct ApiDocNovels00;
+pub struct ApiDocNovels;

@@ -99,4 +99,4 @@ mod stubs {
     stubs::op_get_storyboard_by_project_v1,
     stubs::op_patch_storyboard_by_project_v1
 ))]
-pub struct ApiDocStoryboards00;
+pub struct ApiDocStoryboards;

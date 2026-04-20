@@ -409,7 +409,6 @@ def main() -> None:
 
     ops.sort(key=lambda t: (t[0], t[1], t[2].get("operationId", "")))
 
-    PART_SIZE = 28
     grouped: dict[str, list[tuple[str, str, dict[str, Any]]]] = defaultdict(list)
     for path, method, op in ops:
         tags = op.get("tags") or []
@@ -420,12 +419,9 @@ def main() -> None:
     for slug in sorted(grouped.keys()):
         items = grouped[slug]
         items.sort(key=lambda t: (t[0], t[1], t[2].get("operationId", "")))
-        for ci in range(0, len(items), PART_SIZE):
-            chunk = items[ci : ci + PART_SIZE]
-            chunk_idx = ci // PART_SIZE
-            module_name = f"{slug}_{chunk_idx:02}"
-            struct_name = f"ApiDoc{snake_to_pascal(slug)}{chunk_idx:02}"
-            modules.append((module_name, struct_name, chunk))
+        module_name = slug
+        struct_name = f"ApiDoc{snake_to_pascal(slug)}"
+        modules.append((module_name, struct_name, items))
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for stale in OUT_DIR.glob("*.rs"):

@@ -164,4 +164,4 @@ mod stubs {
     stubs::op_get_visual_manual_v1,
     stubs::op_post_visual_manual_v1
 ))]
-pub struct ApiDocSkills00;
+pub struct ApiDocSkills;

@@ -136,4 +136,4 @@ mod stubs {
     stubs::op_patch_art_style_by_numeric_id_v1,
     stubs::op_get_art_style_cover_by_numeric_id_v1
 ))]
-pub struct ApiDocArtStyles00;
+pub struct ApiDocArtStyles;
