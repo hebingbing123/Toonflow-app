@@ -10,6 +10,15 @@ use crate::production::flow_data;
 use crate::scope::{self, OwnedScriptScope};
 use crate::state::AppState;
 
+fn require_authenticated_pool<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+) -> Result<(Uuid, &'a PgPool), ApiError> {
+    let uid = require_user_uuid(state, headers)?;
+    let pool = state.require_pool()?;
+    Ok((uid, pool))
+}
+
 /// 仅校验 Bearer 并返回当前用户 UUID（不触发任何 DB scope 查询）。
 pub fn require_authenticated_user(state: &AppState, headers: &HeaderMap) -> Result<Uuid, ApiError> {
     require_user_uuid(state, headers)
@@ -21,13 +30,12 @@ pub async fn require_owned_numeric_project_scope<'a>(
     headers: &HeaderMap,
     project_numeric_id: i32,
 ) -> Result<(Uuid, &'a PgPool, Uuid), ApiError> {
-    let uid = require_user_uuid(state, headers)?;
     if project_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId must be a positive integer".into(),
         ));
     }
-    let pool = state.require_pool()?;
+    let (uid, pool) = require_authenticated_pool(state, headers)?;
     let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
         .await
         .map_err(|e| e.into_api_error())?;
@@ -43,13 +51,12 @@ pub async fn require_owned_numeric_script_scope<'a>(
     project_numeric_id: i32,
     script_numeric_id: i32,
 ) -> Result<(Uuid, &'a PgPool, OwnedScriptScope), ApiError> {
-    let uid = require_user_uuid(state, headers)?;
     if project_numeric_id <= 0 || script_numeric_id <= 0 {
         return Err(ApiError::BadRequest(
             "projectId and scriptId must be positive integers".into(),
         ));
     }
-    let pool = state.require_pool()?;
+    let (uid, pool) = require_authenticated_pool(state, headers)?;
     let scope_row = scope::owned_script_scope(pool, uid, project_numeric_id, script_numeric_id)
         .await
         .map_err(|e| e.into_api_error())?;
@@ -63,13 +70,12 @@ async fn require_owned_numeric_production_scope_inner<'a>(
     script_numeric_id: i32,
     second_field_name: &str,
 ) -> Result<(Uuid, &'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
-    let uid = require_user_uuid(state, headers)?;
     if project_numeric_id <= 0 || script_numeric_id <= 0 {
         return Err(ApiError::BadRequest(format!(
             "projectId and {second_field_name} must be positive integers"
         )));
     }
-    let pool = state.require_pool()?;
+    let (uid, pool) = require_authenticated_pool(state, headers)?;
     let (project_id, script_id, script_content) =
         flow_data::resolve_owned_production_scope(pool, uid, project_numeric_id, script_numeric_id)
             .await?;
