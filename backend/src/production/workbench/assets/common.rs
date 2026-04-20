@@ -3,7 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
 
 pub(super) fn normalize_asset_ids(asset_ids: &[i32]) -> Result<Vec<i32>, ApiError> {
@@ -63,8 +63,8 @@ pub(super) async fn require_owned_normalized_assets_scope<'a>(
     asset_ids: &[i32],
 ) -> Result<(Uuid, &'a PgPool, Uuid, Vec<i32>), ApiError> {
     let uniq = normalize_asset_ids(asset_ids)?;
-    let (uid, pool, scope_row) =
-        require_owned_numeric_script_scope(state, headers, project_id, script_id).await?;
-    ensure_assets_linked_to_script(pool, uid, project_id, scope_row.script_id, &uniq).await?;
-    Ok((uid, pool, scope_row.script_id, uniq))
+    let (uid, pool, script_uuid) =
+        require_owned_numeric_script_scope_ids(state, headers, project_id, script_id).await?;
+    ensure_assets_linked_to_script(pool, uid, project_id, script_uuid, &uniq).await?;
+    Ok((uid, pool, script_uuid, uniq))
 }

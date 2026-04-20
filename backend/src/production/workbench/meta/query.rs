@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ApiError;
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::VideoItem;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -50,8 +50,8 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     headers: HeaderMap,
     Json(body): Json<GetGenerateDataBody>,
 ) -> Result<JsonResponse<GetGenerateDataResponse>, ApiError> {
-    let (uid, pool, scope) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (uid, pool, script_id) =
+        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let generated_videos = sqlx::query_as::<_, VideoItem>(
@@ -73,7 +73,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         ORDER BY sb.created_at DESC
         "#,
     )
-    .bind(scope.script_id)
+    .bind(script_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

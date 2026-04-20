@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_ids;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -59,8 +59,8 @@ pub(in crate::production) async fn post_assets_update_url(
         return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
     }
 
-    let (uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (uid, pool, script_id) =
+        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
             .await?;
 
     let image_id = sqlx::query_scalar::<_, uuid::Uuid>(
@@ -78,7 +78,7 @@ pub(in crate::production) async fn post_assets_update_url(
         RETURNING id
         "#,
     )
-    .bind(scope_row.script_id)
+    .bind(script_id)
     .bind(uid)
     .bind(body.project_id)
     .bind(body.asset_id)

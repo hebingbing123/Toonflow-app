@@ -11,7 +11,7 @@ use super::super::types::{ExportImageBody, ExportImageSourceRow};
 use super::shot_ids::normalize_export_shot_ids;
 use super::zip_export::build_storyboard_export_zip;
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope;
+use crate::scope::http::require_owned_numeric_script_scope_ids;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -39,11 +39,11 @@ pub(in crate::production) async fn post_export_image(
 ) -> Result<Response, ApiError> {
     let normalized_ids = normalize_export_shot_ids(&body.shot_id)?;
 
-    let (uid, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
+    let (uid, pool, script_id) =
+        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
             .await?;
 
-    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
+    ensure_owned_storyboards(pool, script_id, &normalized_ids).await?;
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"
@@ -54,7 +54,7 @@ pub(in crate::production) async fn post_export_image(
         ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
-    .bind(scope_row.script_id)
+    .bind(script_id)
     .bind(&normalized_ids)
     .fetch_all(pool)
     .await
