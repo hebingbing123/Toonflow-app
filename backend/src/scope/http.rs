@@ -56,25 +56,59 @@ pub async fn require_owned_numeric_script_scope<'a>(
     Ok((uid, pool, scope_row))
 }
 
-/// 当前用户 + DB 下，按 **numeric `project_id` / `script_id`** 解析 production flow scope。
-///
-/// 返回 `(uid, pool, project_uuid, script_uuid, script_content)`，用于复用
-/// `resolve_owned_production_scope` 逻辑，避免 handler 重复拼装。
-pub async fn require_owned_numeric_production_scope<'a>(
+async fn require_owned_numeric_production_scope_inner<'a>(
     state: &'a AppState,
     headers: &HeaderMap,
     project_numeric_id: i32,
     script_numeric_id: i32,
+    second_field_name: &str,
 ) -> Result<(Uuid, &'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
     let uid = require_user_uuid(state, headers)?;
     if project_numeric_id <= 0 || script_numeric_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId and episodesId must be positive integers".into(),
-        ));
+        return Err(ApiError::BadRequest(format!(
+            "projectId and {second_field_name} must be positive integers"
+        )));
     }
     let pool = state.require_pool()?;
     let (project_id, script_id, script_content) =
         flow_data::resolve_owned_production_scope(pool, uid, project_numeric_id, script_numeric_id)
             .await?;
     Ok((uid, pool, project_id, script_id, script_content))
+}
+
+/// 当前用户 + DB 下，按 **numeric `project_id` / `script_id`** 解析 production flow scope。
+///
+/// 返回 `(uid, pool, project_uuid, script_uuid, script_content)`，用于复用
+/// `resolve_owned_production_scope` 逻辑，避免 handler 重复拼装。
+pub async fn require_owned_numeric_production_script_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<(Uuid, &'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
+    require_owned_numeric_production_scope_inner(
+        state,
+        headers,
+        project_numeric_id,
+        script_numeric_id,
+        "scriptId",
+    )
+    .await
+}
+
+/// 与 [`require_owned_numeric_production_script_scope`] 相同，但保持 `episodesId` 错误字段名兼容。
+pub async fn require_owned_numeric_production_episodes_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_numeric_id: i32,
+    episodes_numeric_id: i32,
+) -> Result<(Uuid, &'a PgPool, Uuid, Uuid, Option<String>), ApiError> {
+    require_owned_numeric_production_scope_inner(
+        state,
+        headers,
+        project_numeric_id,
+        episodes_numeric_id,
+        "episodesId",
+    )
+    .await
 }

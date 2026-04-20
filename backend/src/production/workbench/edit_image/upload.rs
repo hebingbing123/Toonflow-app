@@ -7,7 +7,7 @@ use base64::Engine;
 use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_production_scope;
+use crate::scope::http::require_owned_numeric_production_script_scope;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -85,8 +85,13 @@ pub(in crate::production) async fn post_edit_image_upload_image(
 ) -> Result<JsonResponse<EditImageUploadImageResponse>, ApiError> {
     let normalized = normalize_upload_image_data_uri(&body.base64_data)?;
     let (_uid, _pool, _project_id, _script_id, _script_content) =
-        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.script_id)
-            .await?;
+        require_owned_numeric_production_script_scope(
+            &state,
+            &headers,
+            body.project_id,
+            body.script_id,
+        )
+        .await?;
 
     Ok(JsonResponse(EditImageUploadImageResponse {
         url: normalized,

@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use crate::error::ApiError;
 use crate::production::flow_data::load_owned_production_flow_json;
-use crate::scope::http::require_owned_numeric_production_scope;
+use crate::scope::http::require_owned_numeric_production_episodes_scope;
 use crate::state::AppState;
 
 use super::storyboard_order::ordered_storyboard_numeric_ids;
@@ -46,8 +46,13 @@ pub(crate) async fn post_get_flow_data(
     }
 
     let (uid, pool, _project_id, _script_id, _script_content) =
-        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.episodes_id)
-            .await?;
+        require_owned_numeric_production_episodes_scope(
+            &state,
+            &headers,
+            body.project_id,
+            body.episodes_id,
+        )
+        .await?;
     let flow =
         load_owned_production_flow_json(pool, uid, body.project_id, body.episodes_id).await?;
     Ok(JsonResponse(flow))
@@ -84,8 +89,13 @@ pub(crate) async fn post_save_flow_data(
     let ordered_storyboard_ids = ordered_storyboard_numeric_ids(&body.data)?;
 
     let (_uid, pool, project_id, script_id, _script_content) =
-        require_owned_numeric_production_scope(&state, &headers, body.project_id, body.episodes_id)
-            .await?;
+        require_owned_numeric_production_episodes_scope(
+            &state,
+            &headers,
+            body.project_id,
+            body.episodes_id,
+        )
+        .await?;
 
     if let Some(ordered_ids) = ordered_storyboard_ids {
         for (index, storyboard_numeric_id) in ordered_ids.iter().enumerate() {
