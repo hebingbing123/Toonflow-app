@@ -161,4 +161,4 @@ class _ProjectEditorDialogState {
   }
 }
 
-// Project detail dialog widgets were split into `editor_dialog.dart` to keep this file small.
+// Project detail dialog widgets live in `editor_dialog_*.dart` parts to keep this file small.
