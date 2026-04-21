@@ -44,6 +44,18 @@ typedef WorkspaceWritebackSaveFlow =
       Map<String, dynamic> data,
     });
 
+class _ScriptPlanWritebackPayload {
+  const _ScriptPlanWritebackPayload({
+    required this.storySkeleton,
+    required this.adaptationStrategy,
+    required this.rawScript,
+  });
+
+  final String storySkeleton;
+  final String adaptationStrategy;
+  final Object? rawScript;
+}
+
 class WorkspaceWritebackController {
   WorkspaceWritebackController({
     required WorkspaceInputController inputController,
@@ -166,18 +178,14 @@ class WorkspaceWritebackController {
       return;
     }
 
-    final payload = candidate['data'];
-    if (payload is! Map<String, dynamic>) {
+    final payload = _extractScriptPlanWritebackPayload(candidate);
+    if (payload == null) {
       _onErrorChanged('planData 结果缺少 data 字段');
       return;
     }
-
-    final storySkeleton = (payload['storySkeleton'] as String?)?.trim() ?? '';
-    final adaptationStrategy =
-        (payload['adaptationStrategy'] as String?)?.trim() ?? '';
-    final scriptRaw = payload['script'];
-    final script = scriptRaw is List
-        ? scriptRaw.whereType<Map<String, dynamic>>().toList(growable: false)
+    final rawScript = payload.rawScript;
+    final script = rawScript is List
+        ? rawScript.whereType<Map<String, dynamic>>().toList(growable: false)
         : const <Map<String, dynamic>>[];
 
     _beginWriteback(WorkspaceOperation.scriptPlanResultWriteback);
@@ -185,8 +193,8 @@ class WorkspaceWritebackController {
       final status = await _setPlanData(
         token,
         projectId: projectId,
-        storySkeleton: storySkeleton,
-        adaptationStrategy: adaptationStrategy,
+        storySkeleton: payload.storySkeleton,
+        adaptationStrategy: payload.adaptationStrategy,
         script: script,
       );
       if (status != 200) {
@@ -218,24 +226,20 @@ class WorkspaceWritebackController {
       return;
     }
 
-    final payload = candidate['data'];
-    if (payload is! Map<String, dynamic>) {
+    final payload = _extractScriptPlanWritebackPayload(candidate);
+    if (payload == null) {
       _onErrorChanged('planData 结果缺少 data 字段');
       return;
     }
-
-    final storySkeleton = (payload['storySkeleton'] as String?)?.trim() ?? '';
-    final adaptationStrategy =
-        (payload['adaptationStrategy'] as String?)?.trim() ?? '';
-    final scriptRows = _normalizeScriptPlanRows(payload['script']);
+    final scriptRows = _normalizeScriptPlanRows(payload.rawScript);
 
     _beginWriteback(WorkspaceOperation.scriptPlanResultWriteback);
     try {
       final status = await _updatePlanData(
         token,
         id: planRowId,
-        storySkeleton: storySkeleton,
-        adaptationStrategy: adaptationStrategy,
+        storySkeleton: payload.storySkeleton,
+        adaptationStrategy: payload.adaptationStrategy,
         script: scriptRows,
       );
       if (status != 200) {
@@ -378,4 +382,17 @@ class WorkspaceWritebackController {
     }
     return rows;
   }
+
+  _ScriptPlanWritebackPayload? _extractScriptPlanWritebackPayload(
+    Map<String, dynamic> candidate,
+  ) {
+    final payload = candidate['data'];
+    if (payload is! Map<String, dynamic>) return null;
+    return _ScriptPlanWritebackPayload(
+      storySkeleton: (payload['storySkeleton'] as String?)?.trim() ?? '',
+      adaptationStrategy: (payload['adaptationStrategy'] as String?)?.trim() ?? '',
+      rawScript: payload['script'],
+    );
+  }
+
 }
