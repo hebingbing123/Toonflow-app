@@ -83,6 +83,8 @@ part 'system_probes/controller.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
 part 'system_probes/models_catalog/production_probe.dart';
 part 'shell/build_sections.dart';
+part 'shell/build_sections_product.dart';
+part 'shell/build_sections_debug.dart';
 part 'shell/runtime_helpers.dart';
 part 'script_editor/editor.dart';
 part 'script_editor/edit_image/workbench.dart';
