@@ -66,6 +66,8 @@ part 'project_editor/assets/compatibility/crud_primary.dart';
 part 'project_editor/assets/compatibility/crud_query.dart';
 part 'project_editor/assets/compatibility/relations.dart';
 part 'project_editor/novels/compatibility/actions.dart';
+part 'project_editor/novels/compatibility/actions_probe_reads.dart';
+part 'project_editor/novels/compatibility/actions_probe_mutations.dart';
 part 'project_editor/novels/compatibility/section.dart';
 part 'project_editor/novels/events/actions.dart';
 part 'project_editor/novels/events/compatibility.dart';
