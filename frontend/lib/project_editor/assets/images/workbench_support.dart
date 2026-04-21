@@ -13,3 +13,4 @@ part 'workbench_mutations_runner.dart';
 part 'workbench_mutations.dart';
 part 'workbench_runtime.dart';
 part 'workbench_state.dart';
+part 'workbench_selection_sync.dart';
