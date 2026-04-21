@@ -52,14 +52,6 @@ class _AssetGenerationWorkbenchDialogState
     setState(action);
   }
 
-  List<AssetRow> _filteredVisibleAssets() {
-    final assets = widget.visibleAssets();
-    if (_selectedType.isEmpty) return assets;
-    return assets
-        .where((a) => a.assetType.trim() == _selectedType)
-        .toList(growable: false);
-  }
-
   List<int> _sortedSelection() => sortUniqueAssetNumericIds(_selectedIds);
 
   void _applySelection(Iterable<int> ids, String label) {
@@ -77,7 +69,7 @@ class _AssetGenerationWorkbenchDialogState
   void _applyScopedSelection(Iterable<int> candidateIds, String label) {
     final next = collectScopedAssetNumericIds(
       candidateIds,
-      _filteredVisibleAssets(),
+      _filterAssetsByType(widget.visibleAssets(), _selectedType),
     );
     _updateWorkbenchState(() {
       _selectedIds
@@ -169,7 +161,10 @@ class _AssetGenerationWorkbenchDialogState
           selected,
         );
       }
-      final currentVisibleAssets = _filteredVisibleAssets();
+      final currentVisibleAssets = _filterAssetsByType(
+        widget.visibleAssets(),
+        _selectedType,
+      );
       final nextSelection = chooseVisibleAssetSelection(
         currentVisibleAssets,
         preferredIds: _selectedIds,
@@ -226,18 +221,14 @@ class _AssetGenerationWorkbenchDialogState
   @override
   Widget build(BuildContext context) {
     final visible = widget.visibleAssets();
-    final scopedAssets = _filteredVisibleAssets();
+    final scopedAssets = _filterAssetsByType(visible, _selectedType);
     final typeSelections = collectAssetIdsByType(visible);
-    final pollingSelections = _pollingData == null
-        ? const <String, List<int>>{}
-        : collectAssetIdsByImageState(_pollingData!.statuses);
-    final promptSelections = _promptPollingData == null
-        ? const <String, List<int>>{}
-        : collectAssetIdsByPromptState(_promptPollingData!);
+    final pollingSelections = _resolvePollingSelections(_pollingData);
+    final promptSelections = _resolvePromptSelections(_promptPollingData);
     final selected = _sortedSelection();
-    final selectedSingleAssetId = selected.length == 1 ? selected.first : null;
+    final selectedSingleAssetId = _resolveSingleSelectedAssetId(selected);
     return AssetGenerationWorkbenchDialogView(
-      model: AssetGenerationWorkbenchDialogViewModel(
+      model: _buildAssetGenerationWorkbenchViewModel(
         scriptList: widget.scriptList,
         visibleAssets: visible,
         scopedAssets: scopedAssets,
