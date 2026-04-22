@@ -23,6 +23,11 @@ pub struct JobRow {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, FromRow)]
+pub(crate) struct JobFileSource {
+    pub(crate) result: sqlx::types::Json<Value>,
+}
+
 #[derive(Debug, Deserialize, Default)]
 pub(super) struct ListJobsQuery {
     #[serde(default)]

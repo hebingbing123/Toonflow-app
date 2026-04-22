@@ -6,7 +6,8 @@ mod page;
 
 #[allow(unused_imports)]
 pub(crate) use detail::{
-    __path_get_job, __path_get_job_task_detail_compat, get_job, get_job_task_detail_compat,
+    __path_get_job, __path_get_job_file, __path_get_job_task_detail_compat, get_job, get_job_file,
+    get_job_task_detail_compat,
 };
 #[allow(unused_imports)]
 pub(crate) use list::{__path_list_jobs, list_jobs};

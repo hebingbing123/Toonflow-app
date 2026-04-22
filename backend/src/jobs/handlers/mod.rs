@@ -14,7 +14,7 @@ use axum::{
 
 use crate::state::AppState;
 
-use listing::{get_job, get_job_task_detail_compat, list_jobs, list_jobs_page};
+use listing::{get_job, get_job_file, get_job_task_detail_compat, list_jobs, list_jobs_page};
 use mutate::{cancel_job, create_job, retry_job};
 use summaries::{list_job_kind_summaries, list_job_kinds, list_job_status_summaries};
 
@@ -39,6 +39,7 @@ pub(crate) fn router() -> Router<AppState> {
         )
         .route("/api/v1/jobs", get(list_jobs).post(create_job))
         .route("/api/v1/jobs/{id}", get(get_job))
+        .route("/api/v1/jobs/{id}/file", get(get_job_file))
         .route("/api/v1/jobs/{id}/cancel", post(cancel_job))
         .route("/api/v1/jobs/{id}/retry", post(retry_job))
 }
@@ -54,6 +55,7 @@ pub(crate) fn router() -> Router<AppState> {
         listing::list_jobs,
         mutate::create_job,
         listing::get_job,
+        listing::get_job_file,
         mutate::cancel_job,
         mutate::retry_job,
     ),

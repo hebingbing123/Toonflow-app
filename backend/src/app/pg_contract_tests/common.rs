@@ -149,6 +149,7 @@ pub(crate) fn contract_state(pool: sqlx::PgPool, jwt_secret: String) -> AppState
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
+        local_video_export_dir: None,
     }
 }
 
@@ -163,6 +164,7 @@ pub(crate) fn smoke_state() -> AppState {
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
+        local_video_export_dir: None,
     }
 }
 
@@ -245,6 +247,7 @@ pub(crate) fn contract_state_with_local_dir(
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: Some(dir),
         local_art_style_cover_dir: None,
+        local_video_export_dir: None,
     }
 }
 
@@ -263,5 +266,6 @@ pub(crate) fn contract_state_with_local_art_style_dir(
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: Some(dir),
+        local_video_export_dir: None,
     }
 }

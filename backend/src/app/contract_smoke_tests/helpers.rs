@@ -50,6 +50,7 @@ pub(super) fn smoke_state() -> AppState {
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
+        local_video_export_dir: None,
     }
 }
 
@@ -65,6 +66,7 @@ pub(super) fn smoke_state_without_jwt_secret() -> AppState {
         switch_ai_dev_tool: Arc::new(RwLock::new("0".into())),
         local_asset_image_dir: None,
         local_art_style_cover_dir: None,
+        local_video_export_dir: None,
     }
 }
 
