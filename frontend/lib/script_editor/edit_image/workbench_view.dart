@@ -67,10 +67,14 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final dialogWidth = viewportWidth.isFinite
+        ? viewportWidth.clamp(320.0, 780.0)
+        : 780.0;
     return AlertDialog(
       title: const Text('编辑图片工作台'),
       content: SizedBox(
-        width: 780,
+        width: dialogWidth,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

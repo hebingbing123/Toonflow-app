@@ -28,10 +28,14 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
   required VoidCallback? onRefresh,
   required VoidCallback? onClose,
 }) {
+  final viewportWidth = MediaQuery.sizeOf(dialogCtx).width;
+  final dialogWidth = viewportWidth.isFinite
+      ? viewportWidth.clamp(320.0, 780.0)
+      : 780.0;
   return AlertDialog(
     title: const Text('资产主工作台'),
     content: SizedBox(
-      width: 780,
+      width: dialogWidth,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

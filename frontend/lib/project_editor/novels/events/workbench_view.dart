@@ -64,10 +64,14 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final dialogWidth = viewportWidth.isFinite
+        ? viewportWidth.clamp(320.0, 760.0)
+        : 760.0;
     return AlertDialog(
       title: const Text('事件工作台'),
       content: SizedBox(
-        width: 760,
+        width: dialogWidth,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
