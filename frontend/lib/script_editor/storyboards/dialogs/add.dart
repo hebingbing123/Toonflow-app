@@ -80,6 +80,12 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         ).showSnackBar(const SnackBar(content: Text('时长必须是整数')));
         return;
       }
+      if (duration != null && duration <= 0) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('时长必须是正整数')));
+        return;
+      }
 
       actionBusy[0] = true;
       setBoardsState(() {});

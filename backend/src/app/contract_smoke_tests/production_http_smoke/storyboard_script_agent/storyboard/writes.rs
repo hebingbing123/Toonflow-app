@@ -10,10 +10,28 @@ async fn production_storyboard_add_requires_database_with_jwt() {
 }
 
 #[tokio::test]
+async fn production_storyboard_add_rejects_non_positive_duration_with_jwt() {
+    assert_bad_request(
+        "/api/v1/production/storyboard/add",
+        r#"{"projectId":1,"scriptId":1,"prompt":"probe","duration":0}"#,
+    )
+    .await;
+}
+
+#[tokio::test]
 async fn production_storyboard_edit_info_rejects_empty_prompt_with_jwt() {
     assert_bad_request(
         "/api/v1/production/storyboard/edit-info",
         r#"{"projectId":1,"scriptId":1,"storyboardId":1,"prompt":"   "}"#,
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn production_storyboard_edit_info_rejects_non_positive_duration_with_jwt() {
+    assert_bad_request(
+        "/api/v1/production/storyboard/edit-info",
+        r#"{"projectId":1,"scriptId":1,"storyboardId":1,"prompt":"probe","duration":-1}"#,
     )
     .await;
 }

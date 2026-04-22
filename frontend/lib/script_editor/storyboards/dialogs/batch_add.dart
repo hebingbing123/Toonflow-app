@@ -84,6 +84,12 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
         ).showSnackBar(const SnackBar(content: Text('统一时长必须是整数')));
         return;
       }
+      if (duration != null && duration <= 0) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('统一时长必须是正整数')));
+        return;
+      }
       final payload = prompts
           .map(
             (prompt) =>
