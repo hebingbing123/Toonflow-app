@@ -86,6 +86,7 @@ part 'script_editor/storyboards/dialogs/batch_add.dart';
 part 'script_editor/storyboards/workbench.dart';
 part 'system_probes/controller.dart';
 part 'system_probes/models_catalog/settings_probe.dart';
+part 'system_probes/models_catalog/settings_probe_core.dart';
 part 'system_probes/models_catalog/settings_probe_vendor_assets.dart';
 part 'system_probes/models_catalog/production_probe.dart';
 part 'system_probes/models_catalog/production_probe_typed.dart';
