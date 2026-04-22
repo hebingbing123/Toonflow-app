@@ -4,6 +4,7 @@ import '../../../../rust_api.dart';
 
 part 'workbench_launcher_controllers.dart';
 part 'workbench_launcher_state.dart';
+part 'workbench_launcher_helpers.dart';
 
 Future<void> openNovelWorkbenchDialog({
   required BuildContext ctx,
@@ -105,28 +106,13 @@ Future<void> openNovelWorkbenchDialog({
   final local = _NovelWorkbenchLocalState.fromItems(currentItems);
 
   Future<void> refreshWorkbench(StateSetter setLocalState) async {
-    await reloadAssetsAndStats();
-    final refreshed = novelsRef[0]?.items ?? const <NovelRow>[];
-    setLocalState(() {
-      local.previewRows = List<NovelRow>.from(refreshed.take(6));
-      local.infoLine = refreshed.isEmpty
-          ? '章节列表为空。'
-          : '已刷新，共 ${refreshed.length} 条章节。';
-      if (ctrls.selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        ctrls.selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
-        ctrls.patchChapterCtrl.text = refreshed.first.chapter;
-        ctrls.patchBodyCtrl.text = refreshed.first.chapterData;
-      }
-      if (ctrls.deleteNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        ctrls.deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
-      }
-      if (ctrls.generateIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        ctrls.generateIdsCtrl.text = refreshed
-            .take(3)
-            .map((e) => e.numericId)
-            .join(',');
-      }
-    });
+    await refreshNovelWorkbenchLocalState(
+      setLocalState: setLocalState,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+      novelsRef: novelsRef,
+      ctrls: ctrls,
+      local: local,
+    );
   }
 
   try {
@@ -204,10 +190,12 @@ Future<void> openNovelWorkbenchDialog({
                         setLocalBusy: setLocalBusy,
                         refreshWorkbench: refreshWorkbench,
                         applyResult: (rows, message) {
-                          setLocalState(() {
-                            local.previewRows = rows;
-                            local.infoLine = message;
-                          });
+                          applyNovelWorkbenchSearchResult(
+                            setLocalState: setLocalState,
+                            local: local,
+                            rows: rows,
+                            message: message,
+                          );
                         },
                       ),
                       const SizedBox(height: 16),
