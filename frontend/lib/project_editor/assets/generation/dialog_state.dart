@@ -281,27 +281,26 @@ class _AssetGenerationWorkbenchDialogState
         },
         onLoadBatchCandidates: () {
           _runMutation(() async {
-            final effectiveType =
-                _selectedType.isEmpty ? visible.first.assetType.trim() : _selectedType;
-            final limit = int.tryParse(_batchLimitCtrl.text.trim()) ?? 10;
-            if (effectiveType.isEmpty) {
-              throw const FormatException('批量候选读取需要有效资产类型');
-            }
-            if (limit <= 0) {
-              throw const FormatException('候选 limit 需要大于 0');
-            }
+            final request = _buildBatchCandidatesRequest(
+              selectedType: _selectedType,
+              visibleAssets: visible,
+              batchNameText: _batchNameCtrl.text,
+              batchLimitText: _batchLimitCtrl.text,
+            );
             final response = await postWorkbenchAssetsBatchGenerationData(
               widget.token,
               projectId: widget.project.id,
-              assetType: effectiveType,
-              name: _batchNameCtrl.text.trim(),
-              limit: limit,
+              assetType: request.assetType,
+              name: request.name,
+              limit: request.limit,
             );
             if (mounted) {
               setState(() {
                 _batchData = response;
-                _statusLine =
-                    '${summarizeWorkbenchBatchGenerationData(response)} · type=$effectiveType';
+                _statusLine = _buildBatchCandidatesStatusLine(
+                  response: response,
+                  assetType: request.assetType,
+                );
               });
             }
           });
@@ -329,7 +328,10 @@ class _AssetGenerationWorkbenchDialogState
             );
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
-              lead: '已为 ${response.total} 条资产创建出图任务，队列 ${response.enqueued.length} 条',
+              lead: _buildBatchGenerateLead(
+                total: response.total,
+                enqueuedCount: response.enqueued.length,
+              ),
             );
           });
         },
@@ -344,8 +346,8 @@ class _AssetGenerationWorkbenchDialogState
             if (mounted) {
               setState(() {
                 _pollingData = response;
-                _statusLine = summarizeAssetWorkbenchSnapshot(
-                  visibleAssets: scopedAssets,
+                _statusLine = _buildWorkbenchPollingStatusLine(
+                  scopedAssets: scopedAssets,
                   selectedIds: _selectedIds,
                   productionData: _productionData,
                   pollingData: _pollingData,
@@ -365,8 +367,8 @@ class _AssetGenerationWorkbenchDialogState
             if (mounted) {
               setState(() {
                 _promptPollingData = response;
-                _statusLine = summarizeAssetWorkbenchSnapshot(
-                  visibleAssets: scopedAssets,
+                _statusLine = _buildWorkbenchPollingStatusLine(
+                  scopedAssets: scopedAssets,
                   selectedIds: _selectedIds,
                   productionData: _productionData,
                   pollingData: _pollingData,
@@ -387,8 +389,10 @@ class _AssetGenerationWorkbenchDialogState
             await widget.reloadAssetsAndStats();
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
-              lead:
-                  '已删除 ${response.deleted} 个衍生图记录，资产 ${response.assetIds.join(", ")}',
+              lead: _buildDeleteDerivativesLead(
+                deleted: response.deleted,
+                assetIds: response.assetIds,
+              ),
             );
           });
         },
@@ -404,7 +408,10 @@ class _AssetGenerationWorkbenchDialogState
             await widget.reloadAssetsAndStats();
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
-              lead: '已更新资产 #${response.assetId} 封面 URL：${response.message}',
+              lead: _buildUpdateImageUrlLead(
+                assetId: response.assetId,
+                message: response.message,
+              ),
             );
           });
         },

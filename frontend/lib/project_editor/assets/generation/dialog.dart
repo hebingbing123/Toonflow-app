@@ -6,6 +6,7 @@ import 'support.dart';
 
 part 'dialog_state.dart';
 part 'dialog_state_helpers.dart';
+part 'dialog_state_mutation_helpers.dart';
 
 class AssetGenerationWorkbenchDialog extends StatefulWidget {
   const AssetGenerationWorkbenchDialog({
