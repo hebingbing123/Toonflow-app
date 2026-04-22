@@ -2,10 +2,7 @@ part of 'creative_manuals.dart';
 
 class _ProjectsCreativeManualsWorkbenchDialogState
     extends State<ProjectsCreativeManualsWorkbenchDialog> {
-  late final TextEditingController _nameCtrl;
-  late final TextEditingController _pathCtrl;
-  late final TextEditingController _imagesCtrl;
-  late final TextEditingController _slotsCtrl;
+  late final _CreativeManualsWorkbenchControllers _ctrls;
 
   _CreativeManualKind _kind = _CreativeManualKind.director;
   List<_CreativeManualRow> _directorRows = const <_CreativeManualRow>[];
@@ -36,18 +33,12 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _nameCtrl = TextEditingController();
-    _pathCtrl = TextEditingController();
-    _imagesCtrl = TextEditingController();
-    _slotsCtrl = TextEditingController(text: '场景|scene|\n角色|role|');
+    _ctrls = _CreativeManualsWorkbenchControllers.create();
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _pathCtrl.dispose();
-    _imagesCtrl.dispose();
-    _slotsCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
@@ -68,18 +59,18 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   void _clearForm() {
-    _nameCtrl.clear();
-    _pathCtrl.clear();
-    _imagesCtrl.clear();
-    _slotsCtrl.text = _defaultCreativeManualSlotsText;
+    _ctrls.nameCtrl.clear();
+    _ctrls.pathCtrl.clear();
+    _ctrls.imagesCtrl.clear();
+    _ctrls.slotsCtrl.text = _defaultCreativeManualSlotsText;
   }
 
   void _applyRow(_CreativeManualRow row) {
     _selected = row;
-    _nameCtrl.text = row.name;
-    _pathCtrl.text = row.path;
-    _imagesCtrl.text = row.images.join('\n');
-    _slotsCtrl.text = encodeCreativeManualSlots(row.slots);
+    _ctrls.nameCtrl.text = row.name;
+    _ctrls.pathCtrl.text = row.path;
+    _ctrls.imagesCtrl.text = row.images.join('\n');
+    _ctrls.slotsCtrl.text = encodeCreativeManualSlots(row.slots);
   }
 
   Future<void> _reloadAll({String? preferredPath}) async {
@@ -141,14 +132,14 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _createCurrentKind() async {
-    final name = _nameCtrl.text.trim();
-    final path = _pathCtrl.text.trim();
+    final name = _ctrls.nameCtrl.text.trim();
+    final path = _ctrls.pathCtrl.text.trim();
     if (name.isEmpty || path.isEmpty) {
       setState(() => _statusLine = '新建失败：名称与路径不能为空。');
       return;
     }
-    final slots = parseCreativeManualSlots(_slotsCtrl.text);
-    final images = parseCreativeManualImages(_imagesCtrl.text);
+    final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
+    final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = '新建手册中…';
@@ -196,8 +187,8 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _saveCurrentKind() async {
-    final path = _pathCtrl.text.trim();
-    final name = _nameCtrl.text.trim();
+    final path = _ctrls.pathCtrl.text.trim();
+    final name = _ctrls.nameCtrl.text.trim();
     if (_selected == null) {
       setState(() => _statusLine = '保存失败：请先选择一条手册。');
       return;
@@ -206,8 +197,8 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       setState(() => _statusLine = '保存失败：名称与路径不能为空。');
       return;
     }
-    final slots = parseCreativeManualSlots(_slotsCtrl.text);
-    final images = parseCreativeManualImages(_imagesCtrl.text);
+    final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
+    final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = '保存手册中…';
@@ -302,10 +293,10 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       activeRows: _activeRows,
       selected: _selected,
       statusLine: _statusLine,
-      nameCtrl: _nameCtrl,
-      pathCtrl: _pathCtrl,
-      imagesCtrl: _imagesCtrl,
-      slotsCtrl: _slotsCtrl,
+      nameCtrl: _ctrls.nameCtrl,
+      pathCtrl: _ctrls.pathCtrl,
+      imagesCtrl: _ctrls.imagesCtrl,
+      slotsCtrl: _ctrls.slotsCtrl,
       pathLabel: _pathLabel,
       selectionLabel: _selectionLabel,
       createLabel: _createLabel,
