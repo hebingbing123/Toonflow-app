@@ -84,6 +84,17 @@ class _StoryboardBatchWorkbenchDialogState
         productionRows: _productionRows,
       );
 
+  StoryboardExportBundleSummary? _currentExportEstimate() {
+    if (_selectedIds.isEmpty) {
+      return null;
+    }
+    return buildStoryboardExportBundleSummary(
+      selectedIds: _selectedIds,
+      boards: widget.boardsList,
+      productionRows: _productionRows,
+    );
+  }
+
   String _storyboardMetaLine(
     StoryboardRow row,
     ProductionStoryboardItemV1? productionRow,

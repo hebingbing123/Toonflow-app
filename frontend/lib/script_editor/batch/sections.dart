@@ -162,6 +162,7 @@ extension _StoryboardBatchWorkbenchSections
     required BuildContext context,
     required int? singleSelectedId,
   }) {
+    final exportEstimate = _currentExportEstimate();
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -181,6 +182,19 @@ extension _StoryboardBatchWorkbenchSections
                 : '当前查看分镜 #$singleSelectedId',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          if (exportEstimate != null) ...[
+            const SizedBox(height: 12),
+            Text('待导出包预估', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 6),
+            Text(
+              '内容：${exportEstimate.shotCount} 张分镜图 + ${exportEstimate.sidecarLabel}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '预计条目：${exportEstimate.estimatedEntryCount} 个 · 总时长 ${exportEstimate.totalDurationLabel}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           if (_downloadUrl != null) ...[
             const SizedBox(height: 8),
             SelectableText(
@@ -201,7 +215,7 @@ extension _StoryboardBatchWorkbenchSections
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '预计条目：${_exportSummary!.estimatedEntryCount} 个 · 总时长 ${_exportSummary!.totalDurationLabel} · 大小 ${formatBinarySize(_exportSummary!.byteLength)}',
+              '预计条目：${_exportSummary!.estimatedEntryCount} 个 · 总时长 ${_exportSummary!.totalDurationLabel} · 大小 ${formatBinarySize(_exportSummary!.byteLength ?? 0)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(

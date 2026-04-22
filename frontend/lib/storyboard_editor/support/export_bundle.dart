@@ -10,7 +10,7 @@ class StoryboardExportBundleSummary {
     required this.imageFileCount,
     required this.sidecarFileCount,
     required this.totalDurationSeconds,
-    required this.byteLength,
+    this.byteLength,
   });
 
   final String filename;
@@ -18,7 +18,7 @@ class StoryboardExportBundleSummary {
   final int imageFileCount;
   final int sidecarFileCount;
   final int totalDurationSeconds;
-  final int byteLength;
+  final int? byteLength;
 
   int get shotCount => shotIds.length;
   int get estimatedEntryCount => imageFileCount + sidecarFileCount;
@@ -47,7 +47,7 @@ StoryboardExportBundleSummary buildStoryboardExportBundleSummary({
   required Iterable<int> selectedIds,
   required Iterable<StoryboardRow> boards,
   required Iterable<ProductionStoryboardItemV1> productionRows,
-  required ProductionExportZipResponse zip,
+  ProductionExportZipResponse? zip,
 }) {
   final sortedShotIds = selectedIds.toSet().toList()..sort();
   final boardById = <int, StoryboardRow>{
@@ -67,12 +67,12 @@ StoryboardExportBundleSummary buildStoryboardExportBundleSummary({
   }
 
   return StoryboardExportBundleSummary(
-    filename: zip.filename ?? 'storyboards.zip',
+    filename: zip?.filename ?? 'storyboards.zip',
     shotIds: sortedShotIds,
     imageFileCount: sortedShotIds.length,
     sidecarFileCount: _storyboardExportSidecarCount,
     totalDurationSeconds: totalDurationSeconds,
-    byteLength: zip.bytes.length,
+    byteLength: zip?.bytes.length,
   );
 }
 

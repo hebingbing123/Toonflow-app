@@ -54,11 +54,11 @@ void main() {
         ),
       ],
       productionRows: const [],
-      zip: ProductionExportZipResponse(filename: null, bytes: Uint8List(10)),
     );
 
     expect(summary.filename, 'storyboards.zip');
     expect(summary.totalDurationSeconds, 5);
     expect(summary.totalDurationLabel, '5s');
+    expect(summary.byteLength, isNull);
   });
 }
