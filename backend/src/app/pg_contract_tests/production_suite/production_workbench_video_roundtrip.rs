@@ -357,15 +357,45 @@ async fn production_workbench_video_roundtrip() {
 
     let cursor = Cursor::new(body);
     let mut archive = ZipArchive::new(cursor).expect("valid zip");
-    assert_eq!(archive.len(), 1, "one storyboard file expected in zip");
-    let mut exported = archive.by_index(0).expect("zip first file");
-    assert_eq!(exported.name(), format!("storyboard-{storyboard_id}.png"));
+    assert_eq!(archive.len(), 3, "image + manifest + csv expected in zip");
+    let mut exported = archive
+        .by_name(&format!("storyboard-{storyboard_id}.png"))
+        .expect("zip storyboard image");
     let mut exported_bytes = Vec::new();
     std::io::Read::read_to_end(&mut exported, &mut exported_bytes).expect("read zip entry");
     assert!(
         !exported_bytes.is_empty(),
         "zip entry should contain image bytes"
     );
+    drop(exported);
+    let mut manifest_entry = archive.by_name("manifest.json").expect("zip manifest");
+    let mut manifest_bytes = Vec::new();
+    std::io::Read::read_to_end(&mut manifest_entry, &mut manifest_bytes)
+        .expect("read manifest entry");
+    let manifest: Value = serde_json::from_slice(&manifest_bytes).expect("manifest json");
+    assert_eq!(
+        manifest["export_type"].as_str(),
+        Some("storyboard_image_bundle")
+    );
+    assert_eq!(manifest["shot_count"].as_i64(), Some(1));
+    assert_eq!(
+        manifest["shots"][0]["storyboard_id"].as_i64(),
+        Some(i64::from(storyboard_id))
+    );
+    assert_eq!(
+        manifest["shots"][0]["image_filename"].as_str(),
+        Some(format!("storyboard-{storyboard_id}.png").as_str())
+    );
+    drop(manifest_entry);
+    let mut csv_entry = archive
+        .by_name("storyboard.csv")
+        .expect("zip storyboard csv");
+    let mut csv = String::new();
+    std::io::Read::read_to_string(&mut csv_entry, &mut csv).expect("read csv entry");
+    assert!(csv.starts_with(
+        "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,image_filename,image_source\n"
+    ));
+    assert!(csv.contains(&storyboard_id.to_string()));
 
     let res = app
         .clone()

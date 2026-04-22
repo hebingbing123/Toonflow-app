@@ -49,7 +49,14 @@ pub(in crate::production) async fn post_export_image(
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"
-        SELECT sb.numeric_id, sb.file_path
+        SELECT
+            sb.numeric_id,
+            sb.file_path,
+            sb.prompt,
+            sb.duration,
+            sb.state,
+            sb.track_id,
+            sb.sb_index
         FROM app_storyboard sb
         WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])

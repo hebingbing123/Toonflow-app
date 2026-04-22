@@ -53,6 +53,11 @@ pub(in crate::production) struct ExportImageBody {
 pub(super) struct ExportImageSourceRow {
     pub(super) numeric_id: i32,
     pub(super) file_path: Option<String>,
+    pub(super) prompt: Option<String>,
+    pub(super) duration: Option<String>,
+    pub(super) state: Option<String>,
+    pub(super) track_id: Option<i32>,
+    pub(super) sb_index: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]
