@@ -23,16 +23,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
 
 class _QualityReviewsWorkbenchDialogState
     extends State<_QualityReviewsWorkbenchDialog> {
-  late final TextEditingController _targetTypeFilterCtrl;
-  late final TextEditingController _targetIdFilterCtrl;
-  late final TextEditingController _jobIdFilterCtrl;
-  late final TextEditingController _reviewIdCtrl;
-  late final TextEditingController _createTargetTypeCtrl;
-  late final TextEditingController _createTargetIdCtrl;
-  late final TextEditingController _createSourceCtrl;
-  late final TextEditingController _createScoreCtrl;
-  late final TextEditingController _createCommentsCtrl;
-  late final TextEditingController _createBadCaseCategoryCtrl;
+  late final _QualityReviewsWorkbenchControllers _ctrls;
 
   List<QualityReview> _reviews = const <QualityReview>[];
   String? _statsSummary;
@@ -52,41 +43,19 @@ class _QualityReviewsWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _targetTypeFilterCtrl = TextEditingController();
-    _targetIdFilterCtrl = TextEditingController();
-    _jobIdFilterCtrl = TextEditingController();
-    _reviewIdCtrl = TextEditingController();
-    _createTargetTypeCtrl = TextEditingController(text: 'output');
-    _createTargetIdCtrl = TextEditingController(
-      text: 'flutter-workbench-${DateTime.now().millisecondsSinceEpoch}',
-    );
-    _createSourceCtrl = TextEditingController(text: 'manual');
-    _createScoreCtrl = TextEditingController(text: '85');
-    _createCommentsCtrl = TextEditingController(
-      text: 'quality workbench review',
-    );
-    _createBadCaseCategoryCtrl = TextEditingController();
+    _ctrls = _QualityReviewsWorkbenchControllers.create();
     _reviews = List<QualityReview>.from(widget.initialReviews);
     _statsSummary = widget.initialStatsSummary;
     _stagePassRateSummary = widget.initialStagePassRateSummary;
     _reviewDetails = widget.initialReviewDetails;
     if (_reviews.isNotEmpty) {
-      _reviewIdCtrl.text = _reviews.first.id;
+      _ctrls.reviewIdCtrl.text = _reviews.first.id;
     }
   }
 
   @override
   void dispose() {
-    _targetTypeFilterCtrl.dispose();
-    _targetIdFilterCtrl.dispose();
-    _jobIdFilterCtrl.dispose();
-    _reviewIdCtrl.dispose();
-    _createTargetTypeCtrl.dispose();
-    _createTargetIdCtrl.dispose();
-    _createSourceCtrl.dispose();
-    _createScoreCtrl.dispose();
-    _createCommentsCtrl.dispose();
-    _createBadCaseCategoryCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
@@ -102,9 +71,9 @@ class _QualityReviewsWorkbenchDialogState
     try {
       final rows = await fetchQualityReviews(
         widget.accessToken,
-        targetType: _targetTypeFilterCtrl.text.trim(),
-        targetId: _targetIdFilterCtrl.text.trim(),
-        jobId: _jobIdFilterCtrl.text.trim(),
+        targetType: _ctrls.targetTypeFilterCtrl.text.trim(),
+        targetId: _ctrls.targetIdFilterCtrl.text.trim(),
+        jobId: _ctrls.jobIdFilterCtrl.text.trim(),
         isBadCase: onlyBadCases ? true : null,
         limit: 20,
       );
@@ -115,8 +84,8 @@ class _QualityReviewsWorkbenchDialogState
         _statusLine = onlyBadCases
             ? '已加载 ${rows.length} 条坏例评审'
             : '已加载 ${rows.length} 条评审';
-        if (_reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
-          _reviewIdCtrl.text = rows.first.id;
+        if (_ctrls.reviewIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
+          _ctrls.reviewIdCtrl.text = rows.first.id;
         }
       });
     } on RustApiException catch (e) {
@@ -180,7 +149,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadReviewById() async {
-    final reviewId = _reviewIdCtrl.text.trim();
+    final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
       setState(() => _statusLine = '请先输入评审 ID');
       return;
@@ -207,9 +176,9 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _createReview() async {
-    final targetType = _createTargetTypeCtrl.text.trim();
-    final source = _createSourceCtrl.text.trim();
-    final score = int.tryParse(_createScoreCtrl.text.trim());
+    final targetType = _ctrls.createTargetTypeCtrl.text.trim();
+    final source = _ctrls.createSourceCtrl.text.trim();
+    final score = int.tryParse(_ctrls.createScoreCtrl.text.trim());
     if (targetType.isEmpty || source.isEmpty) {
       setState(() => _statusLine = 'targetType 和 source 不能为空');
       return;
@@ -223,19 +192,19 @@ class _QualityReviewsWorkbenchDialogState
         widget.accessToken,
         CreateQualityReviewBody(
           targetType: targetType,
-          targetId: _createTargetIdCtrl.text.trim().isEmpty
+          targetId: _ctrls.createTargetIdCtrl.text.trim().isEmpty
               ? null
-              : _createTargetIdCtrl.text.trim(),
+              : _ctrls.createTargetIdCtrl.text.trim(),
           source: source,
           overallScore: score,
           passed: _createPassed,
-          comments: _createCommentsCtrl.text.trim().isEmpty
+          comments: _ctrls.createCommentsCtrl.text.trim().isEmpty
               ? null
-              : _createCommentsCtrl.text.trim(),
+              : _ctrls.createCommentsCtrl.text.trim(),
           isBadCase: _createBadCase,
-          badCaseCategory: _createBadCaseCategoryCtrl.text.trim().isEmpty
+          badCaseCategory: _ctrls.createBadCaseCategoryCtrl.text.trim().isEmpty
               ? null
-              : _createBadCaseCategoryCtrl.text.trim(),
+              : _ctrls.createBadCaseCategoryCtrl.text.trim(),
           modelName: 'manual',
           skillVersion: 'flutter.workbench',
           modelParams: const {'surface': 'quality_reviews_workbench'},
@@ -243,7 +212,7 @@ class _QualityReviewsWorkbenchDialogState
       );
       if (!mounted) return;
       setState(() {
-        _reviewIdCtrl.text = created.id;
+        _ctrls.reviewIdCtrl.text = created.id;
         _reviewDetails = formatQualityReviewDetails(created);
         _statusLine = '已创建评审 ${created.id}';
       });
@@ -276,16 +245,16 @@ class _QualityReviewsWorkbenchDialogState
         loadingStagePassRate: _loadingStagePassRate,
         loadingReviewById: _loadingReviewById,
         creatingReview: _creatingReview,
-        targetTypeFilterCtrl: _targetTypeFilterCtrl,
-        targetIdFilterCtrl: _targetIdFilterCtrl,
-        jobIdFilterCtrl: _jobIdFilterCtrl,
-        reviewIdCtrl: _reviewIdCtrl,
-        createTargetTypeCtrl: _createTargetTypeCtrl,
-        createTargetIdCtrl: _createTargetIdCtrl,
-        createSourceCtrl: _createSourceCtrl,
-        createScoreCtrl: _createScoreCtrl,
-        createCommentsCtrl: _createCommentsCtrl,
-        createBadCaseCategoryCtrl: _createBadCaseCategoryCtrl,
+        targetTypeFilterCtrl: _ctrls.targetTypeFilterCtrl,
+        targetIdFilterCtrl: _ctrls.targetIdFilterCtrl,
+        jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
+        reviewIdCtrl: _ctrls.reviewIdCtrl,
+        createTargetTypeCtrl: _ctrls.createTargetTypeCtrl,
+        createTargetIdCtrl: _ctrls.createTargetIdCtrl,
+        createSourceCtrl: _ctrls.createSourceCtrl,
+        createScoreCtrl: _ctrls.createScoreCtrl,
+        createCommentsCtrl: _ctrls.createCommentsCtrl,
+        createBadCaseCategoryCtrl: _ctrls.createBadCaseCategoryCtrl,
       ),
       callbacks: QualityReviewsWorkbenchDialogViewCallbacks(
         onLoadReviews: () {
@@ -311,7 +280,7 @@ class _QualityReviewsWorkbenchDialogState
             setState(() => _createBadCase = value),
         onSelectReview: (review) {
           setState(() {
-            _reviewIdCtrl.text = review.id;
+            _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review);
           });
         },

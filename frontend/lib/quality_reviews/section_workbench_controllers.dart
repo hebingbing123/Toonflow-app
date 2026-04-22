@@ -1,0 +1,58 @@
+part of 'section.dart';
+
+class _QualityReviewsWorkbenchControllers {
+  _QualityReviewsWorkbenchControllers({
+    required this.targetTypeFilterCtrl,
+    required this.targetIdFilterCtrl,
+    required this.jobIdFilterCtrl,
+    required this.reviewIdCtrl,
+    required this.createTargetTypeCtrl,
+    required this.createTargetIdCtrl,
+    required this.createSourceCtrl,
+    required this.createScoreCtrl,
+    required this.createCommentsCtrl,
+    required this.createBadCaseCategoryCtrl,
+  });
+
+  factory _QualityReviewsWorkbenchControllers.create() {
+    return _QualityReviewsWorkbenchControllers(
+      targetTypeFilterCtrl: TextEditingController(),
+      targetIdFilterCtrl: TextEditingController(),
+      jobIdFilterCtrl: TextEditingController(),
+      reviewIdCtrl: TextEditingController(),
+      createTargetTypeCtrl: TextEditingController(text: 'output'),
+      createTargetIdCtrl: TextEditingController(
+        text: 'flutter-workbench-${DateTime.now().millisecondsSinceEpoch}',
+      ),
+      createSourceCtrl: TextEditingController(text: 'manual'),
+      createScoreCtrl: TextEditingController(text: '85'),
+      createCommentsCtrl: TextEditingController(text: 'quality workbench review'),
+      createBadCaseCategoryCtrl: TextEditingController(),
+    );
+  }
+
+  final TextEditingController targetTypeFilterCtrl;
+  final TextEditingController targetIdFilterCtrl;
+  final TextEditingController jobIdFilterCtrl;
+  final TextEditingController reviewIdCtrl;
+  final TextEditingController createTargetTypeCtrl;
+  final TextEditingController createTargetIdCtrl;
+  final TextEditingController createSourceCtrl;
+  final TextEditingController createScoreCtrl;
+  final TextEditingController createCommentsCtrl;
+  final TextEditingController createBadCaseCategoryCtrl;
+
+  void dispose() {
+    targetTypeFilterCtrl.dispose();
+    targetIdFilterCtrl.dispose();
+    jobIdFilterCtrl.dispose();
+    reviewIdCtrl.dispose();
+    createTargetTypeCtrl.dispose();
+    createTargetIdCtrl.dispose();
+    createSourceCtrl.dispose();
+    createScoreCtrl.dispose();
+    createCommentsCtrl.dispose();
+    createBadCaseCategoryCtrl.dispose();
+  }
+}
+
