@@ -22,8 +22,8 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _batchGenerate() async {
     final productionMap = _productionById();
     final selected = _sortedSelection();
-    final suffix = _promptSuffixCtrl.text.trim();
-    final negativePrompt = _negativePromptCtrl.text.trim();
+    final suffix = _ctrls.promptSuffixCtrl.text.trim();
+    final negativePrompt = _ctrls.negativePromptCtrl.text.trim();
     final items = <BatchGenerateImageItem>[];
     for (final numericId in selected) {
       final scriptRow = _findScriptRow(numericId);
@@ -38,10 +38,12 @@ extension _StoryboardBatchWorkbenchActions
           storyboardId: numericId,
           prompt: combinedPrompt,
           negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
-          model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
-          resolution: _resolutionCtrl.text.trim().isEmpty
+          model: _ctrls.modelCtrl.text.trim().isEmpty
               ? null
-              : _resolutionCtrl.text.trim(),
+              : _ctrls.modelCtrl.text.trim(),
+          resolution: _ctrls.resolutionCtrl.text.trim().isEmpty
+              ? null
+              : _ctrls.resolutionCtrl.text.trim(),
         ),
       );
     }
@@ -53,10 +55,12 @@ extension _StoryboardBatchWorkbenchActions
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
       items: items,
-      model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
-      resolution: _resolutionCtrl.text.trim().isEmpty
+      model: _ctrls.modelCtrl.text.trim().isEmpty
           ? null
-          : _resolutionCtrl.text.trim(),
+          : _ctrls.modelCtrl.text.trim(),
+      resolution: _ctrls.resolutionCtrl.text.trim().isEmpty
+          ? null
+          : _ctrls.resolutionCtrl.text.trim(),
     );
     await _refreshProduction();
     if (mounted) {

@@ -32,7 +32,7 @@ extension _StoryboardBatchWorkbenchSections
       children: [
         Expanded(
           child: TextField(
-            controller: _promptSuffixCtrl,
+            controller: _ctrls.promptSuffixCtrl,
             decoration: const InputDecoration(
               labelText: '追加提示词（可选）',
               helperText: '会拼接到每条分镜原提示词末尾。',
@@ -42,7 +42,7 @@ extension _StoryboardBatchWorkbenchSections
         const SizedBox(width: 12),
         Expanded(
           child: TextField(
-            controller: _negativePromptCtrl,
+            controller: _ctrls.negativePromptCtrl,
             decoration: const InputDecoration(labelText: '负面提示词（可选）'),
           ),
         ),
@@ -55,14 +55,14 @@ extension _StoryboardBatchWorkbenchSections
       children: [
         Expanded(
           child: TextField(
-            controller: _modelCtrl,
+            controller: _ctrls.modelCtrl,
             decoration: const InputDecoration(labelText: '模型（可选）'),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: TextField(
-            controller: _resolutionCtrl,
+            controller: _ctrls.resolutionCtrl,
             decoration: const InputDecoration(labelText: '分辨率（可选）'),
           ),
         ),

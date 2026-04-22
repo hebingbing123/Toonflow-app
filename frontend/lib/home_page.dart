@@ -100,6 +100,7 @@ part 'script_editor/workbench.dart';
 part 'storyboard_editor/editor.dart';
 part 'script_editor/batch/workbench.dart';
 part 'script_editor/batch/dialog.dart';
+part 'script_editor/batch/dialog_controllers.dart';
 part 'script_editor/batch/actions.dart';
 part 'script_editor/batch/sections.dart';
 part 'storyboard_editor/workbench.dart';

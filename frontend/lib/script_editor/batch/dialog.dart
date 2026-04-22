@@ -24,10 +24,7 @@ class _StoryboardBatchWorkbenchDialog extends StatefulWidget {
 
 class _StoryboardBatchWorkbenchDialogState
     extends State<_StoryboardBatchWorkbenchDialog> {
-  late final TextEditingController _promptSuffixCtrl;
-  late final TextEditingController _negativePromptCtrl;
-  late final TextEditingController _modelCtrl;
-  late final TextEditingController _resolutionCtrl;
+  late final _StoryboardBatchWorkbenchControllers _ctrls;
 
   final Set<int> _selectedIds = {};
   List<ProductionStoryboardItemV1> _productionRows = const [];
@@ -45,10 +42,7 @@ class _StoryboardBatchWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _promptSuffixCtrl = TextEditingController();
-    _negativePromptCtrl = TextEditingController();
-    _modelCtrl = TextEditingController();
-    _resolutionCtrl = TextEditingController();
+    _ctrls = _StoryboardBatchWorkbenchControllers.create();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       await _refreshProduction();
@@ -57,10 +51,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   @override
   void dispose() {
-    _promptSuffixCtrl.dispose();
-    _negativePromptCtrl.dispose();
-    _modelCtrl.dispose();
-    _resolutionCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
