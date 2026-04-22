@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'input_controller.dart';
 import 'operation_controller.dart';
 
+part 'run_controller_helpers.dart';
+
 typedef WorkspaceRunAccessTokenProvider = String? Function();
 typedef WorkspaceRunErrorSink = void Function(String? error);
 typedef WorkspaceRunStateReset = void Function();
@@ -97,6 +99,7 @@ class WorkspaceRunController {
       rawArgs,
       objectError: 'script tool arguments 必须是 JSON object',
       parseError: 'script tool arguments JSON 解析失败',
+      onErrorChanged: _onErrorChanged,
     );
     if (args == null) {
       return;
@@ -237,6 +240,7 @@ class WorkspaceRunController {
       _inputController.productionDomainArgsController.text,
       objectError: 'production tool arguments 必须是 JSON object',
       parseError: 'production tool arguments JSON 解析失败',
+      onErrorChanged: _onErrorChanged,
     );
     if (args == null) {
       return;
@@ -335,37 +339,11 @@ class WorkspaceRunController {
     }
   }
 
-  int? _parsePositiveInt(String raw) {
-    final value = int.tryParse(raw.trim());
-    if (value == null || value <= 0) return null;
-    return value;
-  }
-
-  Map<String, dynamic>? _parseJsonObject(
-    String raw, {
-    required String objectError,
-    required String parseError,
-  }) {
-    final normalized = raw.trim();
-    if (normalized.isEmpty) {
-      return <String, dynamic>{};
-    }
-    try {
-      final decoded = jsonDecode(normalized);
-      if (decoded is! Map<String, dynamic>) {
-        _onErrorChanged(objectError);
-        return null;
-      }
-      return decoded;
-    } catch (_) {
-      _onErrorChanged(parseError);
-      return null;
-    }
-  }
-
   void _prepareWorkspaceRun() {
-    _clearWsLog();
-    _resetWorkspaceOutputs();
-    _onErrorChanged(null);
+    _prepareWorkspaceRunState(
+      clearWsLog: _clearWsLog,
+      resetWorkspaceOutputs: _resetWorkspaceOutputs,
+      onErrorChanged: _onErrorChanged,
+    );
   }
 }
