@@ -129,10 +129,14 @@ Future<void> openNovelWorkbenchDialog({
               setLocalState(() => local.infoLine = value);
             }
 
+            final viewportWidth = MediaQuery.sizeOf(dialogCtx).width;
+            final dialogWidth = viewportWidth.isFinite
+                ? viewportWidth.clamp(320.0, 760.0)
+                : 760.0;
             return AlertDialog(
               title: const Text('章节工作台'),
               content: SizedBox(
-                width: 760,
+                width: dialogWidth,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
