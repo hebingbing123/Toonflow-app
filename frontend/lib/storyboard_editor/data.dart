@@ -12,9 +12,22 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     try {
       final job = await fetchJob(widget.token, jobId);
       if (!mounted) return;
+      final exportUrl = (job.result?['export_url'] as String?)?.trim() ?? '';
+      final shouldSyncWriteback =
+          job.status == 'completed' &&
+          exportUrl.isNotEmpty &&
+          !_latestExportWritebackSynced;
       _applyWorkbenchState(() {
         _latestExportJob = job;
       });
+      if (shouldSyncWriteback) {
+        await _refreshProductionData(syncImageUrl: true);
+        if (!mounted) return;
+        _applyWorkbenchState(() {
+          _latestExportWritebackSynced = true;
+          _setWorkbenchFollowUp('导出任务已完成，已自动同步当前分镜制作数据。');
+        });
+      }
     } finally {
       if (mounted) {
         _applyWorkbenchState(() => _loadingExportJob = false);

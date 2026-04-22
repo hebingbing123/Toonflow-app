@@ -43,6 +43,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   GetGenerateDataResponse? _generateData;
   String? _latestExportJobId;
   JobRow? _latestExportJob;
+  bool _latestExportWritebackSynced = false;
   String? _productionError;
   String? _workbenchLine;
   String _mode = 'standard';
