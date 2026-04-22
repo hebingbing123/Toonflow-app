@@ -45,6 +45,7 @@ pub(super) async fn build_storyboard_export_zip(
     let timeline = build_storyboard_timeline(&manifest_rows);
     let subtitles = build_storyboard_srt(&manifest_rows);
     let voiceover_script = build_storyboard_voiceover_script(&manifest_rows);
+    let voiceover_segments = build_storyboard_voiceover_segments(&manifest_rows);
     write_export_text_file(
         &mut archive,
         "manifest.json",
@@ -73,6 +74,12 @@ pub(super) async fn build_storyboard_export_zip(
         &mut archive,
         "voiceover_script.txt",
         voiceover_script.as_bytes(),
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "voiceover_segments.json",
+        &serde_json::to_vec_pretty(&voiceover_segments).map_err(|_| ApiError::Internal)?,
         options,
     )?;
 
@@ -164,6 +171,30 @@ struct StoryboardExportTimeline<'a> {
     shot_count: usize,
     total_duration_ms: u64,
     shots: Vec<StoryboardExportTimelineShot>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportVoiceoverSegments<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    ready_count: usize,
+    placeholder_count: usize,
+    total_duration_ms: u64,
+    shots: Vec<StoryboardExportVoiceoverSegment>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportVoiceoverSegment {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    text: String,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -307,6 +338,46 @@ pub(super) fn build_storyboard_voiceover_script(shots: &[StoryboardExportManifes
         out.push_str("\n\n");
     }
     out
+}
+
+pub(super) fn build_storyboard_voiceover_segments(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportVoiceoverSegments<'static> {
+    let mut cursor_ms = 0_u64;
+    let mut ready_count = 0_usize;
+    let segments = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            if shot.voiceover_ready {
+                ready_count += 1;
+            }
+            StoryboardExportVoiceoverSegment {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                text: resolve_shot_script_line(shot),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
+            }
+        })
+        .collect::<Vec<_>>();
+    let placeholder_count = segments.len().saturating_sub(ready_count);
+    StoryboardExportVoiceoverSegments {
+        export_type: "storyboard_voiceover_segments",
+        shot_count: segments.len(),
+        ready_count,
+        placeholder_count,
+        total_duration_ms: cursor_ms,
+        shots: segments,
+    }
 }
 
 fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {

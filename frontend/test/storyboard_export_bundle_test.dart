@@ -49,8 +49,8 @@ void main() {
     expect(summary.shotIds, const [7, 9]);
     expect(summary.shotCount, 2);
     expect(summary.imageFileCount, 2);
-    expect(summary.sidecarFileCount, 5);
-    expect(summary.estimatedEntryCount, 7);
+    expect(summary.sidecarFileCount, 6);
+    expect(summary.estimatedEntryCount, 8);
     expect(summary.totalDurationSeconds, 14);
     expect(summary.totalDurationLabel, '14s');
     expect(summary.explicitSubtitleCount, 1);
@@ -59,10 +59,12 @@ void main() {
     expect(summary.subtitleCoverageLabel, '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
     expect(summary.voiceoverCoverageLabel, '旁白脚本：2 条可用文案 / 0 条占位文案');
     expect(summary.audioDeliveryLabel, '音频交付：2 条可直接配音 / 0 条仍是占位文本');
+    expect(summary.voiceoverJsonLabel, '配音 JSON：2 条可直接投喂 / 0 条仍需补文案');
     expect(summary.byteLength, 2048);
     expect(summary.includesTimeline, isTrue);
     expect(summary.includesSubtitles, isTrue);
     expect(summary.includesVoiceoverScript, isTrue);
+    expect(summary.includesVoiceoverSegments, isTrue);
   });
 
   test('buildStoryboardExportBundleSummary falls back to default duration', () {
@@ -87,6 +89,7 @@ void main() {
     expect(summary.placeholderSubtitleCount, 1);
     expect(summary.voiceoverCoverageLabel, '旁白脚本：0 条可用文案 / 1 条占位文案');
     expect(summary.audioDeliveryLabel, '音频交付：0 条可直接配音 / 1 条仍是占位文本');
+    expect(summary.voiceoverJsonLabel, '配音 JSON：0 条可直接投喂 / 1 条仍需补文案');
     expect(summary.byteLength, isNull);
   });
 }

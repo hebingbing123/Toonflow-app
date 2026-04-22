@@ -371,8 +371,8 @@ async fn production_workbench_video_roundtrip() {
     let mut archive = ZipArchive::new(cursor).expect("valid zip");
     assert_eq!(
         archive.len(),
-        6,
-        "image + manifest + csv + timeline + subtitles + voiceover expected in zip"
+        7,
+        "image + manifest + csv + timeline + subtitles + voiceover script + voiceover segments expected in zip"
     );
     let mut exported = archive
         .by_name(&format!("storyboard-{storyboard_id}.png"))
@@ -470,6 +470,33 @@ async fn production_workbench_video_roundtrip() {
     assert!(voiceover_script.contains("[00:00:00,000 - 00:00:05,000] Shot"));
     assert!(voiceover_script.contains("source=explicit_narration · voiceover_ready=true"));
     assert!(voiceover_script.contains("旁白：主角抬头看向远方"));
+    drop(voiceover_entry);
+    let mut voiceover_segments_entry = archive
+        .by_name("voiceover_segments.json")
+        .expect("zip voiceover segments");
+    let mut voiceover_segments_bytes = Vec::new();
+    std::io::Read::read_to_end(&mut voiceover_segments_entry, &mut voiceover_segments_bytes)
+        .expect("read voiceover segments entry");
+    let voiceover_segments: Value =
+        serde_json::from_slice(&voiceover_segments_bytes).expect("voiceover segments json");
+    assert_eq!(
+        voiceover_segments["export_type"].as_str(),
+        Some("storyboard_voiceover_segments")
+    );
+    assert_eq!(voiceover_segments["ready_count"].as_i64(), Some(1));
+    assert_eq!(voiceover_segments["placeholder_count"].as_i64(), Some(0));
+    assert_eq!(
+        voiceover_segments["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(
+        voiceover_segments["shots"][0]["voiceover_ready"].as_bool(),
+        Some(true)
+    );
+    assert_eq!(
+        voiceover_segments["shots"][0]["text"].as_str(),
+        Some("旁白：主角抬头看向远方")
+    );
 
     let res = app
         .clone()

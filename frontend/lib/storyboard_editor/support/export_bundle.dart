@@ -1,7 +1,7 @@
 part of 'diagnosis.dart';
 
 const int _defaultStoryboardDurationSeconds = 5;
-const int _storyboardExportSidecarCount = 5;
+const int _storyboardExportSidecarCount = 6;
 
 class StoryboardExportBundleSummary {
   const StoryboardExportBundleSummary({
@@ -33,6 +33,7 @@ class StoryboardExportBundleSummary {
   bool get includesTimeline => true;
   bool get includesSubtitles => true;
   bool get includesVoiceoverScript => true;
+  bool get includesVoiceoverSegments => true;
 
   String get totalDurationLabel {
     final minutes = totalDurationSeconds ~/ 60;
@@ -47,7 +48,7 @@ class StoryboardExportBundleSummary {
   }
 
   String get sidecarLabel =>
-      'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt';
+      'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json';
 
   String get subtitleCoverageLabel =>
       '字幕来源：$explicitSubtitleCount 条旁白文案'
@@ -65,6 +66,12 @@ class StoryboardExportBundleSummary {
     final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
     return '音频交付：$readyCount 条可直接配音 / '
         '$placeholderSubtitleCount 条仍是占位文本';
+  }
+
+  String get voiceoverJsonLabel {
+    final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
+    return '配音 JSON：$readyCount 条可直接投喂 / '
+        '$placeholderSubtitleCount 条仍需补文案';
   }
 }
 

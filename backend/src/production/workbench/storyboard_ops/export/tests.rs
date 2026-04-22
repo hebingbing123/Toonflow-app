@@ -134,3 +134,64 @@ fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
     assert!(script.contains("source=prompt_fallback · voiceover_ready=true"));
     assert!(script.contains("Fallback prompt"));
 }
+
+#[test]
+fn storyboard_voiceover_segments_carry_timeline_and_ready_counts() {
+    let first = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 7,
+            file_path: Some("https://cdn.example.com/storyboard-7.png".into()),
+            prompt: Some("Opening line".into()),
+            video_desc: Some("Narrator opening".into()),
+            duration: Some("5".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(9),
+        },
+        0,
+    );
+    let second = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 8,
+            file_path: Some("https://cdn.example.com/storyboard-8.png".into()),
+            prompt: None,
+            video_desc: None,
+            duration: Some("6".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(10),
+        },
+        1,
+    );
+
+    let payload = serde_json::to_value(super::zip_export::build_storyboard_voiceover_segments(&[
+        first, second,
+    ]))
+    .expect("voiceover segments json");
+
+    assert_eq!(
+        payload["export_type"].as_str(),
+        Some("storyboard_voiceover_segments")
+    );
+    assert_eq!(payload["shot_count"].as_u64(), Some(2));
+    assert_eq!(payload["ready_count"].as_u64(), Some(1));
+    assert_eq!(payload["placeholder_count"].as_u64(), Some(1));
+    assert_eq!(payload["total_duration_ms"].as_u64(), Some(11_000));
+    assert_eq!(payload["shots"][0]["start_ms"].as_u64(), Some(0));
+    assert_eq!(payload["shots"][0]["end_ms"].as_u64(), Some(5_000));
+    assert_eq!(
+        payload["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(payload["shots"][0]["voiceover_ready"].as_bool(), Some(true));
+    assert_eq!(payload["shots"][1]["start_ms"].as_u64(), Some(5_000));
+    assert_eq!(payload["shots"][1]["end_ms"].as_u64(), Some(11_000));
+    assert_eq!(
+        payload["shots"][1]["subtitle_source"].as_str(),
+        Some("placeholder")
+    );
+    assert_eq!(
+        payload["shots"][1]["voiceover_ready"].as_bool(),
+        Some(false)
+    );
+}

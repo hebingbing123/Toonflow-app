@@ -206,6 +206,10 @@ extension _StoryboardBatchWorkbenchSections
               exportEstimate.audioDeliveryLabel,
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            Text(
+              exportEstimate.voiceoverJsonLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
           if (_downloadUrl != null) ...[
             const SizedBox(height: 8),
@@ -240,6 +244,10 @@ extension _StoryboardBatchWorkbenchSections
             ),
             Text(
               _exportSummary!.audioDeliveryLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              _exportSummary!.voiceoverJsonLabel,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
