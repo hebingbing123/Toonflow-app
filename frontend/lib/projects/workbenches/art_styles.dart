@@ -18,11 +18,7 @@ class _ArtStylesWorkbenchDialog extends StatefulWidget {
 }
 
 class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
-  late final TextEditingController _nameCtrl;
-  late final TextEditingController _labelCtrl;
-  late final TextEditingController _promptCtrl;
-  late final TextEditingController _fileUrlCtrl;
-  late final TextEditingController _extractImagesCtrl;
+  late final _ArtStylesWorkbenchControllers _ctrls;
 
   List<ArtStyleRow> _rows = const <ArtStyleRow>[];
   ArtStyleRow? _selected;
@@ -34,11 +30,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   @override
   void initState() {
     super.initState();
-    _nameCtrl = TextEditingController();
-    _labelCtrl = TextEditingController();
-    _promptCtrl = TextEditingController();
-    _fileUrlCtrl = TextEditingController();
-    _extractImagesCtrl = TextEditingController();
+    _ctrls = _ArtStylesWorkbenchControllers.create();
     _rows = List<ArtStyleRow>.from(widget.initialRows);
     if (_rows.isNotEmpty) {
       _applySelection(_rows.first, loadCover: false);
@@ -47,21 +39,17 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _labelCtrl.dispose();
-    _promptCtrl.dispose();
-    _fileUrlCtrl.dispose();
-    _extractImagesCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
   void _applySelection(ArtStyleRow row, {bool loadCover = true}) {
     setState(() {
       _selected = row;
-      _nameCtrl.text = row.name;
-      _labelCtrl.text = row.label ?? '';
-      _promptCtrl.text = row.prompt ?? '';
-      _fileUrlCtrl.text = row.fileUrl ?? '';
+      _ctrls.nameCtrl.text = row.name;
+      _ctrls.labelCtrl.text = row.label ?? '';
+      _ctrls.promptCtrl.text = row.prompt ?? '';
+      _ctrls.fileUrlCtrl.text = row.fileUrl ?? '';
       _coverBytes = null;
     });
     if (loadCover) {
@@ -102,10 +90,10 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
         setState(() {
           _selected = null;
           _coverBytes = null;
-          _nameCtrl.clear();
-          _labelCtrl.clear();
-          _promptCtrl.clear();
-          _fileUrlCtrl.clear();
+          _ctrls.nameCtrl.clear();
+          _ctrls.labelCtrl.clear();
+          _ctrls.promptCtrl.clear();
+          _ctrls.fileUrlCtrl.clear();
         });
       }
     } on RustApiException catch (e) {
@@ -159,7 +147,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _createStyle() async {
-    final name = _nameCtrl.text.trim();
+    final name = _ctrls.nameCtrl.text.trim();
     if (name.isEmpty) {
       setState(() => _statusLine = '新建失败：名称不能为空。');
       return;
@@ -172,13 +160,15 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       final created = await createArtStyle(
         widget.accessToken,
         name: name,
-        label: _labelCtrl.text.trim().isEmpty ? null : _labelCtrl.text.trim(),
-        prompt: _promptCtrl.text.trim().isEmpty
+        label: _ctrls.labelCtrl.text.trim().isEmpty
             ? null
-            : _promptCtrl.text.trim(),
-        fileUrl: _fileUrlCtrl.text.trim().isEmpty
+            : _ctrls.labelCtrl.text.trim(),
+        prompt: _ctrls.promptCtrl.text.trim().isEmpty
             ? null
-            : _fileUrlCtrl.text.trim(),
+            : _ctrls.promptCtrl.text.trim(),
+        fileUrl: _ctrls.fileUrlCtrl.text.trim().isEmpty
+            ? null
+            : _ctrls.fileUrlCtrl.text.trim(),
       );
       await _reloadRows(preferredNumericId: created.numericId);
       if (!mounted) return;
@@ -205,10 +195,10 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       return;
     }
     final body = buildArtStylePatchBody(
-      name: _nameCtrl.text,
-      label: _labelCtrl.text,
-      prompt: _promptCtrl.text,
-      fileUrl: _fileUrlCtrl.text,
+      name: _ctrls.nameCtrl.text,
+      label: _ctrls.labelCtrl.text,
+      prompt: _ctrls.promptCtrl.text,
+      fileUrl: _ctrls.fileUrlCtrl.text,
     );
     setState(() {
       _busy = true;
@@ -269,7 +259,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _extractPrompt() async {
-    final images = parseArtStyleExtractImages(_extractImagesCtrl.text);
+    final images = parseArtStyleExtractImages(_ctrls.extractImagesCtrl.text);
     if (images.isEmpty) {
       setState(() => _statusLine = '抽取失败：请至少输入一个图片 URL 或 data URI。');
       return;
@@ -282,7 +272,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       final response = await extractArtStylePrompt(widget.accessToken, images);
       if (!mounted) return;
       setState(() {
-        _promptCtrl.text = response.text;
+        _ctrls.promptCtrl.text = response.text;
         _busy = false;
         _statusLine = '已生成画风 prompt，可直接保存到当前画风。';
       });
@@ -311,11 +301,11 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
         statusLine: _statusLine,
         busy: _busy,
         loadingCover: _loadingCover,
-        nameCtrl: _nameCtrl,
-        labelCtrl: _labelCtrl,
-        promptCtrl: _promptCtrl,
-        fileUrlCtrl: _fileUrlCtrl,
-        extractImagesCtrl: _extractImagesCtrl,
+        nameCtrl: _ctrls.nameCtrl,
+        labelCtrl: _ctrls.labelCtrl,
+        promptCtrl: _ctrls.promptCtrl,
+        fileUrlCtrl: _ctrls.fileUrlCtrl,
+        extractImagesCtrl: _ctrls.extractImagesCtrl,
       ),
       callbacks: ArtStylesWorkbenchDialogViewCallbacks(
         onReloadRows: _reloadRows,

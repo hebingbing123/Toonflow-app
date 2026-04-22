@@ -11,6 +11,7 @@ import '../../rust_api.dart';
 
 part 'workbenches/art_styles.dart';
 part 'workbenches/art_styles_helpers.dart';
+part 'workbenches/art_styles_controllers.dart';
 
 class ProjectsSection extends StatelessWidget {
   const ProjectsSection({
