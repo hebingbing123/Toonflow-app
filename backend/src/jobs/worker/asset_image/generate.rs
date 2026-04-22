@@ -49,7 +49,15 @@ pub(crate) async fn run_asset_generate_image(
         .get("prompt")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing prompt".into()))?;
-    let image_base64 = p.get("image_base64").and_then(|x| x.as_str());
+    let prompt = prompt.trim();
+    if prompt.is_empty() {
+        return Err(JobRunError::Failed("payload prompt cannot be empty".into()));
+    }
+    let image_base64 = p
+        .get("image_base64")
+        .and_then(|x| x.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
 
     let image_model = resolve_openai_image_model(model_in);
     let size = resolve_openai_image_size(&image_model, resolution);

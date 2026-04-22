@@ -97,7 +97,15 @@ async fn run_asset_generate_batch_items(
             .get("prompt")
             .and_then(|x| x.as_str())
             .ok_or_else(|| JobRunError::Failed("item missing prompt".into()))?;
-        let image_base64 = item.get("image_base64").and_then(|x| x.as_str());
+        let prompt = prompt.trim();
+        if prompt.is_empty() {
+            return Err(JobRunError::Failed("item prompt cannot be empty".into()));
+        }
+        let image_base64 = item
+            .get("image_base64")
+            .and_then(|x| x.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
 
         let one: serde_json::Value = generate_and_store_asset_image(
             &ctx,
