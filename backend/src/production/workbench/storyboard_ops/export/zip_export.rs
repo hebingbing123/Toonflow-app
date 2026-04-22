@@ -42,6 +42,8 @@ pub(super) async fn build_storyboard_export_zip(
     }
 
     let storyboard_csv = build_storyboard_csv(&manifest_rows);
+    let timeline = build_storyboard_timeline(&manifest_rows);
+    let subtitles = build_storyboard_srt(&manifest_rows);
     write_export_text_file(
         &mut archive,
         "manifest.json",
@@ -59,6 +61,13 @@ pub(super) async fn build_storyboard_export_zip(
         storyboard_csv.as_bytes(),
         options,
     )?;
+    write_export_text_file(
+        &mut archive,
+        "timeline.json",
+        &serde_json::to_vec_pretty(&timeline).map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+    write_export_text_file(&mut archive, "subtitles.srt", subtitles.as_bytes(), options)?;
 
     archive
         .finish()
@@ -130,6 +139,29 @@ impl StoryboardExportManifestShot {
     }
 }
 
+#[derive(Debug, Serialize)]
+struct StoryboardExportTimeline<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    total_duration_ms: u64,
+    shots: Vec<StoryboardExportTimelineShot>,
+}
+
+#[derive(Debug, Serialize)]
+struct StoryboardExportTimelineShot {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    state: Option<String>,
+    prompt: Option<String>,
+    image_filename: String,
+    image_source: Option<String>,
+}
+
 fn write_export_text_file(
     archive: &mut zip::ZipWriter<Cursor<Vec<u8>>>,
     filename: &str,
@@ -161,6 +193,85 @@ pub(super) fn build_storyboard_csv(shots: &[StoryboardExportManifestShot]) -> St
         out.push('\n');
     }
     out
+}
+
+fn build_storyboard_timeline(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportTimeline<'static> {
+    let mut cursor_ms = 0_u64;
+    let timeline_shots = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            StoryboardExportTimelineShot {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                state: shot.state.clone(),
+                prompt: shot.prompt.clone(),
+                image_filename: shot.image_filename.clone(),
+                image_source: shot.image_source.clone(),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    StoryboardExportTimeline {
+        export_type: "storyboard_timeline",
+        shot_count: timeline_shots.len(),
+        total_duration_ms: cursor_ms,
+        shots: timeline_shots,
+    }
+}
+
+pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> String {
+    let mut out = String::new();
+    let mut cursor_ms = 0_u64;
+    for (index, shot) in shots.iter().enumerate() {
+        let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+        let start_ms = cursor_ms;
+        let end_ms = start_ms + (duration_seconds as u64 * 1000);
+        cursor_ms = end_ms;
+        let subtitle = shot
+            .prompt
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id));
+
+        out.push_str(&(index + 1).to_string());
+        out.push('\n');
+        out.push_str(&format!(
+            "{} --> {}\n",
+            format_srt_timestamp(start_ms),
+            format_srt_timestamp(end_ms)
+        ));
+        out.push_str(&subtitle);
+        out.push_str("\n\n");
+    }
+    out
+}
+
+fn parse_storyboard_duration_seconds(value: Option<&str>) -> i32 {
+    value
+        .and_then(|raw| raw.trim().parse::<i32>().ok())
+        .filter(|duration| *duration > 0)
+        .unwrap_or(5)
+}
+
+fn format_srt_timestamp(total_ms: u64) -> String {
+    let hours = total_ms / 3_600_000;
+    let minutes = (total_ms % 3_600_000) / 60_000;
+    let seconds = (total_ms % 60_000) / 1_000;
+    let millis = total_ms % 1_000;
+    format!("{hours:02}:{minutes:02}:{seconds:02},{millis:03}")
 }
 
 fn opt_i32_csv(value: Option<i32>) -> String {

@@ -1,9 +1,9 @@
 use super::super::common::StoryboardInsertDraft;
-use super::prepare::{
-    prepare_batch_storyboard_inserts, prepare_storyboard_insert, DEFAULT_STORYBOARD_DURATION,
-};
+use super::prepare::{prepare_batch_storyboard_inserts, prepare_storyboard_insert};
 use super::types::StoryboardInfoInput;
 use crate::error::ApiError;
+
+const DEFAULT_STORYBOARD_DURATION: i32 = 5;
 
 #[test]
 fn prepare_storyboard_insert_trims_prompt_and_defaults_duration() {
@@ -23,6 +23,15 @@ fn prepare_storyboard_insert_rejects_blank_prompt() {
     assert!(matches!(
         err,
         ApiError::BadRequest(message) if message == "prompt must not be empty"
+    ));
+}
+
+#[test]
+fn prepare_storyboard_insert_rejects_non_positive_duration() {
+    let err = prepare_storyboard_insert("opening", Some(0)).unwrap_err();
+    assert!(matches!(
+        err,
+        ApiError::BadRequest(message) if message == "duration must be a positive integer"
     ));
 }
 
@@ -75,5 +84,20 @@ fn prepare_batch_storyboard_inserts_relabels_blank_prompt_error() {
     assert!(matches!(
         err,
         ApiError::BadRequest(message) if message == "storyboards[*].prompt must not be empty"
+    ));
+}
+
+#[test]
+fn prepare_batch_storyboard_inserts_relabels_invalid_duration_error() {
+    let err = prepare_batch_storyboard_inserts(&[StoryboardInfoInput {
+        prompt: "valid".to_string(),
+        duration: Some(-1),
+    }])
+    .unwrap_err();
+
+    assert!(matches!(
+        err,
+        ApiError::BadRequest(message)
+            if message == "storyboards[*].duration must be a positive integer"
     ));
 }

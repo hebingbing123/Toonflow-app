@@ -11,7 +11,7 @@ pub(in crate::production::workbench::storyboard) async fn update_storyboard_info
     let updated = sqlx::query(
         r#"
         UPDATE app_storyboard
-        SET prompt = $2, duration = $3, updated_at = NOW()
+        SET prompt = $2, duration = COALESCE($3::text, duration), updated_at = NOW()
         WHERE id = $1
         "#,
     )

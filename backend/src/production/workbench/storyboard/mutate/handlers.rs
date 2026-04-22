@@ -8,7 +8,7 @@ use axum::{
 
 use super::super::common::{
     normalize_storyboard_image_url, normalize_storyboard_prompt, remove_storyboard_frame,
-    update_storyboard_image_url, update_storyboard_info,
+    update_storyboard_image_url, update_storyboard_info, validate_storyboard_duration,
 };
 use super::types::{
     EditStoryboardInfoBody, EditStoryboardInfoResponse, RemoveFrameBody, RemoveFrameResponse,
@@ -42,6 +42,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     Json(body): Json<EditStoryboardInfoBody>,
 ) -> Result<JsonResponse<EditStoryboardInfoResponse>, ApiError> {
     let prompt = normalize_storyboard_prompt(&body.prompt)?;
+    let duration = validate_storyboard_duration(body.duration)?;
 
     let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
         &state,
@@ -51,7 +52,7 @@ pub(in crate::production) async fn post_storyboard_edit_info(
         body.storyboard_id,
     )
     .await?;
-    update_storyboard_info(pool, sb_uuid, &prompt, body.duration).await?;
+    update_storyboard_info(pool, sb_uuid, &prompt, duration).await?;
 
     Ok(JsonResponse(EditStoryboardInfoResponse {
         storyboard_id: body.storyboard_id,

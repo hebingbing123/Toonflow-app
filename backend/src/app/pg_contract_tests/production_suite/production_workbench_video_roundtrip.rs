@@ -357,7 +357,11 @@ async fn production_workbench_video_roundtrip() {
 
     let cursor = Cursor::new(body);
     let mut archive = ZipArchive::new(cursor).expect("valid zip");
-    assert_eq!(archive.len(), 3, "image + manifest + csv expected in zip");
+    assert_eq!(
+        archive.len(),
+        5,
+        "image + manifest + csv + timeline + subtitles expected in zip"
+    );
     let mut exported = archive
         .by_name(&format!("storyboard-{storyboard_id}.png"))
         .expect("zip storyboard image");
@@ -396,6 +400,32 @@ async fn production_workbench_video_roundtrip() {
         "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,image_filename,image_source\n"
     ));
     assert!(csv.contains(&storyboard_id.to_string()));
+    drop(csv_entry);
+    let mut timeline_entry = archive.by_name("timeline.json").expect("zip timeline json");
+    let mut timeline_bytes = Vec::new();
+    std::io::Read::read_to_end(&mut timeline_entry, &mut timeline_bytes)
+        .expect("read timeline entry");
+    let timeline: Value = serde_json::from_slice(&timeline_bytes).expect("timeline json");
+    assert_eq!(
+        timeline["export_type"].as_str(),
+        Some("storyboard_timeline")
+    );
+    assert_eq!(timeline["shot_count"].as_i64(), Some(1));
+    assert_eq!(timeline["total_duration_ms"].as_i64(), Some(5000));
+    assert_eq!(
+        timeline["shots"][0]["start_ms"].as_i64(),
+        Some(0),
+        "timeline should start at zero"
+    );
+    assert_eq!(timeline["shots"][0]["end_ms"].as_i64(), Some(5000));
+    assert_eq!(timeline["shots"][0]["duration_seconds"].as_i64(), Some(5));
+    drop(timeline_entry);
+    let mut subtitles_entry = archive.by_name("subtitles.srt").expect("zip subtitles srt");
+    let mut subtitles = String::new();
+    std::io::Read::read_to_string(&mut subtitles_entry, &mut subtitles)
+        .expect("read subtitles entry");
+    assert!(subtitles.contains("1\n00:00:00,000 --> 00:00:05,000"));
+    assert!(subtitles.contains("pg_video_storyboard"));
 
     let res = app
         .clone()

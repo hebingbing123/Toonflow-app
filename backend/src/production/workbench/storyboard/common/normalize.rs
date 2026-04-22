@@ -1,5 +1,7 @@
 use crate::error::ApiError;
 
+pub(in crate::production::workbench::storyboard) const DEFAULT_STORYBOARD_DURATION: i32 = 5;
+
 pub(in crate::production::workbench::storyboard) fn normalize_storyboard_prompt(
     prompt: &str,
 ) -> Result<String, ApiError> {
@@ -18,4 +20,24 @@ pub(in crate::production::workbench::storyboard) fn normalize_storyboard_image_u
         return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
     }
     Ok(image_url.to_string())
+}
+
+pub(in crate::production::workbench::storyboard) fn normalize_storyboard_duration(
+    duration: Option<i32>,
+) -> Result<i32, ApiError> {
+    let duration = duration.unwrap_or(DEFAULT_STORYBOARD_DURATION);
+    if duration <= 0 {
+        return Err(ApiError::BadRequest(
+            "duration must be a positive integer".into(),
+        ));
+    }
+    Ok(duration)
+}
+
+pub(in crate::production::workbench::storyboard) fn validate_storyboard_duration(
+    duration: Option<i32>,
+) -> Result<Option<i32>, ApiError> {
+    duration
+        .map(|value| normalize_storyboard_duration(Some(value)))
+        .transpose()
 }
