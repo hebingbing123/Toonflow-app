@@ -204,16 +204,12 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() => _statusLine = '保存失败：请先选择画风。');
       return;
     }
-    final body = <String, dynamic>{
-      'name': _nameCtrl.text.trim(),
-      'label': _labelCtrl.text.trim().isEmpty ? null : _labelCtrl.text.trim(),
-      'prompt': _promptCtrl.text.trim().isEmpty
-          ? null
-          : _promptCtrl.text.trim(),
-      'file_url': _fileUrlCtrl.text.trim().isEmpty
-          ? null
-          : _fileUrlCtrl.text.trim(),
-    };
+    final body = buildArtStylePatchBody(
+      name: _nameCtrl.text,
+      label: _labelCtrl.text,
+      prompt: _promptCtrl.text,
+      fileUrl: _fileUrlCtrl.text,
+    );
     setState(() {
       _busy = true;
       _statusLine = '保存画风中…';
@@ -273,11 +269,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _extractPrompt() async {
-    final images = _extractImagesCtrl.text
-        .split(RegExp(r'[\n,]+'))
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty)
-        .toList();
+    final images = parseArtStyleExtractImages(_extractImagesCtrl.text);
     if (images.isEmpty) {
       setState(() => _statusLine = '抽取失败：请至少输入一个图片 URL 或 data URI。');
       return;
