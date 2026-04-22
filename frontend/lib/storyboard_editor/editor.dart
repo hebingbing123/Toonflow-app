@@ -33,10 +33,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
 
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
+              final viewportWidth = MediaQuery.sizeOf(ctx).width;
+              final dialogWidth = viewportWidth.isFinite
+                  ? viewportWidth.clamp(320.0, 720.0)
+                  : 720.0;
               return AlertDialog(
                 title: Text('Storyboard #${row.numericId}'),
                 content: SizedBox(
-                  width: 720,
+                  width: dialogWidth,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

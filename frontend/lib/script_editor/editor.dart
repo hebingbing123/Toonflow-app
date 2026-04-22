@@ -27,10 +27,14 @@ extension _HomePageScriptEditor on _HomePageState {
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
+              final viewportWidth = MediaQuery.sizeOf(ctx).width;
+              final dialogWidth = viewportWidth.isFinite
+                  ? viewportWidth.clamp(320.0, 720.0)
+                  : 720.0;
               return AlertDialog(
                 title: Text('剧本 #${script.numericId}'),
                 content: SizedBox(
-                  width: 720,
+                  width: dialogWidth,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
