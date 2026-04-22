@@ -20,6 +20,19 @@ const String kSupabaseAnonKey = String.fromEnvironment(
 bool get kSupabaseConfigured =>
     kSupabaseUrl.isNotEmpty && kSupabaseAnonKey.isNotEmpty;
 
+String resolveRustApiUrl(String pathOrUrl) {
+  final raw = pathOrUrl.trim();
+  if (raw.isEmpty) {
+    return raw;
+  }
+  final parsed = Uri.tryParse(raw);
+  if (parsed != null && parsed.hasScheme) {
+    return parsed.toString();
+  }
+  final base = Uri.parse(kApiBaseUrl);
+  return base.resolve(raw).toString();
+}
+
 /// `GET /api/v1/ws` with optional `access_token` query (browser-friendly).
 Uri rustWebSocketUri(String apiBase, {String? accessToken}) {
   final base = Uri.parse(apiBase);

@@ -67,6 +67,12 @@ class _StoryboardVideoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final latestExportUrl = (latestExportJob?.result?['export_url'] as String?)
+        ?.trim();
+    final resolvedExportUrl =
+        latestExportUrl != null && latestExportUrl.isNotEmpty
+        ? resolveRustApiUrl(latestExportUrl)
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -224,10 +230,9 @@ class _StoryboardVideoSection extends StatelessWidget {
             '最近导出任务：#${latestExportJob!.numericTaskId} · ${latestExportJob!.status} · ${latestExportJob!.updatedAt}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          if ((latestExportJob!.result?['export_url'] as String?)?.trim().isNotEmpty ??
-              false)
+          if (resolvedExportUrl != null)
             SelectableText(
-              '导出链接：${latestExportJob!.result!['export_url']}',
+              '导出链接：$resolvedExportUrl',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if ((latestExportJob!.errorMessage ?? '').trim().isNotEmpty)
