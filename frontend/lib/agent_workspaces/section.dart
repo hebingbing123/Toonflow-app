@@ -9,6 +9,7 @@ import 'panels/production.dart';
 import 'panels/script.dart';
 
 part 'section_state.dart';
+part 'section_helpers.dart';
 
 class AgentWorkspacesSection extends StatefulWidget {
   const AgentWorkspacesSection({
