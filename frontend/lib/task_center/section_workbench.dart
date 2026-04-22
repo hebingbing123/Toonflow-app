@@ -27,13 +27,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
 
 class _TaskCenterWorkbenchDialogState
     extends State<_TaskCenterWorkbenchDialog> {
-  late final TextEditingController _pageCtrl;
-  late final TextEditingController _limitCtrl;
-  late final TextEditingController _stateCtrl;
-  late final TextEditingController _taskClassCtrl;
-  late final TextEditingController _projectIdCtrl;
-  late final TextEditingController _numericTaskIdCtrl;
-  late final TextEditingController _uuidCtrl;
+  late final _TaskCenterWorkbenchControllers _ctrls;
 
   List<TaskCenterProjectItem> _projects = const <TaskCenterProjectItem>[];
   List<TaskCenterTaskClassRow> _categories = const <TaskCenterTaskClassRow>[];
@@ -52,22 +46,9 @@ class _TaskCenterWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _pageCtrl = TextEditingController(text: '1');
-    _limitCtrl = TextEditingController(text: '10');
-    _stateCtrl = TextEditingController();
-    _taskClassCtrl = TextEditingController();
-    _projectIdCtrl = TextEditingController(
-      text: widget.initialProjects.isEmpty
-          ? ''
-          : widget.initialProjects.first.numericId.toString(),
-    );
-    _numericTaskIdCtrl = TextEditingController(
-      text: widget.initialJobs.isEmpty
-          ? ''
-          : widget.initialJobs.first.numericTaskId.toString(),
-    );
-    _uuidCtrl = TextEditingController(
-      text: widget.initialJobs.isEmpty ? '' : widget.initialJobs.first.id,
+    _ctrls = _TaskCenterWorkbenchControllers.create(
+      initialProjects: widget.initialProjects,
+      initialJobs: widget.initialJobs,
     );
     _projects = widget.initialProjects;
     _jobs = widget.initialJobs;
@@ -79,13 +60,7 @@ class _TaskCenterWorkbenchDialogState
 
   @override
   void dispose() {
-    _pageCtrl.dispose();
-    _limitCtrl.dispose();
-    _stateCtrl.dispose();
-    _taskClassCtrl.dispose();
-    _projectIdCtrl.dispose();
-    _numericTaskIdCtrl.dispose();
-    _uuidCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
@@ -99,8 +74,8 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _projects = rows;
-        if (_projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
-          _projectIdCtrl.text = rows.first.numericId.toString();
+        if (_ctrls.projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
+          _ctrls.projectIdCtrl.text = rows.first.numericId.toString();
         }
         _statusLine = '已读取 ${rows.length} 个任务项目。';
         _loadingProjects = false;
@@ -150,11 +125,11 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadTasks() async {
-    final page = int.tryParse(_pageCtrl.text.trim()) ?? 1;
-    final limit = int.tryParse(_limitCtrl.text.trim()) ?? 10;
-    final projectId = int.tryParse(_projectIdCtrl.text.trim());
-    final state = _stateCtrl.text.trim();
-    final taskClass = _taskClassCtrl.text.trim();
+    final page = int.tryParse(_ctrls.pageCtrl.text.trim()) ?? 1;
+    final limit = int.tryParse(_ctrls.limitCtrl.text.trim()) ?? 10;
+    final projectId = int.tryParse(_ctrls.projectIdCtrl.text.trim());
+    final state = _ctrls.stateCtrl.text.trim();
+    final taskClass = _ctrls.taskClassCtrl.text.trim();
     setState(() {
       _loadingTasks = true;
       _statusLine = null;
@@ -179,8 +154,8 @@ class _TaskCenterWorkbenchDialogState
             '${taskClass.isEmpty ? '' : ' taskClass=$taskClass'}'
             ' · total=${rows.total} · page_rows=${jobs.length}';
         if (jobs.isNotEmpty) {
-          _numericTaskIdCtrl.text = jobs.first.numericTaskId.toString();
-          _uuidCtrl.text = jobs.first.id;
+          _ctrls.numericTaskIdCtrl.text = jobs.first.numericTaskId.toString();
+          _ctrls.uuidCtrl.text = jobs.first.id;
         }
         _statusLine = '已刷新 ${jobs.length} 条任务。';
         _loadingTasks = false;
@@ -201,7 +176,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadNumericIdTaskDetail() async {
-    final taskId = int.tryParse(_numericTaskIdCtrl.text.trim());
+    final taskId = int.tryParse(_ctrls.numericTaskIdCtrl.text.trim());
     if (taskId == null) {
       setState(() => _statusLine = '请填写合法的任务 numeric ID。');
       return;
@@ -215,7 +190,7 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _numericIdTaskDetailText = formatTaskJobDetails(row);
-        _uuidCtrl.text = row.id;
+        _ctrls.uuidCtrl.text = row.id;
         _loadingNumericIdTaskDetail = false;
       });
     } on RustApiException catch (e) {
@@ -234,7 +209,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadUuidDetails() async {
-    final taskId = _uuidCtrl.text.trim();
+    final taskId = _ctrls.uuidCtrl.text.trim();
     if (taskId.isEmpty) {
       setState(() => _statusLine = '请填写任务 UUID。');
       return;
@@ -248,7 +223,7 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _uuidDetails = formatTaskJobDetails(row);
-        _numericTaskIdCtrl.text = row.numericTaskId.toString();
+        _ctrls.numericTaskIdCtrl.text = row.numericTaskId.toString();
         _loadingUuidDetails = false;
       });
     } on RustApiException catch (e) {
@@ -276,13 +251,13 @@ class _TaskCenterWorkbenchDialogState
       model: TaskCenterWorkbenchDialogViewModel(
         projectSummary: projectSummary,
         jobSummary: jobSummary,
-        pageCtrl: _pageCtrl,
-        limitCtrl: _limitCtrl,
-        stateCtrl: _stateCtrl,
-        taskClassCtrl: _taskClassCtrl,
-        projectIdCtrl: _projectIdCtrl,
-        numericTaskIdCtrl: _numericTaskIdCtrl,
-        uuidCtrl: _uuidCtrl,
+        pageCtrl: _ctrls.pageCtrl,
+        limitCtrl: _ctrls.limitCtrl,
+        stateCtrl: _ctrls.stateCtrl,
+        taskClassCtrl: _ctrls.taskClassCtrl,
+        projectIdCtrl: _ctrls.projectIdCtrl,
+        numericTaskIdCtrl: _ctrls.numericTaskIdCtrl,
+        uuidCtrl: _ctrls.uuidCtrl,
         categories: _categories,
         jobs: _jobs,
         categoriesSummary: _categoriesSummary,
@@ -311,11 +286,12 @@ class _TaskCenterWorkbenchDialogState
         onLoadUuidDetails: () {
           _loadUuidDetails();
         },
-        onPickCategory: (value) => setState(() => _taskClassCtrl.text = value),
+        onPickCategory: (value) =>
+            setState(() => _ctrls.taskClassCtrl.text = value),
         onPickJob: (job) {
           setState(() {
-            _numericTaskIdCtrl.text = job.numericTaskId.toString();
-            _uuidCtrl.text = job.id;
+            _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
+            _ctrls.uuidCtrl.text = job.id;
           });
         },
         onClose: () => Navigator.of(context).pop(),
