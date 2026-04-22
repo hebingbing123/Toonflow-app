@@ -66,6 +66,7 @@ impl VideoProviderClient {
         &self,
         req: &VideoExportRequest,
     ) -> anyhow::Result<VideoExportResponse> {
+        validate_export_request(req)?;
         // Export is typically done via internal processing or a specific provider
         // For now, we'll implement a placeholder that downloads and re-encodes
         tracing::info!(
@@ -104,4 +105,60 @@ fn resolve_provider_api_key(
             provider.api_key_env_var()
         )
     })
+}
+
+fn validate_export_request(req: &VideoExportRequest) -> anyhow::Result<()> {
+    let source_url = req.source_url.trim();
+    if source_url.is_empty() {
+        return Err(anyhow::anyhow!("source_url cannot be empty"));
+    }
+    let parsed =
+        reqwest::Url::parse(source_url).map_err(|e| anyhow::anyhow!("invalid source_url: {e}"))?;
+    match parsed.scheme() {
+        "http" | "https" => {}
+        other => {
+            return Err(anyhow::anyhow!(
+                "unsupported source_url scheme: {other} (expected http/https)"
+            ));
+        }
+    }
+
+    let format = req.format.trim().to_ascii_lowercase();
+    if !matches!(format.as_str(), "mp4" | "mov" | "webm") {
+        return Err(anyhow::anyhow!(
+            "unsupported export format: {} (expected mp4/mov/webm)",
+            req.format
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_export_request;
+    use crate::vendor::video::VideoExportRequest;
+
+    #[test]
+    fn validate_export_request_rejects_empty_source_url() {
+        let req = VideoExportRequest {
+            source_url: "   ".to_string(),
+            format: "mp4".to_string(),
+            target_resolution: None,
+            include_audio: true,
+        };
+        let err = validate_export_request(&req).expect_err("should reject empty source_url");
+        assert!(err.to_string().contains("source_url cannot be empty"));
+    }
+
+    #[test]
+    fn validate_export_request_rejects_unsupported_format() {
+        let req = VideoExportRequest {
+            source_url: "https://example.com/video.mp4".to_string(),
+            format: "avi".to_string(),
+            target_resolution: None,
+            include_audio: true,
+        };
+        let err = validate_export_request(&req).expect_err("should reject unsupported format");
+        assert!(err.to_string().contains("unsupported export format"));
+    }
 }
