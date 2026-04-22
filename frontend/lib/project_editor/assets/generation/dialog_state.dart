@@ -55,30 +55,32 @@ class _AssetGenerationWorkbenchDialogState
   List<int> _sortedSelection() => sortUniqueAssetNumericIds(_selectedIds);
 
   void _applySelection(Iterable<int> ids, String label) {
-    final next = sortUniqueAssetNumericIds(ids);
-    _updateWorkbenchState(() {
-      _selectedIds
-        ..clear()
-        ..addAll(next);
-      _focusedAssetNumericId = next.isEmpty ? _focusedAssetNumericId : next.first;
-      _statusLine =
-          next.isEmpty ? '$label：没有可选资产' : '$label：已选择 ${next.length} 条资产';
-    });
-  }
-
-  void _applyScopedSelection(Iterable<int> candidateIds, String label) {
-    final next = collectScopedAssetNumericIds(
-      candidateIds,
-      _filterAssetsByType(widget.visibleAssets(), _selectedType),
+    final result = _buildSelectionApplyResult(
+      ids: ids,
+      label: label,
+      previousFocusedAssetNumericId: _focusedAssetNumericId,
     );
     _updateWorkbenchState(() {
       _selectedIds
         ..clear()
-        ..addAll(next);
-      _focusedAssetNumericId = next.isEmpty ? null : next.first;
-      _statusLine = next.isEmpty
-          ? '$label：当前可见资产中没有匹配项'
-          : '$label：已选择 ${next.length} 条资产';
+        ..addAll(result.selectedIds);
+      _focusedAssetNumericId = result.focusedAssetNumericId;
+      _statusLine = result.statusLine;
+    });
+  }
+
+  void _applyScopedSelection(Iterable<int> candidateIds, String label) {
+    final result = _buildScopedSelectionApplyResult(
+      candidateIds: candidateIds,
+      scopedAssets: _filterAssetsByType(widget.visibleAssets(), _selectedType),
+      label: label,
+    );
+    _updateWorkbenchState(() {
+      _selectedIds
+        ..clear()
+        ..addAll(result.selectedIds);
+      _focusedAssetNumericId = result.focusedAssetNumericId;
+      _statusLine = result.statusLine;
     });
   }
 
@@ -86,13 +88,9 @@ class _AssetGenerationWorkbenchDialogState
     String nextType,
     List<AssetRow> visible,
   ) async {
-    final nextVisibleAssets = nextType.isEmpty
-        ? visible
-        : visible
-            .where((a) => a.assetType.trim() == nextType)
-            .toList(growable: false);
-    final nextSelection = chooseVisibleAssetSelection(
-      nextVisibleAssets,
+    final result = _buildTypeChangeSelectionResult(
+      nextType: nextType,
+      visibleAssets: visible,
       preferredIds: _selectedIds,
       preferredNumericId: _focusedAssetNumericId,
     );
@@ -100,29 +98,27 @@ class _AssetGenerationWorkbenchDialogState
       _selectedType = nextType;
       _selectedIds
         ..clear()
-        ..addAll(nextSelection);
-      _focusedAssetNumericId = _selectedIds.isEmpty ? null : _selectedIds.first;
-      _statusLine = nextType.isEmpty
-          ? '正在切换到全部类型并同步工作台摘要…'
-          : '正在切换到 $nextType 并同步工作台摘要…';
+        ..addAll(result.selectedIds);
+      _focusedAssetNumericId = result.focusedAssetNumericId;
+      _statusLine = result.statusLine;
     });
     await _syncWorkbenchSnapshot(includeProductionSummary: true);
   }
 
   void _toggleAssetSelection(AssetRow asset, bool checked) {
+    final result = _buildToggleSelectionResult(
+      currentSelectedIds: _selectedIds,
+      currentFocusedAssetNumericId: _focusedAssetNumericId,
+      assetNumericId: asset.numericId,
+      checked: checked,
+    );
     _updateWorkbenchState(() {
-      if (checked) {
-        _selectedIds.add(asset.numericId);
-        _focusedAssetNumericId = asset.numericId;
-        if (_selectedIds.length == 1) {
-          _imageUrlCtrl.clear();
-        }
-      } else {
-        _selectedIds.remove(asset.numericId);
-        if (_focusedAssetNumericId == asset.numericId) {
-          final remaining = sortUniqueAssetNumericIds(_selectedIds);
-          _focusedAssetNumericId = remaining.isEmpty ? null : remaining.first;
-        }
+      _selectedIds
+        ..clear()
+        ..addAll(result.selectedIds);
+      _focusedAssetNumericId = result.focusedAssetNumericId;
+      if (result.clearImageUrl) {
+        _imageUrlCtrl.clear();
       }
     });
   }
