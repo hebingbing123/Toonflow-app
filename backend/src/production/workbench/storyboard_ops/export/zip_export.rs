@@ -104,6 +104,8 @@ pub(super) struct StoryboardExportManifestShot {
     state: Option<String>,
     prompt: Option<String>,
     subtitle_text: Option<String>,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
     image_filename: String,
     image_source: Option<String>,
 }
@@ -142,6 +144,14 @@ impl StoryboardExportManifestShot {
             state: row.state.clone(),
             prompt: row.prompt.clone(),
             subtitle_text: row.video_desc.clone(),
+            subtitle_source: resolve_shot_script_source(
+                row.video_desc.as_deref(),
+                row.prompt.as_deref(),
+            ),
+            voiceover_ready: resolve_shot_voiceover_ready(
+                row.video_desc.as_deref(),
+                row.prompt.as_deref(),
+            ),
             image_filename: format!("storyboard-{}.{}", row.numeric_id, extension),
             image_source: row.file_path.clone(),
         }
@@ -168,6 +178,8 @@ struct StoryboardExportTimelineShot {
     state: Option<String>,
     prompt: Option<String>,
     subtitle_text: Option<String>,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
     image_filename: String,
     image_source: Option<String>,
 }
@@ -186,7 +198,7 @@ fn write_export_text_file(
 
 pub(super) fn build_storyboard_csv(shots: &[StoryboardExportManifestShot]) -> String {
     let mut out =
-        String::from("storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,image_filename,image_source\n");
+        String::from("storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,subtitle_source,voiceover_ready,image_filename,image_source\n");
     for (index, shot) in shots.iter().enumerate() {
         let fields = [
             shot.storyboard_id.to_string(),
@@ -196,6 +208,8 @@ pub(super) fn build_storyboard_csv(shots: &[StoryboardExportManifestShot]) -> St
             opt_str_csv(shot.duration.as_deref()),
             opt_str_csv(shot.state.as_deref()),
             opt_str_csv(shot.prompt.as_deref()),
+            csv_escape(shot.subtitle_source),
+            shot.voiceover_ready.to_string(),
             csv_escape(&shot.image_filename),
             opt_str_csv(shot.image_source.as_deref()),
         ];
@@ -227,6 +241,8 @@ fn build_storyboard_timeline(
                 state: shot.state.clone(),
                 prompt: shot.prompt.clone(),
                 subtitle_text: shot.subtitle_text.clone(),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
                 image_filename: shot.image_filename.clone(),
                 image_source: shot.image_source.clone(),
             }
@@ -283,6 +299,10 @@ pub(super) fn build_storyboard_voiceover_script(shots: &[StoryboardExportManifes
             out.push_str(&format!(" (sb_index={storyboard_index})"));
         }
         out.push('\n');
+        out.push_str(&format!(
+            "source={} · voiceover_ready={}\n",
+            shot.subtitle_source, shot.voiceover_ready
+        ));
         out.push_str(&line);
         out.push_str("\n\n");
     }
@@ -303,6 +323,31 @@ fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {
                 .map(str::to_string)
         })
         .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id))
+}
+
+fn resolve_shot_script_source(subtitle_text: Option<&str>, prompt: Option<&str>) -> &'static str {
+    if subtitle_text
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .is_some()
+    {
+        return "explicit_narration";
+    }
+    if prompt
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .is_some()
+    {
+        return "prompt_fallback";
+    }
+    "placeholder"
+}
+
+fn resolve_shot_voiceover_ready(subtitle_text: Option<&str>, prompt: Option<&str>) -> bool {
+    matches!(
+        resolve_shot_script_source(subtitle_text, prompt),
+        "explicit_narration" | "prompt_fallback"
+    )
 }
 
 fn parse_storyboard_duration_seconds(value: Option<&str>) -> i32 {

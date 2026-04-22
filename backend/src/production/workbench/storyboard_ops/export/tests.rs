@@ -52,9 +52,11 @@ fn storyboard_csv_quotes_prompt_and_preserves_columns() {
     let csv = build_storyboard_csv(&[shot]);
 
     assert!(csv.starts_with(
-        "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,image_filename,image_source\n"
+        "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,subtitle_source,voiceover_ready,image_filename,image_source\n"
     ));
-    assert!(csv.contains("7,0,9,3,5,已完成,\"close-up, hero says \"\"go\"\"\""));
+    assert!(
+        csv.contains("7,0,9,3,5,已完成,\"close-up, hero says \"\"go\"\"\",explicit_narration,true")
+    );
     assert!(csv.contains("storyboard-7.png"));
 }
 
@@ -126,7 +128,9 @@ fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
 
     assert!(script.starts_with("# Toonflow Storyboard Voiceover Script"));
     assert!(script.contains("[00:00:00,000 - 00:00:05,000] Shot 7 (sb_index=9)"));
+    assert!(script.contains("source=explicit_narration · voiceover_ready=true"));
     assert!(script.contains("Narrator opening"));
     assert!(script.contains("[00:00:05,000 - 00:00:11,000] Shot 8 (sb_index=10)"));
+    assert!(script.contains("source=prompt_fallback · voiceover_ready=true"));
     assert!(script.contains("Fallback prompt"));
 }

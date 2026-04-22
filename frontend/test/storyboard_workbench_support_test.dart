@@ -277,6 +277,60 @@ void main() {
   });
 
   test(
+    'resolveStoryboardNarrationSource prefers explicit narration before prompt fallback',
+    () {
+      final source = resolveStoryboardNarrationSource(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '镜头提示词',
+          videoDesc: '旁白台词',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(id: 11),
+      );
+
+      expect(source, StoryboardNarrationSource.explicitNarration);
+      expect(describeStoryboardNarrationSource(source), '已具备显式旁白文案');
+    },
+  );
+
+  test(
+    'resolveStoryboardNarrationSource falls back to prompt when narration is absent',
+    () {
+      final source = resolveStoryboardNarrationSource(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '镜头提示词',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(id: 11),
+      );
+
+      expect(source, StoryboardNarrationSource.promptFallback);
+      expect(describeStoryboardNarrationSource(source), '将回退到分镜提示词');
+    },
+  );
+
+  test(
+    'resolveStoryboardNarrationSource reports placeholder when both narration and prompt are absent',
+    () {
+      final source = resolveStoryboardNarrationSource(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(id: 11),
+      );
+
+      expect(source, StoryboardNarrationSource.placeholder);
+      expect(describeStoryboardNarrationSource(source), '仍是占位文本');
+    },
+  );
+
+  test(
     'resolveStoryboardVideoPromptSeed falls back to prompt when narration is absent',
     () {
       final prompt = resolveStoryboardVideoPromptSeed(

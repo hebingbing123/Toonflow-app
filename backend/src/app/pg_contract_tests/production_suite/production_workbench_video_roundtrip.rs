@@ -402,6 +402,14 @@ async fn production_workbench_video_roundtrip() {
         manifest["shots"][0]["image_filename"].as_str(),
         Some(format!("storyboard-{storyboard_id}.png").as_str())
     );
+    assert_eq!(
+        manifest["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(
+        manifest["shots"][0]["voiceover_ready"].as_bool(),
+        Some(true)
+    );
     drop(manifest_entry);
     let mut csv_entry = archive
         .by_name("storyboard.csv")
@@ -409,9 +417,10 @@ async fn production_workbench_video_roundtrip() {
     let mut csv = String::new();
     std::io::Read::read_to_string(&mut csv_entry, &mut csv).expect("read csv entry");
     assert!(csv.starts_with(
-        "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,image_filename,image_source\n"
+        "storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,subtitle_source,voiceover_ready,image_filename,image_source\n"
     ));
     assert!(csv.contains(&storyboard_id.to_string()));
+    assert!(csv.contains("explicit_narration,true"));
     drop(csv_entry);
     let mut timeline_entry = archive.by_name("timeline.json").expect("zip timeline json");
     let mut timeline_bytes = Vec::new();
@@ -435,6 +444,14 @@ async fn production_workbench_video_roundtrip() {
         timeline["shots"][0]["subtitle_text"].as_str(),
         Some("旁白：主角抬头看向远方")
     );
+    assert_eq!(
+        timeline["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(
+        timeline["shots"][0]["voiceover_ready"].as_bool(),
+        Some(true)
+    );
     drop(timeline_entry);
     let mut subtitles_entry = archive.by_name("subtitles.srt").expect("zip subtitles srt");
     let mut subtitles = String::new();
@@ -451,6 +468,7 @@ async fn production_workbench_video_roundtrip() {
         .expect("read voiceover entry");
     assert!(voiceover_script.contains("# Toonflow Storyboard Voiceover Script"));
     assert!(voiceover_script.contains("[00:00:00,000 - 00:00:05,000] Shot"));
+    assert!(voiceover_script.contains("source=explicit_narration · voiceover_ready=true"));
     assert!(voiceover_script.contains("旁白：主角抬头看向远方"));
 
     let res = app

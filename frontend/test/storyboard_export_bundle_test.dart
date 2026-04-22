@@ -58,6 +58,7 @@ void main() {
     expect(summary.placeholderSubtitleCount, 0);
     expect(summary.subtitleCoverageLabel, '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
     expect(summary.voiceoverCoverageLabel, '旁白脚本：2 条可用文案 / 0 条占位文案');
+    expect(summary.audioDeliveryLabel, '音频交付：2 条可直接配音 / 0 条仍是占位文本');
     expect(summary.byteLength, 2048);
     expect(summary.includesTimeline, isTrue);
     expect(summary.includesSubtitles, isTrue);
@@ -85,6 +86,7 @@ void main() {
     expect(summary.promptFallbackSubtitleCount, 0);
     expect(summary.placeholderSubtitleCount, 1);
     expect(summary.voiceoverCoverageLabel, '旁白脚本：0 条可用文案 / 1 条占位文案');
+    expect(summary.audioDeliveryLabel, '音频交付：0 条可直接配音 / 1 条仍是占位文本');
     expect(summary.byteLength, isNull);
   });
 }

@@ -60,6 +60,12 @@ class StoryboardExportBundleSummary {
     return '旁白脚本：$scriptedVoiceoverCount 条可用文案 / '
         '$placeholderSubtitleCount 条占位文案';
   }
+
+  String get audioDeliveryLabel {
+    final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
+    return '音频交付：$readyCount 条可直接配音 / '
+        '$placeholderSubtitleCount 条仍是占位文本';
+  }
 }
 
 StoryboardExportBundleSummary buildStoryboardExportBundleSummary({

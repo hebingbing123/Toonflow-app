@@ -166,6 +166,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       children: [
         _StoryboardPreviewCard(
           loadingProduction: _loadingProduction,
+          scriptStoryboard: widget.scriptStoryboard,
           productionRow: _productionRow,
           metaLine: _storyboardProductionMetaLine(_productionRow),
         ),

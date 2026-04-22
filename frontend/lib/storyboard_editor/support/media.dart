@@ -2,6 +2,12 @@ import 'dart:collection';
 
 import '../../../rust_api.dart';
 
+enum StoryboardNarrationSource {
+  explicitNarration,
+  promptFallback,
+  placeholder,
+}
+
 List<int> collectStoryboardTrackIds({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
@@ -103,4 +109,36 @@ String? resolveStoryboardVideoPromptSeed({
     scriptStoryboard: scriptStoryboard,
     productionStoryboard: productionStoryboard,
   );
+}
+
+StoryboardNarrationSource resolveStoryboardNarrationSource({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+}) {
+  final narration = resolveStoryboardNarrationText(
+    scriptStoryboard: scriptStoryboard,
+    productionStoryboard: productionStoryboard,
+  );
+  if (narration != null && narration.isNotEmpty) {
+    return StoryboardNarrationSource.explicitNarration;
+  }
+  final prompt = resolveStoryboardGenerationPrompt(
+    scriptStoryboard: scriptStoryboard,
+    productionStoryboard: productionStoryboard,
+  );
+  if (prompt != null && prompt.isNotEmpty) {
+    return StoryboardNarrationSource.promptFallback;
+  }
+  return StoryboardNarrationSource.placeholder;
+}
+
+String describeStoryboardNarrationSource(StoryboardNarrationSource source) {
+  switch (source) {
+    case StoryboardNarrationSource.explicitNarration:
+      return '已具备显式旁白文案';
+    case StoryboardNarrationSource.promptFallback:
+      return '将回退到分镜提示词';
+    case StoryboardNarrationSource.placeholder:
+      return '仍是占位文本';
+  }
 }

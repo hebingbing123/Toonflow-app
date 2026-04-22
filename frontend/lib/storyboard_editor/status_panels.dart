@@ -4,11 +4,13 @@ part of '../../home_page.dart';
 class _StoryboardPreviewCard extends StatelessWidget {
   const _StoryboardPreviewCard({
     required this.loadingProduction,
+    required this.scriptStoryboard,
     required this.productionRow,
     required this.metaLine,
   });
 
   final bool loadingProduction;
+  final StoryboardRow scriptStoryboard;
   final ProductionStoryboardItemV1? productionRow;
   final String metaLine;
 
@@ -16,6 +18,12 @@ class _StoryboardPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     final imageUrl = productionRow?.url?.trim();
+    final narrationSource = describeStoryboardNarrationSource(
+      resolveStoryboardNarrationSource(
+        scriptStoryboard: scriptStoryboard,
+        productionStoryboard: productionRow,
+      ),
+    );
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -83,6 +91,15 @@ class _StoryboardPreviewCard extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          Text(
+            '音频交付：$narrationSource',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         ],
       ),
     );
