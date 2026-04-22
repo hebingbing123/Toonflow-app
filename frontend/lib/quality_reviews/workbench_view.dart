@@ -96,10 +96,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final dialogWidth = viewportWidth.isFinite
+        ? viewportWidth.clamp(320.0, 840.0)
+        : 840.0;
     return AlertDialog(
       title: const Text('质量工作台'),
       content: SizedBox(
-        width: 840,
+        width: dialogWidth,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
