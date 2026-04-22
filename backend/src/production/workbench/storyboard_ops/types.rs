@@ -17,6 +17,7 @@ pub(crate) struct ProductionStoryboardItem {
     #[sqlx(rename = "script_id")]
     pub(crate) script_id: Option<i32>,
     pub(crate) prompt: Option<String>,
+    pub(crate) video_desc: Option<String>,
     #[sqlx(rename = "url")]
     pub(crate) file_path: Option<String>,
     pub(crate) duration: Option<String>,
@@ -54,6 +55,7 @@ pub(super) struct ExportImageSourceRow {
     pub(super) numeric_id: i32,
     pub(super) file_path: Option<String>,
     pub(super) prompt: Option<String>,
+    pub(super) video_desc: Option<String>,
     pub(super) duration: Option<String>,
     pub(super) state: Option<String>,
     pub(super) track_id: Option<i32>,
@@ -154,6 +156,7 @@ mod tests {
             id: 1,
             script_id: Some(2),
             prompt: Some("test prompt".to_string()),
+            video_desc: Some("narration".to_string()),
             file_path: Some("http://example.com/image.png".to_string()),
             duration: Some("5s".to_string()),
             state: Some("completed".to_string()),
@@ -165,6 +168,7 @@ mod tests {
         assert!(json.contains("\"id\":1"));
         assert!(json.contains("\"scriptId\":2"));
         assert!(json.contains("\"prompt\":\"test prompt\""));
+        assert!(json.contains("\"videoDesc\":\"narration\""));
     }
 
     #[test]

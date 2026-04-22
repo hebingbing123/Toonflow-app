@@ -39,6 +39,7 @@ fn storyboard_csv_quotes_prompt_and_preserves_columns() {
             numeric_id: 7,
             file_path: Some("https://cdn.example.com/storyboard-7.png".into()),
             prompt: Some("close-up, hero says \"go\"".into()),
+            video_desc: Some("Hero: go".into()),
             duration: Some("5".into()),
             state: Some("已完成".into()),
             track_id: Some(3),
@@ -62,6 +63,7 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
             numeric_id: 7,
             file_path: Some("https://cdn.example.com/storyboard-7.png".into()),
             prompt: Some("Opening line".into()),
+            video_desc: Some("Narrator opening".into()),
             duration: Some("5".into()),
             state: Some("已完成".into()),
             track_id: Some(3),
@@ -74,6 +76,7 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
             numeric_id: 8,
             file_path: Some("https://cdn.example.com/storyboard-8.png".into()),
             prompt: None,
+            video_desc: None,
             duration: Some("6".into()),
             state: Some("已完成".into()),
             track_id: Some(3),
@@ -84,6 +87,6 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
 
     let srt = build_storyboard_srt(&[first, second]);
 
-    assert!(srt.contains("1\n00:00:00,000 --> 00:00:05,000\nOpening line"));
+    assert!(srt.contains("1\n00:00:00,000 --> 00:00:05,000\nNarrator opening"));
     assert!(srt.contains("2\n00:00:05,000 --> 00:00:11,000\nShot 8"));
 }

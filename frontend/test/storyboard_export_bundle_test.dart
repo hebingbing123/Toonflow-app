@@ -5,6 +5,20 @@ import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/storyboard_editor/support.dart';
 
 void main() {
+  test('ProductionStoryboardItemV1 parses videoDesc payload', () {
+    final item = ProductionStoryboardItemV1.fromJson(const {
+      'id': 7,
+      'prompt': '镜头提示词',
+      'videoDesc': '旁白台词',
+      'duration': '5',
+    });
+
+    expect(item.id, 7);
+    expect(item.prompt, '镜头提示词');
+    expect(item.videoDesc, '旁白台词');
+    expect(item.duration, '5');
+  });
+
   test('buildStoryboardExportBundleSummary reports sidecars and duration', () {
     final summary = buildStoryboardExportBundleSummary(
       selectedIds: const [9, 7, 9],

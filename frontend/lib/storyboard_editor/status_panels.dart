@@ -72,6 +72,17 @@ class _StoryboardPreviewCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
+          if ((productionRow?.videoDesc ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              '字幕/旁白：${productionRow!.videoDesc!.trim()}',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -108,10 +119,7 @@ class _StoryboardDiagnosisCard extends StatelessWidget {
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 6),
-          Text(
-            diagnosis.detail,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 8),
           FilledButton.tonal(
             onPressed: recommendedAction,

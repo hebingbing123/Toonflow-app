@@ -96,6 +96,7 @@ pub(super) struct StoryboardExportManifestShot {
     duration: Option<String>,
     state: Option<String>,
     prompt: Option<String>,
+    subtitle_text: Option<String>,
     image_filename: String,
     image_source: Option<String>,
 }
@@ -133,6 +134,7 @@ impl StoryboardExportManifestShot {
             duration: row.duration.clone(),
             state: row.state.clone(),
             prompt: row.prompt.clone(),
+            subtitle_text: row.video_desc.clone(),
             image_filename: format!("storyboard-{}.{}", row.numeric_id, extension),
             image_source: row.file_path.clone(),
         }
@@ -158,6 +160,7 @@ struct StoryboardExportTimelineShot {
     duration_seconds: i32,
     state: Option<String>,
     prompt: Option<String>,
+    subtitle_text: Option<String>,
     image_filename: String,
     image_source: Option<String>,
 }
@@ -216,6 +219,7 @@ fn build_storyboard_timeline(
                 duration_seconds,
                 state: shot.state.clone(),
                 prompt: shot.prompt.clone(),
+                subtitle_text: shot.subtitle_text.clone(),
                 image_filename: shot.image_filename.clone(),
                 image_source: shot.image_source.clone(),
             }
@@ -239,11 +243,18 @@ pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> St
         let end_ms = start_ms + (duration_seconds as u64 * 1000);
         cursor_ms = end_ms;
         let subtitle = shot
-            .prompt
+            .subtitle_text
             .as_deref()
             .map(str::trim)
             .filter(|value| !value.is_empty())
             .map(str::to_string)
+            .or_else(|| {
+                shot.prompt
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                    .map(str::to_string)
+            })
             .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id));
 
         out.push_str(&(index + 1).to_string());

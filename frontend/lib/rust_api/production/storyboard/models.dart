@@ -4,6 +4,7 @@ class ProductionStoryboardItemV1 {
     required this.id,
     this.scriptId,
     this.prompt,
+    this.videoDesc,
     this.url,
     this.duration,
     this.state,
@@ -15,6 +16,7 @@ class ProductionStoryboardItemV1 {
   final int id;
   final int? scriptId;
   final String? prompt;
+  final String? videoDesc;
   final String? url;
   final String? duration;
   final String? state;
@@ -29,6 +31,7 @@ class ProductionStoryboardItemV1 {
           ? null
           : (json['scriptId'] as num).toInt(),
       prompt: json['prompt'] as String?,
+      videoDesc: json['videoDesc'] as String?,
       url: json['url'] as String?,
       duration: json['duration'] as String?,
       state: json['state'] as String?,

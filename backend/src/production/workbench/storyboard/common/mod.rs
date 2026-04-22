@@ -112,6 +112,7 @@ mod tests {
             id: 7,
             script_id: Some(3),
             prompt: Some("frame".into()),
+            video_desc: Some("subtitle".into()),
             file_path: Some("https://example.com/frame.png".into()),
             duration: Some("5".into()),
             state: Some("done".into()),

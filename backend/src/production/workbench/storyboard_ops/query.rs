@@ -48,6 +48,7 @@ pub(in crate::production) async fn post_get_production_data(
           sb.numeric_id AS id,
           sb.numeric_script_id AS script_id,
           sb.prompt,
+          sb.video_desc,
           sb.file_path AS url,
           sb.duration,
           sb.state,

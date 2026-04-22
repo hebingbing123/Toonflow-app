@@ -53,6 +53,7 @@ pub(in crate::production) async fn post_export_image(
             sb.numeric_id,
             sb.file_path,
             sb.prompt,
+            sb.video_desc,
             sb.duration,
             sb.state,
             sb.track_id,

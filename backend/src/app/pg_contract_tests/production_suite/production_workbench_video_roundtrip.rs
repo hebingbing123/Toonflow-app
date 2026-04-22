@@ -300,6 +300,18 @@ async fn production_workbench_video_roundtrip() {
         updated_storyboard["imageUrl"].as_str(),
         Some(storyboard_data_uri)
     );
+    sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET video_desc = $2, updated_at = NOW()
+        WHERE numeric_id = $1
+        "#,
+    )
+    .bind(storyboard_id)
+    .bind("旁白：主角抬头看向远方")
+    .execute(&pool)
+    .await
+    .expect("persist storyboard subtitle text");
 
     let res = app
         .clone()
@@ -419,13 +431,17 @@ async fn production_workbench_video_roundtrip() {
     );
     assert_eq!(timeline["shots"][0]["end_ms"].as_i64(), Some(5000));
     assert_eq!(timeline["shots"][0]["duration_seconds"].as_i64(), Some(5));
+    assert_eq!(
+        timeline["shots"][0]["subtitle_text"].as_str(),
+        Some("旁白：主角抬头看向远方")
+    );
     drop(timeline_entry);
     let mut subtitles_entry = archive.by_name("subtitles.srt").expect("zip subtitles srt");
     let mut subtitles = String::new();
     std::io::Read::read_to_string(&mut subtitles_entry, &mut subtitles)
         .expect("read subtitles entry");
     assert!(subtitles.contains("1\n00:00:00,000 --> 00:00:05,000"));
-    assert!(subtitles.contains("pg_video_storyboard"));
+    assert!(subtitles.contains("旁白：主角抬头看向远方"));
 
     let res = app
         .clone()
