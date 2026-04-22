@@ -79,6 +79,37 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     await _notifyStoryboardMutated();
   }
 
+  Future<void> _exportCurrentVideoJob() async {
+    final candidates = _storyboardVideos();
+    final selected = widget.scriptStoryboard.filePath;
+    final sourceUrl = (selected ?? '').trim().isNotEmpty
+        ? selected!.trim()
+        : (candidates
+              .map((v) => v.videoUrl)
+              .whereType<String>()
+              .map((s) => s.trim())
+              .firstWhere((s) => s.isNotEmpty, orElse: () => ''));
+    if (sourceUrl.isEmpty) {
+        throw const FormatException('当前分镜还没有可导出的已选视频或候选视频 URL');
+    }
+    final job = await createJob(
+      widget.token,
+      'video.export',
+      payload: <String, dynamic>{
+        'source_url': sourceUrl,
+        'format': 'mp4',
+        'project_numeric_id': widget.projectNumericId,
+        'storyboard_numeric_id': widget.storyNumericId,
+      },
+    );
+    if (!mounted) return;
+    _applyWorkbenchState(() {
+      _setWorkbenchFollowUp(
+        '已提交视频导出任务（job=${job.id}）。完成后会写回当前分镜视频 URL，可稍后刷新制作数据查看。',
+      );
+    });
+  }
+
   Future<void> _notifyStoryboardMutated() async {
     final callback = widget.onStoryboardMutated;
     if (callback == null) {

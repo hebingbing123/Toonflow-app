@@ -27,6 +27,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onGenerateVideoPrompt,
     required this.onRefreshVideoData,
     required this.onSubmitVideoGeneration,
+    required this.onExportCurrentVideo,
     required this.onSelectVideo,
     required this.onDeleteCurrentVideo,
   });
@@ -54,6 +55,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onGenerateVideoPrompt;
   final VoidCallback onRefreshVideoData;
   final VoidCallback onSubmitVideoGeneration;
+  final VoidCallback onExportCurrentVideo;
   final ValueChanged<VideoItem> onSelectVideo;
   final VoidCallback onDeleteCurrentVideo;
 
@@ -190,9 +192,20 @@ class _StoryboardVideoSection extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: FilledButton(
-            onPressed: saving ? null : onSubmitVideoGeneration,
-            child: Text(saving ? '提交中…' : '提交视频生成'),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              FilledButton(
+                onPressed: saving ? null : onSubmitVideoGeneration,
+                child: Text(saving ? '提交中…' : '提交视频生成'),
+              ),
+              OutlinedButton(
+                onPressed: saving ? null : onExportCurrentVideo,
+                child: const Text('导出当前视频（job）'),
+              ),
+            ],
           ),
         ),
         if (workbenchLine != null) ...[

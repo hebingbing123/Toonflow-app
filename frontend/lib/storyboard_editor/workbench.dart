@@ -214,6 +214,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onRefreshVideoData: _refreshWorkbenchData,
           onSubmitVideoGeneration: () =>
               _runDialogAction(_submitVideoGeneration),
+          onExportCurrentVideo: () => _runDialogAction(_exportCurrentVideoJob),
           onSelectVideo: (video) => _runDialogAction(() => _selectVideo(video)),
           onDeleteCurrentVideo: () => _runDialogAction(_deleteCurrentVideo),
         ),
