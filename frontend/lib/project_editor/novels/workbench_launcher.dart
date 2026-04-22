@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../rust_api.dart';
 
 part 'workbench_launcher_controllers.dart';
+part 'workbench_launcher_state.dart';
 
 Future<void> openNovelWorkbenchDialog({
   required BuildContext ctx,
@@ -101,18 +102,14 @@ Future<void> openNovelWorkbenchDialog({
     last: last,
   );
 
-  List<NovelRow> previewRows = List<NovelRow>.from(currentItems.take(6));
-  String infoLine = currentItems.isEmpty
-      ? '当前项目还没有章节。'
-      : '已载入 ${currentItems.length} 条章节。';
-  bool localBusy = false;
+  final local = _NovelWorkbenchLocalState.fromItems(currentItems);
 
   Future<void> refreshWorkbench(StateSetter setLocalState) async {
     await reloadAssetsAndStats();
     final refreshed = novelsRef[0]?.items ?? const <NovelRow>[];
     setLocalState(() {
-      previewRows = List<NovelRow>.from(refreshed.take(6));
-      infoLine = refreshed.isEmpty
+      local.previewRows = List<NovelRow>.from(refreshed.take(6));
+      local.infoLine = refreshed.isEmpty
           ? '章节列表为空。'
           : '已刷新，共 ${refreshed.length} 条章节。';
       if (ctrls.selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
@@ -139,11 +136,11 @@ Future<void> openNovelWorkbenchDialog({
         return StatefulBuilder(
           builder: (dialogCtx, setLocalState) {
             void setLocalBusy(bool value) {
-              setLocalState(() => localBusy = value);
+              setLocalState(() => local.localBusy = value);
             }
 
             void updateInfoLine(String value) {
-              setLocalState(() => infoLine = value);
+              setLocalState(() => local.infoLine = value);
             }
 
             return AlertDialog(
@@ -156,11 +153,11 @@ Future<void> openNovelWorkbenchDialog({
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        infoLine,
+                        local.infoLine,
                         style: Theme.of(dialogCtx).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 8),
-                      if (previewRows.isNotEmpty)
+                      if (local.previewRows.isNotEmpty)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
@@ -180,7 +177,7 @@ Future<void> openNovelWorkbenchDialog({
                                 style: Theme.of(dialogCtx).textTheme.labelLarge,
                               ),
                               const SizedBox(height: 8),
-                              ...previewRows.map(
+                              ...local.previewRows.map(
                                 (row) => Padding(
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: Text(
@@ -203,13 +200,13 @@ Future<void> openNovelWorkbenchDialog({
                         project: project,
                         novelsBusy: novelsBusy,
                         searchCtrl: ctrls.searchCtrl,
-                        localBusy: localBusy,
+                        localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         refreshWorkbench: refreshWorkbench,
                         applyResult: (rows, message) {
                           setLocalState(() {
-                            previewRows = rows;
-                            infoLine = message;
+                            local.previewRows = rows;
+                            local.infoLine = message;
                           });
                         },
                       ),
@@ -221,7 +218,7 @@ Future<void> openNovelWorkbenchDialog({
                         token: token,
                         project: project,
                         novelsBusy: novelsBusy,
-                        localBusy: localBusy,
+                        localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
                         createChapterCtrl: ctrls.createChapterCtrl,
@@ -239,7 +236,7 @@ Future<void> openNovelWorkbenchDialog({
                         token: token,
                         project: project,
                         novelsBusy: novelsBusy,
-                        localBusy: localBusy,
+                        localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
                         selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
@@ -255,7 +252,7 @@ Future<void> openNovelWorkbenchDialog({
                         token: token,
                         project: project,
                         novelsBusy: novelsBusy,
-                        localBusy: localBusy,
+                        localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
                         deleteNovelIdCtrl: ctrls.deleteNovelIdCtrl,
@@ -270,7 +267,7 @@ Future<void> openNovelWorkbenchDialog({
                         token: token,
                         project: project,
                         novelsBusy: novelsBusy,
-                        localBusy: localBusy,
+                        localBusy: local.localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
                         numericIdsCtrl: ctrls.numericIdsCtrl,
@@ -283,7 +280,7 @@ Future<void> openNovelWorkbenchDialog({
               ),
               actions: [
                 TextButton(
-                  onPressed: localBusy
+                  onPressed: local.localBusy
                       ? null
                       : () => Navigator.of(dialogCtx).pop(),
                   child: const Text('关闭'),
