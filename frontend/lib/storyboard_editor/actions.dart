@@ -79,6 +79,30 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     await _notifyStoryboardMutated();
   }
 
+  Future<void> _saveVideoDescription() async {
+    final response = await updateStoryboardByProjectAndNumericId(
+      widget.token,
+      widget.projectId,
+      widget.storyNumericId,
+      <String, dynamic>{
+        'video_desc': widget.videoDescriptionCtrl.text.trim().isEmpty
+            ? null
+            : widget.videoDescriptionCtrl.text.trim(),
+      },
+    );
+    widget.videoDescriptionCtrl.text = response.videoDesc ?? '';
+    await _refreshProductionData();
+    if (!mounted) return;
+    _applyWorkbenchState(() {
+      _setWorkbenchFollowUp(
+        widget.videoDescriptionCtrl.text.trim().isEmpty
+            ? '已清空字幕/旁白文案，导出时会回退到分镜提示词。'
+            : '已保存字幕/旁白文案，后续默认视频提示词和导出字幕会优先使用它。',
+      );
+    });
+    await _notifyStoryboardMutated();
+  }
+
   Future<void> _exportCurrentVideoJob() async {
     final candidates = _storyboardVideos();
     final selected = widget.scriptStoryboard.filePath;
@@ -90,7 +114,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
               .map((s) => s.trim())
               .firstWhere((s) => s.isNotEmpty, orElse: () => ''));
     if (sourceUrl.isEmpty) {
-        throw const FormatException('当前分镜还没有可导出的已选视频或候选视频 URL');
+      throw const FormatException('当前分镜还没有可导出的已选视频或候选视频 URL');
     }
     final job = await createJob(
       widget.token,
@@ -268,9 +292,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       }
       if (knownTrackIds.isNotEmpty) {
         _trackIdCtrl.text = knownTrackIds.first.toString();
-        _setWorkbenchFollowUp(
-          '已回填轨道 ${knownTrackIds.first}，可继续确认视频参数。',
-        );
+        _setWorkbenchFollowUp('已回填轨道 ${knownTrackIds.first}，可继续确认视频参数。');
         return;
       }
       if (_trackNameCtrl.text.trim().isEmpty) {
@@ -281,10 +303,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _syncProductionDataAction() async {
-    await _refreshProductionData(
-      syncImageUrl: true,
-      syncTrackId: true,
-    );
+    await _refreshProductionData(syncImageUrl: true, syncTrackId: true);
     if (!mounted) return;
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp('已同步当前分镜制作数据。');
@@ -300,9 +319,6 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _refreshProductionInputsAction() async {
-    await _refreshProductionData(
-      syncImageUrl: true,
-      syncTrackId: true,
-    );
+    await _refreshProductionData(syncImageUrl: true, syncTrackId: true);
   }
 }

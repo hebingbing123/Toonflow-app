@@ -3,22 +3,26 @@ part of '../../home_page.dart';
 class _StoryboardWorkbenchPanel extends StatefulWidget {
   const _StoryboardWorkbenchPanel({
     required this.token,
+    required this.projectId,
     required this.storyNumericId,
     required this.projectNumericId,
     required this.scriptNumericId,
     required this.scriptStoryboard,
     required this.readPromptText,
     required this.readVideoDescriptionText,
+    required this.videoDescriptionCtrl,
     this.onStoryboardMutated,
   });
 
   final String token;
+  final String projectId;
   final int storyNumericId;
   final int projectNumericId;
   final int scriptNumericId;
   final StoryboardRow scriptStoryboard;
   final String Function() readPromptText;
   final String Function() readVideoDescriptionText;
+  final TextEditingController videoDescriptionCtrl;
   final Future<void> Function()? onStoryboardMutated;
 
   @override
@@ -109,9 +113,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
       error: error,
       fallbackDetail: fallbackDetail,
     );
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(notice)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(notice)));
   }
 
   void _applyWorkbenchState(VoidCallback action) {
@@ -198,6 +200,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           loadingWorkbench: _loadingWorkbench,
           trackIdCtrl: _trackIdCtrl,
           trackNameCtrl: _trackNameCtrl,
+          videoDescriptionCtrl: widget.videoDescriptionCtrl,
           videoPromptCtrl: _videoPromptCtrl,
           videoDurationCtrl: _videoDurationCtrl,
           resolution: _resolution,
@@ -220,6 +223,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           latestExportJob: _latestExportJob,
           onSubmitVideoGeneration: () =>
               _runDialogAction(_submitVideoGeneration),
+          onSaveVideoDescription: () => _runDialogAction(_saveVideoDescription),
           onExportCurrentVideo: () => _runDialogAction(_exportCurrentVideoJob),
           onRefreshExportJob: () => _runDialogAction(_refreshExportJobStatus),
           onSelectVideo: (video) => _runDialogAction(() => _selectVideo(video)),

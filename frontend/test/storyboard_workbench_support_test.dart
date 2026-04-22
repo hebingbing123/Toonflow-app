@@ -259,6 +259,61 @@ void main() {
     },
   );
 
+  test('resolveStoryboardNarrationText prefers script narration first', () {
+    final narration = resolveStoryboardNarrationText(
+      scriptStoryboard: const StoryboardRow(
+        id: '1',
+        numericId: 11,
+        scriptId: '3',
+        videoDesc: '脚本旁白',
+      ),
+      productionStoryboard: const ProductionStoryboardItemV1(
+        id: 11,
+        videoDesc: '制作旁白',
+      ),
+    );
+
+    expect(narration, '脚本旁白');
+  });
+
+  test(
+    'resolveStoryboardVideoPromptSeed falls back to prompt when narration is absent',
+    () {
+      final prompt = resolveStoryboardVideoPromptSeed(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '镜头一提示词',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(id: 11),
+      );
+
+      expect(prompt, '镜头一提示词');
+    },
+  );
+
+  test(
+    'resolveStoryboardVideoPromptSeed prefers narration over prompt for video generation',
+    () {
+      final prompt = resolveStoryboardVideoPromptSeed(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '镜头一提示词',
+          videoDesc: '旁白：主角抬头看向远方',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          prompt: '制作提示词',
+        ),
+      );
+
+      expect(prompt, '旁白：主角抬头看向远方');
+    },
+  );
+
   test(
     'diagnoseStoryboardWorkbench prefers refreshing when jobs or videos already exist',
     () {
@@ -368,7 +423,8 @@ void main() {
   test('buildStoryboardWorkbenchLoadingNotice appends detail text', () {
     final line = buildStoryboardWorkbenchLoadingNotice(
       actionSummary: '正在同步当前分镜制作数据。',
-      recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+      recommendedAction:
+          StoryboardWorkbenchRecommendedAction.syncProductionData,
       detail: '同步完成后会自动回填当前画面。',
     );
 

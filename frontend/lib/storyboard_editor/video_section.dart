@@ -8,6 +8,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.loadingWorkbench,
     required this.trackIdCtrl,
     required this.trackNameCtrl,
+    required this.videoDescriptionCtrl,
     required this.videoPromptCtrl,
     required this.videoDurationCtrl,
     required this.resolution,
@@ -29,6 +30,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.loadingExportJob,
     required this.latestExportJob,
     required this.onSubmitVideoGeneration,
+    required this.onSaveVideoDescription,
     required this.onExportCurrentVideo,
     required this.onRefreshExportJob,
     required this.onSelectVideo,
@@ -39,6 +41,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final bool loadingWorkbench;
   final TextEditingController trackIdCtrl;
   final TextEditingController trackNameCtrl;
+  final TextEditingController videoDescriptionCtrl;
   final TextEditingController videoPromptCtrl;
   final TextEditingController videoDurationCtrl;
   final String resolution;
@@ -60,6 +63,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final bool loadingExportJob;
   final JobRow? latestExportJob;
   final VoidCallback onSubmitVideoGeneration;
+  final VoidCallback onSaveVideoDescription;
   final VoidCallback onExportCurrentVideo;
   final VoidCallback onRefreshExportJob;
   final ValueChanged<VideoItem> onSelectVideo;
@@ -118,6 +122,25 @@ class _StoryboardVideoSection extends StatelessWidget {
               child: Text(loadingWorkbench ? '刷新中…' : '刷新视频数据'),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: videoDescriptionCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '字幕/旁白文案',
+            helperText: '导出 SRT、时间线字幕和默认视频提示词会优先使用这里的内容。',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: saving ? null : onSaveVideoDescription,
+            child: const Text('保存字幕/旁白文案'),
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -218,7 +241,9 @@ class _StoryboardVideoSection extends StatelessWidget {
                 child: const Text('导出当前视频（job）'),
               ),
               TextButton(
-                onPressed: saving || loadingExportJob ? null : onRefreshExportJob,
+                onPressed: saving || loadingExportJob
+                    ? null
+                    : onRefreshExportJob,
                 child: Text(loadingExportJob ? '刷新导出任务中…' : '刷新导出任务状态'),
               ),
             ],
@@ -238,9 +263,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           if ((latestExportJob!.errorMessage ?? '').trim().isNotEmpty)
             Text(
               '导出错误：${latestExportJob!.errorMessage}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
         ],
         if (workbenchLine != null) ...[
@@ -259,34 +284,32 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ...storyboardVideos.take(3).map(
-          (video) {
-            final state = video.state ?? '';
-            final duration = video.duration ?? '';
-            return ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                video.videoUrl ?? '视频 URL 缺失',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                [
-                  if (state.trim().isNotEmpty) '状态 $state',
-                  if (video.trackId != null) '轨道 ${video.trackId}',
-                  if (duration.trim().isNotEmpty) '时长 $duration',
-                ].join(' · '),
-              ),
-              trailing: TextButton(
-                onPressed: saving || (video.videoUrl ?? '').trim().isEmpty
-                    ? null
-                    : () => onSelectVideo(video),
-                child: const Text('设为当前视频'),
-              ),
-            );
-          },
-        ),
+        ...storyboardVideos.take(3).map((video) {
+          final state = video.state ?? '';
+          final duration = video.duration ?? '';
+          return ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              video.videoUrl ?? '视频 URL 缺失',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              [
+                if (state.trim().isNotEmpty) '状态 $state',
+                if (video.trackId != null) '轨道 ${video.trackId}',
+                if (duration.trim().isNotEmpty) '时长 $duration',
+              ].join(' · '),
+            ),
+            trailing: TextButton(
+              onPressed: saving || (video.videoUrl ?? '').trim().isEmpty
+                  ? null
+                  : () => onSelectVideo(video),
+              child: const Text('设为当前视频'),
+            ),
+          );
+        }),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
@@ -298,14 +321,16 @@ class _StoryboardVideoSection extends StatelessWidget {
           const SizedBox(height: 8),
           Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 4),
-          ...generateData!.generatingJobs.take(3).map(
-            (job) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: Text(job.kind),
-              subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
-            ),
-          ),
+          ...generateData!.generatingJobs
+              .take(3)
+              .map(
+                (job) => ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(job.kind),
+                  subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
+                ),
+              ),
         ],
       ],
     );

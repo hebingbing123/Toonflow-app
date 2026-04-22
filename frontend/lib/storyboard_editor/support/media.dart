@@ -72,3 +72,35 @@ String? resolveStoryboardGenerationPrompt({
   }
   return null;
 }
+
+String? resolveStoryboardNarrationText({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+}) {
+  final scriptNarration = scriptStoryboard?.videoDesc?.trim();
+  if (scriptNarration != null && scriptNarration.isNotEmpty) {
+    return scriptNarration;
+  }
+  final productionNarration = productionStoryboard?.videoDesc?.trim();
+  if (productionNarration != null && productionNarration.isNotEmpty) {
+    return productionNarration;
+  }
+  return null;
+}
+
+String? resolveStoryboardVideoPromptSeed({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+}) {
+  final narration = resolveStoryboardNarrationText(
+    scriptStoryboard: scriptStoryboard,
+    productionStoryboard: productionStoryboard,
+  );
+  if (narration != null && narration.isNotEmpty) {
+    return narration;
+  }
+  return resolveStoryboardGenerationPrompt(
+    scriptStoryboard: scriptStoryboard,
+    productionStoryboard: productionStoryboard,
+  );
+}

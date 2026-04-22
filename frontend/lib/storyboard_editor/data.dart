@@ -44,7 +44,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _productionError = null;
       _setWorkbenchActionNotice(
         actionSummary: '正在同步当前分镜制作数据。',
-        recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+        recommendedAction:
+            StoryboardWorkbenchRecommendedAction.syncProductionData,
         detail: '同步完成后会自动回填当前画面、轨道和可用视频参数。',
       );
     });
@@ -70,9 +71,14 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         if (syncTrackId && productionRow.trackId != null) {
           _trackIdCtrl.text = productionRow.trackId!.toString();
         }
+        final videoPromptSeed = resolveStoryboardVideoPromptSeed(
+          scriptStoryboard: widget.scriptStoryboard,
+          productionStoryboard: productionRow,
+        );
         if (_videoPromptCtrl.text.trim().isEmpty &&
-            (productionRow.prompt ?? '').trim().isNotEmpty) {
-          _videoPromptCtrl.text = productionRow.prompt!.trim();
+            videoPromptSeed != null &&
+            videoPromptSeed.isNotEmpty) {
+          _videoPromptCtrl.text = videoPromptSeed;
         }
         if ((_videoDurationCtrl.text.trim().isEmpty ||
                 int.tryParse(_videoDurationCtrl.text.trim()) == null) &&
@@ -88,7 +94,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         );
         _setWorkbenchFailureNotice(
           actionSummary: '同步当前分镜制作数据失败。',
-          recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+          recommendedAction:
+              StoryboardWorkbenchRecommendedAction.syncProductionData,
           error: e,
           fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
         );
@@ -101,7 +108,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         );
         _setWorkbenchFailureNotice(
           actionSummary: '同步当前分镜制作数据失败。',
-          recommendedAction: StoryboardWorkbenchRecommendedAction.syncProductionData,
+          recommendedAction:
+              StoryboardWorkbenchRecommendedAction.syncProductionData,
           error: e,
           fallbackDetail: '可先检查当前分镜是否已在 production 侧生成，再重新同步。',
         );
@@ -118,7 +126,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _loadingWorkbench = true;
       _setWorkbenchActionNotice(
         actionSummary: '正在刷新当前分镜的视频数据。',
-        recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+        recommendedAction:
+            StoryboardWorkbenchRecommendedAction.refreshVideoData,
         detail: '刷新完成后会同步模型信息、已生成视频和进行中的任务。',
       );
     });
@@ -144,7 +153,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _applyWorkbenchState(() {
         _setWorkbenchFailureNotice(
           actionSummary: '刷新当前分镜的视频数据失败。',
-          recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+          recommendedAction:
+              StoryboardWorkbenchRecommendedAction.refreshVideoData,
           error: e,
           fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
         );
@@ -154,7 +164,8 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _applyWorkbenchState(() {
         _setWorkbenchFailureNotice(
           actionSummary: '刷新当前分镜的视频数据失败。',
-          recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
+          recommendedAction:
+              StoryboardWorkbenchRecommendedAction.refreshVideoData,
           error: e,
           fallbackDetail: '可稍后重试，或先继续维护图片和轨道信息。',
         );

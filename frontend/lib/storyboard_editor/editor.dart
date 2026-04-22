@@ -48,12 +48,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
                       children: [
                         _StoryboardWorkbenchPanel(
                           token: token,
+                          projectId: projectId,
                           storyNumericId: storyNumericId,
                           projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           scriptStoryboard: row,
                           readPromptText: () => promptCtrl.text,
                           readVideoDescriptionText: () => videoCtrl.text,
+                          videoDescriptionCtrl: videoCtrl,
                           onStoryboardMutated: onStoryboardTreeMutated,
                         ),
                         const SizedBox(height: 16),
