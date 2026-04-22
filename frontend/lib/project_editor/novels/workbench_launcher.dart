@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../rust_api.dart';
 
+part 'workbench_launcher_controllers.dart';
+
 Future<void> openNovelWorkbenchDialog({
   required BuildContext ctx,
   required StateSetter setDialogState,
@@ -93,27 +95,10 @@ Future<void> openNovelWorkbenchDialog({
   final currentItems = novelsRef[0]?.items ?? const <NovelRow>[];
   final first = currentItems.isNotEmpty ? currentItems.first : null;
   final last = currentItems.isNotEmpty ? currentItems.last : null;
-  final searchCtrl = TextEditingController();
-  final createChapterCtrl = TextEditingController(
-    text: '章节_${DateTime.now().millisecondsSinceEpoch}',
-  );
-  final createBodyCtrl = TextEditingController(text: '在这里填写章节正文。');
-  final selectedNovelIdCtrl = TextEditingController(
-    text: first?.numericId.toString() ?? '',
-  );
-  final patchChapterCtrl = TextEditingController(text: first?.chapter ?? '');
-  final patchBodyCtrl = TextEditingController(text: first?.chapterData ?? '');
-  final deleteNovelIdCtrl = TextEditingController(
-    text: last?.numericId.toString() ?? '',
-  );
-  final generateIdsCtrl = TextEditingController(
-    text: currentItems.take(3).map((e) => e.numericId).join(','),
-  );
-  final numericIdsCtrl = TextEditingController(
-    text: currentItems.take(3).map((e) => e.numericId).join(','),
-  );
-  final batchDeleteIdsCtrl = TextEditingController(
-    text: currentItems.skip(1).take(2).map((e) => e.numericId).join(','),
+  final ctrls = _NovelWorkbenchControllers.fromItems(
+    currentItems: currentItems,
+    first: first,
+    last: last,
   );
 
   List<NovelRow> previewRows = List<NovelRow>.from(currentItems.take(6));
@@ -130,16 +115,16 @@ Future<void> openNovelWorkbenchDialog({
       infoLine = refreshed.isEmpty
           ? '章节列表为空。'
           : '已刷新，共 ${refreshed.length} 条章节。';
-      if (selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
-        patchChapterCtrl.text = refreshed.first.chapter;
-        patchBodyCtrl.text = refreshed.first.chapterData;
+      if (ctrls.selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
+        ctrls.selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
+        ctrls.patchChapterCtrl.text = refreshed.first.chapter;
+        ctrls.patchBodyCtrl.text = refreshed.first.chapterData;
       }
-      if (deleteNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
+      if (ctrls.deleteNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
+        ctrls.deleteNovelIdCtrl.text = refreshed.last.numericId.toString();
       }
-      if (generateIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
-        generateIdsCtrl.text = refreshed
+      if (ctrls.generateIdsCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
+        ctrls.generateIdsCtrl.text = refreshed
             .take(3)
             .map((e) => e.numericId)
             .join(',');
@@ -217,7 +202,7 @@ Future<void> openNovelWorkbenchDialog({
                         token: token,
                         project: project,
                         novelsBusy: novelsBusy,
-                        searchCtrl: searchCtrl,
+                        searchCtrl: ctrls.searchCtrl,
                         localBusy: localBusy,
                         setLocalBusy: setLocalBusy,
                         refreshWorkbench: refreshWorkbench,
@@ -239,11 +224,11 @@ Future<void> openNovelWorkbenchDialog({
                         localBusy: localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
-                        createChapterCtrl: createChapterCtrl,
-                        createBodyCtrl: createBodyCtrl,
-                        selectedNovelIdCtrl: selectedNovelIdCtrl,
-                        patchChapterCtrl: patchChapterCtrl,
-                        patchBodyCtrl: patchBodyCtrl,
+                        createChapterCtrl: ctrls.createChapterCtrl,
+                        createBodyCtrl: ctrls.createBodyCtrl,
+                        selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
+                        patchChapterCtrl: ctrls.patchChapterCtrl,
+                        patchBodyCtrl: ctrls.patchBodyCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                       const SizedBox(height: 16),
@@ -257,9 +242,9 @@ Future<void> openNovelWorkbenchDialog({
                         localBusy: localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
-                        selectedNovelIdCtrl: selectedNovelIdCtrl,
-                        patchChapterCtrl: patchChapterCtrl,
-                        patchBodyCtrl: patchBodyCtrl,
+                        selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
+                        patchChapterCtrl: ctrls.patchChapterCtrl,
+                        patchBodyCtrl: ctrls.patchBodyCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                       const SizedBox(height: 16),
@@ -273,8 +258,8 @@ Future<void> openNovelWorkbenchDialog({
                         localBusy: localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
-                        deleteNovelIdCtrl: deleteNovelIdCtrl,
-                        generateIdsCtrl: generateIdsCtrl,
+                        deleteNovelIdCtrl: ctrls.deleteNovelIdCtrl,
+                        generateIdsCtrl: ctrls.generateIdsCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                       const SizedBox(height: 16),
@@ -288,8 +273,8 @@ Future<void> openNovelWorkbenchDialog({
                         localBusy: localBusy,
                         setLocalBusy: setLocalBusy,
                         updateInfoLine: updateInfoLine,
-                        numericIdsCtrl: numericIdsCtrl,
-                        batchDeleteIdsCtrl: batchDeleteIdsCtrl,
+                        numericIdsCtrl: ctrls.numericIdsCtrl,
+                        batchDeleteIdsCtrl: ctrls.batchDeleteIdsCtrl,
                         refreshWorkbench: refreshWorkbench,
                       ),
                     ],
@@ -310,15 +295,6 @@ Future<void> openNovelWorkbenchDialog({
       },
     );
   } finally {
-    searchCtrl.dispose();
-    createChapterCtrl.dispose();
-    createBodyCtrl.dispose();
-    selectedNovelIdCtrl.dispose();
-    patchChapterCtrl.dispose();
-    patchBodyCtrl.dispose();
-    deleteNovelIdCtrl.dispose();
-    generateIdsCtrl.dispose();
-    numericIdsCtrl.dispose();
-    batchDeleteIdsCtrl.dispose();
+    ctrls.dispose();
   }
 }
