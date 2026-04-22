@@ -9,6 +9,7 @@ part 'dialog_state_helpers.dart';
 part 'dialog_state_mutation_helpers.dart';
 part 'dialog_state_selection_helpers.dart';
 part 'dialog_state_snapshot_helpers.dart';
+part 'dialog_state_controllers.dart';
 
 class AssetGenerationWorkbenchDialog extends StatefulWidget {
   const AssetGenerationWorkbenchDialog({

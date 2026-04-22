@@ -2,11 +2,7 @@ part of 'dialog.dart';
 
 class _AssetGenerationWorkbenchDialogState
     extends State<AssetGenerationWorkbenchDialog> {
-  late final TextEditingController _modelCtrl;
-  late final TextEditingController _resolutionCtrl;
-  late final TextEditingController _imageUrlCtrl;
-  late final TextEditingController _batchNameCtrl;
-  late final TextEditingController _batchLimitCtrl;
+  late final _AssetGenerationWorkbenchControllers _ctrls;
 
   late final Set<int> _selectedIds;
   int? _focusedAssetNumericId;
@@ -24,11 +20,7 @@ class _AssetGenerationWorkbenchDialogState
   @override
   void initState() {
     super.initState();
-    _modelCtrl = TextEditingController();
-    _resolutionCtrl = TextEditingController();
-    _imageUrlCtrl = TextEditingController();
-    _batchNameCtrl = TextEditingController();
-    _batchLimitCtrl = TextEditingController(text: '10');
+    _ctrls = _AssetGenerationWorkbenchControllers.create();
     _selectedIds = <int>{...widget.initialSelectedIds};
     _focusedAssetNumericId = widget.initialFocusedAssetNumericId;
     _selectedScriptNumericId = widget.initialScriptNumericId;
@@ -40,11 +32,7 @@ class _AssetGenerationWorkbenchDialogState
 
   @override
   void dispose() {
-    _modelCtrl.dispose();
-    _resolutionCtrl.dispose();
-    _imageUrlCtrl.dispose();
-    _batchNameCtrl.dispose();
-    _batchLimitCtrl.dispose();
+    _ctrls.dispose();
     super.dispose();
   }
 
@@ -118,7 +106,7 @@ class _AssetGenerationWorkbenchDialogState
         ..addAll(result.selectedIds);
       _focusedAssetNumericId = result.focusedAssetNumericId;
       if (result.clearImageUrl) {
-        _imageUrlCtrl.clear();
+        _ctrls.imageUrlCtrl.clear();
       }
     });
   }
@@ -238,11 +226,11 @@ class _AssetGenerationWorkbenchDialogState
         batchData: _batchData,
         promptPollingData: _promptPollingData,
         statusLine: _statusLine,
-        modelCtrl: _modelCtrl,
-        resolutionCtrl: _resolutionCtrl,
-        imageUrlCtrl: _imageUrlCtrl,
-        batchNameCtrl: _batchNameCtrl,
-        batchLimitCtrl: _batchLimitCtrl,
+        modelCtrl: _ctrls.modelCtrl,
+        resolutionCtrl: _ctrls.resolutionCtrl,
+        imageUrlCtrl: _ctrls.imageUrlCtrl,
+        batchNameCtrl: _ctrls.batchNameCtrl,
+        batchLimitCtrl: _ctrls.batchLimitCtrl,
       ),
       callbacks: AssetGenerationWorkbenchDialogViewCallbacks(
         onScriptChanged: (value) {
@@ -274,8 +262,8 @@ class _AssetGenerationWorkbenchDialogState
             final request = _buildBatchCandidatesRequest(
               selectedType: _selectedType,
               visibleAssets: visible,
-              batchNameText: _batchNameCtrl.text,
-              batchLimitText: _batchLimitCtrl.text,
+              batchNameText: _ctrls.batchNameCtrl.text,
+              batchLimitText: _ctrls.batchLimitCtrl.text,
             );
             final response = await postWorkbenchAssetsBatchGenerationData(
               widget.token,
@@ -311,10 +299,12 @@ class _AssetGenerationWorkbenchDialogState
               projectId: widget.project.numericId,
               scriptId: _selectedScriptNumericId,
               assetIds: selected,
-              model: _modelCtrl.text.trim().isEmpty ? null : _modelCtrl.text.trim(),
-              resolution: _resolutionCtrl.text.trim().isEmpty
+              model: _ctrls.modelCtrl.text.trim().isEmpty
                   ? null
-                  : _resolutionCtrl.text.trim(),
+                  : _ctrls.modelCtrl.text.trim(),
+              resolution: _ctrls.resolutionCtrl.text.trim().isEmpty
+                  ? null
+                  : _ctrls.resolutionCtrl.text.trim(),
             );
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
@@ -393,7 +383,7 @@ class _AssetGenerationWorkbenchDialogState
               projectId: widget.project.numericId,
               scriptId: _selectedScriptNumericId,
               assetId: selectedSingleAssetId!,
-              imageUrl: _imageUrlCtrl.text.trim(),
+              imageUrl: _ctrls.imageUrlCtrl.text.trim(),
             );
             await widget.reloadAssetsAndStats();
             await _syncWorkbenchSnapshot(
