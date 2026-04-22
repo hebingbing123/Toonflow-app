@@ -13,6 +13,7 @@ import '../../contexts/production/support.dart';
 
 part 'card_support.dart';
 part 'card_logic.dart';
+part 'card_logic_templates.dart';
 
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
