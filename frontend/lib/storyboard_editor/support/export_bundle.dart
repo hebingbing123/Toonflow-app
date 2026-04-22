@@ -10,6 +10,9 @@ class StoryboardExportBundleSummary {
     required this.imageFileCount,
     required this.sidecarFileCount,
     required this.totalDurationSeconds,
+    required this.explicitSubtitleCount,
+    required this.promptFallbackSubtitleCount,
+    required this.placeholderSubtitleCount,
     this.byteLength,
   });
 
@@ -18,6 +21,9 @@ class StoryboardExportBundleSummary {
   final int imageFileCount;
   final int sidecarFileCount;
   final int totalDurationSeconds;
+  final int explicitSubtitleCount;
+  final int promptFallbackSubtitleCount;
+  final int placeholderSubtitleCount;
   final int? byteLength;
 
   int get shotCount => shotIds.length;
@@ -41,6 +47,11 @@ class StoryboardExportBundleSummary {
 
   String get sidecarLabel =>
       'manifest.json / storyboard.csv / timeline.json / subtitles.srt';
+
+  String get subtitleCoverageLabel =>
+      '字幕来源：$explicitSubtitleCount 条旁白文案'
+      ' / $promptFallbackSubtitleCount 条提示词回退'
+      ' / $placeholderSubtitleCount 条占位文本';
 }
 
 StoryboardExportBundleSummary buildStoryboardExportBundleSummary({
@@ -58,12 +69,34 @@ StoryboardExportBundleSummary buildStoryboardExportBundleSummary({
   };
 
   var totalDurationSeconds = 0;
+  var explicitSubtitleCount = 0;
+  var promptFallbackSubtitleCount = 0;
+  var placeholderSubtitleCount = 0;
   for (final id in sortedShotIds) {
-    final productionDuration = productionById[id]?.duration;
+    final productionRow = productionById[id];
+    final boardRow = boardById[id];
+    final productionDuration = productionRow?.duration;
     final boardDuration = boardById[id]?.duration;
     totalDurationSeconds += _parseStoryboardDurationSeconds(
       productionDuration ?? boardDuration,
     );
+    final narration = resolveStoryboardNarrationText(
+      scriptStoryboard: boardRow,
+      productionStoryboard: productionRow,
+    );
+    if (narration != null && narration.isNotEmpty) {
+      explicitSubtitleCount += 1;
+      continue;
+    }
+    final prompt = resolveStoryboardGenerationPrompt(
+      scriptStoryboard: boardRow,
+      productionStoryboard: productionRow,
+    );
+    if (prompt != null && prompt.isNotEmpty) {
+      promptFallbackSubtitleCount += 1;
+      continue;
+    }
+    placeholderSubtitleCount += 1;
   }
 
   return StoryboardExportBundleSummary(
@@ -72,6 +105,9 @@ StoryboardExportBundleSummary buildStoryboardExportBundleSummary({
     imageFileCount: sortedShotIds.length,
     sidecarFileCount: _storyboardExportSidecarCount,
     totalDurationSeconds: totalDurationSeconds,
+    explicitSubtitleCount: explicitSubtitleCount,
+    promptFallbackSubtitleCount: promptFallbackSubtitleCount,
+    placeholderSubtitleCount: placeholderSubtitleCount,
     byteLength: zip?.bytes.length,
   );
 }

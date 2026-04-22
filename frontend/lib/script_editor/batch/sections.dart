@@ -194,6 +194,10 @@ extension _StoryboardBatchWorkbenchSections
               '预计条目：${exportEstimate.estimatedEntryCount} 个 · 总时长 ${exportEstimate.totalDurationLabel}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            Text(
+              exportEstimate.subtitleCoverageLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
           if (_downloadUrl != null) ...[
             const SizedBox(height: 8),
@@ -216,6 +220,10 @@ extension _StoryboardBatchWorkbenchSections
             ),
             Text(
               '预计条目：${_exportSummary!.estimatedEntryCount} 个 · 总时长 ${_exportSummary!.totalDurationLabel} · 大小 ${formatBinarySize(_exportSummary!.byteLength ?? 0)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              _exportSummary!.subtitleCoverageLabel,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(

@@ -28,11 +28,13 @@ void main() {
           scriptId: 'sc-1',
           numericId: 7,
           duration: '4',
+          videoDesc: '旁白：镜头七',
         ),
         StoryboardRow(
           id: 'sb-9',
           scriptId: 'sc-1',
           numericId: 9,
+          prompt: '镜头九提示词',
           duration: '8',
         ),
       ],
@@ -51,6 +53,10 @@ void main() {
     expect(summary.estimatedEntryCount, 6);
     expect(summary.totalDurationSeconds, 14);
     expect(summary.totalDurationLabel, '14s');
+    expect(summary.explicitSubtitleCount, 1);
+    expect(summary.promptFallbackSubtitleCount, 1);
+    expect(summary.placeholderSubtitleCount, 0);
+    expect(summary.subtitleCoverageLabel, '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
     expect(summary.byteLength, 2048);
     expect(summary.includesTimeline, isTrue);
     expect(summary.includesSubtitles, isTrue);
@@ -73,6 +79,9 @@ void main() {
     expect(summary.filename, 'storyboards.zip');
     expect(summary.totalDurationSeconds, 5);
     expect(summary.totalDurationLabel, '5s');
+    expect(summary.explicitSubtitleCount, 0);
+    expect(summary.promptFallbackSubtitleCount, 0);
+    expect(summary.placeholderSubtitleCount, 1);
     expect(summary.byteLength, isNull);
   });
 }
