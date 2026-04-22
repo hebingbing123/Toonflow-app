@@ -46,6 +46,7 @@ pub(super) async fn build_storyboard_export_zip(
     let subtitles = build_storyboard_srt(&manifest_rows);
     let voiceover_script = build_storyboard_voiceover_script(&manifest_rows);
     let voiceover_segments = build_storyboard_voiceover_segments(&manifest_rows);
+    let assembly_plan = build_storyboard_assembly_plan(&manifest_rows);
     write_export_text_file(
         &mut archive,
         "manifest.json",
@@ -80,6 +81,12 @@ pub(super) async fn build_storyboard_export_zip(
         &mut archive,
         "voiceover_segments.json",
         &serde_json::to_vec_pretty(&voiceover_segments).map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "assembly_plan.json",
+        &serde_json::to_vec_pretty(&assembly_plan).map_err(|_| ApiError::Internal)?,
         options,
     )?;
 
@@ -195,6 +202,33 @@ pub(super) struct StoryboardExportVoiceoverSegment {
     text: String,
     subtitle_source: &'static str,
     voiceover_ready: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportAssemblyPlan<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    total_duration_ms: u64,
+    audio_ready_count: usize,
+    placeholder_audio_count: usize,
+    shots: Vec<StoryboardExportAssemblyShot>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportAssemblyShot {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    image_filename: String,
+    image_source: Option<String>,
+    subtitle_text: String,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
+    suggested_transition: &'static str,
 }
 
 #[derive(Debug, Serialize)]
@@ -377,6 +411,48 @@ pub(super) fn build_storyboard_voiceover_segments(
         placeholder_count,
         total_duration_ms: cursor_ms,
         shots: segments,
+    }
+}
+
+pub(super) fn build_storyboard_assembly_plan(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportAssemblyPlan<'static> {
+    let mut cursor_ms = 0_u64;
+    let mut audio_ready_count = 0_usize;
+    let assembly_shots = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            if shot.voiceover_ready {
+                audio_ready_count += 1;
+            }
+            StoryboardExportAssemblyShot {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                image_filename: shot.image_filename.clone(),
+                image_source: shot.image_source.clone(),
+                subtitle_text: resolve_shot_script_line(shot),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
+                suggested_transition: "cut",
+            }
+        })
+        .collect::<Vec<_>>();
+    StoryboardExportAssemblyPlan {
+        export_type: "storyboard_assembly_plan",
+        shot_count: assembly_shots.len(),
+        total_duration_ms: cursor_ms,
+        audio_ready_count,
+        placeholder_audio_count: assembly_shots.len().saturating_sub(audio_ready_count),
+        shots: assembly_shots,
     }
 }
 

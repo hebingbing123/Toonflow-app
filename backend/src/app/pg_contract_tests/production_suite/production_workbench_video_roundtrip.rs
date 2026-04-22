@@ -371,8 +371,8 @@ async fn production_workbench_video_roundtrip() {
     let mut archive = ZipArchive::new(cursor).expect("valid zip");
     assert_eq!(
         archive.len(),
-        7,
-        "image + manifest + csv + timeline + subtitles + voiceover script + voiceover segments expected in zip"
+        8,
+        "image + manifest + csv + timeline + subtitles + voiceover script + voiceover segments + assembly plan expected in zip"
     );
     let mut exported = archive
         .by_name(&format!("storyboard-{storyboard_id}.png"))
@@ -496,6 +496,37 @@ async fn production_workbench_video_roundtrip() {
     assert_eq!(
         voiceover_segments["shots"][0]["text"].as_str(),
         Some("旁白：主角抬头看向远方")
+    );
+    drop(voiceover_segments_entry);
+    let mut assembly_plan_entry = archive
+        .by_name("assembly_plan.json")
+        .expect("zip assembly plan");
+    let mut assembly_plan_bytes = Vec::new();
+    std::io::Read::read_to_end(&mut assembly_plan_entry, &mut assembly_plan_bytes)
+        .expect("read assembly plan entry");
+    let assembly_plan: Value =
+        serde_json::from_slice(&assembly_plan_bytes).expect("assembly plan json");
+    assert_eq!(
+        assembly_plan["export_type"].as_str(),
+        Some("storyboard_assembly_plan")
+    );
+    assert_eq!(assembly_plan["audio_ready_count"].as_i64(), Some(1));
+    assert_eq!(assembly_plan["placeholder_audio_count"].as_i64(), Some(0));
+    assert_eq!(
+        assembly_plan["shots"][0]["image_filename"].as_str(),
+        Some(format!("storyboard-{storyboard_id}.png").as_str())
+    );
+    assert_eq!(
+        assembly_plan["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(
+        assembly_plan["shots"][0]["voiceover_ready"].as_bool(),
+        Some(true)
+    );
+    assert_eq!(
+        assembly_plan["shots"][0]["suggested_transition"].as_str(),
+        Some("cut")
     );
 
     let res = app

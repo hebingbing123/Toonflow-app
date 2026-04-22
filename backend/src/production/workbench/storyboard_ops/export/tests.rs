@@ -1,6 +1,7 @@
 use super::shot_ids::normalize_export_shot_ids;
 use super::zip_export::{
-    build_storyboard_csv, build_storyboard_srt, build_storyboard_voiceover_script,
+    build_storyboard_assembly_plan, build_storyboard_csv, build_storyboard_srt,
+    build_storyboard_voiceover_script,
 };
 use crate::error::ApiError;
 use crate::production::workbench::storyboard_ops::types::ExportImageShotRef;
@@ -186,6 +187,69 @@ fn storyboard_voiceover_segments_carry_timeline_and_ready_counts() {
     assert_eq!(payload["shots"][0]["voiceover_ready"].as_bool(), Some(true));
     assert_eq!(payload["shots"][1]["start_ms"].as_u64(), Some(5_000));
     assert_eq!(payload["shots"][1]["end_ms"].as_u64(), Some(11_000));
+    assert_eq!(
+        payload["shots"][1]["subtitle_source"].as_str(),
+        Some("placeholder")
+    );
+    assert_eq!(
+        payload["shots"][1]["voiceover_ready"].as_bool(),
+        Some(false)
+    );
+}
+
+#[test]
+fn storyboard_assembly_plan_carries_edit_timeline_and_audio_counts() {
+    let first = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 7,
+            file_path: Some("https://cdn.example.com/storyboard-7.png".into()),
+            prompt: Some("Opening line".into()),
+            video_desc: Some("Narrator opening".into()),
+            duration: Some("5".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(9),
+        },
+        0,
+    );
+    let second = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 8,
+            file_path: Some("https://cdn.example.com/storyboard-8.png".into()),
+            prompt: None,
+            video_desc: None,
+            duration: Some("6".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(10),
+        },
+        1,
+    );
+
+    let payload = serde_json::to_value(build_storyboard_assembly_plan(&[first, second]))
+        .expect("assembly plan json");
+
+    assert_eq!(
+        payload["export_type"].as_str(),
+        Some("storyboard_assembly_plan")
+    );
+    assert_eq!(payload["shot_count"].as_u64(), Some(2));
+    assert_eq!(payload["audio_ready_count"].as_u64(), Some(1));
+    assert_eq!(payload["placeholder_audio_count"].as_u64(), Some(1));
+    assert_eq!(payload["total_duration_ms"].as_u64(), Some(11_000));
+    assert_eq!(
+        payload["shots"][0]["image_filename"].as_str(),
+        Some("storyboard-7.png")
+    );
+    assert_eq!(
+        payload["shots"][0]["subtitle_source"].as_str(),
+        Some("explicit_narration")
+    );
+    assert_eq!(payload["shots"][0]["voiceover_ready"].as_bool(), Some(true));
+    assert_eq!(
+        payload["shots"][0]["suggested_transition"].as_str(),
+        Some("cut")
+    );
     assert_eq!(
         payload["shots"][1]["subtitle_source"].as_str(),
         Some("placeholder")
