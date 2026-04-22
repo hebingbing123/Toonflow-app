@@ -19,8 +19,20 @@ pub(crate) async fn run_video_export(
         .get("source_url")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing source_url".into()))?;
+    let source_url = source_url.trim();
+    if source_url.is_empty() {
+        return Err(JobRunError::Failed(
+            "payload source_url cannot be empty".into(),
+        ));
+    }
 
     let format = p.get("format").and_then(|x| x.as_str()).unwrap_or("mp4");
+    let format_norm = format.trim().to_ascii_lowercase();
+    if !matches!(format_norm.as_str(), "mp4" | "mov" | "webm") {
+        return Err(JobRunError::Failed(format!(
+            "payload format must be mp4/mov/webm (got {format})"
+        )));
+    }
     let target_resolution = p.get("target_resolution").and_then(|x| x.as_str());
     let include_audio = p
         .get("include_audio")
@@ -38,7 +50,7 @@ pub(crate) async fn run_video_export(
     let client = VideoProviderClient::new();
     let export_req = VideoExportRequest {
         source_url: source_url.to_string(),
-        format: format.to_string(),
+        format: format_norm.clone(),
         target_resolution: target_resolution.map(String::from),
         include_audio,
     };
@@ -57,7 +69,7 @@ pub(crate) async fn run_video_export(
         "task_id": export_resp.task_id,
         "status": export_resp.status.as_str(),
         "export_url": export_url,
-        "format": format,
+        "format": format_norm,
         "include_audio": include_audio,
     }))
 }
