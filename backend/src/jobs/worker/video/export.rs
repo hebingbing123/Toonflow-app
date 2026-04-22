@@ -7,6 +7,8 @@ use crate::jobs::JobRow;
 use crate::state::AppState;
 use crate::vendor::video::{VideoExportRequest, VideoProviderClient};
 
+use super::storage::store_video_reference;
+
 pub(crate) async fn run_video_export(
     _state: &AppState,
     _pool: &PgPool,
@@ -39,6 +41,15 @@ pub(crate) async fn run_video_export(
         .and_then(|x| x.as_bool())
         .unwrap_or(true);
 
+    let project_numeric_id = p
+        .get("project_numeric_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok());
+    let storyboard_id = p
+        .get("storyboard_numeric_id")
+        .and_then(|x| x.as_i64())
+        .and_then(|n| i32::try_from(n).ok());
+
     tracing::info!(
         job_id = %row.id,
         kind = %row.kind,
@@ -64,6 +75,13 @@ pub(crate) async fn run_video_export(
         .export_url
         .ok_or_else(|| JobRunError::Failed("no export URL in response".to_string()))?;
 
+    if let (Some(pid), Some(sid)) = (project_numeric_id, storyboard_id) {
+        if let Err(e) = store_video_reference(_pool, row.owner_user_id, pid, sid, &export_url).await
+        {
+            tracing::warn!(error = %e, "failed to store video export reference");
+        }
+    }
+
     Ok(json!({
         "source": "video.export",
         "task_id": export_resp.task_id,
@@ -71,5 +89,7 @@ pub(crate) async fn run_video_export(
         "export_url": export_url,
         "format": format_norm,
         "include_audio": include_audio,
+        "project_numeric_id": project_numeric_id,
+        "storyboard_numeric_id": storyboard_id,
     }))
 }
