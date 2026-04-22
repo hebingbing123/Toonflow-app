@@ -24,6 +24,12 @@ pub(crate) async fn run_video_generate(
         .get("provider")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing provider".into()))?;
+    let provider_str = provider_str.trim();
+    if provider_str.is_empty() {
+        return Err(JobRunError::Failed(
+            "payload provider cannot be empty".into(),
+        ));
+    }
     let provider = provider_str
         .parse::<VideoProvider>()
         .map_err(|_| JobRunError::Failed(format!("unknown video provider: {provider_str}")))?;
@@ -38,6 +44,10 @@ pub(crate) async fn run_video_generate(
         .get("prompt")
         .and_then(|x| x.as_str())
         .ok_or_else(|| JobRunError::Failed("payload missing prompt".into()))?;
+    let prompt = prompt.trim();
+    if prompt.is_empty() {
+        return Err(JobRunError::Failed("payload prompt cannot be empty".into()));
+    }
 
     let negative_prompt = p
         .get("negative_prompt")
@@ -48,6 +58,11 @@ pub(crate) async fn run_video_generate(
         .and_then(|x| x.as_u64())
         .map(|d| d as u32)
         .unwrap_or(5);
+    if !(1..=60).contains(&duration) {
+        return Err(JobRunError::Failed(format!(
+            "payload duration must be between 1 and 60 seconds (got {duration})"
+        )));
+    }
     let resolution = p
         .get("resolution")
         .and_then(|x| x.as_str())
@@ -61,8 +76,23 @@ pub(crate) async fn run_video_generate(
     let image_url = p
         .get("image_url")
         .and_then(|x| x.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
         .map(String::from);
     let seed = p.get("seed").and_then(|x| x.as_u64());
+
+    if let Some(url) = image_url.as_deref() {
+        let parsed = reqwest::Url::parse(url)
+            .map_err(|e| JobRunError::Failed(format!("invalid payload image_url: {e}")))?;
+        match parsed.scheme() {
+            "http" | "https" => {}
+            other => {
+                return Err(JobRunError::Failed(format!(
+                    "unsupported payload image_url scheme: {other} (expected http/https)"
+                )));
+            }
+        }
+    }
 
     let project_numeric_id = p
         .get("project_numeric_id")
