@@ -129,7 +129,7 @@ class _AssetGenerationWorkbenchDialogState
   }) async {
     _updateWorkbenchState(() {
       _loadingSummary = true;
-      _statusLine = lead == null ? null : '$lead，正在同步工作台摘要…';
+      _statusLine = _buildSnapshotLoadingStatusLine(lead);
     });
     try {
       final selected = _sortedSelection();
@@ -157,14 +157,15 @@ class _AssetGenerationWorkbenchDialogState
           selected,
         );
       }
-      final currentVisibleAssets = _filterAssetsByType(
-        widget.visibleAssets(),
-        _selectedType,
-      );
-      final nextSelection = chooseVisibleAssetSelection(
-        currentVisibleAssets,
+      final snapshotApply = _buildSnapshotApplyResult(
+        lead: lead,
+        visibleAssets: widget.visibleAssets(),
+        selectedType: _selectedType,
         preferredIds: _selectedIds,
         preferredNumericId: _focusedAssetNumericId,
+        productionData: includeProductionSummary ? nextProductionData : _productionData,
+        pollingData: nextPollingData,
+        promptPollingData: nextPromptPollingData,
       );
       if (!mounted) return;
       _updateWorkbenchState(() {
@@ -173,16 +174,9 @@ class _AssetGenerationWorkbenchDialogState
         _promptPollingData = nextPromptPollingData;
         _selectedIds
           ..clear()
-          ..addAll(nextSelection);
-        _focusedAssetNumericId = _selectedIds.isEmpty ? null : _selectedIds.first;
-        _statusLine = summarizeAssetWorkbenchSnapshot(
-          lead: lead,
-          visibleAssets: currentVisibleAssets,
-          selectedIds: _selectedIds,
-          productionData: _productionData,
-          pollingData: _pollingData,
-          promptPollingData: _promptPollingData,
-        );
+          ..addAll(snapshotApply.selectedIds);
+        _focusedAssetNumericId = snapshotApply.focusedAssetNumericId;
+        _statusLine = snapshotApply.statusLine;
       });
     } on RustApiException catch (e) {
       if (mounted) {
