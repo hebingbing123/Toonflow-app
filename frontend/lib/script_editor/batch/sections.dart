@@ -127,15 +127,17 @@ extension _StoryboardBatchWorkbenchSections
               ? null
               : (value) {
                   _applyBatchWorkbenchState(() {
-                    final previousSingleSelectedId =
-                        _selectedIds.length == 1 ? _selectedIds.first : null;
+                    final previousSingleSelectedId = _selectedIds.length == 1
+                        ? _selectedIds.first
+                        : null;
                     if (value == true) {
                       _selectedIds.add(row.numericId);
                     } else {
                       _selectedIds.remove(row.numericId);
                     }
-                    final nextSingleSelectedId =
-                        _selectedIds.length == 1 ? _selectedIds.first : null;
+                    final nextSingleSelectedId = _selectedIds.length == 1
+                        ? _selectedIds.first
+                        : null;
                     if (previousSingleSelectedId != nextSingleSelectedId) {
                       _clearSelectionScopedOutputs();
                     }
@@ -184,6 +186,29 @@ extension _StoryboardBatchWorkbenchSections
             SelectableText(
               '下载链接：$_downloadUrl',
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          if (_exportSummary != null) ...[
+            const SizedBox(height: 12),
+            Text('最近导出包', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 6),
+            Text(
+              '文件：${_exportSummary!.filename}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '内容：${_exportSummary!.shotCount} 张分镜图 + ${_exportSummary!.sidecarLabel}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '预计条目：${_exportSummary!.estimatedEntryCount} 个 · 总时长 ${_exportSummary!.totalDurationLabel} · 大小 ${formatBinarySize(_exportSummary!.byteLength)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '分镜 ID：${_exportSummary!.shotIds.join(", ")}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ],
           const SizedBox(height: 12),

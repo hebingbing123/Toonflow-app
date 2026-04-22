@@ -33,7 +33,7 @@ class _StoryboardBatchWorkbenchDialogState
   String? _statusLine;
   String? _previewUrl;
   String? _downloadUrl;
-  String? _exportLine;
+  StoryboardExportBundleSummary? _exportSummary;
 
   void _applyBatchWorkbenchState(VoidCallback action) {
     setState(action);
@@ -74,6 +74,7 @@ class _StoryboardBatchWorkbenchDialogState
   void _clearSelectionScopedOutputs() {
     _previewUrl = null;
     _downloadUrl = null;
+    _exportSummary = null;
   }
 
   StoryboardBatchWorkbenchDiagnosis _currentDiagnosis() =>
@@ -94,15 +95,15 @@ class _StoryboardBatchWorkbenchDialogState
         '状态 ${row.state ?? productionRow?.state}',
       if ((row.duration ?? productionRow?.duration ?? '').trim().isNotEmpty)
         '时长 ${row.duration ?? productionRow?.duration}',
-      if ((row.filePath ?? productionRow?.url ?? '').trim().isNotEmpty)
-        '已有画面',
+      if ((row.filePath ?? productionRow?.url ?? '').trim().isNotEmpty) '已有画面',
     ];
     return parts.isEmpty ? '待补充分镜信息' : parts.join(' · ');
   }
 
   Future<void> _refreshProduction() async {
-    final previousSingleSelectedId =
-        _sortedSelection().length == 1 ? _sortedSelection().first : null;
+    final previousSingleSelectedId = _sortedSelection().length == 1
+        ? _sortedSelection().first
+        : null;
     setState(() {
       _loadingProduction = true;
       _statusLine = null;
@@ -123,8 +124,9 @@ class _StoryboardBatchWorkbenchDialogState
       if (nextSelectedIds.isEmpty && widget.boardsList.isNotEmpty) {
         nextSelectedIds.add(widget.boardsList.first.numericId);
       }
-      final nextSingleSelectedId =
-          nextSelectedIds.length == 1 ? nextSelectedIds.first : null;
+      final nextSingleSelectedId = nextSelectedIds.length == 1
+          ? nextSelectedIds.first
+          : null;
       if (!mounted) return;
       setState(() {
         _productionRows = filtered;
@@ -170,8 +172,7 @@ class _StoryboardBatchWorkbenchDialogState
                 diagnosis.recommendedAction,
               );
       case StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards:
-        recommendedAction =
-            _busyMutation ? null : _selectReadyStoryboards;
+        recommendedAction = _busyMutation ? null : _selectReadyStoryboards;
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
               diagnosis.recommendedAction,
@@ -217,7 +218,12 @@ class _StoryboardBatchWorkbenchDialogState
               ),
             ),
             const SizedBox(height: 12),
-            _buildDiagnosisCard(context, diagnosis, recommendedAction, recommendedActionLabel),
+            _buildDiagnosisCard(
+              context,
+              diagnosis,
+              recommendedAction,
+              recommendedActionLabel,
+            ),
             const SizedBox(height: 12),
             _buildBatchWorkbenchTopActions(),
             const SizedBox(height: 8),
@@ -232,15 +238,6 @@ class _StoryboardBatchWorkbenchDialogState
             if (_statusLine != null) ...[
               const SizedBox(height: 8),
               Text(_statusLine!, style: Theme.of(context).textTheme.bodySmall),
-            ],
-            if (_exportLine != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                _exportLine!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
             ],
             const SizedBox(height: 12),
             SizedBox(
@@ -267,8 +264,7 @@ class _StoryboardBatchWorkbenchDialogState
       ),
       actions: [
         TextButton(
-          onPressed:
-              _busyMutation ? null : () => Navigator.of(context).pop(),
+          onPressed: _busyMutation ? null : () => Navigator.of(context).pop(),
           child: const Text('关闭'),
         ),
       ],
@@ -285,16 +281,18 @@ class _StoryboardBatchWorkbenchDialogState
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .secondaryContainer
-            .withValues(alpha: 0.45),
+        color: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(diagnosis.summary, style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            diagnosis.summary,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 6),
           Text(diagnosis.detail, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 8),

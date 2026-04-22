@@ -103,7 +103,6 @@ extension _StoryboardBatchWorkbenchActions
     _applyBatchWorkbenchState(() {
       _selectedIds.clear();
       _clearSelectionScopedOutputs();
-      _exportLine = null;
       _statusLine = buildStoryboardBatchWorkbenchFollowUp(
         actionSummary: '已清空选择。',
         diagnosis: _currentDiagnosis(),
@@ -160,12 +159,18 @@ extension _StoryboardBatchWorkbenchActions
           .map((id) => <String, dynamic>{'id': '$id'})
           .toList(growable: false),
     );
+    final summary = buildStoryboardExportBundleSummary(
+      selectedIds: selected,
+      boards: widget.boardsList,
+      productionRows: _productionRows,
+      zip: zip,
+    );
     if (mounted) {
       _applyBatchWorkbenchState(() {
-        _exportLine =
-            '已导出 ${selected.length} 张分镜图片，文件 ${zip.filename ?? "storyboards.zip"}，大小 ${zip.bytes.length} bytes';
+        _exportSummary = summary;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-          actionSummary: _exportLine!,
+          actionSummary:
+              '已导出 ${summary.shotCount} 条分镜，文件 ${summary.filename}，总时长 ${summary.totalDurationLabel}。',
           diagnosis: _currentDiagnosis(),
         );
       });
