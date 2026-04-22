@@ -104,6 +104,8 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     );
     if (!mounted) return;
     _applyWorkbenchState(() {
+      _latestExportJobId = job.id;
+      _latestExportJob = job;
       _setWorkbenchFollowUp(
         '已提交视频导出任务（job=${job.id}）。完成后会写回当前分镜视频 URL，可稍后刷新制作数据查看。',
       );

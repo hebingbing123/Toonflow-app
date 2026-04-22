@@ -3,6 +3,25 @@ part of '../../home_page.dart';
 /// Encapsulates storyboard workbench data loading so the main panel file stays
 /// focused on state ownership and section composition.
 extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
+  Future<void> _refreshExportJobStatus() async {
+    final jobId = _latestExportJobId?.trim();
+    if (jobId == null || jobId.isEmpty) {
+      throw const FormatException('当前还没有已提交的导出任务');
+    }
+    _applyWorkbenchState(() => _loadingExportJob = true);
+    try {
+      final job = await fetchJob(widget.token, jobId);
+      if (!mounted) return;
+      _applyWorkbenchState(() {
+        _latestExportJob = job;
+      });
+    } finally {
+      if (mounted) {
+        _applyWorkbenchState(() => _loadingExportJob = false);
+      }
+    }
+  }
+
   Future<void> _refreshProductionData({
     bool syncImageUrl = false,
     bool syncTrackId = false,
@@ -143,6 +162,10 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       syncTrackId: syncTrackId,
     );
     await _refreshWorkbenchData();
+    final jobId = _latestExportJobId?.trim();
+    if (jobId != null && jobId.isNotEmpty) {
+      await _refreshExportJobStatus();
+    }
   }
 
   List<int> _knownTrackIds() {

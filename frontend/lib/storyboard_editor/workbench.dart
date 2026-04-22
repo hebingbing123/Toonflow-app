@@ -36,10 +36,13 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _saving = false;
   bool _loadingProduction = false;
   bool _loadingWorkbench = false;
+  bool _loadingExportJob = false;
   ProductionStoryboardItemV1? _productionRow;
   List<ProductionStoryboardItemV1> _productionRows = const [];
   VideoModelDetail? _modelDetail;
   GetGenerateDataResponse? _generateData;
+  String? _latestExportJobId;
+  JobRow? _latestExportJob;
   String? _productionError;
   String? _workbenchLine;
   String _mode = 'standard';
@@ -212,9 +215,12 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           onDeleteTrack: () => _runDialogAction(_deleteTrack),
           onGenerateVideoPrompt: () => _runDialogAction(_generateVideoPrompt),
           onRefreshVideoData: _refreshWorkbenchData,
+          loadingExportJob: _loadingExportJob,
+          latestExportJob: _latestExportJob,
           onSubmitVideoGeneration: () =>
               _runDialogAction(_submitVideoGeneration),
           onExportCurrentVideo: () => _runDialogAction(_exportCurrentVideoJob),
+          onRefreshExportJob: () => _runDialogAction(_refreshExportJobStatus),
           onSelectVideo: (video) => _runDialogAction(() => _selectVideo(video)),
           onDeleteCurrentVideo: () => _runDialogAction(_deleteCurrentVideo),
         ),

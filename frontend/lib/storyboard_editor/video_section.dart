@@ -26,8 +26,11 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onDeleteTrack,
     required this.onGenerateVideoPrompt,
     required this.onRefreshVideoData,
+    required this.loadingExportJob,
+    required this.latestExportJob,
     required this.onSubmitVideoGeneration,
     required this.onExportCurrentVideo,
+    required this.onRefreshExportJob,
     required this.onSelectVideo,
     required this.onDeleteCurrentVideo,
   });
@@ -54,8 +57,11 @@ class _StoryboardVideoSection extends StatelessWidget {
   final VoidCallback onDeleteTrack;
   final VoidCallback onGenerateVideoPrompt;
   final VoidCallback onRefreshVideoData;
+  final bool loadingExportJob;
+  final JobRow? latestExportJob;
   final VoidCallback onSubmitVideoGeneration;
   final VoidCallback onExportCurrentVideo;
+  final VoidCallback onRefreshExportJob;
   final ValueChanged<VideoItem> onSelectVideo;
   final VoidCallback onDeleteCurrentVideo;
 
@@ -205,9 +211,33 @@ class _StoryboardVideoSection extends StatelessWidget {
                 onPressed: saving ? null : onExportCurrentVideo,
                 child: const Text('导出当前视频（job）'),
               ),
+              TextButton(
+                onPressed: saving || loadingExportJob ? null : onRefreshExportJob,
+                child: Text(loadingExportJob ? '刷新导出任务中…' : '刷新导出任务状态'),
+              ),
             ],
           ),
         ),
+        if (latestExportJob != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            '最近导出任务：#${latestExportJob!.numericTaskId} · ${latestExportJob!.status} · ${latestExportJob!.updatedAt}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if ((latestExportJob!.result?['export_url'] as String?)?.trim().isNotEmpty ??
+              false)
+            SelectableText(
+              '导出链接：${latestExportJob!.result!['export_url']}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          if ((latestExportJob!.errorMessage ?? '').trim().isNotEmpty)
+            Text(
+              '导出错误：${latestExportJob!.errorMessage}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+            ),
+        ],
         if (workbenchLine != null) ...[
           const SizedBox(height: 8),
           Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
