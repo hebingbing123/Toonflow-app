@@ -71,7 +71,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     _nameCtrl.clear();
     _pathCtrl.clear();
     _imagesCtrl.clear();
-    _slotsCtrl.text = '场景|scene|\n角色|role|';
+    _slotsCtrl.text = _defaultCreativeManualSlotsText;
   }
 
   void _applyRow(_CreativeManualRow row) {
@@ -79,7 +79,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     _nameCtrl.text = row.name;
     _pathCtrl.text = row.path;
     _imagesCtrl.text = row.images.join('\n');
-    _slotsCtrl.text = _encodeSlots(row.slots);
+    _slotsCtrl.text = encodeCreativeManualSlots(row.slots);
   }
 
   Future<void> _reloadAll({String? preferredPath}) async {
@@ -140,43 +140,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     }
   }
 
-  List<String> _parseImages() => _imagesCtrl.text
-      .split(RegExp(r'[\n,]+'))
-      .map((value) => value.trim())
-      .where((value) => value.isNotEmpty)
-      .toList(growable: false);
-
-  List<DirectorManualDataSlot> _parseSlots() {
-    final lines = _slotsCtrl.text
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty);
-    final slots = <DirectorManualDataSlot>[];
-    for (final line in lines) {
-      final parts = line.split('|');
-      if (parts.length < 3) {
-        throw FormatException('槽位格式必须为 label|value|data：$line');
-      }
-      slots.add(
-        DirectorManualDataSlot(
-          label: parts[0].trim(),
-          value: parts[1].trim(),
-          data: parts.sublist(2).join('|').trim(),
-        ),
-      );
-    }
-    return slots;
-  }
-
-  String _encodeSlots(List<DirectorManualDataSlot> slots) {
-    if (slots.isEmpty) {
-      return '场景|scene|\n角色|role|';
-    }
-    return slots
-        .map((slot) => '${slot.label}|${slot.value}|${slot.data}')
-        .join('\n');
-  }
-
   Future<void> _createCurrentKind() async {
     final name = _nameCtrl.text.trim();
     final path = _pathCtrl.text.trim();
@@ -184,8 +147,8 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       setState(() => _statusLine = '新建失败：名称与路径不能为空。');
       return;
     }
-    final slots = _parseSlots();
-    final images = _parseImages();
+    final slots = parseCreativeManualSlots(_slotsCtrl.text);
+    final images = parseCreativeManualImages(_imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = '新建手册中…';
@@ -210,7 +173,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       }
       await _reloadAll(preferredPath: path);
       if (!mounted) return;
-      setState(() => _statusLine = '已新建 ${_kindLabel()}：$path');
+      setState(() => _statusLine = '已新建 ${creativeManualKindLabel(_kind)}：$path');
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -243,8 +206,8 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       setState(() => _statusLine = '保存失败：名称与路径不能为空。');
       return;
     }
-    final slots = _parseSlots();
-    final images = _parseImages();
+    final slots = parseCreativeManualSlots(_slotsCtrl.text);
+    final images = parseCreativeManualImages(_imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = '保存手册中…';
@@ -269,7 +232,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       }
       await _reloadAll(preferredPath: path);
       if (!mounted) return;
-      setState(() => _statusLine = '已保存 ${_kindLabel()}：$path');
+      setState(() => _statusLine = '已保存 ${creativeManualKindLabel(_kind)}：$path');
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -312,7 +275,10 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       }
       await _reloadAll();
       if (!mounted) return;
-      setState(() => _statusLine = '已删除 ${_kindLabel()}：${selected.path}');
+      setState(
+        () => _statusLine =
+            '已删除 ${creativeManualKindLabel(_kind)}：${selected.path}',
+      );
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -327,9 +293,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       });
     }
   }
-
-  String _kindLabel() =>
-      _kind == _CreativeManualKind.director ? '导演手册' : '视觉手册';
 
   @override
   Widget build(BuildContext context) {

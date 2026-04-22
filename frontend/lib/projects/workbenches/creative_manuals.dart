@@ -7,6 +7,7 @@ import '../../../rust_api.dart';
 part 'creative_manuals_row.dart';
 part 'creative_manuals_state.dart';
 part 'creative_manuals_view.dart';
+part 'creative_manuals_helpers.dart';
 
 enum _CreativeManualKind { director, visual }
 
