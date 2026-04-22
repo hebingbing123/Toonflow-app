@@ -147,7 +147,16 @@ pub(crate) async fn run_asset_generate_batch(
         }
     }
 
-    let source = p.get("source").and_then(|s| s.as_str()).unwrap_or("");
+    let source = p
+        .get("source")
+        .and_then(|s| s.as_str())
+        .ok_or_else(|| JobRunError::Failed("payload missing source (or non-empty items)".into()))?;
+    let source = source.trim();
+    if source.is_empty() {
+        return Err(JobRunError::Failed(
+            "payload source cannot be empty (or provide non-empty items)".into(),
+        ));
+    }
     match source {
         "production.assets.batch-generate" => {
             run_production_assets_batch_generate(state, pool, job_id, row, cfg, p).await
