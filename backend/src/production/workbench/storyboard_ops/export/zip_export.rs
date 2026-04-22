@@ -44,6 +44,7 @@ pub(super) async fn build_storyboard_export_zip(
     let storyboard_csv = build_storyboard_csv(&manifest_rows);
     let timeline = build_storyboard_timeline(&manifest_rows);
     let subtitles = build_storyboard_srt(&manifest_rows);
+    let voiceover_script = build_storyboard_voiceover_script(&manifest_rows);
     write_export_text_file(
         &mut archive,
         "manifest.json",
@@ -68,6 +69,12 @@ pub(super) async fn build_storyboard_export_zip(
         options,
     )?;
     write_export_text_file(&mut archive, "subtitles.srt", subtitles.as_bytes(), options)?;
+    write_export_text_file(
+        &mut archive,
+        "voiceover_script.txt",
+        voiceover_script.as_bytes(),
+        options,
+    )?;
 
     archive
         .finish()
@@ -242,20 +249,7 @@ pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> St
         let start_ms = cursor_ms;
         let end_ms = start_ms + (duration_seconds as u64 * 1000);
         cursor_ms = end_ms;
-        let subtitle = shot
-            .subtitle_text
-            .as_deref()
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .map(str::to_string)
-            .or_else(|| {
-                shot.prompt
-                    .as_deref()
-                    .map(str::trim)
-                    .filter(|value| !value.is_empty())
-                    .map(str::to_string)
-            })
-            .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id));
+        let subtitle = resolve_shot_script_line(shot);
 
         out.push_str(&(index + 1).to_string());
         out.push('\n');
@@ -268,6 +262,47 @@ pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> St
         out.push_str("\n\n");
     }
     out
+}
+
+pub(super) fn build_storyboard_voiceover_script(shots: &[StoryboardExportManifestShot]) -> String {
+    let mut out = String::from("# Toonflow Storyboard Voiceover Script\n\n");
+    let mut cursor_ms = 0_u64;
+    for shot in shots {
+        let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+        let start_ms = cursor_ms;
+        let end_ms = start_ms + (duration_seconds as u64 * 1000);
+        cursor_ms = end_ms;
+        let line = resolve_shot_script_line(shot);
+        out.push_str(&format!(
+            "[{} - {}] Shot {}",
+            format_srt_timestamp(start_ms),
+            format_srt_timestamp(end_ms),
+            shot.storyboard_id
+        ));
+        if let Some(storyboard_index) = shot.storyboard_index {
+            out.push_str(&format!(" (sb_index={storyboard_index})"));
+        }
+        out.push('\n');
+        out.push_str(&line);
+        out.push_str("\n\n");
+    }
+    out
+}
+
+fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {
+    shot.subtitle_text
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .or_else(|| {
+            shot.prompt
+                .as_deref()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+        })
+        .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id))
 }
 
 fn parse_storyboard_duration_seconds(value: Option<&str>) -> i32 {

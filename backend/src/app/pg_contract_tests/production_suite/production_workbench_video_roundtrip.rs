@@ -371,8 +371,8 @@ async fn production_workbench_video_roundtrip() {
     let mut archive = ZipArchive::new(cursor).expect("valid zip");
     assert_eq!(
         archive.len(),
-        5,
-        "image + manifest + csv + timeline + subtitles expected in zip"
+        6,
+        "image + manifest + csv + timeline + subtitles + voiceover expected in zip"
     );
     let mut exported = archive
         .by_name(&format!("storyboard-{storyboard_id}.png"))
@@ -442,6 +442,16 @@ async fn production_workbench_video_roundtrip() {
         .expect("read subtitles entry");
     assert!(subtitles.contains("1\n00:00:00,000 --> 00:00:05,000"));
     assert!(subtitles.contains("旁白：主角抬头看向远方"));
+    drop(subtitles_entry);
+    let mut voiceover_entry = archive
+        .by_name("voiceover_script.txt")
+        .expect("zip voiceover script");
+    let mut voiceover_script = String::new();
+    std::io::Read::read_to_string(&mut voiceover_entry, &mut voiceover_script)
+        .expect("read voiceover entry");
+    assert!(voiceover_script.contains("# Toonflow Storyboard Voiceover Script"));
+    assert!(voiceover_script.contains("[00:00:00,000 - 00:00:05,000] Shot"));
+    assert!(voiceover_script.contains("旁白：主角抬头看向远方"));
 
     let res = app
         .clone()

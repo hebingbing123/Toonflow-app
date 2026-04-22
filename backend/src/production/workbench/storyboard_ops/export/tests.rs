@@ -1,5 +1,7 @@
 use super::shot_ids::normalize_export_shot_ids;
-use super::zip_export::{build_storyboard_csv, build_storyboard_srt};
+use super::zip_export::{
+    build_storyboard_csv, build_storyboard_srt, build_storyboard_voiceover_script,
+};
 use crate::error::ApiError;
 use crate::production::workbench::storyboard_ops::types::ExportImageShotRef;
 use crate::production::workbench::storyboard_ops::types::ExportImageSourceRow;
@@ -89,4 +91,42 @@ fn storyboard_srt_uses_timeline_offsets_and_prompt_text() {
 
     assert!(srt.contains("1\n00:00:00,000 --> 00:00:05,000\nNarrator opening"));
     assert!(srt.contains("2\n00:00:05,000 --> 00:00:11,000\nShot 8"));
+}
+
+#[test]
+fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
+    let first = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 7,
+            file_path: Some("https://cdn.example.com/storyboard-7.png".into()),
+            prompt: Some("Opening line".into()),
+            video_desc: Some("Narrator opening".into()),
+            duration: Some("5".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(9),
+        },
+        0,
+    );
+    let second = super::zip_export::StoryboardExportManifestShot::from_row(
+        &ExportImageSourceRow {
+            numeric_id: 8,
+            file_path: Some("https://cdn.example.com/storyboard-8.png".into()),
+            prompt: Some("Fallback prompt".into()),
+            video_desc: None,
+            duration: Some("6".into()),
+            state: Some("已完成".into()),
+            track_id: Some(3),
+            sb_index: Some(10),
+        },
+        1,
+    );
+
+    let script = build_storyboard_voiceover_script(&[first, second]);
+
+    assert!(script.starts_with("# Toonflow Storyboard Voiceover Script"));
+    assert!(script.contains("[00:00:00,000 - 00:00:05,000] Shot 7 (sb_index=9)"));
+    assert!(script.contains("Narrator opening"));
+    assert!(script.contains("[00:00:05,000 - 00:00:11,000] Shot 8 (sb_index=10)"));
+    assert!(script.contains("Fallback prompt"));
 }

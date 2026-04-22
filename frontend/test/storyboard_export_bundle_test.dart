@@ -49,17 +49,19 @@ void main() {
     expect(summary.shotIds, const [7, 9]);
     expect(summary.shotCount, 2);
     expect(summary.imageFileCount, 2);
-    expect(summary.sidecarFileCount, 4);
-    expect(summary.estimatedEntryCount, 6);
+    expect(summary.sidecarFileCount, 5);
+    expect(summary.estimatedEntryCount, 7);
     expect(summary.totalDurationSeconds, 14);
     expect(summary.totalDurationLabel, '14s');
     expect(summary.explicitSubtitleCount, 1);
     expect(summary.promptFallbackSubtitleCount, 1);
     expect(summary.placeholderSubtitleCount, 0);
     expect(summary.subtitleCoverageLabel, '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
+    expect(summary.voiceoverCoverageLabel, '旁白脚本：2 条可用文案 / 0 条占位文案');
     expect(summary.byteLength, 2048);
     expect(summary.includesTimeline, isTrue);
     expect(summary.includesSubtitles, isTrue);
+    expect(summary.includesVoiceoverScript, isTrue);
   });
 
   test('buildStoryboardExportBundleSummary falls back to default duration', () {
@@ -82,6 +84,7 @@ void main() {
     expect(summary.explicitSubtitleCount, 0);
     expect(summary.promptFallbackSubtitleCount, 0);
     expect(summary.placeholderSubtitleCount, 1);
+    expect(summary.voiceoverCoverageLabel, '旁白脚本：0 条可用文案 / 1 条占位文案');
     expect(summary.byteLength, isNull);
   });
 }
