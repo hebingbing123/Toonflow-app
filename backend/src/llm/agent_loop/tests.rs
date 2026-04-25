@@ -25,6 +25,10 @@ fn production_sub_agent_tools_allow_scope_ids() {
 
     assert!(matches!(properties.get("assetIds"), Some(Value::Object(_))));
     assert!(matches!(
+        properties.get("assetTypes"),
+        Some(Value::Object(_))
+    ));
+    assert!(matches!(
         properties.get("storyboardIds"),
         Some(Value::Object(_))
     ));

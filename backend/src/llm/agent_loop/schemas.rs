@@ -230,6 +230,12 @@ fn tool_parameters_schema(name: &str) -> Value {
                     "minItems": 1,
                     "description": "Optional focused production asset numeric ids."
                 },
+                "assetTypes": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["role", "scene", "tool"] },
+                    "minItems": 1,
+                    "description": "Optional focused production asset type scope when exact ids are not yet known."
+                },
                 "storyboardIds": {
                     "type": "array",
                     "items": { "type": "integer" },

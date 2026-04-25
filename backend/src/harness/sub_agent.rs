@@ -220,10 +220,30 @@ fn parse_positive_id_list(arguments: &Value, key: &str) -> Vec<i64> {
     ids
 }
 
+fn parse_asset_type_list(arguments: &Value, key: &str) -> Vec<&'static str> {
+    let mut types = arguments
+        .get(key)
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .filter_map(|value| match value.trim().to_ascii_lowercase().as_str() {
+            "role" => Some("role"),
+            "scene" => Some("scene"),
+            "tool" => Some("tool"),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    types.sort_unstable();
+    types.dedup();
+    types
+}
+
 fn production_scope_note(arguments: &Value) -> Option<String> {
     let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
     let asset_ids = parse_positive_id_list(arguments, "assetIds");
-    if storyboard_ids.is_empty() && asset_ids.is_empty() {
+    let asset_types = parse_asset_type_list(arguments, "assetTypes");
+    if storyboard_ids.is_empty() && asset_ids.is_empty() && asset_types.is_empty() {
         return None;
     }
 
@@ -248,8 +268,11 @@ fn production_scope_note(arguments: &Value) -> Option<String> {
                 .join(",")
         ));
     }
+    if !asset_types.is_empty() {
+        attrs.push(format!("assetTypes=\"{}\"", asset_types.join(",")));
+    }
     Some(format!(
-        "<scope {} />\n严格限定在以上范围内处理；只有信息不足时才做同批最小补读。",
+        "<scope {} />\n仅限此范围；不足再最小补读。",
         attrs.join(" ")
     ))
 }
@@ -416,13 +439,15 @@ mod tests {
             &json!({
                 "prompt": "请继续推进 storyboard。",
                 "storyboardIds": [9, 3, 9, 1],
-                "assetIds": [7, 0, 5, 7]
+                "assetIds": [7, 0, 5, 7],
+                "assetTypes": ["scene", "role", "scene"]
             }),
         )
         .expect("prompt");
 
         assert!(prompt.contains("请继续推进 storyboard。"));
-        assert!(prompt.contains(r#"<scope storyboardIds="1,3,9" assetIds="5,7" />"#));
+        assert!(prompt
+            .contains(r#"<scope storyboardIds="1,3,9" assetIds="5,7" assetTypes="role,scene" />"#));
     }
 
     #[test]

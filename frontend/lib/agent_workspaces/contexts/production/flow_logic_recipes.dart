@@ -500,6 +500,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           subAgentArgs: buildProductionSubAgentArgs(
             storyboardIds: review.storyboardIds,
             assetIds: review.assetIds,
+            assetTypes: review.assetTypes,
           ),
           prompt:
               '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
@@ -544,6 +545,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           subAgentArgs: buildProductionSubAgentArgs(
             storyboardIds: review.storyboardIds,
             assetIds: promptAssetIds,
+            assetTypes: review.assetTypes,
           ),
           prompt:
               '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',

@@ -472,6 +472,21 @@ void main() {
     },
   );
 
+  test('buildProductionSubAgentArgs keeps normalized asset type scope', () {
+    expect(
+      buildProductionSubAgentArgs(
+        storyboardIds: const <int>[9, 3, 9],
+        assetIds: const <int>[12, 7, 12],
+        assetTypes: const <String>['scene', 'tool', 'role', 'scene'],
+      ),
+      <String, dynamic>{
+        'storyboardIds': <int>[3, 9],
+        'assetIds': <int>[7, 12],
+        'assetTypes': <String>['role', 'scene', 'tool'],
+      },
+    );
+  });
+
   test('buildProductionStoryboardAssetHint caps long asset id lists', () {
     final hint = buildProductionStoryboardAssetHint(const <int>[
       9,
@@ -679,6 +694,34 @@ void main() {
           'camera',
           'associateAssetsIds',
         ],
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes keeps review asset type scope in storyboard follow-up sub-agent args',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '只补关键缺帧镜头',
+            'storyboardIds': '9,3,9',
+            'assetTypes': 'scene,role',
+          },
+        },
+      );
+
+      expect(recipes.first.subAgentArgs, <String, dynamic>{
+        'storyboardIds': <int>[3, 9],
+        'assetTypes': <String>['role', 'scene'],
       });
     },
   );
@@ -1119,6 +1162,37 @@ void main() {
         'limit': 12,
       });
       expect(assetStage.detail, contains('角色/场景资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages keeps review asset type scope in storyboard generation args',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '先核对角色与场景后补帧',
+            'storyboardIds': '2,5,7',
+            'assetTypes': 'scene,role',
+          },
+        },
+      );
+
+      final storyboardStage = stages.singleWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.subAgentArgs, <String, dynamic>{
+        'storyboardIds': <int>[2, 5, 7],
+        'assetTypes': <String>['role', 'scene'],
+      });
     },
   );
 

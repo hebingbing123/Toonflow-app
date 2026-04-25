@@ -375,6 +375,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         'revise_storyboardTable' => buildProductionSubAgentArgs(
           storyboardIds: review.storyboardIds,
           assetIds: review.assetIds,
+          assetTypes: review.assetTypes,
         ),
         _ => null,
       },
@@ -490,6 +491,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
           ? buildProductionSubAgentArgs(
               storyboardIds: storyboardIds,
               assetIds: review.assetIds,
+              assetTypes: review.assetTypes,
             )
           : null,
       prompt: review.nextAction == 'generate_storyboard'

@@ -772,17 +772,32 @@ String buildProductionAssetGenerationPrompt({
 Map<String, dynamic> buildProductionSubAgentArgs({
   List<int> storyboardIds = const <int>[],
   List<int> assetIds = const <int>[],
+  List<String> assetTypes = const <String>[],
 }) {
   final payload = <String, dynamic>{};
   final normalizedStoryboardIds =
       storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   final normalizedAssetIds = assetIds.where((id) => id > 0).toSet().toList()
     ..sort();
+  final normalizedAssetTypes =
+      assetTypes
+          .map(_normalizeProductionAssetType)
+          .where((entry) => entry.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort(
+          (left, right) => _productionAssetTypeOrder(
+            left,
+          ).compareTo(_productionAssetTypeOrder(right)),
+        );
   if (normalizedStoryboardIds.isNotEmpty) {
     payload['storyboardIds'] = normalizedStoryboardIds;
   }
   if (normalizedAssetIds.isNotEmpty) {
     payload['assetIds'] = normalizedAssetIds;
+  }
+  if (normalizedAssetTypes.isNotEmpty) {
+    payload['assetTypes'] = normalizedAssetTypes;
   }
   return payload;
 }
