@@ -38,7 +38,7 @@ description: >-
 先输出一行结构化摘要，供工作台直接生成下一步动作：
 
 ```xml
-<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" assetIds="12,18" />
+<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" assetIds="12,18" storyboardIds="31,32" />
 ```
 
 然后再输出精简 Markdown 审核报告：
@@ -66,6 +66,7 @@ description: >-
 
 - `reviewSummary` 必须放在第一行，`summary` 控制在 36 个汉字以内
 - `assetIds` 仅在下一步需要核对具体资产时填写，内容为逗号分隔的真实资产 ID；若问题不指向具体资产则省略该属性
+- `storyboardIds` 仅在下一步需要核对或补齐具体镜头时填写，内容为逗号分隔的真实 storyboard 镜头 ID；若无需聚焦到局部镜头则省略该属性
 - 审核通过的项目不出现在报告中
 - 同类轻微问题合并为一行
 - B 级及以上省略「需要您决定」区块
@@ -87,6 +88,7 @@ description: >-
 4. **建议多元化**：严重问题提供多个可选方案
 5. **动态基准**：数值判断以实际工作区数据为唯一基准；未明确的参数以合理比例推算，并在报告中注明
 6. **回填精确资产范围**：若审核结论要求下一步 `check_assets`，且你已能定位到具体资产，必须把这些真实资产 ID 写入 `reviewSummary.assetIds`
+7. **回填精确镜头范围**：若审核结论要求下一步 `check_storyboard` 或 `generate_storyboard`，且你已能定位到具体缺帧/待核对镜头，必须把这些真实镜头 ID 写入 `reviewSummary.storyboardIds`
 
 ---
 

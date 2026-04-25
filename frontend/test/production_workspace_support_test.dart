@@ -147,7 +147,29 @@ void main() {
     expect(review.severeCount, 1);
     expect(review.nextAction, 'revise_storyboardTable');
     expect(review.assetIds, isEmpty);
+    expect(review.storyboardIds, isEmpty);
   });
+
+  test(
+    'parseProductionSupervisionReview reads storyboard ids for focused follow-up',
+    () {
+      final review = parseProductionSupervisionReview(<String, dynamic>{
+        'review': <String, dynamic>{
+          'target': 'storyboardTable',
+          'grade': 'B',
+          'severeCount': '0',
+          'mediumCount': '1',
+          'minorCount': '0',
+          'nextAction': 'generate_storyboard',
+          'summary': '只需补齐缺帧镜头',
+          'storyboardIds': '9,3,9',
+        },
+      });
+
+      expect(review, isNotNull);
+      expect(review!.storyboardIds, <int>[3, 9]);
+    },
+  );
 
   test(
     'buildProductionWorkspaceRecipes narrows storyboard table asset checks to referenced ids',
@@ -485,6 +507,48 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages narrows storyboard checks to review storyboard ids',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_storyboard',
+            'summary': '优先核对第 3、9 镜头',
+            'storyboardIds': <int>[9, 3, 9],
+          },
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '待核对');
+      expect(storyboardStage.domainTool, 'get_flowData');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'flowId',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages narrows supervision asset checks to review asset ids',
     () {
       final stages = buildProductionWorkspaceStages(
@@ -720,6 +784,76 @@ void main() {
         'ids': <int>[3, 7],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
+    },
+  );
+
+  test(
+    'supervision storyboard recipes narrow to structured review storyboard ids',
+    () {
+      final checkRecipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_storyboard',
+            'summary': '先核对第 3、9 镜头',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      expect(checkRecipes.single.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'flowId',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
+
+      final generateRecipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '只需补第 3、9 镜头',
+            'storyboardIds': <int>[9, 3],
+          },
+        },
+      );
+
+      expect(generateRecipes.single.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'flowId',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
+      expect(generateRecipes.single.prompt, contains('ids=3,9'));
     },
   );
 }

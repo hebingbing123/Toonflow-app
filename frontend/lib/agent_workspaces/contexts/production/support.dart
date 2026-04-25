@@ -50,6 +50,7 @@ class ProductionSupervisionReview {
     required this.nextAction,
     required this.summary,
     required this.assetIds,
+    required this.storyboardIds,
   });
 
   final String target;
@@ -60,6 +61,7 @@ class ProductionSupervisionReview {
   final String nextAction;
   final String summary;
   final List<int> assetIds;
+  final List<int> storyboardIds;
 }
 
 class ProductionWorkspaceArgumentSuggestion {
@@ -179,6 +181,7 @@ ProductionSupervisionReview? parseProductionSupervisionReview(Object? result) {
     nextAction: nextAction,
     summary: summary,
     assetIds: _parseReviewAssetIds(review['assetIds']),
+    storyboardIds: _parseReviewIds(review['storyboardIds']),
   );
 }
 
@@ -189,6 +192,10 @@ int _parseLooseInt(Object? value) {
 }
 
 List<int> _parseReviewAssetIds(Object? value) {
+  return _parseReviewIds(value);
+}
+
+List<int> _parseReviewIds(Object? value) {
   if (value is List) {
     final ids = value
         .map(_parseLooseInt)
@@ -221,6 +228,19 @@ Map<String, dynamic> buildProductionReviewAssetArgs(
     'key': 'assets',
     'ids': review.assetIds,
     'fields': _productionAssetFields(),
+  };
+}
+
+Map<String, dynamic> buildProductionReviewStoryboardArgs(
+  ProductionSupervisionReview review,
+) {
+  if (review.storyboardIds.isEmpty) {
+    return buildProductionStoryboardCompactArgs();
+  }
+  return <String, dynamic>{
+    'key': 'storyboard',
+    'ids': review.storyboardIds,
+    'fields': productionStoryboardFields(),
   };
 }
 
@@ -440,6 +460,23 @@ List<String> _productionAssetFields() => <String>[
 Map<String, dynamic> _productionAssetsCompactArgs() => <String, dynamic>{
   'key': 'assets',
   'fields': _productionAssetFields(),
+  'limit': 24,
+};
+
+List<String> productionStoryboardFields() => <String>[
+  'id',
+  'index',
+  'duration',
+  'src',
+  'state',
+  'flowId',
+  'associateAssetsIds',
+  'shouldGenerateImage',
+];
+
+Map<String, dynamic> buildProductionStoryboardCompactArgs() => <String, dynamic>{
+  'key': 'storyboard',
+  'fields': productionStoryboardFields(),
   'limit': 24,
 };
 

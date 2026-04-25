@@ -319,20 +319,8 @@ Map<String, dynamic> _assetsCompactArgs() => <String, dynamic>{
   'limit': 24,
 };
 
-Map<String, dynamic> _storyboardCompactArgs() => <String, dynamic>{
-  'key': 'storyboard',
-  'fields': <String>[
-    'id',
-    'index',
-    'duration',
-    'src',
-    'state',
-    'flowId',
-    'associateAssetsIds',
-    'shouldGenerateImage',
-  ],
-  'limit': 24,
-};
+Map<String, dynamic> _storyboardCompactArgs() =>
+    buildProductionStoryboardCompactArgs();
 
 Map<String, dynamic> _storyboardTableRelatedAssetsArgs(Object? data) {
   return buildProductionFlowAssetArgs(data);
@@ -386,7 +374,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
-          domainArgs: _storyboardCompactArgs(),
+          domainArgs: buildProductionReviewStoryboardArgs(review),
         ),
       ];
     case 'revise_storyboardTable':
@@ -417,14 +405,21 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
         ),
       ];
     case 'generate_storyboard':
+      final storyboardArgs = buildProductionReviewStoryboardArgs(review);
+      final storyboardIds = review.storyboardIds;
+      final storyboardScope = storyboardIds.isEmpty
+          ? '优先只补缺少画面结果的镜头'
+          : '优先只处理镜头 ids=${storyboardIds.join(',')}';
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '继续生成分镜图',
           detail: '审核结论：$summary',
           flowKey: 'storyboard',
+          domainTool: 'get_flowData',
+          domainArgs: storyboardArgs,
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
-              '请基于最近审核结论继续推进 storyboard；优先只补缺少画面结果的镜头，避免重跑已有结果或 shouldGenerateImage=false 的镜头。注意：$summary',
+              '请基于最近审核结论继续推进 storyboard；$storyboardScope，避免重跑已有结果或 shouldGenerateImage=false 的镜头。注意：$summary',
         ),
       ];
     default:

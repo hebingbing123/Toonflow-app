@@ -41,6 +41,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
+      review: review,
     ),
   ];
 }
@@ -364,7 +365,35 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
+  required ProductionSupervisionReview? review,
 }) {
+  if (review != null &&
+      (review.nextAction == 'check_storyboard' ||
+          review.nextAction == 'generate_storyboard')) {
+    final storyboardArgs = buildProductionReviewStoryboardArgs(review);
+    final storyboardIds = review.storyboardIds;
+    final scopeLine = storyboardIds.isEmpty
+        ? review.nextAction == 'generate_storyboard'
+              ? '建议先读取缺帧镜头状态，再最小化补图。'
+              : '建议先读取紧凑 storyboard 状态，确认审核涉及的镜头。'
+        : '审核已定位 ${storyboardIds.length} 个镜头，优先只看这批 storyboard 更省 token。';
+    return ProductionWorkspaceStage(
+      title: '分镜画面',
+      flowKey: 'storyboard',
+      statusLabel: review.nextAction == 'generate_storyboard' ? '待补帧' : '待核对',
+      detail: '${_reviewDetail(review)} $scopeLine',
+      domainTool: 'get_flowData',
+      domainArgs: storyboardArgs,
+      subAgentTool: review.nextAction == 'generate_storyboard'
+          ? 'run_sub_agent_storyboard_gen'
+          : null,
+      prompt: review.nextAction == 'generate_storyboard'
+          ? storyboardIds.isEmpty
+                ? '请根据最近审核意见继续推进 storyboard，优先只补缺少画面结果的镜头，不要重跑已有结果或 shouldGenerateImage=false 的镜头。'
+                : '请根据最近审核意见继续推进 storyboard，优先处理镜头 ids=${storyboardIds.join(',')}，不要重跑已有结果或 shouldGenerateImage=false 的镜头。'
+          : null,
+    );
+  }
   final data = flowSnapshot['storyboard'];
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
