@@ -27,6 +27,7 @@ const List<String> _productionSubAgentPresets = <String>[
   'run_sub_agent_director_plan',
   'run_sub_agent_derive_assets',
   'run_sub_agent_generate_assets',
+  'run_sub_agent_production_supervision',
   'run_sub_agent_storyboard_gen',
   'run_sub_agent_storyboard_panel',
   'run_sub_agent_storyboard_table',
@@ -64,6 +65,11 @@ const List<AgentWorkspacePromptPreset> _productionPromptPresets =
         label: '分镜推进',
         prompt:
             '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
+      ),
+      AgentWorkspacePromptPreset(
+        label: '制作审核',
+        prompt:
+            '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。',
       ),
     ];
 
@@ -125,4 +131,3 @@ String _buildProductionToolArgsPresetText({
   }
   return jsonEncode(preset);
 }
-

@@ -58,6 +58,18 @@ void main() {
     },
   );
 
+  test('buildProductionWorkspaceRecipes suggests supervising script plan', () {
+    final recipes = buildProductionWorkspaceRecipes(
+      toolName: 'get_flowData',
+      suggestedFlowKey: 'scriptPlan',
+      result: <String, dynamic>{'data': '<scriptPlan>已有导演规划</scriptPlan>'},
+    );
+
+    expect(recipes.first.subAgentTool, 'run_sub_agent_production_supervision');
+    expect(recipes.first.flowKey, 'scriptPlan');
+    expect(recipes.first.title, contains('审核'));
+  });
+
   test('extractProductionActionCandidateIds reads derive asset ids', () {
     final ids = extractProductionActionCandidateIds(
       selectedTool: 'generate_deriveAsset',
@@ -177,4 +189,20 @@ void main() {
       expect(storyboardStage.subAgentTool, isNull);
     },
   );
+
+  test('buildProductionWorkspaceStages marks storyboard table as review-ready', () {
+    final stages = buildProductionWorkspaceStages(
+      toolName: 'get_flowData',
+      suggestedFlowKey: 'storyboardTable',
+      result: <String, dynamic>{
+        'data': '| 序号 | 画面描述 |\n|---|---|\n| 1 | 首镜 |',
+      },
+    );
+
+    final tableStage = stages.firstWhere(
+      (stage) => stage.flowKey == 'storyboardTable',
+    );
+    expect(tableStage.statusLabel, '待审核');
+    expect(tableStage.subAgentTool, 'run_sub_agent_production_supervision');
+  });
 }

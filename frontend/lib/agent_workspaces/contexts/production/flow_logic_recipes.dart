@@ -182,6 +182,13 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
   }
   return const <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
+      title: '审核导演计划',
+      detail: '导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。',
+      flowKey: 'scriptPlan',
+      subAgentTool: 'run_sub_agent_production_supervision',
+      prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
+    ),
+    ProductionWorkspaceRecipe(
       title: '检查资产落地',
       detail: '导演计划已有内容，下一步通常是核对 assets 是否支撑执行。',
       flowKey: 'assets',
@@ -209,6 +216,13 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
     ];
   }
   return const <ProductionWorkspaceRecipe>[
+    ProductionWorkspaceRecipe(
+      title: '审核分镜表',
+      detail: '分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。',
+      flowKey: 'storyboardTable',
+      subAgentTool: 'run_sub_agent_production_supervision',
+      prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
+    ),
     ProductionWorkspaceRecipe(
       title: '切回分镜结果',
       detail: '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。',
