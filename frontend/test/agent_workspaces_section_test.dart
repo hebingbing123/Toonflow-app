@@ -210,6 +210,7 @@ void main() {
     await tester.tap(find.text('1) 拉取 planData'));
     await tester.pump();
     expect(lastProbedTool, 'get_planData');
+    expect(lastProbedArgs, '{"key":"storySkeleton","maxChars":1600}');
 
     await tester.tap(find.text('2) 拉取剧本正文'));
     await tester.pump();
@@ -703,7 +704,10 @@ void main() {
     await tester.tap(readContextButton);
     await tester.pump();
     expect(lastTool, 'get_novel_text');
-    expect(lastArgs, '{}');
+    expect(
+      lastArgs,
+      '{"novelId":1,"lineStart":1,"lineEnd":80,"maxChars":1800}',
+    );
   });
 
   testWidgets('Script form blocks invalid JSON args before probe', (
@@ -928,7 +932,10 @@ void main() {
 
     await tester.tap(find.text('模板: 当前剧本'));
     await tester.pump();
-    expect(scriptDomainArgsController.text, '{"scriptId":9}');
+    expect(
+      scriptDomainArgsController.text,
+      '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+    );
 
     final probeButton = find.widgetWithText(FilledButton, '读取剧本上下文');
     await tester.ensureVisible(probeButton);
@@ -936,7 +943,10 @@ void main() {
     await tester.pump();
 
     expect(lastTool, 'get_script_content');
-    expect(lastArgs, '{"scriptId":9}');
+    expect(
+      lastArgs,
+      '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+    );
   });
 
   testWidgets('Production guided tasks update flow context and callbacks', (

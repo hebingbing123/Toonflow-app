@@ -11,6 +11,17 @@ List<String> summarizeScriptResultSnapshot(String? toolName, Object? result) {
   }
 
   switch (normalizedTool) {
+    case 'run_supervision_agent':
+      final review = parseScriptWorkspaceReview(result);
+      if (review == null) {
+        return <String>['审核结果已返回'];
+      }
+      final issueCount =
+          review.severeCount + review.mediumCount + review.minorCount;
+      final summary = review.summary.isEmpty ? '' : ' · ${review.summary}';
+      return <String>[
+        '审核 ${review.target}：${review.grade} 级，问题 $issueCount 项$summary',
+      ];
     case 'get_planData':
       final data = result['data'];
       if (data is! Map<String, dynamic>) {

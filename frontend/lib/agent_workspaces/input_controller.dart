@@ -8,7 +8,8 @@ class WorkspaceInputController {
     text: '1',
   );
   final TextEditingController scriptPromptController = TextEditingController(
-    text: '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
+    text:
+        '先用 get_planData 读取 storySkeleton/adaptationStrategy 的必要片段，再补最少的事件或正文窗口，最后给出下一轮 script 建议。',
   );
   final TextEditingController scriptDomainArgsController =
       TextEditingController(text: '{}');

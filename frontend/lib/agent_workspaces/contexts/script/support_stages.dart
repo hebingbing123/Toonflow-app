@@ -7,6 +7,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
 }) {
   final normalizedTool = toolName?.trim() ?? '';
   final resultMap = result is Map<String, dynamic> ? result : null;
+  final review = parseScriptWorkspaceReview(resultMap);
   final items = _extractResultItems(result);
   final planData = _extractPlanDataMap(resultMap);
   final storySkeleton = (planData?['storySkeleton'] as String?)?.trim() ?? '';
@@ -16,11 +17,30 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
 
   return <ScriptWorkspaceStage>[
     if (storySkeleton.isNotEmpty)
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '故事骨架',
         statusLabel: '已就绪',
         detail: 'storySkeleton 已存在，可继续收束改编策略或对照剧本正文。',
         domainTool: 'get_planData',
+        args: _planSectionArgs('storySkeleton'),
+      )
+    else if (review?.target == 'storySkeleton')
+      ScriptWorkspaceStage(
+        title: '故事骨架',
+        statusLabel: review!.grade == 'A' || review.grade == 'B'
+            ? '可沿用'
+            : '待修订',
+        detail: review.summary.isEmpty
+            ? '审核已覆盖 storySkeleton，可按建议继续修订。'
+            : '审核结论：${review.summary}',
+        domainTool: 'get_planData',
+        args: _planSectionArgs('storySkeleton'),
+        subAgentTool: review.nextAction == 'revise_storySkeleton'
+            ? 'run_sub_agent_storySkeleton'
+            : null,
+        prompt: review.nextAction == 'revise_storySkeleton'
+            ? '请先读取 storySkeleton 与相关事件窗口，再针对审核意见局部修订故事骨架。'
+            : null,
       )
     else if (normalizedTool == 'get_planData' ||
         normalizedTool == 'run_sub_agent_storySkeleton')
@@ -32,18 +52,38 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         prompt: '请基于当前项目上下文生成一版清晰的故事骨架，并突出主冲突与反转节点。',
       )
     else
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '故事骨架',
         statusLabel: '待读取',
         detail: '先读取 planData，确认 storySkeleton 是否齐备。',
         domainTool: 'get_planData',
+        args: const <String, dynamic>{'key': 'storySkeleton', 'maxChars': 1600},
       ),
     if (adaptationStrategy.isNotEmpty)
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '改编策略',
         statusLabel: '已就绪',
         detail: 'adaptationStrategy 已存在，可继续读取章节材料或生成正文。',
         domainTool: 'get_planData',
+        args: _planSectionArgs('adaptationStrategy'),
+      )
+    else if (review?.target == 'adaptationStrategy')
+      ScriptWorkspaceStage(
+        title: '改编策略',
+        statusLabel: review!.grade == 'A' || review.grade == 'B'
+            ? '可沿用'
+            : '待修订',
+        detail: review.summary.isEmpty
+            ? '审核已覆盖 adaptationStrategy，可按建议继续修订。'
+            : '审核结论：${review.summary}',
+        domainTool: 'get_planData',
+        args: _planSectionArgs('adaptationStrategy'),
+        subAgentTool: review.nextAction == 'revise_adaptationStrategy'
+            ? 'run_sub_agent_adaptationStrategy'
+            : null,
+        prompt: review.nextAction == 'revise_adaptationStrategy'
+            ? '请先读取 adaptationStrategy 与 storySkeleton，再针对审核意见局部修订改编策略。'
+            : null,
       )
     else if (normalizedTool == 'get_planData' ||
         normalizedTool == 'run_sub_agent_adaptationStrategy')
@@ -55,11 +95,15 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         prompt: '请基于现有故事骨架补齐改编策略，突出节奏、人物弧光与集数拆分原则。',
       )
     else
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '改编策略',
         statusLabel: '待读取',
         detail: '回看 planData，判断 adaptationStrategy 是否已具备。',
         domainTool: 'get_planData',
+        args: const <String, dynamic>{
+          'key': 'adaptationStrategy',
+          'maxChars': 1600,
+        },
       ),
     if (items.isNotEmpty &&
         (normalizedTool == 'get_novel_text' ||
@@ -73,25 +117,56 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
       )
     else if (normalizedTool == 'get_novel_text' ||
         normalizedTool == 'get_novel_events')
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '章节材料',
         statusLabel: '待补充',
         detail: '小说上下文为空，建议继续读取章节正文或事件脉络。',
         domainTool: 'get_novel_text',
+        args: <String, dynamic>{
+          'novelId': 1,
+          'lineStart': 1,
+          'lineEnd': 80,
+          'maxChars': 1800,
+        },
       )
     else
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '章节材料',
         statusLabel: '待读取',
         detail: '先读取章节正文或事件列表，再决定如何改写剧本。',
         domainTool: 'get_novel_text',
+        args: <String, dynamic>{
+          'novelId': 1,
+          'lineStart': 1,
+          'lineEnd': 80,
+          'maxChars': 1800,
+        },
       ),
     if (scriptContent.isNotEmpty)
-      const ScriptWorkspaceStage(
+      ScriptWorkspaceStage(
         title: '剧本正文',
         statusLabel: '已完成',
         detail: '当前 script 正文已存在，可直接写回或回看计划数据继续改稿。',
         domainTool: 'get_script_content',
+        args: _scriptWindowArgs(scopeScriptId),
+      )
+    else if (review?.target == 'script')
+      ScriptWorkspaceStage(
+        title: '剧本正文',
+        statusLabel: review!.grade == 'A' || review.grade == 'B'
+            ? '可沿用'
+            : '待修订',
+        detail: review.summary.isEmpty
+            ? '审核已覆盖剧本正文，可按建议继续改稿。'
+            : '审核结论：${review.summary}',
+        domainTool: 'get_script_content',
+        args: _scriptWindowArgs(scopeScriptId),
+        subAgentTool: review.nextAction == 'revise_script'
+            ? 'run_sub_agent_script'
+            : null,
+        prompt: review.nextAction == 'revise_script'
+            ? '请先读取当前剧本正文窗口、storySkeleton、adaptationStrategy，并针对审核意见定向修订本集剧本。'
+            : null,
       )
     else if (normalizedTool == 'get_script_content' ||
         normalizedTool == 'run_sub_agent_script')
@@ -108,9 +183,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待读取',
         detail: '读取当前剧本正文，再判断是否需要直接生成下一版。',
         domainTool: 'get_script_content',
-        args: scopeScriptId == null
-            ? null
-            : <String, dynamic>{'scriptId': scopeScriptId},
+        args: _scriptWindowArgs(scopeScriptId),
       ),
   ];
 }

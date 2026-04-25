@@ -94,14 +94,31 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       case 'get_script_content':
         final scriptId = _scopeScriptId ?? 1;
         return <({String label, String args})>[
-          (label: '模板: 当前剧本', args: '{"scriptId":$scriptId}'),
-        ];
-      case 'get_novel_text':
-      case 'get_novel_events':
-        return <({String label, String args})>[
-          (label: '模板: 小说 ID', args: '{"novelId":1}'),
+          (
+            label: '模板: 当前剧本',
+            args:
+                '{"scriptId":$scriptId,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+          ),
         ];
       case 'get_planData':
+        return <({String label, String args})>[
+          (label: '模板: 骨架片段', args: '{"key":"storySkeleton","maxChars":1600}'),
+          (
+            label: '模板: 策略片段',
+            args: '{"key":"adaptationStrategy","maxChars":1600}',
+          ),
+        ];
+      case 'get_novel_text':
+        return <({String label, String args})>[
+          (
+            label: '模板: 正文窗口',
+            args: '{"novelId":1,"lineStart":1,"lineEnd":80,"maxChars":1800}',
+          ),
+        ];
+      case 'get_novel_events':
+        return <({String label, String args})>[
+          (label: '模板: 事件窗口', args: '{"novelId":1,"limit":8,"maxChars":1200}'),
+        ];
       default:
         return <({String label, String args})>[(label: '模板: 空参数', args: '{}')];
     }
@@ -173,16 +190,19 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       canWriteBackScriptResult: _canWriteBackScriptResult,
       onFetchPlanData: () {
         widget.onScriptDomainToolChanged('get_planData');
+        widget.scriptDomainArgsController.text =
+            '{"key":"storySkeleton","maxChars":1600}';
         _probeScriptDomainTool();
       },
       onFetchScriptContent: () {
         widget.onScriptDomainToolChanged('get_script_content');
+        final scriptId = _scopeScriptId ?? 1;
+        widget.scriptDomainArgsController.text =
+            '{"scriptId":$scriptId,"lineStart":1,"lineEnd":80,"maxChars":2200}';
         _probeScriptDomainTool();
       },
       onGenerateDraft: () {
-        _applyScriptPromptIfEmpty(
-          '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
-        );
+        _applyScriptPromptIfEmpty('请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。');
         widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();
       },
@@ -279,4 +299,3 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     _runScriptSubAgentTool();
   }
 }
-

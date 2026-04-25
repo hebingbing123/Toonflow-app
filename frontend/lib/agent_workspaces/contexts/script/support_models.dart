@@ -47,3 +47,23 @@ class ScriptWorkspaceArgumentSuggestion {
   final String label;
   final Map<String, dynamic> payload;
 }
+
+class ScriptWorkspaceReview {
+  const ScriptWorkspaceReview({
+    required this.target,
+    required this.grade,
+    required this.severeCount,
+    required this.mediumCount,
+    required this.minorCount,
+    required this.nextAction,
+    required this.summary,
+  });
+
+  final String target;
+  final String grade;
+  final int severeCount;
+  final int mediumCount;
+  final int minorCount;
+  final String nextAction;
+  final String summary;
+}

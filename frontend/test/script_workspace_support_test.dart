@@ -54,6 +54,55 @@ void main() {
     },
   );
 
+  test('parseScriptWorkspaceReview reads structured review payload', () {
+    final review = parseScriptWorkspaceReview(<String, dynamic>{
+      'review': <String, dynamic>{
+        'target': 'script',
+        'grade': 'C',
+        'severeCount': '1',
+        'mediumCount': '1',
+        'minorCount': '0',
+        'nextAction': 'revise_script',
+        'summary': '冲突升级不够集中',
+      },
+    });
+
+    expect(review, isNotNull);
+    expect(review!.target, 'script');
+    expect(review.severeCount, 1);
+    expect(review.nextAction, 'revise_script');
+  });
+
+  test(
+    'buildScriptWorkspaceRecipes uses structured supervision next action',
+    () {
+      final recipes = buildScriptWorkspaceRecipes(
+        toolName: 'run_supervision_agent',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'script',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'revise_script',
+            'summary': '冲突升级不够集中',
+          },
+        },
+        scopeScriptId: 8,
+      );
+
+      expect(recipes.first.title, '修剧本正文');
+      expect(recipes.first.subAgentTool, 'run_sub_agent_script');
+      expect(recipes.first.args, <String, dynamic>{
+        'scriptId': 8,
+        'lineStart': 1,
+        'lineEnd': 80,
+        'maxChars': 2200,
+      });
+    },
+  );
+
   test(
     'buildScriptWorkspaceStages marks missing story skeleton as pending',
     () {
@@ -85,4 +134,35 @@ void main() {
     expect(scriptStage.statusLabel, '已完成');
     expect(scriptStage.domainTool, 'get_script_content');
   });
+
+  test(
+    'buildScriptWorkspaceStages surfaces script review as revise-needed',
+    () {
+      final stages = buildScriptWorkspaceStages(
+        toolName: 'run_supervision_agent',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'script',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'revise_script',
+            'summary': '冲突升级不够集中',
+          },
+        },
+        scopeScriptId: 8,
+      );
+
+      final scriptStage = stages.firstWhere((stage) => stage.title == '剧本正文');
+      expect(scriptStage.statusLabel, '待修订');
+      expect(scriptStage.subAgentTool, 'run_sub_agent_script');
+      expect(scriptStage.args, <String, dynamic>{
+        'scriptId': 8,
+        'lineStart': 1,
+        'lineEnd': 80,
+        'maxChars': 2200,
+      });
+    },
+  );
 }

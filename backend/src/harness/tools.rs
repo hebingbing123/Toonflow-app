@@ -94,7 +94,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "run_supervision_agent",
         description:
-            "Script-agent orchestration parity: run supervision sub-agent with arguments.prompt.",
+            "Script-agent orchestration parity: run supervision sub-agent with arguments.prompt; returns concise text plus a parsed review summary when available.",
     },
     HarnessToolInfo {
         name: "run_sub_agent_derive_assets",

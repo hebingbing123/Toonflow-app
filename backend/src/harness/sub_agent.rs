@@ -78,7 +78,7 @@ fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<St
     Some(attrs)
 }
 
-fn parse_production_supervision_review(text: &str) -> Option<Value> {
+fn parse_review_summary(text: &str) -> Option<Value> {
     let summary_line = text
         .lines()
         .map(str::trim)
@@ -126,7 +126,9 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             role_name: "编辑",
             skill_path: "script_agent_supervision.md",
             skill_section: None,
-            format_hint: None,
+            format_hint: Some(
+                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"storySkeleton|adaptationStrategy|script\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_storySkeleton|revise_adaptationStrategy|revise_script|check_novel_events|check_novel_text|check_script\" summary=\"一句话总结\" />\n随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
+            ),
             execution_hint: Some(
                 "审核必须基于工具实读的工作区内容，优先拉取字段子集或窗口片段，不要为了审核先全量加载全部正文。",
             ),
@@ -267,10 +269,11 @@ pub async fn invoke_sub_agent_tool(
     .await
     .map_err(InvokeError::LlmError)?;
 
-    let review = if tool_name == "run_sub_agent_production_supervision" {
-        parse_production_supervision_review(&text)
-    } else {
-        None
+    let review = match tool_name {
+        "run_supervision_agent" | "run_sub_agent_production_supervision" => {
+            parse_review_summary(&text)
+        }
+        _ => None,
     };
 
     Ok(json!({
@@ -283,7 +286,7 @@ pub async fn invoke_sub_agent_tool(
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_production_supervision_review, parse_tag_attributes};
+    use super::{parse_review_summary, parse_tag_attributes};
 
     #[test]
     fn parse_tag_attributes_reads_xml_style_summary_line() {
@@ -304,8 +307,8 @@ mod tests {
     }
 
     #[test]
-    fn parse_production_supervision_review_uses_first_summary_line() {
-        let review = parse_production_supervision_review(
+    fn parse_review_summary_uses_first_summary_line() {
+        let review = parse_review_summary(
             r#"
 <reviewSummary target="scriptPlan" grade="B" severeCount="0" mediumCount="2" minorCount="1" nextAction="check_assets" summary="导演规划可用但资产还需对齐" />
 
@@ -315,5 +318,20 @@ mod tests {
         .expect("review");
         assert_eq!(review["target"].as_str(), Some("scriptPlan"));
         assert_eq!(review["nextAction"].as_str(), Some("check_assets"));
+    }
+
+    #[test]
+    fn parse_review_summary_supports_script_supervision_payload() {
+        let review = parse_review_summary(
+            r#"
+<reviewSummary target="script" grade="C" severeCount="1" mediumCount="1" minorCount="0" nextAction="revise_script" summary="人物动机衔接还需要补强" />
+
+# 审核报告：剧本正文
+"#,
+        )
+        .expect("review");
+        assert_eq!(review["target"].as_str(), Some("script"));
+        assert_eq!(review["grade"].as_str(), Some("C"));
+        assert_eq!(review["nextAction"].as_str(), Some("revise_script"));
     }
 }

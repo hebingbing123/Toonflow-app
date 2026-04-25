@@ -41,37 +41,37 @@ const List<String> _productionDomainToolPresets = <String>[
   'generate_storyboard',
 ];
 
-const List<AgentWorkspacePromptPreset> _scriptPromptPresets =
-    <AgentWorkspacePromptPreset>[
-      AgentWorkspacePromptPreset(
-        label: '剧情骨架',
-        prompt:
-            '先读取 get_planData 与 get_novel_events，总结当前剧情骨架缺口，再给出下一轮 script 生成建议。',
-      ),
-      AgentWorkspacePromptPreset(
-        label: '章节改编',
-        prompt:
-            '基于 get_novel_text 与 get_script_content，对当前章节做改编策略建议，输出 3 条可执行脚本改写项。',
-      ),
-    ];
+const List<AgentWorkspacePromptPreset>
+_scriptPromptPresets = <AgentWorkspacePromptPreset>[
+  AgentWorkspacePromptPreset(
+    label: '剧情骨架',
+    prompt:
+        '先读取 get_planData 的 storySkeleton/adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。',
+  ),
+  AgentWorkspacePromptPreset(
+    label: '章节改编',
+    prompt:
+        '基于 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改编策略建议，输出 3 条可执行脚本改写项。',
+  ),
+];
 
-const List<AgentWorkspacePromptPreset> _productionPromptPresets =
-    <AgentWorkspacePromptPreset>[
-      AgentWorkspacePromptPreset(
-        label: '资产盘点',
-        prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
-      ),
-      AgentWorkspacePromptPreset(
-        label: '分镜推进',
-        prompt:
-            '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
-      ),
-      AgentWorkspacePromptPreset(
-        label: '制作审核',
-        prompt:
-            '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。',
-      ),
-    ];
+const List<AgentWorkspacePromptPreset>
+_productionPromptPresets = <AgentWorkspacePromptPreset>[
+  AgentWorkspacePromptPreset(
+    label: '资产盘点',
+    prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
+  ),
+  AgentWorkspacePromptPreset(
+    label: '分镜推进',
+    prompt:
+        '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
+  ),
+  AgentWorkspacePromptPreset(
+    label: '制作审核',
+    prompt:
+        '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。',
+  ),
+];
 
 bool _isDefaultJsonObject(String raw) {
   final trimmed = raw.trim();
@@ -85,16 +85,35 @@ String _buildScriptToolArgsPresetText({
   final scriptId = int.tryParse(scriptIdText.trim());
   final Map<String, dynamic> preset;
   switch (toolName) {
+    case 'get_planData':
+      preset = <String, dynamic>{'key': 'storySkeleton', 'maxChars': 1600};
+      break;
     case 'get_script_content':
       preset = scriptId != null && scriptId > 0
-          ? <String, dynamic>{'scriptId': scriptId}
-          : <String, dynamic>{'scriptId': 1};
+          ? <String, dynamic>{
+              'scriptId': scriptId,
+              'lineStart': 1,
+              'lineEnd': 80,
+              'maxChars': 2200,
+            }
+          : <String, dynamic>{
+              'scriptId': 1,
+              'lineStart': 1,
+              'lineEnd': 80,
+              'maxChars': 2200,
+            };
       break;
     case 'get_novel_text':
-    case 'get_novel_events':
-      preset = <String, dynamic>{'novelId': 1};
+      preset = <String, dynamic>{
+        'novelId': 1,
+        'lineStart': 1,
+        'lineEnd': 80,
+        'maxChars': 1800,
+      };
       break;
-    case 'get_planData':
+    case 'get_novel_events':
+      preset = <String, dynamic>{'novelId': 1, 'limit': 8, 'maxChars': 1200};
+      break;
     default:
       preset = <String, dynamic>{};
       break;
