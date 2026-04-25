@@ -119,14 +119,12 @@ void main() {
         'id',
         'index',
         'duration',
-        'prompt',
         'src',
         'state',
-        'flowId',
         'associateAssetsIds',
         'shouldGenerateImage',
       ],
-      'limit': 24,
+      'limit': 12,
     });
   });
 

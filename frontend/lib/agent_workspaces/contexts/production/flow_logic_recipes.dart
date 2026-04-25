@@ -113,7 +113,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
           detail: '素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
-          domainArgs: _storyboardCompactArgs(),
+          domainArgs: buildProductionStoryboardReviewArgs(),
         ),
       ];
     }
@@ -124,7 +124,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
       detail: '资产已具备基础结果，可切到 storyboard 评估镜头生成状态。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardCompactArgs(),
+      domainArgs: buildProductionStoryboardReviewArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '整理导演计划',
@@ -244,7 +244,7 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       detail: '如计划已定，可直接回看 storyboard 的实际生成状态。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardCompactArgs(),
+      domainArgs: buildProductionStoryboardReviewArgs(),
     ),
   ];
 }
@@ -287,7 +287,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
       detail: '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardCompactArgs(),
+      domainArgs: buildProductionStoryboardReviewArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '抽样读取分镜表',
@@ -326,9 +326,6 @@ Map<String, dynamic> _assetsCompactArgs() => <String, dynamic>{
   'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
   'limit': 24,
 };
-
-Map<String, dynamic> _storyboardCompactArgs() =>
-    buildProductionStoryboardCompactArgs();
 
 Map<String, dynamic> _storyboardTableRelatedAssetsArgs(Object? data) {
   return buildProductionFlowAssetArgs(data);

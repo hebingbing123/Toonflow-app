@@ -436,7 +436,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       detail:
           '需出图 ${targetRows.length} 个镜头，画面结果齐备${skippedCount > 0 ? '；另有 $skippedCount 个纯文本镜头按设计无需出图' : ''}，可准备写回或继续导演计划。',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardCompactArgs(),
+      domainArgs: buildProductionStoryboardReviewArgs(),
     );
   }
   if (activeKey == 'storyboard' ||
@@ -447,7 +447,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
         toolName == 'generate_storyboard' ||
             toolName == 'run_sub_agent_storyboard_gen'
         ? buildProductionStoryboardGenerationArgs()
-        : _storyboardCompactArgs();
+        : buildProductionStoryboardReviewArgs();
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
@@ -467,7 +467,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     statusLabel: '待读取',
     detail: '读取 storyboard 后可判断是否需要继续补图或直接写回结果。',
     domainTool: 'get_flowData',
-    domainArgs: _storyboardCompactArgs(),
+    domainArgs: buildProductionStoryboardReviewArgs(),
   );
 }
 
