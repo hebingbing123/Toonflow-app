@@ -150,6 +150,31 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceRecipes narrows storyboard table asset checks from markdown text',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': '''
+| 序号 | 画面描述 | 场景 | 关联资产ID |
+|---|---|---|---|
+| 1 | 首镜 | 大殿 | [12, 7] |
+| 2 | 次镜 | 大殿 | [3] |
+''',
+        },
+      );
+
+      expect(recipes[1].title, '核对关联资产');
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes uses structured supervision next action',
     () {
       final recipes = buildProductionWorkspaceRecipes(
@@ -296,8 +321,14 @@ void main() {
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
           'data': <Map<String, dynamic>>[
-            <String, dynamic>{'id': 101, 'associateAssetsIds': <int>[9, 3]},
-            <String, dynamic>{'id': 102, 'associateAssetsIds': <Object>['3']},
+            <String, dynamic>{
+              'id': 101,
+              'associateAssetsIds': <int>[9, 3],
+            },
+            <String, dynamic>{
+              'id': 102,
+              'associateAssetsIds': <Object>['3'],
+            },
           ],
         },
       );
@@ -467,6 +498,59 @@ void main() {
       });
     },
   );
+
+  test(
+    'buildProductionWorkspaceStages narrows asset reads from storyboard table markdown text',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': '''
+| 序号 | 画面描述 | 场景 | 关联资产ID |
+|---|---|---|---|
+| 1 | 首镜 | 大殿 | [9, 3] |
+| 2 | 次镜 | 大殿 | [3] |
+''',
+        },
+      );
+
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.statusLabel, '已定位');
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 9],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(assetsStage.detail, contains('2 项资产'));
+    },
+  );
+
+  test('summarizeProductionFlowValue surfaces storyboard table row digest', () {
+    final lines = summarizeProductionFlowValue('''
+| 序号 | 画面描述 | 场景 | 关联资产ID |
+|---|---|---|---|
+| 1 | 首镜 | 大殿 | [12, 7] |
+| 2 | 次镜 | 大殿 | [3] |
+''', flowKey: 'storyboardTable');
+
+    expect(lines, contains('分镜表 2 行'));
+    expect(lines, contains('关联资产 3 项'));
+  });
+
+  test('summarizeProductionFlowValue surfaces script plan section digest', () {
+    final lines = summarizeProductionFlowValue('''
+<scriptPlan>
+① 主题立意与叙事核心
+② 视觉风格与画面基调
+③ 叙事结构与节奏规划
+</scriptPlan>
+''', flowKey: 'scriptPlan');
+
+    expect(lines, contains('规划维度 3/6'));
+  });
 
   test('productionFlowEntryHasMediaResult supports src fields', () {
     expect(

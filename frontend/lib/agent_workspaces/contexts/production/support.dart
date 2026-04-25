@@ -213,14 +213,89 @@ List<int> extractProductionReferencedAssetIds(Object? flowData) {
     }
   }
 
+  void collectFromMarkdown(String text) {
+    final parsed = parseProductionStoryboardTableMarkdown(text);
+    for (final row in parsed) {
+      final values = row['associateAssetsIds'];
+      if (values is! List) continue;
+      for (final value in values) {
+        final numericId = _parseLooseInt(value);
+        if (numericId > 0) {
+          ids.add(numericId);
+        }
+      }
+    }
+  }
+
   if (flowData is List) {
     collectFromRows(flowData);
   } else if (flowData is Map<String, dynamic>) {
     collectFromRows(flowData['rows']);
+  } else if (flowData is String) {
+    collectFromMarkdown(flowData);
   }
 
   final sortedIds = ids.toList()..sort();
   return sortedIds;
+}
+
+int countProductionStoryboardTableRows(Object? flowData) {
+  if (flowData is Map<String, dynamic>) {
+    final totalRows = _parseLooseInt(flowData['totalRows']);
+    if (totalRows > 0) return totalRows;
+    final rows = flowData['rows'];
+    if (rows is List) return rows.length;
+  }
+  if (flowData is String) {
+    return parseProductionStoryboardTableMarkdown(flowData).length;
+  }
+  return 0;
+}
+
+int countProductionScriptPlanSections(Object? flowData) {
+  if (flowData is! String) return 0;
+  final matches = RegExp(r'[①②③④⑤⑥]').allMatches(flowData).length;
+  return matches.clamp(0, 6);
+}
+
+List<Map<String, dynamic>> parseProductionStoryboardTableMarkdown(String text) {
+  final tableLines = text
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.startsWith('|') && line.endsWith('|'))
+      .toList(growable: false);
+  if (tableLines.length < 3) {
+    return const <Map<String, dynamic>>[];
+  }
+
+  final headers = _splitMarkdownTableRow(
+    tableLines.first,
+  ).map(_normalizeStoryboardTableColumn).toList(growable: false);
+  if (headers.isEmpty) {
+    return const <Map<String, dynamic>>[];
+  }
+
+  final rows = <Map<String, dynamic>>[];
+  for (final line in tableLines.skip(2)) {
+    final cells = _splitMarkdownTableRow(line);
+    if (cells.length != headers.length) continue;
+    final row = <String, dynamic>{};
+    for (var index = 0; index < headers.length; index += 1) {
+      final header = headers[index];
+      final rawCell = cells[index].trim();
+      if (header == 'associateAssetsIds') {
+        row[header] = RegExp(r'\d+')
+            .allMatches(rawCell)
+            .map((match) => int.tryParse(match.group(0) ?? ''))
+            .whereType<int>()
+            .toList(growable: false);
+      } else {
+        row[header] = rawCell;
+      }
+    }
+    rows.add(row);
+  }
+  return rows;
 }
 
 List<ProductionWorkspaceArgumentSuggestion>
@@ -407,4 +482,42 @@ List<int> _extractEntityIds(Object? value) {
     }
   }
   return ids.toSet().toList(growable: false);
+}
+
+List<String> _splitMarkdownTableRow(String line) {
+  final trimmed = line.trim();
+  if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) {
+    return const <String>[];
+  }
+  return trimmed
+      .substring(1, trimmed.length - 1)
+      .split('|')
+      .map((cell) => cell.trim())
+      .toList(growable: false);
+}
+
+String _normalizeStoryboardTableColumn(String column) {
+  switch (column.trim()) {
+    case '序号':
+    case 'id':
+      return 'id';
+    case '画面描述':
+    case 'description':
+      return 'description';
+    case '场景':
+    case 'scene':
+      return 'scene';
+    case '时长':
+    case 'duration':
+      return 'duration';
+    case '景别':
+    case 'camera':
+      return 'camera';
+    case '关联资产ID':
+    case '关联资产Ids':
+    case 'associateAssetsIds':
+      return 'associateAssetsIds';
+    default:
+      return column.trim();
+  }
 }

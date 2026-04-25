@@ -3,6 +3,7 @@ part of 'flow_logic.dart';
 List<String> summarizeProductionResultSnapshot(
   String? toolName,
   Object? result,
+  String? suggestedFlowKey,
 ) {
   final normalizedTool = toolName?.trim() ?? '';
   if (result is! Map<String, dynamic>) {
@@ -17,7 +18,7 @@ List<String> summarizeProductionResultSnapshot(
 
   final data = result['data'];
   if (normalizedTool == 'get_flowData' && data != null) {
-    return summarizeProductionFlowValue(data);
+    return summarizeProductionFlowValue(data, flowKey: suggestedFlowKey);
   }
 
   if (result['items'] is List) {
@@ -42,7 +43,8 @@ List<String> summarizeProductionResultSnapshot(
   return <String>['返回对象 keys=${result.keys.join(',')}'];
 }
 
-List<String> summarizeProductionFlowValue(Object? value) {
+List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
+  final normalizedKey = flowKey?.trim() ?? '';
   if (value == null) {
     return const <String>['当前 flow 为空'];
   }
@@ -52,6 +54,24 @@ List<String> summarizeProductionFlowValue(Object? value) {
       return const <String>['当前 flow 为空字符串'];
     }
     final lines = '\n'.allMatches(trimmed).length + 1;
+    if (normalizedKey == 'scriptPlan') {
+      final sectionCount = countProductionScriptPlanSections(trimmed);
+      return <String>[
+        '文本 ${trimmed.length} 字',
+        '$lines 行',
+        if (sectionCount > 0) '规划维度 $sectionCount/6',
+      ];
+    }
+    if (normalizedKey == 'storyboardTable') {
+      final rowCount = countProductionStoryboardTableRows(trimmed);
+      final assetCount = extractProductionReferencedAssetIds(trimmed).length;
+      return <String>[
+        '文本 ${trimmed.length} 字',
+        '$lines 行',
+        if (rowCount > 0) '分镜表 $rowCount 行',
+        if (assetCount > 0) '关联资产 $assetCount 项',
+      ];
+    }
     return <String>['文本 ${trimmed.length} 字', '$lines 行'];
   }
   if (value is List) {
@@ -85,6 +105,16 @@ List<String> summarizeProductionFlowValue(Object? value) {
     return <String>['列表 ${value.length} 项'];
   }
   if (value is Map<String, dynamic>) {
+    if (normalizedKey == 'storyboardTable') {
+      final rowCount = countProductionStoryboardTableRows(value);
+      final sampledRows = _readSummaryInt(value['rowCount']);
+      final assetCount = extractProductionReferencedAssetIds(value).length;
+      return <String>[
+        if (sampledRows > 0 && rowCount > 0) '分镜表抽样 $sampledRows/$rowCount 行',
+        if (sampledRows <= 0 && rowCount > 0) '分镜表 $rowCount 行',
+        if (assetCount > 0) '关联资产 $assetCount 项',
+      ];
+    }
     final lines = <String>['对象 keys=${value.keys.length} 个'];
     for (final entry in value.entries) {
       final child = entry.value;
@@ -100,4 +130,10 @@ List<String> summarizeProductionFlowValue(Object? value) {
     return lines;
   }
   return <String>['返回 ${value.runtimeType}'];
+}
+
+int _readSummaryInt(Object? value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim()) ?? 0;
+  return 0;
 }

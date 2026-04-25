@@ -8,7 +8,11 @@ extension _AgentWorkspaceProductionCardSupport
     final lines = <String>[
       if (toolName != null && toolName.isNotEmpty) 'tool=$toolName',
       if (result != null) 'resultType=${result.runtimeType}',
-      ...summarizeProductionResultSnapshot(toolName, result),
+      ...summarizeProductionResultSnapshot(
+        toolName,
+        result,
+        _suggestedFlowKeyLine,
+      ),
     ];
     return lines.take(6).toList(growable: false);
   }

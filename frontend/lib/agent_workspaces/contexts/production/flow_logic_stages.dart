@@ -139,12 +139,14 @@ ProductionWorkspaceStage _buildScriptPlanStage({
         prompt: '请基于当前 production 上下文生成一版导演计划，并给出执行优先级。',
       );
     }
+    final sectionCount = countProductionScriptPlanSections(trimmed);
+    final sectionLine = sectionCount > 0 ? '已覆盖 $sectionCount/6 个规划维度，' : '';
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
       statusLabel: '待审核',
       detail:
-          '已读取 scriptPlan，当前约 ${trimmed.length} 字，建议先做导演规划审核再推进 assets 与 storyboard。',
+          '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字，建议先做导演规划审核再推进 assets 与 storyboard。',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
     );
@@ -307,12 +309,18 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         prompt: '请先产出结构化 storyboardTable，并保持字段清晰可回写。',
       );
     }
+    final rowCount = countProductionStoryboardTableRows(trimmed);
+    final assetCount = extractProductionReferencedAssetIds(trimmed).length;
+    final digest = <String>[
+      if (rowCount > 0) '共 $rowCount 行',
+      if (assetCount > 0) '关联 $assetCount 项资产',
+    ].join('，');
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
       statusLabel: '待审核',
       detail:
-          'storyboardTable 已有内容，约 ${trimmed.length} 字，建议先做分镜表审核再推进 storyboard 画面结果。',
+          'storyboardTable 已有内容，${digest.isEmpty ? '' : '$digest，'}约 ${trimmed.length} 字，建议先做分镜表审核再推进 storyboard 画面结果。',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
