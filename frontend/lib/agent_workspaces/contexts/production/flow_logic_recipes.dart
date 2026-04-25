@@ -237,6 +237,8 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       ),
     ];
   }
+  final assetArgs = buildProductionScriptPlanAssetArgs(data);
+  final assetScope = summarizeProductionAssetScope(assetArgs);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核导演计划',
@@ -246,11 +248,13 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
     ),
     ProductionWorkspaceRecipe(
-      title: '检查资产落地',
-      detail: '导演计划已有内容，下一步通常是核对 assets 是否支撑执行。',
+      title: '检查关键资产',
+      detail: assetArgs.containsKey('ids')
+          ? '导演计划已点名$assetScope，先精确核对再决定是否扩读其他素材。'
+          : '导演计划已有内容，先核对$assetScope是否支撑执行，信息不足时再补更多资产。',
       flowKey: 'assets',
       domainTool: 'get_flowData',
-      domainArgs: _assetsCompactArgs(),
+      domainArgs: assetArgs,
     ),
     ProductionWorkspaceRecipe(
       title: '先看分镜表落地',
@@ -279,7 +283,9 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
   }
   final assetArgs = _storyboardTableRelatedAssetsArgs(data);
   final storyboardIds = extractProductionStoryboardIds(data);
-  final storyboardArgs = buildProductionStoryboardReviewArgs(ids: storyboardIds);
+  final storyboardArgs = buildProductionStoryboardReviewArgs(
+    ids: storyboardIds,
+  );
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核分镜表',

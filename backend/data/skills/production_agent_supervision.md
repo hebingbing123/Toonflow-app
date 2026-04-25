@@ -101,7 +101,8 @@ description: >-
 2. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
 3. 仅当需要验证资产支撑时读取 assets：
    - 能从 `scriptPlan` 明确定位到具体资产时，优先调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
-   - 无法精准定位时，再退回 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 24 })`
+   - 无法精准定位时，先调用 `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "derive"], limit: 12 })`
+   - 仅当 `scriptPlan` 明确涉及关键道具、法器、信物或状态型物件时，再补一次 `get_flowData({ key: "assets", assetTypes: ["tool"], fields: ["id", "name", "type", "derive"], limit: 12 })`
 
 优先最小读取：信息足够时不得补读整段剧本或整份 assets。
 

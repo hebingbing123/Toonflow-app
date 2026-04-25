@@ -245,6 +245,23 @@ ProductionWorkspaceStage _buildAssetsStage({
       domainArgs: storyboardAssetArgs,
     );
   }
+  final scriptPlanAssetArgs = buildProductionScriptPlanAssetArgs(
+    flowSnapshot['scriptPlan'],
+  );
+  final scriptPlanAssetScope = summarizeProductionAssetScope(
+    scriptPlanAssetArgs,
+  );
+  if (flowSnapshot['scriptPlan'] is String) {
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '已收紧',
+      detail:
+          '已从 scriptPlan 收紧到$scriptPlanAssetScope，优先核对这批素材更省 token；信息不足时再扩读。',
+      domainTool: 'get_flowData',
+      domainArgs: scriptPlanAssetArgs,
+    );
+  }
   if (activeKey == 'assets' ||
       toolName == 'generate_deriveAsset' ||
       toolName == 'add_deriveAsset' ||

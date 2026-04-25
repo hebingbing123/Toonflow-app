@@ -420,6 +420,20 @@ Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
   return buildProductionAssetReadArgs(ids: ids);
 }
 
+Map<String, dynamic> buildProductionScriptPlanAssetArgs(Object? flowData) {
+  final ids = extractProductionScriptPlanAssetIds(flowData);
+  if (ids.isNotEmpty) {
+    return buildProductionAssetReadArgs(ids: ids);
+  }
+  final assetTypes = extractProductionScriptPlanAssetTypes(flowData);
+  return <String, dynamic>{
+    'key': 'assets',
+    'assetTypes': assetTypes,
+    'fields': _productionAssetFields(),
+    'limit': assetTypes.contains('tool') ? 18 : 12,
+  };
+}
+
 Map<String, dynamic> buildProductionAssetReadArgs({
   List<int> ids = const <int>[],
 }) {
@@ -474,6 +488,78 @@ List<int> extractProductionReferencedAssetIds(Object? flowData) {
 
   final sortedIds = ids.toList()..sort();
   return sortedIds;
+}
+
+List<int> extractProductionScriptPlanAssetIds(Object? flowData) {
+  if (flowData is! String) return const <int>[];
+  final ids = <int>{};
+  for (final match in RegExp(
+    r'(?:资产|asset)\s*[#：:\s]?\s*([\d\s,，、]+)',
+    caseSensitive: false,
+  ).allMatches(flowData)) {
+    final raw = match.group(1) ?? '';
+    for (final token in raw.split(RegExp(r'[\s,，、]+'))) {
+      final numericId = int.tryParse(token.trim());
+      if (numericId != null && numericId > 0) {
+        ids.add(numericId);
+      }
+    }
+  }
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
+}
+
+List<String> extractProductionScriptPlanAssetTypes(Object? flowData) {
+  if (flowData is! String) {
+    return const <String>['role', 'scene'];
+  }
+  final normalized = flowData.replaceAll(RegExp(r'</?scriptPlan>'), '');
+  final assetTypes = <String>{'role', 'scene'};
+  final toolSignals = <Pattern>[
+    '道具',
+    '物件',
+    '兵器',
+    '武器',
+    '法器',
+    '信物',
+    '令牌',
+    '玉佩',
+    '佩剑',
+    'tool',
+    'prop',
+  ];
+  if (toolSignals.any((signal) => normalized.contains(signal))) {
+    assetTypes.add('tool');
+  }
+  final sortedTypes = assetTypes.toList()
+    ..sort(
+      (left, right) => _productionAssetTypeOrder(
+        left,
+      ).compareTo(_productionAssetTypeOrder(right)),
+    );
+  return sortedTypes;
+}
+
+String summarizeProductionAssetScope(Map<String, dynamic> args) {
+  final ids = args['ids'];
+  if (ids is List && ids.isNotEmpty) {
+    final numericIds =
+        ids.map(_parseLooseInt).where((id) => id > 0).toSet().toList()..sort();
+    if (numericIds.isNotEmpty) {
+      return '资产 #${numericIds.join(', ')}';
+    }
+  }
+  final assetTypes = args['assetTypes'];
+  if (assetTypes is List) {
+    final labels = assetTypes
+        .map((value) => value is String ? _productionAssetTypeLabel(value) : '')
+        .where((value) => value.isNotEmpty)
+        .toList(growable: false);
+    if (labels.isNotEmpty) {
+      return '${labels.join('/')}资产';
+    }
+  }
+  return '紧凑资产摘要';
 }
 
 List<int> extractProductionStoryboardIds(Object? flowData) {
@@ -709,6 +795,24 @@ Map<String, dynamic> _productionAssetsCompactArgs() => <String, dynamic>{
   'fields': _productionAssetFields(),
   'limit': 24,
 };
+
+int _productionAssetTypeOrder(String value) {
+  return switch (value) {
+    'role' => 0,
+    'scene' => 1,
+    'tool' => 2,
+    _ => 99,
+  };
+}
+
+String _productionAssetTypeLabel(String value) {
+  return switch (value) {
+    'role' => '角色',
+    'scene' => '场景',
+    'tool' => '道具',
+    _ => value,
+  };
+}
 
 List<String> productionStoryboardFields() => <String>[
   'id',

@@ -108,10 +108,12 @@ void main() {
     expect(recipes.first.subAgentTool, 'run_sub_agent_production_supervision');
     expect(recipes.first.flowKey, 'scriptPlan');
     expect(recipes.first.title, contains('审核'));
+    expect(recipes[1].title, '检查关键资产');
     expect(recipes[1].domainArgs, <String, dynamic>{
       'key': 'assets',
+      'assetTypes': <String>['role', 'scene'],
       'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
-      'limit': 24,
+      'limit': 12,
     });
     expect(recipes[2].domainArgs, <String, dynamic>{
       'key': 'storyboardTable',
@@ -129,6 +131,56 @@ void main() {
     expect(recipes[2].flowKey, 'storyboardTable');
     expect(recipes[2].title, '先看分镜表落地');
   });
+
+  test(
+    'buildProductionWorkspaceRecipes adds tool asset scope when script plan mentions props',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+④ 分场景情绪与画面意图
+重点核对玉佩与令牌这类道具状态，避免镜头里错拿主资产。
+</scriptPlan>
+''',
+        },
+      );
+
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'assetTypes': <String>['role', 'scene', 'tool'],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+        'limit': 18,
+      });
+      expect(recipes[1].detail, contains('角色/场景/道具资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows script plan asset checks to explicit ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+执行阶段先核对资产 #12、7 和 asset 5 的状态是否可直接上镜。
+</scriptPlan>
+''',
+        },
+      );
+
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[5, 7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes[1].detail, contains('资产 #5, 7, 12'));
+    },
+  );
 
   test('parseProductionSupervisionReview reads structured review payload', () {
     final review = parseProductionSupervisionReview(<String, dynamic>{
@@ -1234,6 +1286,64 @@ void main() {
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
       expect(assetsStage.detail, contains('2 项资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages narrows asset reads from script plan scope',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+④ 分场景情绪与画面意图
+先核对玉佩与令牌两类道具，再决定是否补衍生状态。
+</scriptPlan>
+''',
+        },
+      );
+
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.statusLabel, '已收紧');
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'assetTypes': <String>['role', 'scene', 'tool'],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+        'limit': 18,
+      });
+      expect(assetsStage.detail, contains('角色/场景/道具资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages prefers explicit asset ids from script plan',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+执行计划里先确认资产 #12, 3 与 asset 9 是否可直接复用。
+</scriptPlan>
+''',
+        },
+      );
+
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.statusLabel, '已收紧');
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 9, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(assetsStage.detail, contains('资产 #3, 9, 12'));
     },
   );
 
