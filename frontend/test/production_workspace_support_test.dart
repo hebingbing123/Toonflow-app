@@ -467,6 +467,32 @@ void main() {
     },
   );
 
+  test(
+    'buildProductionScriptReviewArgs shifts script window toward later storyboard ids',
+    () {
+      final args = buildProductionScriptReviewArgs(
+        review: const ProductionSupervisionReview(
+          target: 'storyboardTable',
+          grade: 'B',
+          severeCount: 0,
+          mediumCount: 1,
+          minorCount: 0,
+          nextAction: 'check_script',
+          summary: '后段镜头需要复核剧本依据',
+          assetIds: <int>[],
+          storyboardIds: <int>[9, 10],
+        ),
+      );
+
+      expect(args, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 43,
+        'lineEnd': 74,
+        'maxChars': 920,
+      });
+    },
+  );
+
   test('extractProductionActionCandidateIds reads derive asset ids', () {
     final ids = extractProductionActionCandidateIds(
       selectedTool: 'generate_deriveAsset',

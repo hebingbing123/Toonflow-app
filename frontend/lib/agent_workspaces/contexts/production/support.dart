@@ -278,17 +278,51 @@ Map<String, dynamic> buildProductionReviewStoryboardTableArgs(
 Map<String, dynamic> buildProductionScriptReviewArgs({
   ProductionSupervisionReview? review,
 }) {
-  final focusCount = review?.storyboardIds.length ?? 0;
-  final lineEnd = focusCount > 0 ? (focusCount * 8 + 16).clamp(32, 80) : 60;
-  final maxChars = focusCount > 0
-      ? (focusCount * 180 + 500).clamp(1000, 1800)
-      : 1400;
+  final focusWindow = buildProductionStoryboardScriptFocusWindow(
+    review?.storyboardIds ?? const <int>[],
+  );
   return <String, dynamic>{
     'key': 'script',
-    'lineStart': 1,
-    'lineEnd': lineEnd,
-    'maxChars': maxChars,
+    'lineStart': focusWindow.lineStart,
+    'lineEnd': focusWindow.lineEnd,
+    'maxChars': focusWindow.maxChars,
   };
+}
+
+class ProductionStoryboardScriptFocusWindow {
+  const ProductionStoryboardScriptFocusWindow({
+    required this.lineStart,
+    required this.lineEnd,
+    required this.maxChars,
+  });
+
+  final int lineStart;
+  final int lineEnd;
+  final int maxChars;
+}
+
+ProductionStoryboardScriptFocusWindow buildProductionStoryboardScriptFocusWindow(
+  List<int> storyboardIds,
+) {
+  final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) {
+    return const ProductionStoryboardScriptFocusWindow(
+      lineStart: 1,
+      lineEnd: 60,
+      maxChars: 1400,
+    );
+  }
+
+  final focusCount = ids.length;
+  final minId = ids.first;
+  final lineStart = ((minId - 2).clamp(0, 9999) * 6) + 1;
+  final lineBudget = (focusCount * 8 + 16).clamp(32, 56);
+  final maxChars = (focusCount * 120 + 680).clamp(920, 1600);
+  return ProductionStoryboardScriptFocusWindow(
+    lineStart: lineStart,
+    lineEnd: lineStart + lineBudget - 1,
+    maxChars: maxChars,
+  );
 }
 
 Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
