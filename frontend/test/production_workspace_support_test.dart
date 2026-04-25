@@ -21,6 +21,36 @@ void main() {
   });
 
   test(
+    'summarizeProductionFlowValue surfaces storyboard generation digest',
+    () {
+      final lines = summarizeProductionFlowValue(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 1,
+          'prompt': 'scene one',
+          'shouldGenerateImage': true,
+        },
+        <String, dynamic>{
+          'id': 2,
+          'prompt': 'scene two',
+          'src': 'https://example.com/2.png',
+          'shouldGenerateImage': 1,
+          'state': 'done',
+        },
+        <String, dynamic>{
+          'id': 3,
+          'prompt': 'scene three',
+          'shouldGenerateImage': false,
+        },
+      ], flowKey: 'storyboard');
+
+      expect(lines, contains('列表 3 项'));
+      expect(lines, contains('需出图 2 项'));
+      expect(lines, contains('缺帧 1 项'));
+      expect(lines, contains('纯文本 1 项'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes suggests derive-assets for empty assets',
     () {
       final recipes = buildProductionWorkspaceRecipes(

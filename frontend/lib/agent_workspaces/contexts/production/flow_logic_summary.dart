@@ -80,15 +80,17 @@ List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
     }
     final first = value.first;
     if (first is Map<String, dynamic>) {
-      final withUrl = value.whereType<Map<String, dynamic>>().where((entry) {
+      final rows = value.whereType<Map<String, dynamic>>().toList(
+        growable: false,
+      );
+      final withUrl = rows.where((entry) {
         return productionFlowEntryHasMediaResult(entry);
       }).length;
-      final withPrompt = value.whereType<Map<String, dynamic>>().where((entry) {
+      final withPrompt = rows.where((entry) {
         final raw = entry['prompt'];
         return raw is String && raw.trim().isNotEmpty;
       }).length;
-      final states = value
-          .whereType<Map<String, dynamic>>()
+      final states = rows
           .map((entry) {
             final raw = entry['state'];
             return raw is String ? raw.trim() : '';
@@ -99,6 +101,16 @@ List<String> summarizeProductionFlowValue(Object? value, {String? flowKey}) {
       final lines = <String>['列表 ${value.length} 项'];
       if (withPrompt > 0) lines.add('含提示词 $withPrompt 项');
       if (withUrl > 0) lines.add('含媒体地址 $withUrl 项');
+      if (normalizedKey == 'storyboard') {
+        final targetCount = rows
+            .where(productionStoryboardEntryNeedsImageGeneration)
+            .length;
+        final missingIds = extractProductionStoryboardMissingImageIds(rows);
+        final skippedCount = rows.length - targetCount;
+        if (targetCount > 0) lines.add('需出图 $targetCount 项');
+        if (missingIds.isNotEmpty) lines.add('缺帧 ${missingIds.length} 项');
+        if (skippedCount > 0) lines.add('纯文本 $skippedCount 项');
+      }
       if (states > 0) lines.add('状态种类 $states 个');
       return lines;
     }
