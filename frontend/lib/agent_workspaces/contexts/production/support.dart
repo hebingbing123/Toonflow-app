@@ -131,6 +131,26 @@ List<int> extractProductionActionCandidateIds({
     return const <int>[];
   }
 
+  final review = parseProductionSupervisionReview(result);
+  if (normalizedToolName == 'run_sub_agent_production_supervision' &&
+      review != null) {
+    switch (normalizedSelectedTool) {
+      case 'generate_storyboard':
+        if (review.nextAction == 'generate_storyboard' &&
+            review.storyboardIds.isNotEmpty) {
+          return review.storyboardIds;
+        }
+        return const <int>[];
+      case 'generate_deriveAsset':
+        if (review.nextAction == 'check_assets' && review.assetIds.isNotEmpty) {
+          return review.assetIds;
+        }
+        return const <int>[];
+      default:
+        return const <int>[];
+    }
+  }
+
   Object? data = result['data'];
   if (normalizedToolName == 'get_flowData') {
     switch (normalizedSelectedTool) {

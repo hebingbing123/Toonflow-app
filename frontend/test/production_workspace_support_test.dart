@@ -358,6 +358,31 @@ void main() {
   );
 
   test(
+    'extractProductionActionCandidateIds reads focused storyboard ids from supervision review',
+    () {
+      final ids = extractProductionActionCandidateIds(
+        selectedTool: 'generate_storyboard',
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '只需补第 3、9 镜头',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      expect(ids, <int>[3, 9]);
+    },
+  );
+
+  test(
     'buildProductionActionArgumentSuggestions builds add/delete payloads',
     () {
       final result = <String, dynamic>{

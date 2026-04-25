@@ -1762,6 +1762,121 @@ void main() {
     expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
   });
 
+  testWidgets(
+    'Production pane fills focused storyboard ids from supervision review',
+    (WidgetTester tester) async {
+      final projectIdController = TextEditingController(text: '1');
+      final scriptIdController = TextEditingController(text: '2');
+      final scriptPromptController = TextEditingController(text: '');
+      final scriptDomainArgsController = TextEditingController(text: '{}');
+      final productionPromptController = TextEditingController(text: '');
+      final flowKeyController = TextEditingController(text: 'storyboard');
+      final productionDomainToolController = TextEditingController(
+        text: 'generate_storyboard',
+      );
+      final productionDomainArgsController = TextEditingController(text: '{}');
+      final scriptSubAgentToolController = TextEditingController(
+        text: 'run_sub_agent_storySkeleton',
+      );
+      final productionSubAgentToolController = TextEditingController(
+        text: 'run_sub_agent_director_plan',
+      );
+
+      addTearDown(() {
+        projectIdController.dispose();
+        scriptIdController.dispose();
+        scriptPromptController.dispose();
+        scriptDomainArgsController.dispose();
+        productionPromptController.dispose();
+        flowKeyController.dispose();
+        productionDomainToolController.dispose();
+        productionDomainArgsController.dispose();
+        scriptSubAgentToolController.dispose();
+        productionSubAgentToolController.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SizedBox(
+                width: 1800,
+                child: AgentWorkspacesSection(
+                  initialPane: AgentWorkspacePane.production,
+                  projectIdController: projectIdController,
+                  scriptIdController: scriptIdController,
+                  scriptPromptController: scriptPromptController,
+                  scriptDomainArgsController: scriptDomainArgsController,
+                  productionPromptController: productionPromptController,
+                  flowKeyController: flowKeyController,
+                  productionDomainToolController: productionDomainToolController,
+                  productionDomainArgsController: productionDomainArgsController,
+                  loadingScriptWorkspaceRun: false,
+                  loadingProductionWorkspaceRun: false,
+                  loadingScriptDomainProbe: false,
+                  loadingProductionFlowProbe: false,
+                  loadingScriptSubAgentRun: false,
+                  loadingProductionSubAgentRun: false,
+                  loadingScriptResultWriteback: false,
+                  loadingScriptPlanResultWriteback: false,
+                  loadingProductionResultWriteback: false,
+                  wsLog: const <String>[],
+                  workspaceAssistantText: '',
+                  workspaceScriptWritebackCandidate: null,
+                  workspaceScriptPlanWritebackCandidate: null,
+                  workspaceScriptPlanRowId: null,
+                  workspaceScriptWritebackSource: null,
+                  workspaceLastToolResultLine:
+                      'run_sub_agent_production_supervision => {"review":{"nextAction":"generate_storyboard","storyboardIds":[9,3,9]}}',
+                  workspaceLastToolName: 'run_sub_agent_production_supervision',
+                  workspaceLastToolResultData: const <String, dynamic>{
+                    'review': <String, dynamic>{
+                      'target': 'storyboardTable',
+                      'grade': 'B',
+                      'severeCount': '0',
+                      'mediumCount': '1',
+                      'minorCount': '0',
+                      'nextAction': 'generate_storyboard',
+                      'summary': '只需补第 3、9 镜头',
+                      'storyboardIds': <int>[9, 3, 9],
+                    },
+                  },
+                  workspaceSuggestedFlowKey: 'storyboardTable',
+                  workspaceWritebackLine: null,
+                  onRunScriptWorkspace: () {},
+                  onRunProductionWorkspace: () {},
+                  onProbeScriptDomainTool: (_, _) {},
+                  onProbeProductionDomainTool: () {},
+                  scriptSubAgentToolController: scriptSubAgentToolController,
+                  productionSubAgentToolController:
+                      productionSubAgentToolController,
+                  onRunScriptSubAgentTool: () {},
+                  onRunProductionSubAgentTool: () {},
+                  onWriteBackScriptResult: () {},
+                  onWriteBackScriptPlanResult: () {},
+                  onWriteBackScriptPlanViaUpdateData: () {},
+                  onWriteBackProductionFlowResult: () {},
+                  onApplySuggestedFlowKey: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('当前 flow 候选参数'), findsOneWidget);
+      expect(find.text('候选 2 项：3, 9'), findsOneWidget);
+
+      final fillButton = find.text('填充前 3 项');
+      await tester.ensureVisible(fillButton);
+      await tester.tap(fillButton);
+      await tester.pump();
+
+      expect(productionDomainArgsController.text, '{"ids":[3,9]}');
+      expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
+    },
+  );
+
   testWidgets('Production stage board applies and advances stage actions', (
     WidgetTester tester,
   ) async {
