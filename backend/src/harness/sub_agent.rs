@@ -139,7 +139,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("一、衍生资产分析与信息写入"),
             format_hint: None,
             execution_hint: Some(
-                "先最小读取：资产优先取 fields 或 idList，剧本优先取窗口片段；确认需要写入时再补读局部上下文。",
+                "先最小读取：先读剧本窗口，再按实际涉及的 assetTypes 分批读 assets；确认到具体父资产或状态后再按需补读，不要先吞整包素材。",
             ),
         }),
         "run_sub_agent_generate_assets" => Some(SubAgentSpec {
@@ -157,7 +157,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("三、导演规划"),
             format_hint: Some("你必须使用如下XML格式写入工作区：\n<scriptPlan>内容</scriptPlan>"),
             execution_hint: Some(
-                "先最小读取：剧本优先窗口化，资产优先字段子集；信息足够时不要把整份 assets 或整段剧本拉进上下文。",
+                "先最小读取：先读剧本窗口，再先读 role/scene 资产，只有剧本明确需要时才补 tool 或具体资产 ID；不要默认整份 assets 进上下文。",
             ),
         }),
         "run_sub_agent_storyboard_gen" => Some(SubAgentSpec {
@@ -188,7 +188,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
                 "你必须使用如下XML格式写入工作区：\n<storyboardTable>内容</storyboardTable>",
             ),
             execution_hint: Some(
-                "先最小读取：剧本优先窗口片段，资产优先字段子集；完成分镜拆解前避免反复加载整份原文。",
+                "先最小读取：剧本优先窗口片段，资产先读 role/scene，再按需要补 tool 或精确 ids；完成分镜拆解前避免反复加载整份原文或整包素材。",
             ),
         }),
         "run_sub_agent_production_supervision" => Some(SubAgentSpec {
