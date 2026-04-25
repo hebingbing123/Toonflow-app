@@ -67,6 +67,7 @@ description: >-
 - `reviewSummary` 必须放在第一行，`summary` 控制在 36 个汉字以内
 - `assetIds` 仅在下一步需要核对具体资产时填写，内容为逗号分隔的真实资产 ID；若问题不指向具体资产则省略该属性
 - `storyboardIds` 仅在下一步需要核对或补齐具体镜头时填写，内容为逗号分隔的真实 storyboard 镜头 ID；若无需聚焦到局部镜头则省略该属性
+- 若下一步是 `check_script` 且问题来自具体镜头，也要继续沿用这批 `storyboardIds`，让后续只读取对应剧本窗口
 - 审核通过的项目不出现在报告中
 - 同类轻微问题合并为一行
 - B 级及以上省略「需要您决定」区块
@@ -88,7 +89,7 @@ description: >-
 4. **建议多元化**：严重问题提供多个可选方案
 5. **动态基准**：数值判断以实际工作区数据为唯一基准；未明确的参数以合理比例推算，并在报告中注明
 6. **回填精确资产范围**：若审核结论要求下一步 `check_assets`，且你已能定位到具体资产，必须把这些真实资产 ID 写入 `reviewSummary.assetIds`
-7. **回填精确镜头范围**：若审核结论要求下一步 `check_storyboard` 或 `generate_storyboard`，且你已能定位到具体缺帧/待核对镜头，必须把这些真实镜头 ID 写入 `reviewSummary.storyboardIds`
+7. **回填精确镜头范围**：若审核结论要求下一步 `check_storyboard`、`generate_storyboard` 或 `check_script`，且你已能定位到具体缺帧/待核对镜头，必须把这些真实镜头 ID 写入 `reviewSummary.storyboardIds`
 
 ---
 
@@ -184,7 +185,7 @@ description: >-
 
 1. 先调用 `get_flowData({ key: "storyboardTable", rowStart: 1, rowCount: 8, fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` 获取首批关键行
 2. 若首批不足以判断，再按需追加下一个窗口，禁止默认整表读取
-3. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
+3. 仅在需要核对剧本覆盖或映射时调用 `get_flowData({ key: "script", lineStart: ..., lineEnd: ..., maxChars: ... })` 获取对应剧本窗口；若当前问题只落在少数镜头，优先围绕这些镜头的局部窗口读取，禁止默认整段剧本
 4. 仅当需要验证资产关联时读取 assets：
    - 优先从当前 `storyboardTable` 窗口里的 `associateAssetsIds` 提取真实资产 ID，并调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
    - 若当前窗口没有有效资产 ID，再退回 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 24 })`
