@@ -725,6 +725,8 @@ Image [2]: @图2 — [外貌关键描述]
 | 操作 | 调用 |
 |------|------|
 | 读取分镜面板 | `get_flowData({ key: "storyboard", fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"], limit: 12 })` |
+| 读取关联分镜表 | `get_flowData({ key: "storyboardTable", ids: [分镜ID列表], fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` |
+| 读取关联剧本窗口 | `get_flowData({ key: "script", lineStart, lineEnd, maxChars })` |
 | 生成图片 | `generate_storyboard({ ids: [分镜ID列表] })` |
 
 ### 执行流程
@@ -732,12 +734,14 @@ Image [2]: @图2 — [外貌关键描述]
 1. 先最小读取分镜摘要：默认用 `get_flowData({ key: "storyboard", fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"], limit: 12 })`；若派发指令里已经给了明确镜头 ID，则改成 `get_flowData({ key: "storyboard", ids: [真实分镜ID列表], fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"] })`
 2. 只筛出 **`shouldGenerateImage=true` 且当前没有 `src` / 图片结果** 的镜头；若派发指令里已经给了明确镜头 ID，则只在这批 ID 内核对状态
 3. 提取这批“缺帧镜头”的真实分镜 ID 列表；若列表为空，直接返回“当前缺帧镜头已补齐”
-4. 仅对这批缺帧镜头调用 `generate_storyboard({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
+4. 若需要在补图前复核镜头依据，优先只复读这批缺帧镜头的 `storyboardTable` 行：`get_flowData({ key: "storyboardTable", ids: [真实分镜ID列表], fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })`；仅当镜头表仍不足以判断时，再按同批镜头对应的剧本窗口最小补读 `script`
+5. 仅对这批缺帧镜头调用 `generate_storyboard({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
 
 ### 约束
 
 - 前置条件：分镜面板已写入完成
 - 图片必须与分镜描述匹配
 - 仅使用 `storyboard` 中的真实分镜 ID，禁止编造或复用无效 ID
+- 如需复核依据，必须优先沿用同一批真实分镜 ID 读取 `storyboardTable`；禁止先回到整张表或整段剧本
 - 禁止重跑已有图片结果的镜头
 - 禁止对 `shouldGenerateImage=false` 的纯文本镜头发起出图
