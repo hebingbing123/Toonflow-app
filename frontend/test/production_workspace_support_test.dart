@@ -172,6 +172,32 @@ void main() {
   );
 
   test(
+    'summarizeProductionResultSnapshot surfaces focused asset and storyboard scope',
+    () {
+      final lines = summarizeProductionResultSnapshot(
+        'run_sub_agent_production_supervision',
+        <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '先补关键镜头',
+            'assetIds': '7,3,7',
+            'storyboardIds': '9,3,9',
+          },
+        },
+        'storyboardTable',
+      );
+
+      expect(lines, contains('聚焦资产 2 项'));
+      expect(lines, contains('聚焦镜头 2 项'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes narrows storyboard table asset checks to referenced ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
