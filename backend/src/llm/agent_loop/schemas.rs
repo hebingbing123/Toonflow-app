@@ -69,17 +69,21 @@ fn tool_parameters_schema(name: &str) -> Value {
             "properties": {
                 "novelId": {
                     "type": "integer",
-                    "description": "Optional numeric novel id to narrow results within the attached project."
+                    "description": "Optional numeric chapter id to narrow reads within the attached project; when omitted, the server now returns only a compact first window by default."
                 },
                 "lineStart": { "type": "integer", "minimum": 1 },
                 "lineEnd": { "type": "integer", "minimum": 1 },
                 "maxChars": { "type": "integer", "minimum": 1 },
                 "offset": { "type": "integer", "minimum": 0 },
-                "limit": { "type": "integer", "minimum": 1 },
+                "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Optional row cap. Defaults are compact: get_novel_text=1 chapter window, get_novel_events=8 event rows."
+                },
                 "fields": {
                     "type": "array",
                     "items": { "type": "string" },
-                    "description": "Optional field subset to reduce payload size."
+                    "description": "Optional field subset to reduce payload size. Defaults are already compact when omitted: get_novel_text => [numeric_id, chapter_index, chapter, chapter_data], get_novel_events => [numeric_id, name, detail]."
                 }
             },
             "additionalProperties": false
