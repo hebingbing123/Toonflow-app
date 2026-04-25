@@ -119,6 +119,7 @@ void main() {
         'id',
         'index',
         'duration',
+        'prompt',
         'src',
         'state',
         'flowId',
@@ -469,14 +470,12 @@ void main() {
         'fields': <String>[
           'id',
           'index',
-          'duration',
           'src',
           'state',
-          'flowId',
           'associateAssetsIds',
           'shouldGenerateImage',
         ],
-        'limit': 24,
+        'limit': 12,
       });
       expect(storyboardStage.subAgentTool, isNull);
     },
@@ -566,7 +565,6 @@ void main() {
           'duration',
           'src',
           'state',
-          'flowId',
           'associateAssetsIds',
           'shouldGenerateImage',
         ],
@@ -842,7 +840,6 @@ void main() {
           'duration',
           'src',
           'state',
-          'flowId',
           'associateAssetsIds',
           'shouldGenerateImage',
         ],
@@ -871,15 +868,47 @@ void main() {
         'fields': <String>[
           'id',
           'index',
-          'duration',
           'src',
           'state',
-          'flowId',
           'associateAssetsIds',
           'shouldGenerateImage',
         ],
       });
       expect(generateRecipes.single.prompt, contains('ids=3,9'));
+    },
+  );
+
+  test(
+    'supervision generate storyboard recipe falls back to minimal generation read',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '只需补缺帧镜头',
+          },
+        },
+      );
+
+      expect(recipes.single.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'fields': <String>[
+          'id',
+          'index',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+        'limit': 12,
+      });
     },
   );
 }

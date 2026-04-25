@@ -370,7 +370,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   if (review != null &&
       (review.nextAction == 'check_storyboard' ||
           review.nextAction == 'generate_storyboard')) {
-    final storyboardArgs = buildProductionReviewStoryboardArgs(review);
+    final storyboardArgs = review.nextAction == 'generate_storyboard'
+        ? buildProductionReviewStoryboardGenerationArgs(review)
+        : buildProductionReviewStoryboardArgs(review);
     final storyboardIds = review.storyboardIds;
     final scopeLine = storyboardIds.isEmpty
         ? review.nextAction == 'generate_storyboard'
@@ -441,13 +443,22 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
       toolName == 'run_sub_agent_storyboard_panel') {
+    final refreshArgs =
+        toolName == 'generate_storyboard' ||
+            toolName == 'run_sub_agent_storyboard_gen'
+        ? buildProductionStoryboardGenerationArgs()
+        : _storyboardCompactArgs();
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
       statusLabel: '建议刷新',
-      detail: '分镜动作刚执行，建议重新读取 storyboard 再决定是否写回。',
+      detail:
+          toolName == 'generate_storyboard' ||
+              toolName == 'run_sub_agent_storyboard_gen'
+          ? '分镜动作刚执行，建议先按补图最小字段读取 storyboard，再决定是否继续补帧或写回。'
+          : '分镜动作刚执行，建议重新读取 storyboard 再决定是否写回。',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardCompactArgs(),
+      domainArgs: refreshArgs,
     );
   }
   return ProductionWorkspaceStage(

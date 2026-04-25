@@ -33,13 +33,21 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   }
 
   if (normalizedTool == 'generate_storyboard') {
+    final affectedIds = extractProductionActionCandidateIds(
+      selectedTool: 'generate_storyboard',
+      toolName: toolName,
+      suggestedFlowKey: suggestedFlowKey,
+      result: result,
+    );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
         title: '刷新分镜 flow',
-        detail: '分镜生成动作已执行，先拉取最新 storyboard 再决定是否写回。',
+        detail: affectedIds.isEmpty
+            ? '分镜生成动作已执行，先按补图最小字段回读 storyboard 再决定是否写回。'
+            : '分镜生成动作已执行，先只回读本次镜头 #${affectedIds.join(', ')} 的补图状态。',
         flowKey: 'storyboard',
         domainTool: 'get_flowData',
-        domainArgs: _storyboardCompactArgs(),
+        domainArgs: buildProductionStoryboardGenerationArgs(ids: affectedIds),
       ),
       ProductionWorkspaceRecipe(
         title: '继续导演计划',
@@ -405,7 +413,9 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
         ),
       ];
     case 'generate_storyboard':
-      final storyboardArgs = buildProductionReviewStoryboardArgs(review);
+      final storyboardArgs = buildProductionReviewStoryboardGenerationArgs(
+        review,
+      );
       final storyboardIds = review.storyboardIds;
       final storyboardScope = storyboardIds.isEmpty
           ? '优先只补缺少画面结果的镜头'

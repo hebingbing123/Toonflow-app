@@ -152,7 +152,12 @@ List<int> extractProductionActionCandidateIds({
       case 'generate_deriveAsset':
         return _extractDeriveAssetIds(data['assets']);
       case 'generate_storyboard':
-        return _extractEntityIds(data['storyboard']);
+        final storyboard = data['storyboard'];
+        final missingIds = extractProductionStoryboardMissingImageIds(
+          storyboard,
+        );
+        if (missingIds.isNotEmpty) return missingIds;
+        return _extractEntityIds(storyboard);
       default:
         return const <int>[];
     }
@@ -234,14 +239,13 @@ Map<String, dynamic> buildProductionReviewAssetArgs(
 Map<String, dynamic> buildProductionReviewStoryboardArgs(
   ProductionSupervisionReview review,
 ) {
-  if (review.storyboardIds.isEmpty) {
-    return buildProductionStoryboardCompactArgs();
-  }
-  return <String, dynamic>{
-    'key': 'storyboard',
-    'ids': review.storyboardIds,
-    'fields': productionStoryboardFields(),
-  };
+  return buildProductionStoryboardReviewArgs(ids: review.storyboardIds);
+}
+
+Map<String, dynamic> buildProductionReviewStoryboardGenerationArgs(
+  ProductionSupervisionReview review,
+) {
+  return buildProductionStoryboardGenerationArgs(ids: review.storyboardIds);
 }
 
 Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
@@ -467,6 +471,7 @@ List<String> productionStoryboardFields() => <String>[
   'id',
   'index',
   'duration',
+  'prompt',
   'src',
   'state',
   'flowId',
@@ -479,6 +484,55 @@ Map<String, dynamic> buildProductionStoryboardCompactArgs() => <String, dynamic>
   'fields': productionStoryboardFields(),
   'limit': 24,
 };
+
+List<String> productionStoryboardReviewFields() => <String>[
+  'id',
+  'index',
+  'duration',
+  'src',
+  'state',
+  'associateAssetsIds',
+  'shouldGenerateImage',
+];
+
+Map<String, dynamic> buildProductionStoryboardReviewArgs({
+  List<int> ids = const <int>[],
+}) {
+  final payload = <String, dynamic>{
+    'key': 'storyboard',
+    'fields': productionStoryboardReviewFields(),
+  };
+  if (ids.isNotEmpty) {
+    payload['ids'] = ids;
+  } else {
+    payload['limit'] = 12;
+  }
+  return payload;
+}
+
+List<String> productionStoryboardGenerationFields() => <String>[
+  'id',
+  'index',
+  'src',
+  'state',
+  'associateAssetsIds',
+  'shouldGenerateImage',
+];
+
+Map<String, dynamic> buildProductionStoryboardGenerationArgs({
+  List<int> ids = const <int>[],
+}) {
+  final payload = <String, dynamic>{
+    'key': 'storyboard',
+    'fields': productionStoryboardGenerationFields(),
+  };
+  if (ids.isNotEmpty) {
+    payload['ids'] = ids;
+  } else {
+    payload['limit'] = 12;
+  }
+  return payload;
+}
 
 List<ProductionWorkspaceArgumentSuggestion> _buildDeleteDeriveAssetSuggestions(
   Object? flowData,

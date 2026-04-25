@@ -724,12 +724,12 @@ Image [2]: @图2 — [外貌关键描述]
 
 | 操作 | 调用 |
 |------|------|
-| 读取分镜面板 | `get_flowData({ key: "storyboard", fields: ["id", "index", "duration", "src", "state", "flowId", "associateAssetsIds", "shouldGenerateImage"], limit: 24 })` |
+| 读取分镜面板 | `get_flowData({ key: "storyboard", fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"], limit: 12 })` |
 | 生成图片 | `generate_storyboard({ ids: [分镜ID列表] })` |
 
 ### 执行流程
 
-1. 先用 `get_flowData({ key: "storyboard", fields: ["id", "index", "duration", "src", "state", "flowId", "associateAssetsIds", "shouldGenerateImage"], limit: 24 })` 获取分镜摘要
+1. 先最小读取分镜摘要：默认用 `get_flowData({ key: "storyboard", fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"], limit: 12 })`；若派发指令里已经给了明确镜头 ID，则改成 `get_flowData({ key: "storyboard", ids: [真实分镜ID列表], fields: ["id", "index", "src", "state", "associateAssetsIds", "shouldGenerateImage"] })`
 2. 只筛出 **`shouldGenerateImage=true` 且当前没有 `src` / 图片结果** 的镜头；若派发指令里已经给了明确镜头 ID，则只在这批 ID 内核对状态
 3. 提取这批“缺帧镜头”的真实分镜 ID 列表；若列表为空，直接返回“当前缺帧镜头已补齐”
 4. 仅对这批缺帧镜头调用 `generate_storyboard({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
