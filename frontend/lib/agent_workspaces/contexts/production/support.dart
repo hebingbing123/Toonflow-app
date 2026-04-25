@@ -4,6 +4,7 @@ class ProductionWorkspaceRecipe {
     required this.detail,
     required this.flowKey,
     this.domainTool,
+    this.domainArgs,
     this.subAgentTool,
     this.prompt,
   });
@@ -12,6 +13,7 @@ class ProductionWorkspaceRecipe {
   final String detail;
   final String flowKey;
   final String? domainTool;
+  final Map<String, dynamic>? domainArgs;
   final String? subAgentTool;
   final String? prompt;
 }
@@ -23,6 +25,7 @@ class ProductionWorkspaceStage {
     required this.statusLabel,
     required this.detail,
     this.domainTool,
+    this.domainArgs,
     this.subAgentTool,
     this.prompt,
   });
@@ -32,8 +35,29 @@ class ProductionWorkspaceStage {
   final String statusLabel;
   final String detail;
   final String? domainTool;
+  final Map<String, dynamic>? domainArgs;
   final String? subAgentTool;
   final String? prompt;
+}
+
+class ProductionSupervisionReview {
+  const ProductionSupervisionReview({
+    required this.target,
+    required this.grade,
+    required this.severeCount,
+    required this.mediumCount,
+    required this.minorCount,
+    required this.nextAction,
+    required this.summary,
+  });
+
+  final String target;
+  final String grade;
+  final int severeCount;
+  final int mediumCount;
+  final int minorCount;
+  final String nextAction;
+  final String summary;
 }
 
 class ProductionWorkspaceArgumentSuggestion {
@@ -85,6 +109,34 @@ List<int> extractProductionActionCandidateIds({
   }
 
   return const <int>[];
+}
+
+ProductionSupervisionReview? parseProductionSupervisionReview(Object? result) {
+  if (result is! Map<String, dynamic>) return null;
+  final review = result['review'];
+  if (review is! Map<String, dynamic>) return null;
+  final target = (review['target'] as String?)?.trim() ?? '';
+  final grade = (review['grade'] as String?)?.trim() ?? '';
+  final nextAction = (review['nextAction'] as String?)?.trim() ?? '';
+  final summary = (review['summary'] as String?)?.trim() ?? '';
+  if (target.isEmpty || grade.isEmpty || nextAction.isEmpty) {
+    return null;
+  }
+  return ProductionSupervisionReview(
+    target: target,
+    grade: grade,
+    severeCount: _parseLooseInt(review['severeCount']),
+    mediumCount: _parseLooseInt(review['mediumCount']),
+    minorCount: _parseLooseInt(review['minorCount']),
+    nextAction: nextAction,
+    summary: summary,
+  );
+}
+
+int _parseLooseInt(Object? value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim()) ?? 0;
+  return 0;
 }
 
 List<ProductionWorkspaceArgumentSuggestion>
@@ -257,4 +309,3 @@ List<int> _extractEntityIds(Object? value) {
   }
   return ids.toSet().toList(growable: false);
 }
-

@@ -7,6 +7,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
 }) {
   final normalizedTool = toolName?.trim() ?? '';
   final normalizedKey = suggestedFlowKey?.trim() ?? '';
+  final review = parseProductionSupervisionReview(result);
   final flowSnapshot = _resolveProductionWorkspaceFlowSnapshot(
     toolName: toolName,
     suggestedFlowKey: suggestedFlowKey,
@@ -15,6 +16,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
   final activeKey = _resolveProductionStageActiveKey(
     toolName: normalizedTool,
     suggestedFlowKey: normalizedKey,
+    review: review,
   );
 
   return <ProductionWorkspaceStage>[
@@ -22,6 +24,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
+      review: review,
     ),
     _buildAssetsStage(
       activeKey: activeKey,
@@ -32,6 +35,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
+      review: review,
     ),
     _buildStoryboardStage(
       activeKey: activeKey,
@@ -75,9 +79,13 @@ Map<String, Object?> _resolveProductionWorkspaceFlowSnapshot({
 String? _resolveProductionStageActiveKey({
   required String toolName,
   required String suggestedFlowKey,
+  required ProductionSupervisionReview? review,
 }) {
   if (toolName == 'get_flowData' && suggestedFlowKey.isNotEmpty) {
     return suggestedFlowKey;
+  }
+  if (toolName == 'run_sub_agent_production_supervision') {
+    return review?.target;
   }
   return switch (toolName) {
     'add_deriveAsset' ||
@@ -98,7 +106,26 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
+  required ProductionSupervisionReview? review,
 }) {
+  if (review != null && review.target == 'scriptPlan') {
+    return ProductionWorkspaceStage(
+      title: '导演计划',
+      flowKey: 'scriptPlan',
+      statusLabel: _reviewStatusLabel(review),
+      detail: _reviewDetail(review),
+      domainTool: review.nextAction == 'check_assets' ? 'get_flowData' : null,
+      domainArgs: review.nextAction == 'check_assets'
+          ? <String, dynamic>{'key': 'assets'}
+          : null,
+      subAgentTool: review.nextAction == 'revise_scriptPlan'
+          ? 'run_sub_agent_director_plan'
+          : null,
+      prompt: review.nextAction == 'revise_scriptPlan'
+          ? '请根据最近审核意见修订 scriptPlan，优先解决：${review.summary}'
+          : null,
+    );
+  }
   final data = flowSnapshot['scriptPlan'];
   if (data is String) {
     final trimmed = data.trim();
@@ -208,7 +235,33 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
+  required ProductionSupervisionReview? review,
 }) {
+  if (review != null && review.target == 'storyboardTable') {
+    return ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: _reviewStatusLabel(review),
+      detail: _reviewDetail(review),
+      domainTool: switch (review.nextAction) {
+        'check_script' => 'get_flowData',
+        _ => null,
+      },
+      domainArgs: switch (review.nextAction) {
+        'check_script' => <String, dynamic>{'key': 'script', 'maxChars': 1800},
+        _ => null,
+      },
+      subAgentTool: switch (review.nextAction) {
+        'revise_storyboardTable' => 'run_sub_agent_storyboard_table',
+        _ => null,
+      },
+      prompt: switch (review.nextAction) {
+        'revise_storyboardTable' =>
+          '请根据最近审核意见修订 storyboardTable，优先解决：${review.summary}',
+        _ => null,
+      },
+    );
+  }
   final data = flowSnapshot['storyboardTable'];
   if (data is String) {
     final trimmed = data.trim();
@@ -232,22 +285,38 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
   }
+  if (data is Map<String, dynamic>) {
+    final rowCount = _readInt(data['rowCount']);
+    final totalRows = _readInt(data['totalRows']);
+    return ProductionWorkspaceStage(
+      title: '分镜表',
+      flowKey: 'storyboardTable',
+      statusLabel: '已抽样',
+      detail: '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。',
+      domainTool: 'get_flowData',
+      domainArgs: _storyboardTableWindowArgs(),
+      subAgentTool: 'run_sub_agent_production_supervision',
+      prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
+    );
+  }
   if (activeKey == 'storyboardTable' ||
       toolName == 'run_sub_agent_storyboard_table') {
-    return const ProductionWorkspaceStage(
+    return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
       statusLabel: '建议刷新',
       detail: '分镜表刚变更或正在处理，建议重新读取 storyboardTable。',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardTableWindowArgs(),
     );
   }
-  return const ProductionWorkspaceStage(
+  return ProductionWorkspaceStage(
     title: '分镜表',
     flowKey: 'storyboardTable',
     statusLabel: '待读取',
     detail: '需要时可读取 storyboardTable 审阅结构化镜头表。',
     domainTool: 'get_flowData',
+    domainArgs: _storyboardTableWindowArgs(),
   );
 }
 
@@ -311,4 +380,22 @@ ProductionWorkspaceStage _buildStoryboardStage({
     detail: '读取 storyboard 后可判断是否需要继续补图或直接写回结果。',
     domainTool: 'get_flowData',
   );
+}
+
+String _reviewStatusLabel(ProductionSupervisionReview review) {
+  if (review.severeCount > 0 || review.grade == 'D') return '需返工';
+  if (review.grade == 'C') return '待修订';
+  if (review.grade == 'B') return '可推进';
+  return '已通过';
+}
+
+String _reviewDetail(ProductionSupervisionReview review) {
+  final summary = review.summary.isEmpty ? '请按审核结果推进下一步。' : review.summary;
+  return '审核等级 ${review.grade}，严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}。$summary';
+}
+
+int _readInt(Object? value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim()) ?? 0;
+  return 0;
 }

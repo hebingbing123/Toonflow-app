@@ -70,6 +70,62 @@ void main() {
     expect(recipes.first.title, contains('审核'));
   });
 
+  test('parseProductionSupervisionReview reads structured review payload', () {
+    final review = parseProductionSupervisionReview(<String, dynamic>{
+      'review': <String, dynamic>{
+        'target': 'storyboardTable',
+        'grade': 'C',
+        'severeCount': '1',
+        'mediumCount': '2',
+        'minorCount': '0',
+        'nextAction': 'revise_storyboardTable',
+        'summary': '分镜拆分过粗且关联资产缺失',
+      },
+    });
+
+    expect(review, isNotNull);
+    expect(review!.target, 'storyboardTable');
+    expect(review.severeCount, 1);
+    expect(review.nextAction, 'revise_storyboardTable');
+  });
+
+  test(
+    'buildProductionWorkspaceRecipes uses structured supervision next action',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '分镜拆分过粗且关联资产缺失',
+          },
+        },
+      );
+
+      expect(recipes.first.subAgentTool, 'run_sub_agent_storyboard_table');
+      expect(recipes.first.title, contains('修分镜表'));
+      expect(recipes.last.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'rowStart': 1,
+        'rowCount': 8,
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+    },
+  );
+
   test('extractProductionActionCandidateIds reads derive asset ids', () {
     final ids = extractProductionActionCandidateIds(
       selectedTool: 'generate_deriveAsset',
@@ -190,19 +246,92 @@ void main() {
     },
   );
 
-  test('buildProductionWorkspaceStages marks storyboard table as review-ready', () {
-    final stages = buildProductionWorkspaceStages(
-      toolName: 'get_flowData',
-      suggestedFlowKey: 'storyboardTable',
-      result: <String, dynamic>{
-        'data': '| 序号 | 画面描述 |\n|---|---|\n| 1 | 首镜 |',
-      },
-    );
+  test(
+    'buildProductionWorkspaceStages marks storyboard table as review-ready',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': '| 序号 | 画面描述 |\n|---|---|\n| 1 | 首镜 |',
+        },
+      );
 
-    final tableStage = stages.firstWhere(
-      (stage) => stage.flowKey == 'storyboardTable',
-    );
-    expect(tableStage.statusLabel, '待审核');
-    expect(tableStage.subAgentTool, 'run_sub_agent_production_supervision');
-  });
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.statusLabel, '待审核');
+      expect(tableStage.subAgentTool, 'run_sub_agent_production_supervision');
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages surfaces structured supervision state',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '1',
+            'nextAction': 'check_script',
+            'summary': '覆盖基本可用，但仍需核对一处剧本映射',
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.statusLabel, '可推进');
+      expect(tableStage.domainTool, 'get_flowData');
+      expect(tableStage.domainArgs, <String, dynamic>{
+        'key': 'script',
+        'maxChars': 1800,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages prefers storyboard table window args',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'table': 'storyboardTable',
+            'rowStart': 1,
+            'rowCount': 8,
+            'totalRows': 24,
+            'rows': <Map<String, dynamic>>[
+              <String, dynamic>{'id': '1', 'description': '首镜'},
+            ],
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.statusLabel, '已抽样');
+      expect(tableStage.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'rowStart': 1,
+        'rowCount': 8,
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+    },
+  );
 }

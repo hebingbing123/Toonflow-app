@@ -25,6 +25,15 @@ List<String> summarizeProductionResultSnapshot(
     return <String>['返回 items ${items.length} 项'];
   }
 
+  final review = parseProductionSupervisionReview(result);
+  if (review != null) {
+    return <String>[
+      '审核 ${review.target} → ${review.grade}',
+      '严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
+      if (review.summary.isNotEmpty) review.summary,
+    ];
+  }
+
   final text = result['result'];
   if (text is String && text.trim().isNotEmpty) {
     return <String>['返回文本 ${text.trim().length} 字'];

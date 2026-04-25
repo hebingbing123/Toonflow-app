@@ -116,11 +116,21 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "fields": {
                     "type": "array",
                     "items": { "type": "string" },
-                    "description": "Optional object field subset."
+                    "description": "Optional object field subset; for key=storyboardTable also accepts column aliases such as id, description, scene, duration, camera, cameraMove, lines, sound, associateAssetsIds."
                 },
                 "lineStart": { "type": "integer", "minimum": 1 },
                 "lineEnd": { "type": "integer", "minimum": 1 },
                 "maxChars": { "type": "integer", "minimum": 1 },
+                "rowStart": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "For key=storyboardTable: optional 1-based data-row start for compact table reads."
+                },
+                "rowCount": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "For key=storyboardTable: optional number of data rows to return."
+                },
                 "offset": { "type": "integer", "minimum": 0 },
                 "limit": { "type": "integer", "minimum": 1 }
             },

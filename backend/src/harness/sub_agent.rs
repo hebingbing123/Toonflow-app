@@ -14,6 +14,79 @@ struct SubAgentSpec {
     execution_hint: Option<&'static str>,
 }
 
+fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<String, Value>> {
+    let trimmed = line.trim();
+    if !trimmed.starts_with('<') || !trimmed.ends_with("/>") {
+        return None;
+    }
+    let mut inner = trimmed
+        .strip_prefix('<')?
+        .strip_suffix("/>")?
+        .trim()
+        .to_string();
+    if !inner.starts_with(tag_name) {
+        return None;
+    }
+    inner = inner[tag_name.len()..].trim().to_string();
+    if inner.is_empty() {
+        return Some(serde_json::Map::new());
+    }
+
+    let mut attrs = serde_json::Map::new();
+    let bytes = inner.as_bytes();
+    let mut idx = 0;
+    while idx < bytes.len() {
+        while idx < bytes.len() && bytes[idx].is_ascii_whitespace() {
+            idx += 1;
+        }
+        if idx >= bytes.len() {
+            break;
+        }
+        let key_start = idx;
+        while idx < bytes.len() && !bytes[idx].is_ascii_whitespace() && bytes[idx] != b'=' {
+            idx += 1;
+        }
+        if key_start == idx {
+            return None;
+        }
+        let key = inner[key_start..idx].trim();
+        while idx < bytes.len() && bytes[idx].is_ascii_whitespace() {
+            idx += 1;
+        }
+        if idx >= bytes.len() || bytes[idx] != b'=' {
+            return None;
+        }
+        idx += 1;
+        while idx < bytes.len() && bytes[idx].is_ascii_whitespace() {
+            idx += 1;
+        }
+        if idx >= bytes.len() || bytes[idx] != b'"' {
+            return None;
+        }
+        idx += 1;
+        let value_start = idx;
+        while idx < bytes.len() && bytes[idx] != b'"' {
+            idx += 1;
+        }
+        if idx >= bytes.len() {
+            return None;
+        }
+        let value = &inner[value_start..idx];
+        idx += 1;
+        attrs.insert(key.to_string(), Value::String(value.to_string()));
+    }
+    Some(attrs)
+}
+
+fn parse_production_supervision_review(text: &str) -> Option<Value> {
+    let summary_line = text
+        .lines()
+        .map(str::trim)
+        .find(|line| line.starts_with("<reviewSummary "))?;
+    let attrs = parse_tag_attributes(summary_line, "reviewSummary")?;
+    Some(Value::Object(attrs))
+}
+
 fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
     match tool_name {
         "run_sub_agent_storySkeleton" => Some(SubAgentSpec {
@@ -120,7 +193,9 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             role_name: "监督导演",
             skill_path: "production_agent_supervision.md",
             skill_section: None,
-            format_hint: None,
+            format_hint: Some(
+                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"scriptPlan|storyboardTable\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard\" summary=\"一句话总结\" />\n随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
+            ),
             execution_hint: Some(
                 "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口，不要无差别全量读取。",
             ),
@@ -192,9 +267,53 @@ pub async fn invoke_sub_agent_tool(
     .await
     .map_err(InvokeError::LlmError)?;
 
+    let review = if tool_name == "run_sub_agent_production_supervision" {
+        parse_production_supervision_review(&text)
+    } else {
+        None
+    };
+
     Ok(json!({
         "tool": tool_name,
         "agent_role": spec.role_name,
         "result": text,
+        "review": review,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{parse_production_supervision_review, parse_tag_attributes};
+
+    #[test]
+    fn parse_tag_attributes_reads_xml_style_summary_line() {
+        let attrs = parse_tag_attributes(
+            r#"<reviewSummary target="storyboardTable" grade="C" severeCount="1" summary="需要先修复表结构" />"#,
+            "reviewSummary",
+        )
+        .expect("attrs");
+        assert_eq!(
+            attrs.get("target").and_then(|v| v.as_str()),
+            Some("storyboardTable")
+        );
+        assert_eq!(attrs.get("grade").and_then(|v| v.as_str()), Some("C"));
+        assert_eq!(
+            attrs.get("summary").and_then(|v| v.as_str()),
+            Some("需要先修复表结构")
+        );
+    }
+
+    #[test]
+    fn parse_production_supervision_review_uses_first_summary_line() {
+        let review = parse_production_supervision_review(
+            r#"
+<reviewSummary target="scriptPlan" grade="B" severeCount="0" mediumCount="2" minorCount="1" nextAction="check_assets" summary="导演规划可用但资产还需对齐" />
+
+# 审核报告：导演规划
+"#,
+        )
+        .expect("review");
+        assert_eq!(review["target"].as_str(), Some("scriptPlan"));
+        assert_eq!(review["nextAction"].as_str(), Some("check_assets"));
+    }
 }

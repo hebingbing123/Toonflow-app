@@ -6,10 +6,15 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   required Object? result,
 }) {
   final normalizedTool = toolName?.trim() ?? '';
-  final normalizedKey = suggestedFlowKey?.trim() ?? '';
   if (normalizedTool.isEmpty || result is! Map<String, dynamic>) {
     return const <ProductionWorkspaceRecipe>[];
   }
+  final review = parseProductionSupervisionReview(result);
+  if (normalizedTool == 'run_sub_agent_production_supervision' &&
+      review != null) {
+    return _buildSupervisionRecipes(review);
+  }
+  final normalizedKey = suggestedFlowKey?.trim() ?? '';
 
   if (normalizedTool == 'get_flowData') {
     final data = result['data'];
@@ -95,7 +100,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
           subAgentTool: 'run_sub_agent_generate_assets',
           prompt: '请基于当前 assets flow 优先补齐缺少图像结果的素材，并执行最小可行生成动作。',
         ),
-        ProductionWorkspaceRecipe(
+        const ProductionWorkspaceRecipe(
           title: '刷新分镜需求',
           detail: '素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。',
           flowKey: 'storyboard',
@@ -140,8 +145,8 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
       return raw is! String || raw.trim().isEmpty;
     }).length;
     if (withoutImage > 0) {
-      return const <ProductionWorkspaceRecipe>[
-        ProductionWorkspaceRecipe(
+      return <ProductionWorkspaceRecipe>[
+        const ProductionWorkspaceRecipe(
           title: '继续补齐分镜图',
           detail: '仍有分镜缺少画面结果，继续推进 storyboard 生成更合适。',
           flowKey: 'storyboard',
@@ -153,6 +158,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           detail: '必要时切到 storyboardTable 审阅结构化镜头表后再回写。',
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
+          domainArgs: _storyboardTableWindowArgs(),
         ),
       ];
     }
@@ -215,19 +221,136 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
       ),
     ];
   }
-  return const <ProductionWorkspaceRecipe>[
-    ProductionWorkspaceRecipe(
+  if (!_hasStoryboardTableData(data)) {
+    return const <ProductionWorkspaceRecipe>[];
+  }
+  return <ProductionWorkspaceRecipe>[
+    const ProductionWorkspaceRecipe(
       title: '审核分镜表',
       detail: '分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。',
       flowKey: 'storyboardTable',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     ),
-    ProductionWorkspaceRecipe(
+    const ProductionWorkspaceRecipe(
       title: '切回分镜结果',
       detail: '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
     ),
+    ProductionWorkspaceRecipe(
+      title: '抽样读取分镜表',
+      detail: '先只看前 8 行关键列，通常足够判断是否继续审核或回写。',
+      flowKey: 'storyboardTable',
+      domainTool: 'get_flowData',
+      domainArgs: _storyboardTableWindowArgs(),
+    ),
   ];
+}
+
+Map<String, dynamic> _storyboardTableWindowArgs({
+  int rowStart = 1,
+  int rowCount = 8,
+}) => <String, dynamic>{
+  'key': 'storyboardTable',
+  'rowStart': rowStart,
+  'rowCount': rowCount,
+  'fields': <String>[
+    'id',
+    'description',
+    'scene',
+    'duration',
+    'camera',
+    'associateAssetsIds',
+  ],
+};
+
+bool _hasStoryboardTableData(Object? data) {
+  if (data is String) return data.trim().isNotEmpty;
+  if (data is Map<String, dynamic>) {
+    final rows = data['rows'];
+    return rows is List && rows.isNotEmpty;
+  }
+  return false;
+}
+
+List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
+  ProductionSupervisionReview review,
+) {
+  final summary = review.summary.isEmpty ? '按审核结论继续推进。' : review.summary;
+  switch (review.nextAction) {
+    case 'revise_scriptPlan':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '修导演计划',
+          detail: '审核结论：$summary',
+          flowKey: 'scriptPlan',
+          subAgentTool: 'run_sub_agent_director_plan',
+          prompt: '请根据最近审核意见修订 scriptPlan，优先解决：$summary',
+        ),
+        const ProductionWorkspaceRecipe(
+          title: '复查资产支撑',
+          detail: '导演计划常先卡在资产准备，先看 assets 能减少返工。',
+          flowKey: 'assets',
+          domainTool: 'get_flowData',
+        ),
+      ];
+    case 'check_assets':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '核对资产支撑',
+          detail: '审核结论：$summary',
+          flowKey: 'assets',
+          domainTool: 'get_flowData',
+        ),
+      ];
+    case 'check_storyboard':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '检查分镜结果',
+          detail: '审核结论：$summary',
+          flowKey: 'storyboard',
+          domainTool: 'get_flowData',
+        ),
+      ];
+    case 'revise_storyboardTable':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '修分镜表',
+          detail: '审核结论：$summary',
+          flowKey: 'storyboardTable',
+          subAgentTool: 'run_sub_agent_storyboard_table',
+          prompt: '请根据最近审核意见修订 storyboardTable，优先解决：$summary',
+        ),
+        ProductionWorkspaceRecipe(
+          title: '抽样复读分镜表',
+          detail: '先读取关键列窗口，避免把整张表反复带入上下文。',
+          flowKey: 'storyboardTable',
+          domainTool: 'get_flowData',
+          domainArgs: _storyboardTableWindowArgs(),
+        ),
+      ];
+    case 'check_script':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '回看剧本依据',
+          detail: '审核结论：$summary',
+          flowKey: 'script',
+          domainTool: 'get_flowData',
+          domainArgs: <String, dynamic>{'key': 'script', 'maxChars': 1800},
+        ),
+      ];
+    case 'generate_storyboard':
+      return <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '继续生成分镜图',
+          detail: '审核结论：$summary',
+          flowKey: 'storyboard',
+          subAgentTool: 'run_sub_agent_storyboard_gen',
+          prompt: '请基于最近审核结论继续推进 storyboard，注意：$summary',
+        ),
+      ];
+    default:
+      return const <ProductionWorkspaceRecipe>[];
+  }
 }
