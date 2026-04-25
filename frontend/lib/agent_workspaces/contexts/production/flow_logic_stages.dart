@@ -113,15 +113,21 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   required ProductionSupervisionReview? review,
 }) {
   if (review != null && review.target == 'scriptPlan') {
+    final planningScriptArgs = buildProductionPlanningScriptArgs();
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
       statusLabel: _reviewStatusLabel(review),
       detail: _reviewDetail(review),
-      domainTool: review.nextAction == 'check_assets' ? 'get_flowData' : null,
-      domainArgs: review.nextAction == 'check_assets'
-          ? buildProductionReviewAssetArgs(review)
-          : null,
+      domainTool: switch (review.nextAction) {
+        'check_assets' || 'revise_scriptPlan' => 'get_flowData',
+        _ => null,
+      },
+      domainArgs: switch (review.nextAction) {
+        'check_assets' => buildProductionReviewAssetArgs(review),
+        'revise_scriptPlan' => planningScriptArgs,
+        _ => null,
+      },
       subAgentTool: review.nextAction == 'revise_scriptPlan'
           ? 'run_sub_agent_director_plan'
           : null,
@@ -145,12 +151,13 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     }
     final sectionCount = countProductionScriptPlanSections(trimmed);
     final sectionLine = sectionCount > 0 ? '已覆盖 $sectionCount/6 个规划维度，' : '';
+    final scriptWindow = summarizeProductionPlanningScriptWindow();
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
       statusLabel: '待审核',
       detail:
-          '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字，建议先做导演规划审核再推进 assets 与 storyboard。',
+          '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字；复核时先只回看$scriptWindow，再做导演规划审核并推进 assets 与 storyboard。',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
     );

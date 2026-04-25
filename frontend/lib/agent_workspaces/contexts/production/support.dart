@@ -289,6 +289,18 @@ Map<String, dynamic> buildProductionScriptReviewArgs({
   };
 }
 
+class ProductionScriptReadWindow {
+  const ProductionScriptReadWindow({
+    required this.lineStart,
+    required this.lineEnd,
+    required this.maxChars,
+  });
+
+  final int lineStart;
+  final int lineEnd;
+  final int maxChars;
+}
+
 class ProductionStoryboardScriptFocusWindow {
   const ProductionStoryboardScriptFocusWindow({
     required this.lineStart,
@@ -299,6 +311,29 @@ class ProductionStoryboardScriptFocusWindow {
   final int lineStart;
   final int lineEnd;
   final int maxChars;
+}
+
+ProductionScriptReadWindow buildProductionPlanningScriptWindow() {
+  return const ProductionScriptReadWindow(
+    lineStart: 1,
+    lineEnd: 48,
+    maxChars: 1400,
+  );
+}
+
+Map<String, dynamic> buildProductionPlanningScriptArgs() {
+  final window = buildProductionPlanningScriptWindow();
+  return <String, dynamic>{
+    'key': 'script',
+    'lineStart': window.lineStart,
+    'lineEnd': window.lineEnd,
+    'maxChars': window.maxChars,
+  };
+}
+
+String summarizeProductionPlanningScriptWindow() {
+  final window = buildProductionPlanningScriptWindow();
+  return '剧本 ${window.lineStart}-${window.lineEnd} 行（<=${window.maxChars} 字）';
 }
 
 String summarizeProductionStoryboardFocusIds(

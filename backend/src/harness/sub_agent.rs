@@ -157,7 +157,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("三、导演规划"),
             format_hint: Some("你必须使用如下XML格式写入工作区：\n<scriptPlan>内容</scriptPlan>"),
             execution_hint: Some(
-                "先最小读取：先读剧本窗口，再先读 role/scene 资产，只有剧本明确需要时才补 tool 或具体资产 ID；不要默认整份 assets 进上下文。",
+                "先最小读取：先读剧本 1-48 行、<=1400 字的窗口，再先读 role/scene 资产，只有剧本明确需要时才补 tool 或具体资产 ID；不要默认整份 assets 进上下文。",
             ),
         }),
         "run_sub_agent_storyboard_gen" => Some(SubAgentSpec {
@@ -188,7 +188,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
                 "你必须使用如下XML格式写入工作区：\n<storyboardTable>内容</storyboardTable>",
             ),
             execution_hint: Some(
-                "先最小读取：剧本优先窗口片段，资产先读 role/scene，再按需要补 tool 或精确 ids；完成分镜拆解前避免反复加载整份原文或整包素材。",
+                "先最小读取：剧本优先只读 1-48 行、<=1400 字窗口，资产先读 role/scene，再按需要补 tool 或精确 ids；完成分镜拆解前避免反复加载整份原文或整包素材。",
             ),
         }),
         "run_sub_agent_production_supervision" => Some(SubAgentSpec {

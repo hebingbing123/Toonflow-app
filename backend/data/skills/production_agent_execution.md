@@ -30,14 +30,14 @@
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本窗口 | `get_flowData({ key: "script", maxChars: 1800 })` |
+| 读取剧本窗口 | `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` |
 | 读取候选资产 | `get_flowData({ key: "assets", assetTypes: ["role", "tool", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })` |
 | 写入衍生资产 | `add_deriveAsset` |
 
 
 ### 执行流程
 
-1. 先调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取当前剧本窗口，标出本轮确实出现视觉状态变化的角色 / 道具 / 场景类型。
+1. 先调用 `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` 获取当前剧本窗口，标出本轮确实出现视觉状态变化的角色 / 道具 / 场景类型。
 2. 再按剧本里实际涉及的类型分批读取候选资产，优先调用 `get_flowData({ key: "assets", assetTypes: [...], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })`；信息足够时不要把 `role/tool/scene` 一次性全读进上下文。
 3. 仅当当前剧本窗口不足以判断时，才补读下一段剧本或下一批 `assetTypes`；禁止先默认整包读取 assets 再分析。
 4. 按下方提取规则分析剧本，识别每个资产的视觉状态变体
@@ -129,7 +129,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本窗口 | `get_flowData({ key: "script", maxChars: 1800 })` |
+| 读取剧本窗口 | `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` |
 | 读取角色/场景资产 | `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })` |
 | 按需补读道具资产 | `get_flowData({ key: "assets", assetTypes: ["tool"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })` |
 
@@ -139,7 +139,7 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 加载风格技法参考，先用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口，并激活 `director_planning_narrative` 以及 `director_planning_style`；所有规划内容以该文档为风格基准，冲突时以风格技法参考为准。
+1. 加载风格技法参考，先用 `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` 获取剧本窗口，并激活 `director_planning_narrative` 以及 `director_planning_style`；所有规划内容以该文档为风格基准，冲突时以风格技法参考为准。
 2. 先只补读导演规划必需的角色与场景资产：调用 `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })`；仅当当前剧本窗口里明确出现关键道具或状态变体时，再补一次 `assetTypes: ["tool"]`。
 3. 若规划里需要核对某个具体衍生状态或单个资产是否已存在，优先按真实资产 ID 精确读取；禁止为了写 `scriptPlan` 默认整包读取 assets。
 4. 按下方规范制定导演规划（创作规划），全文遵守「导演具象化原则」
@@ -249,7 +249,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本窗口 | `get_flowData({ key: "script", maxChars: 1800 })` |
+| 读取剧本窗口 | `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` |
 | 读取角色/场景资产 | `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })` |
 | 按需补读道具资产 | `get_flowData({ key: "assets", assetTypes: ["tool"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })` |
 
@@ -259,7 +259,7 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 先用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口，并激活 `director_storyboard_table_narrative` 以及 `director_storyboard_table_style`，作为分镜设计的风格参考。
+1. 先用 `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` 获取剧本窗口，并激活 `director_storyboard_table_narrative` 以及 `director_storyboard_table_style`，作为分镜设计的风格参考。
 2. 先只读取本批分镜高频会用到的角色与场景资产：`get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })`。
 3. 仅当当前剧本窗口明确出现关键道具、特殊状态或需要校对衍生资产时，再补读 `assetTypes: ["tool"]` 或按真实资产 ID 精确读取；禁止为构建 `storyboardTable` 默认整包读取 assets。
 4. 按下方规则将剧本拆分为分镜，**每写一行前**回顾上一行状态，确保符合「视觉连续性铁律」后再填写当前行所有字段

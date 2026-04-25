@@ -108,14 +108,21 @@ void main() {
     expect(recipes.first.subAgentTool, 'run_sub_agent_production_supervision');
     expect(recipes.first.flowKey, 'scriptPlan');
     expect(recipes.first.title, contains('审核'));
-    expect(recipes[1].title, '检查关键资产');
+    expect(recipes[1].title, '回看剧本依据');
     expect(recipes[1].domainArgs, <String, dynamic>{
+      'key': 'script',
+      'lineStart': 1,
+      'lineEnd': 48,
+      'maxChars': 1400,
+    });
+    expect(recipes[2].title, '检查关键资产');
+    expect(recipes[2].domainArgs, <String, dynamic>{
       'key': 'assets',
       'assetTypes': <String>['role', 'scene'],
       'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       'limit': 12,
     });
-    expect(recipes[2].domainArgs, <String, dynamic>{
+    expect(recipes[3].domainArgs, <String, dynamic>{
       'key': 'storyboardTable',
       'fields': <String>[
         'id',
@@ -128,8 +135,8 @@ void main() {
       'rowStart': 1,
       'rowCount': 8,
     });
-    expect(recipes[2].flowKey, 'storyboardTable');
-    expect(recipes[2].title, '先看分镜表落地');
+    expect(recipes[3].flowKey, 'storyboardTable');
+    expect(recipes[3].title, '先看分镜表落地');
   });
 
   test(
@@ -148,13 +155,13 @@ void main() {
         },
       );
 
-      expect(recipes[1].domainArgs, <String, dynamic>{
+      expect(recipes[2].domainArgs, <String, dynamic>{
         'key': 'assets',
         'assetTypes': <String>['role', 'scene', 'tool'],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
         'limit': 18,
       });
-      expect(recipes[1].detail, contains('角色/场景/道具资产'));
+      expect(recipes[2].detail, contains('角色/场景/道具资产'));
     },
   );
 
@@ -173,12 +180,44 @@ void main() {
         },
       );
 
-      expect(recipes[1].domainArgs, <String, dynamic>{
+      expect(recipes[2].domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[5, 7, 12],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
-      expect(recipes[1].detail, contains('资产 #5, 7, 12'));
+      expect(recipes[2].detail, contains('资产 #5, 7, 12'));
+    },
+  );
+
+  test('buildProductionPlanningScriptArgs exposes fixed compact script window', () {
+    expect(buildProductionPlanningScriptArgs(), <String, dynamic>{
+      'key': 'script',
+      'lineStart': 1,
+      'lineEnd': 48,
+      'maxChars': 1400,
+    });
+    expect(summarizeProductionPlanningScriptWindow(), '剧本 1-48 行（<=1400 字）');
+  });
+
+  test(
+    'buildProductionWorkspaceRecipes adds compact script reread before script-plan follow-ups',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{'data': '<scriptPlan>已有导演规划</scriptPlan>'},
+      );
+
+      expect(recipes[1].title, '回看剧本依据');
+      expect(recipes[1].flowKey, 'script');
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 48,
+        'maxChars': 1400,
+      });
+      expect(recipes[1].detail, contains('剧本 1-48 行（<=1400 字）'));
+      expect(recipes[2].title, '检查关键资产');
     },
   );
 
@@ -669,6 +708,39 @@ void main() {
         'lineEnd': 40,
         'maxChars': 1040,
       });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages reuses compact script window for script-plan revisions',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'revise_scriptPlan',
+            'summary': '先收紧导演规划节奏',
+          },
+        },
+      );
+
+      final scriptPlanStage = stages.singleWhere(
+        (stage) => stage.flowKey == 'scriptPlan',
+      );
+      expect(scriptPlanStage.domainTool, 'get_flowData');
+      expect(scriptPlanStage.domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 48,
+        'maxChars': 1400,
+      });
+      expect(scriptPlanStage.subAgentTool, 'run_sub_agent_director_plan');
     },
   );
 

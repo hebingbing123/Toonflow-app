@@ -239,6 +239,7 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
   }
   final assetArgs = buildProductionScriptPlanAssetArgs(data);
   final assetScope = summarizeProductionAssetScope(assetArgs);
+  final scriptWindow = summarizeProductionPlanningScriptWindow();
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核导演计划',
@@ -246,6 +247,13 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       flowKey: 'scriptPlan',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
+    ),
+    ProductionWorkspaceRecipe(
+      title: '回看剧本依据',
+      detail: '先只回看$scriptWindow，确认导演计划与原文节奏一致，再决定是否扩读。',
+      flowKey: 'script',
+      domainTool: 'get_flowData',
+      domainArgs: buildProductionPlanningScriptArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '检查关键资产',
@@ -365,6 +373,14 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           flowKey: 'scriptPlan',
           subAgentTool: 'run_sub_agent_director_plan',
           prompt: '请根据最近审核意见修订 scriptPlan，优先解决：$summary',
+        ),
+        ProductionWorkspaceRecipe(
+          title: '回看剧本依据',
+          detail:
+              '修订前先只回看${summarizeProductionPlanningScriptWindow()}，避免为 scriptPlan 扩读整段剧本。',
+          flowKey: 'script',
+          domainTool: 'get_flowData',
+          domainArgs: buildProductionPlanningScriptArgs(),
         ),
         ProductionWorkspaceRecipe(
           title: '复查资产支撑',

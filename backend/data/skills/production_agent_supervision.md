@@ -98,7 +98,7 @@ description: >-
 ### 数据准备
 
 1. 调用 `get_flowData({ key: "scriptPlan", maxChars: 2200 })` 获取导演规划数据
-2. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
+2. 调用 `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` 获取剧本窗口
 3. 仅当需要验证资产支撑时读取 assets：
    - 能从 `scriptPlan` 明确定位到具体资产时，优先调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
    - 无法精准定位时，先调用 `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "derive"], limit: 12 })`
