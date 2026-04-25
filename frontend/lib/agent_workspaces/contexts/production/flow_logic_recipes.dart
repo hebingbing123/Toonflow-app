@@ -175,7 +175,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
-              '请只补齐缺少画面结果的 storyboard 镜头 ids=${missingIds.join(',')}，不要重跑已有画面结果或 shouldGenerateImage=false 的镜头；先用最小读取确认这批镜头后，再执行最小可行生成动作。',
+              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds)}',
         ),
         ProductionWorkspaceRecipe(
           title: '核对关联资产',
@@ -415,7 +415,8 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'storyboardTable',
           subAgentTool: 'run_sub_agent_storyboard_table',
-          prompt: '请根据最近审核意见修订 storyboardTable，优先解决：$summary',
+          prompt:
+              '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
         ),
         ProductionWorkspaceRecipe(
           title: '抽样复读分镜表',
@@ -441,10 +442,6 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       final storyboardArgs = buildProductionReviewStoryboardGenerationArgs(
         review,
       );
-      final storyboardIds = review.storyboardIds;
-      final storyboardScope = storyboardIds.isEmpty
-          ? '优先只补缺少画面结果的镜头'
-          : '优先只处理镜头 ids=${storyboardIds.join(',')}';
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '继续生成分镜图',
@@ -454,7 +451,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           domainArgs: storyboardArgs,
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
-              '请基于最近审核结论继续推进 storyboard；$storyboardScope，避免重跑已有结果或 shouldGenerateImage=false 的镜头。注意：$summary',
+              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, summary: summary)}',
         ),
         ProductionWorkspaceRecipe(
           title: '对照分镜表',

@@ -552,6 +552,34 @@ void main() {
           'associateAssetsIds',
         ],
       });
+      expect(recipes.first.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(recipes.first.prompt, contains('剧本仅回看剧本 7-38 行'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes adds focused storyboard scope to revision prompt',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '先修第 3、9 镜头对应表格行',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      expect(recipes.first.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(recipes.first.prompt, contains('保持其余行不动'));
+      expect(recipes.first.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
   );
 
@@ -1073,6 +1101,35 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages adds focused storyboard scope to revision prompt',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '先修第 3、9 镜头对应表格行',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(tableStage.prompt, contains('保持其余行不动'));
+      expect(tableStage.prompt, contains('剧本仅回看剧本 7-38 行'));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages narrows supervision asset checks to review asset ids',
     () {
       final stages = buildProductionWorkspaceStages(
@@ -1169,6 +1226,33 @@ void main() {
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
       expect(assetsStage.detail, contains('2 项资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages uses focused script window in missing storyboard prompt',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 3, 'shouldGenerateImage': true},
+            <String, dynamic>{'id': 9, 'shouldGenerateImage': true},
+            <String, dynamic>{
+              'id': 10,
+              'src': 'https://example.com/10.png',
+              'shouldGenerateImage': true,
+            },
+          ],
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(storyboardStage.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
   );
 

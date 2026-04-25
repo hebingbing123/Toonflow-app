@@ -313,7 +313,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       },
       prompt: switch (review.nextAction) {
         'revise_storyboardTable' =>
-          '请根据最近审核意见修订 storyboardTable，优先解决：${review.summary}',
+          '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
         _ => null,
       },
     );
@@ -413,9 +413,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
           ? 'run_sub_agent_storyboard_gen'
           : null,
       prompt: review.nextAction == 'generate_storyboard'
-          ? storyboardIds.isEmpty
-                ? '请根据最近审核意见继续推进 storyboard，优先只补缺少画面结果的镜头，不要重跑已有结果或 shouldGenerateImage=false 的镜头。'
-                : '请根据最近审核意见继续推进 storyboard，优先处理镜头 ids=${storyboardIds.join(',')}，不要重跑已有结果或 shouldGenerateImage=false 的镜头。'
+          ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, summary: review.summary)}'
           : null,
     );
   }
@@ -449,7 +447,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
             '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}',
         subAgentTool: 'run_sub_agent_storyboard_gen',
         prompt:
-            '请只补齐缺少画面结果的 storyboard 镜头 ids=${missingIds.join(',')}，不要重跑已有画面结果或 shouldGenerateImage=false 的镜头；先最小读取这批镜头，再执行最小可行生成动作。',
+            '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds)}',
       );
     }
     return ProductionWorkspaceStage(

@@ -321,6 +321,61 @@ String summarizeProductionStoryboardScriptWindow(List<int> storyboardIds) {
   return '剧本 ${focusWindow.lineStart}-${focusWindow.lineEnd} 行';
 }
 
+String buildProductionStoryboardPromptScope(
+  List<int> storyboardIds, {
+  required String fallback,
+}) {
+  final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) return fallback;
+  return '优先处理镜头 ids=${ids.join(',')}';
+}
+
+String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
+  final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) {
+    return '如需核对依据，先只回看同批 storyboardTable 行和局部剧本窗口。';
+  }
+  final tableFocus = summarizeProductionStoryboardFocusIds(ids);
+  final scriptWindow = summarizeProductionStoryboardScriptWindow(ids);
+  final pieces = <String>[
+    if (tableFocus.isNotEmpty) '先只回看$tableFocus对应的 storyboardTable 行',
+    if (scriptWindow.isNotEmpty) '剧本仅回看$scriptWindow',
+  ];
+  if (pieces.isEmpty) {
+    return '如需核对依据，先只回看同批 storyboardTable 行和局部剧本窗口。';
+  }
+  return '如需核对依据，${pieces.join('，')}。';
+}
+
+String buildProductionStoryboardGenerationPrompt({
+  required List<int> storyboardIds,
+  String? summary,
+}) {
+  final scope = buildProductionStoryboardPromptScope(
+    storyboardIds,
+    fallback: '优先只补缺少画面结果的镜头',
+  );
+  final contextHint = buildProductionStoryboardPromptContextHint(storyboardIds);
+  final normalizedSummary = summary?.trim() ?? '';
+  final summaryLine = normalizedSummary.isEmpty ? '' : '注意：$normalizedSummary';
+  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$summaryLine';
+}
+
+String buildProductionStoryboardTableRevisionPrompt(
+  ProductionSupervisionReview review,
+) {
+  final summary = review.summary.trim();
+  final scope = buildProductionStoryboardPromptScope(
+    review.storyboardIds,
+    fallback: '优先修订当前审核聚焦的分镜表问题',
+  );
+  final contextHint = buildProductionStoryboardPromptContextHint(
+    review.storyboardIds,
+  );
+  final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
+  return '$scope 对应的 storyboardTable 行，保持其余行不动。$contextHint$summaryLine';
+}
+
 ProductionStoryboardScriptFocusWindow
 buildProductionStoryboardScriptFocusWindow(List<int> storyboardIds) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
