@@ -38,7 +38,7 @@ description: >-
 先输出一行结构化摘要，供工作台直接生成下一步动作：
 
 ```xml
-<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" />
+<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" assetIds="12,18" />
 ```
 
 然后再输出精简 Markdown 审核报告：
@@ -65,6 +65,7 @@ description: >-
 ### 精简规则
 
 - `reviewSummary` 必须放在第一行，`summary` 控制在 36 个汉字以内
+- `assetIds` 仅在下一步需要核对具体资产时填写，内容为逗号分隔的真实资产 ID；若问题不指向具体资产则省略该属性
 - 审核通过的项目不出现在报告中
 - 同类轻微问题合并为一行
 - B 级及以上省略「需要您决定」区块
@@ -85,6 +86,7 @@ description: >-
 3. **问题具体化**：每个问题指向具体位置和内容，不说"整体不够好"
 4. **建议多元化**：严重问题提供多个可选方案
 5. **动态基准**：数值判断以实际工作区数据为唯一基准；未明确的参数以合理比例推算，并在报告中注明
+6. **回填精确资产范围**：若审核结论要求下一步 `check_assets`，且你已能定位到具体资产，必须把这些真实资产 ID 写入 `reviewSummary.assetIds`
 
 ---
 
@@ -94,7 +96,9 @@ description: >-
 
 1. 调用 `get_flowData({ key: "scriptPlan", maxChars: 2200 })` 获取导演规划数据
 2. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
-3. 调用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 80 })` 获取资产字段子集
+3. 仅当需要验证资产支撑时读取 assets：
+   - 能从 `scriptPlan` 明确定位到具体资产时，优先调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
+   - 无法精准定位时，再退回 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 24 })`
 
 优先最小读取：信息足够时不得补读整段剧本或整份 assets。
 
@@ -179,7 +183,9 @@ description: >-
 1. 先调用 `get_flowData({ key: "storyboardTable", rowStart: 1, rowCount: 8, fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` 获取首批关键行
 2. 若首批不足以判断，再按需追加下一个窗口，禁止默认整表读取
 3. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
-4. 调用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 80 })` 获取资产字段子集
+4. 仅当需要验证资产关联时读取 assets：
+   - 优先从当前 `storyboardTable` 窗口里的 `associateAssetsIds` 提取真实资产 ID，并调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
+   - 若当前窗口没有有效资产 ID，再退回 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 24 })`
 
 ### 审核维度
 

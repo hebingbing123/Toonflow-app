@@ -116,7 +116,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       detail: _reviewDetail(review),
       domainTool: review.nextAction == 'check_assets' ? 'get_flowData' : null,
       domainArgs: review.nextAction == 'check_assets'
-          ? _assetsCompactArgs()
+          ? buildProductionReviewAssetArgs(review)
           : null,
       subAgentTool: review.nextAction == 'revise_scriptPlan'
           ? 'run_sub_agent_director_plan'

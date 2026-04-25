@@ -105,6 +105,7 @@ void main() {
     expect(review!.target, 'storyboardTable');
     expect(review.severeCount, 1);
     expect(review.nextAction, 'revise_storyboardTable');
+    expect(review.assetIds, isEmpty);
   });
 
   test(
@@ -359,6 +360,38 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages narrows supervision asset checks to review asset ids',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '先核对女主与玉佩资产',
+            'assetIds': <int>[12, 5, 12],
+          },
+        },
+      );
+
+      final scriptPlanStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'scriptPlan',
+      );
+      expect(scriptPlanStage.domainTool, 'get_flowData');
+      expect(scriptPlanStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[5, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceStages prefers storyboard table window args',
     () {
       final stages = buildProductionWorkspaceStages(
@@ -439,4 +472,32 @@ void main() {
       'limit': 24,
     });
   });
+
+  test(
+    'supervision check assets recipe narrows to structured review asset ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '导演规划可用但第 3、7 号资产需补核对',
+            'assetIds': '7,3,7',
+          },
+        },
+      );
+
+      expect(recipes.single.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 7],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+    },
+  );
 }

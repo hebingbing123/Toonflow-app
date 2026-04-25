@@ -361,7 +361,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '导演计划常先卡在资产准备，先看 assets 能减少返工。',
           flowKey: 'assets',
           domainTool: 'get_flowData',
-          domainArgs: _assetsCompactArgs(),
+          domainArgs: buildProductionReviewAssetArgs(review),
         ),
       ];
     case 'check_assets':
@@ -371,7 +371,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'assets',
           domainTool: 'get_flowData',
-          domainArgs: _assetsCompactArgs(),
+          domainArgs: buildProductionReviewAssetArgs(review),
         ),
       ];
     case 'check_storyboard':

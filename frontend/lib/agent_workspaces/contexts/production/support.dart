@@ -49,6 +49,7 @@ class ProductionSupervisionReview {
     required this.minorCount,
     required this.nextAction,
     required this.summary,
+    required this.assetIds,
   });
 
   final String target;
@@ -58,6 +59,7 @@ class ProductionSupervisionReview {
   final int minorCount;
   final String nextAction;
   final String summary;
+  final List<int> assetIds;
 }
 
 class ProductionWorkspaceArgumentSuggestion {
@@ -136,6 +138,7 @@ ProductionSupervisionReview? parseProductionSupervisionReview(Object? result) {
     minorCount: _parseLooseInt(review['minorCount']),
     nextAction: nextAction,
     summary: summary,
+    assetIds: _parseReviewAssetIds(review['assetIds']),
   );
 }
 
@@ -143,6 +146,42 @@ int _parseLooseInt(Object? value) {
   if (value is num) return value.toInt();
   if (value is String) return int.tryParse(value.trim()) ?? 0;
   return 0;
+}
+
+List<int> _parseReviewAssetIds(Object? value) {
+  if (value is List) {
+    final ids = value
+        .map(_parseLooseInt)
+        .where((id) => id > 0)
+        .toSet()
+        .toList();
+    ids.sort();
+    return ids;
+  }
+  if (value is String) {
+    final ids = value
+        .split(',')
+        .map((entry) => _parseLooseInt(entry))
+        .where((id) => id > 0)
+        .toSet()
+        .toList();
+    ids.sort();
+    return ids;
+  }
+  return const <int>[];
+}
+
+Map<String, dynamic> buildProductionReviewAssetArgs(
+  ProductionSupervisionReview review,
+) {
+  if (review.assetIds.isEmpty) {
+    return _productionAssetsCompactArgs();
+  }
+  return <String, dynamic>{
+    'key': 'assets',
+    'ids': review.assetIds,
+    'fields': _productionAssetFields(),
+  };
 }
 
 List<ProductionWorkspaceArgumentSuggestion>
@@ -234,6 +273,21 @@ List<ProductionWorkspaceArgumentSuggestion> _buildAddDeriveAssetSuggestions(
   }
   return suggestions;
 }
+
+List<String> _productionAssetFields() => <String>[
+  'id',
+  'name',
+  'type',
+  'src',
+  'flowId',
+  'derive',
+];
+
+Map<String, dynamic> _productionAssetsCompactArgs() => <String, dynamic>{
+  'key': 'assets',
+  'fields': _productionAssetFields(),
+  'limit': 24,
+};
 
 List<ProductionWorkspaceArgumentSuggestion> _buildDeleteDeriveAssetSuggestions(
   Object? flowData,

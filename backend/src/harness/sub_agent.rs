@@ -196,10 +196,10 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_path: "production_agent_supervision.md",
             skill_section: None,
             format_hint: Some(
-                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"scriptPlan|storyboardTable\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard\" summary=\"一句话总结\" />\n随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
+                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"scriptPlan|storyboardTable\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard\" summary=\"一句话总结\" assetIds=\"12,18\" />\n其中 assetIds 仅在下一步需要核对具体资产时填写，填逗号分隔的真实资产 ID；不需要时可省略。随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
             ),
             execution_hint: Some(
-                "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口，不要无差别全量读取。",
+                "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口；若问题只涉及部分资产，下一步给出 check_assets 时要把真实 assetIds 回填到 reviewSummary，避免无差别全量读取。",
             ),
         }),
         _ => None,
@@ -310,7 +310,7 @@ mod tests {
     fn parse_review_summary_uses_first_summary_line() {
         let review = parse_review_summary(
             r#"
-<reviewSummary target="scriptPlan" grade="B" severeCount="0" mediumCount="2" minorCount="1" nextAction="check_assets" summary="导演规划可用但资产还需对齐" />
+<reviewSummary target="scriptPlan" grade="B" severeCount="0" mediumCount="2" minorCount="1" nextAction="check_assets" summary="导演规划可用但资产还需对齐" assetIds="7,3,7" />
 
 # 审核报告：导演规划
 "#,
@@ -318,6 +318,7 @@ mod tests {
         .expect("review");
         assert_eq!(review["target"].as_str(), Some("scriptPlan"));
         assert_eq!(review["nextAction"].as_str(), Some("check_assets"));
+        assert_eq!(review["assetIds"].as_str(), Some("7,3,7"));
     }
 
     #[test]
