@@ -290,6 +290,121 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceRecipes re-reads focused storyboard table ids after supervision',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '分镜拆分过粗且关联资产缺失',
+            'storyboardIds': <int>[9, 3, 9],
+          },
+        },
+      );
+
+      expect(recipes.last.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows storyboard table reads to missing storyboard ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 9,
+              'prompt': 'scene one',
+              'associateAssetsIds': <int>[12, 7],
+              'shouldGenerateImage': true,
+            },
+            <String, dynamic>{
+              'id': 3,
+              'prompt': 'scene two',
+              'associateAssetsIds': <int>[7],
+              'shouldGenerateImage': true,
+            },
+            <String, dynamic>{
+              'id': 4,
+              'prompt': 'scene three',
+              'src': 'https://example.com/4.png',
+              'shouldGenerateImage': true,
+            },
+          ],
+        },
+      );
+
+      expect(recipes[2].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes falls back to storyboard table window without focused ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '分镜拆分过粗且关联资产缺失',
+          },
+        },
+      );
+
+      expect(recipes.last.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'rowStart': 1,
+        'rowCount': 8,
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes shrinks check-script reads to focused window',
     () {
       final recipes = buildProductionWorkspaceRecipes(
@@ -615,6 +730,45 @@ void main() {
         'lineStart': 1,
         'lineEnd': 60,
         'maxChars': 1400,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages re-read focused storyboard table ids for revision',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'C',
+            'severeCount': '1',
+            'mediumCount': '2',
+            'minorCount': '0',
+            'nextAction': 'revise_storyboardTable',
+            'summary': '先修第 3、9 镜头对应表格行',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      final tableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(tableStage.domainTool, 'get_flowData');
+      expect(tableStage.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
       });
     },
   );

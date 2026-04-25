@@ -25,6 +25,7 @@ struct StoryboardTableSelection<'a> {
     row_start: usize,
     row_count: usize,
     columns: Option<&'a Vec<String>>,
+    ids: Option<&'a Vec<i32>>,
 }
 
 fn normalize_storyboard_table_column(column: &str) -> String {
@@ -97,10 +98,31 @@ fn select_storyboard_table_window(text: &str, selection: StoryboardTableSelectio
             .collect::<Vec<_>>()
     });
     let total_rows = rows.len();
-    let start = selection.row_start.saturating_sub(1).min(total_rows);
-    let end = start.saturating_add(selection.row_count).min(total_rows);
-    let out_rows = rows[start..end]
-        .iter()
+    let id_column = headers.iter().position(|header| header == "id");
+    let (selected_row_start, selected_rows) = if let Some(ids) = selection.ids {
+        let filtered = rows
+            .iter()
+            .enumerate()
+            .filter(|(_, row)| {
+                id_column
+                    .and_then(|idx| row.get(idx))
+                    .and_then(|cell| cell.parse::<i32>().ok())
+                    .is_some_and(|id| ids.contains(&id))
+            })
+            .collect::<Vec<_>>();
+        let start = filtered.first().map(|(idx, _)| idx + 1).unwrap_or(1);
+        let rows = filtered.into_iter().map(|(_, row)| row).collect::<Vec<_>>();
+        (start, rows)
+    } else {
+        let start = selection.row_start.saturating_sub(1).min(total_rows);
+        let end = start.saturating_add(selection.row_count).min(total_rows);
+        (
+            selection.row_start,
+            rows[start..end].iter().collect::<Vec<_>>(),
+        )
+    };
+    let out_rows = selected_rows
+        .into_iter()
         .map(|row| {
             let mut map = serde_json::Map::new();
             for (idx, header) in headers.iter().enumerate() {
@@ -119,10 +141,26 @@ fn select_storyboard_table_window(text: &str, selection: StoryboardTableSelectio
         .collect::<Vec<_>>();
     serde_json::json!({
         "table": "storyboardTable",
-        "rowStart": selection.row_start,
+        "rowStart": selected_row_start,
         "rowCount": out_rows.len(),
         "totalRows": total_rows,
         "columns": selected_columns.unwrap_or(headers),
+        if selection.ids.is_some() { "ids" } else { "window" }: if selection.ids.is_some() {
+            Value::Array(
+                selection
+                    .ids
+                    .cloned()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(Value::from)
+                    .collect::<Vec<_>>(),
+            )
+        } else {
+            serde_json::json!({
+                "rowStart": selection.row_start,
+                "rowCount": selection.row_count,
+            })
+        },
         "rows": out_rows,
     })
 }
@@ -251,12 +289,7 @@ fn apply_compact_flow_defaults(request: FlowReadRequest<'_>) -> FlowReadDefaults
             }
         }
         "storyboardTable" => {
-            if defaults.row_start.is_none()
-                && defaults.row_count.is_none()
-                && defaults.fields.is_none()
-            {
-                defaults.row_start = Some(1);
-                defaults.row_count = Some(8);
+            if defaults.fields.is_none() {
                 defaults.fields = Some(compact_field_list(&[
                     "id",
                     "description",
@@ -265,6 +298,11 @@ fn apply_compact_flow_defaults(request: FlowReadRequest<'_>) -> FlowReadDefaults
                     "camera",
                     "associateAssetsIds",
                 ]));
+            }
+            if defaults.row_start.is_none() && defaults.row_count.is_none() && request.ids.is_none()
+            {
+                defaults.row_start = Some(1);
+                defaults.row_count = Some(8);
             }
         }
         "assets" if request.format == "full" => {
@@ -441,6 +479,7 @@ pub(crate) async fn invoke_get_flow_data(
                         row_start: defaults.row_start.unwrap_or(1),
                         row_count: defaults.row_count.unwrap_or(8),
                         columns: defaults.fields.as_ref(),
+                        ids: ids.as_ref(),
                     },
                 )
             } else {
@@ -515,6 +554,7 @@ mod tests {
                 row_start: 2,
                 row_count: 1,
                 columns: Some(&vec!["id".into(), "scene".into(), "duration".into()]),
+                ids: None,
             },
         );
         assert_eq!(selected["totalRows"].as_u64(), Some(2));
@@ -526,6 +566,27 @@ mod tests {
         assert_eq!(rows[0]["scene"].as_str(), Some("大殿"));
         assert_eq!(rows[0]["duration"].as_str(), Some("3"));
         assert!(rows[0].get("camera").is_none());
+    }
+
+    #[test]
+    fn select_storyboard_table_window_supports_exact_ids() {
+        let selected = select_storyboard_table_window(
+            STORYBOARD_TABLE,
+            StoryboardTableSelection {
+                row_start: 1,
+                row_count: 8,
+                columns: Some(&vec!["id".into(), "description".into()]),
+                ids: Some(&vec![2]),
+            },
+        );
+        assert_eq!(selected["totalRows"].as_u64(), Some(2));
+        assert_eq!(selected["rowStart"].as_u64(), Some(2));
+        assert_eq!(selected["rowCount"].as_u64(), Some(1));
+        assert_eq!(selected["ids"], json!([2]));
+        let rows = selected["rows"].as_array().expect("rows");
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0]["id"].as_str(), Some("2"));
+        assert_eq!(rows[0]["description"].as_str(), Some("次镜"));
     }
 
     #[test]

@@ -109,7 +109,7 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "ids": {
                     "type": "array",
                     "items": { "type": "integer" },
-                    "description": "Optional id filter for assets/storyboard arrays."
+                    "description": "Optional id filter for assets/storyboard arrays, or exact storyboardTable row ids when key=storyboardTable."
                 },
                 "assetTypes": {
                     "type": "array",

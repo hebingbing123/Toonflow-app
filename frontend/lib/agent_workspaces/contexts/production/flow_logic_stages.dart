@@ -280,10 +280,14 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       detail: _reviewDetail(review),
       domainTool: switch (review.nextAction) {
         'check_script' => 'get_flowData',
+        'revise_storyboardTable' => 'get_flowData',
         _ => null,
       },
       domainArgs: switch (review.nextAction) {
         'check_script' => buildProductionScriptReviewArgs(review: review),
+        'revise_storyboardTable' => buildProductionReviewStoryboardTableArgs(
+          review,
+        ),
         _ => null,
       },
       subAgentTool: switch (review.nextAction) {
@@ -335,7 +339,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       statusLabel: '已抽样',
       detail: '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardTableWindowArgs(),
+      domainArgs: buildProductionStoryboardTableReadArgs(),
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     );
@@ -348,7 +352,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       statusLabel: '建议刷新',
       detail: '分镜表刚变更或正在处理，建议重新读取 storyboardTable。',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardTableWindowArgs(),
+      domainArgs: buildProductionStoryboardTableReadArgs(),
     );
   }
   return ProductionWorkspaceStage(
@@ -357,7 +361,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     statusLabel: '待读取',
     detail: '需要时可读取 storyboardTable 审阅结构化镜头表。',
     domainTool: 'get_flowData',
-    domainArgs: _storyboardTableWindowArgs(),
+    domainArgs: buildProductionStoryboardTableReadArgs(),
   );
 }
 

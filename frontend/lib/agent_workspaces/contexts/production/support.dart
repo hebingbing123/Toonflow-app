@@ -268,6 +268,12 @@ Map<String, dynamic> buildProductionReviewStoryboardGenerationArgs(
   return buildProductionStoryboardGenerationArgs(ids: review.storyboardIds);
 }
 
+Map<String, dynamic> buildProductionReviewStoryboardTableArgs(
+  ProductionSupervisionReview review,
+) {
+  return buildProductionStoryboardTableReadArgs(ids: review.storyboardIds);
+}
+
 Map<String, dynamic> buildProductionScriptReviewArgs({
   ProductionSupervisionReview? review,
 }) {
@@ -522,6 +528,33 @@ Map<String, dynamic> buildProductionStoryboardCompactArgs() => <String, dynamic>
   'fields': productionStoryboardFields(),
   'limit': 24,
 };
+
+List<String> productionStoryboardTableFields() => <String>[
+  'id',
+  'description',
+  'scene',
+  'duration',
+  'camera',
+  'associateAssetsIds',
+];
+
+Map<String, dynamic> buildProductionStoryboardTableReadArgs({
+  List<int> ids = const <int>[],
+  int rowStart = 1,
+  int rowCount = 8,
+}) {
+  final payload = <String, dynamic>{
+    'key': 'storyboardTable',
+    'fields': productionStoryboardTableFields(),
+  };
+  if (ids.isNotEmpty) {
+    payload['ids'] = ids;
+  } else {
+    payload['rowStart'] = rowStart;
+    payload['rowCount'] = rowCount;
+  }
+  return payload;
+}
 
 List<String> productionStoryboardReviewFields() => <String>[
   'id',

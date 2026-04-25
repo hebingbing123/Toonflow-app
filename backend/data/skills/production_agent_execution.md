@@ -431,7 +431,7 @@ add_deriveAsset({
 | 操作 | 调用 |
 |------|------|
 | 读取剧本 | `get_flowData({ key: "script", maxChars: 1800 })` |
-| 读取分镜表 | `get_flowData({ key: "storyboardTable", rowStart, rowCount, fields })` |
+| 读取分镜表 | `get_flowData({ key: "storyboardTable", rowStart, rowCount, fields })` / `get_flowData({ key: "storyboardTable", ids: [分镜ID...], fields })` |
 | 读取关联资产 | `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "src", "flowId", "derive"] })` |
 
 ### 写入模式
@@ -450,7 +450,7 @@ add_deriveAsset({
 
 1. 先获取 `script`，再用 `get_flowData({ key: "storyboardTable", rowStart: 1, rowCount: 8, fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` 读取首批分镜行，识别决策层指令中的**写入模式**（纯文本多参模式 / 分镜图辅助多参模式 / 首位帧模式）
 2. 仅当当前窗口的 `videoDesc` 或 prompt 需要资产名称/类型时，优先从该窗口的 `associateAssetsIds` 提取真实资产 ID，并调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "src", "flowId", "derive"] })` 精确读取；禁止为写分镜面板默认整包读取 assets
-3. 需要更多分镜时，按窗口继续读取下一批 `storyboardTable` 行；切换窗口时只补读新窗口引用的资产 ID，禁止默认整表读入
+3. 若上游审核或派发指令已经给了明确 `storyboardIds`，优先调用 `get_flowData({ key: "storyboardTable", ids: [真实分镜ID列表], fields: [...] })` 精确复读对应行；只有未给出精确镜头时，才按窗口继续读取下一批 `storyboardTable` 行。切换窗口时只补读新窗口引用的资产 ID，禁止默认整表读入
 4. **若为「分镜图辅助多参模式」或「首位帧模式」**：加载下方「分镜提示词 · 通用基础技法」与风格专属技法（激活 `director_storyboard`）作为提示词生成的全部参考依据，冲突时以风格专属技法为准；**若为「纯文本多参模式」**：跳过提示词相关技法加载
 5. 确定分组（track）与时长规则：
    - **纯文本多参模式 / 分镜图辅助多参模式**：同组内分镜 `duration` 累计时长不得超过 15 秒

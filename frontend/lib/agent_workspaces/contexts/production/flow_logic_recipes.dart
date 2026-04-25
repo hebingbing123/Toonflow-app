@@ -178,7 +178,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           detail: '必要时切到 storyboardTable 审阅结构化镜头表后再回写。',
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
-          domainArgs: _storyboardTableWindowArgs(),
+          domainArgs: buildProductionStoryboardTableReadArgs(ids: missingIds),
         ),
       ];
     }
@@ -294,27 +294,10 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
       detail: '先只看前 8 行关键列，通常足够判断是否继续审核或回写。',
       flowKey: 'storyboardTable',
       domainTool: 'get_flowData',
-      domainArgs: _storyboardTableWindowArgs(),
+      domainArgs: buildProductionStoryboardTableReadArgs(),
     ),
   ];
 }
-
-Map<String, dynamic> _storyboardTableWindowArgs({
-  int rowStart = 1,
-  int rowCount = 8,
-}) => <String, dynamic>{
-  'key': 'storyboardTable',
-  'rowStart': rowStart,
-  'rowCount': rowCount,
-  'fields': <String>[
-    'id',
-    'description',
-    'scene',
-    'duration',
-    'camera',
-    'associateAssetsIds',
-  ],
-};
 
 Map<String, dynamic> _scriptPlanCompactArgs() => <String, dynamic>{
   'key': 'scriptPlan',
@@ -393,10 +376,12 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
         ),
         ProductionWorkspaceRecipe(
           title: '抽样复读分镜表',
-          detail: '先读取关键列窗口，避免把整张表反复带入上下文。',
+          detail: review.storyboardIds.isEmpty
+              ? '先读取关键列窗口，避免把整张表反复带入上下文。'
+              : '先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。',
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
-          domainArgs: _storyboardTableWindowArgs(),
+          domainArgs: buildProductionReviewStoryboardTableArgs(review),
         ),
       ];
     case 'check_script':
