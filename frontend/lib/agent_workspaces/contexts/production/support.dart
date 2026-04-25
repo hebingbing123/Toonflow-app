@@ -184,6 +184,45 @@ Map<String, dynamic> buildProductionReviewAssetArgs(
   };
 }
 
+Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
+  final ids = extractProductionReferencedAssetIds(flowData);
+  if (ids.isEmpty) {
+    return _productionAssetsCompactArgs();
+  }
+  return <String, dynamic>{
+    'key': 'assets',
+    'ids': ids,
+    'fields': _productionAssetFields(),
+  };
+}
+
+List<int> extractProductionReferencedAssetIds(Object? flowData) {
+  final ids = <int>{};
+
+  void collectFromRows(Object? rows) {
+    if (rows is! List) return;
+    for (final row in rows.whereType<Map<String, dynamic>>()) {
+      final values = row['associateAssetsIds'];
+      if (values is! List) continue;
+      for (final value in values) {
+        final numericId = _parseLooseInt(value);
+        if (numericId > 0) {
+          ids.add(numericId);
+        }
+      }
+    }
+  }
+
+  if (flowData is List) {
+    collectFromRows(flowData);
+  } else if (flowData is Map<String, dynamic>) {
+    collectFromRows(flowData['rows']);
+  }
+
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
+}
+
 List<ProductionWorkspaceArgumentSuggestion>
 buildProductionActionArgumentSuggestions({
   required String? selectedTool,

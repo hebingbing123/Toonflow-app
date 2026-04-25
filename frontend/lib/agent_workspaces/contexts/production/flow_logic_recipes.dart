@@ -145,6 +145,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
     final withoutImage = rows.where((row) {
       return !productionFlowEntryHasMediaResult(row);
     }).length;
+    final assetArgs = buildProductionFlowAssetArgs(rows);
     if (withoutImage > 0) {
       return <ProductionWorkspaceRecipe>[
         const ProductionWorkspaceRecipe(
@@ -155,6 +156,15 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           prompt: '请优先补齐缺少画面结果的 storyboard 项，并执行最小可行生成动作。',
         ),
         ProductionWorkspaceRecipe(
+          title: '核对关联资产',
+          detail: assetArgs.containsKey('ids')
+              ? '优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。'
+              : '当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。',
+          flowKey: 'assets',
+          domainTool: 'get_flowData',
+          domainArgs: assetArgs,
+        ),
+        ProductionWorkspaceRecipe(
           title: '检查分镜表',
           detail: '必要时切到 storyboardTable 审阅结构化镜头表后再回写。',
           flowKey: 'storyboardTable',
@@ -163,6 +173,24 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
         ),
       ];
     }
+    return <ProductionWorkspaceRecipe>[
+      ProductionWorkspaceRecipe(
+        title: '核对关联资产',
+        detail: assetArgs.containsKey('ids')
+            ? '分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。'
+            : '当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。',
+        flowKey: 'assets',
+        domainTool: 'get_flowData',
+        domainArgs: assetArgs,
+      ),
+      ProductionWorkspaceRecipe(
+        title: '刷新导演计划',
+        detail: '分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。',
+        flowKey: 'scriptPlan',
+        domainTool: 'get_flowData',
+        subAgentTool: 'run_sub_agent_director_plan',
+      ),
+    ];
   }
   return const <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
@@ -305,32 +333,7 @@ Map<String, dynamic> _storyboardCompactArgs() => <String, dynamic>{
 };
 
 Map<String, dynamic> _storyboardTableRelatedAssetsArgs(Object? data) {
-  final ids = <int>{};
-  if (data is Map<String, dynamic>) {
-    final rows = data['rows'];
-    if (rows is List) {
-      for (final row in rows.whereType<Map<String, dynamic>>()) {
-        final values = row['associateAssetsIds'];
-        if (values is List) {
-          for (final value in values) {
-            final numericId = _readInt(value);
-            if (numericId > 0) {
-              ids.add(numericId);
-            }
-          }
-        }
-      }
-    }
-  }
-  if (ids.isEmpty) {
-    return _assetsCompactArgs();
-  }
-  final sortedIds = ids.toList()..sort();
-  return <String, dynamic>{
-    'key': 'assets',
-    'ids': sortedIds,
-    'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
-  };
+  return buildProductionFlowAssetArgs(data);
 }
 
 bool _hasStoryboardTableData(Object? data) {

@@ -43,7 +43,11 @@ void main() {
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
           'data': <Map<String, dynamic>>[
-            <String, dynamic>{'id': 1, 'prompt': 'scene one'},
+            <String, dynamic>{
+              'id': 1,
+              'prompt': 'scene one',
+              'associateAssetsIds': <int>[12, 7],
+            },
             <String, dynamic>{
               'id': 2,
               'prompt': 'scene two',
@@ -55,6 +59,12 @@ void main() {
 
       expect(recipes.first.subAgentTool, 'run_sub_agent_storyboard_gen');
       expect(recipes.first.flowKey, 'storyboard');
+      expect(recipes[1].title, '核对关联资产');
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
     },
   );
 
@@ -277,6 +287,34 @@ void main() {
     expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
     expect(assetsStage.detail, contains('仍有 1 项缺少图像结果'));
   });
+
+  test(
+    'buildProductionWorkspaceStages narrows asset reads from storyboard references',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 101, 'associateAssetsIds': <int>[9, 3]},
+            <String, dynamic>{'id': 102, 'associateAssetsIds': <Object>['3']},
+          ],
+        },
+      );
+
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.statusLabel, '已定位');
+      expect(assetsStage.domainTool, 'get_flowData');
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 9],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(assetsStage.detail, contains('当前分镜窗口引用了 2 项资产'));
+    },
+  );
 
   test(
     'buildProductionWorkspaceStages marks storyboard as refresh-needed after generation',

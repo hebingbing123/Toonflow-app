@@ -210,6 +210,34 @@ ProductionWorkspaceStage _buildAssetsStage({
       domainArgs: _assetsCompactArgs(),
     );
   }
+  final storyboardTableAssetArgs = buildProductionFlowAssetArgs(
+    flowSnapshot['storyboardTable'],
+  );
+  if (storyboardTableAssetArgs.containsKey('ids')) {
+    final ids = storyboardTableAssetArgs['ids'] as List<int>;
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '已定位',
+      detail: '当前分镜表窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
+      domainTool: 'get_flowData',
+      domainArgs: storyboardTableAssetArgs,
+    );
+  }
+  final storyboardAssetArgs = buildProductionFlowAssetArgs(
+    flowSnapshot['storyboard'],
+  );
+  if (storyboardAssetArgs.containsKey('ids')) {
+    final ids = storyboardAssetArgs['ids'] as List<int>;
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: '已定位',
+      detail: '当前分镜窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
+      domainTool: 'get_flowData',
+      domainArgs: storyboardAssetArgs,
+    );
+  }
   if (activeKey == 'assets' ||
       toolName == 'generate_deriveAsset' ||
       toolName == 'add_deriveAsset' ||
