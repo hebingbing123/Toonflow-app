@@ -347,7 +347,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
   final storyboardFocus = summarizeProductionStoryboardFocusIds(
     review.storyboardIds,
   );
-  final scriptWindow = summarizeProductionStoryboardScriptWindow(
+  final reviewScope = summarizeProductionStoryboardReviewScope(
     review.storyboardIds,
   );
   switch (review.nextAction) {
@@ -384,7 +384,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           title: '检查分镜结果',
           detail: storyboardFocus.isEmpty
               ? '审核结论：$summary'
-              : '审核结论：$summary；优先只看$storyboardFocus。',
+              : '审核结论：$summary；优先只看$storyboardFocus。${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardArgs(review),
@@ -400,9 +400,9 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
         ),
         ProductionWorkspaceRecipe(
           title: '回看剧本依据',
-          detail: scriptWindow.isEmpty
+          detail: reviewScope.isEmpty
               ? '需要时再回看紧凑剧本窗口，确认镜头依据。'
-              : '如需核对镜头依据，优先只读$scriptWindow。',
+              : '如需核对镜头依据，优先只用局部范围：$reviewScope。',
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionScriptReviewArgs(review: review),
@@ -432,7 +432,9 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '回看剧本依据',
-          detail: '审核结论：$summary',
+          detail: reviewScope.isEmpty
+              ? '审核结论：$summary'
+              : '审核结论：$summary；优先只用局部范围：$reviewScope。',
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionScriptReviewArgs(review: review),
@@ -445,7 +447,9 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '继续生成分镜图',
-          detail: '审核结论：$summary',
+          detail: reviewScope.isEmpty
+              ? '审核结论：$summary'
+              : '审核结论：$summary；$reviewScope。',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: storyboardArgs,

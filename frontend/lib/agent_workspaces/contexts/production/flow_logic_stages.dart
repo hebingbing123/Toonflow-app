@@ -397,11 +397,12 @@ ProductionWorkspaceStage _buildStoryboardStage({
         ? buildProductionReviewStoryboardGenerationArgs(review)
         : buildProductionReviewStoryboardArgs(review);
     final storyboardIds = review.storyboardIds;
+    final reviewScope = summarizeProductionStoryboardReviewScope(storyboardIds);
     final scopeLine = storyboardIds.isEmpty
         ? review.nextAction == 'generate_storyboard'
               ? '建议先读取缺帧镜头状态，再最小化补图。'
               : '建议先读取紧凑 storyboard 状态，确认审核涉及的镜头。'
-        : '审核已定位 ${storyboardIds.length} 个镜头，优先只看这批 storyboard 更省 token。';
+        : '审核已定位 ${storyboardIds.length} 个镜头，优先只看这批 storyboard 更省 token。${reviewScope.isEmpty ? '' : ' $reviewScope。'}';
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
@@ -439,12 +440,13 @@ ProductionWorkspaceStage _buildStoryboardStage({
     if (missingCount > 0) {
       final idsLabel = missingIds.take(6).join(', ');
       final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
+      final reviewScope = summarizeProductionStoryboardReviewScope(missingIds);
       return ProductionWorkspaceStage(
         title: '分镜画面',
         flowKey: 'storyboard',
         statusLabel: '需补帧',
         detail:
-            '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}',
+            '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
         subAgentTool: 'run_sub_agent_storyboard_gen',
         prompt:
             '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds)}',
@@ -511,7 +513,11 @@ String _reviewStatusLabel(ProductionSupervisionReview review) {
 
 String _reviewDetail(ProductionSupervisionReview review) {
   final summary = review.summary.isEmpty ? '请按审核结果推进下一步。' : review.summary;
-  return '审核等级 ${review.grade}，严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}。$summary';
+  final reviewScope = summarizeProductionStoryboardReviewScope(
+    review.storyboardIds,
+  );
+  final scopeLine = reviewScope.isEmpty ? '' : ' 局部范围：$reviewScope。';
+  return '审核等级 ${review.grade}，严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}。$summary$scopeLine';
 }
 
 int _readInt(Object? value) {

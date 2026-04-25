@@ -31,7 +31,7 @@ List<String> summarizeProductionResultSnapshot(
     final focusedShots = summarizeProductionStoryboardFocusIds(
       review.storyboardIds,
     );
-    final scriptWindow = summarizeProductionStoryboardScriptWindow(
+    final reviewScope = summarizeProductionStoryboardReviewScope(
       review.storyboardIds,
     );
     return <String>[
@@ -44,8 +44,8 @@ List<String> summarizeProductionResultSnapshot(
       if ((review.nextAction == 'check_storyboard' ||
               review.nextAction == 'check_script' ||
               review.nextAction == 'generate_storyboard') &&
-          scriptWindow.isNotEmpty)
-        scriptWindow,
+          reviewScope.isNotEmpty)
+        reviewScope,
       if (review.summary.isNotEmpty) review.summary,
     ];
   }

@@ -318,7 +318,23 @@ String summarizeProductionStoryboardScriptWindow(List<int> storyboardIds) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return '';
   final focusWindow = buildProductionStoryboardScriptFocusWindow(ids);
-  return '剧本 ${focusWindow.lineStart}-${focusWindow.lineEnd} 行';
+  return '剧本 ${focusWindow.lineStart}-${focusWindow.lineEnd} 行（<=${focusWindow.maxChars} 字）';
+}
+
+String summarizeProductionStoryboardTableFocus(List<int> storyboardIds) {
+  final focus = summarizeProductionStoryboardFocusIds(storyboardIds);
+  if (focus.isEmpty) return '';
+  return '分镜表仅回看$focus对应行';
+}
+
+String summarizeProductionStoryboardReviewScope(List<int> storyboardIds) {
+  final tableFocus = summarizeProductionStoryboardTableFocus(storyboardIds);
+  final scriptWindow = summarizeProductionStoryboardScriptWindow(storyboardIds);
+  final pieces = <String>[
+    if (tableFocus.isNotEmpty) tableFocus,
+    if (scriptWindow.isNotEmpty) '剧本仅回看$scriptWindow',
+  ];
+  return pieces.join('；');
 }
 
 String buildProductionStoryboardPromptScope(

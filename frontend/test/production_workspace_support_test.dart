@@ -196,7 +196,7 @@ void main() {
       expect(lines, contains('聚焦资产 2 项'));
       expect(lines, contains('聚焦镜头 2 项'));
       expect(lines, contains('镜头 #3, 9'));
-      expect(lines, contains('剧本 7-38 行'));
+      expect(lines, contains('分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'));
     },
   );
 
@@ -552,6 +552,10 @@ void main() {
           'associateAssetsIds',
         ],
       });
+      expect(
+        recipes.first.detail,
+        contains('分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
+      );
       expect(recipes.first.prompt, contains('优先处理镜头 ids=3,9'));
       expect(recipes.first.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
@@ -1123,6 +1127,10 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
+      expect(
+        tableStage.detail,
+        contains('局部范围：分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
+      );
       expect(tableStage.prompt, contains('优先处理镜头 ids=3,9'));
       expect(tableStage.prompt, contains('保持其余行不动'));
       expect(tableStage.prompt, contains('剧本仅回看剧本 7-38 行'));
@@ -1250,6 +1258,10 @@ void main() {
 
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(
+        storyboardStage.detail,
+        contains('分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
       );
       expect(storyboardStage.prompt, contains('优先处理镜头 ids=3,9'));
       expect(storyboardStage.prompt, contains('剧本仅回看剧本 7-38 行'));
