@@ -177,7 +177,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
                 "你必须使用如下XML格式写入工作区：\n<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='分组' duration='视频推荐时间' associateAssetsIds='[资产ID列表]'></storyboardItem>",
             ),
             execution_hint: Some(
-                "先最小读取：先拿 storyboardTable 必要行和资产字段子集，按行生成并写入；不要默认把整表和整份剧本都拉满。",
+                "先最小读取：先拿 storyboardTable 必要行和资产字段子集，只有 storyboardTable 不足以写 videoDesc/台词依据时才补同批镜头的局部 script 窗口；不要默认把整表和整段剧本都拉满。",
             ),
         }),
         "run_sub_agent_storyboard_table" => Some(SubAgentSpec {
