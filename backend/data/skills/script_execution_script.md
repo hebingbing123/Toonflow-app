@@ -12,13 +12,18 @@
 | 读取剧本内容 | `get_script_content(ids:string[])` |
 
 优先最小读取，避免整段搬运：
-- 先用 `get_planData({ key: "storySkeleton", maxChars })` / `get_planData({ key: "adaptationStrategy", maxChars })` 取需要的工作区片段
-- 只在确实需要上一集衔接时才调用 `get_script_content`，并优先带 `lineStart` / `lineEnd` / `maxChars`
-- `get_novel_text` 先按目标章节读取；信息不足再扩大窗口，不要一上来整章全读
+- 先用 `get_planData({ key: "storySkeleton", maxChars })` / `get_planData({ key: "adaptationStrategy", maxChars })` 取需要的工作区片段，不读取无关 key
+- `get_novel_events` 默认只取当前任务章节范围，并优先带 `fields:["numeric_id","name","detail"]`、`limit`、`maxChars`
+- `get_novel_text` 先按目标章节读取，并优先带 `fields:["numeric_id","chapter","chapter_data"]` + `lineStart` / `lineEnd` / `maxChars`
+- 只在确实需要上一集衔接时才调用 `get_script_content`，并优先只取尾段窗口，例如 `lineStart:61, lineEnd:120, maxChars:1600`
+- 若当前信息已经足够，不得继续补读其他章节、整章原文或整集剧本
 
 ## 执行流程
 
-1. 调用 `get_planData` 获取骨架与改编策略；若存在上一集剧本id，调用 `get_script_content` 获取上一集剧本内容，用于衔接剧情与角色状态，再按当前章节调用 `get_novel_text` 获取对应原文，调用 `get_novel_events` 获取事件表
+1. 先调用 `get_planData` 分别获取骨架与改编策略，并只提取当前任务集对应的章节范围、集目标、冲突升级、集末钩子
+2. 按当前任务章节调用 `get_novel_events` 获取事件表；若事件信息已足够支撑当前集，不要额外补读原文
+3. 仅在需要细化台词、动作细节或情绪递进时，再调用 `get_novel_text` 读取当前章节正文窗口；优先局部窗口，信息不足再逐步扩大
+4. 仅在需要承接上一集结尾时，调用 `get_script_content` 读取上一集尾段窗口，用于衔接剧情与角色状态；禁止默认读取上一集全文
 2. 从骨架中**仅提取当前任务集**的信息：覆盖章节、戏剧功能、场景核心、删减决策、集末钩子。**忽略其他已完成或未分配的集**
 3. **阐述思路**（200-300字）：场景组织方式、重点情绪与冲突、节奏把控思路
 4. 按下方【输出格式规范】**只编写当前任务集的剧本**（文件头 → 剧情梗概 → 出场角色表 → 场景表 → 剧本正文），按照XML格式写入工作区`<script><item name="剧本名称">剧本内容</item></script>`，**只写入当前任务集的剧本，不重复写入之前已完成的集**，改编策略不写入XML中
@@ -36,6 +41,7 @@
 - **每次只编写当前任务集的剧本，不得将之前已完成的集重新输出或写入**
 - 只执行剧本编写，不越权执行其他阶段
 - 不处理剧本删除请求，收到时提醒：`请在道具本管理中手动删除剧本`
+- 若当前集信息不足，先说明缺哪一段上下文并补读最小窗口，不得靠猜测补全剧情
 - 完成写入后返回一句确认即可，不复述内容；返回后本次任务终止
 
 ## 完成约束

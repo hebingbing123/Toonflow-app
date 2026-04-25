@@ -96,9 +96,9 @@ void main() {
       expect(recipes.first.subAgentTool, 'run_sub_agent_script');
       expect(recipes.first.args, <String, dynamic>{
         'scriptId': 8,
-        'lineStart': 1,
-        'lineEnd': 80,
-        'maxChars': 2200,
+        'lineStart': 61,
+        'lineEnd': 120,
+        'maxChars': 1600,
       });
     },
   );
@@ -159,10 +159,42 @@ void main() {
       expect(scriptStage.subAgentTool, 'run_sub_agent_script');
       expect(scriptStage.args, <String, dynamic>{
         'scriptId': 8,
-        'lineStart': 1,
-        'lineEnd': 80,
-        'maxChars': 2200,
+        'lineStart': 61,
+        'lineEnd': 120,
+        'maxChars': 1600,
       });
     },
   );
+
+  test('buildScriptWorkspaceRecipes narrows novel/event reads with field subsets', () {
+    final textRecipes = buildScriptWorkspaceRecipes(
+      toolName: 'get_script_content',
+      result: <String, dynamic>{'content': '已有剧本内容'},
+      scopeScriptId: 8,
+    );
+    final textRecipe = textRecipes.firstWhere((recipe) => recipe.title == '补章节材料');
+    expect(textRecipe.args, <String, dynamic>{
+      'novelId': 1,
+      'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
+      'lineStart': 1,
+      'lineEnd': 80,
+      'maxChars': 1800,
+    });
+
+    final novelRecipes = buildScriptWorkspaceRecipes(
+      toolName: 'get_novel_text',
+      result: <String, dynamic>{
+        'items': <Map<String, dynamic>>[
+          <String, dynamic>{'numeric_id': 21},
+        ],
+      },
+      scopeScriptId: 8,
+    );
+    expect(novelRecipes.first.args, <String, dynamic>{
+      'novelId': 21,
+      'fields': <String>['numeric_id', 'name', 'detail'],
+      'limit': 8,
+      'maxChars': 1200,
+    });
+  });
 }

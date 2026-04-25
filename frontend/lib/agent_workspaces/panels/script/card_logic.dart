@@ -95,9 +95,14 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
         final scriptId = _scopeScriptId ?? 1;
         return <({String label, String args})>[
           (
-            label: '模板: 当前剧本',
+            label: '模板: 当前剧本窗口',
             args:
                 '{"scriptId":$scriptId,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+          ),
+          (
+            label: '模板: 当前剧本尾段',
+            args:
+                '{"scriptId":$scriptId,"lineStart":61,"lineEnd":120,"maxChars":1600}',
           ),
         ];
       case 'get_planData':
@@ -112,12 +117,17 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
         return <({String label, String args})>[
           (
             label: '模板: 正文窗口',
-            args: '{"novelId":1,"lineStart":1,"lineEnd":80,"maxChars":1800}',
+            args:
+                '{"novelId":1,"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800}',
           ),
         ];
       case 'get_novel_events':
         return <({String label, String args})>[
-          (label: '模板: 事件窗口', args: '{"novelId":1,"limit":8,"maxChars":1200}'),
+          (
+            label: '模板: 事件窗口',
+            args:
+                '{"novelId":1,"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
+          ),
         ];
       default:
         return <({String label, String args})>[(label: '模板: 空参数', args: '{}')];
@@ -198,11 +208,13 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
         widget.onScriptDomainToolChanged('get_script_content');
         final scriptId = _scopeScriptId ?? 1;
         widget.scriptDomainArgsController.text =
-            '{"scriptId":$scriptId,"lineStart":1,"lineEnd":80,"maxChars":2200}';
+            '{"scriptId":$scriptId,"lineStart":61,"lineEnd":120,"maxChars":1600}';
         _probeScriptDomainTool();
       },
       onGenerateDraft: () {
-        _applyScriptPromptIfEmpty('请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。');
+        _applyScriptPromptIfEmpty(
+          '请先读取当前集计划与目标章节事件，必要时再补章节正文窗口和上一集尾段，再生成下一版剧本正文并输出可直接写回的完整内容。',
+        );
         widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();
       },

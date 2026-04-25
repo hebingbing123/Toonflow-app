@@ -69,22 +69,17 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
         title: '读取当前剧本正文',
         detail: 'planData 已准备好后，下一步通常要对比当前 script 正文是否偏离。',
         domainTool: 'get_script_content',
-        args: _scriptWindowArgs(scopeScriptId),
+        args: _scriptTailWindowArgs(scopeScriptId),
       ),
     );
   }
   if (scriptRows is List && scriptRows.isEmpty) {
     recipes.add(
-      const ScriptWorkspaceRecipe(
+      ScriptWorkspaceRecipe(
         title: '拉取章节材料',
         detail: '计划里还没有剧本草稿，先读取小说章节文本补上下文。',
         domainTool: 'get_novel_text',
-        args: <String, dynamic>{
-          'novelId': 1,
-          'lineStart': 1,
-          'lineEnd': 80,
-          'maxChars': 1800,
-        },
+        args: _novelTextWindowArgs(1),
       ),
     );
   } else {
@@ -94,7 +89,7 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
         detail: '计划信息已具备，可直接让 script 子代理输出下一版可写回正文。',
         subAgentTool: 'run_sub_agent_script',
         prompt:
-            '请先最小读取当前集 storySkeleton、adaptationStrategy、必要事件与正文窗口，再输出可直接写回的完整剧本正文。',
+            '请先读当前集 storySkeleton、adaptationStrategy、目标章节事件；仅在不足时补读章节正文窗口和上一集尾段，再输出可直接写回的完整剧本正文。',
       ),
     );
   }
@@ -120,7 +115,7 @@ List<ScriptWorkspaceRecipe> _buildNovelTextRecipes(
       title: '读取对应事件',
       detail: '章节文本已到位，继续按同一章节拉取事件脉络更利于总结冲突。',
       domainTool: 'get_novel_events',
-      args: <String, dynamic>{'novelId': ids.first},
+      args: _novelEventWindowArgs(ids.first),
     ),
     const ScriptWorkspaceRecipe(
       title: '生成改编策略',
@@ -130,10 +125,10 @@ List<ScriptWorkspaceRecipe> _buildNovelTextRecipes(
     ),
     if (scopeScriptId != null)
       ScriptWorkspaceRecipe(
-        title: '回看当前剧本',
-        detail: '在章节材料明确后，再对照当前剧本正文更容易定位缺口。',
+        title: '回看上一版尾段',
+        detail: '在章节材料明确后，对照当前集尾段更容易定位衔接缺口且 token 更省。',
         domainTool: 'get_script_content',
-        args: _scriptWindowArgs(scopeScriptId),
+        args: _scriptTailWindowArgs(scopeScriptId),
       ),
   ];
 }
@@ -163,14 +158,14 @@ List<ScriptWorkspaceRecipe> _buildNovelEventRecipes(
       title: '生成剧本初稿',
       detail: '如果事件链路基本齐全，可直接让 script 子代理生成可写回正文。',
       subAgentTool: 'run_sub_agent_script',
-      prompt: '请结合当前事件脉络生成一版可直接写回的剧本正文，保持节奏紧凑。',
+      prompt: '请先结合当前事件脉络，再按需补读计划片段与章节正文窗口，生成一版可直接写回的剧本正文。',
     ),
     if (scopeScriptId != null)
       ScriptWorkspaceRecipe(
         title: '对比现有剧本',
         detail: '用当前事件链路反查现有正文，能更快定位缺场或冲突偏移。',
         domainTool: 'get_script_content',
-        args: _scriptWindowArgs(scopeScriptId),
+        args: _scriptTailWindowArgs(scopeScriptId),
       ),
   ];
 }
@@ -185,7 +180,7 @@ List<ScriptWorkspaceRecipe> _buildScriptContentRecipes(
         title: '生成剧本正文',
         detail: '当前正文为空，直接让 script 子代理产出首版内容更合适。',
         subAgentTool: 'run_sub_agent_script',
-        prompt: '请先最小读取计划与章节上下文，再生成一版完整剧本正文。',
+        prompt: '请先读取当前集计划与目标章节事件；只有细节不足时再补读正文窗口，然后生成一版完整剧本正文。',
       ),
       ScriptWorkspaceRecipe(
         title: '刷新计划数据',
@@ -195,7 +190,7 @@ List<ScriptWorkspaceRecipe> _buildScriptContentRecipes(
       ),
     ];
   }
-  return const <ScriptWorkspaceRecipe>[
+  return <ScriptWorkspaceRecipe>[
     ScriptWorkspaceRecipe(
       title: '刷新计划数据',
       detail: '已有正文后，通常要回看 planData 判断是否需要同步骨架或策略。',
@@ -206,12 +201,7 @@ List<ScriptWorkspaceRecipe> _buildScriptContentRecipes(
       title: '补章节材料',
       detail: '如果要继续改稿，可先拉小说正文与事件，避免只盯着当前 script。',
       domainTool: 'get_novel_text',
-      args: <String, dynamic>{
-        'novelId': 1,
-        'lineStart': 1,
-        'lineEnd': 80,
-        'maxChars': 1800,
-      },
+      args: _novelTextWindowArgs(1),
     ),
   ];
 }
@@ -235,7 +225,7 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           domainTool: 'get_planData',
           args: <String, dynamic>{'key': 'storySkeleton', 'maxChars': 1600},
           subAgentTool: 'run_sub_agent_storySkeleton',
-          prompt: '请先读取 storySkeleton 与相关事件窗口，针对审核问题局部修订故事骨架。',
+          prompt: '请先读取 storySkeleton 与相关事件窗口，信息不足再补章节正文窗口，针对审核问题局部修订故事骨架。',
         ),
       );
       break;
@@ -250,7 +240,7 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
             'maxChars': 1600,
           },
           subAgentTool: 'run_sub_agent_adaptationStrategy',
-          prompt: '请先读取 adaptationStrategy 与 storySkeleton，针对审核问题局部修订改编策略。',
+          prompt: '请先读取 adaptationStrategy 与 storySkeleton，再按需补事件窗口，针对审核问题局部修订改编策略。',
         ),
       );
       break;
@@ -258,12 +248,12 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
       recipes.add(
         ScriptWorkspaceRecipe(
           title: '修剧本正文',
-          detail: '审核已定位剧本正文问题，先读取当前正文窗口再定向改稿。',
+          detail: '审核已定位剧本正文问题，先读取当前集尾段窗口再定向改稿。',
           domainTool: 'get_script_content',
-          args: _scriptWindowArgs(scopeScriptId),
+          args: _scriptTailWindowArgs(scopeScriptId),
           subAgentTool: 'run_sub_agent_script',
           prompt:
-              '请先读取当前剧本正文窗口、storySkeleton、adaptationStrategy，并针对审核问题定向修订本集剧本。',
+              '请先读取当前集尾段窗口、storySkeleton、adaptationStrategy；如仍不足再补读章节正文窗口，并针对审核问题定向修订本集剧本。',
         ),
       );
       break;
@@ -273,7 +263,12 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           title: '核对事件脉络',
           detail: '审核建议回看事件链路，优先读取小说事件而不是整章原文。',
           domainTool: 'get_novel_events',
-          args: <String, dynamic>{'novelId': 1, 'limit': 8, 'maxChars': 1200},
+          args: <String, dynamic>{
+            'novelId': 1,
+            'fields': <String>['numeric_id', 'name', 'detail'],
+            'limit': 8,
+            'maxChars': 1200,
+          },
         ),
       );
       break;
@@ -285,6 +280,7 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           domainTool: 'get_novel_text',
           args: <String, dynamic>{
             'novelId': 1,
+            'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
             'lineStart': 1,
             'lineEnd': 80,
             'maxChars': 1800,
@@ -296,9 +292,9 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
       recipes.add(
         ScriptWorkspaceRecipe(
           title: '回看当前剧本',
-          detail: '先重新读取当前剧本正文窗口，再决定是否继续改稿。',
+          detail: '先重新读取当前集尾段窗口，再决定是否继续改稿。',
           domainTool: 'get_script_content',
-          args: _scriptWindowArgs(scopeScriptId),
+          args: _scriptTailWindowArgs(scopeScriptId),
         ),
       );
       break;
@@ -312,7 +308,7 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           ? 'get_script_content'
           : 'get_planData',
       args: review.target == 'script'
-          ? _scriptWindowArgs(scopeScriptId)
+          ? _scriptTailWindowArgs(scopeScriptId)
           : _planSectionArgs(review.target),
     ),
   );

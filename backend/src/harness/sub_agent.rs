@@ -119,7 +119,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
                 "你必须使用如下XML格式写入工作区：\n<scriptItem name=\"剧本名称\">剧本内容</scriptItem>",
             ),
             execution_hint: Some(
-                "先最小读取：先读当前集骨架、改编策略、事件表和必要的上一集/原文章节窗口；不要默认整段搬运全章或全剧本。",
+                "先最小读取：1) 先分别读当前集的 storySkeleton 与 adaptationStrategy；2) 再读目标章节的事件表字段子集；3) 只有在台词/动作细节不足时才读当前章节正文窗口；4) 只有在承接上一集时才读上一集尾段窗口。不要默认整章、整集或整块 planData 全量搬运。",
             ),
         }),
         "run_supervision_agent" => Some(SubAgentSpec {

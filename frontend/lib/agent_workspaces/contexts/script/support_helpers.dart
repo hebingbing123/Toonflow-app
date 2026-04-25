@@ -57,6 +57,25 @@ Map<String, dynamic> _planSectionArgs(String key, {int maxChars = 1600}) {
   return <String, dynamic>{'key': key, 'maxChars': maxChars};
 }
 
+Map<String, dynamic> _novelTextWindowArgs(int novelId) {
+  return <String, dynamic>{
+    'novelId': novelId,
+    'fields': const <String>['numeric_id', 'chapter', 'chapter_data'],
+    'lineStart': 1,
+    'lineEnd': 80,
+    'maxChars': 1800,
+  };
+}
+
+Map<String, dynamic> _novelEventWindowArgs(int novelId) {
+  return <String, dynamic>{
+    'novelId': novelId,
+    'fields': const <String>['numeric_id', 'name', 'detail'],
+    'limit': 8,
+    'maxChars': 1200,
+  };
+}
+
 Map<String, dynamic>? _scriptWindowArgs(int? scopeScriptId) {
   if (scopeScriptId == null) return null;
   return <String, dynamic>{
@@ -64,5 +83,15 @@ Map<String, dynamic>? _scriptWindowArgs(int? scopeScriptId) {
     'lineStart': 1,
     'lineEnd': 80,
     'maxChars': 2200,
+  };
+}
+
+Map<String, dynamic>? _scriptTailWindowArgs(int? scopeScriptId) {
+  if (scopeScriptId == null) return null;
+  return <String, dynamic>{
+    'scriptId': scopeScriptId,
+    'lineStart': 61,
+    'lineEnd': 120,
+    'maxChars': 1600,
   };
 }

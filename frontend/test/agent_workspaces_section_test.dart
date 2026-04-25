@@ -215,13 +215,19 @@ void main() {
     await tester.tap(find.text('2) 拉取剧本正文'));
     await tester.pump();
     expect(lastProbedTool, 'get_script_content');
-    expect(lastProbedArgs, contains('"scriptId":2'));
+    expect(
+      lastProbedArgs,
+      '{"scriptId":2,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+    );
 
     await tester.tap(find.text('3) 生成剧本草稿'));
     await tester.pump();
     expect(runSubAgentCalls, 1);
     expect(scriptSubAgentToolController.text, 'run_sub_agent_script');
-    expect(scriptPromptController.text, isNotEmpty);
+    expect(
+      scriptPromptController.text,
+      '请先读取当前集计划与目标章节事件，必要时再补章节正文窗口和上一集尾段，再生成下一版剧本正文并输出可直接写回的完整内容。',
+    );
 
     await tester.tap(find.text('4) 写回剧本'));
     await tester.pump();
@@ -569,7 +575,10 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '读取上下文').at(4));
     await tester.pump();
     expect(lastTool, 'get_novel_events');
-    expect(lastArgs, '{"novelId":21}');
+    expect(
+      lastArgs,
+      '{"novelId":21,"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
+    );
 
     await tester.tap(find.widgetWithText(FilledButton, '运行子代理').last);
     await tester.pump();
@@ -706,7 +715,7 @@ void main() {
     expect(lastTool, 'get_novel_text');
     expect(
       lastArgs,
-      '{"novelId":1,"lineStart":1,"lineEnd":80,"maxChars":1800}',
+      '{"novelId":1,"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800}',
     );
   });
 
@@ -926,11 +935,11 @@ void main() {
     await tester.tap(find.text('get_script_content').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('模板: 当前剧本'), findsOneWidget);
+    expect(find.text('模板: 当前剧本窗口'), findsOneWidget);
     expect(find.text('tool=get_script_content'), findsOneWidget);
     expect(find.text('plan.scriptRows=1'), findsOneWidget);
 
-    await tester.tap(find.text('模板: 当前剧本'));
+    await tester.tap(find.text('模板: 当前剧本窗口'));
     await tester.pump();
     expect(
       scriptDomainArgsController.text,

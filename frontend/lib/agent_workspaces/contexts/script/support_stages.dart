@@ -122,12 +122,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待补充',
         detail: '小说上下文为空，建议继续读取章节正文或事件脉络。',
         domainTool: 'get_novel_text',
-        args: <String, dynamic>{
-          'novelId': 1,
-          'lineStart': 1,
-          'lineEnd': 80,
-          'maxChars': 1800,
-        },
+        args: _novelTextWindowArgs(1),
       )
     else
       ScriptWorkspaceStage(
@@ -135,12 +130,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待读取',
         detail: '先读取章节正文或事件列表，再决定如何改写剧本。',
         domainTool: 'get_novel_text',
-        args: <String, dynamic>{
-          'novelId': 1,
-          'lineStart': 1,
-          'lineEnd': 80,
-          'maxChars': 1800,
-        },
+        args: _novelTextWindowArgs(1),
       ),
     if (scriptContent.isNotEmpty)
       ScriptWorkspaceStage(
@@ -160,12 +150,12 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
             ? '审核已覆盖剧本正文，可按建议继续改稿。'
             : '审核结论：${review.summary}',
         domainTool: 'get_script_content',
-        args: _scriptWindowArgs(scopeScriptId),
+        args: _scriptTailWindowArgs(scopeScriptId),
         subAgentTool: review.nextAction == 'revise_script'
             ? 'run_sub_agent_script'
             : null,
         prompt: review.nextAction == 'revise_script'
-            ? '请先读取当前剧本正文窗口、storySkeleton、adaptationStrategy，并针对审核意见定向修订本集剧本。'
+            ? '请先读取当前集尾段窗口、storySkeleton、adaptationStrategy；如仍不足再补读章节正文窗口，并针对审核意见定向修订本集剧本。'
             : null,
       )
     else if (normalizedTool == 'get_script_content' ||
@@ -175,7 +165,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待生成',
         detail: '当前 script 正文为空，适合直接运行 script 子代理生成首版内容。',
         subAgentTool: 'run_sub_agent_script',
-        prompt: '请基于当前剧情计划与上下文生成下一版剧本正文，输出可直接写回的完整内容。',
+        prompt: '请先读取当前集计划与目标章节事件，再按需补正文窗口，生成下一版剧本正文并输出可直接写回的完整内容。',
       )
     else
       ScriptWorkspaceStage(
