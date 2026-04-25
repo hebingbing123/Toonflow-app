@@ -262,7 +262,7 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
   }
 }
 
-/// Shows inferred flow-based candidate payloads for the selected production tool.
+/// Shows inferred candidate payloads for the selected production tool.
 class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
   const ProductionWorkspaceActionCandidatesPanel({
     super.key,
@@ -282,7 +282,7 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('当前 flow 候选参数', style: Theme.of(context).textTheme.labelMedium),
+        Text('当前结果候选参数', style: Theme.of(context).textTheme.labelMedium),
         if (candidateIds.isNotEmpty) ...<Widget>[
           const SizedBox(height: 6),
           Text(
