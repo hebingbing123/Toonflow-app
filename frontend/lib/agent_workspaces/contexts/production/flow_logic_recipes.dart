@@ -88,8 +88,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     final withoutUrl = rows.where((row) {
-      final raw = row['url'] ?? row['imageUrl'];
-      return raw is! String || raw.trim().isEmpty;
+      return !productionFlowEntryHasMediaResult(row);
     }).length;
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
@@ -141,8 +140,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     final withoutImage = rows.where((row) {
-      final raw = row['url'];
-      return raw is! String || raw.trim().isEmpty;
+      return !productionFlowEntryHasMediaResult(row);
     }).length;
     if (withoutImage > 0) {
       return <ProductionWorkspaceRecipe>[

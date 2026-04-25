@@ -7,7 +7,10 @@ extension _AgentWorkspaceProductionCardWorkflow
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
       widget.onProductionDomainToolChanged(recipe.domainTool!.trim());
       widget.productionDomainArgsController.text = jsonEncode(
-        recipe.domainArgs ?? <String, dynamic>{'key': recipe.flowKey},
+        recipe.domainArgs ??
+            (recipe.domainTool == 'get_flowData'
+                ? _flowDataArgsTemplate()
+                : <String, dynamic>{'key': recipe.flowKey}),
       );
     }
     if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
@@ -26,7 +29,7 @@ extension _AgentWorkspaceProductionCardWorkflow
       widget.onProductionDomainToolChanged(stage.domainTool!.trim());
       if (stage.domainTool == 'get_flowData') {
         widget.productionDomainArgsController.text = jsonEncode(
-          stage.domainArgs ?? <String, dynamic>{'key': stage.flowKey},
+          stage.domainArgs ?? _flowDataArgsTemplate(),
         );
       }
     }

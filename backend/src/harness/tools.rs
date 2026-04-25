@@ -54,7 +54,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "get_flowData",
         description:
-            "Production-agent parity read: returns one production flow field by key, with optional line windows, storyboard-table row/column windows, id/type filters, field subsets, and compact formats.",
+            "Production-agent parity read: returns one production flow field by key, with key-aware compact defaults plus optional line windows, storyboard-table row/column windows, id/type filters, field subsets, and compact formats.",
     },
     HarnessToolInfo {
         name: "add_deriveAsset",

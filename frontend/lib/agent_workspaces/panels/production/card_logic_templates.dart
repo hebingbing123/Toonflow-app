@@ -4,15 +4,75 @@ extension _AgentWorkspaceProductionCardTemplates
     on _AgentWorkspaceProductionCardState {
   Map<String, dynamic> _flowDataArgsTemplate() {
     final flowKey = widget.flowKeyController.text.trim();
-    return <String, dynamic>{'key': flowKey.isEmpty ? 'assets' : flowKey};
+    switch (flowKey.isEmpty ? 'scriptPlan' : flowKey) {
+      case 'script':
+        return <String, dynamic>{'key': 'script', 'maxChars': 1800};
+      case 'scriptPlan':
+        return <String, dynamic>{'key': 'scriptPlan', 'maxChars': 2200};
+      case 'storyboardTable':
+        return <String, dynamic>{
+          'key': 'storyboardTable',
+          'rowStart': 1,
+          'rowCount': 8,
+          'fields': <String>[
+            'id',
+            'description',
+            'scene',
+            'duration',
+            'camera',
+            'associateAssetsIds',
+          ],
+        };
+      case 'storyboard':
+        return <String, dynamic>{
+          'key': 'storyboard',
+          'fields': <String>[
+            'id',
+            'index',
+            'duration',
+            'src',
+            'state',
+            'flowId',
+            'associateAssetsIds',
+          ],
+          'limit': 24,
+        };
+      case 'workspaceResult':
+        return <String, dynamic>{'key': 'workspaceResult'};
+      case 'assets':
+      default:
+        return <String, dynamic>{
+          'key': 'assets',
+          'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+          'limit': 24,
+        };
+    }
   }
 
   List<({String label, Map<String, dynamic> args})> _argumentTemplates() {
     switch (_selectedProductionTool) {
       case 'get_flowData':
         return <({String label, Map<String, dynamic> args})>[
-          (label: '模板: 仅 key', args: _flowDataArgsTemplate()),
-          (label: '模板: 默认 assets', args: <String, dynamic>{'key': 'assets'}),
+          (label: '模板: 紧凑读取', args: _flowDataArgsTemplate()),
+          (
+            label: '模板: 导演计划',
+            args: <String, dynamic>{'key': 'scriptPlan', 'maxChars': 2200},
+          ),
+          (
+            label: '模板: 资产摘要',
+            args: <String, dynamic>{
+              'key': 'assets',
+              'fields': <String>[
+                'id',
+                'name',
+                'type',
+                'src',
+                'flowId',
+                'derive',
+              ],
+              'limit': 24,
+            },
+          ),
         ];
       case 'add_deriveAsset':
       case 'del_deriveAsset':
@@ -20,14 +80,18 @@ extension _AgentWorkspaceProductionCardTemplates
         return <({String label, Map<String, dynamic> args})>[
           (
             label: '模板: ID 列表',
-            args: <String, dynamic>{'ids': <int>[1]},
+            args: <String, dynamic>{
+              'ids': <int>[1],
+            },
           ),
         ];
       case 'generate_storyboard':
         return <({String label, Map<String, dynamic> args})>[
           (
             label: '模板: 分镜 ID',
-            args: <String, dynamic>{'ids': <int>[1]},
+            args: <String, dynamic>{
+              'ids': <int>[1],
+            },
           ),
         ];
       default:
@@ -75,7 +139,9 @@ extension _AgentWorkspaceProductionCardTemplates
     );
   }
 
-  void _applyActionSuggestion(ProductionWorkspaceArgumentSuggestion suggestion) {
+  void _applyActionSuggestion(
+    ProductionWorkspaceArgumentSuggestion suggestion,
+  ) {
     widget.productionDomainArgsController.text = jsonEncode(suggestion.payload);
     _setTaskStatus('已填充候选参数：${suggestion.label}');
   }
@@ -91,4 +157,3 @@ extension _AgentWorkspaceProductionCardTemplates
     );
   }
 }
-

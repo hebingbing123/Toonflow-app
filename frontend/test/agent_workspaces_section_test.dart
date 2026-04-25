@@ -1305,9 +1305,12 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, '制作工作区'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('模板: 默认 assets'));
+    await tester.tap(find.text('模板: 导演计划'));
     await tester.pump();
-    expect(productionDomainArgsController.text, '{"key":"assets"}');
+    expect(
+      productionDomainArgsController.text,
+      '{"key":"scriptPlan","maxChars":2200}',
+    );
 
     expect(find.text('结果摘要'), findsOneWidget);
     expect(find.text('tool=get_flowData'), findsOneWidget);
@@ -1876,6 +1879,9 @@ void main() {
     expect(productionProbeCalls, 1);
     expect(flowKeyController.text, 'scriptPlan');
     expect(productionDomainToolController.text, 'get_flowData');
-    expect(productionDomainArgsController.text, '{"key":"scriptPlan"}');
+    expect(
+      productionDomainArgsController.text,
+      '{"key":"scriptPlan","maxChars":2200}',
+    );
   });
 }

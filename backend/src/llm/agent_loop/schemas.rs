@@ -95,7 +95,7 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "key": {
                     "type": "string",
                     "enum": ["script", "scriptPlan", "assets", "storyboardTable", "storyboard", "stoaryTable"],
-                    "description": "Production workbench flow data key (`stoaryTable` is accepted as historical typo alias)."
+                    "description": "Production workbench flow data key (`stoaryTable` is accepted as historical typo alias). When extra filters are omitted, the server now defaults to compact reads by key: script/scriptPlan => text windows, storyboardTable => first-row window, assets/storyboard => trimmed field subsets."
                 },
                 "scriptId": {
                     "type": "integer",
@@ -104,7 +104,7 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "format": {
                     "type": "string",
                     "enum": ["full", "idList", "count"],
-                    "description": "Optional payload compaction mode for array-based keys."
+                    "description": "Optional payload compaction mode for array-based keys. Even with format=full, omitted filters now fall back to compact key-specific defaults."
                 },
                 "ids": {
                     "type": "array",
@@ -128,7 +128,11 @@ fn tool_parameters_schema(name: &str) -> Value {
                 },
                 "lineStart": { "type": "integer", "minimum": 1 },
                 "lineEnd": { "type": "integer", "minimum": 1 },
-                "maxChars": { "type": "integer", "minimum": 1 },
+                "maxChars": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Optional text cap. Compact defaults are applied when omitted: script≈1800 chars, scriptPlan≈2200 chars."
+                },
                 "rowStart": {
                     "type": "integer",
                     "minimum": 1,
@@ -137,10 +141,14 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "rowCount": {
                     "type": "integer",
                     "minimum": 1,
-                    "description": "For key=storyboardTable: optional number of data rows to return."
+                    "description": "For key=storyboardTable: optional number of data rows to return. Defaults to a compact 8-row window when omitted together with rowStart/fields."
                 },
                 "offset": { "type": "integer", "minimum": 0 },
-                "limit": { "type": "integer", "minimum": 1 }
+                "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Optional row cap. Compact defaults are applied when omitted for broad assets/storyboard reads."
+                }
             },
             "additionalProperties": false
         }),

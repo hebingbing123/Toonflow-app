@@ -4,7 +4,7 @@
 
 ## 通用规则
 
-- 执行前先调用 `get_flowData` 确认工作区状态；已有内容在其基础上修改，除非指令要求重写
+- 执行前先调用 `get_flowData` 确认工作区状态；省略细化参数时工具会走 compact defaults，但仍应优先显式带 `fields` / `limit` / `maxChars` 做最小读取；已有内容在其基础上修改，除非指令要求重写
 - 只执行当前任务对应的工作，不越权执行其他阶段
 - 完成写入后返回一句简短确认即可，不复述完整内容；返回后本次任务终止
 - 优先最小读取：先用 `format` / `fields` / `ids` / `assetTypes` / `maxChars` 读取所需片段，不要默认整块拉取 `assets`、`storyboard` 或整段剧本

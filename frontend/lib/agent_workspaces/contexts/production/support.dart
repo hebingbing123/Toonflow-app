@@ -70,6 +70,12 @@ class ProductionWorkspaceArgumentSuggestion {
   final Map<String, dynamic> payload;
 }
 
+bool productionFlowEntryHasMediaResult(Map<String, dynamic> entry) {
+  final raw =
+      entry['src'] ?? entry['url'] ?? entry['imageUrl'] ?? entry['videoUrl'];
+  return raw is String && raw.trim().isNotEmpty;
+}
+
 List<int> extractProductionActionCandidateIds({
   required String? selectedTool,
   required String? toolName,

@@ -186,8 +186,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       );
     }
     final readyCount = rows.where((row) {
-      final raw = row['url'] ?? row['imageUrl'];
-      return raw is String && raw.trim().isNotEmpty;
+      return productionFlowEntryHasMediaResult(row);
     }).length;
     final missingCount = rows.length - readyCount;
     if (missingCount > 0) {
@@ -339,8 +338,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       );
     }
     final readyCount = rows.where((row) {
-      final raw = row['url'];
-      return raw is String && raw.trim().isNotEmpty;
+      return productionFlowEntryHasMediaResult(row);
     }).length;
     final missingCount = rows.length - readyCount;
     if (missingCount > 0) {

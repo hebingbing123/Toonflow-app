@@ -8,7 +8,7 @@ void main() {
       <String, dynamic>{
         'id': 1,
         'prompt': 'scene one',
-        'url': 'https://example.com/1.png',
+        'src': 'https://example.com/1.png',
         'state': 'done',
       },
       <String, dynamic>{'id': 2, 'prompt': 'scene two', 'state': 'queued'},
@@ -47,7 +47,7 @@ void main() {
             <String, dynamic>{
               'id': 2,
               'prompt': 'scene two',
-              'url': 'https://example.com/2.png',
+              'src': 'https://example.com/2.png',
             },
           ],
         },
@@ -216,7 +216,7 @@ void main() {
       suggestedFlowKey: 'assets',
       result: <String, dynamic>{
         'data': <Map<String, dynamic>>[
-          <String, dynamic>{'id': 1, 'name': '角色A', 'url': 'https://a.png'},
+          <String, dynamic>{'id': 1, 'name': '角色A', 'src': 'https://a.png'},
           <String, dynamic>{'id': 2, 'name': '角色B'},
         ],
       },
@@ -334,4 +334,23 @@ void main() {
       });
     },
   );
+
+  test('productionFlowEntryHasMediaResult supports src fields', () {
+    expect(
+      productionFlowEntryHasMediaResult(<String, dynamic>{
+        'src': 'https://example.com/a.png',
+      }),
+      isTrue,
+    );
+    expect(
+      productionFlowEntryHasMediaResult(<String, dynamic>{
+        'url': 'https://example.com/a.png',
+      }),
+      isTrue,
+    );
+    expect(
+      productionFlowEntryHasMediaResult(<String, dynamic>{'src': '   '}),
+      isFalse,
+    );
+  });
 }

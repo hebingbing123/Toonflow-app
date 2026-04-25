@@ -13,12 +13,13 @@ class WorkspaceInputController {
   );
   final TextEditingController scriptDomainArgsController =
       TextEditingController(text: '{}');
-  final TextEditingController productionPromptController =
-      TextEditingController(
-        text: '先调用 get_flowData key=assets，然后总结当前资产与可执行的下一步 production 操作。',
-      );
+  final TextEditingController
+  productionPromptController = TextEditingController(
+    text:
+        '先调用 get_flowData key=scriptPlan 读取紧凑导演规划，再按需补最小化 assets 或 storyboardTable，上来不要整包读取 production flow。',
+  );
   final TextEditingController productionFlowKeyController =
-      TextEditingController(text: 'assets');
+      TextEditingController(text: 'scriptPlan');
   final TextEditingController productionDomainToolController =
       TextEditingController(text: 'get_flowData');
   final TextEditingController productionDomainArgsController =

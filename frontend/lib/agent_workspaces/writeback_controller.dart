@@ -277,6 +277,21 @@ class WorkspaceWritebackController {
 
     Object? payloadForWriteback = result;
     var writebackSource = toolName;
+    if (toolName == 'get_flowData' &&
+        _coreProductionFlowKeys.contains(flowKey)) {
+      try {
+        final latestFlow = await _fetchProductionFlow(
+          token,
+          projectId: projectId,
+          episodesId: scriptId,
+        );
+        payloadForWriteback = latestFlow[flowKey];
+        writebackSource = 'get_flowData -> refreshed full flow[$flowKey]';
+      } catch (error) {
+        _onErrorChanged(error.toString());
+        return;
+      }
+    }
     if (toolName != 'get_flowData' &&
         _coreProductionFlowKeys.contains(flowKey)) {
       final refreshableKey = _toolRefreshableCoreFlowKey[toolName];
@@ -345,5 +360,4 @@ class WorkspaceWritebackController {
     _operationController.setLoading(operation, true);
     _outputController.clearWritebackLine();
   }
-
 }

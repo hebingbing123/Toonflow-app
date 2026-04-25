@@ -1,9 +1,9 @@
 part of 'section.dart';
 
 const List<String> _flowKeyPresets = <String>[
+  'scriptPlan',
   'assets',
   'script',
-  'scriptPlan',
   'storyboardTable',
   'storyboard',
   'workspaceResult',
@@ -58,13 +58,19 @@ _scriptPromptPresets = <AgentWorkspacePromptPreset>[
 const List<AgentWorkspacePromptPreset>
 _productionPromptPresets = <AgentWorkspacePromptPreset>[
   AgentWorkspacePromptPreset(
+    label: '导演计划',
+    prompt:
+        '先调用 get_flowData key=scriptPlan，读取紧凑导演规划，再决定是否继续读 assets 或 storyboardTable。',
+  ),
+  AgentWorkspacePromptPreset(
     label: '资产盘点',
-    prompt: '先调用 get_flowData key=assets，盘点现有资产状态并给出下一步 production 任务建议。',
+    prompt:
+        '先调用 get_flowData key=assets 并读取最小字段子集，盘点现有资产状态并给出下一步 production 任务建议。',
   ),
   AgentWorkspacePromptPreset(
     label: '分镜推进',
     prompt:
-        '读取 get_flowData key=storyboard，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
+        '读取 get_flowData key=storyboard 的紧凑镜头状态，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。',
   ),
   AgentWorkspacePromptPreset(
     label: '制作审核',
@@ -136,10 +142,69 @@ String _buildProductionToolArgsPresetText({
   final Map<String, dynamic> preset;
   switch (toolName) {
     case 'get_flowData':
-      preset = <String, dynamic>{
-        'key': flowKey.isEmpty ? 'assets' : flowKey,
-        if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
-      };
+      switch (flowKey.isEmpty ? 'scriptPlan' : flowKey) {
+        case 'script':
+          preset = <String, dynamic>{
+            'key': 'script',
+            'maxChars': 1800,
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+        case 'scriptPlan':
+          preset = <String, dynamic>{
+            'key': 'scriptPlan',
+            'maxChars': 2200,
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+        case 'storyboardTable':
+          preset = <String, dynamic>{
+            'key': 'storyboardTable',
+            'rowStart': 1,
+            'rowCount': 8,
+            'fields': <String>[
+              'id',
+              'description',
+              'scene',
+              'duration',
+              'camera',
+              'associateAssetsIds',
+            ],
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+        case 'storyboard':
+          preset = <String, dynamic>{
+            'key': 'storyboard',
+            'fields': <String>[
+              'id',
+              'index',
+              'duration',
+              'src',
+              'state',
+              'flowId',
+              'associateAssetsIds',
+            ],
+            'limit': 24,
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+        case 'workspaceResult':
+          preset = <String, dynamic>{
+            'key': 'workspaceResult',
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+        case 'assets':
+        default:
+          preset = <String, dynamic>{
+            'key': 'assets',
+            'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+            'limit': 24,
+            if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
+          };
+          break;
+      }
       break;
     case 'add_deriveAsset':
     case 'del_deriveAsset':

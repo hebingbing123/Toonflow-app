@@ -8,8 +8,12 @@ void main() {
 
     expect(controller.projectIdController.text, '1');
     expect(controller.scriptIdController.text, '1');
-    expect(controller.productionFlowKeyController.text, 'assets');
+    expect(controller.productionFlowKeyController.text, 'scriptPlan');
     expect(controller.productionDomainToolController.text, 'get_flowData');
+    expect(
+      controller.productionPromptController.text,
+      contains('key=scriptPlan'),
+    );
     expect(
       controller.scriptSubAgentToolController.text,
       'run_sub_agent_storySkeleton',

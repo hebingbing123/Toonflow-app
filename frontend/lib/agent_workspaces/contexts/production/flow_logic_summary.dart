@@ -61,8 +61,7 @@ List<String> summarizeProductionFlowValue(Object? value) {
     final first = value.first;
     if (first is Map<String, dynamic>) {
       final withUrl = value.whereType<Map<String, dynamic>>().where((entry) {
-        final raw = entry['url'] ?? entry['imageUrl'] ?? entry['videoUrl'];
-        return raw is String && raw.trim().isNotEmpty;
+        return productionFlowEntryHasMediaResult(entry);
       }).length;
       final withPrompt = value.whereType<Map<String, dynamic>>().where((entry) {
         final raw = entry['prompt'];
