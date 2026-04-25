@@ -32,6 +32,7 @@ pub async fn harness_agent_run(
         "You are the Toonflow harness agent ({assistant_name}). \
          Tools match GET /api/v1/harness/tools. \
          Use tools when asked to read a skill file, inspect script plan/content, test echo / isolated echo, or run the WASM probe. \
+         Prefer the narrowest possible tool call first: use field subsets, paging, id lists, or text windows before full payloads. \
          After tools succeed, answer briefly in natural language."
     );
     let mut messages: Vec<Value> = vec![

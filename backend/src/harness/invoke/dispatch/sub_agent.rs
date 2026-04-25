@@ -11,5 +11,6 @@ pub(super) fn is_sub_agent_tool(name: &str) -> bool {
             | "run_sub_agent_storyboard_gen"
             | "run_sub_agent_storyboard_panel"
             | "run_sub_agent_storyboard_table"
+            | "run_sub_agent_production_supervision"
     )
 }

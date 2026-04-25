@@ -106,12 +106,12 @@ add_deriveAsset({
 | 操作 | 调用 |
 |------|------|
 | 读取资产列表 | `get_flowData("assets")` |
-| 生成资产图片 | `generate_assets_images({ ids: [资产id列表] })` |
+| 生成资产图片 | `generate_deriveAsset({ ids: [资产id列表] })` |
 
 ### 执行流程
 
 1. 先用 `get_flowData({ key: "assets", format: "idList" })` 或带 `fields` 的最小读取拿到候选资产 id
-2. 调用 `generate_assets_images({ ids: [资产id列表] })` 生成图片（异步，发起即返回）
+2. 调用 `generate_deriveAsset({ ids: [资产id列表] })` 生成图片（异步，发起即返回）
 
 ### 约束
 
@@ -420,7 +420,7 @@ add_deriveAsset({
 | 操作 | 调用 |
 |------|------|
 | 读取剧本 | `get_flowData("script")` |
-| 读取分镜表 | `get_flowData("stoaryTable")` |
+| 读取分镜表 | `get_flowData("storyboardTable")` |
 
 ### 写入模式
 
@@ -436,16 +436,16 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 获取 `script` 、`stoaryTable`，识别决策层指令中的**写入模式**（纯文本多参模式 / 分镜图辅助多参模式 / 首位帧模式）
+1. 获取 `script`、`storyboardTable`，识别决策层指令中的**写入模式**（纯文本多参模式 / 分镜图辅助多参模式 / 首位帧模式）
 2. **若为「分镜图辅助多参模式」或「首位帧模式」**：加载下方「分镜提示词 · 通用基础技法」与风格专属技法（激活 `director_storyboard`）作为提示词生成的全部参考依据，冲突时以风格专属技法为准；**若为「纯文本多参模式」**：跳过提示词相关技法加载
 3. 确定分组（track）与时长规则：
    - **纯文本多参模式 / 分镜图辅助多参模式**：同组内分镜 `duration` 累计时长不得超过 15 秒
    - **首位帧模式**：**不分组**，每条分镜独立一组，`track` 按顺序递增（第1行 track=1，第2行 track=2，以此类推）
-   - 所有模式下，每条 `duration` 必须严格使用 `stoaryTable` 对应行时长
+   - 所有模式下，每条 `duration` 必须严格使用 `storyboardTable` 对应行时长
 4. **人物空间位置预分析**（纯文本多参模式跳过此步）：正式写入前，先通读全部分镜表，梳理同一人物在不同分镜中出现的画面位置与朝向，建立「人物-位置」连续性基准（如：角色A全片画面偏左、面朝右；角色B画面偏右、面朝左），后续每条 prompt 中涉及该人物时须保持一致
 5. **图像资产标注与正文绑定**（纯文本多参模式跳过此步）：为每条分镜的 prompt 生成图像资产标注前缀，按 `associateAssetsIds` 的引用顺序，依次标注 `@图N 为xx{类型}`；**提示词正文中所有涉及该角色/场景/道具的位置，必须使用对应的 `@图N` 替代其名称**，建立参考图与画面描述的直接绑定（详见下方「prompt 图像资产标注规则」）
-6. **生成视频描述（videoDesc）**（所有模式均需）：根据 `stoaryTable` 对应行的完整分镜数据（画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID），将该行信息整合为一段结构化的视频描述文本，填入 `videoDesc` 字段
-7. 严格按 `stoaryTable` 的分镜数据行逐行写入分镜面板（排除表头与分隔行），根据模式差异化输出：
+6. **生成视频描述（videoDesc）**（所有模式均需）：根据 `storyboardTable` 对应行的完整分镜数据（画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID），将该行信息整合为一段结构化的视频描述文本，填入 `videoDesc` 字段
+7. 严格按 `storyboardTable` 的分镜数据行逐行写入分镜面板（排除表头与分隔行），根据模式差异化输出：
    - **纯文本多参模式**：`<storyboardItem videoDesc='视频描述' prompt='' track='分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="false" ></storyboardItem>`
    - **分镜图辅助多参模式**：`<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="true" ></storyboardItem>`
    - **首位帧模式**：`<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='按顺序递增的独立分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="true" ></storyboardItem>`
@@ -686,10 +686,10 @@ Image [2]: @图2 — [外貌关键描述]
 
 - 前置条件：分镜表已构建完成且用户已确认
 - 你必须使用XML格式写入工作区分镜面板（具体参数值按当前模式填写，见上方执行流程第7步）
-- **videoDesc 必填**（所有模式）：每条分镜的 `videoDesc` 必须根据 `stoaryTable` 对应行的分镜数据生成，包含画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID 等完整信息
-- 行数一致性约束：分镜面板 `items` 数量必须与 `stoaryTable` 的分镜数据行数量完全一致（不包含表头与分隔行）
-- 时长一致性约束：分镜面板 `duration` 必须与 `stoaryTable` 对应行时长完全一致
-- 阶段边界：本阶段禁止调用 `generate_storyboard_images`
+- **videoDesc 必填**（所有模式）：每条分镜的 `videoDesc` 必须根据 `storyboardTable` 对应行的分镜数据生成，包含画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID 等完整信息
+- 行数一致性约束：分镜面板 `items` 数量必须与 `storyboardTable` 的分镜数据行数量完全一致（不包含表头与分隔行）
+- 时长一致性约束：分镜面板 `duration` 必须与 `storyboardTable` 对应行时长完全一致
+- 阶段边界：本阶段禁止调用 `generate_storyboard`
 
 **模式差异化约束：**
 
@@ -711,13 +711,13 @@ Image [2]: @图2 — [外貌关键描述]
 | 操作 | 调用 |
 |------|------|
 | 读取分镜面板 | `get_flowData("storyboard")` |
-| 生成图片 | `generate_storyboard_images({ ids: [分镜ID列表] })` |
+| 生成图片 | `generate_storyboard({ ids: [分镜ID列表] })` |
 
 ### 执行流程
 
 1. 获取 `storyboard`
 2. 提取真实分镜 ID 列表
-3. 调用 `generate_storyboard_images({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
+3. 调用 `generate_storyboard({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
 
 ### 约束
 

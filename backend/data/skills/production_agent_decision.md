@@ -11,8 +11,8 @@
 
 1. **需求分析**：解析用户请求，判断属于流水线哪个阶段
 2. **任务拆解**：将复杂请求分解为可执行的子任务
-3. **调度执行**：通过 `run_sub_agent_execution` 派发任务到执行层
-4. **质量管控**：通过 `run_sub_agent_supervision` 调用监督层审核产出物
+3. **调度执行**：通过对应的生产子 Agent 派发任务到执行层
+4. **质量管控**：通过 `run_sub_agent_production_supervision` 调用监督层审核产出物
 5. **记忆检索**：通过 `deepRetrieve` 获取历史上下文和项目进度记忆
 
 ---
@@ -157,12 +157,15 @@
 
 ### 执行层派发
 
-使用 `run_sub_agent_execution` 调用执行层：
+按阶段调用对应执行层子 Agent：
 
 ```
-run_sub_agent_execution(
-  prompts: "<按模板构建的具体指令>"
-)
+run_sub_agent_derive_assets(prompt: "<按模板构建的具体指令>")
+run_sub_agent_generate_assets(prompt: "<按模板构建的具体指令>")
+run_sub_agent_director_plan(prompt: "<按模板构建的具体指令>")
+run_sub_agent_storyboard_table(prompt: "<按模板构建的具体指令>")
+run_sub_agent_storyboard_panel(prompt: "<按模板构建的具体指令>")
+run_sub_agent_storyboard_gen(prompt: "<按模板构建的具体指令>")
 ```
 
 ### 审核派发与结果处理
@@ -172,8 +175,8 @@ run_sub_agent_execution(
 2. **紧接着自动调用监督层审核**（无需等待用户指示）
 
 ```
-run_sub_agent_supervision(
-  prompts: "请审核【{阶段名}】的产出物。审核维度：{维度列表}"
+run_sub_agent_production_supervision(
+  prompt: "请审核【{阶段名}】的产出物。审核维度：{维度列表}"
 )
 ```
 

@@ -11,6 +11,7 @@ struct SubAgentSpec {
     skill_path: &'static str,
     skill_section: Option<&'static str>,
     format_hint: Option<&'static str>,
+    execution_hint: Option<&'static str>,
 }
 
 fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
@@ -22,6 +23,9 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             format_hint: Some(
                 "你必须使用如下XML格式写入工作区：\n<storySkeleton>故事骨架内容</storySkeleton>",
             ),
+            execution_hint: Some(
+                "先最小读取：优先只拿当前任务相关的章节事件、骨架片段和必要原文窗口；信息足够时不要补读整章。",
+            ),
         }),
         "run_sub_agent_adaptationStrategy" => Some(SubAgentSpec {
             role_name: "编剧",
@@ -29,6 +33,9 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: None,
             format_hint: Some(
                 "你必须使用如下XML格式写入工作区：\n<adaptationStrategy>改编策略内容</adaptationStrategy>",
+            ),
+            execution_hint: Some(
+                "先最小读取：先读骨架和事件表字段子集，只有在世界观或细节不足时才补读原文窗口。",
             ),
         }),
         "run_sub_agent_script" => Some(SubAgentSpec {
@@ -38,36 +45,54 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             format_hint: Some(
                 "你必须使用如下XML格式写入工作区：\n<scriptItem name=\"剧本名称\">剧本内容</scriptItem>",
             ),
+            execution_hint: Some(
+                "先最小读取：先读当前集骨架、改编策略、事件表和必要的上一集/原文章节窗口；不要默认整段搬运全章或全剧本。",
+            ),
         }),
         "run_supervision_agent" => Some(SubAgentSpec {
             role_name: "编辑",
             skill_path: "script_agent_supervision.md",
             skill_section: None,
             format_hint: None,
+            execution_hint: Some(
+                "审核必须基于工具实读的工作区内容，优先拉取字段子集或窗口片段，不要为了审核先全量加载全部正文。",
+            ),
         }),
         "run_sub_agent_derive_assets" => Some(SubAgentSpec {
             role_name: "执行导演",
             skill_path: "production_agent_execution.md",
             skill_section: Some("一、衍生资产分析与信息写入"),
             format_hint: None,
+            execution_hint: Some(
+                "先最小读取：资产优先取 fields 或 idList，剧本优先取窗口片段；确认需要写入时再补读局部上下文。",
+            ),
         }),
         "run_sub_agent_generate_assets" => Some(SubAgentSpec {
             role_name: "执行导演",
             skill_path: "production_agent_execution.md",
             skill_section: Some("二、衍生资产图片生成"),
             format_hint: None,
+            execution_hint: Some(
+                "先最小读取：优先拿待生成资产 id 列表或字段子集，只对明确候选发起生成。",
+            ),
         }),
         "run_sub_agent_director_plan" => Some(SubAgentSpec {
             role_name: "执行导演",
             skill_path: "production_agent_execution.md",
             skill_section: Some("三、导演规划"),
             format_hint: Some("你必须使用如下XML格式写入工作区：\n<scriptPlan>内容</scriptPlan>"),
+            execution_hint: Some(
+                "先最小读取：剧本优先窗口化，资产优先字段子集；信息足够时不要把整份 assets 或整段剧本拉进上下文。",
+            ),
         }),
         "run_sub_agent_storyboard_gen" => Some(SubAgentSpec {
             role_name: "执行导演",
             skill_path: "production_agent_execution.md",
             skill_section: Some("六、分镜图生成"),
             format_hint: None,
+            execution_hint: Some(
+                "先最小读取：只提取真实分镜 id 列表和必要状态，不要先加载整块 storyboard 内容。",
+            ),
         }),
         "run_sub_agent_storyboard_panel" => Some(SubAgentSpec {
             role_name: "执行导演",
@@ -76,6 +101,9 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             format_hint: Some(
                 "你必须使用如下XML格式写入工作区：\n<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='分组' duration='视频推荐时间' associateAssetsIds='[资产ID列表]'></storyboardItem>",
             ),
+            execution_hint: Some(
+                "先最小读取：先拿 storyboardTable 必要行和资产字段子集，按行生成并写入；不要默认把整表和整份剧本都拉满。",
+            ),
         }),
         "run_sub_agent_storyboard_table" => Some(SubAgentSpec {
             role_name: "执行导演",
@@ -83,6 +111,18 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("四、构建分镜表"),
             format_hint: Some(
                 "你必须使用如下XML格式写入工作区：\n<storyboardTable>内容</storyboardTable>",
+            ),
+            execution_hint: Some(
+                "先最小读取：剧本优先窗口片段，资产优先字段子集；完成分镜拆解前避免反复加载整份原文。",
+            ),
+        }),
+        "run_sub_agent_production_supervision" => Some(SubAgentSpec {
+            role_name: "监督导演",
+            skill_path: "production_agent_supervision.md",
+            skill_section: None,
+            format_hint: None,
+            execution_hint: Some(
+                "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口，不要无差别全量读取。",
             ),
         }),
         _ => None,
@@ -136,12 +176,16 @@ pub async fn invoke_sub_agent_tool(
     let context_note = format!(
         "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
     );
+    let execution_note = spec.execution_hint.unwrap_or(
+        "Use the narrowest tool call that can solve the task before requesting broader context.",
+    );
     let text = chat_completion_assistant_text(
         cfg,
         client,
         vec![
             json!({"role":"system","content":system}),
             json!({"role":"assistant","content":context_note}),
+            json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}),
             json!({"role":"user","content":prompt}),
         ],
     )

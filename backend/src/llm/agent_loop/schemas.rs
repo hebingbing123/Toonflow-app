@@ -189,7 +189,8 @@ fn tool_parameters_schema(name: &str) -> Value {
         | "run_sub_agent_director_plan"
         | "run_sub_agent_storyboard_gen"
         | "run_sub_agent_storyboard_panel"
-        | "run_sub_agent_storyboard_table" => json!({
+        | "run_sub_agent_storyboard_table"
+        | "run_sub_agent_production_supervision" => json!({
             "type": "object",
             "required": ["prompt"],
             "properties": {

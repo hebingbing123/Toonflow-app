@@ -126,6 +126,11 @@ const CATALOG: &[HarnessToolInfo] = &[
         description:
             "Production-agent orchestration parity: run storyboard-table sub-agent with arguments.prompt.",
     },
+    HarnessToolInfo {
+        name: "run_sub_agent_production_supervision",
+        description:
+            "Production-agent orchestration parity: run production-supervision sub-agent with arguments.prompt.",
+    },
 ];
 
 /// Accessor for the registered tool catalog (names stable for clients).
