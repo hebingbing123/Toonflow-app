@@ -164,6 +164,8 @@ class ProductionContextSnapshotView extends StatelessWidget {
       '问题: 严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
       '下一步: ${review.nextAction}',
       if (review.assetIds.isNotEmpty) '聚焦资产: ${review.assetIds.join(', ')}',
+      if (review.assetIds.isEmpty && review.assetTypes.isNotEmpty)
+        '聚焦资产范围: ${summarizeProductionAssetTypeScope(review.assetTypes)}',
       if (review.storyboardIds.isNotEmpty)
         '聚焦镜头: ${review.storyboardIds.join(', ')}',
       if (review.summary.isNotEmpty) '结论: ${review.summary}',

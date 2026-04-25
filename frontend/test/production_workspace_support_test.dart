@@ -239,8 +239,31 @@ void main() {
     expect(review.severeCount, 1);
     expect(review.nextAction, 'revise_storyboardTable');
     expect(review.assetIds, isEmpty);
+    expect(review.assetTypes, isEmpty);
     expect(review.storyboardIds, isEmpty);
   });
+
+  test(
+    'parseProductionSupervisionReview reads asset type scope for check-assets follow-up',
+    () {
+      final review = parseProductionSupervisionReview(<String, dynamic>{
+        'review': <String, dynamic>{
+          'target': 'scriptPlan',
+          'grade': 'B',
+          'severeCount': '0',
+          'mediumCount': '1',
+          'minorCount': '0',
+          'nextAction': 'check_assets',
+          'summary': '先核对角色与场景资产',
+          'assetTypes': 'scene,role,scene',
+        },
+      });
+
+      expect(review, isNotNull);
+      expect(review!.assetIds, isEmpty);
+      expect(review.assetTypes, <String>['role', 'scene']);
+    },
+  );
 
   test(
     'parseProductionSupervisionReview reads storyboard ids for focused follow-up',
@@ -814,6 +837,38 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages narrows check-assets review to structured asset types',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '先核对角色与场景资产',
+            'assetTypes': 'scene,role',
+          },
+        },
+      );
+
+      final assetStage = stages.singleWhere((stage) => stage.flowKey == 'assets');
+      expect(assetStage.statusLabel, '可推进');
+      expect(assetStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'assetTypes': <String>['role', 'scene'],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+        'limit': 12,
+      });
+      expect(assetStage.detail, contains('角色/场景资产'));
+    },
+  );
+
+  test(
     'buildProductionScriptReviewArgs shifts script window toward later storyboard ids',
     () {
       final args = buildProductionScriptReviewArgs(
@@ -826,6 +881,7 @@ void main() {
           nextAction: 'check_script',
           summary: '后段镜头需要复核剧本依据',
           assetIds: <int>[],
+          assetTypes: <String>[],
           storyboardIds: <int>[9, 10],
         ),
       );
@@ -1643,11 +1699,11 @@ void main() {
       },
     );
 
-    expect(recipes.first.domainArgs, <String, dynamic>{
-      'key': 'assets',
-      'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
-      'limit': 24,
-    });
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+        'limit': 24,
+      });
     expect(recipes.last.domainArgs, <String, dynamic>{
       'key': 'scriptPlan',
       'maxChars': 2200,
@@ -1683,6 +1739,36 @@ void main() {
         'key': 'scriptPlan',
         'maxChars': 2200,
       });
+    },
+  );
+
+  test(
+    'supervision check assets recipe narrows to structured review asset types',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '先核对角色与场景资产',
+            'assetTypes': 'scene,role',
+          },
+        },
+      );
+
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'assetTypes': <String>['role', 'scene'],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+        'limit': 12,
+      });
+      expect(recipes.first.detail, contains('角色/场景资产'));
     },
   );
 

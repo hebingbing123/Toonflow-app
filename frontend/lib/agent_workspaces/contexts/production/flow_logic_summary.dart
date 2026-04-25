@@ -38,6 +38,8 @@ List<String> summarizeProductionResultSnapshot(
       '审核 ${review.target} → ${review.grade}',
       '严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
       if (review.assetIds.isNotEmpty) '聚焦资产 ${review.assetIds.length} 项',
+      if (review.assetIds.isEmpty && review.assetTypes.isNotEmpty)
+        '聚焦资产范围 ${summarizeProductionAssetTypeScope(review.assetTypes)}',
       if (review.storyboardIds.isNotEmpty)
         '聚焦镜头 ${review.storyboardIds.length} 项',
       if (focusedShots.isNotEmpty) focusedShots,

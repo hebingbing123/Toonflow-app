@@ -196,10 +196,10 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_path: "production_agent_supervision.md",
             skill_section: None,
             format_hint: Some(
-                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"scriptPlan|storyboardTable\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard\" summary=\"一句话总结\" assetIds=\"12,18\" storyboardIds=\"31,32\" />\n其中 assetIds 仅在下一步需要核对具体资产时填写，填逗号分隔的真实资产 ID；storyboardIds 仅在下一步需要核对或补齐具体镜头时填写，填逗号分隔的真实 storyboard 镜头 ID；不需要时可省略。随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
+                "输出时第一行必须是单行 XML 摘要，格式如下：\n<reviewSummary target=\"scriptPlan|storyboardTable\" grade=\"A|B|C|D\" severeCount=\"0\" mediumCount=\"0\" minorCount=\"0\" nextAction=\"revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard\" summary=\"一句话总结\" assetIds=\"12,18\" assetTypes=\"role,scene\" storyboardIds=\"31,32\" />\n其中 assetIds 仅在下一步需要核对具体资产时填写，填逗号分隔的真实资产 ID；若暂时无法精确到资产 ID 但已收紧到最小资产类型范围，填写 assetTypes（如 role,scene 或 tool）；storyboardIds 仅在下一步需要核对或补齐具体镜头时填写，填逗号分隔的真实 storyboard 镜头 ID；不需要时可省略。随后再输出精简 Markdown 审核报告。summary 控制在 36 个汉字以内；若信息足够，不要写冗长解释。",
             ),
             execution_hint: Some(
-                "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口；审核 scriptPlan 时，assets 默认先读 role/scene，再按需要补 tool 或精确 ids；若问题只涉及部分资产，下一步给出 check_assets 时要把真实 assetIds 回填到 reviewSummary；若只涉及部分缺帧或待核对镜头，下一步给出 check_storyboard、generate_storyboard 或 check_script 时都应沿用同一批真实 storyboardIds，避免无差别全量读取 storyboard 或剧本。",
+                "审核必须基于工具实读的数据，优先读取 storyboardTable/script/assets 的必要字段或窗口；审核 scriptPlan 时，assets 默认先读 role/scene，再按需要补 tool 或精确 ids；若问题只涉及部分资产，下一步给出 check_assets 时优先回填真实 assetIds，做不到精确 id 也必须回填最小 assetTypes 范围；若只涉及部分缺帧或待核对镜头，下一步给出 check_storyboard、generate_storyboard 或 check_script 时都应沿用同一批真实 storyboardIds，避免无差别全量读取 storyboard 或剧本。",
             ),
         }),
         _ => None,
@@ -320,6 +320,17 @@ mod tests {
         assert_eq!(review["nextAction"].as_str(), Some("check_assets"));
         assert_eq!(review["assetIds"].as_str(), Some("7,3,7"));
         assert_eq!(review["storyboardIds"].as_str(), Some("9,3,9"));
+    }
+
+    #[test]
+    fn parse_review_summary_preserves_asset_types_scope() {
+        let review = parse_review_summary(
+            r#"
+<reviewSummary target="scriptPlan" grade="B" severeCount="0" mediumCount="1" minorCount="0" nextAction="check_assets" summary="先核对角色场景资产" assetTypes="role,scene" />
+"#,
+        )
+        .expect("review");
+        assert_eq!(review["assetTypes"].as_str(), Some("role,scene"));
     }
 
     #[test]

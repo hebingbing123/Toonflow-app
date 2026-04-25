@@ -38,7 +38,7 @@ description: >-
 先输出一行结构化摘要，供工作台直接生成下一步动作：
 
 ```xml
-<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" assetIds="12,18" storyboardIds="31,32" />
+<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" assetIds="12,18" assetTypes="role,scene" storyboardIds="31,32" />
 ```
 
 然后再输出精简 Markdown 审核报告：
@@ -66,6 +66,7 @@ description: >-
 
 - `reviewSummary` 必须放在第一行，`summary` 控制在 36 个汉字以内
 - `assetIds` 仅在下一步需要核对具体资产时填写，内容为逗号分隔的真实资产 ID；若问题不指向具体资产则省略该属性
+- `assetTypes` 仅在下一步需要 `check_assets`、但还不能精确到具体资产 ID 时填写，内容为逗号分隔的最小资产类型范围（`role`、`scene`、`tool`）
 - `storyboardIds` 仅在下一步需要核对或补齐具体镜头时填写，内容为逗号分隔的真实 storyboard 镜头 ID；若无需聚焦到局部镜头则省略该属性
 - 若下一步是 `check_script` 且问题来自具体镜头，也要继续沿用这批 `storyboardIds`，让后续只读取对应剧本窗口
 - 审核通过的项目不出现在报告中
@@ -88,7 +89,7 @@ description: >-
 3. **问题具体化**：每个问题指向具体位置和内容，不说"整体不够好"
 4. **建议多元化**：严重问题提供多个可选方案
 5. **动态基准**：数值判断以实际工作区数据为唯一基准；未明确的参数以合理比例推算，并在报告中注明
-6. **回填精确资产范围**：若审核结论要求下一步 `check_assets`，且你已能定位到具体资产，必须把这些真实资产 ID 写入 `reviewSummary.assetIds`
+6. **回填最小资产范围**：若审核结论要求下一步 `check_assets`，且你已能定位到具体资产，必须把这些真实资产 ID 写入 `reviewSummary.assetIds`；若暂时还不能精确到 ID，也必须把当前最小资产类型范围写入 `reviewSummary.assetTypes`
 7. **回填精确镜头范围**：若审核结论要求下一步 `check_storyboard`、`generate_storyboard` 或 `check_script`，且你已能定位到具体缺帧/待核对镜头，必须把这些真实镜头 ID 写入 `reviewSummary.storyboardIds`
 
 ---
@@ -105,7 +106,7 @@ description: >-
    - 仅当 `scriptPlan` 明确涉及关键道具、法器、信物或状态型物件时，再补一次 `get_flowData({ key: "assets", assetTypes: ["tool"], fields: ["id", "name", "type", "derive"], limit: 12 })`
 4. 若判断下一步应为 `check_assets`，只保留支撑该结论所需的最小资产范围：
    - 已定位真实资产时，只输出这批 `assetIds`
-   - 未定位真实资产时，只允许回退到当前最小类型范围（通常 `role/scene`，必要时再补 `tool`），不要把整包 assets 拉满
+   - 未定位真实资产时，必须输出当前最小类型范围到 `assetTypes`（通常 `role,scene`，必要时再补 `tool`），不要把整包 assets 拉满
 
 优先最小读取：信息足够时不得补读整段剧本或整份 assets。
 

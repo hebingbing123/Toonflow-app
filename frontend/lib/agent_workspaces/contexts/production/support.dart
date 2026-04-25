@@ -50,6 +50,7 @@ class ProductionSupervisionReview {
     required this.nextAction,
     required this.summary,
     required this.assetIds,
+    required this.assetTypes,
     required this.storyboardIds,
   });
 
@@ -61,6 +62,7 @@ class ProductionSupervisionReview {
   final String nextAction;
   final String summary;
   final List<int> assetIds;
+  final List<String> assetTypes;
   final List<int> storyboardIds;
 }
 
@@ -214,6 +216,7 @@ ProductionSupervisionReview? parseProductionSupervisionReview(Object? result) {
     nextAction: nextAction,
     summary: summary,
     assetIds: _parseReviewAssetIds(review['assetIds']),
+    assetTypes: _parseReviewAssetTypes(review['assetTypes']),
     storyboardIds: _parseReviewIds(review['storyboardIds']),
   );
 }
@@ -226,6 +229,24 @@ int _parseLooseInt(Object? value) {
 
 List<int> _parseReviewAssetIds(Object? value) {
   return _parseReviewIds(value);
+}
+
+List<String> _parseReviewAssetTypes(Object? value) {
+  final rawValues = switch (value) {
+    List<dynamic> values => values,
+    String text => text.split(','),
+    _ => const <Object?>[],
+  };
+  final types = rawValues
+      .map(_normalizeProductionAssetType)
+      .where((entry) => entry.isNotEmpty)
+      .toSet()
+      .toList();
+  types.sort(
+    (left, right) => _productionAssetTypeOrder(left)
+        .compareTo(_productionAssetTypeOrder(right)),
+  );
+  return types;
 }
 
 List<int> _parseReviewIds(Object? value) {
@@ -254,6 +275,12 @@ List<int> _parseReviewIds(Object? value) {
 Map<String, dynamic> buildProductionReviewAssetArgs(
   ProductionSupervisionReview review,
 ) {
+  if (review.assetIds.isNotEmpty) {
+    return buildProductionAssetReadArgs(ids: review.assetIds);
+  }
+  if (review.assetTypes.isNotEmpty) {
+    return buildProductionAssetTypeReadArgs(assetTypes: review.assetTypes);
+  }
   return buildProductionAssetReadArgs(ids: review.assetIds);
 }
 
@@ -461,12 +488,7 @@ Map<String, dynamic> buildProductionScriptPlanAssetArgs(Object? flowData) {
     return buildProductionAssetReadArgs(ids: ids);
   }
   final assetTypes = extractProductionScriptPlanAssetTypes(flowData);
-  return <String, dynamic>{
-    'key': 'assets',
-    'assetTypes': assetTypes,
-    'fields': _productionAssetFields(),
-    'limit': assetTypes.contains('tool') ? 18 : 12,
-  };
+  return buildProductionAssetTypeReadArgs(assetTypes: assetTypes);
 }
 
 Map<String, dynamic> buildProductionAssetReadArgs({
@@ -479,6 +501,29 @@ Map<String, dynamic> buildProductionAssetReadArgs({
     'key': 'assets',
     'ids': ids,
     'fields': _productionAssetFields(),
+  };
+}
+
+Map<String, dynamic> buildProductionAssetTypeReadArgs({
+  List<String> assetTypes = const <String>[],
+}) {
+  final normalizedTypes = assetTypes
+      .map(_normalizeProductionAssetType)
+      .where((entry) => entry.isNotEmpty)
+      .toSet()
+      .toList();
+  normalizedTypes.sort(
+    (left, right) => _productionAssetTypeOrder(left)
+        .compareTo(_productionAssetTypeOrder(right)),
+  );
+  if (normalizedTypes.isEmpty) {
+    return _productionAssetsCompactArgs();
+  }
+  return <String, dynamic>{
+    'key': 'assets',
+    'assetTypes': normalizedTypes,
+    'fields': _productionAssetFields(),
+    'limit': normalizedTypes.contains('tool') ? 18 : 12,
   };
 }
 
@@ -599,6 +644,12 @@ String summarizeProductionAssetScope(Map<String, dynamic> args) {
 
 String summarizeProductionAssetReviewScope(ProductionSupervisionReview review) {
   return summarizeProductionAssetScope(buildProductionReviewAssetArgs(review));
+}
+
+String summarizeProductionAssetTypeScope(List<String> assetTypes) {
+  return summarizeProductionAssetScope(
+    buildProductionAssetTypeReadArgs(assetTypes: assetTypes),
+  );
 }
 
 String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
@@ -854,6 +905,19 @@ int _productionAssetTypeOrder(String value) {
     'scene' => 1,
     'tool' => 2,
     _ => 99,
+  };
+}
+
+String _normalizeProductionAssetType(Object? value) {
+  final normalized = switch (value) {
+    String text => text.trim().toLowerCase(),
+    _ => '',
+  };
+  return switch (normalized) {
+    'role' || 'roles' || 'character' || 'characters' => 'role',
+    'scene' || 'scenes' || 'location' || 'locations' => 'scene',
+    'tool' || 'tools' || 'prop' || 'props' => 'tool',
+    _ => '',
   };
 }
 
