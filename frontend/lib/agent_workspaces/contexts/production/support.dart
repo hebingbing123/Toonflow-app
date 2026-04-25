@@ -301,9 +301,28 @@ class ProductionStoryboardScriptFocusWindow {
   final int maxChars;
 }
 
-ProductionStoryboardScriptFocusWindow buildProductionStoryboardScriptFocusWindow(
-  List<int> storyboardIds,
-) {
+String summarizeProductionStoryboardFocusIds(
+  List<int> storyboardIds, {
+  int previewCount = 6,
+}) {
+  final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) return '';
+  final visible = ids.take(previewCount).join(', ');
+  if (ids.length <= previewCount) {
+    return '镜头 #$visible';
+  }
+  return '镜头 #$visible 等 ${ids.length} 个';
+}
+
+String summarizeProductionStoryboardScriptWindow(List<int> storyboardIds) {
+  final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) return '';
+  final focusWindow = buildProductionStoryboardScriptFocusWindow(ids);
+  return '剧本 ${focusWindow.lineStart}-${focusWindow.lineEnd} 行';
+}
+
+ProductionStoryboardScriptFocusWindow
+buildProductionStoryboardScriptFocusWindow(List<int> storyboardIds) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) {
     return const ProductionStoryboardScriptFocusWindow(

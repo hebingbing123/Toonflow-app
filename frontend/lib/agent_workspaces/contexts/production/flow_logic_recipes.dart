@@ -340,6 +340,12 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
   ProductionSupervisionReview review,
 ) {
   final summary = review.summary.isEmpty ? '按审核结论继续推进。' : review.summary;
+  final storyboardFocus = summarizeProductionStoryboardFocusIds(
+    review.storyboardIds,
+  );
+  final scriptWindow = summarizeProductionStoryboardScriptWindow(
+    review.storyboardIds,
+  );
   switch (review.nextAction) {
     case 'revise_scriptPlan':
       return <ProductionWorkspaceRecipe>[
@@ -372,10 +378,30 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '检查分镜结果',
-          detail: '审核结论：$summary',
+          detail: storyboardFocus.isEmpty
+              ? '审核结论：$summary'
+              : '审核结论：$summary；优先只看$storyboardFocus。',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardArgs(review),
+        ),
+        ProductionWorkspaceRecipe(
+          title: '对照分镜表',
+          detail: storyboardFocus.isEmpty
+              ? '先复读关键列窗口，避免把整张分镜表重新带入上下文。'
+              : '优先只复读$storyboardFocus对应的分镜表行，避免退回整表。',
+          flowKey: 'storyboardTable',
+          domainTool: 'get_flowData',
+          domainArgs: buildProductionReviewStoryboardTableArgs(review),
+        ),
+        ProductionWorkspaceRecipe(
+          title: '回看剧本依据',
+          detail: scriptWindow.isEmpty
+              ? '需要时再回看紧凑剧本窗口，确认镜头依据。'
+              : '如需核对镜头依据，优先只读$scriptWindow。',
+          flowKey: 'script',
+          domainTool: 'get_flowData',
+          domainArgs: buildProductionScriptReviewArgs(review: review),
         ),
       ];
     case 'revise_storyboardTable':
@@ -425,6 +451,15 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
               '请基于最近审核结论继续推进 storyboard；$storyboardScope，避免重跑已有结果或 shouldGenerateImage=false 的镜头。注意：$summary',
+        ),
+        ProductionWorkspaceRecipe(
+          title: '对照分镜表',
+          detail: storyboardFocus.isEmpty
+              ? '补图前先复读关键列窗口，避免为整批镜头重建上下文。'
+              : '补图前先只复读$storyboardFocus对应的分镜表行。',
+          flowKey: 'storyboardTable',
+          domainTool: 'get_flowData',
+          domainArgs: buildProductionReviewStoryboardTableArgs(review),
         ),
       ];
     default:

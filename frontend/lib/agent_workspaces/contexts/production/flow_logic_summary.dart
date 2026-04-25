@@ -28,12 +28,24 @@ List<String> summarizeProductionResultSnapshot(
 
   final review = parseProductionSupervisionReview(result);
   if (review != null) {
+    final focusedShots = summarizeProductionStoryboardFocusIds(
+      review.storyboardIds,
+    );
+    final scriptWindow = summarizeProductionStoryboardScriptWindow(
+      review.storyboardIds,
+    );
     return <String>[
       '审核 ${review.target} → ${review.grade}',
       '严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
       if (review.assetIds.isNotEmpty) '聚焦资产 ${review.assetIds.length} 项',
       if (review.storyboardIds.isNotEmpty)
         '聚焦镜头 ${review.storyboardIds.length} 项',
+      if (focusedShots.isNotEmpty) focusedShots,
+      if ((review.nextAction == 'check_storyboard' ||
+              review.nextAction == 'check_script' ||
+              review.nextAction == 'generate_storyboard') &&
+          scriptWindow.isNotEmpty)
+        scriptWindow,
       if (review.summary.isNotEmpty) review.summary,
     ];
   }

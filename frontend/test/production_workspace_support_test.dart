@@ -193,6 +193,8 @@ void main() {
 
       expect(lines, contains('聚焦资产 2 项'));
       expect(lines, contains('聚焦镜头 2 项'));
+      expect(lines, contains('镜头 #3, 9'));
+      expect(lines, contains('剧本 7-38 行'));
     },
   );
 
@@ -430,6 +432,97 @@ void main() {
         'lineStart': 1,
         'lineEnd': 40,
         'maxChars': 1040,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows check-storyboard follow-ups to focused rows and script window',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_storyboard',
+            'summary': '先核对关键镜头画面一致性',
+            'storyboardIds': '2,5,7',
+          },
+        },
+      );
+
+      expect(recipes, hasLength(3));
+      expect(recipes[0].domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[2, 5, 7],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[2, 5, 7],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+      expect(recipes[2].domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 40,
+        'maxChars': 1040,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes adds focused storyboard table reread before generation',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'generate_storyboard',
+            'summary': '只补关键缺帧镜头',
+            'storyboardIds': '9,3,9',
+          },
+        },
+      );
+
+      expect(recipes, hasLength(2));
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
       });
     },
   );
@@ -1230,7 +1323,7 @@ void main() {
         },
       );
 
-      expect(checkRecipes.single.domainArgs, <String, dynamic>{
+      expect(checkRecipes.first.domainArgs, <String, dynamic>{
         'key': 'storyboard',
         'ids': <int>[3, 9],
         'fields': <String>[
@@ -1242,6 +1335,24 @@ void main() {
           'associateAssetsIds',
           'shouldGenerateImage',
         ],
+      });
+      expect(checkRecipes[1].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
+      expect(checkRecipes[2].domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 7,
+        'lineEnd': 38,
+        'maxChars': 920,
       });
 
       final generateRecipes = buildProductionWorkspaceRecipes(
@@ -1261,7 +1372,7 @@ void main() {
         },
       );
 
-      expect(generateRecipes.single.domainArgs, <String, dynamic>{
+      expect(generateRecipes.first.domainArgs, <String, dynamic>{
         'key': 'storyboard',
         'ids': <int>[3, 9],
         'fields': <String>[
@@ -1273,7 +1384,19 @@ void main() {
           'shouldGenerateImage',
         ],
       });
-      expect(generateRecipes.single.prompt, contains('ids=3,9'));
+      expect(generateRecipes.first.prompt, contains('ids=3,9'));
+      expect(generateRecipes[1].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+      });
     },
   );
 
@@ -1296,7 +1419,7 @@ void main() {
         },
       );
 
-      expect(recipes.single.domainArgs, <String, dynamic>{
+      expect(recipes.first.domainArgs, <String, dynamic>{
         'key': 'storyboard',
         'fields': <String>[
           'id',
@@ -1307,6 +1430,19 @@ void main() {
           'shouldGenerateImage',
         ],
         'limit': 12,
+      });
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+        'rowStart': 1,
+        'rowCount': 8,
       });
     },
   );
