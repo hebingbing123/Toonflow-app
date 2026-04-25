@@ -369,6 +369,60 @@ void main() {
   );
 
   test(
+    'buildStoryboardVideoPromptRequest prefers draft narration and draft duration',
+    () {
+      final request = buildStoryboardVideoPromptRequest(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '脚本提示词',
+          videoDesc: '脚本旁白',
+          duration: '4s',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          prompt: '制作提示词',
+          videoDesc: '制作旁白',
+          duration: '6',
+        ),
+        draftNarration: '临时改成新的旁白',
+        draftPrompt: '临时提示词',
+        draftDuration: '8 秒',
+      );
+
+      expect(request.description, '临时改成新的旁白');
+      expect(request.durationSeconds, 8);
+    },
+  );
+
+  test(
+    'buildStoryboardVideoPromptRequest falls back to prompt and persisted duration',
+    () {
+      final request = buildStoryboardVideoPromptRequest(
+        scriptStoryboard: const StoryboardRow(
+          id: '1',
+          numericId: 11,
+          scriptId: '3',
+          prompt: '脚本提示词',
+          duration: '4s',
+        ),
+        productionStoryboard: const ProductionStoryboardItemV1(
+          id: 11,
+          prompt: '制作提示词',
+          duration: '6',
+        ),
+        draftNarration: ' ',
+        draftPrompt: ' ',
+        draftDuration: '',
+      );
+
+      expect(request.description, '脚本提示词');
+      expect(request.durationSeconds, 4);
+    },
+  );
+
+  test(
     'diagnoseStoryboardWorkbench prefers refreshing when jobs or videos already exist',
     () {
       final withJobs = diagnoseStoryboardWorkbench(

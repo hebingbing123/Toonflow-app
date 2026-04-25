@@ -237,6 +237,13 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _generateVideoPrompt() async {
+    final request = buildStoryboardVideoPromptRequest(
+      scriptStoryboard: widget.scriptStoryboard,
+      productionStoryboard: _productionRow,
+      draftNarration: widget.readVideoDescriptionText(),
+      draftPrompt: widget.readPromptText(),
+      draftDuration: _videoDurationCtrl.text,
+    );
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
       projectId: widget.projectNumericId,
@@ -245,9 +252,8 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
         productionStoryboard: _productionRow,
         draftImageUrl: _imageUrlCtrl.text,
       ),
-      description: widget.readVideoDescriptionText().trim().isEmpty
-          ? widget.readPromptText().trim()
-          : widget.readVideoDescriptionText().trim(),
+      description: request.description,
+      durationHint: request.durationSeconds,
     );
     _videoPromptCtrl.text = generated.prompt;
     _videoDurationCtrl.text = generated.duration.toString();

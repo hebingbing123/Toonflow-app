@@ -34,6 +34,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   required int scriptId,
   String? imageUrl,
   String? description,
+  int? durationHint,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/generate-video-prompt',
@@ -41,6 +42,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   final body = <String, dynamic>{'projectId': projectId, 'scriptId': scriptId};
   if (imageUrl != null) body['imageUrl'] = imageUrl;
   if (description != null) body['description'] = description;
+  if (durationHint != null) body['durationHint'] = durationHint;
   final res = await http
       .post(
         uri,

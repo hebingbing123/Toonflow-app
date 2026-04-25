@@ -8,6 +8,16 @@ enum StoryboardNarrationSource {
   placeholder,
 }
 
+class StoryboardVideoPromptRequest {
+  const StoryboardVideoPromptRequest({
+    required this.description,
+    required this.durationSeconds,
+  });
+
+  final String? description;
+  final int? durationSeconds;
+}
+
 List<int> collectStoryboardTrackIds({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
@@ -67,7 +77,12 @@ String? resolveStoryboardSourceImageUrl({
 String? resolveStoryboardGenerationPrompt({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
+  String? draftPrompt,
 }) {
+  final rawDraftPrompt = draftPrompt?.trim();
+  if (rawDraftPrompt != null && rawDraftPrompt.isNotEmpty) {
+    return rawDraftPrompt;
+  }
   final scriptPrompt = scriptStoryboard?.prompt?.trim();
   if (scriptPrompt != null && scriptPrompt.isNotEmpty) {
     return scriptPrompt;
@@ -82,7 +97,12 @@ String? resolveStoryboardGenerationPrompt({
 String? resolveStoryboardNarrationText({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
+  String? draftNarration,
 }) {
+  final rawDraftNarration = draftNarration?.trim();
+  if (rawDraftNarration != null && rawDraftNarration.isNotEmpty) {
+    return rawDraftNarration;
+  }
   final scriptNarration = scriptStoryboard?.videoDesc?.trim();
   if (scriptNarration != null && scriptNarration.isNotEmpty) {
     return scriptNarration;
@@ -97,10 +117,13 @@ String? resolveStoryboardNarrationText({
 String? resolveStoryboardVideoPromptSeed({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
+  String? draftNarration,
+  String? draftPrompt,
 }) {
   final narration = resolveStoryboardNarrationText(
     scriptStoryboard: scriptStoryboard,
     productionStoryboard: productionStoryboard,
+    draftNarration: draftNarration,
   );
   if (narration != null && narration.isNotEmpty) {
     return narration;
@@ -108,16 +131,20 @@ String? resolveStoryboardVideoPromptSeed({
   return resolveStoryboardGenerationPrompt(
     scriptStoryboard: scriptStoryboard,
     productionStoryboard: productionStoryboard,
+    draftPrompt: draftPrompt,
   );
 }
 
 StoryboardNarrationSource resolveStoryboardNarrationSource({
   StoryboardRow? scriptStoryboard,
   ProductionStoryboardItemV1? productionStoryboard,
+  String? draftNarration,
+  String? draftPrompt,
 }) {
   final narration = resolveStoryboardNarrationText(
     scriptStoryboard: scriptStoryboard,
     productionStoryboard: productionStoryboard,
+    draftNarration: draftNarration,
   );
   if (narration != null && narration.isNotEmpty) {
     return StoryboardNarrationSource.explicitNarration;
@@ -125,6 +152,7 @@ StoryboardNarrationSource resolveStoryboardNarrationSource({
   final prompt = resolveStoryboardGenerationPrompt(
     scriptStoryboard: scriptStoryboard,
     productionStoryboard: productionStoryboard,
+    draftPrompt: draftPrompt,
   );
   if (prompt != null && prompt.isNotEmpty) {
     return StoryboardNarrationSource.promptFallback;
@@ -141,4 +169,63 @@ String describeStoryboardNarrationSource(StoryboardNarrationSource source) {
     case StoryboardNarrationSource.placeholder:
       return '仍是占位文本';
   }
+}
+
+StoryboardVideoPromptRequest buildStoryboardVideoPromptRequest({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+  String? draftNarration,
+  String? draftPrompt,
+  String? draftDuration,
+}) {
+  return StoryboardVideoPromptRequest(
+    description: resolveStoryboardVideoPromptSeed(
+      scriptStoryboard: scriptStoryboard,
+      productionStoryboard: productionStoryboard,
+      draftNarration: draftNarration,
+      draftPrompt: draftPrompt,
+    ),
+    durationSeconds: resolveStoryboardDurationSeconds(
+      scriptStoryboard: scriptStoryboard,
+      productionStoryboard: productionStoryboard,
+      draftDuration: draftDuration,
+    ),
+  );
+}
+
+int? resolveStoryboardDurationSeconds({
+  StoryboardRow? scriptStoryboard,
+  ProductionStoryboardItemV1? productionStoryboard,
+  String? draftDuration,
+}) {
+  final candidates = <String?>[
+    draftDuration,
+    scriptStoryboard?.duration,
+    productionStoryboard?.duration,
+  ];
+  for (final candidate in candidates) {
+    final seconds = _parseStoryboardDurationSeconds(candidate);
+    if (seconds != null) {
+      return seconds;
+    }
+  }
+  return null;
+}
+
+int? _parseStoryboardDurationSeconds(String? raw) {
+  final text = raw?.trim();
+  if (text == null || text.isEmpty) return null;
+  final digits = StringBuffer();
+  for (final rune in text.runes) {
+    final char = String.fromCharCode(rune);
+    if (char.codeUnitAt(0) >= 48 && char.codeUnitAt(0) <= 57) {
+      digits.write(char);
+      continue;
+    }
+    if (digits.isNotEmpty) break;
+  }
+  if (digits.isEmpty) return null;
+  final value = int.tryParse(digits.toString());
+  if (value == null || value <= 0) return null;
+  return value;
 }
