@@ -71,6 +71,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
     if (body is! String) {
       return _prettyJsonEncoder.convert(body).trim();
     }
+    final sections = summarizeProductionScriptPlanSections(body);
+    if (sections.isNotEmpty) {
+      return sections.join('\n');
+    }
     return _plainTextDigest(body, maxLines: 8, maxChars: 420);
   }
 
@@ -116,6 +120,20 @@ class ProductionContextSnapshotView extends StatelessWidget {
       return missingRows.join('\n\n');
     }
     return rows.take(4).map(_formatStoryboardRow).join('\n\n');
+  }
+
+  String _reviewDigest(ProductionSupervisionReview review) {
+    final lines = <String>[
+      '目标: ${review.target}',
+      '评级: ${review.grade}',
+      '问题: 严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
+      '下一步: ${review.nextAction}',
+      if (review.assetIds.isNotEmpty) '聚焦资产: ${review.assetIds.join(', ')}',
+      if (review.storyboardIds.isNotEmpty)
+        '聚焦镜头: ${review.storyboardIds.join(', ')}',
+      if (review.summary.isNotEmpty) '结论: ${review.summary}',
+    ];
+    return lines.join('\n');
   }
 
   String _formatStoryboardTableRow(Map<String, dynamic> row) {
@@ -263,6 +281,15 @@ class ProductionContextSnapshotView extends StatelessWidget {
     final text = result['result'];
     if (text is String && text.trim().isNotEmpty) {
       addPreviewCard(title: '工具返回文本', subtitle: '来自 $toolName', body: text);
+    }
+
+    final review = parseProductionSupervisionReview(result);
+    if (review != null) {
+      addPreviewCard(
+        title: '审核摘要',
+        subtitle: '来自 $toolName',
+        body: _reviewDigest(review),
+      );
     }
 
     if (sections.isEmpty) return const SizedBox.shrink();

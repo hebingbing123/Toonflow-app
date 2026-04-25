@@ -97,4 +97,55 @@ void main() {
       expect(find.textContaining('第3场 城门'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'ProductionContextSnapshotView prefers script plan section digest and review summary',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: ProductionContextSnapshotView(
+              workspaceLastToolName: 'run_sub_agent_production_supervision',
+              workspaceSuggestedFlowKey: 'scriptPlan',
+              workspaceLastToolResultData: <String, dynamic>{
+                'data': <String, dynamic>{
+                  'scriptPlan': '''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+
+② 视觉风格与画面基调
+冷金对比，朝堂压迫感要强，人物特写优先保留眼神戏。
+</scriptPlan>
+''',
+                },
+                'review': <String, dynamic>{
+                  'target': 'storyboardTable',
+                  'grade': 'B',
+                  'severeCount': '0',
+                  'mediumCount': '1',
+                  'minorCount': '0',
+                  'nextAction': 'generate_storyboard',
+                  'summary': '只需补关键缺帧镜头',
+                  'assetIds': '7,12',
+                  'storyboardIds': '3,9',
+                },
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('flow[scriptPlan]'), findsOneWidget);
+      expect(
+        find.textContaining('① 主题立意与叙事核心：女主复仇线要压住爽感'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('② 视觉风格与画面基调：冷金对比'), findsOneWidget);
+      expect(find.text('审核摘要'), findsOneWidget);
+      expect(find.textContaining('聚焦资产: 7, 12'), findsOneWidget);
+      expect(find.textContaining('聚焦镜头: 3, 9'), findsOneWidget);
+      expect(find.textContaining('下一步: generate_storyboard'), findsOneWidget);
+    },
+  );
 }

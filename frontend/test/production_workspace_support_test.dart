@@ -938,6 +938,23 @@ void main() {
     expect(lines, contains('规划维度 3/6'));
   });
 
+  test('summarizeProductionScriptPlanSections extracts compact section digest', () {
+    final sections = summarizeProductionScriptPlanSections('''
+<scriptPlan>
+① 主题立意与叙事核心
+女主复仇线要压住爽感，并保证前两场快速立住目标。
+
+② 视觉风格与画面基调
+冷金对比，朝堂压迫感要强，人物特写优先保留眼神戏。
+</scriptPlan>
+''');
+
+    expect(sections, <String>[
+      '① 主题立意与叙事核心：女主复仇线要压住爽感，并保证前两场快速立住目标。',
+      '② 视觉风格与画面基调：冷金对比，朝堂压迫感要强，人物特写优先保留眼神戏。',
+    ]);
+  });
+
   test('productionFlowEntryHasMediaResult supports src fields', () {
     expect(
       productionFlowEntryHasMediaResult(<String, dynamic>{

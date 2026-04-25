@@ -366,6 +366,53 @@ int countProductionScriptPlanSections(Object? flowData) {
   return matches.clamp(0, 6);
 }
 
+List<String> summarizeProductionScriptPlanSections(
+  Object? flowData, {
+  int maxSections = 4,
+}) {
+  if (flowData is! String) return const <String>[];
+  final text = flowData
+      .replaceAll(RegExp(r'</?scriptPlan>'), '')
+      .trim();
+  if (text.isEmpty) return const <String>[];
+
+  final summaries = <String>[];
+  String? currentHeading;
+  String? currentDetail;
+
+  void flushSection() {
+    final heading = currentHeading?.trim() ?? '';
+    if (heading.isEmpty) return;
+    final detail = currentDetail?.trim() ?? '';
+    if (detail.isEmpty || detail == heading) {
+      summaries.add(heading);
+    } else {
+      final compactDetail = detail.replaceAll(RegExp(r'\s+'), ' ').trim();
+      final clipped = compactDetail.length <= 54
+          ? compactDetail
+          : '${compactDetail.substring(0, 54)}...';
+      summaries.add('$heading：$clipped');
+    }
+  }
+
+  for (final rawLine in text.split('\n')) {
+    final line = rawLine.trim();
+    if (line.isEmpty) continue;
+    if (RegExp(r'^[①②③④⑤⑥]').hasMatch(line)) {
+      flushSection();
+      currentHeading = line;
+      currentDetail = null;
+      continue;
+    }
+    if (currentHeading != null && currentDetail == null) {
+      currentDetail = line;
+    }
+  }
+  flushSection();
+  if (summaries.isEmpty) return const <String>[];
+  return summaries.take(maxSections).toList(growable: false);
+}
+
 List<Map<String, dynamic>> parseProductionStoryboardTableMarkdown(String text) {
   final tableLines = text
       .split('\n')
