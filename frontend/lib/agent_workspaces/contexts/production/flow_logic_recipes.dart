@@ -253,11 +253,11 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       domainArgs: _assetsCompactArgs(),
     ),
     ProductionWorkspaceRecipe(
-      title: '检查分镜落地',
-      detail: '如计划已定，可直接回看 storyboard 的实际生成状态。',
-      flowKey: 'storyboard',
+      title: '先看分镜表落地',
+      detail: '如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。',
+      flowKey: 'storyboardTable',
       domainTool: 'get_flowData',
-      domainArgs: buildProductionStoryboardReviewArgs(),
+      domainArgs: buildProductionStoryboardTableReadArgs(),
     ),
   ];
 }

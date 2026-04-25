@@ -114,18 +114,20 @@ void main() {
       'limit': 24,
     });
     expect(recipes[2].domainArgs, <String, dynamic>{
-      'key': 'storyboard',
+      'key': 'storyboardTable',
       'fields': <String>[
         'id',
-        'index',
+        'description',
+        'scene',
         'duration',
-        'src',
-        'state',
+        'camera',
         'associateAssetsIds',
-        'shouldGenerateImage',
       ],
-      'limit': 12,
+      'rowStart': 1,
+      'rowCount': 8,
     });
+    expect(recipes[2].flowKey, 'storyboardTable');
+    expect(recipes[2].title, '先看分镜表落地');
   });
 
   test('parseProductionSupervisionReview reads structured review payload', () {
