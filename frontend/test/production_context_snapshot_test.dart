@@ -17,8 +17,9 @@ void main() {
                   'storyboardTable': '''
 | 序号 | 画面描述 | 场景 | 时长 | 关联资产ID |
 |---|---|---|---|---|
-| 1 | 皇帝在大殿中宣布出征，群臣静默。 | 大殿 | 3s | [12, 7] |
-| 2 | 将军抬头回应，镜头推进到手中兵符。 | 大殿 | 2s | [7] |
+| 101 | 皇帝在大殿中宣布出征，群臣静默。 | 大殿 | 3s | [12, 7] |
+| 102 | 将军抬头回应，镜头推进到手中兵符。 | 大殿 | 2s | [7] |
+| 103 | 殿外旌旗猎猎，士兵列阵。 | 城门 | 2s | [9] |
 ''',
                   'storyboard': <Map<String, dynamic>>[
                     <String, dynamic>{
@@ -50,18 +51,23 @@ void main() {
 
       expect(find.text('上下文快照'), findsOneWidget);
       expect(find.text('flow[storyboardTable]'), findsOneWidget);
-      expect(find.textContaining('分镜表 2 行'), findsOneWidget);
-      expect(find.textContaining('镜头 #1\n场景: 大殿'), findsOneWidget);
+      expect(find.textContaining('分镜表 3 行'), findsOneWidget);
+      expect(find.textContaining('优先展示缺帧相关镜头'), findsOneWidget);
+      expect(find.textContaining('镜头 #101\n场景: 大殿'), findsOneWidget);
       expect(
         find.textContaining('皇帝在大殿中宣布出征，群臣静默。\n资产: 7, 12'),
         findsOneWidget,
       );
+      expect(find.textContaining('镜头 #102'), findsNothing);
+      expect(find.textContaining('其余 2 行已折叠'), findsOneWidget);
 
       expect(find.text('flow[storyboard]'), findsOneWidget);
       expect(find.textContaining('缺帧 1 项'), findsOneWidget);
+      expect(find.textContaining('优先展示缺帧镜头'), findsOneWidget);
       expect(find.textContaining('结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #101\n结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #102'), findsNothing);
+      expect(find.textContaining('其余 2 项已折叠'), findsOneWidget);
     },
   );
 

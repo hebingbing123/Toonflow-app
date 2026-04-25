@@ -26,7 +26,11 @@ class ProductionContextSnapshotView extends StatelessWidget {
     return '${value.substring(0, maxChars)}...';
   }
 
-  String _buildPreviewBody(Object body, {String? flowKey}) {
+  String _buildPreviewBody(
+    Object body, {
+    String? flowKey,
+    Set<int> focusedStoryboardIds = const <int>{},
+  }) {
     final normalizedKey = flowKey?.trim() ?? '';
     final summary = summarizeProductionFlowValue(
       body,
@@ -35,7 +39,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
     final digest = switch (normalizedKey) {
       'script' => _scriptDigest(body),
       'scriptPlan' => _scriptPlanDigest(body),
-      'storyboardTable' => _storyboardTableDigest(body),
+      'storyboardTable' => _storyboardTableDigest(
+        body,
+        focusedStoryboardIds: focusedStoryboardIds,
+      ),
       'storyboard' => _storyboardDigest(body),
       _ => switch (body) {
           String value => value.trim(),
@@ -78,7 +85,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
     return _plainTextDigest(body, maxLines: 8, maxChars: 420);
   }
 
-  String _storyboardTableDigest(Object body) {
+  String _storyboardTableDigest(
+    Object body, {
+    Set<int> focusedStoryboardIds = const <int>{},
+  }) {
     final rows = switch (body) {
       String value => parseProductionStoryboardTableMarkdown(value),
       Map<String, dynamic> value => (value['rows'] is List)
@@ -94,7 +104,27 @@ class ProductionContextSnapshotView extends StatelessWidget {
         _ => _prettyJsonEncoder.convert(body).trim(),
       };
     }
-    return rows.take(4).map(_formatStoryboardTableRow).join('\n\n');
+    final focusedRows = focusedStoryboardIds.isEmpty
+        ? const <Map<String, dynamic>>[]
+        : rows.where((row) {
+            final id = _readNumericId(
+              row['id'] ??
+                  row['numeric_id'] ??
+                  row['numericId'] ??
+                  row['storyboardId'],
+            );
+            return id != null && focusedStoryboardIds.contains(id);
+          }).toList(growable: false);
+    final selectedRows = (focusedRows.isNotEmpty ? focusedRows : rows)
+        .take(4)
+        .toList(growable: false);
+    final hiddenCount = rows.length - selectedRows.length;
+    final lines = <String>[
+      if (focusedRows.isNotEmpty) '优先展示缺帧相关镜头',
+      ...selectedRows.map(_formatStoryboardTableRow),
+      if (hiddenCount > 0) '其余 $hiddenCount 行已折叠',
+    ];
+    return lines.join('\n\n');
   }
 
   String _storyboardDigest(Object body) {
@@ -113,13 +143,18 @@ class ProductionContextSnapshotView extends StatelessWidget {
           return productionStoryboardEntryNeedsImageGeneration(row) &&
               !productionFlowEntryHasMediaResult(row);
         })
+        .toList(growable: false);
+    final selectedRows = (missingRows.isNotEmpty ? missingRows : rows)
         .take(4)
         .map(_formatStoryboardRow)
         .toList(growable: false);
-    if (missingRows.isNotEmpty) {
-      return missingRows.join('\n\n');
-    }
-    return rows.take(4).map(_formatStoryboardRow).join('\n\n');
+    final hiddenCount = rows.length - selectedRows.length;
+    final lines = <String>[
+      if (missingRows.isNotEmpty) '优先展示缺帧镜头',
+      ...selectedRows,
+      if (hiddenCount > 0) '其余 $hiddenCount 项已折叠',
+    ];
+    return lines.join('\n\n');
   }
 
   String _reviewDigest(ProductionSupervisionReview review) {
@@ -210,8 +245,13 @@ class ProductionContextSnapshotView extends StatelessWidget {
       required Object body,
       String? flowKey,
       String? subtitle,
+      Set<int> focusedStoryboardIds = const <int>{},
     }) {
-      final normalized = _buildPreviewBody(body, flowKey: flowKey).trim();
+      final normalized = _buildPreviewBody(
+        body,
+        flowKey: flowKey,
+        focusedStoryboardIds: focusedStoryboardIds,
+      ).trim();
       if (normalized.isEmpty) return;
       sections.add(
         Card(
@@ -241,6 +281,9 @@ class ProductionContextSnapshotView extends StatelessWidget {
 
     final data = result['data'];
     if (data is Map<String, dynamic>) {
+      final focusedStoryboardIds = extractProductionStoryboardMissingImageIds(
+        data['storyboard'],
+      ).toSet();
       for (final key in <String>[
         'assets',
         'script',
@@ -255,6 +298,9 @@ class ProductionContextSnapshotView extends StatelessWidget {
           flowKey: key,
           subtitle: '来自 $toolName',
           body: value,
+          focusedStoryboardIds: key == 'storyboardTable'
+              ? focusedStoryboardIds
+              : const <int>{},
         );
       }
     } else if (toolName == 'get_flowData' &&
