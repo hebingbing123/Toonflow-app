@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/input_controller.dart';
 import 'package:openflow_app/agent_workspaces/operation_controller.dart';
 import 'package:openflow_app/agent_workspaces/run_controller.dart';
+import 'package:openflow_app/agent_workspaces/runtime_output_controller.dart';
 
 void main() {
   test('workspace run controller builds script workspace messages', () async {
     final inputController = WorkspaceInputController();
     final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
     addTearDown(inputController.dispose);
 
     final sent = <List<Map<String, dynamic>>>[];
@@ -16,6 +18,7 @@ void main() {
     final controller = WorkspaceRunController(
       inputController: inputController,
       operationController: operationController,
+      outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
       clearWsLog: () => clearWsLogCalls++,
@@ -46,12 +49,14 @@ void main() {
     () async {
       final inputController = WorkspaceInputController();
       final operationController = WorkspaceOperationController();
+      final outputController = WorkspaceOutputController();
       addTearDown(inputController.dispose);
 
       String? lastError;
       final controller = WorkspaceRunController(
         inputController: inputController,
         operationController: operationController,
+        outputController: outputController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
         clearWsLog: () {},
@@ -79,12 +84,14 @@ void main() {
   test('workspace run controller reports validation errors', () async {
     final inputController = WorkspaceInputController();
     final operationController = WorkspaceOperationController();
+    final outputController = WorkspaceOutputController();
     addTearDown(inputController.dispose);
 
     String? lastError;
     final controller = WorkspaceRunController(
       inputController: inputController,
       operationController: operationController,
+      outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
       clearWsLog: () {},

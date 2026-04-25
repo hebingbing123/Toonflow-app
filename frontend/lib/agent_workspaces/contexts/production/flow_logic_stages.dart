@@ -4,6 +4,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
+  Map<String, dynamic>? toolArguments,
 }) {
   final normalizedTool = toolName?.trim() ?? '';
   final normalizedKey = suggestedFlowKey?.trim() ?? '';
@@ -32,6 +33,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       toolName: normalizedTool,
       result: result,
       review: review,
+      toolArguments: toolArguments,
     ),
     _buildStoryboardTableStage(
       activeKey: activeKey,
@@ -46,6 +48,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       review: review,
       suggestedFlowKey: suggestedFlowKey,
       result: result,
+      toolArguments: toolArguments,
     ),
   ];
 }
@@ -192,6 +195,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   required String toolName,
   required Object? result,
   required ProductionSupervisionReview? review,
+  required Map<String, dynamic>? toolArguments,
 }) {
   if (review != null && review.nextAction == 'check_assets') {
     final assetArgs = buildProductionReviewAssetArgs(review);
@@ -299,13 +303,16 @@ ProductionWorkspaceStage _buildAssetsStage({
       toolName == 'del_deriveAsset' ||
       toolName == 'run_sub_agent_derive_assets' ||
       toolName == 'run_sub_agent_generate_assets') {
-    final refreshArgs = toolName == 'generate_deriveAsset'
+    final refreshArgs =
+        toolName == 'generate_deriveAsset' ||
+            toolName == 'run_sub_agent_generate_assets'
         ? buildProductionAssetReadArgs(
             ids: extractProductionActionCandidateIds(
               selectedTool: 'generate_deriveAsset',
               toolName: toolName,
               suggestedFlowKey: 'assets',
               result: result,
+              toolArguments: toolArguments,
             ),
           )
         : _assetsCompactArgs();
@@ -314,7 +321,9 @@ ProductionWorkspaceStage _buildAssetsStage({
       flowKey: 'assets',
       statusLabel: '建议刷新',
       detail:
-          toolName == 'generate_deriveAsset' && refreshArgs.containsKey('ids')
+          (toolName == 'generate_deriveAsset' ||
+                  toolName == 'run_sub_agent_generate_assets') &&
+              refreshArgs.containsKey('ids')
           ? '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。'
           : '资产相关动作刚执行，建议重新读取 assets 确认最新结果。',
       domainTool: 'get_flowData',
@@ -437,6 +446,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required ProductionSupervisionReview? review,
   required String? suggestedFlowKey,
   required Object? result,
+  required Map<String, dynamic>? toolArguments,
 }) {
   if (review != null &&
       (review.nextAction == 'check_storyboard' ||
@@ -514,12 +524,15 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
       toolName == 'run_sub_agent_storyboard_panel') {
-    final affectedIds = toolName == 'generate_storyboard'
+    final affectedIds =
+        toolName == 'generate_storyboard' ||
+            toolName == 'run_sub_agent_storyboard_gen'
         ? extractProductionActionCandidateIds(
             selectedTool: 'generate_storyboard',
             toolName: toolName,
             suggestedFlowKey: suggestedFlowKey,
             result: result,
+            toolArguments: toolArguments,
           )
         : const <int>[];
     final refreshArgs =

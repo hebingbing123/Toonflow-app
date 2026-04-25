@@ -44,6 +44,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.workspaceLastToolResultLine,
     this.workspaceLastToolName,
     this.workspaceLastToolResultData,
+    this.workspaceLastToolArguments,
     required this.workspaceSuggestedFlowKey,
     required this.workspaceWritebackLine,
     required this.onRunScriptWorkspace,
@@ -91,6 +92,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String? workspaceLastToolResultLine;
   final String? workspaceLastToolName;
   final Object? workspaceLastToolResultData;
+  final Map<String, dynamic>? workspaceLastToolArguments;
   final String? workspaceSuggestedFlowKey;
   final String? workspaceWritebackLine;
   final VoidCallback onRunScriptWorkspace;

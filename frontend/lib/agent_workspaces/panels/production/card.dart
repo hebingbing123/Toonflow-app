@@ -36,6 +36,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
     required this.workspaceLastToolResultLine,
     this.workspaceLastToolName,
     this.workspaceLastToolResultData,
+    this.workspaceLastToolArguments,
     required this.workspaceSuggestedFlowKey,
     required this.onSelectPrompt,
     required this.onProductionDomainToolChanged,
@@ -65,6 +66,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
   final String? workspaceLastToolResultLine;
   final String? workspaceLastToolName;
   final Object? workspaceLastToolResultData;
+  final Map<String, dynamic>? workspaceLastToolArguments;
   final String? workspaceSuggestedFlowKey;
   final ValueChanged<String> onSelectPrompt;
   final ValueChanged<String> onProductionDomainToolChanged;

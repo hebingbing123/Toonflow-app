@@ -4,6 +4,7 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
+  Map<String, dynamic>? toolArguments,
 }) {
   final normalizedTool = toolName?.trim() ?? '';
   if (normalizedTool.isEmpty || result is! Map<String, dynamic>) {
@@ -32,12 +33,14 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     }
   }
 
-  if (normalizedTool == 'generate_storyboard') {
+  if (normalizedTool == 'generate_storyboard' ||
+      normalizedTool == 'run_sub_agent_storyboard_gen') {
     final affectedIds = extractProductionActionCandidateIds(
       selectedTool: 'generate_storyboard',
       toolName: toolName,
       suggestedFlowKey: suggestedFlowKey,
       result: result,
+      toolArguments: toolArguments,
     );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -60,14 +63,18 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   }
 
   if (normalizedTool == 'generate_deriveAsset' ||
+      normalizedTool == 'run_sub_agent_generate_assets' ||
       normalizedTool == 'add_deriveAsset' ||
       normalizedTool == 'del_deriveAsset') {
-    final affectedIds = normalizedTool == 'generate_deriveAsset'
+    final affectedIds =
+        normalizedTool == 'generate_deriveAsset' ||
+            normalizedTool == 'run_sub_agent_generate_assets'
         ? extractProductionActionCandidateIds(
             selectedTool: 'generate_deriveAsset',
             toolName: toolName,
             suggestedFlowKey: suggestedFlowKey,
             result: result,
+            toolArguments: toolArguments,
           )
         : const <int>[];
     return <ProductionWorkspaceRecipe>[

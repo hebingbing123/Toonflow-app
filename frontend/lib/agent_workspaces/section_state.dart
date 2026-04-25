@@ -94,12 +94,15 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           loadingScriptDomainProbe: widget.loadingScriptDomainProbe,
           loadingScriptSubAgentRun: widget.loadingScriptSubAgentRun,
           loadingScriptResultWriteback: widget.loadingScriptResultWriteback,
-          loadingScriptPlanResultWriteback: widget.loadingScriptPlanResultWriteback,
+          loadingScriptPlanResultWriteback:
+              widget.loadingScriptPlanResultWriteback,
           scopeScriptIdText: widget.scriptIdController.text,
           workspaceAssistantText: widget.workspaceAssistantText,
           workspaceScriptWritebackSource: widget.workspaceScriptWritebackSource,
-          workspaceScriptWritebackCandidate: widget.workspaceScriptWritebackCandidate,
-          workspaceScriptPlanWritebackCandidate: widget.workspaceScriptPlanWritebackCandidate,
+          workspaceScriptWritebackCandidate:
+              widget.workspaceScriptWritebackCandidate,
+          workspaceScriptPlanWritebackCandidate:
+              widget.workspaceScriptPlanWritebackCandidate,
           workspaceScriptPlanRowId: widget.workspaceScriptPlanRowId,
           workspaceLastToolName: widget.workspaceLastToolName,
           workspaceLastToolResultData: widget.workspaceLastToolResultData,
@@ -133,7 +136,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           productionPromptController: widget.productionPromptController,
           productionDomainToolController: widget.productionDomainToolController,
           productionDomainArgsController: widget.productionDomainArgsController,
-          productionSubAgentToolController: widget.productionSubAgentToolController,
+          productionSubAgentToolController:
+              widget.productionSubAgentToolController,
           flowKeyController: widget.flowKeyController,
           productionPromptPresets: _productionPromptPresets,
           productionDomainToolPresets: _productionDomainToolPresets,
@@ -142,10 +146,12 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           loadingProductionWorkspaceRun: widget.loadingProductionWorkspaceRun,
           loadingProductionFlowProbe: widget.loadingProductionFlowProbe,
           loadingProductionSubAgentRun: widget.loadingProductionSubAgentRun,
-          loadingProductionResultWriteback: widget.loadingProductionResultWriteback,
+          loadingProductionResultWriteback:
+              widget.loadingProductionResultWriteback,
           workspaceLastToolResultLine: widget.workspaceLastToolResultLine,
           workspaceLastToolName: widget.workspaceLastToolName,
           workspaceLastToolResultData: widget.workspaceLastToolResultData,
+          workspaceLastToolArguments: widget.workspaceLastToolArguments,
           workspaceSuggestedFlowKey: widget.workspaceSuggestedFlowKey,
           onSelectPrompt: (String prompt) {
             setState(() => widget.productionPromptController.text = prompt);
@@ -159,7 +165,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           onFlowKeyChanged: (String value) {
             setState(() {
               widget.flowKeyController.text = value;
-              if (widget.productionDomainToolController.text.trim() == 'get_flowData') {
+              if (widget.productionDomainToolController.text.trim() ==
+                  'get_flowData') {
                 _maybeApplyProductionToolArgsPreset('get_flowData');
               }
             });
@@ -167,10 +174,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           onRunProductionWorkspace: widget.onRunProductionWorkspace,
           onProbeProductionDomainTool: widget.onProbeProductionDomainTool,
           onProductionSubAgentChanged: (String value) {
-            setState(() => widget.productionSubAgentToolController.text = value);
+            setState(
+              () => widget.productionSubAgentToolController.text = value,
+            );
           },
           onRunProductionSubAgentTool: widget.onRunProductionSubAgentTool,
-          onWriteBackProductionFlowResult: widget.onWriteBackProductionFlowResult,
+          onWriteBackProductionFlowResult:
+              widget.onWriteBackProductionFlowResult,
           onApplySuggestedFlowKey: widget.onApplySuggestedFlowKey,
         );
       case AgentWorkspacePane.activity:
@@ -186,7 +196,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   /// Agent 工作区外层视图，负责标题、范围输入与 pane 壳层布局。
   Widget _buildAgentWorkspacesSectionView(BuildContext context) {
     final title = widget.sectionTitle ?? 'Agent 工作区';
-    final description = widget.sectionDescription ??
+    final description =
+        widget.sectionDescription ??
         '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独执行动态面板。';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,4 +234,3 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     return _buildAgentWorkspacesSectionView(context);
   }
 }
-

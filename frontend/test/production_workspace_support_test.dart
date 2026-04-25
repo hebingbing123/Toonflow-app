@@ -224,6 +224,75 @@ void main() {
     },
   );
 
+  test(
+    'extractProductionActionCandidateIds restores asset ids from sub-agent prompt scope',
+    () {
+      final ids = extractProductionActionCandidateIds(
+        selectedTool: 'generate_deriveAsset',
+        toolName: 'run_sub_agent_generate_assets',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{'result': 'done'},
+        toolArguments: <String, dynamic>{
+          'prompt': '请先检查并补跑。优先处理 asset ids=12, 7, 5，不要扩读其他素材。',
+        },
+      );
+
+      expect(ids, <int>[5, 7, 12]);
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows asset refresh after asset sub-agent run',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_generate_assets',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{'result': '已完成'},
+        toolArguments: <String, dynamic>{
+          'prompt': '先检查 asset ids=12,7，再决定是否补跑。',
+        },
+      );
+
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes.first.detail, contains('资产 #7, 12'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages narrows storyboard refresh after sub-agent run',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_storyboard_gen',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{'result': '已完成'},
+        toolArguments: <String, dynamic>{
+          'prompt': '优先处理 storyboard ids=3, 9, 4，不要重跑已有结果。',
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'fields': <String>[
+          'id',
+          'index',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+        'ids': <int>[3, 4, 9],
+      });
+      expect(storyboardStage.detail, contains('镜头 #3, 4, 9'));
+    },
+  );
+
   test('parseProductionSupervisionReview reads structured review payload', () {
     final review = parseProductionSupervisionReview(<String, dynamic>{
       'review': <String, dynamic>{

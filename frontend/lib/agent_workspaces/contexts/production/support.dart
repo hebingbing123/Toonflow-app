@@ -125,6 +125,7 @@ List<int> extractProductionActionCandidateIds({
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
+  Map<String, dynamic>? toolArguments,
 }) {
   final normalizedSelectedTool = selectedTool?.trim() ?? '';
   final normalizedToolName = toolName?.trim() ?? '';
@@ -159,6 +160,15 @@ List<int> extractProductionActionCandidateIds({
 
   if (normalizedToolName == 'generate_storyboard') {
     return _extractToolScopedIds(result['storyboardIds']);
+  }
+
+  final promptScopedIds = _extractPromptScopedIds(
+    selectedTool: normalizedSelectedTool,
+    toolName: normalizedToolName,
+    toolArguments: toolArguments,
+  );
+  if (promptScopedIds.isNotEmpty) {
+    return promptScopedIds;
   }
 
   Object? data = result['data'];
@@ -830,6 +840,7 @@ buildProductionActionArgumentSuggestions({
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
+  Map<String, dynamic>? toolArguments,
 }) {
   final normalizedSelectedTool = selectedTool?.trim() ?? '';
   final flowData = _resolveProductionFlowData(
@@ -849,6 +860,7 @@ buildProductionActionArgumentSuggestions({
           toolName: toolName,
           suggestedFlowKey: suggestedFlowKey,
           result: result,
+          toolArguments: toolArguments,
         ),
       );
     case 'generate_storyboard':
@@ -858,6 +870,7 @@ buildProductionActionArgumentSuggestions({
           toolName: toolName,
           suggestedFlowKey: suggestedFlowKey,
           result: result,
+          toolArguments: toolArguments,
         ),
       );
     default:
@@ -1167,6 +1180,66 @@ List<int> _extractToolScopedIds(Object? value) {
   final ids = value.map(_parseLooseInt).where((id) => id > 0).toSet().toList();
   ids.sort();
   return ids;
+}
+
+List<int> _extractPromptScopedIds({
+  required String selectedTool,
+  required String toolName,
+  required Map<String, dynamic>? toolArguments,
+}) {
+  if (toolArguments == null || toolArguments.isEmpty) {
+    return const <int>[];
+  }
+  if (toolName == 'run_sub_agent_generate_assets' &&
+      selectedTool == 'generate_deriveAsset') {
+    return _extractPromptIds(
+      toolArguments,
+      explicitKey: 'assetIds',
+      noun: 'asset',
+    );
+  }
+  if (toolName == 'run_sub_agent_storyboard_gen' &&
+      selectedTool == 'generate_storyboard') {
+    return _extractPromptIds(
+      toolArguments,
+      explicitKey: 'storyboardIds',
+      noun: 'storyboard',
+    );
+  }
+  return const <int>[];
+}
+
+List<int> _extractPromptIds(
+  Map<String, dynamic> arguments, {
+  required String explicitKey,
+  required String noun,
+}) {
+  final explicitIds = _extractToolScopedIds(arguments[explicitKey]);
+  if (explicitIds.isNotEmpty) {
+    return explicitIds;
+  }
+  final prompt = (arguments['prompt'] as String?)?.trim() ?? '';
+  if (prompt.isEmpty) {
+    return const <int>[];
+  }
+  final ids = <int>{};
+  final patterns = <RegExp>[
+    RegExp('$noun\\s+ids?\\s*=\\s*([\\d,\\s]+)', caseSensitive: false),
+    RegExp('$noun\\s*#([\\d,\\s]+)', caseSensitive: false),
+  ];
+  for (final pattern in patterns) {
+    for (final match in pattern.allMatches(prompt)) {
+      final scope = match.group(1) ?? '';
+      for (final idMatch in RegExp(r'\d+').allMatches(scope)) {
+        final id = int.tryParse(idMatch.group(0) ?? '');
+        if (id != null && id > 0) {
+          ids.add(id);
+        }
+      }
+    }
+  }
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
 }
 
 List<String> _splitMarkdownTableRow(String line) {

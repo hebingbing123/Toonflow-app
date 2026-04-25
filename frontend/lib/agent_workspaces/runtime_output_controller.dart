@@ -7,17 +7,21 @@ class WorkspaceOutputController extends ChangeNotifier {
   String? _lastToolResultLine;
   String? _lastToolName;
   Object? _lastToolResultData;
+  Map<String, dynamic>? _lastToolArguments;
   String? _suggestedFlowKey;
   String? _scriptWritebackCandidate;
   Map<String, dynamic>? _scriptPlanWritebackCandidate;
   int? _scriptPlanRowId;
   String? _scriptWritebackSource;
   String? _writebackLine;
+  String? _pendingToolName;
+  Map<String, dynamic>? _pendingToolArguments;
 
   String get assistantText => _assistantText;
   String? get lastToolResultLine => _lastToolResultLine;
   String? get lastToolName => _lastToolName;
   Object? get lastToolResultData => _lastToolResultData;
+  Map<String, dynamic>? get lastToolArguments => _lastToolArguments;
   String? get suggestedFlowKey => _suggestedFlowKey;
   String? get scriptWritebackCandidate => _scriptWritebackCandidate;
   Map<String, dynamic>? get scriptPlanWritebackCandidate =>
@@ -31,12 +35,15 @@ class WorkspaceOutputController extends ChangeNotifier {
     _lastToolResultLine = null;
     _lastToolName = null;
     _lastToolResultData = null;
+    _lastToolArguments = null;
     _suggestedFlowKey = null;
     _scriptWritebackCandidate = null;
     _scriptPlanWritebackCandidate = null;
     _scriptPlanRowId = null;
     _scriptWritebackSource = null;
     _writebackLine = null;
+    _pendingToolName = null;
+    _pendingToolArguments = null;
     notifyListeners();
   }
 
@@ -74,9 +81,21 @@ class WorkspaceOutputController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void recordToolInvocation(String name, Map<String, dynamic> arguments) {
+    _pendingToolName = name;
+    _pendingToolArguments = Map<String, dynamic>.from(arguments);
+  }
+
   void recordToolResult(String name, Object? result, {String? currentFlowKey}) {
     _lastToolName = name;
     _lastToolResultData = result;
+    if (_pendingToolName == name && _pendingToolArguments != null) {
+      _lastToolArguments = Map<String, dynamic>.from(_pendingToolArguments!);
+    } else {
+      _lastToolArguments = null;
+    }
+    _pendingToolName = null;
+    _pendingToolArguments = null;
     _suggestedFlowKey = _suggestFlowKeyFromToolName(
       name,
       currentFlowKey: currentFlowKey,

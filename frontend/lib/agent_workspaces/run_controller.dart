@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'input_controller.dart';
 import 'operation_controller.dart';
+import 'runtime_output_controller.dart';
 
 part 'run_controller_helpers.dart';
 
@@ -15,6 +16,7 @@ class WorkspaceRunController {
   WorkspaceRunController({
     required WorkspaceInputController inputController,
     required WorkspaceOperationController operationController,
+    required WorkspaceOutputController outputController,
     required WorkspaceRunAccessTokenProvider accessTokenProvider,
     required WorkspaceRunErrorSink onErrorChanged,
     required WorkspaceRunStateReset clearWsLog,
@@ -22,6 +24,7 @@ class WorkspaceRunController {
     required WorkspaceRunRequestSender requestSender,
   }) : _inputController = inputController,
        _operationController = operationController,
+       _outputController = outputController,
        _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
        _clearWsLog = clearWsLog,
@@ -30,6 +33,7 @@ class WorkspaceRunController {
 
   final WorkspaceInputController _inputController;
   final WorkspaceOperationController _operationController;
+  final WorkspaceOutputController _outputController;
   final WorkspaceRunAccessTokenProvider _accessTokenProvider;
   final WorkspaceRunErrorSink _onErrorChanged;
   final WorkspaceRunStateReset _clearWsLog;
@@ -125,6 +129,9 @@ class WorkspaceRunController {
         'payload': <String, dynamic>{'name': normalizedTool, 'arguments': args},
       },
     ]);
+    if (sent) {
+      _outputController.recordToolInvocation(toolName, args);
+    }
     if (!sent) {
       _operationController.setLoading(
         WorkspaceOperation.scriptDomainProbe,
@@ -309,6 +316,7 @@ class WorkspaceRunController {
       WorkspaceOperation.productionSubAgentRun,
       true,
     );
+    final arguments = <String, dynamic>{'prompt': prompt, 'scriptId': scriptId};
     final sent = await _requestSender(token, <Map<String, dynamic>>[
       <String, dynamic>{
         'type': 'agent.production.attach',
@@ -322,15 +330,12 @@ class WorkspaceRunController {
       <String, dynamic>{
         'type': 'harness.tool.invoke',
         'schema_version': 1,
-        'payload': <String, dynamic>{
-          'name': toolName,
-          'arguments': <String, dynamic>{
-            'prompt': prompt,
-            'scriptId': scriptId,
-          },
-        },
+        'payload': <String, dynamic>{'name': toolName, 'arguments': arguments},
       },
     ]);
+    if (sent) {
+      _outputController.recordToolInvocation(toolName, arguments);
+    }
     if (!sent) {
       _operationController.setLoading(
         WorkspaceOperation.productionSubAgentRun,

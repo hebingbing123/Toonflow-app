@@ -32,6 +32,7 @@ extension _AgentWorkspaceProductionCardSupport
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
       result: widget.workspaceLastToolResultData,
+      toolArguments: widget.workspaceLastToolArguments,
     );
   }
 
@@ -40,6 +41,7 @@ extension _AgentWorkspaceProductionCardSupport
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
       result: widget.workspaceLastToolResultData,
+      toolArguments: widget.workspaceLastToolArguments,
     );
   }
 

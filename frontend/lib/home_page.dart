@@ -126,6 +126,7 @@ class _HomePageState extends State<HomePage> {
       WorkspaceRunController(
         inputController: _workspaceInputController,
         operationController: _workspaceOperationController,
+        outputController: _workspaceOutputController,
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
         clearWsLog: _skillsHarnessController.wsLog.clear,

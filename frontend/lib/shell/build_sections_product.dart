@@ -99,6 +99,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       workspaceLastToolResultLine: _workspaceOutputController.lastToolResultLine,
       workspaceLastToolName: _workspaceOutputController.lastToolName,
       workspaceLastToolResultData: _workspaceOutputController.lastToolResultData,
+      workspaceLastToolArguments: _workspaceOutputController.lastToolArguments,
       workspaceSuggestedFlowKey: _workspaceOutputController.suggestedFlowKey,
       workspaceWritebackLine: _workspaceOutputController.writebackLine,
       onRunScriptWorkspace: _workspaceRunController.runScriptWorkspaceAgent,
@@ -198,4 +199,3 @@ extension _HomePageBuildProductSections on _HomePageState {
       ),
   ];
 }
-
