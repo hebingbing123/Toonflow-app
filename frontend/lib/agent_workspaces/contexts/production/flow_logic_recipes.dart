@@ -358,6 +358,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
   ProductionSupervisionReview review,
 ) {
   final summary = review.summary.isEmpty ? '按审核结论继续推进。' : review.summary;
+  final assetScope = summarizeProductionAssetReviewScope(review);
   final storyboardFocus = summarizeProductionStoryboardFocusIds(
     review.storyboardIds,
   );
@@ -394,10 +395,17 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '核对资产支撑',
-          detail: '审核结论：$summary',
+          detail: '审核结论：$summary；优先只看$assetScope，确认导演计划缺口。',
           flowKey: 'assets',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewAssetArgs(review),
+        ),
+        ProductionWorkspaceRecipe(
+          title: '回看导演计划',
+          detail: '资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。',
+          flowKey: 'scriptPlan',
+          domainTool: 'get_flowData',
+          domainArgs: _scriptPlanCompactArgs(),
         ),
       ];
     case 'check_storyboard':

@@ -31,6 +31,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
       result: result,
+      review: review,
     ),
     _buildStoryboardTableStage(
       activeKey: activeKey,
@@ -89,6 +90,9 @@ String? _resolveProductionStageActiveKey({
     return suggestedFlowKey;
   }
   if (toolName == 'run_sub_agent_production_supervision') {
+    if (review?.nextAction == 'check_assets') {
+      return 'assets';
+    }
     return review?.target;
   }
   return switch (toolName) {
@@ -187,7 +191,21 @@ ProductionWorkspaceStage _buildAssetsStage({
   required Map<String, Object?> flowSnapshot,
   required String toolName,
   required Object? result,
+  required ProductionSupervisionReview? review,
 }) {
+  if (review != null && review.nextAction == 'check_assets') {
+    final assetArgs = buildProductionReviewAssetArgs(review);
+    final assetScope = summarizeProductionAssetScope(assetArgs);
+    return ProductionWorkspaceStage(
+      title: '资产准备',
+      flowKey: 'assets',
+      statusLabel: _reviewStatusLabel(review),
+      detail:
+          '${_reviewDetail(review)} 优先只核对$assetScope，确认后回到 scriptPlan 收束导演计划。',
+      domainTool: 'get_flowData',
+      domainArgs: assetArgs,
+    );
+  }
   final data = flowSnapshot['assets'];
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
@@ -540,8 +558,12 @@ String _reviewDetail(ProductionSupervisionReview review) {
   final reviewScope = summarizeProductionStoryboardReviewScope(
     review.storyboardIds,
   );
+  final assetScope = review.nextAction == 'check_assets'
+      ? summarizeProductionAssetReviewScope(review)
+      : '';
   final scopeLine = reviewScope.isEmpty ? '' : ' 局部范围：$reviewScope。';
-  return '审核等级 ${review.grade}，严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}。$summary$scopeLine';
+  final assetLine = assetScope.isEmpty ? '' : ' 资产范围：$assetScope。';
+  return '审核等级 ${review.grade}，严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}。$summary$scopeLine$assetLine';
 }
 
 int _readInt(Object? value) {

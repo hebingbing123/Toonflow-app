@@ -103,6 +103,9 @@ description: >-
    - 能从 `scriptPlan` 明确定位到具体资产时，优先调用 `get_flowData({ key: "assets", ids: [资产ID...], fields: ["id", "name", "type", "derive"] })`
    - 无法精准定位时，先调用 `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "derive"], limit: 12 })`
    - 仅当 `scriptPlan` 明确涉及关键道具、法器、信物或状态型物件时，再补一次 `get_flowData({ key: "assets", assetTypes: ["tool"], fields: ["id", "name", "type", "derive"], limit: 12 })`
+4. 若判断下一步应为 `check_assets`，只保留支撑该结论所需的最小资产范围：
+   - 已定位真实资产时，只输出这批 `assetIds`
+   - 未定位真实资产时，只允许回退到当前最小类型范围（通常 `role/scene`，必要时再补 `tool`），不要把整包 assets 拉满
 
 优先最小读取：信息足够时不得补读整段剧本或整份 assets。
 

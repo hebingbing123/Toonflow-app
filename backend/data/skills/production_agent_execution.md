@@ -142,7 +142,8 @@ add_deriveAsset({
 1. 加载风格技法参考，先用 `get_flowData({ key: "script", lineStart: 1, lineEnd: 48, maxChars: 1400 })` 获取剧本窗口，并激活 `director_planning_narrative` 以及 `director_planning_style`；所有规划内容以该文档为风格基准，冲突时以风格技法参考为准。
 2. 先只补读导演规划必需的角色与场景资产：调用 `get_flowData({ key: "assets", assetTypes: ["role", "scene"], fields: ["id", "name", "type", "desc", "derive"], limit: 12 })`；仅当当前剧本窗口里明确出现关键道具或状态变体时，再补一次 `assetTypes: ["tool"]`。
 3. 若规划里需要核对某个具体衍生状态或单个资产是否已存在，优先按真实资产 ID 精确读取；禁止为了写 `scriptPlan` 默认整包读取 assets。
-4. 按下方规范制定导演规划（创作规划），全文遵守「导演具象化原则」
+4. 若上游监督要求先 `check_assets`，核对结束后只回到紧凑 `scriptPlan` 判断缺口是否闭合；不要在资产核对完成前提前扩读 `storyboardTable` 或 `storyboard`。
+5. 按下方规范制定导演规划（创作规划），全文遵守「导演具象化原则」
 
 ### 导演具象化原则（贯穿全文）
 

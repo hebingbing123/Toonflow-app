@@ -597,6 +597,23 @@ String summarizeProductionAssetScope(Map<String, dynamic> args) {
   return '紧凑资产摘要';
 }
 
+String summarizeProductionAssetReviewScope(ProductionSupervisionReview review) {
+  return summarizeProductionAssetScope(buildProductionReviewAssetArgs(review));
+}
+
+String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
+  final args = buildProductionReviewAssetArgs(review);
+  final scope = summarizeProductionAssetScope(args);
+  final summary = review.summary.trim();
+  final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
+  if (args['ids'] case final List ids when ids.isNotEmpty) {
+    final normalizedIds =
+        ids.map(_parseLooseInt).where((id) => id > 0).toSet().toList()..sort();
+    return '请优先只核对资产 ids=${normalizedIds.join(',')} 是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$summaryLine';
+  }
+  return '请先核对$scope是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。$summaryLine';
+}
+
 List<int> extractProductionStoryboardIds(Object? flowData) {
   final ids = <int>{};
 

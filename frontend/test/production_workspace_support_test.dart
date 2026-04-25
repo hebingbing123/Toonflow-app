@@ -411,6 +411,42 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceRecipes keeps check-assets follow-up focused and returns to script plan',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '先核对关键角色与场景素材',
+            'assetIds': '12,7,12',
+          },
+        },
+      );
+
+      expect(recipes, hasLength(2));
+      expect(recipes.first.flowKey, 'assets');
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes.first.detail, contains('资产 #7, 12'));
+      expect(recipes.last.flowKey, 'scriptPlan');
+      expect(recipes.last.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes re-reads focused storyboard table ids after supervision',
     () {
       final recipes = buildProductionWorkspaceRecipes(
@@ -741,6 +777,39 @@ void main() {
         'maxChars': 1400,
       });
       expect(scriptPlanStage.subAgentTool, 'run_sub_agent_director_plan');
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages promotes check-assets review into focused assets stage',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'scriptPlan',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_assets',
+            'summary': '先核对关键角色与场景素材',
+            'assetIds': '12,7,12',
+          },
+        },
+      );
+
+      final assetStage = stages.singleWhere((stage) => stage.flowKey == 'assets');
+      expect(assetStage.statusLabel, '可推进');
+      expect(assetStage.domainTool, 'get_flowData');
+      expect(assetStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(assetStage.detail, contains('资产范围：资产 #7, 12'));
+      expect(assetStage.detail, contains('回到 scriptPlan'));
     },
   );
 
@@ -1574,10 +1643,14 @@ void main() {
       },
     );
 
-    expect(recipes.single.domainArgs, <String, dynamic>{
+    expect(recipes.first.domainArgs, <String, dynamic>{
       'key': 'assets',
       'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       'limit': 24,
+    });
+    expect(recipes.last.domainArgs, <String, dynamic>{
+      'key': 'scriptPlan',
+      'maxChars': 2200,
     });
   });
 
@@ -1601,10 +1674,14 @@ void main() {
         },
       );
 
-      expect(recipes.single.domainArgs, <String, dynamic>{
+      expect(recipes.first.domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[3, 7],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes.last.domainArgs, <String, dynamic>{
+        'key': 'scriptPlan',
+        'maxChars': 2200,
       });
     },
   );
