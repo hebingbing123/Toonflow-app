@@ -142,18 +142,19 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
   }
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
-    final withoutImage = rows.where((row) {
-      return !productionFlowEntryHasMediaResult(row);
-    }).length;
+    final missingIds = extractProductionStoryboardMissingImageIds(rows);
     final assetArgs = buildProductionFlowAssetArgs(rows);
-    if (withoutImage > 0) {
+    if (missingIds.isNotEmpty) {
+      final idsLabel = missingIds.take(6).join(', ');
+      final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
       return <ProductionWorkspaceRecipe>[
-        const ProductionWorkspaceRecipe(
+        ProductionWorkspaceRecipe(
           title: '继续补齐分镜图',
-          detail: '仍有分镜缺少画面结果，继续推进 storyboard 生成更合适。',
+          detail: '优先只补缺帧镜头 #$idsLabel$idTail，避免把已完成镜头整批重跑。',
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
-          prompt: '请优先补齐缺少画面结果的 storyboard 项，并执行最小可行生成动作。',
+          prompt:
+              '请只补齐缺少画面结果的 storyboard 镜头 ids=${missingIds.join(',')}，不要重跑已有画面结果或 shouldGenerateImage=false 的镜头；先用最小读取确认这批镜头后，再执行最小可行生成动作。',
         ),
         ProductionWorkspaceRecipe(
           title: '核对关联资产',
@@ -328,6 +329,7 @@ Map<String, dynamic> _storyboardCompactArgs() => <String, dynamic>{
     'state',
     'flowId',
     'associateAssetsIds',
+    'shouldGenerateImage',
   ],
   'limit': 24,
 };
@@ -421,7 +423,8 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
-          prompt: '请基于最近审核结论继续推进 storyboard，注意：$summary',
+          prompt:
+              '请基于最近审核结论继续推进 storyboard；优先只补缺少画面结果的镜头，避免重跑已有结果或 shouldGenerateImage=false 的镜头。注意：$summary',
         ),
       ];
     default:

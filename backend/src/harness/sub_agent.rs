@@ -166,7 +166,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("六、分镜图生成"),
             format_hint: None,
             execution_hint: Some(
-                "先最小读取：只提取真实分镜 id 列表和必要状态，不要先加载整块 storyboard 内容。",
+                "先最小读取：优先只提取缺少画面结果且 shouldGenerateImage=true 的真实分镜 id 列表，再对这批镜头做必要确认；不要先加载整块 storyboard 内容，也不要重跑已有结果的镜头。",
             ),
         }),
         "run_sub_agent_storyboard_panel" => Some(SubAgentSpec {

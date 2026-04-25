@@ -93,6 +93,7 @@ void main() {
         'state',
         'flowId',
         'associateAssetsIds',
+        'shouldGenerateImage',
       ],
       'limit': 24,
     });
@@ -256,6 +257,30 @@ void main() {
   });
 
   test(
+    'extractProductionActionCandidateIds prefers storyboard ids still missing images',
+    () {
+      final ids = extractProductionActionCandidateIds(
+        selectedTool: 'generate_storyboard',
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 101, 'shouldGenerateImage': true},
+            <String, dynamic>{
+              'id': 102,
+              'shouldGenerateImage': 1,
+              'src': 'https://example.com/102.png',
+            },
+            <String, dynamic>{'id': 103, 'shouldGenerateImage': false},
+          ],
+        },
+      );
+
+      expect(ids, <int>[101]);
+    },
+  );
+
+  test(
     'buildProductionActionArgumentSuggestions builds add/delete payloads',
     () {
       final result = <String, dynamic>{
@@ -371,6 +396,7 @@ void main() {
           'state',
           'flowId',
           'associateAssetsIds',
+          'shouldGenerateImage',
         ],
         'limit': 24,
       });
@@ -570,6 +596,50 @@ void main() {
       isFalse,
     );
   });
+
+  test('production storyboard generation helpers ignore pure text rows', () {
+    final rows = <Map<String, dynamic>>[
+      <String, dynamic>{'id': 11, 'shouldGenerateImage': false},
+      <String, dynamic>{'id': 12, 'shouldGenerateImage': '0'},
+      <String, dynamic>{'id': 13, 'shouldGenerateImage': true},
+      <String, dynamic>{
+        'id': 14,
+        'shouldGenerateImage': 1,
+        'src': 'https://example.com/14.png',
+      },
+    ];
+
+    expect(extractProductionStoryboardMissingImageIds(rows), <int>[13]);
+  });
+
+  test(
+    'buildProductionWorkspaceStages summarizes missing storyboard ids and skips pure text rows',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 101, 'shouldGenerateImage': true},
+            <String, dynamic>{
+              'id': 102,
+              'shouldGenerateImage': true,
+              'src': 'https://example.com/102.png',
+            },
+            <String, dynamic>{'id': 103, 'shouldGenerateImage': false},
+          ],
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.statusLabel, '需补帧');
+      expect(storyboardStage.detail, contains('#101'));
+      expect(storyboardStage.detail, contains('纯文本模式'));
+      expect(storyboardStage.prompt, contains('ids=101'));
+    },
+  );
 
   test('supervision check assets recipe keeps compact asset read args', () {
     final recipes = buildProductionWorkspaceRecipes(

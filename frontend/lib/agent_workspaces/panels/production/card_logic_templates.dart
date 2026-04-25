@@ -34,6 +34,7 @@ extension _AgentWorkspaceProductionCardTemplates
             'state',
             'flowId',
             'associateAssetsIds',
+            'shouldGenerateImage',
           ],
           'limit': 24,
         };

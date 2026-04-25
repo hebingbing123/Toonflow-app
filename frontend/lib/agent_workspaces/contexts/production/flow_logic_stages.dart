@@ -378,25 +378,32 @@ ProductionWorkspaceStage _buildStoryboardStage({
         prompt: '请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。',
       );
     }
-    final readyCount = rows.where((row) {
-      return productionFlowEntryHasMediaResult(row);
-    }).length;
-    final missingCount = rows.length - readyCount;
+    final targetRows = rows
+        .where(productionStoryboardEntryNeedsImageGeneration)
+        .toList(growable: false);
+    final missingIds = extractProductionStoryboardMissingImageIds(rows);
+    final missingCount = missingIds.length;
+    final skippedCount = rows.length - targetRows.length;
     if (missingCount > 0) {
+      final idsLabel = missingIds.take(6).join(', ');
+      final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
       return ProductionWorkspaceStage(
         title: '分镜画面',
         flowKey: 'storyboard',
         statusLabel: '需补帧',
-        detail: '共 ${rows.length} 个镜头，仍有 $missingCount 个缺少画面结果，适合继续生成分镜。',
+        detail:
+            '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}',
         subAgentTool: 'run_sub_agent_storyboard_gen',
-        prompt: '请优先补齐缺少画面结果的 storyboard 项，并执行最小可行生成动作。',
+        prompt:
+            '请只补齐缺少画面结果的 storyboard 镜头 ids=${missingIds.join(',')}，不要重跑已有画面结果或 shouldGenerateImage=false 的镜头；先最小读取这批镜头，再执行最小可行生成动作。',
       );
     }
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
       statusLabel: '已完成',
-      detail: '共 ${rows.length} 个镜头，画面结果齐备，可准备写回或继续导演计划。',
+      detail:
+          '需出图 ${targetRows.length} 个镜头，画面结果齐备${skippedCount > 0 ? '；另有 $skippedCount 个纯文本镜头按设计无需出图' : ''}，可准备写回或继续导演计划。',
       domainTool: 'get_flowData',
       domainArgs: _storyboardCompactArgs(),
     );

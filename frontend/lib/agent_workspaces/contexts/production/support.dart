@@ -78,6 +78,44 @@ bool productionFlowEntryHasMediaResult(Map<String, dynamic> entry) {
   return raw is String && raw.trim().isNotEmpty;
 }
 
+bool productionStoryboardEntryNeedsImageGeneration(Map<String, dynamic> entry) {
+  final raw = entry['shouldGenerateImage'];
+  if (raw is bool) return raw;
+  if (raw is num) return raw != 0;
+  if (raw is String) {
+    final normalized = raw.trim().toLowerCase();
+    if (normalized.isEmpty) return true;
+    if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+      return false;
+    }
+    if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+      return true;
+    }
+  }
+  return true;
+}
+
+List<int> extractProductionStoryboardMissingImageIds(Object? flowData) {
+  if (flowData is! List) return const <int>[];
+  final ids = <int>{};
+  for (final row in flowData.whereType<Map<String, dynamic>>()) {
+    if (!productionStoryboardEntryNeedsImageGeneration(row) ||
+        productionFlowEntryHasMediaResult(row)) {
+      continue;
+    }
+    final rawId =
+        row['id'] ??
+        row['numeric_id'] ??
+        row['numericId'] ??
+        row['storyboardId'];
+    if (rawId is num && rawId.toInt() > 0) {
+      ids.add(rawId.toInt());
+    }
+  }
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
+}
+
 List<int> extractProductionActionCandidateIds({
   required String? selectedTool,
   required String? toolName,
@@ -99,6 +137,8 @@ List<int> extractProductionActionCandidateIds({
         return _extractDeriveAssetIds(data);
       case 'generate_storyboard':
         if (normalizedKey != 'storyboard') return const <int>[];
+        final missingIds = extractProductionStoryboardMissingImageIds(data);
+        if (missingIds.isNotEmpty) return missingIds;
         return _extractEntityIds(data);
       default:
         return const <int>[];

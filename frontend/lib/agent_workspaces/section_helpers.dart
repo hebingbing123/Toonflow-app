@@ -184,6 +184,7 @@ String _buildProductionToolArgsPresetText({
               'state',
               'flowId',
               'associateAssetsIds',
+              'shouldGenerateImage',
             ],
             'limit': 24,
             if (scriptId != null && scriptId > 0) 'scriptId': scriptId,
