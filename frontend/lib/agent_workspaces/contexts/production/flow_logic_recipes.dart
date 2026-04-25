@@ -278,6 +278,8 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
     return const <ProductionWorkspaceRecipe>[];
   }
   final assetArgs = _storyboardTableRelatedAssetsArgs(data);
+  final storyboardIds = extractProductionStoryboardIds(data);
+  final storyboardArgs = buildProductionStoryboardReviewArgs(ids: storyboardIds);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核分镜表',
@@ -297,10 +299,12 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
     ),
     ProductionWorkspaceRecipe(
       title: '切回分镜结果',
-      detail: '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。',
+      detail: storyboardIds.isEmpty
+          ? '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。'
+          : '优先只回看当前分镜表窗口对应的 ${storyboardIds.length} 个镜头，避免退回通用分镜摘要。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
-      domainArgs: buildProductionStoryboardReviewArgs(),
+      domainArgs: storyboardArgs,
     ),
     ProductionWorkspaceRecipe(
       title: '抽样读取分镜表',

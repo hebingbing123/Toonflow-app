@@ -226,6 +226,19 @@ void main() {
         'ids': <int>[3, 7, 12],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
+      expect(recipes[2].domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[1, 2],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
     },
   );
 
@@ -250,6 +263,19 @@ void main() {
         'key': 'assets',
         'ids': <int>[3, 7, 12],
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes[2].domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[1, 2],
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
       });
     },
   );

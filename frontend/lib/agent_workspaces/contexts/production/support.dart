@@ -405,6 +405,31 @@ List<int> extractProductionReferencedAssetIds(Object? flowData) {
   return sortedIds;
 }
 
+List<int> extractProductionStoryboardIds(Object? flowData) {
+  final ids = <int>{};
+
+  void collectFromRows(Object? rows) {
+    if (rows is! List) return;
+    ids.addAll(_extractEntityIds(rows));
+  }
+
+  void collectFromMarkdown(String text) {
+    final parsed = parseProductionStoryboardTableMarkdown(text);
+    ids.addAll(_extractEntityIds(parsed));
+  }
+
+  if (flowData is List) {
+    collectFromRows(flowData);
+  } else if (flowData is Map<String, dynamic>) {
+    collectFromRows(flowData['rows']);
+  } else if (flowData is String) {
+    collectFromMarkdown(flowData);
+  }
+
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
+}
+
 int countProductionStoryboardTableRows(Object? flowData) {
   if (flowData is Map<String, dynamic>) {
     final totalRows = _parseLooseInt(flowData['totalRows']);
@@ -774,7 +799,7 @@ List<int> _extractDeriveAssetIds(Object? value) {
 
 List<int> _extractEntityIds(Object? value) {
   if (value is! List) return const <int>[];
-  final ids = <int>[];
+  final ids = <int>{};
   for (final row in value.whereType<Map<String, dynamic>>()) {
     final rawId =
         row['id'] ??
@@ -783,11 +808,13 @@ List<int> _extractEntityIds(Object? value) {
         row['storyboardId'] ??
         row['assetId'] ??
         row['assetsId'];
-    if (rawId is num) {
-      ids.add(rawId.toInt());
+    final parsedId = _parseLooseInt(rawId);
+    if (parsedId > 0) {
+      ids.add(parsedId);
     }
   }
-  return ids.toSet().toList(growable: false);
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
 }
 
 List<int> _extractToolScopedIds(Object? value) {
