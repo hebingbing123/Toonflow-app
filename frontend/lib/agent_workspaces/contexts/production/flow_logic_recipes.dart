@@ -34,7 +34,8 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   }
 
   if (normalizedTool == 'generate_storyboard' ||
-      normalizedTool == 'run_sub_agent_storyboard_gen') {
+      normalizedTool == 'run_sub_agent_storyboard_gen' ||
+      normalizedTool == 'run_sub_agent_storyboard_panel') {
     final affectedIds = extractProductionActionCandidateIds(
       selectedTool: 'generate_storyboard',
       toolName: toolName,
@@ -58,6 +59,33 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         flowKey: 'scriptPlan',
         domainTool: 'get_flowData',
         subAgentTool: 'run_sub_agent_director_plan',
+      ),
+    ];
+  }
+
+  if (normalizedTool == 'run_sub_agent_storyboard_table') {
+    final affectedIds = extractProductionStoryboardPromptScopeIds(
+      normalizedTool,
+      toolArguments,
+    );
+    return <ProductionWorkspaceRecipe>[
+      ProductionWorkspaceRecipe(
+        title: '刷新分镜表',
+        detail: affectedIds.isEmpty
+            ? '分镜表子代理已执行，先回读关键列窗口再决定是否继续修订。'
+            : '分镜表子代理已执行，先只回读本次镜头 #${affectedIds.join(', ')} 对应的分镜表行。',
+        flowKey: 'storyboardTable',
+        domainTool: 'get_flowData',
+        domainArgs: buildProductionStoryboardTableReadArgs(ids: affectedIds),
+      ),
+      ProductionWorkspaceRecipe(
+        title: '核对对应分镜',
+        detail: affectedIds.isEmpty
+            ? '必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。'
+            : '优先只回读镜头 #${affectedIds.join(', ')} 的 storyboard 结果，确认表格修改没有放大到整段。',
+        flowKey: 'storyboard',
+        domainTool: 'get_flowData',
+        domainArgs: buildProductionStoryboardReviewArgs(ids: affectedIds),
       ),
     ];
   }

@@ -40,6 +40,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
       review: review,
+      toolArguments: toolArguments,
     ),
     _buildStoryboardStage(
       activeKey: activeKey,
@@ -345,6 +346,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   required Map<String, Object?> flowSnapshot,
   required String toolName,
   required ProductionSupervisionReview? review,
+  required Map<String, dynamic>? toolArguments,
 }) {
   if (review != null && review.target == 'storyboardTable') {
     return ProductionWorkspaceStage(
@@ -420,13 +422,18 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   }
   if (activeKey == 'storyboardTable' ||
       toolName == 'run_sub_agent_storyboard_table') {
+    final affectedIds = toolName == 'run_sub_agent_storyboard_table'
+        ? extractProductionStoryboardPromptScopeIds(toolName, toolArguments)
+        : const <int>[];
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
       statusLabel: '建议刷新',
-      detail: '分镜表刚变更或正在处理，建议重新读取 storyboardTable。',
+      detail: affectedIds.isEmpty
+          ? '分镜表刚变更或正在处理，建议重新读取 storyboardTable。'
+          : '分镜表刚变更，建议先只回读镜头 #${affectedIds.join(', ')} 对应的 storyboardTable 行。',
       domainTool: 'get_flowData',
-      domainArgs: buildProductionStoryboardTableReadArgs(),
+      domainArgs: buildProductionStoryboardTableReadArgs(ids: affectedIds),
     );
   }
   return ProductionWorkspaceStage(
@@ -534,10 +541,13 @@ ProductionWorkspaceStage _buildStoryboardStage({
             result: result,
             toolArguments: toolArguments,
           )
+        : toolName == 'run_sub_agent_storyboard_panel'
+        ? extractProductionStoryboardPromptScopeIds(toolName, toolArguments)
         : const <int>[];
     final refreshArgs =
         toolName == 'generate_storyboard' ||
-            toolName == 'run_sub_agent_storyboard_gen'
+            toolName == 'run_sub_agent_storyboard_gen' ||
+            toolName == 'run_sub_agent_storyboard_panel'
         ? buildProductionStoryboardGenerationArgs(ids: affectedIds)
         : buildProductionStoryboardReviewArgs();
     return ProductionWorkspaceStage(
@@ -546,7 +556,8 @@ ProductionWorkspaceStage _buildStoryboardStage({
       statusLabel: '建议刷新',
       detail:
           toolName == 'generate_storyboard' ||
-              toolName == 'run_sub_agent_storyboard_gen'
+              toolName == 'run_sub_agent_storyboard_gen' ||
+              toolName == 'run_sub_agent_storyboard_panel'
           ? affectedIds.isEmpty
                 ? '分镜动作刚执行，建议先按补图最小字段读取 storyboard，再决定是否继续补帧或写回。'
                 : '分镜动作刚执行，建议先只回读本次镜头 #${affectedIds.join(', ')} 的补图状态。'

@@ -1206,7 +1206,32 @@ List<int> _extractPromptScopedIds({
       noun: 'storyboard',
     );
   }
+  if (toolName == 'run_sub_agent_storyboard_panel' &&
+      selectedTool == 'generate_storyboard') {
+    return _extractPromptIds(
+      toolArguments,
+      explicitKey: 'storyboardIds',
+      noun: 'storyboard',
+    );
+  }
   return const <int>[];
+}
+
+List<int> extractProductionStoryboardPromptScopeIds(
+  String toolName,
+  Map<String, dynamic>? toolArguments,
+) {
+  final normalizedToolName = toolName.trim();
+  if (normalizedToolName != 'run_sub_agent_storyboard_gen' &&
+      normalizedToolName != 'run_sub_agent_storyboard_panel' &&
+      normalizedToolName != 'run_sub_agent_storyboard_table') {
+    return const <int>[];
+  }
+  return _extractPromptIds(
+    toolArguments ?? const <String, dynamic>{},
+    explicitKey: 'storyboardIds',
+    noun: 'storyboard',
+  );
 }
 
 List<int> _extractPromptIds(

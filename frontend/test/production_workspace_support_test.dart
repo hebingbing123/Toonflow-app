@@ -293,6 +293,65 @@ void main() {
     },
   );
 
+  test(
+    'buildProductionWorkspaceRecipes narrows storyboard refresh after storyboard panel sub-agent run',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_storyboard_panel',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{'result': '已完成'},
+        toolArguments: <String, dynamic>{
+          'prompt': '请只处理 storyboard ids=8, 2，对已有结果不要重跑。',
+        },
+      );
+
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'fields': <String>[
+          'id',
+          'index',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+        'ids': <int>[2, 8],
+      });
+      expect(recipes.first.detail, contains('镜头 #2, 8'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages narrows storyboard table refresh after storyboard-table sub-agent run',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_storyboard_table',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{'result': '已完成'},
+        toolArguments: <String, dynamic>{
+          'prompt': '先修订 storyboard ids=12, 4, 12 的分镜表行。',
+        },
+      );
+
+      final storyboardTableStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(storyboardTableStage.domainArgs, <String, dynamic>{
+        'key': 'storyboardTable',
+        'fields': <String>[
+          'id',
+          'description',
+          'scene',
+          'duration',
+          'camera',
+          'associateAssetsIds',
+        ],
+        'ids': <int>[4, 12],
+      });
+      expect(storyboardTableStage.detail, contains('镜头 #4, 12'));
+    },
+  );
+
   test('parseProductionSupervisionReview reads structured review payload', () {
     final review = parseProductionSupervisionReview(<String, dynamic>{
       'review': <String, dynamic>{
@@ -1122,6 +1181,18 @@ void main() {
       );
 
       expect(ids, <int>[3, 9]);
+    },
+  );
+
+  test(
+    'extractProductionStoryboardPromptScopeIds reads storyboard ids from storyboard-table prompt',
+    () {
+      final ids = extractProductionStoryboardPromptScopeIds(
+        'run_sub_agent_storyboard_table',
+        <String, dynamic>{'prompt': '请只修订 storyboard ids=7, 2, 7 对应的表格行。'},
+      );
+
+      expect(ids, <int>[2, 7]);
     },
   );
 
