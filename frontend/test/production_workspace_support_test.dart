@@ -68,6 +68,24 @@ void main() {
     expect(recipes.first.subAgentTool, 'run_sub_agent_production_supervision');
     expect(recipes.first.flowKey, 'scriptPlan');
     expect(recipes.first.title, contains('审核'));
+    expect(recipes[1].domainArgs, <String, dynamic>{
+      'key': 'assets',
+      'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      'limit': 24,
+    });
+    expect(recipes[2].domainArgs, <String, dynamic>{
+      'key': 'storyboard',
+      'fields': <String>[
+        'id',
+        'index',
+        'duration',
+        'src',
+        'state',
+        'flowId',
+        'associateAssetsIds',
+      ],
+      'limit': 24,
+    });
   });
 
   test('parseProductionSupervisionReview reads structured review payload', () {
@@ -242,6 +260,19 @@ void main() {
       );
       expect(storyboardStage.statusLabel, '建议刷新');
       expect(storyboardStage.domainTool, 'get_flowData');
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'fields': <String>[
+          'id',
+          'index',
+          'duration',
+          'src',
+          'state',
+          'flowId',
+          'associateAssetsIds',
+        ],
+        'limit': 24,
+      });
       expect(storyboardStage.subAgentTool, isNull);
     },
   );

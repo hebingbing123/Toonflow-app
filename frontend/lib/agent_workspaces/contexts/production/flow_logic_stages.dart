@@ -116,7 +116,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       detail: _reviewDetail(review),
       domainTool: review.nextAction == 'check_assets' ? 'get_flowData' : null,
       domainArgs: review.nextAction == 'check_assets'
-          ? <String, dynamic>{'key': 'assets'}
+          ? _assetsCompactArgs()
           : null,
       subAgentTool: review.nextAction == 'revise_scriptPlan'
           ? 'run_sub_agent_director_plan'
@@ -150,20 +150,22 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     );
   }
   if (activeKey == 'scriptPlan' || toolName == 'run_sub_agent_director_plan') {
-    return const ProductionWorkspaceStage(
+    return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
       statusLabel: '建议刷新',
       detail: '导演计划刚变更或正在处理，建议重新读取 scriptPlan 确认最新内容。',
       domainTool: 'get_flowData',
+      domainArgs: _scriptPlanCompactArgs(),
     );
   }
-  return const ProductionWorkspaceStage(
+  return ProductionWorkspaceStage(
     title: '导演计划',
     flowKey: 'scriptPlan',
     statusLabel: '待读取',
     detail: '先读取 scriptPlan，确认制作优先级与执行顺序。',
     domainTool: 'get_flowData',
+    domainArgs: _scriptPlanCompactArgs(),
   );
 }
 
@@ -205,6 +207,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       statusLabel: '已齐备',
       detail: '共 ${rows.length} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。',
       domainTool: 'get_flowData',
+      domainArgs: _assetsCompactArgs(),
     );
   }
   if (activeKey == 'assets' ||
@@ -213,20 +216,22 @@ ProductionWorkspaceStage _buildAssetsStage({
       toolName == 'del_deriveAsset' ||
       toolName == 'run_sub_agent_derive_assets' ||
       toolName == 'run_sub_agent_generate_assets') {
-    return const ProductionWorkspaceStage(
+    return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
       statusLabel: '建议刷新',
       detail: '资产相关动作刚执行，建议重新读取 assets 确认最新结果。',
       domainTool: 'get_flowData',
+      domainArgs: _assetsCompactArgs(),
     );
   }
-  return const ProductionWorkspaceStage(
+  return ProductionWorkspaceStage(
     title: '资产准备',
     flowKey: 'assets',
     statusLabel: '待读取',
     detail: '读取 assets flow 后可判断是否需要继续做衍生资产或素材生成。',
     domainTool: 'get_flowData',
+    domainArgs: _assetsCompactArgs(),
   );
 }
 
@@ -357,26 +362,29 @@ ProductionWorkspaceStage _buildStoryboardStage({
       statusLabel: '已完成',
       detail: '共 ${rows.length} 个镜头，画面结果齐备，可准备写回或继续导演计划。',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardCompactArgs(),
     );
   }
   if (activeKey == 'storyboard' ||
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
       toolName == 'run_sub_agent_storyboard_panel') {
-    return const ProductionWorkspaceStage(
+    return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
       statusLabel: '建议刷新',
       detail: '分镜动作刚执行，建议重新读取 storyboard 再决定是否写回。',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardCompactArgs(),
     );
   }
-  return const ProductionWorkspaceStage(
+  return ProductionWorkspaceStage(
     title: '分镜画面',
     flowKey: 'storyboard',
     statusLabel: '待读取',
     detail: '读取 storyboard 后可判断是否需要继续补图或直接写回结果。',
     domainTool: 'get_flowData',
+    domainArgs: _storyboardCompactArgs(),
   );
 }
 

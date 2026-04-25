@@ -30,7 +30,7 @@
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本与资产 | `get_flowData("script")` / `get_flowData("assets")` |
+| 读取剧本与资产 | `get_flowData({ key: "script", maxChars: 1800 })` / `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` |
 | 写入衍生资产 | `add_deriveAsset` |
 
 
@@ -105,7 +105,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取资产列表 | `get_flowData("assets")` |
+| 读取资产列表 | `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` |
 | 生成资产图片 | `generate_deriveAsset({ ids: [资产id列表] })` |
 
 ### 执行流程
@@ -126,7 +126,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本与资产 | `get_flowData("script")` / `get_flowData("assets")` |
+| 读取剧本与资产 | `get_flowData({ key: "script", maxChars: 1800 })` / `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` |
 
 ### 风格技法参考
 
@@ -134,7 +134,7 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 加载风格技法参考，获取 `script` 和 `assets`，并并且激活 `director_planning_narrative` 以及 `director_planning_style`，所有规划内容以该文档为风格基准，冲突时以风格技法参考为准。
+1. 加载风格技法参考，先用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口，再用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` 获取资产摘要，并激活 `director_planning_narrative` 以及 `director_planning_style`；所有规划内容以该文档为风格基准，冲突时以风格技法参考为准。
 2. 按下方规范制定导演规划（创作规划），全文遵守「导演具象化原则」
 
 ### 导演具象化原则（贯穿全文）
@@ -242,7 +242,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本与资产 | `get_flowData("script")` / `get_flowData("assets")` |
+| 读取剧本与资产 | `get_flowData({ key: "script", maxChars: 1800 })` / `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` |
 
 ### 风格技法参考
 
@@ -250,7 +250,7 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 获取 `script` 和 `assets`，并且激活 `director_storyboard_table_narrative` 以及 `director_storyboard_table_style` ，作为分镜设计的风格参考。
+1. 先用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口，再用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "src", "flowId", "derive"], limit: 24 })` 获取资产摘要，并激活 `director_storyboard_table_narrative` 以及 `director_storyboard_table_style`，作为分镜设计的风格参考。
 2. 按下方规则将剧本拆分为分镜，**每写一行前**回顾上一行状态，确保符合「视觉连续性铁律」后再填写当前行所有字段
 
 ### 分镜拆分原则
@@ -419,7 +419,7 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
-| 读取剧本 | `get_flowData("script")` |
+| 读取剧本 | `get_flowData({ key: "script", maxChars: 1800 })` |
 | 读取分镜表 | `get_flowData({ key: "storyboardTable", rowStart, rowCount, fields })` |
 
 ### 写入模式
@@ -711,12 +711,12 @@ Image [2]: @图2 — [外貌关键描述]
 
 | 操作 | 调用 |
 |------|------|
-| 读取分镜面板 | `get_flowData("storyboard")` |
+| 读取分镜面板 | `get_flowData({ key: "storyboard", fields: ["id", "index", "duration", "src", "state", "flowId", "associateAssetsIds"], limit: 24 })` |
 | 生成图片 | `generate_storyboard({ ids: [分镜ID列表] })` |
 
 ### 执行流程
 
-1. 获取 `storyboard`
+1. 先用 `get_flowData({ key: "storyboard", fields: ["id", "index", "duration", "src", "state", "flowId", "associateAssetsIds"], limit: 24 })` 获取分镜摘要
 2. 提取真实分镜 ID 列表
 3. 调用 `generate_storyboard({ ids: [真实分镜ID列表] })` 生成分镜图片（异步，发起即返回）
 

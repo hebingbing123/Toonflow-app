@@ -33,12 +33,13 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   }
 
   if (normalizedTool == 'generate_storyboard') {
-    return const <ProductionWorkspaceRecipe>[
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
         title: '刷新分镜 flow',
         detail: '分镜生成动作已执行，先拉取最新 storyboard 再决定是否写回。',
         flowKey: 'storyboard',
         domainTool: 'get_flowData',
+        domainArgs: _storyboardCompactArgs(),
       ),
       ProductionWorkspaceRecipe(
         title: '继续导演计划',
@@ -92,28 +93,30 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
     }).length;
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
-        const ProductionWorkspaceRecipe(
+        ProductionWorkspaceRecipe(
           title: '继续资产生成',
           detail: '仍有素材缺少图像结果，适合直接运行素材生成子代理。',
           flowKey: 'assets',
           subAgentTool: 'run_sub_agent_generate_assets',
           prompt: '请基于当前 assets flow 优先补齐缺少图像结果的素材，并执行最小可行生成动作。',
         ),
-        const ProductionWorkspaceRecipe(
+        ProductionWorkspaceRecipe(
           title: '刷新分镜需求',
           detail: '素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
+          domainArgs: _storyboardCompactArgs(),
         ),
       ];
     }
   }
-  return const <ProductionWorkspaceRecipe>[
+  return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '检查分镜 flow',
       detail: '资产已具备基础结果，可切到 storyboard 评估镜头生成状态。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardCompactArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '整理导演计划',
@@ -184,7 +187,7 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       ),
     ];
   }
-  return const <ProductionWorkspaceRecipe>[
+  return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核导演计划',
       detail: '导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。',
@@ -197,12 +200,14 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
       detail: '导演计划已有内容，下一步通常是核对 assets 是否支撑执行。',
       flowKey: 'assets',
       domainTool: 'get_flowData',
+      domainArgs: _assetsCompactArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '检查分镜落地',
       detail: '如计划已定，可直接回看 storyboard 的实际生成状态。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardCompactArgs(),
     ),
   ];
 }
@@ -223,18 +228,19 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
     return const <ProductionWorkspaceRecipe>[];
   }
   return <ProductionWorkspaceRecipe>[
-    const ProductionWorkspaceRecipe(
+    ProductionWorkspaceRecipe(
       title: '审核分镜表',
       detail: '分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。',
       flowKey: 'storyboardTable',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
     ),
-    const ProductionWorkspaceRecipe(
+    ProductionWorkspaceRecipe(
       title: '切回分镜结果',
       detail: '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。',
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
+      domainArgs: _storyboardCompactArgs(),
     ),
     ProductionWorkspaceRecipe(
       title: '抽样读取分镜表',
@@ -261,6 +267,31 @@ Map<String, dynamic> _storyboardTableWindowArgs({
     'camera',
     'associateAssetsIds',
   ],
+};
+
+Map<String, dynamic> _scriptPlanCompactArgs() => <String, dynamic>{
+  'key': 'scriptPlan',
+  'maxChars': 2200,
+};
+
+Map<String, dynamic> _assetsCompactArgs() => <String, dynamic>{
+  'key': 'assets',
+  'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+  'limit': 24,
+};
+
+Map<String, dynamic> _storyboardCompactArgs() => <String, dynamic>{
+  'key': 'storyboard',
+  'fields': <String>[
+    'id',
+    'index',
+    'duration',
+    'src',
+    'state',
+    'flowId',
+    'associateAssetsIds',
+  ],
+  'limit': 24,
 };
 
 bool _hasStoryboardTableData(Object? data) {
