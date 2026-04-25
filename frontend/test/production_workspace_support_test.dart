@@ -472,6 +472,23 @@ void main() {
     },
   );
 
+  test('buildProductionStoryboardAssetHint caps long asset id lists', () {
+    final hint = buildProductionStoryboardAssetHint(const <int>[
+      9,
+      1,
+      7,
+      3,
+      5,
+      11,
+      13,
+      15,
+      17,
+    ]);
+
+    expect(hint, contains('asset ids=1,3,5,7,9,11,13,15 等 9 项'));
+    expect(hint, isNot(contains('17')));
+  });
+
   test(
     'summarizeProductionResultSnapshot surfaces focused asset and storyboard scope',
     () {

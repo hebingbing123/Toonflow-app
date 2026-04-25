@@ -439,7 +439,9 @@ String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
 String buildProductionStoryboardAssetHint(List<int> assetIds) {
   final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return '';
-  return '如需核对素材，仅看 asset ids=${ids.join(',')}。';
+  final visible = ids.take(8).join(',');
+  final suffix = ids.length > 8 ? ' 等 ${ids.length} 项' : '';
+  return '如需核对素材，仅看 asset ids=$visible$suffix。';
 }
 
 String buildProductionStoryboardGenerationPrompt({
