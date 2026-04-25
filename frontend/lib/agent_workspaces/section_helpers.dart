@@ -105,14 +105,19 @@ String _buildScriptToolArgsPresetText({
       break;
     case 'get_novel_text':
       preset = <String, dynamic>{
-        'novelId': 1,
+        'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
         'lineStart': 1,
         'lineEnd': 80,
         'maxChars': 1800,
+        'limit': 1,
       };
       break;
     case 'get_novel_events':
-      preset = <String, dynamic>{'novelId': 1, 'limit': 8, 'maxChars': 1200};
+      preset = <String, dynamic>{
+        'fields': <String>['numeric_id', 'name', 'detail'],
+        'limit': 8,
+        'maxChars': 1200,
+      };
       break;
     default:
       preset = <String, dynamic>{};

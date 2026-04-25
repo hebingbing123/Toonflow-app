@@ -16,10 +16,15 @@ Map<String, dynamic>? _extractPlanDataMap(Map<String, dynamic>? result) {
   return null;
 }
 
-Map<String, dynamic>? _buildNovelStageArgs(List<Map<String, dynamic>> items) {
+Map<String, dynamic>? _buildNovelStageArgs(
+  List<Map<String, dynamic>> items, {
+  required String toolName,
+}) {
   final ids = extractScriptWorkspaceNovelIds(<String, dynamic>{'items': items});
-  if (ids.isEmpty) return null;
-  return <String, dynamic>{'novelId': ids.first};
+  if (toolName == 'get_novel_events') {
+    return _novelEventWindowArgs(ids.isEmpty ? null : ids.first);
+  }
+  return _novelTextWindowArgs(ids.isEmpty ? null : ids.first);
 }
 
 int _parseReviewCount(Object? raw) {
@@ -57,19 +62,26 @@ Map<String, dynamic> _planSectionArgs(String key, {int maxChars = 1600}) {
   return <String, dynamic>{'key': key, 'maxChars': maxChars};
 }
 
-Map<String, dynamic> _novelTextWindowArgs(int novelId) {
+Map<String, dynamic> _novelTextWindowArgs(int? novelId) {
   return <String, dynamic>{
-    'novelId': novelId,
+    ...switch (novelId) {
+      final int value => <String, dynamic>{'novelId': value},
+      null => const <String, dynamic>{},
+    },
     'fields': const <String>['numeric_id', 'chapter', 'chapter_data'],
     'lineStart': 1,
     'lineEnd': 80,
     'maxChars': 1800,
+    if (novelId == null) 'limit': 1,
   };
 }
 
-Map<String, dynamic> _novelEventWindowArgs(int novelId) {
+Map<String, dynamic> _novelEventWindowArgs(int? novelId) {
   return <String, dynamic>{
-    'novelId': novelId,
+    ...switch (novelId) {
+      final int value => <String, dynamic>{'novelId': value},
+      null => const <String, dynamic>{},
+    },
     'fields': const <String>['numeric_id', 'name', 'detail'],
     'limit': 8,
     'maxChars': 1200,

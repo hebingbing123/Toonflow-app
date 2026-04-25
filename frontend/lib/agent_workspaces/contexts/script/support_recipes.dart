@@ -79,7 +79,7 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
         title: '拉取章节材料',
         detail: '计划里还没有剧本草稿，先读取小说章节文本补上下文。',
         domainTool: 'get_novel_text',
-        args: _novelTextWindowArgs(1),
+        args: _novelTextWindowArgs(null),
       ),
     );
   } else {
@@ -201,7 +201,7 @@ List<ScriptWorkspaceRecipe> _buildScriptContentRecipes(
       title: '补章节材料',
       detail: '如果要继续改稿，可先拉小说正文与事件，避免只盯着当前 script。',
       domainTool: 'get_novel_text',
-      args: _novelTextWindowArgs(1),
+      args: _novelTextWindowArgs(null),
     ),
   ];
 }
@@ -264,7 +264,6 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           detail: '审核建议回看事件链路，优先读取小说事件而不是整章原文。',
           domainTool: 'get_novel_events',
           args: <String, dynamic>{
-            'novelId': 1,
             'fields': <String>['numeric_id', 'name', 'detail'],
             'limit': 8,
             'maxChars': 1200,
@@ -279,11 +278,11 @@ List<ScriptWorkspaceRecipe> _buildScriptSupervisionRecipes(
           detail: '审核需要追溯原文时，先读取章节窗口，避免整章搬运。',
           domainTool: 'get_novel_text',
           args: <String, dynamic>{
-            'novelId': 1,
             'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
             'lineStart': 1,
             'lineEnd': 80,
             'maxChars': 1800,
+            'limit': 1,
           },
         ),
       );

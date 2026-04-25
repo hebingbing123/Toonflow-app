@@ -198,7 +198,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                 maxLines: 2,
                 decoration: const InputDecoration(
                   labelText: '剧本工具参数(JSON)',
-                  helperText: '可选，例如 {"novelId":1}',
+                  helperText: '优先沿用最近章节结果填充 novelId；拿不准时先别写死。',
                 ),
               ),
             ),

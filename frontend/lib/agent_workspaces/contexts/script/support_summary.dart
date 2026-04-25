@@ -89,14 +89,20 @@ buildScriptWorkspaceArgumentSuggestions({
   final suggestions = <ScriptWorkspaceArgumentSuggestion>[
     ScriptWorkspaceArgumentSuggestion(
       label: '填充首章',
-      payload: <String, dynamic>{'novelId': ids.first},
+      payload: _buildSuggestedNovelPayload(
+        normalizedSelectedTool,
+        novelId: ids.first,
+      ),
     ),
   ];
   if (ids.length > 1) {
     suggestions.add(
       ScriptWorkspaceArgumentSuggestion(
         label: '填充前 3 章',
-        payload: <String, dynamic>{'novelId': ids.take(3).first},
+        payload: _buildSuggestedNovelPayload(
+          normalizedSelectedTool,
+          novelId: ids.take(3).first,
+        ),
       ),
     );
   }
@@ -105,9 +111,22 @@ buildScriptWorkspaceArgumentSuggestions({
     suggestions.add(
       ScriptWorkspaceArgumentSuggestion(
         label: '沿用章节到事件',
-        payload: <String, dynamic>{'novelId': ids.first},
+        payload: _buildSuggestedNovelPayload(
+          normalizedSelectedTool,
+          novelId: ids.first,
+        ),
       ),
     );
   }
   return suggestions;
+}
+
+Map<String, dynamic> _buildSuggestedNovelPayload(
+  String selectedTool, {
+  required int novelId,
+}) {
+  if (selectedTool == 'get_novel_events') {
+    return _novelEventWindowArgs(novelId);
+  }
+  return _novelTextWindowArgs(novelId);
 }

@@ -50,7 +50,12 @@ void main() {
       );
 
       expect(suggestions.map((item) => item.label), contains('填充首章'));
-      expect(suggestions.first.payload, <String, dynamic>{'novelId': 21});
+      expect(suggestions.first.payload, <String, dynamic>{
+        'novelId': 21,
+        'fields': <String>['numeric_id', 'name', 'detail'],
+        'limit': 8,
+        'maxChars': 1200,
+      });
     },
   );
 
@@ -197,11 +202,11 @@ void main() {
     );
     final textRecipe = textRecipes.firstWhere((recipe) => recipe.title == '补章节材料');
     expect(textRecipe.args, <String, dynamic>{
-      'novelId': 1,
       'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
       'lineStart': 1,
       'lineEnd': 80,
       'maxChars': 1800,
+      'limit': 1,
     });
 
     final novelRecipes = buildScriptWorkspaceRecipes(

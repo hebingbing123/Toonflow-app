@@ -715,7 +715,7 @@ void main() {
     expect(lastTool, 'get_novel_text');
     expect(
       lastArgs,
-      '{"novelId":1,"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800}',
+      '{"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800,"limit":1}',
     );
   });
 

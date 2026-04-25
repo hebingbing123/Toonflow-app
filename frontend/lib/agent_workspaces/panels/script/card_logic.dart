@@ -124,7 +124,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
           (
             label: '模板: 正文窗口',
             args:
-                '{"novelId":1,"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800}',
+                '{"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800,"limit":1}',
           ),
         ];
       case 'get_novel_events':
@@ -132,7 +132,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
           (
             label: '模板: 事件窗口',
             args:
-                '{"novelId":1,"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
+                '{"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
           ),
         ];
       default:

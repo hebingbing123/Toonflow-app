@@ -113,7 +113,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '已就绪',
         detail: '已读取 ${items.length} 条小说上下文，可继续生成剧本正文或对照现有 script。',
         domainTool: normalizedTool,
-        args: _buildNovelStageArgs(items),
+        args: _buildNovelStageArgs(items, toolName: normalizedTool),
       )
     else if (normalizedTool == 'get_novel_text' ||
         normalizedTool == 'get_novel_events')
@@ -122,7 +122,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待补充',
         detail: '小说上下文为空，建议继续读取章节正文或事件脉络。',
         domainTool: 'get_novel_text',
-        args: _novelTextWindowArgs(1),
+        args: _novelTextWindowArgs(null),
       )
     else
       ScriptWorkspaceStage(
@@ -130,7 +130,7 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待读取',
         detail: '先读取章节正文或事件列表，再决定如何改写剧本。',
         domainTool: 'get_novel_text',
-        args: _novelTextWindowArgs(1),
+        args: _novelTextWindowArgs(null),
       ),
     if (scriptContent.isNotEmpty)
       ScriptWorkspaceStage(
