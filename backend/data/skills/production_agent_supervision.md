@@ -35,6 +35,14 @@ description: >-
 
 ### 审核报告格式
 
+先输出一行结构化摘要，供工作台直接生成下一步动作：
+
+```xml
+<reviewSummary target="scriptPlan|storyboardTable" grade="A|B|C|D" severeCount="0" mediumCount="0" minorCount="0" nextAction="revise_scriptPlan|check_assets|check_storyboard|revise_storyboardTable|check_script|generate_storyboard" summary="一句话总结" />
+```
+
+然后再输出精简 Markdown 审核报告：
+
 ```markdown
 # 审核报告：{审核对象}
 
@@ -56,6 +64,7 @@ description: >-
 
 ### 精简规则
 
+- `reviewSummary` 必须放在第一行，`summary` 控制在 36 个汉字以内
 - 审核通过的项目不出现在报告中
 - 同类轻微问题合并为一行
 - B 级及以上省略「需要您决定」区块
@@ -83,8 +92,11 @@ description: >-
 
 ### 数据准备
 
-1. 调用 `get_flowData` 获取导演规划数据（plan）
-2. 调用 `get_flowData` 获取剧本数据（script）和资产数据（assets）
+1. 调用 `get_flowData({ key: "scriptPlan", maxChars: 2200 })` 获取导演规划数据
+2. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
+3. 调用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 80 })` 获取资产字段子集
+
+优先最小读取：信息足够时不得补读整段剧本或整份 assets。
 
 ### 审核维度
 
@@ -164,8 +176,10 @@ description: >-
 
 ### 数据准备
 
-1. 调用 `get_flowData` 获取分镜表数据（storyboardTable）
-2. 调用 `get_flowData` 获取剧本数据（script）和资产数据（assets）
+1. 先调用 `get_flowData({ key: "storyboardTable", rowStart: 1, rowCount: 8, fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` 获取首批关键行
+2. 若首批不足以判断，再按需追加下一个窗口，禁止默认整表读取
+3. 调用 `get_flowData({ key: "script", maxChars: 1800 })` 获取剧本窗口
+4. 调用 `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], limit: 80 })` 获取资产字段子集
 
 ### 审核维度
 

@@ -420,7 +420,7 @@ add_deriveAsset({
 | 操作 | 调用 |
 |------|------|
 | 读取剧本 | `get_flowData("script")` |
-| 读取分镜表 | `get_flowData("storyboardTable")` |
+| 读取分镜表 | `get_flowData({ key: "storyboardTable", rowStart, rowCount, fields })` |
 
 ### 写入模式
 
@@ -436,20 +436,21 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 获取 `script`、`storyboardTable`，识别决策层指令中的**写入模式**（纯文本多参模式 / 分镜图辅助多参模式 / 首位帧模式）
-2. **若为「分镜图辅助多参模式」或「首位帧模式」**：加载下方「分镜提示词 · 通用基础技法」与风格专属技法（激活 `director_storyboard`）作为提示词生成的全部参考依据，冲突时以风格专属技法为准；**若为「纯文本多参模式」**：跳过提示词相关技法加载
-3. 确定分组（track）与时长规则：
+1. 先获取 `script`，再用 `get_flowData({ key: "storyboardTable", rowStart: 1, rowCount: 8, fields: ["id", "description", "scene", "duration", "camera", "associateAssetsIds"] })` 读取首批分镜行，识别决策层指令中的**写入模式**（纯文本多参模式 / 分镜图辅助多参模式 / 首位帧模式）
+2. 需要更多分镜时，按窗口继续读取下一批 `storyboardTable` 行；禁止默认整表读入
+3. **若为「分镜图辅助多参模式」或「首位帧模式」**：加载下方「分镜提示词 · 通用基础技法」与风格专属技法（激活 `director_storyboard`）作为提示词生成的全部参考依据，冲突时以风格专属技法为准；**若为「纯文本多参模式」**：跳过提示词相关技法加载
+4. 确定分组（track）与时长规则：
    - **纯文本多参模式 / 分镜图辅助多参模式**：同组内分镜 `duration` 累计时长不得超过 15 秒
    - **首位帧模式**：**不分组**，每条分镜独立一组，`track` 按顺序递增（第1行 track=1，第2行 track=2，以此类推）
    - 所有模式下，每条 `duration` 必须严格使用 `storyboardTable` 对应行时长
-4. **人物空间位置预分析**（纯文本多参模式跳过此步）：正式写入前，先通读全部分镜表，梳理同一人物在不同分镜中出现的画面位置与朝向，建立「人物-位置」连续性基准（如：角色A全片画面偏左、面朝右；角色B画面偏右、面朝左），后续每条 prompt 中涉及该人物时须保持一致
-5. **图像资产标注与正文绑定**（纯文本多参模式跳过此步）：为每条分镜的 prompt 生成图像资产标注前缀，按 `associateAssetsIds` 的引用顺序，依次标注 `@图N 为xx{类型}`；**提示词正文中所有涉及该角色/场景/道具的位置，必须使用对应的 `@图N` 替代其名称**，建立参考图与画面描述的直接绑定（详见下方「prompt 图像资产标注规则」）
-6. **生成视频描述（videoDesc）**（所有模式均需）：根据 `storyboardTable` 对应行的完整分镜数据（画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID），将该行信息整合为一段结构化的视频描述文本，填入 `videoDesc` 字段
-7. 严格按 `storyboardTable` 的分镜数据行逐行写入分镜面板（排除表头与分隔行），根据模式差异化输出：
+5. **人物空间位置预分析**（纯文本多参模式跳过此步）：在已读取的分镜窗口内先建立人物位置基准；只有跨窗口连续性不足时才补读相邻窗口，而不是整表通读
+6. **图像资产标注与正文绑定**（纯文本多参模式跳过此步）：为每条分镜的 prompt 生成图像资产标注前缀，按 `associateAssetsIds` 的引用顺序，依次标注 `@图N 为xx{类型}`；**提示词正文中所有涉及该角色/场景/道具的位置，必须使用对应的 `@图N` 替代其名称**，建立参考图与画面描述的直接绑定（详见下方「prompt 图像资产标注规则」）
+7. **生成视频描述（videoDesc）**（所有模式均需）：根据 `storyboardTable` 对应行的完整分镜数据（画面描述、场景、关联资产名称、时长、景别、运镜、角色动作、情绪、光影氛围、台词、音效、关联资产ID），将该行信息整合为一段结构化的视频描述文本，填入 `videoDesc` 字段
+8. 严格按 `storyboardTable` 的分镜数据行逐行写入分镜面板（排除表头与分隔行），根据模式差异化输出：
    - **纯文本多参模式**：`<storyboardItem videoDesc='视频描述' prompt='' track='分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="false" ></storyboardItem>`
    - **分镜图辅助多参模式**：`<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="true" ></storyboardItem>`
    - **首位帧模式**：`<storyboardItem videoDesc='视频描述' prompt='提示词内容' track='按顺序递增的独立分组' duration='视频推荐时间' associateAssetsIds="[该分镜所需的资产ID列表]" shouldGenerateImage="true" ></storyboardItem>`
-8. 写入完成后，仅返回一句确认：`已完成分镜面板写入（{当前模式名称}）`
+9. 写入完成后，仅返回一句确认：`已完成分镜面板写入（{当前模式名称}）`
 
 ### 分镜提示词 · 通用基础技法
 
