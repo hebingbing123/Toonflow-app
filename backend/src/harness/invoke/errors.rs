@@ -31,6 +31,9 @@ impl From<SkillReadError> for InvokeError {
             SkillReadError::BadPath(m) => InvokeError::SkillBadRequest(m),
             SkillReadError::SkillsDirMissing => InvokeError::SkillUnavailable,
             SkillReadError::NotFound => InvokeError::SkillNotFound,
+            SkillReadError::SectionNotFound(section) => {
+                InvokeError::SkillBadRequest(format!("skill section not found: {section}"))
+            }
             SkillReadError::TooLarge | SkillReadError::TooLargeBinary => {
                 InvokeError::SkillBadRequest("skill file exceeds maximum allowed size".into())
             }

@@ -14,8 +14,10 @@ mod helpers;
 pub use errors::InvokeError;
 
 pub(super) use helpers::{
-    map_api_error, parse_i32_required, parse_ids_required, project_numeric_from_ctx, require_pool,
-    script_numeric_id_from_args_or_ctx,
+    apply_text_window, map_api_error, parse_i32_required, parse_ids_required, parse_optional_i32,
+    parse_optional_i32_array, parse_optional_string_array, parse_optional_usize,
+    parse_optional_zero_based_usize, project_numeric_from_ctx, require_pool,
+    script_numeric_id_from_args_or_ctx, select_object_fields,
 };
 
 pub use dispatch::{invoke_tool, invoke_tool_async};

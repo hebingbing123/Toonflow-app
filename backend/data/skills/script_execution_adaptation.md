@@ -10,6 +10,10 @@
 | 读取事件 | `get_novel_events(ids:number[])` |
 | 写入策略 | `set_planData_adaptationStrategy` |
 
+优先最小读取：
+- `get_planData` 优先带 `key: "storySkeleton"`，只拿骨架而不是整个工作区
+- `get_novel_events` 先按当前章节/任务范围读取，必要时再扩大
+
 ## 执行流程
 
 1. 调用 `get_novel_events(ids)` 获取事件表，调用 `get_planData` 获取故事骨架

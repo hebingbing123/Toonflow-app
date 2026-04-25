@@ -44,7 +44,7 @@ pub async fn invoke_tool_async(
 
     match name {
         "isolated.echo" => super::super::isolate::isolated_echo(arguments).await,
-        "get_planData" => invoke_get_plan_data(ctx).await,
+        "get_planData" => invoke_get_plan_data(ctx, arguments).await,
         "get_script_content" => invoke_get_script_content(ctx, arguments).await,
         "get_novel_text" => invoke_get_novel_text(ctx, arguments).await,
         "get_novel_events" => invoke_get_novel_events(ctx, arguments).await,

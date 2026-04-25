@@ -23,13 +23,41 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "scriptId": {
                     "type": "integer",
                     "description": "Numeric script id under the attached project; optional when attached production context already contains script_id."
+                },
+                "lineStart": { "type": "integer", "minimum": 1 },
+                "lineEnd": { "type": "integer", "minimum": 1 },
+                "maxChars": { "type": "integer", "minimum": 1 },
+                "fields": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["numeric_id", "name", "content", "extract_state"] },
+                    "description": "Optional field subset to reduce payload size."
                 }
             },
             "additionalProperties": false
         }),
         "get_planData" => json!({
             "type": "object",
-            "description": "No arguments required; reads scriptAgent plan data for the attached project context.",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "enum": ["storySkeleton", "adaptationStrategy", "script"],
+                    "description": "Optional specific plan section; when set, returns only that section instead of the full wrapper."
+                },
+                "scriptId": {
+                    "type": "integer",
+                    "description": "Optional numeric script id filter when key=script."
+                },
+                "lineStart": { "type": "integer", "minimum": 1 },
+                "lineEnd": { "type": "integer", "minimum": 1 },
+                "maxChars": { "type": "integer", "minimum": 1 },
+                "offset": { "type": "integer", "minimum": 0 },
+                "limit": { "type": "integer", "minimum": 1 },
+                "fields": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["numeric_id", "name", "content", "extract_state"] },
+                    "description": "Optional script-row field subset when key=script."
+                }
+            },
             "additionalProperties": false
         }),
         "get_novel_text" | "get_novel_events" => json!({
@@ -38,6 +66,16 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "novelId": {
                     "type": "integer",
                     "description": "Optional numeric novel id to narrow results within the attached project."
+                },
+                "lineStart": { "type": "integer", "minimum": 1 },
+                "lineEnd": { "type": "integer", "minimum": 1 },
+                "maxChars": { "type": "integer", "minimum": 1 },
+                "offset": { "type": "integer", "minimum": 0 },
+                "limit": { "type": "integer", "minimum": 1 },
+                "fields": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Optional field subset to reduce payload size."
                 }
             },
             "additionalProperties": false
@@ -54,7 +92,37 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "scriptId": {
                     "type": "integer",
                     "description": "Optional numeric script id; defaults to attached script context."
-                }
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["full", "idList", "count"],
+                    "description": "Optional payload compaction mode for array-based keys."
+                },
+                "ids": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "description": "Optional id filter for assets/storyboard arrays."
+                },
+                "assetTypes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Optional type filter for assets arrays."
+                },
+                "relatedAssetIds": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "description": "Optional associated asset filter for storyboard arrays."
+                },
+                "fields": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Optional object field subset."
+                },
+                "lineStart": { "type": "integer", "minimum": 1 },
+                "lineEnd": { "type": "integer", "minimum": 1 },
+                "maxChars": { "type": "integer", "minimum": 1 },
+                "offset": { "type": "integer", "minimum": 0 },
+                "limit": { "type": "integer", "minimum": 1 }
             },
             "additionalProperties": false
         }),

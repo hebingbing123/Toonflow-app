@@ -10,6 +10,10 @@
 | 读取事件 | `get_novel_events(ids:number[])` |
 | 写入骨架 | `set_planData_storySkeleton` |
 
+优先最小读取：
+- 先按当前任务章节范围调用 `get_novel_events`
+- 读取工作区时优先 `get_planData({ key: "storySkeleton", maxChars })` 做增量校对，避免整块加载
+
 ## 执行流程
 
 1. 调用 `get_novel_events(ids)` 获取事件表

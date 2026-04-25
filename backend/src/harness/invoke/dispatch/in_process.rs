@@ -41,7 +41,7 @@ pub(super) fn dispatch_in_process(
                     "get_planData requires async runtime (WebSocket invoke path)".into(),
                 )
             })?;
-            handle.block_on(invoke_get_plan_data(ctx))
+            handle.block_on(invoke_get_plan_data(ctx, arguments))
         }
         "get_script_content" => {
             let handle = tokio::runtime::Handle::try_current().map_err(|_| {

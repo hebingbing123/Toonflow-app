@@ -8,6 +8,7 @@ pub(crate) enum SkillReadError {
     BadPath(String),
     SkillsDirMissing,
     NotFound,
+    SectionNotFound(String),
     TooLarge,
     TooLargeBinary,
     Io(String),
@@ -21,6 +22,9 @@ impl SkillReadError {
                 "skills directory missing (expected backend/data/skills)".into(),
             ),
             SkillReadError::NotFound => ApiError::NotFound,
+            SkillReadError::SectionNotFound(section) => {
+                ApiError::BadRequest(format!("skill section not found: {section}"))
+            }
             SkillReadError::TooLarge => {
                 ApiError::BadRequest(format!("skill file exceeds {MAX_SKILL_BYTES} bytes"))
             }

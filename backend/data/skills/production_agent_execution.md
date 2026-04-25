@@ -7,6 +7,7 @@
 - 执行前先调用 `get_flowData` 确认工作区状态；已有内容在其基础上修改，除非指令要求重写
 - 只执行当前任务对应的工作，不越权执行其他阶段
 - 完成写入后返回一句简短确认即可，不复述完整内容；返回后本次任务终止
+- 优先最小读取：先用 `format` / `fields` / `ids` / `assetTypes` / `maxChars` 读取所需片段，不要默认整块拉取 `assets`、`storyboard` 或整段剧本
 
 ## 任务路由
 
@@ -35,7 +36,7 @@
 
 ### 执行流程
 
-1. 获取 `script` 和 `assets`
+1. 先最小化获取 `script` 和 `assets`：剧本优先带 `maxChars` 或行窗口；资产优先带 `fields` / `assetTypes`
 2. 按下方提取规则分析剧本，识别每个资产的视觉状态变体
 3. 简单说明要增加的衍生资产内容以及信息。总共200字以内
 4. 如不需要衍生资产，返回"不需要衍生资产"，流程结束
@@ -109,7 +110,7 @@ add_deriveAsset({
 
 ### 执行流程
 
-1. 获取 `assets`，收集所有需要生成图片的资产 id
+1. 先用 `get_flowData({ key: "assets", format: "idList" })` 或带 `fields` 的最小读取拿到候选资产 id
 2. 调用 `generate_assets_images({ ids: [资产id列表] })` 生成图片（异步，发起即返回）
 
 ### 约束

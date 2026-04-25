@@ -17,6 +17,7 @@ pub(crate) fn write_skill_at(
         SkillReadError::BadPath(m) => SkillWriteError::BadPath(m),
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
+        | SkillReadError::SectionNotFound(_)
         | SkillReadError::TooLarge
         | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillWriteError::BadPath("invalid skill path".into()),
@@ -63,6 +64,7 @@ pub(crate) fn create_skill_at(
         SkillReadError::BadPath(m) => SkillCreateError::BadPath(m),
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
+        | SkillReadError::SectionNotFound(_)
         | SkillReadError::TooLarge
         | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillCreateError::BadPath("invalid skill path".into()),
@@ -113,6 +115,7 @@ pub(crate) fn delete_skill_at(root: &Path, relative: &str) -> Result<(), SkillDe
         SkillReadError::BadPath(m) => SkillDeleteError::BadPath(m),
         SkillReadError::SkillsDirMissing
         | SkillReadError::NotFound
+        | SkillReadError::SectionNotFound(_)
         | SkillReadError::TooLarge
         | SkillReadError::TooLargeBinary
         | SkillReadError::Io(_) => SkillDeleteError::BadPath("invalid skill path".into()),

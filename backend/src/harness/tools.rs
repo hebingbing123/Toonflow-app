@@ -34,27 +34,27 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "get_planData",
         description:
-            "Script-agent parity read: returns project-scoped plan data and script list for the attached project context.",
+            "Script-agent parity read: returns project-scoped plan data; supports key/line/field filters to avoid loading the full workspace when not needed.",
     },
     HarnessToolInfo {
         name: "get_script_content",
         description:
-            "Script-agent parity read: returns one script row by numeric script id (arguments.scriptId or attached script context).",
+            "Script-agent parity read: returns one script row by numeric script id, with optional line/char/field trimming.",
     },
     HarnessToolInfo {
         name: "get_novel_text",
         description:
-            "Script-agent parity read: returns project novel text rows (optional arguments.novelId to narrow one chapter).",
+            "Script-agent parity read: returns project novel rows, with optional novelId, paging, text windows, and field trimming.",
     },
     HarnessToolInfo {
         name: "get_novel_events",
         description:
-            "Script-agent parity read: returns project novel-event rows (optional arguments.novelId to filter linked events).",
+            "Script-agent parity read: returns project novel-event rows, with optional novelId, paging, detail trimming, and field trimming.",
     },
     HarnessToolInfo {
         name: "get_flowData",
         description:
-            "Production-agent parity read: returns one production workbench flow field by arguments.key (script/scriptPlan/assets/storyboardTable/storyboard).",
+            "Production-agent parity read: returns one production flow field by key, with optional line windows, id/type filters, field subsets, and compact formats.",
     },
     HarnessToolInfo {
         name: "add_deriveAsset",

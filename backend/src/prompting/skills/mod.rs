@@ -34,8 +34,9 @@ pub(crate) use storage::safe_join_under_root;
 
 #[allow(unused_imports)]
 pub(crate) use storage::{
-    create_skill_at, delete_skill_at, read_skill_binary, read_skill_markdown, skills_root,
-    write_skill_at, SkillCreateError, SkillDeleteError, SkillReadError, SkillWriteError,
+    create_skill_at, delete_skill_at, read_skill_binary, read_skill_markdown,
+    read_skill_markdown_section, skills_root, write_skill_at, SkillCreateError, SkillDeleteError,
+    SkillReadError, SkillWriteError,
 };
 
 #[derive(Serialize)]
