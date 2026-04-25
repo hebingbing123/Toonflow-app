@@ -12,12 +12,14 @@ class ProductionContextSnapshotView extends StatelessWidget {
     super.key,
     required this.workspaceLastToolName,
     required this.workspaceLastToolResultData,
+    required this.workspaceSuggestedFlowKey,
   });
 
   static const JsonEncoder _prettyJsonEncoder = JsonEncoder.withIndent('  ');
 
   final String? workspaceLastToolName;
   final Object? workspaceLastToolResultData;
+  final String? workspaceSuggestedFlowKey;
 
   String _previewText(String value, {required int maxChars}) {
     if (value.length <= maxChars) return value;
@@ -31,6 +33,8 @@ class ProductionContextSnapshotView extends StatelessWidget {
       flowKey: normalizedKey,
     ).join(' · ');
     final digest = switch (normalizedKey) {
+      'script' => _scriptDigest(body),
+      'scriptPlan' => _scriptPlanDigest(body),
       'storyboardTable' => _storyboardTableDigest(body),
       'storyboard' => _storyboardDigest(body),
       _ => switch (body) {
@@ -41,6 +45,33 @@ class ProductionContextSnapshotView extends StatelessWidget {
     if (summary.isEmpty) return digest;
     if (digest.isEmpty || digest == summary) return summary;
     return '$summary\n\n$digest';
+  }
+
+  String _plainTextDigest(String value, {int maxLines = 6, int maxChars = 360}) {
+    final lines = value
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .take(maxLines)
+        .toList(growable: false);
+    if (lines.isEmpty) {
+      return value.trim();
+    }
+    return _previewText(lines.join('\n'), maxChars: maxChars);
+  }
+
+  String _scriptDigest(Object body) {
+    if (body is! String) {
+      return _prettyJsonEncoder.convert(body).trim();
+    }
+    return _plainTextDigest(body, maxLines: 8, maxChars: 420);
+  }
+
+  String _scriptPlanDigest(Object body) {
+    if (body is! String) {
+      return _prettyJsonEncoder.convert(body).trim();
+    }
+    return _plainTextDigest(body, maxLines: 8, maxChars: 420);
   }
 
   String _storyboardTableDigest(Object body) {
@@ -146,6 +177,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
   Widget build(BuildContext context) {
     final result = workspaceLastToolResultData;
     final toolName = workspaceLastToolName?.trim();
+    final suggestedFlowKey = workspaceSuggestedFlowKey?.trim();
     if (result is! Map<String, dynamic> ||
         toolName == null ||
         toolName.isEmpty) {
@@ -207,6 +239,16 @@ class ProductionContextSnapshotView extends StatelessWidget {
           body: value,
         );
       }
+    } else if (toolName == 'get_flowData' &&
+        data != null &&
+        suggestedFlowKey != null &&
+        suggestedFlowKey.isNotEmpty) {
+      addPreviewCard(
+        title: 'flow[$suggestedFlowKey]',
+        flowKey: suggestedFlowKey,
+        subtitle: '来自 $toolName',
+        body: data,
+      );
     }
 
     final items = result['items'];

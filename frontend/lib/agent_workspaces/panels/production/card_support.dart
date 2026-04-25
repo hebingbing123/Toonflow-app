@@ -22,6 +22,7 @@ extension _AgentWorkspaceProductionCardSupport
       ProductionContextSnapshotView(
         workspaceLastToolName: widget.workspaceLastToolName,
         workspaceLastToolResultData: widget.workspaceLastToolResultData,
+        workspaceSuggestedFlowKey: widget.workspaceSuggestedFlowKey,
       ),
     ];
   }

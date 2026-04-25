@@ -11,6 +11,7 @@ void main() {
           home: Scaffold(
             body: ProductionContextSnapshotView(
               workspaceLastToolName: 'get_flowData',
+              workspaceSuggestedFlowKey: 'storyboard',
               workspaceLastToolResultData: <String, dynamic>{
                 'data': <String, dynamic>{
                   'storyboardTable': '''
@@ -61,6 +62,39 @@ void main() {
       expect(find.textContaining('结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #101\n结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #102'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'ProductionContextSnapshotView renders single-flow get_flowData preview with compact script digest',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: ProductionContextSnapshotView(
+              workspaceLastToolName: 'get_flowData',
+              workspaceSuggestedFlowKey: 'script',
+              workspaceLastToolResultData: <String, dynamic>{
+                'data': '''
+第1场 大殿
+皇帝宣布出征，群臣静默。
+
+第2场 殿前
+将军接旨，兵符特写。
+
+第3场 城门
+旌旗猎猎，众军列阵。
+''',
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('flow[script]'), findsOneWidget);
+      expect(find.textContaining('文本'), findsOneWidget);
+      expect(find.textContaining('第1场 大殿\n皇帝宣布出征，群臣静默。'), findsOneWidget);
+      expect(find.textContaining('第3场 城门'), findsOneWidget);
     },
   );
 }

@@ -1546,6 +1546,117 @@ void main() {
     expect(find.textContaining('导演计划：先补资产'), findsWidgets);
   });
 
+  testWidgets('Production pane renders single flow snapshot for get_flowData', (
+    WidgetTester tester,
+  ) async {
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'storyboard');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(
+      text: '{"key":"storyboard"}',
+    );
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    addTearDown(() {
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.production,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptPlanRowId: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine:
+                    'get_flowData => {"data":[{"id":101,"shouldGenerateImage":true}]}',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: <String, dynamic>{
+                  'data': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'id': 101,
+                      'shouldGenerateImage': true,
+                      'associateAssetsIds': <int>[7, 12],
+                    },
+                    <String, dynamic>{
+                      'id': 102,
+                      'shouldGenerateImage': false,
+                    },
+                  ],
+                },
+                workspaceSuggestedFlowKey: 'storyboard',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackScriptPlanViaUpdateData: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('flow[storyboard]'), findsOneWidget);
+    expect(find.textContaining('缺帧 1 项'), findsWidgets);
+    expect(find.textContaining('镜头 #101\n结果: 缺帧待补图'), findsOneWidget);
+    expect(find.textContaining('镜头 #102'), findsNothing);
+  });
+
   testWidgets('Production probe auto-syncs get_flowData key in arguments', (
     WidgetTester tester,
   ) async {
