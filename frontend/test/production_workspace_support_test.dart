@@ -189,15 +189,18 @@ void main() {
     },
   );
 
-  test('buildProductionPlanningScriptArgs exposes fixed compact script window', () {
-    expect(buildProductionPlanningScriptArgs(), <String, dynamic>{
-      'key': 'script',
-      'lineStart': 1,
-      'lineEnd': 48,
-      'maxChars': 1400,
-    });
-    expect(summarizeProductionPlanningScriptWindow(), '剧本 1-48 行（<=1400 字）');
-  });
+  test(
+    'buildProductionPlanningScriptArgs exposes fixed compact script window',
+    () {
+      expect(buildProductionPlanningScriptArgs(), <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 48,
+        'maxChars': 1400,
+      });
+      expect(summarizeProductionPlanningScriptWindow(), '剧本 1-48 行（<=1400 字）');
+    },
+  );
 
   test(
     'buildProductionWorkspaceRecipes adds compact script reread before script-plan follow-ups',
@@ -823,7 +826,9 @@ void main() {
         },
       );
 
-      final assetStage = stages.singleWhere((stage) => stage.flowKey == 'assets');
+      final assetStage = stages.singleWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
       expect(assetStage.statusLabel, '可推进');
       expect(assetStage.domainTool, 'get_flowData');
       expect(assetStage.domainArgs, <String, dynamic>{
@@ -856,7 +861,9 @@ void main() {
         },
       );
 
-      final assetStage = stages.singleWhere((stage) => stage.flowKey == 'assets');
+      final assetStage = stages.singleWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
       expect(assetStage.statusLabel, '可推进');
       expect(assetStage.domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -921,6 +928,33 @@ void main() {
 
     expect(ids, <int>[11, 12, 21]);
   });
+
+  test(
+    'extractProductionPendingDeriveAssetIds keeps only missing derive images',
+    () {
+      final ids = extractProductionPendingDeriveAssetIds(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 1,
+          'derive': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 11},
+            <String, dynamic>{'id': 12, 'src': 'https://example.com/12.png'},
+          ],
+        },
+        <String, dynamic>{
+          'id': 2,
+          'derive': <Map<String, dynamic>>[
+            <String, dynamic>{'id': 21, 'flowId': 88},
+            <String, dynamic>{
+              'id': 22,
+              'imageUrl': 'https://example.com/22.png',
+            },
+          ],
+        },
+      ]);
+
+      expect(ids, <int>[11, 21]);
+    },
+  );
 
   test('extractProductionActionCandidateIds reads storyboard ids', () {
     final ids = extractProductionActionCandidateIds(
@@ -1068,8 +1102,22 @@ void main() {
       suggestedFlowKey: 'assets',
       result: <String, dynamic>{
         'data': <Map<String, dynamic>>[
-          <String, dynamic>{'id': 1, 'name': '角色A', 'src': 'https://a.png'},
-          <String, dynamic>{'id': 2, 'name': '角色B'},
+          <String, dynamic>{
+            'id': 1,
+            'name': '角色A',
+            'src': 'https://a.png',
+            'derive': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 11, 'src': 'https://example.com/11.png'},
+              <String, dynamic>{'id': 12},
+            ],
+          },
+          <String, dynamic>{
+            'id': 2,
+            'name': '角色B',
+            'derive': <Map<String, dynamic>>[
+              <String, dynamic>{'id': 21},
+            ],
+          },
         ],
       },
     );
@@ -1077,8 +1125,52 @@ void main() {
     final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
     expect(assetsStage.statusLabel, '需补图');
     expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
-    expect(assetsStage.detail, contains('仍有 1 项缺少图像结果'));
+    expect(assetsStage.detail, contains('资产 #12, 21 仍缺图'));
+    expect(
+      assetsStage.prompt,
+      '请优先只核对并生成资产 ids=12,21；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
+    );
   });
+
+  test(
+    'buildProductionWorkspaceRecipes narrows asset generation prompt to pending derive ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 1,
+              'name': '角色A',
+              'src': 'https://a.png',
+              'derive': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'id': 11,
+                  'src': 'https://example.com/11.png',
+                },
+                <String, dynamic>{'id': 12},
+              ],
+            },
+            <String, dynamic>{
+              'id': 2,
+              'name': '角色B',
+              'derive': <Map<String, dynamic>>[
+                <String, dynamic>{'id': 21},
+              ],
+            },
+          ],
+        },
+      );
+
+      expect(recipes.first.subAgentTool, 'run_sub_agent_generate_assets');
+      expect(recipes.first.detail, contains('资产 #12, 21 仍缺图'));
+      expect(
+        recipes.first.prompt,
+        '请优先只核对并生成资产 ids=12,21；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
+      );
+    },
+  );
 
   test(
     'buildProductionWorkspaceStages narrows asset reads from storyboard references',
@@ -1699,11 +1791,11 @@ void main() {
       },
     );
 
-      expect(recipes.first.domainArgs, <String, dynamic>{
-        'key': 'assets',
-        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
-        'limit': 24,
-      });
+    expect(recipes.first.domainArgs, <String, dynamic>{
+      'key': 'assets',
+      'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      'limit': 24,
+    });
     expect(recipes.last.domainArgs, <String, dynamic>{
       'key': 'scriptPlan',
       'maxChars': 2200,

@@ -85,9 +85,10 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         detail: '若仍缺素材，可直接衔接资产子代理推进下一轮生成。',
         flowKey: 'assets',
         subAgentTool: 'run_sub_agent_generate_assets',
-        prompt: affectedIds.isEmpty
-            ? '请基于最新 assets flow 判断缺失素材，并执行下一轮最小可行生成动作。'
-            : '请先核对刚生成的资产 ids=${affectedIds.join(',')} 是否已达标，再只补剩余缺口，避免重跑无关素材。',
+        prompt: buildProductionAssetGenerationPrompt(
+          assetIds: affectedIds,
+          summary: affectedIds.isEmpty ? null : '先检查本次刚生成资产的结果再决定是否补跑',
+        ),
       ),
     ];
   }
@@ -112,14 +113,20 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
     final withoutUrl = rows.where((row) {
       return !productionFlowEntryHasMediaResult(row);
     }).length;
+    final pendingDeriveIds = extractProductionPendingDeriveAssetIds(rows);
+    final pendingScope = summarizeProductionAssetFocusIds(pendingDeriveIds);
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '继续资产生成',
-          detail: '仍有素材缺少图像结果，适合直接运行素材生成子代理。',
+          detail: pendingScope.isEmpty
+              ? '仍有素材缺少图像结果，适合直接运行素材生成子代理。'
+              : '$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
           flowKey: 'assets',
           subAgentTool: 'run_sub_agent_generate_assets',
-          prompt: '请基于当前 assets flow 优先补齐缺少图像结果的素材，并执行最小可行生成动作。',
+          prompt: buildProductionAssetGenerationPrompt(
+            assetIds: pendingDeriveIds,
+          ),
         ),
         ProductionWorkspaceRecipe(
           title: '刷新分镜需求',

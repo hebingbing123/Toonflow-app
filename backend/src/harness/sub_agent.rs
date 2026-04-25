@@ -148,7 +148,7 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
             skill_section: Some("二、衍生资产图片生成"),
             format_hint: None,
             execution_hint: Some(
-                "先最小读取：优先拿待生成资产 id 列表或字段子集，只对明确候选发起生成。",
+                "先最小读取：若派发指令已给出明确资产 ids，先只核对这批状态再直接生成；否则再用最小字段拿候选列表，只对明确候选发起生成。",
             ),
         }),
         "run_sub_agent_director_plan" => Some(SubAgentSpec {

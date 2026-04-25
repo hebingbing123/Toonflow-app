@@ -243,8 +243,9 @@ List<String> _parseReviewAssetTypes(Object? value) {
       .toSet()
       .toList();
   types.sort(
-    (left, right) => _productionAssetTypeOrder(left)
-        .compareTo(_productionAssetTypeOrder(right)),
+    (left, right) => _productionAssetTypeOrder(
+      left,
+    ).compareTo(_productionAssetTypeOrder(right)),
   );
   return types;
 }
@@ -513,8 +514,9 @@ Map<String, dynamic> buildProductionAssetTypeReadArgs({
       .toSet()
       .toList();
   normalizedTypes.sort(
-    (left, right) => _productionAssetTypeOrder(left)
-        .compareTo(_productionAssetTypeOrder(right)),
+    (left, right) => _productionAssetTypeOrder(
+      left,
+    ).compareTo(_productionAssetTypeOrder(right)),
   );
   if (normalizedTypes.isEmpty) {
     return _productionAssetsCompactArgs();
@@ -652,6 +654,19 @@ String summarizeProductionAssetTypeScope(List<String> assetTypes) {
   );
 }
 
+String summarizeProductionAssetFocusIds(
+  List<int> assetIds, {
+  int previewCount = 6,
+}) {
+  final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) return '';
+  final visible = ids.take(previewCount).join(', ');
+  if (ids.length <= previewCount) {
+    return '资产 #$visible';
+  }
+  return '资产 #$visible 等 ${ids.length} 项';
+}
+
 String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
   final args = buildProductionReviewAssetArgs(review);
   final scope = summarizeProductionAssetScope(args);
@@ -663,6 +678,21 @@ String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
     return '请优先只核对资产 ids=${normalizedIds.join(',')} 是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$summaryLine';
   }
   return '请先核对$scope是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。$summaryLine';
+}
+
+String buildProductionAssetGenerationPrompt({
+  required List<int> assetIds,
+  String? summary,
+}) {
+  final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
+  final normalizedSummary = summary?.trim() ?? '';
+  final summaryLine = normalizedSummary.isEmpty
+      ? ''
+      : '优先解决：$normalizedSummary';
+  if (ids.isEmpty) {
+    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$summaryLine';
+  }
+  return '请优先只核对并生成资产 ids=${ids.join(',')}；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine';
 }
 
 List<int> extractProductionStoryboardIds(Object? flowData) {
@@ -1086,6 +1116,30 @@ List<int> _extractDeriveAssetIds(Object? value) {
     ids.addAll(_extractEntityIds(derive));
   }
   return ids;
+}
+
+List<int> extractProductionPendingDeriveAssetIds(Object? value) {
+  if (value is! List) return const <int>[];
+  final ids = <int>{};
+  for (final row in value.whereType<Map<String, dynamic>>()) {
+    final derive = row['derive'];
+    if (derive is! List) continue;
+    for (final child in derive.whereType<Map<String, dynamic>>()) {
+      final childId = _parseLooseInt(
+        child['id'] ??
+            child['numeric_id'] ??
+            child['numericId'] ??
+            child['assetId'] ??
+            child['assetsId'],
+      );
+      if (childId <= 0 || productionFlowEntryHasMediaResult(child)) {
+        continue;
+      }
+      ids.add(childId);
+    }
+  }
+  final sortedIds = ids.toList()..sort();
+  return sortedIds;
 }
 
 List<int> _extractEntityIds(Object? value) {

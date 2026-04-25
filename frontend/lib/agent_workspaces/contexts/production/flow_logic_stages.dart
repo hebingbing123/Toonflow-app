@@ -223,14 +223,20 @@ ProductionWorkspaceStage _buildAssetsStage({
       return productionFlowEntryHasMediaResult(row);
     }).length;
     final missingCount = rows.length - readyCount;
+    final pendingDeriveIds = extractProductionPendingDeriveAssetIds(rows);
+    final pendingScope = summarizeProductionAssetFocusIds(pendingDeriveIds);
     if (missingCount > 0) {
       return ProductionWorkspaceStage(
         title: '资产准备',
         flowKey: 'assets',
         statusLabel: '需补图',
-        detail: '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。',
+        detail: pendingScope.isEmpty
+            ? '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。'
+            : '共 ${rows.length} 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
         subAgentTool: 'run_sub_agent_generate_assets',
-        prompt: '请基于当前 assets flow 优先补齐缺少图像结果的素材，并执行最小可行生成动作。',
+        prompt: buildProductionAssetGenerationPrompt(
+          assetIds: pendingDeriveIds,
+        ),
       );
     }
     return ProductionWorkspaceStage(

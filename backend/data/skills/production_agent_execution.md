@@ -108,18 +108,21 @@ add_deriveAsset({
 
 | 操作 | 调用 |
 |------|------|
+| 已知明确待生成资产 ID 时直接生成 | `generate_deriveAsset({ ids: [资产id列表] })` |
 | 读取资产列表 | `get_flowData({ key: "assets", format: "idList", assetTypes: ["role", "tool", "scene"] })` / `get_flowData({ key: "assets", fields: ["id", "name", "type", "derive"], assetTypes: ["role", "tool", "scene"], limit: 12 })` |
 | 生成资产图片 | `generate_deriveAsset({ ids: [资产id列表] })` |
 
 ### 执行流程
 
-1. 先用 `get_flowData({ key: "assets", format: "idList", assetTypes: [...] })` 或带 `fields` 的最小读取拿到候选资产 id；优先只读取本轮要出图的资产类型
-2. 调用 `generate_deriveAsset({ ids: [资产id列表] })` 生成图片（异步，发起即返回）
+1. 若派发指令里已经给出明确资产 ID，先只核对这批 ID 是否仍缺图；确认后直接调用 `generate_deriveAsset({ ids: [...] })`，不要再为此宽读整包 assets。
+2. 仅在没有明确资产 ID 时，才用 `get_flowData({ key: "assets", format: "idList", assetTypes: [...] })` 或带 `fields` 的最小读取拿到候选资产 id；优先只读取本轮要出图的资产类型。
+3. 调用 `generate_deriveAsset({ ids: [资产id列表] })` 生成图片（异步，发起即返回）。
 
 ### 约束
 
 - 前置条件：衍生资产分析已完成并写入
 - 仅对有衍生状态且尚未生成图片的资产发起生成
+- 若派发指令已给出具体资产 ID，禁止退回 `role/tool/scene` 全量扫描
 
 ---
 
