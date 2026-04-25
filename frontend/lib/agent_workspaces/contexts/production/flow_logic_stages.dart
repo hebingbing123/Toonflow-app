@@ -283,7 +283,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         _ => null,
       },
       domainArgs: switch (review.nextAction) {
-        'check_script' => <String, dynamic>{'key': 'script', 'maxChars': 1800},
+        'check_script' => buildProductionScriptReviewArgs(review: review),
         _ => null,
       },
       subAgentTool: switch (review.nextAction) {

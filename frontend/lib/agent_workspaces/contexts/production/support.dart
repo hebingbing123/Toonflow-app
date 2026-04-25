@@ -268,6 +268,24 @@ Map<String, dynamic> buildProductionReviewStoryboardGenerationArgs(
   return buildProductionStoryboardGenerationArgs(ids: review.storyboardIds);
 }
 
+Map<String, dynamic> buildProductionScriptReviewArgs({
+  ProductionSupervisionReview? review,
+}) {
+  final focusCount = review?.storyboardIds.length ?? 0;
+  final lineEnd = focusCount > 0
+      ? (focusCount * 8 + 16).clamp(32, 80)
+      : 60;
+  final maxChars = focusCount > 0
+      ? (focusCount * 180 + 500).clamp(1000, 1800)
+      : 1400;
+  return <String, dynamic>{
+    'key': 'script',
+    'lineStart': 1,
+    'lineEnd': lineEnd,
+    'maxChars': maxChars,
+  };
+}
+
 Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
   final ids = extractProductionReferencedAssetIds(flowData);
   if (ids.isEmpty) {

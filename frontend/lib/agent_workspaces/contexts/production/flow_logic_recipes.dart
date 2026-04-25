@@ -406,7 +406,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'script',
           domainTool: 'get_flowData',
-          domainArgs: <String, dynamic>{'key': 'script', 'maxChars': 1800},
+          domainArgs: buildProductionScriptReviewArgs(review: review),
         ),
       ];
     case 'generate_storyboard':

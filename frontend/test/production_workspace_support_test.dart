@@ -289,6 +289,69 @@ void main() {
     },
   );
 
+  test(
+    'buildProductionWorkspaceRecipes shrinks check-script reads to focused window',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_script',
+            'summary': '先核对关键镜头对应剧本依据',
+            'storyboardIds': '2,5,7',
+          },
+        },
+      );
+
+      expect(recipes, hasLength(1));
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 40,
+        'maxChars': 1040,
+      });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages shrinks check-script reads to focused window',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'run_sub_agent_production_supervision',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'review': <String, dynamic>{
+            'target': 'storyboardTable',
+            'grade': 'B',
+            'severeCount': '0',
+            'mediumCount': '1',
+            'minorCount': '0',
+            'nextAction': 'check_script',
+            'summary': '先核对关键镜头对应剧本依据',
+            'storyboardIds': '2,5,7',
+          },
+        },
+      );
+
+      final storyboardTableStage = stages.singleWhere(
+        (stage) => stage.flowKey == 'storyboardTable',
+      );
+      expect(storyboardTableStage.domainTool, 'get_flowData');
+      expect(storyboardTableStage.domainArgs, <String, dynamic>{
+        'key': 'script',
+        'lineStart': 1,
+        'lineEnd': 40,
+        'maxChars': 1040,
+      });
+    },
+  );
+
   test('extractProductionActionCandidateIds reads derive asset ids', () {
     final ids = extractProductionActionCandidateIds(
       selectedTool: 'generate_deriveAsset',
@@ -549,7 +612,9 @@ void main() {
       expect(tableStage.domainTool, 'get_flowData');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'script',
-        'maxChars': 1800,
+        'lineStart': 1,
+        'lineEnd': 60,
+        'maxChars': 1400,
       });
     },
   );
