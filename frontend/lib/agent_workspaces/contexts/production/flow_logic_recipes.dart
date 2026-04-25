@@ -62,19 +62,32 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   if (normalizedTool == 'generate_deriveAsset' ||
       normalizedTool == 'add_deriveAsset' ||
       normalizedTool == 'del_deriveAsset') {
-    return const <ProductionWorkspaceRecipe>[
+    final affectedIds = normalizedTool == 'generate_deriveAsset'
+        ? extractProductionActionCandidateIds(
+            selectedTool: 'generate_deriveAsset',
+            toolName: toolName,
+            suggestedFlowKey: suggestedFlowKey,
+            result: result,
+          )
+        : const <int>[];
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
         title: '刷新资产 flow',
-        detail: '资产动作已执行，先拉取最新 assets 结果再决定是否写回。',
+        detail: affectedIds.isEmpty
+            ? '资产动作已执行，先拉取最新 assets 结果再决定是否写回。'
+            : '资产生成动作已执行，先只回读本次资产 #${affectedIds.join(', ')} 的最新状态。',
         flowKey: 'assets',
         domainTool: 'get_flowData',
+        domainArgs: buildProductionAssetReadArgs(ids: affectedIds),
       ),
       ProductionWorkspaceRecipe(
         title: '继续资产子代理',
         detail: '若仍缺素材，可直接衔接资产子代理推进下一轮生成。',
         flowKey: 'assets',
         subAgentTool: 'run_sub_agent_generate_assets',
-        prompt: '请基于最新 assets flow 判断缺失素材，并执行下一轮最小可行生成动作。',
+        prompt: affectedIds.isEmpty
+            ? '请基于最新 assets flow 判断缺失素材，并执行下一轮最小可行生成动作。'
+            : '请先核对刚生成的资产 ids=${affectedIds.join(',')} 是否已达标，再只补剩余缺口，避免重跑无关素材。',
       ),
     ];
   }

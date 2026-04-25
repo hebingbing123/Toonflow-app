@@ -151,6 +151,14 @@ List<int> extractProductionActionCandidateIds({
     }
   }
 
+  if (normalizedToolName == 'generate_deriveAsset') {
+    return _extractToolScopedIds(result['assetIds']);
+  }
+
+  if (normalizedToolName == 'generate_storyboard') {
+    return _extractToolScopedIds(result['storyboardIds']);
+  }
+
   Object? data = result['data'];
   if (normalizedToolName == 'get_flowData') {
     switch (normalizedSelectedTool) {
@@ -246,14 +254,7 @@ List<int> _parseReviewIds(Object? value) {
 Map<String, dynamic> buildProductionReviewAssetArgs(
   ProductionSupervisionReview review,
 ) {
-  if (review.assetIds.isEmpty) {
-    return _productionAssetsCompactArgs();
-  }
-  return <String, dynamic>{
-    'key': 'assets',
-    'ids': review.assetIds,
-    'fields': _productionAssetFields(),
-  };
+  return buildProductionAssetReadArgs(ids: review.assetIds);
 }
 
 Map<String, dynamic> buildProductionReviewStoryboardArgs(
@@ -278,9 +279,7 @@ Map<String, dynamic> buildProductionScriptReviewArgs({
   ProductionSupervisionReview? review,
 }) {
   final focusCount = review?.storyboardIds.length ?? 0;
-  final lineEnd = focusCount > 0
-      ? (focusCount * 8 + 16).clamp(32, 80)
-      : 60;
+  final lineEnd = focusCount > 0 ? (focusCount * 8 + 16).clamp(32, 80) : 60;
   final maxChars = focusCount > 0
       ? (focusCount * 180 + 500).clamp(1000, 1800)
       : 1400;
@@ -294,6 +293,12 @@ Map<String, dynamic> buildProductionScriptReviewArgs({
 
 Map<String, dynamic> buildProductionFlowAssetArgs(Object? flowData) {
   final ids = extractProductionReferencedAssetIds(flowData);
+  return buildProductionAssetReadArgs(ids: ids);
+}
+
+Map<String, dynamic> buildProductionAssetReadArgs({
+  List<int> ids = const <int>[],
+}) {
   if (ids.isEmpty) {
     return _productionAssetsCompactArgs();
   }
@@ -371,9 +376,7 @@ List<String> summarizeProductionScriptPlanSections(
   int maxSections = 4,
 }) {
   if (flowData is! String) return const <String>[];
-  final text = flowData
-      .replaceAll(RegExp(r'</?scriptPlan>'), '')
-      .trim();
+  final text = flowData.replaceAll(RegExp(r'</?scriptPlan>'), '').trim();
   if (text.isEmpty) return const <String>[];
 
   final summaries = <String>[];
@@ -570,11 +573,12 @@ List<String> productionStoryboardFields() => <String>[
   'shouldGenerateImage',
 ];
 
-Map<String, dynamic> buildProductionStoryboardCompactArgs() => <String, dynamic>{
-  'key': 'storyboard',
-  'fields': productionStoryboardFields(),
-  'limit': 24,
-};
+Map<String, dynamic> buildProductionStoryboardCompactArgs() =>
+    <String, dynamic>{
+      'key': 'storyboard',
+      'fields': productionStoryboardFields(),
+      'limit': 24,
+    };
 
 List<String> productionStoryboardTableFields() => <String>[
   'id',
@@ -731,6 +735,13 @@ List<int> _extractEntityIds(Object? value) {
     }
   }
   return ids.toSet().toList(growable: false);
+}
+
+List<int> _extractToolScopedIds(Object? value) {
+  if (value is! List) return const <int>[];
+  final ids = value.map(_parseLooseInt).where((id) => id > 0).toSet().toList();
+  ids.sort();
+  return ids;
 }
 
 List<String> _splitMarkdownTableRow(String line) {

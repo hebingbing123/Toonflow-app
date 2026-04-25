@@ -561,6 +561,40 @@ void main() {
   );
 
   test(
+    'extractProductionActionCandidateIds reads generated asset ids from tool result',
+    () {
+      final ids = extractProductionActionCandidateIds(
+        selectedTool: 'generate_deriveAsset',
+        toolName: 'generate_deriveAsset',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{
+          'assetIds': <int>[12, 7, 12],
+          'total': 2,
+        },
+      );
+
+      expect(ids, <int>[7, 12]);
+    },
+  );
+
+  test(
+    'extractProductionActionCandidateIds reads generated storyboard ids from tool result',
+    () {
+      final ids = extractProductionActionCandidateIds(
+        selectedTool: 'generate_storyboard',
+        toolName: 'generate_storyboard',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'storyboardIds': <int>[9, 3, 9],
+          'total': 2,
+        },
+      );
+
+      expect(ids, <int>[3, 9]);
+    },
+  );
+
+  test(
     'buildProductionActionArgumentSuggestions builds add/delete payloads',
     () {
       final result = <String, dynamic>{
@@ -679,6 +713,83 @@ void main() {
         'limit': 12,
       });
       expect(storyboardStage.subAgentTool, isNull);
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages narrows storyboard refresh to generated ids',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'generate_storyboard',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'storyboardIds': <int>[9, 3, 9],
+          'total': 2,
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.domainArgs, <String, dynamic>{
+        'key': 'storyboard',
+        'ids': <int>[3, 9],
+        'fields': <String>[
+          'id',
+          'index',
+          'src',
+          'state',
+          'associateAssetsIds',
+          'shouldGenerateImage',
+        ],
+      });
+      expect(storyboardStage.detail, contains('#3, 9'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceStages narrows asset refresh to generated ids',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'generate_deriveAsset',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{
+          'assetIds': <int>[12, 7, 12],
+          'total': 2,
+        },
+      );
+
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(assetsStage.detail, contains('本次受影响资产'));
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes narrows asset refresh to generated ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'generate_deriveAsset',
+        suggestedFlowKey: 'assets',
+        result: <String, dynamic>{
+          'assetIds': <int>[12, 7, 12],
+          'total': 2,
+        },
+      );
+
+      expect(recipes.first.domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+      expect(recipes.first.detail, contains('#7, 12'));
+      expect(recipes.last.prompt, contains('ids=7,12'));
     },
   );
 
@@ -938,8 +1049,10 @@ void main() {
     expect(lines, contains('规划维度 3/6'));
   });
 
-  test('summarizeProductionScriptPlanSections extracts compact section digest', () {
-    final sections = summarizeProductionScriptPlanSections('''
+  test(
+    'summarizeProductionScriptPlanSections extracts compact section digest',
+    () {
+      final sections = summarizeProductionScriptPlanSections('''
 <scriptPlan>
 ① 主题立意与叙事核心
 女主复仇线要压住爽感，并保证前两场快速立住目标。
@@ -949,11 +1062,12 @@ void main() {
 </scriptPlan>
 ''');
 
-    expect(sections, <String>[
-      '① 主题立意与叙事核心：女主复仇线要压住爽感，并保证前两场快速立住目标。',
-      '② 视觉风格与画面基调：冷金对比，朝堂压迫感要强，人物特写优先保留眼神戏。',
-    ]);
-  });
+      expect(sections, <String>[
+        '① 主题立意与叙事核心：女主复仇线要压住爽感，并保证前两场快速立住目标。',
+        '② 视觉风格与画面基调：冷金对比，朝堂压迫感要强，人物特写优先保留眼神戏。',
+      ]);
+    },
+  );
 
   test('productionFlowEntryHasMediaResult supports src fields', () {
     expect(

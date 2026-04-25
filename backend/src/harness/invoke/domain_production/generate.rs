@@ -64,7 +64,7 @@ pub(crate) async fn invoke_generate_derive_asset(
     }
 
     let mut enqueued = Vec::with_capacity(valid_ids.len());
-    for asset_id in valid_ids {
+    for asset_id in &valid_ids {
         let payload = json!({
             "source": "production.assets.batch-generate",
             "project_numeric_id": project_numeric_id,
@@ -80,7 +80,7 @@ pub(crate) async fn invoke_generate_derive_asset(
     }
 
     let total = enqueued.len();
-    Ok(json!({ "enqueued": enqueued, "total": total }))
+    Ok(json!({ "enqueued": enqueued, "total": total, "assetIds": valid_ids }))
 }
 
 pub(crate) async fn invoke_generate_storyboard(
@@ -126,6 +126,7 @@ pub(crate) async fn invoke_generate_storyboard(
         ));
     }
 
+    let storyboard_ids: Vec<i32> = rows.iter().map(|row| row.numeric_id).collect();
     let mut enqueued = Vec::with_capacity(rows.len());
     for row in rows {
         let payload = json!({
@@ -145,5 +146,5 @@ pub(crate) async fn invoke_generate_storyboard(
     }
 
     let total = enqueued.len();
-    Ok(json!({ "enqueued": enqueued, "total": total }))
+    Ok(json!({ "enqueued": enqueued, "total": total, "storyboardIds": storyboard_ids }))
 }

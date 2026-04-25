@@ -30,6 +30,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
+      result: result,
     ),
     _buildStoryboardTableStage(
       activeKey: activeKey,
@@ -42,6 +43,8 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
       review: review,
+      suggestedFlowKey: suggestedFlowKey,
+      result: result,
     ),
   ];
 }
@@ -176,6 +179,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
+  required Object? result,
 }) {
   final data = flowSnapshot['assets'];
   if (data is List) {
@@ -247,13 +251,26 @@ ProductionWorkspaceStage _buildAssetsStage({
       toolName == 'del_deriveAsset' ||
       toolName == 'run_sub_agent_derive_assets' ||
       toolName == 'run_sub_agent_generate_assets') {
+    final refreshArgs = toolName == 'generate_deriveAsset'
+        ? buildProductionAssetReadArgs(
+            ids: extractProductionActionCandidateIds(
+              selectedTool: 'generate_deriveAsset',
+              toolName: toolName,
+              suggestedFlowKey: 'assets',
+              result: result,
+            ),
+          )
+        : _assetsCompactArgs();
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
       statusLabel: '建议刷新',
-      detail: '资产相关动作刚执行，建议重新读取 assets 确认最新结果。',
+      detail:
+          toolName == 'generate_deriveAsset' && refreshArgs.containsKey('ids')
+          ? '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。'
+          : '资产相关动作刚执行，建议重新读取 assets 确认最新结果。',
       domainTool: 'get_flowData',
-      domainArgs: _assetsCompactArgs(),
+      domainArgs: refreshArgs,
     );
   }
   return ProductionWorkspaceStage(
@@ -370,6 +387,8 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required Map<String, Object?> flowSnapshot,
   required String toolName,
   required ProductionSupervisionReview? review,
+  required String? suggestedFlowKey,
+  required Object? result,
 }) {
   if (review != null &&
       (review.nextAction == 'check_storyboard' ||
@@ -447,10 +466,18 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName == 'generate_storyboard' ||
       toolName == 'run_sub_agent_storyboard_gen' ||
       toolName == 'run_sub_agent_storyboard_panel') {
+    final affectedIds = toolName == 'generate_storyboard'
+        ? extractProductionActionCandidateIds(
+            selectedTool: 'generate_storyboard',
+            toolName: toolName,
+            suggestedFlowKey: suggestedFlowKey,
+            result: result,
+          )
+        : const <int>[];
     final refreshArgs =
         toolName == 'generate_storyboard' ||
             toolName == 'run_sub_agent_storyboard_gen'
-        ? buildProductionStoryboardGenerationArgs()
+        ? buildProductionStoryboardGenerationArgs(ids: affectedIds)
         : buildProductionStoryboardReviewArgs();
     return ProductionWorkspaceStage(
       title: '分镜画面',
@@ -459,7 +486,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
       detail:
           toolName == 'generate_storyboard' ||
               toolName == 'run_sub_agent_storyboard_gen'
-          ? '分镜动作刚执行，建议先按补图最小字段读取 storyboard，再决定是否继续补帧或写回。'
+          ? affectedIds.isEmpty
+                ? '分镜动作刚执行，建议先按补图最小字段读取 storyboard，再决定是否继续补帧或写回。'
+                : '分镜动作刚执行，建议先只回读本次镜头 #${affectedIds.join(', ')} 的补图状态。'
           : '分镜动作刚执行，建议重新读取 storyboard 再决定是否写回。',
       domainTool: 'get_flowData',
       domainArgs: refreshArgs,
