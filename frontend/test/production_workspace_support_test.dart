@@ -108,6 +108,37 @@ void main() {
   });
 
   test(
+    'buildProductionWorkspaceRecipes narrows storyboard table asset checks to referenced ids',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboardTable',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'rows': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'id': '1',
+                'associateAssetsIds': <Object>[12, '7', 12, 0],
+              },
+              <String, dynamic>{
+                'id': '2',
+                'associateAssetsIds': <Object>['3'],
+              },
+            ],
+          },
+        },
+      );
+
+      expect(recipes[1].title, '核对关联资产');
+      expect(recipes[1].domainArgs, <String, dynamic>{
+        'key': 'assets',
+        'ids': <int>[3, 7, 12],
+        'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes uses structured supervision next action',
     () {
       final recipes = buildProductionWorkspaceRecipes(
@@ -383,5 +414,29 @@ void main() {
       productionFlowEntryHasMediaResult(<String, dynamic>{'src': '   '}),
       isFalse,
     );
+  });
+
+  test('supervision check assets recipe keeps compact asset read args', () {
+    final recipes = buildProductionWorkspaceRecipes(
+      toolName: 'run_sub_agent_production_supervision',
+      suggestedFlowKey: 'scriptPlan',
+      result: <String, dynamic>{
+        'review': <String, dynamic>{
+          'target': 'scriptPlan',
+          'grade': 'B',
+          'severeCount': '0',
+          'mediumCount': '1',
+          'minorCount': '0',
+          'nextAction': 'check_assets',
+          'summary': '确认资产是否支撑最新导演计划',
+        },
+      },
+    );
+
+    expect(recipes.single.domainArgs, <String, dynamic>{
+      'key': 'assets',
+      'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+      'limit': 24,
+    });
   });
 }

@@ -227,6 +227,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
   if (!_hasStoryboardTableData(data)) {
     return const <ProductionWorkspaceRecipe>[];
   }
+  final assetArgs = _storyboardTableRelatedAssetsArgs(data);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
       title: '审核分镜表',
@@ -234,6 +235,15 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
       flowKey: 'storyboardTable',
       subAgentTool: 'run_sub_agent_production_supervision',
       prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
+    ),
+    ProductionWorkspaceRecipe(
+      title: '核对关联资产',
+      detail: assetArgs.containsKey('ids')
+          ? '优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。'
+          : '当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。',
+      flowKey: 'assets',
+      domainTool: 'get_flowData',
+      domainArgs: assetArgs,
     ),
     ProductionWorkspaceRecipe(
       title: '切回分镜结果',
@@ -294,6 +304,35 @@ Map<String, dynamic> _storyboardCompactArgs() => <String, dynamic>{
   'limit': 24,
 };
 
+Map<String, dynamic> _storyboardTableRelatedAssetsArgs(Object? data) {
+  final ids = <int>{};
+  if (data is Map<String, dynamic>) {
+    final rows = data['rows'];
+    if (rows is List) {
+      for (final row in rows.whereType<Map<String, dynamic>>()) {
+        final values = row['associateAssetsIds'];
+        if (values is List) {
+          for (final value in values) {
+            final numericId = _readInt(value);
+            if (numericId > 0) {
+              ids.add(numericId);
+            }
+          }
+        }
+      }
+    }
+  }
+  if (ids.isEmpty) {
+    return _assetsCompactArgs();
+  }
+  final sortedIds = ids.toList()..sort();
+  return <String, dynamic>{
+    'key': 'assets',
+    'ids': sortedIds,
+    'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
+  };
+}
+
 bool _hasStoryboardTableData(Object? data) {
   if (data is String) return data.trim().isNotEmpty;
   if (data is Map<String, dynamic>) {
@@ -317,11 +356,12 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           subAgentTool: 'run_sub_agent_director_plan',
           prompt: '请根据最近审核意见修订 scriptPlan，优先解决：$summary',
         ),
-        const ProductionWorkspaceRecipe(
+        ProductionWorkspaceRecipe(
           title: '复查资产支撑',
           detail: '导演计划常先卡在资产准备，先看 assets 能减少返工。',
           flowKey: 'assets',
           domainTool: 'get_flowData',
+          domainArgs: _assetsCompactArgs(),
         ),
       ];
     case 'check_assets':
@@ -331,6 +371,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'assets',
           domainTool: 'get_flowData',
+          domainArgs: _assetsCompactArgs(),
         ),
       ];
     case 'check_storyboard':
@@ -340,6 +381,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
+          domainArgs: _storyboardCompactArgs(),
         ),
       ];
     case 'revise_storyboardTable':
