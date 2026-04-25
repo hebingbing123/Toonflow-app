@@ -165,7 +165,8 @@ List<ScriptWorkspaceStage> buildScriptWorkspaceStages({
         statusLabel: '待生成',
         detail: '当前 script 正文为空，适合直接运行 script 子代理生成首版内容。',
         subAgentTool: 'run_sub_agent_script',
-        prompt: '请先读取当前集计划与目标章节事件，再按需补正文窗口，生成下一版剧本正文并输出可直接写回的完整内容。',
+        prompt:
+            '请先读取当前集计划与目标章节事件；只有在承接上一集时才补读上一集尾段，其余细节再按需补正文窗口，生成下一版剧本正文并输出可直接写回的完整内容。',
       )
     else
       ScriptWorkspaceStage(

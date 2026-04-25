@@ -24,6 +24,10 @@ fn tool_parameters_schema(name: &str) -> Value {
                     "type": "integer",
                     "description": "Numeric script id under the attached project; optional when attached production context already contains script_id."
                 },
+                "relativeOffset": {
+                    "type": "integer",
+                    "description": "Optional non-zero offset relative to the base script id (for example -1 reads the previous episode, +1 reads the next episode)."
+                },
                 "lineStart": { "type": "integer", "minimum": 1 },
                 "lineEnd": { "type": "integer", "minimum": 1 },
                 "maxChars": { "type": "integer", "minimum": 1 },

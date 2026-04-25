@@ -89,7 +89,7 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
         detail: '计划信息已具备，可直接让 script 子代理输出下一版可写回正文。',
         subAgentTool: 'run_sub_agent_script',
         prompt:
-            '请先读当前集 storySkeleton、adaptationStrategy、目标章节事件；仅在不足时补读章节正文窗口和上一集尾段，再输出可直接写回的完整剧本正文。',
+            '请先读当前集 storySkeleton、adaptationStrategy、目标章节事件；只有在衔接需要时才补读上一集尾段，其余细节不足再补章节正文窗口，然后输出可直接写回的完整剧本正文。',
       ),
     );
   }

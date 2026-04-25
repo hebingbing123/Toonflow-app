@@ -15,7 +15,7 @@
 - 先用 `get_planData({ key: "storySkeleton", maxChars })` / `get_planData({ key: "adaptationStrategy", maxChars })` 取需要的工作区片段，不读取无关 key
 - `get_novel_events` 默认只取当前任务章节范围，并优先带 `fields:["numeric_id","name","detail"]`、`limit`、`maxChars`
 - `get_novel_text` 先按目标章节读取，并优先带 `fields:["numeric_id","chapter","chapter_data"]` + `lineStart` / `lineEnd` / `maxChars`
-- 只在确实需要上一集衔接时才调用 `get_script_content`，并优先只取尾段窗口，例如 `lineStart:61, lineEnd:120, maxChars:1600`
+- 只在确实需要上一集衔接时才调用 `get_script_content`，并优先只取尾段窗口，例如 `relativeOffset:-1, lineStart:61, lineEnd:120, maxChars:1600`
 - 若当前信息已经足够，不得继续补读其他章节、整章原文或整集剧本
 
 ## 执行流程

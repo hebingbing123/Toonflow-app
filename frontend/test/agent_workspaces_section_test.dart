@@ -226,7 +226,7 @@ void main() {
     expect(scriptSubAgentToolController.text, 'run_sub_agent_script');
     expect(
       scriptPromptController.text,
-      '请先读取当前集计划与目标章节事件，必要时再补章节正文窗口和上一集尾段，再生成下一版剧本正文并输出可直接写回的完整内容。',
+      '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。',
     );
 
     await tester.tap(find.text('4) 写回剧本'));

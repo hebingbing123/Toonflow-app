@@ -104,6 +104,12 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
             args:
                 '{"scriptId":$scriptId,"lineStart":61,"lineEnd":120,"maxChars":1600}',
           ),
+          if ((_scopeScriptId ?? 1) > 1)
+            (
+              label: '模板: 上一集尾段',
+              args:
+                  '{"relativeOffset":-1,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+            ),
         ];
       case 'get_planData':
         return <({String label, String args})>[
@@ -213,7 +219,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       },
       onGenerateDraft: () {
         _applyScriptPromptIfEmpty(
-          '请先读取当前集计划与目标章节事件，必要时再补章节正文窗口和上一集尾段，再生成下一版剧本正文并输出可直接写回的完整内容。',
+          '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。',
         );
         widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();

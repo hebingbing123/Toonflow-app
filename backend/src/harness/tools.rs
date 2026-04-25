@@ -39,7 +39,7 @@ const CATALOG: &[HarnessToolInfo] = &[
     HarnessToolInfo {
         name: "get_script_content",
         description:
-            "Script-agent parity read: returns one script row by numeric script id, with optional line/char/field trimming.",
+            "Script-agent parity read: returns one script row by numeric script id, with optional relativeOffset (for previous/next episode), line/char windows, and field trimming.",
     },
     HarnessToolInfo {
         name: "get_novel_text",

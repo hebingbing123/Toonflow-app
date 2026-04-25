@@ -103,6 +103,29 @@ void main() {
     },
   );
 
+  test('previous script tail args only exist when there is a previous episode', () {
+    final recipes = buildScriptWorkspaceRecipes(
+      toolName: 'get_planData',
+      result: <String, dynamic>{
+        'data': <String, dynamic>{
+          'storySkeleton': 'ready',
+          'adaptationStrategy': 'ready',
+          'script': const <Map<String, dynamic>>[],
+        },
+      },
+      scopeScriptId: 1,
+    );
+
+    expect(
+      recipes.any(
+        (recipe) =>
+            recipe.args?['relativeOffset'] == -1 &&
+            recipe.domainTool == 'get_script_content',
+      ),
+      isFalse,
+    );
+  });
+
   test(
     'buildScriptWorkspaceStages marks missing story skeleton as pending',
     () {
