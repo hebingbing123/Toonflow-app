@@ -28,6 +28,8 @@ class WorkspaceInputController {
       TextEditingController(text: 'run_sub_agent_storySkeleton');
   final TextEditingController productionSubAgentToolController =
       TextEditingController(text: 'run_sub_agent_director_plan');
+  final TextEditingController productionSubAgentArgsController =
+      TextEditingController(text: '{}');
 
   void applySuggestedProductionFlowKey(String? flowKey) {
     final normalized = flowKey?.trim();
@@ -48,5 +50,6 @@ class WorkspaceInputController {
     productionDomainArgsController.dispose();
     scriptSubAgentToolController.dispose();
     productionSubAgentToolController.dispose();
+    productionSubAgentArgsController.dispose();
   }
 }

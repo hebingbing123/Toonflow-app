@@ -1,6 +1,7 @@
 part of 'card.dart';
 
-extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardState {
+extension _AgentWorkspaceProductionCardLogic
+    on _AgentWorkspaceProductionCardState {
   Widget _buildPromptTemplates() {
     return ProductionWorkspacePromptTemplatesPanel(
       busy: widget.busy,
@@ -52,7 +53,8 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
     if (!_validateJsonArgs(widget.productionDomainArgsController.text)) {
       return false;
     }
-    if (tool == 'get_flowData' && widget.flowKeyController.text.trim().isEmpty) {
+    if (tool == 'get_flowData' &&
+        widget.flowKeyController.text.trim().isEmpty) {
       _setTaskStatus('拦截：get_flowData 需要有效 flow key。');
       return false;
     }
@@ -65,7 +67,9 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
     if (raw.isEmpty) {
       widget.productionDomainArgsController.text = '{}';
     }
-    final decoded = jsonDecode(widget.productionDomainArgsController.text.trim());
+    final decoded = jsonDecode(
+      widget.productionDomainArgsController.text.trim(),
+    );
     if (decoded is! Map<String, dynamic>) {
       _setTaskStatus('拦截：制作工具参数必须是 JSON object。');
       return false;
@@ -87,6 +91,9 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
   bool _validateSubAgentTool() {
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
       _setTaskStatus('拦截：运行子代理前需要选择制作子代理工具。');
+      return false;
+    }
+    if (!_validateJsonArgs(widget.productionSubAgentArgsController.text)) {
       return false;
     }
     return _validatePrompt('运行子代理');
@@ -147,10 +154,9 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
         _probeProductionDomainTool();
       },
       onRunAssetsSubAgent: () {
-        _applyProductionPromptIfEmpty(
-          '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。',
-        );
+        _applyProductionPromptIfEmpty('请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。');
         widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
+        widget.productionSubAgentArgsController.text = '{}';
         _runProductionSubAgentTool();
       },
       onPullStoryboardFlow: () {
@@ -161,10 +167,9 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
       onWriteBackFlow: _writeBackProductionFlowResult,
       onRunStoryboardSubAgent: () {
         widget.onFlowKeyChanged('storyboard');
-        _applyProductionPromptIfEmpty(
-          '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。',
-        );
+        _applyProductionPromptIfEmpty('请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。');
         widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
+        widget.productionSubAgentArgsController.text = '{}';
         _runProductionSubAgentTool();
       },
       onRunDirectorPlanSubAgent: () {
@@ -173,9 +178,9 @@ extension _AgentWorkspaceProductionCardLogic on _AgentWorkspaceProductionCardSta
           '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
         );
         widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
+        widget.productionSubAgentArgsController.text = '{}';
         _runProductionSubAgentTool();
       },
     );
   }
 }
-

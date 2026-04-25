@@ -26,6 +26,7 @@ class AgentWorkspacesSection extends StatefulWidget {
     required this.flowKeyController,
     required this.productionDomainToolController,
     required this.productionDomainArgsController,
+    this.productionSubAgentArgsController,
     required this.loadingScriptWorkspaceRun,
     required this.loadingProductionWorkspaceRun,
     required this.loadingScriptDomainProbe,
@@ -74,6 +75,7 @@ class AgentWorkspacesSection extends StatefulWidget {
   final TextEditingController flowKeyController;
   final TextEditingController productionDomainToolController;
   final TextEditingController productionDomainArgsController;
+  final TextEditingController? productionSubAgentArgsController;
   final bool loadingScriptWorkspaceRun;
   final bool loadingProductionWorkspaceRun;
   final bool loadingScriptDomainProbe;

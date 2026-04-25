@@ -206,7 +206,55 @@ fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
     }
 }
 
-fn sub_agent_prompt_from_args(arguments: &Value) -> Result<String, InvokeError> {
+fn parse_positive_id_list(arguments: &Value, key: &str) -> Vec<i64> {
+    let mut ids = arguments
+        .get(key)
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_i64)
+        .filter(|id| *id > 0)
+        .collect::<Vec<_>>();
+    ids.sort_unstable();
+    ids.dedup();
+    ids
+}
+
+fn production_scope_note(arguments: &Value) -> Option<String> {
+    let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
+    let asset_ids = parse_positive_id_list(arguments, "assetIds");
+    if storyboard_ids.is_empty() && asset_ids.is_empty() {
+        return None;
+    }
+
+    let mut attrs = Vec::new();
+    if !storyboard_ids.is_empty() {
+        attrs.push(format!(
+            "storyboardIds=\"{}\"",
+            storyboard_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+    if !asset_ids.is_empty() {
+        attrs.push(format!(
+            "assetIds=\"{}\"",
+            asset_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+    Some(format!(
+        "<scope {} />\n严格限定在以上范围内处理；只有信息不足时才做同批最小补读。",
+        attrs.join(" ")
+    ))
+}
+
+fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<String, InvokeError> {
     let prompt = arguments
         .get("prompt")
         .and_then(Value::as_str)
@@ -218,7 +266,19 @@ fn sub_agent_prompt_from_args(arguments: &Value) -> Result<String, InvokeError> 
             "prompt must be <= 2000 characters".into(),
         ));
     }
-    Ok(prompt.to_string())
+    let scoped_prompt = match tool_name {
+        "run_sub_agent_derive_assets"
+        | "run_sub_agent_generate_assets"
+        | "run_sub_agent_director_plan"
+        | "run_sub_agent_storyboard_gen"
+        | "run_sub_agent_storyboard_panel"
+        | "run_sub_agent_storyboard_table"
+        | "run_sub_agent_production_supervision" => production_scope_note(arguments)
+            .map(|note| format!("{prompt}\n\n{note}"))
+            .unwrap_or_else(|| prompt.to_string()),
+        _ => prompt.to_string(),
+    };
+    Ok(scoped_prompt)
 }
 
 pub async fn invoke_sub_agent_tool(
@@ -228,7 +288,7 @@ pub async fn invoke_sub_agent_tool(
 ) -> Result<Value, InvokeError> {
     let spec =
         sub_agent_spec(tool_name).ok_or_else(|| InvokeError::UnknownTool(tool_name.into()))?;
-    let prompt = sub_agent_prompt_from_args(arguments)?;
+    let prompt = sub_agent_prompt_from_args(tool_name, arguments)?;
     let cfg = ctx.llm.as_ref().ok_or(InvokeError::LlmNotConfigured)?;
     let client = ctx
         .http_client
@@ -286,7 +346,8 @@ pub async fn invoke_sub_agent_tool(
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_review_summary, parse_tag_attributes};
+    use super::{parse_review_summary, parse_tag_attributes, sub_agent_prompt_from_args};
+    use serde_json::json;
 
     #[test]
     fn parse_tag_attributes_reads_xml_style_summary_line() {
@@ -346,5 +407,35 @@ mod tests {
         assert_eq!(review["target"].as_str(), Some("script"));
         assert_eq!(review["grade"].as_str(), Some("C"));
         assert_eq!(review["nextAction"].as_str(), Some("revise_script"));
+    }
+
+    #[test]
+    fn sub_agent_prompt_from_args_appends_compact_scope_for_production_tools() {
+        let prompt = sub_agent_prompt_from_args(
+            "run_sub_agent_storyboard_gen",
+            &json!({
+                "prompt": "请继续推进 storyboard。",
+                "storyboardIds": [9, 3, 9, 1],
+                "assetIds": [7, 0, 5, 7]
+            }),
+        )
+        .expect("prompt");
+
+        assert!(prompt.contains("请继续推进 storyboard。"));
+        assert!(prompt.contains(r#"<scope storyboardIds="1,3,9" assetIds="5,7" />"#));
+    }
+
+    #[test]
+    fn sub_agent_prompt_from_args_ignores_scope_for_script_tools() {
+        let prompt = sub_agent_prompt_from_args(
+            "run_sub_agent_script",
+            &json!({
+                "prompt": "继续写剧本。",
+                "storyboardIds": [1, 2, 3]
+            }),
+        )
+        .expect("prompt");
+
+        assert_eq!(prompt, "继续写剧本。");
     }
 }

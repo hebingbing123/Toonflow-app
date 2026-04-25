@@ -239,6 +239,7 @@ ProductionWorkspaceStage _buildAssetsStage({
             ? '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。'
             : '共 ${rows.length} 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
         subAgentTool: 'run_sub_agent_generate_assets',
+        subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
         prompt: buildProductionAssetGenerationPrompt(
           assetIds: pendingDeriveIds,
         ),
@@ -370,6 +371,13 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         'revise_storyboardTable' => 'run_sub_agent_storyboard_table',
         _ => null,
       },
+      subAgentArgs: switch (review.nextAction) {
+        'revise_storyboardTable' => buildProductionSubAgentArgs(
+          storyboardIds: review.storyboardIds,
+          assetIds: review.assetIds,
+        ),
+        _ => null,
+      },
       prompt: switch (review.nextAction) {
         'revise_storyboardTable' =>
           '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
@@ -478,6 +486,12 @@ ProductionWorkspaceStage _buildStoryboardStage({
       subAgentTool: review.nextAction == 'generate_storyboard'
           ? 'run_sub_agent_storyboard_gen'
           : null,
+      subAgentArgs: review.nextAction == 'generate_storyboard'
+          ? buildProductionSubAgentArgs(
+              storyboardIds: storyboardIds,
+              assetIds: review.assetIds,
+            )
+          : null,
       prompt: review.nextAction == 'generate_storyboard'
           ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, assetIds: review.assetIds, summary: review.summary)}'
           : null,
@@ -517,6 +531,10 @@ ProductionWorkspaceStage _buildStoryboardStage({
         detail:
             '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
         subAgentTool: 'run_sub_agent_storyboard_gen',
+        subAgentArgs: buildProductionSubAgentArgs(
+          storyboardIds: missingIds,
+          assetIds: promptAssetIds,
+        ),
         prompt:
             '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
       );

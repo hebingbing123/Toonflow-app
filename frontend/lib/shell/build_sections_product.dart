@@ -69,6 +69,8 @@ extension _HomePageBuildProductSections on _HomePageState {
           _workspaceInputController.productionDomainToolController,
       productionDomainArgsController:
           _workspaceInputController.productionDomainArgsController,
+      productionSubAgentArgsController:
+          _workspaceInputController.productionSubAgentArgsController,
       loadingScriptWorkspaceRun:
           _workspaceOperationController.loadingScriptWorkspaceRun,
       loadingProductionWorkspaceRun:
@@ -96,9 +98,11 @@ extension _HomePageBuildProductSections on _HomePageState {
       workspaceScriptPlanRowId: _workspaceOutputController.scriptPlanRowId,
       workspaceScriptWritebackSource:
           _workspaceOutputController.scriptWritebackSource,
-      workspaceLastToolResultLine: _workspaceOutputController.lastToolResultLine,
+      workspaceLastToolResultLine:
+          _workspaceOutputController.lastToolResultLine,
       workspaceLastToolName: _workspaceOutputController.lastToolName,
-      workspaceLastToolResultData: _workspaceOutputController.lastToolResultData,
+      workspaceLastToolResultData:
+          _workspaceOutputController.lastToolResultData,
       workspaceLastToolArguments: _workspaceOutputController.lastToolArguments,
       workspaceSuggestedFlowKey: _workspaceOutputController.suggestedFlowKey,
       workspaceWritebackLine: _workspaceOutputController.writebackLine,
@@ -171,7 +175,8 @@ extension _HomePageBuildProductSections on _HomePageState {
         loadingTaskDetailsByNumericId:
             _taskCenterController.loadingTaskDetailsByNumericId,
         loadingTaskDetailsUuid: _taskCenterController.loadingTaskDetailsUuid,
-        taskDetailJobIdController: _taskCenterController.taskDetailJobIdController,
+        taskDetailJobIdController:
+            _taskCenterController.taskDetailJobIdController,
         taskProjects: _taskCenterController.taskProjects,
         taskCategoriesLine: _taskCenterController.taskCategoriesLine,
         taskApiSummaryLine: _taskCenterController.taskApiSummaryLine,

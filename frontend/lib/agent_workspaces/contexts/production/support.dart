@@ -6,6 +6,7 @@ class ProductionWorkspaceRecipe {
     this.domainTool,
     this.domainArgs,
     this.subAgentTool,
+    this.subAgentArgs,
     this.prompt,
   });
 
@@ -15,6 +16,7 @@ class ProductionWorkspaceRecipe {
   final String? domainTool;
   final Map<String, dynamic>? domainArgs;
   final String? subAgentTool;
+  final Map<String, dynamic>? subAgentArgs;
   final String? prompt;
 }
 
@@ -27,6 +29,7 @@ class ProductionWorkspaceStage {
     this.domainTool,
     this.domainArgs,
     this.subAgentTool,
+    this.subAgentArgs,
     this.prompt,
   });
 
@@ -37,6 +40,7 @@ class ProductionWorkspaceStage {
   final String? domainTool;
   final Map<String, dynamic>? domainArgs;
   final String? subAgentTool;
+  final Map<String, dynamic>? subAgentArgs;
   final String? prompt;
 }
 
@@ -416,7 +420,7 @@ String buildProductionStoryboardPromptScope(
 }) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return fallback;
-  return '优先处理镜头 ids=${ids.join(',')}';
+  return '优先处理这 ${ids.length} 个镜头';
 }
 
 String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
@@ -439,9 +443,7 @@ String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
 String buildProductionStoryboardAssetHint(List<int> assetIds) {
   final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return '';
-  final visible = ids.take(8).join(',');
-  final suffix = ids.length > 8 ? ' 等 ${ids.length} 项' : '';
-  return '如需核对素材，仅看 asset ids=$visible$suffix。';
+  return '如需核对素材，仅看这 ${ids.length} 个关联资产。';
 }
 
 String buildProductionStoryboardGenerationPrompt({
@@ -608,7 +610,10 @@ List<int> extractProductionReferencedAssetIdsForStoryboardIds(
     if (rows is! List) return;
     for (final row in rows.whereType<Map<String, dynamic>>()) {
       final storyboardId = _parseLooseInt(
-        row['id'] ?? row['numeric_id'] ?? row['numericId'] ?? row['storyboardId'],
+        row['id'] ??
+            row['numeric_id'] ??
+            row['numericId'] ??
+            row['storyboardId'],
       );
       if (!focusIds.contains(storyboardId)) {
         continue;
@@ -744,7 +749,7 @@ String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
   if (args['ids'] case final List ids when ids.isNotEmpty) {
     final normalizedIds =
         ids.map(_parseLooseInt).where((id) => id > 0).toSet().toList()..sort();
-    return '请优先只核对资产 ids=${normalizedIds.join(',')} 是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$summaryLine';
+    return '请优先只核对这 ${normalizedIds.length} 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$summaryLine';
   }
   return '请先核对$scope是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。$summaryLine';
 }
@@ -761,7 +766,25 @@ String buildProductionAssetGenerationPrompt({
   if (ids.isEmpty) {
     return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$summaryLine';
   }
-  return '请优先只核对并生成资产 ids=${ids.join(',')}；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine';
+  return '请优先只核对并生成这 ${ids.length} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine';
+}
+
+Map<String, dynamic> buildProductionSubAgentArgs({
+  List<int> storyboardIds = const <int>[],
+  List<int> assetIds = const <int>[],
+}) {
+  final payload = <String, dynamic>{};
+  final normalizedStoryboardIds =
+      storyboardIds.where((id) => id > 0).toSet().toList()..sort();
+  final normalizedAssetIds = assetIds.where((id) => id > 0).toSet().toList()
+    ..sort();
+  if (normalizedStoryboardIds.isNotEmpty) {
+    payload['storyboardIds'] = normalizedStoryboardIds;
+  }
+  if (normalizedAssetIds.isNotEmpty) {
+    payload['assetIds'] = normalizedAssetIds;
+  }
+  return payload;
 }
 
 List<int> extractProductionStoryboardIds(Object? flowData) {

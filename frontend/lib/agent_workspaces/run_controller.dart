@@ -303,10 +303,17 @@ class WorkspaceRunController {
     final prompt = _inputController.productionPromptController.text.trim();
     final toolName = _inputController.productionSubAgentToolController.text
         .trim();
+    final extraArgs = _parseJsonObject(
+      _inputController.productionSubAgentArgsController.text,
+      objectError: 'production sub-agent arguments 必须是 JSON object',
+      parseError: 'production sub-agent arguments JSON 解析失败',
+      onErrorChanged: _onErrorChanged,
+    );
     if (projectId == null ||
         scriptId == null ||
         prompt.isEmpty ||
-        toolName.isEmpty) {
+        toolName.isEmpty ||
+        extraArgs == null) {
       _onErrorChanged('project_id/script_id/prompt/tool 必须有效');
       return;
     }
@@ -316,7 +323,11 @@ class WorkspaceRunController {
       WorkspaceOperation.productionSubAgentRun,
       true,
     );
-    final arguments = <String, dynamic>{'prompt': prompt, 'scriptId': scriptId};
+    final arguments = <String, dynamic>{
+      'prompt': prompt,
+      'scriptId': scriptId,
+      ...extraArgs,
+    };
     final sent = await _requestSender(token, <Map<String, dynamic>>[
       <String, dynamic>{
         'type': 'agent.production.attach',

@@ -120,6 +120,7 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         detail: '若仍缺素材，可直接衔接资产子代理推进下一轮生成。',
         flowKey: 'assets',
         subAgentTool: 'run_sub_agent_generate_assets',
+        subAgentArgs: buildProductionSubAgentArgs(assetIds: affectedIds),
         prompt: buildProductionAssetGenerationPrompt(
           assetIds: affectedIds,
           summary: affectedIds.isEmpty ? null : '先检查本次刚生成资产的结果再决定是否补跑',
@@ -159,6 +160,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
               : '$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
           flowKey: 'assets',
           subAgentTool: 'run_sub_agent_generate_assets',
+          subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
           prompt: buildProductionAssetGenerationPrompt(
             assetIds: pendingDeriveIds,
           ),
@@ -220,6 +222,10 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           detail: '优先只补缺帧镜头 #$idsLabel$idTail，避免把已完成镜头整批重跑。',
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
+          subAgentArgs: buildProductionSubAgentArgs(
+            storyboardIds: missingIds,
+            assetIds: promptAssetIds,
+          ),
           prompt:
               '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
         ),
@@ -491,6 +497,10 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           detail: '审核结论：$summary',
           flowKey: 'storyboardTable',
           subAgentTool: 'run_sub_agent_storyboard_table',
+          subAgentArgs: buildProductionSubAgentArgs(
+            storyboardIds: review.storyboardIds,
+            assetIds: review.assetIds,
+          ),
           prompt:
               '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
         ),
@@ -531,6 +541,10 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           domainTool: 'get_flowData',
           domainArgs: storyboardArgs,
           subAgentTool: 'run_sub_agent_storyboard_gen',
+          subAgentArgs: buildProductionSubAgentArgs(
+            storyboardIds: review.storyboardIds,
+            assetIds: promptAssetIds,
+          ),
           prompt:
               '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',
         ),

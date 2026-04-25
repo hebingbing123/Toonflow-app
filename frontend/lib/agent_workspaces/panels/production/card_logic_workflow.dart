@@ -15,6 +15,9 @@ extension _AgentWorkspaceProductionCardWorkflow
     }
     if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
       widget.onProductionSubAgentChanged(recipe.subAgentTool!.trim());
+      widget.productionSubAgentArgsController.text = jsonEncode(
+        recipe.subAgentArgs ?? const <String, dynamic>{},
+      );
     }
     final prompt = recipe.prompt?.trim();
     if (prompt != null && prompt.isNotEmpty) {
@@ -35,6 +38,9 @@ extension _AgentWorkspaceProductionCardWorkflow
     }
     if (stage.subAgentTool != null && stage.subAgentTool!.trim().isNotEmpty) {
       widget.onProductionSubAgentChanged(stage.subAgentTool!.trim());
+      widget.productionSubAgentArgsController.text = jsonEncode(
+        stage.subAgentArgs ?? const <String, dynamic>{},
+      );
     }
     final prompt = stage.prompt?.trim();
     if (prompt != null && prompt.isNotEmpty) {

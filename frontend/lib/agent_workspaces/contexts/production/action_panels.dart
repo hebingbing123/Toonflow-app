@@ -55,6 +55,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
     required this.hasLastToolResult,
     required this.productionPromptController,
     required this.productionDomainArgsController,
+    required this.productionSubAgentArgsController,
     required this.productionDomainToolPresets,
     required this.productionSubAgentPresets,
     required this.flowKeyPresets,
@@ -80,6 +81,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
   final bool hasLastToolResult;
   final TextEditingController productionPromptController;
   final TextEditingController productionDomainArgsController;
+  final TextEditingController productionSubAgentArgsController;
   final List<String> productionDomainToolPresets;
   final List<String> productionSubAgentPresets;
   final List<String> flowKeyPresets;
@@ -206,6 +208,17 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                 decoration: const InputDecoration(labelText: '制作子代理工具'),
               ),
             ),
+            SizedBox(
+              width: 360,
+              child: TextField(
+                controller: productionSubAgentArgsController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: '子代理范围参数(JSON)',
+                  helperText: '例如 {"storyboardIds":[1,2],"assetIds":[7,12]}',
+                ),
+              ),
+            ),
             FilledButton.tonal(
               onPressed: busy ? null : onRunProductionSubAgentTool,
               child: Text(loadingProductionSubAgentRun ? '…' : '运行子代理'),
@@ -234,7 +247,8 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
 
   final bool busy;
   final List<ProductionWorkspaceArgumentTemplateEntry> templates;
-  final void Function(Map<String, dynamic> payload, String label) onApplyTemplate;
+  final void Function(Map<String, dynamic> payload, String label)
+  onApplyTemplate;
 
   @override
   Widget build(BuildContext context) {
@@ -296,10 +310,13 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
           runSpacing: 8,
           children: suggestions
               .map(
-                (ProductionWorkspaceArgumentSuggestion suggestion) => ActionChip(
-                  label: Text(suggestion.label),
-                  onPressed: busy ? null : () => onApplySuggestion(suggestion),
-                ),
+                (ProductionWorkspaceArgumentSuggestion suggestion) =>
+                    ActionChip(
+                      label: Text(suggestion.label),
+                      onPressed: busy
+                          ? null
+                          : () => onApplySuggestion(suggestion),
+                    ),
               )
               .toList(growable: false),
         ),

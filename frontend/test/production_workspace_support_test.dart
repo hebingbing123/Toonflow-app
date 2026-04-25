@@ -89,7 +89,7 @@ void main() {
 
       expect(recipes.first.subAgentTool, 'run_sub_agent_storyboard_gen');
       expect(recipes.first.flowKey, 'storyboard');
-      expect(recipes.first.prompt, contains('asset ids=7,12'));
+      expect(recipes.first.prompt, contains('仅看这 2 个关联资产'));
       expect(recipes[1].title, '核对关联资产');
       expect(recipes[1].domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -320,8 +320,8 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.prompt, contains('asset ids=7,12'));
-      expect(storyboardStage.prompt, isNot(contains('asset ids=99')));
+      expect(storyboardStage.prompt, contains('仅看这 2 个关联资产'));
+      expect(storyboardStage.prompt, isNot(contains('这 1 个关联资产')));
     },
   );
 
@@ -467,8 +467,8 @@ void main() {
         ),
       );
 
-      expect(prompt, contains('asset ids=7,12'));
-      expect(prompt, contains('ids=3,9'));
+      expect(prompt, contains('仅看这 2 个关联资产'));
+      expect(prompt, contains('优先处理这 2 个镜头'));
     },
   );
 
@@ -485,9 +485,29 @@ void main() {
       17,
     ]);
 
-    expect(hint, contains('asset ids=1,3,5,7,9,11,13,15 等 9 项'));
-    expect(hint, isNot(contains('17')));
+    expect(hint, '如需核对素材，仅看这 9 个关联资产。');
   });
+
+  test('buildProductionAssetGenerationPrompt caps long asset id lists', () {
+    final prompt = buildProductionAssetGenerationPrompt(
+      assetIds: const <int>[9, 1, 7, 3, 5, 11, 13, 15, 17],
+    );
+
+    expect(prompt, contains('请优先只核对并生成这 9 个资产'));
+    expect(prompt, isNot(contains('ids=')));
+  });
+
+  test(
+    'buildProductionStoryboardGenerationPrompt caps long storyboard id lists',
+    () {
+      final prompt = buildProductionStoryboardGenerationPrompt(
+        storyboardIds: const <int>[9, 1, 7, 3, 5, 11, 13, 15, 17],
+      );
+
+      expect(prompt, contains('优先处理这 9 个镜头'));
+      expect(prompt, isNot(contains('ids=')));
+    },
+  );
 
   test(
     'summarizeProductionResultSnapshot surfaces focused asset and storyboard scope',
@@ -558,6 +578,33 @@ void main() {
           'shouldGenerateImage',
         ],
       });
+    },
+  );
+
+  test(
+    'buildProductionWorkspaceRecipes keeps full storyboard scope in sub-agent args while prompt stays compact',
+    () {
+      final recipes = buildProductionWorkspaceRecipes(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            for (final id in <int>[9, 1, 7, 3, 5, 11, 13, 15, 17])
+              <String, dynamic>{
+                'id': id,
+                'prompt': 'scene $id',
+                'shouldGenerateImage': true,
+              },
+          ],
+        },
+      );
+
+      expect(recipes.first.subAgentTool, 'run_sub_agent_storyboard_gen');
+      expect(recipes.first.subAgentArgs, <String, dynamic>{
+        'storyboardIds': <int>[1, 3, 5, 7, 9, 11, 13, 15, 17],
+      });
+      expect(recipes.first.prompt, contains('优先处理这 9 个镜头'));
+      expect(recipes.first.prompt, isNot(contains('ids=')));
     },
   );
 
@@ -909,7 +956,7 @@ void main() {
         recipes.first.detail,
         contains('分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
       );
-      expect(recipes.first.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(recipes.first.prompt, contains('优先处理这 2 个镜头'));
       expect(recipes.first.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
   );
@@ -934,7 +981,7 @@ void main() {
         },
       );
 
-      expect(recipes.first.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(recipes.first.prompt, contains('优先处理这 2 个镜头'));
       expect(recipes.first.prompt, contains('保持其余行不动'));
       expect(recipes.first.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
@@ -1340,7 +1387,7 @@ void main() {
     expect(assetsStage.detail, contains('资产 #12, 21 仍缺图'));
     expect(
       assetsStage.prompt,
-      '请优先只核对并生成资产 ids=12,21；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
+      '请优先只核对并生成这 2 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
     );
   });
 
@@ -1379,7 +1426,7 @@ void main() {
       expect(recipes.first.detail, contains('资产 #12, 21 仍缺图'));
       expect(
         recipes.first.prompt,
-        '请优先只核对并生成资产 ids=12,21；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
+        '请优先只核对并生成这 2 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。',
       );
     },
   );
@@ -1521,7 +1568,7 @@ void main() {
         'fields': <String>['id', 'name', 'type', 'src', 'flowId', 'derive'],
       });
       expect(recipes.first.detail, contains('#7, 12'));
-      expect(recipes.last.prompt, contains('ids=7,12'));
+      expect(recipes.last.prompt, contains('这 2 个资产'));
     },
   );
 
@@ -1684,7 +1731,7 @@ void main() {
         tableStage.detail,
         contains('局部范围：分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
       );
-      expect(tableStage.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(tableStage.prompt, contains('优先处理这 2 个镜头'));
       expect(tableStage.prompt, contains('保持其余行不动'));
       expect(tableStage.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
@@ -1874,7 +1921,7 @@ void main() {
         storyboardStage.detail,
         contains('分镜表仅回看镜头 #3, 9对应行；剧本仅回看剧本 7-38 行（<=920 字）'),
       );
-      expect(storyboardStage.prompt, contains('优先处理镜头 ids=3,9'));
+      expect(storyboardStage.prompt, contains('优先处理这 2 个镜头'));
       expect(storyboardStage.prompt, contains('剧本仅回看剧本 7-38 行'));
     },
   );
@@ -1982,7 +2029,7 @@ void main() {
       expect(storyboardStage.statusLabel, '需补帧');
       expect(storyboardStage.detail, contains('#101'));
       expect(storyboardStage.detail, contains('纯文本模式'));
-      expect(storyboardStage.prompt, contains('ids=101'));
+      expect(storyboardStage.prompt, contains('优先处理这 1 个镜头'));
     },
   );
 
@@ -2157,7 +2204,7 @@ void main() {
           'shouldGenerateImage',
         ],
       });
-      expect(generateRecipes.first.prompt, contains('ids=3,9'));
+      expect(generateRecipes.first.prompt, contains('优先处理这 2 个镜头'));
       expect(generateRecipes[1].domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'ids': <int>[3, 9],

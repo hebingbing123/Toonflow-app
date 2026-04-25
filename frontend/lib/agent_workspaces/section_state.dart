@@ -2,12 +2,20 @@ part of 'section.dart';
 
 class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   late AgentWorkspacePane _pane;
+  late final TextEditingController _fallbackProductionSubAgentArgsController;
   String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
+
+  TextEditingController get _productionSubAgentArgsController =>
+      widget.productionSubAgentArgsController ??
+      _fallbackProductionSubAgentArgsController;
 
   @override
   void initState() {
     super.initState();
     _pane = widget.initialPane;
+    _fallbackProductionSubAgentArgsController = TextEditingController(
+      text: '{}',
+    );
     _ensurePresetDefaults();
   }
 
@@ -40,6 +48,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     }
     if (widget.productionDomainArgsController.text.trim().isEmpty) {
       widget.productionDomainArgsController.text = '{}';
+    }
+    if (_productionSubAgentArgsController.text.trim().isEmpty) {
+      _productionSubAgentArgsController.text = '{}';
     }
   }
 
@@ -136,6 +147,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           productionPromptController: widget.productionPromptController,
           productionDomainToolController: widget.productionDomainToolController,
           productionDomainArgsController: widget.productionDomainArgsController,
+          productionSubAgentArgsController: _productionSubAgentArgsController,
           productionSubAgentToolController:
               widget.productionSubAgentToolController,
           flowKeyController: widget.flowKeyController,
@@ -174,9 +186,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           onRunProductionWorkspace: widget.onRunProductionWorkspace,
           onProbeProductionDomainTool: widget.onProbeProductionDomainTool,
           onProductionSubAgentChanged: (String value) {
-            setState(
-              () => widget.productionSubAgentToolController.text = value,
-            );
+            setState(() {
+              widget.productionSubAgentToolController.text = value;
+              _productionSubAgentArgsController.text = '{}';
+            });
           },
           onRunProductionSubAgentTool: widget.onRunProductionSubAgentTool,
           onWriteBackProductionFlowResult:
@@ -232,5 +245,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   @override
   Widget build(BuildContext context) {
     return _buildAgentWorkspacesSectionView(context);
+  }
+
+  @override
+  void dispose() {
+    _fallbackProductionSubAgentArgsController.dispose();
+    super.dispose();
   }
 }

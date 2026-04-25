@@ -223,6 +223,18 @@ fn tool_parameters_schema(name: &str) -> Value {
                 "prompt": {
                     "type": "string",
                     "description": "Sub-agent task prompt (concise instruction, <= 2000 chars)."
+                },
+                "assetIds": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "description": "Optional focused production asset numeric ids."
+                },
+                "storyboardIds": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "description": "Optional focused production storyboard numeric ids."
                 }
             },
             "additionalProperties": false

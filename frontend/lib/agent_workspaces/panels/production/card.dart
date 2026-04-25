@@ -23,6 +23,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
     required this.productionPromptController,
     required this.productionDomainToolController,
     required this.productionDomainArgsController,
+    required this.productionSubAgentArgsController,
     required this.productionSubAgentToolController,
     required this.flowKeyController,
     required this.productionPromptPresets,
@@ -53,6 +54,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
   final TextEditingController productionPromptController;
   final TextEditingController productionDomainToolController;
   final TextEditingController productionDomainArgsController;
+  final TextEditingController productionSubAgentArgsController;
   final TextEditingController productionSubAgentToolController;
   final TextEditingController flowKeyController;
   final List<AgentWorkspacePromptPreset> productionPromptPresets;
@@ -121,6 +123,8 @@ class _AgentWorkspaceProductionCardState
               productionPromptController: widget.productionPromptController,
               productionDomainArgsController:
                   widget.productionDomainArgsController,
+              productionSubAgentArgsController:
+                  widget.productionSubAgentArgsController,
               productionDomainToolPresets: widget.productionDomainToolPresets,
               productionSubAgentPresets: widget.productionSubAgentPresets,
               flowKeyPresets: widget.flowKeyPresets,
