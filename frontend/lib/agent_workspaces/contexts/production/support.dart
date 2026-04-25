@@ -436,8 +436,15 @@ String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
   return '如需核对依据，${pieces.join('，')}。';
 }
 
+String buildProductionStoryboardAssetHint(List<int> assetIds) {
+  final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
+  if (ids.isEmpty) return '';
+  return '如需核对素材，仅看 asset ids=${ids.join(',')}。';
+}
+
 String buildProductionStoryboardGenerationPrompt({
   required List<int> storyboardIds,
+  List<int> assetIds = const <int>[],
   String? summary,
 }) {
   final scope = buildProductionStoryboardPromptScope(
@@ -445,9 +452,10 @@ String buildProductionStoryboardGenerationPrompt({
     fallback: '优先只补缺少画面结果的镜头',
   );
   final contextHint = buildProductionStoryboardPromptContextHint(storyboardIds);
+  final assetHint = buildProductionStoryboardAssetHint(assetIds);
   final normalizedSummary = summary?.trim() ?? '';
   final summaryLine = normalizedSummary.isEmpty ? '' : '注意：$normalizedSummary';
-  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$summaryLine';
+  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$assetHint$summaryLine';
 }
 
 String buildProductionStoryboardTableRevisionPrompt(
@@ -461,8 +469,9 @@ String buildProductionStoryboardTableRevisionPrompt(
   final contextHint = buildProductionStoryboardPromptContextHint(
     review.storyboardIds,
   );
+  final assetHint = buildProductionStoryboardAssetHint(review.assetIds);
   final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
-  return '$scope 对应的 storyboardTable 行，保持其余行不动。$contextHint$summaryLine';
+  return '$scope 对应的 storyboardTable 行，保持其余行不动。$contextHint$assetHint$summaryLine';
 }
 
 ProductionStoryboardScriptFocusWindow
@@ -579,6 +588,54 @@ List<int> extractProductionReferencedAssetIds(Object? flowData) {
   }
 
   final sortedIds = ids.toList()..sort();
+  return sortedIds;
+}
+
+List<int> extractProductionReferencedAssetIdsForStoryboardIds(
+  Object? flowData,
+  List<int> storyboardIds,
+) {
+  final focusIds = storyboardIds.where((id) => id > 0).toSet();
+  if (focusIds.isEmpty) {
+    return extractProductionReferencedAssetIds(flowData);
+  }
+
+  final assetIds = <int>{};
+
+  void collectFromRows(Object? rows) {
+    if (rows is! List) return;
+    for (final row in rows.whereType<Map<String, dynamic>>()) {
+      final storyboardId = _parseLooseInt(
+        row['id'] ?? row['numeric_id'] ?? row['numericId'] ?? row['storyboardId'],
+      );
+      if (!focusIds.contains(storyboardId)) {
+        continue;
+      }
+      final values = row['associateAssetsIds'];
+      if (values is! List) continue;
+      for (final value in values) {
+        final numericId = _parseLooseInt(value);
+        if (numericId > 0) {
+          assetIds.add(numericId);
+        }
+      }
+    }
+  }
+
+  void collectFromMarkdown(String text) {
+    final parsed = parseProductionStoryboardTableMarkdown(text);
+    collectFromRows(parsed);
+  }
+
+  if (flowData is List) {
+    collectFromRows(flowData);
+  } else if (flowData is Map<String, dynamic>) {
+    collectFromRows(flowData['rows']);
+  } else if (flowData is String) {
+    collectFromMarkdown(flowData);
+  }
+
+  final sortedIds = assetIds.toList()..sort();
   return sortedIds;
 }
 

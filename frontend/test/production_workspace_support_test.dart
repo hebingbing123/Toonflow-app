@@ -89,6 +89,7 @@ void main() {
 
       expect(recipes.first.subAgentTool, 'run_sub_agent_storyboard_gen');
       expect(recipes.first.flowKey, 'storyboard');
+      expect(recipes.first.prompt, contains('asset ids=7,12'));
       expect(recipes[1].title, '核对关联资产');
       expect(recipes[1].domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -294,6 +295,37 @@ void main() {
   );
 
   test(
+    'buildProductionWorkspaceStages include focused asset ids in storyboard generation prompt',
+    () {
+      final stages = buildProductionWorkspaceStages(
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 3,
+              'associateAssetsIds': <int>[12, 7],
+              'shouldGenerateImage': true,
+            },
+            <String, dynamic>{
+              'id': 4,
+              'associateAssetsIds': <int>[99],
+              'src': 'https://example.com/4.png',
+              'shouldGenerateImage': true,
+            },
+          ],
+        },
+      );
+
+      final storyboardStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'storyboard',
+      );
+      expect(storyboardStage.prompt, contains('asset ids=7,12'));
+      expect(storyboardStage.prompt, isNot(contains('asset ids=99')));
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes narrows storyboard refresh after storyboard panel sub-agent run',
     () {
       final recipes = buildProductionWorkspaceRecipes(
@@ -414,6 +446,29 @@ void main() {
 
       expect(review, isNotNull);
       expect(review!.storyboardIds, <int>[3, 9]);
+    },
+  );
+
+  test(
+    'buildProductionStoryboardTableRevisionPrompt includes focused asset ids',
+    () {
+      final prompt = buildProductionStoryboardTableRevisionPrompt(
+        const ProductionSupervisionReview(
+          target: 'storyboardTable',
+          grade: 'C',
+          severeCount: 1,
+          mediumCount: 0,
+          minorCount: 0,
+          nextAction: 'revise_storyboardTable',
+          summary: '修正资产一致性',
+          assetIds: <int>[7, 12, 7],
+          assetTypes: <String>[],
+          storyboardIds: <int>[3, 9],
+        ),
+      );
+
+      expect(prompt, contains('asset ids=7,12'));
+      expect(prompt, contains('ids=3,9'));
     },
   );
 

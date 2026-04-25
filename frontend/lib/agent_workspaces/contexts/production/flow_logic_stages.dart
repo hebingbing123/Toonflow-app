@@ -479,7 +479,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
           ? 'run_sub_agent_storyboard_gen'
           : null,
       prompt: review.nextAction == 'generate_storyboard'
-          ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, summary: review.summary)}'
+          ? '请根据最近审核意见继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: storyboardIds, assetIds: review.assetIds, summary: review.summary)}'
           : null,
     );
   }
@@ -500,6 +500,10 @@ ProductionWorkspaceStage _buildStoryboardStage({
         .where(productionStoryboardEntryNeedsImageGeneration)
         .toList(growable: false);
     final missingIds = extractProductionStoryboardMissingImageIds(rows);
+    final promptAssetIds = extractProductionReferencedAssetIdsForStoryboardIds(
+      rows,
+      missingIds,
+    );
     final missingCount = missingIds.length;
     final skippedCount = rows.length - targetRows.length;
     if (missingCount > 0) {
@@ -514,7 +518,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
             '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
         subAgentTool: 'run_sub_agent_storyboard_gen',
         prompt:
-            '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds)}',
+            '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
       );
     }
     return ProductionWorkspaceStage(

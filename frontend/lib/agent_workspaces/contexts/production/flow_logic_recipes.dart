@@ -207,6 +207,10 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     final missingIds = extractProductionStoryboardMissingImageIds(rows);
     final assetArgs = buildProductionFlowAssetArgs(rows);
+    final promptAssetIds = extractProductionReferencedAssetIdsForStoryboardIds(
+      rows,
+      missingIds,
+    );
     if (missingIds.isNotEmpty) {
       final idsLabel = missingIds.take(6).join(', ');
       final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
@@ -217,7 +221,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
-              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds)}',
+              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
         ),
         ProductionWorkspaceRecipe(
           title: '核对关联资产',
@@ -516,6 +520,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       final storyboardArgs = buildProductionReviewStoryboardGenerationArgs(
         review,
       );
+      final promptAssetIds = review.assetIds;
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
           title: '继续生成分镜图',
@@ -527,7 +532,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
           domainArgs: storyboardArgs,
           subAgentTool: 'run_sub_agent_storyboard_gen',
           prompt:
-              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, summary: summary)}',
+              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',
         ),
         ProductionWorkspaceRecipe(
           title: '对照分镜表',
