@@ -1543,6 +1543,7 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         let action = compact_selected_memory_action(
             &fields.action,
             subject.as_deref(),
+            Some(fields.subject.as_str()),
             Some(fields.subject_refs.as_str()),
             Some(fields.setting.as_str()),
             &fields.mood,
@@ -1703,6 +1704,7 @@ fn merge_selected_memory_subject_action(
 fn compact_selected_memory_action(
     action: &str,
     subject: Option<&str>,
+    subject_source: Option<&str>,
     subject_coverage: Option<&str>,
     setting: Option<&str>,
     mood: &str,
@@ -1744,6 +1746,7 @@ fn compact_selected_memory_action(
         }
     }
 
+    action = strip_selected_memory_action_subject_overlap(&action, subject_source);
     action = strip_selected_memory_action_object_prefix(&action, subject_coverage);
     action = strip_selected_memory_action_setting_prefix(&action, setting);
 
@@ -1765,6 +1768,63 @@ fn compact_selected_memory_action(
         return None;
     }
     Some(action)
+}
+
+fn strip_selected_memory_action_subject_overlap(
+    action: &str,
+    subject_source: Option<&str>,
+) -> String {
+    let mut compacted = normalize_prompt_text(action);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let Some(subject_source) = subject_source
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+    else {
+        return compacted;
+    };
+    let Some(subject_tail) = strip_selected_memory_subject_role_prefix(&subject_source)
+        .map(normalize_prompt_text)
+        .filter(|value| value.chars().count() >= 3)
+    else {
+        return compacted;
+    };
+
+    for overlap_len in (3..=subject_tail.chars().count().min(12)).rev() {
+        let overlap = subject_tail.chars().take(overlap_len).collect::<String>();
+        let Some(start) = compacted.find(&overlap) else {
+            continue;
+        };
+        if start == 0 {
+            continue;
+        }
+        let end = start + overlap.len();
+        let prefix = compacted[..start].trim_end_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ':' | '：' | ',' | '，' | '、' | ';' | '；')
+        });
+        let suffix = compacted[end..].trim_start_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ':' | '：' | ',' | '，' | '、' | ';' | '；')
+        });
+        if prefix.chars().count() < 2 || suffix.chars().count() < 2 {
+            continue;
+        }
+        if !matches!(
+            suffix.chars().next(),
+            Some('后' | '再' | '并' | '且' | '仍')
+        ) {
+            continue;
+        }
+        let merged = normalize_prompt_text(&format!("{prefix}{suffix}"));
+        if merged.chars().count() < 4 || merged == compacted {
+            continue;
+        }
+        compacted = merged;
+        break;
+    }
+
+    compacted
 }
 
 fn strip_selected_memory_action_object_prefix(
@@ -3163,10 +3223,10 @@ mod tests {
         parse_structured_storyboard_description, rejected_video_negative_rejection_count,
         select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
-        select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
-        select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
-        select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-        ScopedAgentMemoryRow, StoryboardPromptSeedRow,
+        select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
+        select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
+        select_script_video_style_memory_notes, select_selected_video_memory_notes,
+        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -3259,10 +3319,7 @@ mod tests {
         )
         .expect("content");
 
-        assert!(
-            content.contains("note=主角，推门冲出旧宅后回望"),
-            "{content}"
-        );
+        assert!(content.contains("note=主角，推门后回望"), "{content}");
         assert!(
             !content.contains("note=主角冲出旧宅，快步推门冲出旧宅后回望"),
             "{content}"
@@ -3323,6 +3380,7 @@ mod tests {
         let action = compact_selected_memory_action(
             "女主缓步后退躲避",
             Some("女主后退躲避"),
+            Some("女主后退躲避"),
             Some("女主"),
             None,
             "",
@@ -3337,6 +3395,7 @@ mod tests {
         let action = compact_selected_memory_action(
             "在旧宅走廊尽头停步回头",
             Some("主角在旧宅走廊尽头回头"),
+            Some("主角在旧宅走廊尽头回头"),
             Some("主角"),
             Some("在旧宅走廊尽头的门厅"),
             "压抑",
@@ -3344,6 +3403,21 @@ mod tests {
         .expect("action");
 
         assert_eq!(action, "停步回头");
+    }
+
+    #[test]
+    fn compact_selected_memory_action_strips_subject_motion_overlap_before_followup_suffix() {
+        let action = compact_selected_memory_action(
+            "快步推门冲出旧宅后回望",
+            Some("主角"),
+            Some("主角冲出旧宅"),
+            Some("主角"),
+            None,
+            "急迫",
+        )
+        .expect("action");
+
+        assert_eq!(action, "推门后回望");
     }
 
     #[test]

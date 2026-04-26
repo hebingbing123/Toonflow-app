@@ -649,7 +649,7 @@ async fn load_pending_video_observation_note(
         current_prompt_seed,
         storyboard_row.as_ref(),
     );
-    let note = select_best_video_prompt_observation_note(
+    let note = select_best_video_prompt_observation_note(prune_low_signal_observation_candidates(
         select_pending_rejected_video_observation_candidates(
             &rows,
             storyboard_numeric_id,
@@ -667,7 +667,7 @@ async fn load_pending_video_observation_note(
             !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
         })
         .collect(),
-    );
+    ));
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
 }
@@ -950,6 +950,29 @@ fn select_best_video_prompt_observation_note(candidates: Vec<String>) -> Option<
             .then(b.chars().count().cmp(&a.chars().count()))
             .then(b.cmp(a))
     })
+}
+
+fn prune_low_signal_observation_candidates(candidates: Vec<String>) -> Vec<String> {
+    let mut kept = candidates
+        .into_iter()
+        .filter(|note| !observation_candidate_is_low_signal(note))
+        .collect::<Vec<_>>();
+    if kept.is_empty() {
+        return Vec::new();
+    }
+    kept.dedup();
+    kept
+}
+
+fn observation_candidate_is_low_signal(note: &str) -> bool {
+    matches!(
+        canonical_observation_note(note).as_str(),
+        "avoid repeating stable follow camera"
+            | "avoid oppressive or frantic mood"
+            | "avoid overly cold emotional tone"
+            | "avoid heavy tragic mood"
+            | "avoid overly cold, oppressive, or frantic mood"
+    )
 }
 
 fn score_video_prompt_observation_specificity(note: &str) -> i32 {
@@ -3936,11 +3959,12 @@ mod tests {
     use super::{
         build_video_prompt, compact_camera_clause,
         compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
-        parse_structured_storyboard_description, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
-        select_best_video_prompt_observation_note, select_video_prompt_memory_notes,
-        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
-        trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
+        parse_structured_storyboard_description, prune_low_signal_observation_candidates,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        select_video_prompt_memory_notes, select_video_prompt_style_notes,
+        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
+        video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
         ScriptRolePromptSeedRow, VideoPromptContext,
     };
@@ -6285,6 +6309,25 @@ mod tests {
         ]);
 
         assert_eq!(note, Some("avoid harsh backlight silhouette".to_string()));
+    }
+
+    #[test]
+    fn prune_low_signal_observation_candidates_drops_single_generic_mood_note() {
+        assert!(prune_low_signal_observation_candidates(vec![
+            "avoid overly cold emotional tone".to_string()
+        ])
+        .is_empty());
+    }
+
+    #[test]
+    fn prune_low_signal_observation_candidates_keeps_specific_note_while_dropping_generic_retry() {
+        assert_eq!(
+            prune_low_signal_observation_candidates(vec![
+                "avoid repeating stable follow camera".to_string(),
+                "avoid extreme camera angle".to_string(),
+            ]),
+            vec!["avoid extreme camera angle".to_string()]
+        );
     }
 
     #[test]
