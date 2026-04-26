@@ -932,27 +932,22 @@ fn build_script_role_anchors(
     let subject = structured_fields
         .map(|fields| normalize_prompt_text(&fields.subject))
         .unwrap_or_default();
-    let mut anchors = Vec::new();
-    for anchor in &ctx.script_role_anchors {
+    let action = structured_fields
+        .map(|fields| normalize_prompt_text(&fields.action))
+        .unwrap_or_default();
+    let mut scored = Vec::new();
+    for (idx, anchor) in ctx.script_role_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
         };
         let name = normalize_prompt_text(name);
-        let subject_matches =
-            !subject.is_empty() && (subject.contains(&name) || name.contains(&subject));
-        if name.is_empty() || (!description.contains(&name) && !subject_matches) {
+        let score = score_script_asset_anchor(&name, &description, &subject, &action);
+        if name.is_empty() || score <= 0 {
             continue;
         }
-        let candidate = format!("{name}:{}", note.trim());
-        if anchors.iter().any(|existing| existing == &candidate) {
-            continue;
-        }
-        anchors.push(candidate);
-        if anchors.len() >= 2 {
-            break;
-        }
+        scored.push((score, idx, format!("{name}:{}", note.trim())));
     }
-    anchors
+    select_script_asset_anchor(scored)
 }
 
 fn build_script_scene_anchors(
@@ -971,27 +966,19 @@ fn build_script_scene_anchors(
     let setting = structured_fields
         .map(|fields| normalize_prompt_text(&fields.setting))
         .unwrap_or_default();
-    let mut anchors = Vec::new();
-    for anchor in &ctx.script_scene_anchors {
+    let mut scored = Vec::new();
+    for (idx, anchor) in ctx.script_scene_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
         };
         let name = normalize_prompt_text(name);
-        let setting_matches =
-            !setting.is_empty() && (setting.contains(&name) || name.contains(&setting));
-        if name.is_empty() || (!description.contains(&name) && !setting_matches) {
+        let score = score_script_asset_anchor(&name, &description, &setting, "");
+        if name.is_empty() || score <= 0 {
             continue;
         }
-        let candidate = format!("{name}:{}", note.trim());
-        if anchors.iter().any(|existing| existing == &candidate) {
-            continue;
-        }
-        anchors.push(candidate);
-        if !anchors.is_empty() {
-            break;
-        }
+        scored.push((score, idx, format!("{name}:{}", note.trim())));
     }
-    anchors
+    select_script_asset_anchor(scored)
 }
 
 fn build_script_tool_anchors(
@@ -1013,28 +1000,72 @@ fn build_script_tool_anchors(
     let action = structured_fields
         .map(|fields| normalize_prompt_text(&fields.action))
         .unwrap_or_default();
-    let mut anchors = Vec::new();
-    for anchor in &ctx.script_tool_anchors {
+    let mut scored = Vec::new();
+    for (idx, anchor) in ctx.script_tool_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
         };
         let name = normalize_prompt_text(name);
-        let structured_match = (!subject.is_empty()
-            && (subject.contains(&name) || name.contains(&subject)))
-            || (!action.is_empty() && action.contains(&name));
-        if name.is_empty() || (!description.contains(&name) && !structured_match) {
+        let score = score_script_asset_anchor(&name, &description, &subject, &action);
+        if name.is_empty() || score <= 0 {
             continue;
         }
-        let candidate = format!("{name}:{}", note.trim());
-        if anchors.iter().any(|existing| existing == &candidate) {
-            continue;
+        scored.push((score, idx, format!("{name}:{}", note.trim())));
+    }
+    select_script_asset_anchor(scored)
+}
+
+fn score_script_asset_anchor(
+    name: &str,
+    description: &str,
+    primary: &str,
+    secondary: &str,
+) -> i32 {
+    if name.is_empty() {
+        return 0;
+    }
+    let mut score = 0;
+    let primary_head = primary
+        .split(['/', '／', '、', '，', ',', ' '])
+        .map(normalize_prompt_text)
+        .find(|part| !part.is_empty());
+    if primary_head.as_deref() == Some(name) {
+        score += 160;
+    }
+    if !primary.is_empty() && primary == name {
+        score += 120;
+    } else if !primary.is_empty() && (primary.contains(name) || name.contains(primary)) {
+        score += 96;
+        if primary.starts_with(name) {
+            score += 96;
         }
-        anchors.push(candidate);
-        if !anchors.is_empty() {
-            break;
+        if let Some(idx) = primary.find(name) {
+            score += 24 - idx.min(24) as i32;
         }
     }
-    anchors
+    if !secondary.is_empty() && secondary.contains(name) {
+        score += 48;
+        if let Some(idx) = secondary.find(name) {
+            score += 12 - idx.min(12) as i32;
+        }
+    }
+    if !description.is_empty() && description.contains(name) {
+        score += 36;
+        if let Some(idx) = description.find(name) {
+            score += 8 - idx.min(8) as i32;
+        }
+    }
+    score - name.chars().count() as i32
+}
+
+fn select_script_asset_anchor(mut scored: Vec<(i32, usize, String)>) -> Vec<String> {
+    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    scored
+        .into_iter()
+        .map(|(_, _, anchor)| anchor)
+        .next()
+        .into_iter()
+        .collect()
 }
 
 fn build_continuity_notes(
@@ -1850,8 +1881,36 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
+        assert!(
+            prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."),
+        );
         assert!(!prompt.contains("路人:灰色外套"));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_only_strongest_matching_role_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角扶住同伴冲出旧宅、旧宅走廊、主角/同伴、5秒、中景、稳定跟拍、扶住同伴冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
+            script_role_anchors: vec![
+                "同伴: 灰色毛衣，神情惊惶".into(),
+                "主角: 黑色风衣，短发，克制冷峻".into(),
+            ],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
+        assert!(!prompt.contains("同伴:灰色毛衣，神情惊惶"));
     }
 
     #[test]
@@ -1883,6 +1942,37 @@ mod tests {
         assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
         assert!(!prompt.contains("街角:雨夜霓虹"));
         assert!(!prompt.contains("雨伞:黑伞"));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_only_strongest_matching_scene_and_tool_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角在旧宅走廊握紧青铜匕首回头、旧宅走廊/门厅、主角/青铜匕首/门锁、5秒、中景、稳定跟拍、握紧匕首回头、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec![
+                "门厅: 破损玻璃，潮湿回声".into(),
+                "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
+            ],
+            script_tool_anchors: vec![
+                "门锁: 生锈锁芯".into(),
+                "青铜匕首: 刀身旧磨损，寒光克制".into(),
+            ],
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
+        assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
+        assert!(!prompt.contains("门厅:破损玻璃，潮湿回声"));
+        assert!(!prompt.contains("门锁:生锈锁芯"));
     }
 
     #[test]
