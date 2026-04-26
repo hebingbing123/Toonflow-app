@@ -50,10 +50,11 @@ pub(crate) fn build_selected_video_memory(
     }
 
     let note = selected_video_memory_note(row)?;
-    let mut parts = vec![
-        format!("storyboardIds={storyboard_numeric_id}"),
-        format!("note={note}"),
-    ];
+    let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
+    if let Some(style) = style_only_note(&note) {
+        parts.push(format!("style={style}"));
+    }
+    parts.push(format!("note={note}"));
     if let Some(duration) = resolve_duration_label(row) {
         parts.push(format!("duration={duration}"));
     }
@@ -219,8 +220,7 @@ pub(crate) async fn refresh_script_video_style_memory(
 pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
-        .filter_map(|row| extract_key_value(&row.content, "note"))
-        .filter_map(|note| style_only_note(&note))
+        .filter_map(selected_video_style_value)
         .take(1)
         .collect()
 }
@@ -240,9 +240,10 @@ pub(crate) fn select_selected_video_memory_notes(
         if !memory_matches_storyboard(&row.content, storyboard_numeric_id) {
             continue;
         }
-        let Some(note) = extract_key_value(&row.content, "note")
-            .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
-        else {
+        let Some(note) = selected_video_style_value(row).or_else(|| {
+            extract_key_value(&row.content, "note")
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        }) else {
             continue;
         };
         if notes.iter().any(|existing| existing == &note) {
@@ -277,8 +278,7 @@ pub(crate) fn select_neighbor_selected_video_memory_notes(
                 .iter()
                 .map(|id| (storyboard_numeric_id - *id).abs())
                 .min()?;
-            let note = extract_key_value(&row.content, "note")
-                .and_then(|value| style_only_note(&value))?;
+            let note = selected_video_style_value(row)?;
             Some((distance, idx, note))
         })
         .collect::<Vec<_>>();
@@ -462,7 +462,7 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     let notes = rows
         .iter()
         .filter(|row| row.name == SELECTED_VIDEO_MEMORY_NAME)
-        .filter_map(|row| extract_key_value(&row.content, "note"))
+        .filter_map(selected_video_style_value)
         .collect::<Vec<_>>();
     if notes.len() < 2 {
         return None;
@@ -473,10 +473,12 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
         return None;
     }
 
+    let style = clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
     Some(format!(
-        "sampleCount={} | note={}",
+        "sampleCount={} | style={} | note={}",
         notes.len(),
-        clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+        style,
+        style
     ))
 }
 
@@ -517,6 +519,12 @@ fn style_only_note(note: &str) -> Option<String> {
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
+    extract_key_value(&row.content, "style")
+        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .or_else(|| extract_key_value(&row.content, "note").and_then(|note| style_only_note(&note)))
 }
 
 pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
@@ -681,6 +689,7 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("storyboardIds=12"));
+        assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊"));
         assert!(content.contains("note=主角冲出旧宅"));
         assert!(content.contains("镜头中景稳定跟拍"));
         assert!(content.contains("情绪急迫"));
@@ -697,7 +706,7 @@ mod tests {
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content: "storyboardIds=12 | note=保持冷调近景和稳定推进".into(),
+                    content: "storyboardIds=12 | style=镜头冷调近景，情绪压迫 | note=保持冷调近景和稳定推进".into(),
                 },
                 AgentMemoryRow {
                     name: "auto_scope_memory".into(),
@@ -707,7 +716,7 @@ mod tests {
             12,
         );
 
-        assert_eq!(notes, vec!["保持冷调近景和稳定推进".to_string()]);
+        assert_eq!(notes, vec!["镜头冷调近景，情绪压迫".to_string()]);
     }
 
     #[test]
@@ -716,20 +725,15 @@ mod tests {
             &[
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content:
-                        "storyboardIds=5 | note=主角推门而入，镜头中景慢推，情绪压迫，光影暖金逆光"
-                            .into(),
+                    content: "storyboardIds=5 | style=镜头中景慢推，情绪压迫，光影暖金逆光 | note=主角推门而入，镜头中景慢推，情绪压迫，光影暖金逆光".into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content:
-                        "storyboardIds=16 | note=反派逼近，镜头中景稳定跟拍，情绪冷峻，光影冷色夜景"
-                            .into(),
+                    content: "storyboardIds=16 | style=镜头中景稳定跟拍，情绪冷峻，光影冷色夜景 | note=反派逼近，镜头中景稳定跟拍，情绪冷峻，光影冷色夜景".into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content: "storyboardIds=11 | note=女主贴墙前行，镜头近景稳定跟拍，情绪压迫"
-                        .into(),
+                    content: "storyboardIds=11 | style=镜头近景稳定跟拍，情绪压迫 | note=女主贴墙前行，镜头近景稳定跟拍，情绪压迫".into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
@@ -754,15 +758,15 @@ mod tests {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=9 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅走廊".into(),
+                content: "storyboardIds=9 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅走廊 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅走廊".into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=10 | note=女主贴墙前行，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅楼梯".into(),
+                content: "storyboardIds=10 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅楼梯 | note=女主贴墙前行，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅楼梯".into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=11 | note=反派逼近，镜头近景手持跟拍，情绪紧张压迫，光影冷调逆光，场景旧宅走廊".into(),
+                content: "storyboardIds=11 | style=镜头近景手持跟拍，情绪紧张压迫，光影冷调逆光，场景旧宅走廊 | note=反派逼近，镜头近景手持跟拍，情绪紧张压迫，光影冷调逆光，场景旧宅走廊".into(),
             },
         ])
         .expect("summary");
@@ -780,7 +784,7 @@ mod tests {
         let notes = select_script_video_style_memory_notes(&[
             AgentMemoryRow {
                 name: "script_video_style_memory".into(),
-                content: "sampleCount=3 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+                content: "sampleCount=3 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
