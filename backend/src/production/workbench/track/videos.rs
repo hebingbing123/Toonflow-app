@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ApiError;
 use crate::production::workbench::video_prompt_memory::{
     build_selected_video_memory, clear_selected_video_memory, persist_selected_video_memory,
-    refresh_script_video_style_memory, StoryboardPromptSeedRow,
+    refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated_user;
 use crate::scope::http::require_owned_numeric_script_scope_row;
@@ -87,6 +87,7 @@ pub(in crate::production) async fn post_workbench_delete_video(
     )
     .await?;
     refresh_script_video_style_memory(pool, user_id, body.project_id, body.script_id).await?;
+    refresh_project_video_style_memory(pool, user_id, body.project_id).await?;
 
     Ok(JsonResponse(DeleteVideoResponse {
         storyboard_id: body.storyboard_id,
@@ -189,6 +190,7 @@ pub(in crate::production) async fn post_workbench_select_video(
             .await?;
             refresh_script_video_style_memory(pool, user_id, body.project_id, body.script_id)
                 .await?;
+            refresh_project_video_style_memory(pool, user_id, body.project_id).await?;
         }
     }
 

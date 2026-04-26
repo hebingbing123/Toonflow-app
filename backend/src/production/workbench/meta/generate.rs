@@ -14,8 +14,8 @@ use crate::production::workbench::meta::common::{
 };
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_neighbor_selected_video_memory_notes,
-    select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_project_video_style_memory_notes, select_script_video_style_memory_notes,
+    select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -171,10 +171,12 @@ async fn load_video_prompt_memory_notes(
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
-          AND episodes_id = $3
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
-          AND name IN ('selected_video_memory', 'script_video_style_memory', 'auto_scope_memory')
+          AND (
+            (episodes_id = $3 AND name IN ('selected_video_memory', 'script_video_style_memory', 'auto_scope_memory'))
+            OR (episodes_id IS NULL AND name = 'project_video_style_memory')
+          )
         ORDER BY create_time_ms DESC
         LIMIT $4
         "#,
@@ -201,6 +203,10 @@ async fn load_video_prompt_memory_notes(
     let style_notes = select_script_video_style_memory_notes(&rows);
     if !style_notes.is_empty() {
         return Ok(style_notes);
+    }
+    let project_style_notes = select_project_video_style_memory_notes(&rows);
+    if !project_style_notes.is_empty() {
+        return Ok(project_style_notes);
     }
     Ok(select_video_prompt_memory_notes(
         &rows,
@@ -568,8 +574,8 @@ mod tests {
         select_video_prompt_memory_notes, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
-        select_neighbor_selected_video_memory_notes, select_script_video_style_memory_notes,
-        AgentMemoryRow,
+        select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
+        select_script_video_style_memory_notes, AgentMemoryRow,
     };
 
     #[test]
@@ -744,6 +750,25 @@ mod tests {
         assert_eq!(
             select_script_video_style_memory_notes(&rows),
             vec!["镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
+        );
+    }
+
+    #[test]
+    fn project_video_style_memory_is_available_before_auto_scope_fallback() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头中景稳定跟拍，情绪冷峻压迫 | note=镜头中景稳定跟拍，情绪冷峻压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=次级摘要".to_string(),
+            },
+        ];
+
+        assert_eq!(
+            select_project_video_style_memory_notes(&rows),
+            vec!["镜头中景稳定跟拍，情绪冷峻压迫".to_string()]
         );
     }
 }

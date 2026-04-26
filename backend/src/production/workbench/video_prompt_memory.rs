@@ -6,8 +6,10 @@ use crate::error::ApiError;
 
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
 const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
+const PROJECT_VIDEO_STYLE_MEMORY_NAME: &str = "project_video_style_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
+const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
@@ -217,9 +219,55 @@ pub(crate) async fn refresh_script_video_style_memory(
     .await
 }
 
+pub(crate) async fn refresh_project_video_style_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+) -> Result<(), ApiError> {
+    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $3
+        ORDER BY create_time_ms DESC
+        LIMIT $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(SELECTED_VIDEO_MEMORY_NAME)
+    .bind(SELECTED_VIDEO_MEMORY_KEEP_ROWS * 4)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let summarized = build_project_video_style_memory(&rows);
+    replace_project_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        PROJECT_VIDEO_STYLE_MEMORY_NAME,
+        summarized.as_deref(),
+        PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
+    .await
+}
+
 pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
+        .filter_map(selected_video_style_value)
+        .take(1)
+        .collect()
+}
+
+pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
+    rows.iter()
+        .filter(|row| row.name == PROJECT_VIDEO_STYLE_MEMORY_NAME)
         .filter_map(selected_video_style_value)
         .take(1)
         .collect()
@@ -482,6 +530,30 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     ))
 }
 
+fn build_project_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
+    let notes = rows
+        .iter()
+        .filter(|row| row.name == SELECTED_VIDEO_MEMORY_NAME)
+        .filter_map(selected_video_style_value)
+        .collect::<Vec<_>>();
+    if notes.len() < 3 {
+        return None;
+    }
+
+    let recurring = recurring_style_fragments(&notes);
+    if recurring.is_empty() {
+        return None;
+    }
+
+    let style = clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+    Some(format!(
+        "sampleCount={} | style={} | note={}",
+        notes.len(),
+        style,
+        style
+    ))
+}
+
 fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
     let parsed = notes
         .iter()
@@ -652,12 +724,88 @@ async fn replace_summary_memory(
     Ok(())
 }
 
+async fn replace_project_summary_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    name: &str,
+    content: Option<&str>,
+    keep_rows: i64,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id IS NULL
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $3
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(name)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(content) = content else {
+        return Ok(());
+    };
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, NULL, 'productionAgent', 'summary', 'assistant', $3, $4, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(name)
+    .bind(content)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id IN (
+          SELECT id
+          FROM app_agent_memory
+          WHERE owner_user_id = $1
+            AND numeric_project_id = $2
+            AND episodes_id IS NULL
+            AND agent_type = 'productionAgent'
+            AND memory_type = 'summary'
+            AND name = $3
+          ORDER BY create_time_ms DESC
+          OFFSET $4
+        )
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(name)
+    .bind(keep_rows)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        build_script_video_style_memory, build_selected_video_memory, clear_selected_video_memory,
-        compact_video_continuity_note, parse_structured_storyboard_description,
-        select_neighbor_selected_video_memory_notes, select_script_video_style_memory_notes,
+        build_project_video_style_memory, build_script_video_style_memory,
+        build_selected_video_memory, clear_selected_video_memory, compact_video_continuity_note,
+        parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
+        select_project_video_style_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
@@ -796,6 +944,44 @@ mod tests {
             notes,
             vec!["镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
         );
+    }
+
+    #[test]
+    fn build_project_video_style_memory_extracts_cross_script_recurring_style() {
+        let summary = build_project_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头中景稳定跟拍，情绪冷峻压迫，场景废弃走廊 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"));
+        assert!(summary.contains("style=镜头中景稳定跟拍，情绪冷峻压迫"));
+    }
+
+    #[test]
+    fn select_project_video_style_memory_notes_reads_summary_note() {
+        let notes = select_project_video_style_memory_notes(&[
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=6 | style=镜头中景稳定跟拍，情绪冷峻压迫 | note=镜头中景稳定跟拍，情绪冷峻压迫".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=3 | style=镜头近景手持 | note=镜头近景手持".into(),
+            },
+        ]);
+
+        assert_eq!(notes, vec!["镜头中景稳定跟拍，情绪冷峻压迫".to_string()]);
     }
 
     #[test]
