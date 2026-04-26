@@ -40,6 +40,7 @@ const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
+const VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT: usize = 2;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -1890,7 +1891,11 @@ fn build_script_tool_anchors(
     let action = structured_fields
         .map(|fields| normalize_prompt_text(&fields.action))
         .unwrap_or_default();
+    let subject_refs = structured_fields
+        .map(structured_subject_ref_names)
+        .unwrap_or_default();
     let mut scored = Vec::new();
+    let mut directly_referenced_anchor_count = 0usize;
     for (idx, anchor) in ctx.script_tool_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
             continue;
@@ -1905,13 +1910,23 @@ fn build_script_tool_anchors(
         ) else {
             continue;
         };
-        let score = score_script_asset_anchor(&name, &description, &subject, &action);
+        let ref_match_score = score_subject_ref_match(&name, &subject_refs);
+        let score =
+            score_script_asset_anchor(&name, &description, &subject, &action) + ref_match_score;
         if name.is_empty() || score <= 0 {
             continue;
         }
+        if ref_match_score > 0 {
+            directly_referenced_anchor_count += 1;
+        }
         scored.push((score, idx, anchor));
     }
-    select_script_asset_anchors(scored, 1)
+    let tool_anchor_limit = if directly_referenced_anchor_count > 1 {
+        VIDEO_PROMPT_MULTI_TOOL_ANCHOR_LIMIT.min(directly_referenced_anchor_count)
+    } else {
+        1
+    };
+    select_script_asset_anchors(scored, tool_anchor_limit)
 }
 
 fn score_script_asset_anchor(name: &str, description: &str, primary: &str, secondary: &str) -> i32 {
@@ -5256,6 +5271,35 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_keeps_two_tool_anchors_for_multi_prop_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角在旧宅走廊握紧青铜匕首撬开门锁、旧宅走廊、主角/青铜匕首/门锁、5秒、中景、稳定跟拍、握紧匕首撬开门锁后回头确认、急迫、阴天冷光、无台词、金属摩擦声脚步声、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec![
+                "门锁: 生锈锁芯，金属划痕".into(),
+                "青铜匕首: 刀身旧磨损，寒光克制".into(),
+                "雨伞: 黑伞".into(),
+            ],
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Prop anchor: 门锁:生锈锁芯，金属划痕; 青铜匕首:刀身旧磨损，寒光克制."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("雨伞:黑伞"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_compacts_setting_prefix_already_covered_by_scene_anchor() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -5383,7 +5427,7 @@ mod tests {
     }
 
     #[test]
-    fn build_video_prompt_keeps_only_strongest_matching_scene_and_tool_anchor() {
+    fn build_video_prompt_keeps_strongest_scene_anchor_but_two_directly_referenced_tool_anchors() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角在旧宅走廊握紧青铜匕首回头、旧宅走廊/门厅、主角/青铜匕首/门锁、5秒、中景、稳定跟拍、握紧匕首回头、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
@@ -5407,9 +5451,12 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
-        assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
+        assert!(
+            prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制; 门锁:生锈锁芯.")
+                || prompt.contains("Prop anchor: 门锁:生锈锁芯; 青铜匕首:刀身旧磨损，寒光克制."),
+            "{prompt}"
+        );
         assert!(!prompt.contains("门厅:破损玻璃，潮湿回声"));
-        assert!(!prompt.contains("门锁:生锈锁芯"));
     }
 
     #[test]
