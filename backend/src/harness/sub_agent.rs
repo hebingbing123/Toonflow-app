@@ -625,7 +625,7 @@ fn compact_auto_memory_entry_for_scope(entry: &str, current_scope: &ScopeSignatu
         return entry.trim().to_string();
     }
 
-    entry
+    let compacted = entry
         .split(" | ")
         .map(str::trim)
         .filter(|segment| {
@@ -634,7 +634,8 @@ fn compact_auto_memory_entry_for_scope(entry: &str, current_scope: &ScopeSignatu
                 && !segment.starts_with("storyboardPromptSeeds=")
         })
         .collect::<Vec<_>>()
-        .join(" | ")
+        .join(" | ");
+    compact_exact_scope_auto_memory_entry(&compacted)
 }
 
 fn dedupe_auto_memory_entries(entries: Vec<String>) -> Vec<String> {
@@ -741,6 +742,134 @@ fn summarize_result_excerpt(text: &str) -> String {
         return "本轮执行完成。".to_string();
     }
     truncate_chars(&normalized, 180)
+}
+
+fn compact_exact_scope_auto_memory_entry(entry: &str) -> String {
+    let mut tool_alias = None;
+    let mut summary = None;
+    let mut review = None;
+    let mut fallback_segments = Vec::new();
+
+    for segment in entry
+        .split(" | ")
+        .map(str::trim)
+        .filter(|segment| !segment.is_empty())
+    {
+        if let Some(value) = segment.strip_prefix("tool=") {
+            tool_alias = Some(compact_auto_memory_tool_alias(value));
+            continue;
+        }
+        if let Some(value) = segment.strip_prefix("summary=") {
+            summary = compact_auto_memory_summary_text(value);
+            continue;
+        }
+        if let Some(value) = segment.strip_prefix("result=") {
+            summary = compact_auto_memory_summary_text(value);
+            continue;
+        }
+        if let Some(value) = segment.strip_prefix("review=") {
+            review = compact_auto_memory_review_text(value);
+            continue;
+        }
+        fallback_segments.push(segment.to_string());
+    }
+
+    let headline = summary.or(review);
+    match (tool_alias, headline) {
+        (Some(tool_alias), Some(headline)) => format!("{tool_alias}: {headline}"),
+        (None, Some(headline)) => headline,
+        (Some(tool_alias), None) if fallback_segments.is_empty() => tool_alias.to_string(),
+        _ => entry.trim().to_string(),
+    }
+}
+
+fn compact_auto_memory_tool_alias(tool_name: &str) -> &str {
+    match tool_name {
+        "run_sub_agent_storyboard_panel" => "panel",
+        "run_sub_agent_storyboard_gen" => "storyboard",
+        "run_sub_agent_production_supervision" => "supervision",
+        "run_sub_agent_director_plan" => "director",
+        "run_sub_agent_storyboard_table" => "storyboard-table",
+        "run_sub_agent_generate_assets" => "asset-image",
+        "run_sub_agent_derive_assets" => "assets",
+        "run_sub_agent_storySkeleton" => "story-skeleton",
+        "run_sub_agent_adaptationStrategy" => "adaptation",
+        "run_sub_agent_script" => "script",
+        "run_supervision_agent" => "supervision",
+        _ => tool_name,
+    }
+}
+
+fn compact_auto_memory_review_text(review: &str) -> Option<String> {
+    let summary = review
+        .split(';')
+        .map(str::trim)
+        .find_map(|part| part.strip_prefix("summary="))
+        .and_then(compact_auto_memory_summary_text);
+    if summary.is_some() {
+        return summary;
+    }
+
+    let target = review
+        .split(';')
+        .map(str::trim)
+        .find_map(|part| part.strip_prefix("target="))
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let next = review
+        .split(';')
+        .map(str::trim)
+        .find_map(|part| part.strip_prefix("next="))
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+
+    match (target, next) {
+        (Some(target), Some(next)) => Some(format!("{target} {next}")),
+        (Some(target), None) => Some(target.to_string()),
+        (None, Some(next)) => Some(next.to_string()),
+        (None, None) => None,
+    }
+}
+
+fn compact_auto_memory_summary_text(text: &str) -> Option<String> {
+    let compacted = text
+        .split('，')
+        .map(strip_auto_memory_scaffolding)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>()
+        .join("，");
+    let compacted = normalize_whitespace(compacted.trim());
+    (!compacted.is_empty()).then_some(truncate_chars(&compacted, AUTO_MEMORY_MAX_CHARS))
+}
+
+fn strip_auto_memory_scaffolding(fragment: &str) -> String {
+    let mut compacted = normalize_whitespace(fragment.trim());
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    for pattern in [
+        "当前镜头已确认的",
+        "当前分镜已确认的",
+        "本镜头已确认的",
+        "该镜头已确认的",
+        "当前镜头已确认",
+        "当前分镜已确认",
+        "本镜头已确认",
+        "该镜头已确认",
+        "当前镜头",
+        "当前分镜",
+        "本镜头",
+        "该镜头",
+    ] {
+        compacted = compacted.replace(pattern, "");
+    }
+
+    let compacted = normalize_whitespace(compacted.trim());
+    match compacted.as_str() {
+        "" | "已确认" | "镜头已确认" | "分镜已确认" => String::new(),
+        _ => compacted,
+    }
 }
 
 fn scope_summary(arguments: &Value) -> Option<String> {
@@ -1569,10 +1698,7 @@ mod tests {
             &current_scope,
         );
 
-        assert_eq!(
-            compacted,
-            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位"
-        );
+        assert_eq!(compacted, "panel: 角色站位");
     }
 
     #[test]
@@ -1596,18 +1722,52 @@ mod tests {
     }
 
     #[test]
+    fn compact_auto_memory_entry_for_scope_prefers_review_summary_over_metadata() {
+        let current_scope = scope_signature_from_args(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+        );
+
+        let compacted = compact_auto_memory_entry_for_scope(
+            "tool=run_sub_agent_production_supervision | scope=storyboardIds=12 | promptSeed=seed-12-current | review=target=storyboardTable; grade=B; next=refresh; summary=当前镜头角色站位不要跳轴",
+            &current_scope,
+        );
+
+        assert_eq!(compacted, "supervision: 角色站位不要跳轴");
+    }
+
+    #[test]
+    fn compact_auto_memory_entry_for_scope_falls_back_to_review_target_and_next() {
+        let current_scope = scope_signature_from_args(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+        );
+
+        let compacted = compact_auto_memory_entry_for_scope(
+            "tool=run_sub_agent_production_supervision | scope=storyboardIds=12 | promptSeed=seed-12-current | review=target=storyboardTable; grade=C; next=refresh",
+            &current_scope,
+        );
+
+        assert_eq!(compacted, "supervision: storyboardTable refresh");
+    }
+
+    #[test]
     fn dedupe_auto_memory_entries_drops_scope_compaction_duplicates() {
         let rows = dedupe_auto_memory_entries(vec![
-            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
-            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
-            "tool=run_sub_agent_storyboard_panel | summary=补充环境光位".to_string(),
+            "panel: 角色站位".to_string(),
+            "panel: 角色站位".to_string(),
+            "panel: 补充环境光位".to_string(),
         ]);
 
         assert_eq!(
             rows,
             vec![
-                "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
-                "tool=run_sub_agent_storyboard_panel | summary=补充环境光位".to_string()
+                "panel: 角色站位".to_string(),
+                "panel: 补充环境光位".to_string()
             ]
         );
     }
