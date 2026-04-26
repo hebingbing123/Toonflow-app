@@ -36,6 +36,9 @@ const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
+const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
+const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
+const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -275,7 +278,6 @@ async fn load_video_prompt_context(
           AND sc.numeric_id = $3
           AND a.asset_type IN ('role', 'scene', 'tool')
         ORDER BY a.created_at DESC
-        LIMIT 16
         "#,
     )
     .bind(user_id)
@@ -284,6 +286,7 @@ async fn load_video_prompt_context(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let script_role_rows = select_video_prompt_asset_seed_rows(script_role_rows);
 
     let mut script_role_anchors = Vec::new();
     let mut script_scene_anchors = Vec::new();
@@ -315,6 +318,39 @@ async fn load_video_prompt_context(
         memory_style_notes,
         continuity_notes,
     }))
+}
+
+fn select_video_prompt_asset_seed_rows(
+    rows: Vec<ScriptRolePromptSeedRow>,
+) -> Vec<ScriptRolePromptSeedRow> {
+    let mut role_count = 0usize;
+    let mut scene_count = 0usize;
+    let mut tool_count = 0usize;
+    let mut selected = Vec::new();
+
+    for row in rows {
+        let asset_type = normalize_prompt_text(&row.asset_type).to_lowercase();
+        let keep = match asset_type.as_str() {
+            "role" if role_count < VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT => {
+                role_count += 1;
+                true
+            }
+            "scene" if scene_count < VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT => {
+                scene_count += 1;
+                true
+            }
+            "tool" if tool_count < VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT => {
+                tool_count += 1;
+                true
+            }
+            _ => false,
+        };
+        if keep {
+            selected.push(row);
+        }
+    }
+
+    selected
 }
 
 async fn load_video_prompt_memory_notes(
@@ -5317,6 +5353,64 @@ mod tests {
             describe: None,
         })
         .is_none());
+    }
+
+    #[test]
+    fn select_video_prompt_asset_seed_rows_keeps_per_type_budget_instead_of_global_recent_rows() {
+        let rows = (0..8)
+            .map(|idx| ScriptRolePromptSeedRow {
+                asset_type: "role".into(),
+                name: Some(format!("角色{idx}")),
+                describe: Some("黑色风衣".into()),
+            })
+            .chain((0..3).map(|idx| ScriptRolePromptSeedRow {
+                asset_type: "scene".into(),
+                name: Some(format!("场景{idx}")),
+                describe: Some("潮湿长廊".into()),
+            }))
+            .chain((0..3).map(|idx| ScriptRolePromptSeedRow {
+                asset_type: "tool".into(),
+                name: Some(format!("道具{idx}")),
+                describe: Some("旧磨损".into()),
+            }))
+            .collect::<Vec<_>>();
+
+        let selected = select_video_prompt_asset_seed_rows(rows);
+        let role_count = selected
+            .iter()
+            .filter(|row| row.asset_type == "role")
+            .count();
+        let scene_count = selected
+            .iter()
+            .filter(|row| row.asset_type == "scene")
+            .count();
+        let tool_count = selected
+            .iter()
+            .filter(|row| row.asset_type == "tool")
+            .count();
+
+        assert_eq!(role_count, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT);
+        assert_eq!(scene_count, 3);
+        assert_eq!(tool_count, 3);
+    }
+
+    #[test]
+    fn select_video_prompt_asset_seed_rows_skips_unknown_asset_types() {
+        let selected = select_video_prompt_asset_seed_rows(vec![
+            ScriptRolePromptSeedRow {
+                asset_type: "role".into(),
+                name: Some("主角".into()),
+                describe: Some("黑色风衣".into()),
+            },
+            ScriptRolePromptSeedRow {
+                asset_type: "vehicle".into(),
+                name: Some("摩托".into()),
+                describe: Some("破旧".into()),
+            },
+        ]);
+
+        assert_eq!(selected.len(), 1);
+        assert_eq!(selected[0].asset_type, "role");
     }
 
     #[test]
