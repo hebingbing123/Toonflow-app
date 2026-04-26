@@ -3,6 +3,110 @@ part of '../../home_page.dart';
 /// Encapsulates storyboard workbench mutations so the main panel file
 /// stays focused on state ownership and section composition.
 extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
+  StoryboardVideoPromptRequest _buildCurrentVideoPromptRequest() {
+    return buildStoryboardVideoPromptRequest(
+      scriptStoryboard: widget.scriptStoryboard,
+      productionStoryboard: _productionRow,
+      draftNarration: widget.readVideoDescriptionText(),
+      draftPrompt: widget.readPromptText(),
+      draftDuration: _videoDurationCtrl.text,
+    );
+  }
+
+  String? _currentStoryboardSourceImage() {
+    return resolveStoryboardSourceImageUrl(
+      productionStoryboard: _productionRow,
+      draftImageUrl: _imageUrlCtrl.text,
+    );
+  }
+
+  String _buildVideoPromptSignature({
+    required StoryboardVideoPromptRequest request,
+    required String? imageUrl,
+  }) {
+    final description = request.description?.trim() ?? '';
+    final duration = request.durationSeconds?.toString() ?? '';
+    final image = imageUrl?.trim() ?? '';
+    return '$description|$duration|$image';
+  }
+
+  bool _videoPromptNeedsAutoRefresh({
+    required String currentPrompt,
+    required StoryboardVideoPromptRequest request,
+    required String? imageUrl,
+  }) {
+    if (currentPrompt.isEmpty) {
+      return true;
+    }
+    final defaultSeed =
+        resolveStoryboardVideoPromptSeed(
+          scriptStoryboard: widget.scriptStoryboard,
+          productionStoryboard: _productionRow,
+          draftNarration: widget.readVideoDescriptionText(),
+          draftPrompt: widget.readPromptText(),
+        )?.trim() ??
+        '';
+    if (defaultSeed.isNotEmpty && currentPrompt == defaultSeed) {
+      return true;
+    }
+    if (_videoPromptEditedAfterAutoGenerate) {
+      return false;
+    }
+    final generatedPrompt = _lastGeneratedVideoPromptText?.trim();
+    if (generatedPrompt == null || generatedPrompt.isEmpty) {
+      return false;
+    }
+    if (currentPrompt != generatedPrompt) {
+      return false;
+    }
+    return _lastGeneratedVideoPromptSignature !=
+        _buildVideoPromptSignature(request: request, imageUrl: imageUrl);
+  }
+
+  void _applyGeneratedVideoPrompt(
+    GenerateVideoPromptResponse generated, {
+    required String signature,
+  }) {
+    _syncingGeneratedVideoPrompt = true;
+    _videoPromptCtrl.text = generated.prompt;
+    _negativeVideoPromptCtrl.text = generated.negativePrompt ?? '';
+    _videoDurationCtrl.text = generated.duration.toString();
+    _syncingGeneratedVideoPrompt = false;
+    _lastGeneratedVideoPromptText = generated.prompt.trim();
+    _lastGeneratedVideoPromptSignature = signature;
+    _videoPromptEditedAfterAutoGenerate = false;
+  }
+
+  Future<void> _refreshVideoPromptBeforeSubmitIfNeeded() async {
+    final currentPrompt = _videoPromptCtrl.text.trim();
+    final request = _buildCurrentVideoPromptRequest();
+    final imageUrl = _currentStoryboardSourceImage();
+    if (!_videoPromptNeedsAutoRefresh(
+      currentPrompt: currentPrompt,
+      request: request,
+      imageUrl: imageUrl,
+    )) {
+      return;
+    }
+
+    final generated = await postWorkbenchGenerateVideoPromptV1(
+      widget.token,
+      projectId: widget.projectNumericId,
+      scriptId: widget.scriptNumericId,
+      storyboardId: widget.storyNumericId,
+      imageUrl: imageUrl,
+      description: request.description,
+      durationHint: request.durationSeconds,
+    );
+    _applyGeneratedVideoPrompt(
+      generated,
+      signature: _buildVideoPromptSignature(
+        request: request,
+        imageUrl: imageUrl,
+      ),
+    );
+  }
+
   Future<void> _runDialogAction(Future<void> Function() action) async {
     _applyWorkbenchState(() => _saving = true);
     try {
@@ -36,10 +140,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _submitVideoGeneration() async {
-    final sourceImage = resolveStoryboardSourceImageUrl(
-      productionStoryboard: _productionRow,
-      draftImageUrl: _imageUrlCtrl.text,
-    );
+    final sourceImage = _currentStoryboardSourceImage();
     if (sourceImage == null) {
       throw const FormatException('生成视频前需要先提供图片 URL 或当前预览图');
     }
@@ -51,6 +152,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     if (duration == null || duration <= 0) {
       throw const FormatException('视频时长必须是正整数');
     }
+    await _refreshVideoPromptBeforeSubmitIfNeeded();
     final prompt = _videoPromptCtrl.text.trim();
     if (prompt.isEmpty) {
       throw const FormatException('视频提示词不能为空');
@@ -248,28 +350,24 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _generateVideoPrompt() async {
-    final request = buildStoryboardVideoPromptRequest(
-      scriptStoryboard: widget.scriptStoryboard,
-      productionStoryboard: _productionRow,
-      draftNarration: widget.readVideoDescriptionText(),
-      draftPrompt: widget.readPromptText(),
-      draftDuration: _videoDurationCtrl.text,
-    );
+    final request = _buildCurrentVideoPromptRequest();
+    final imageUrl = _currentStoryboardSourceImage();
     final generated = await postWorkbenchGenerateVideoPromptV1(
       widget.token,
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
       storyboardId: widget.storyNumericId,
-      imageUrl: resolveStoryboardSourceImageUrl(
-        productionStoryboard: _productionRow,
-        draftImageUrl: _imageUrlCtrl.text,
-      ),
+      imageUrl: imageUrl,
       description: request.description,
       durationHint: request.durationSeconds,
     );
-    _videoPromptCtrl.text = generated.prompt;
-    _negativeVideoPromptCtrl.text = generated.negativePrompt ?? '';
-    _videoDurationCtrl.text = generated.duration.toString();
+    _applyGeneratedVideoPrompt(
+      generated,
+      signature: _buildVideoPromptSignature(
+        request: request,
+        imageUrl: imageUrl,
+      ),
+    );
     if (!mounted) return;
     final followUp = generated.observationNote == null
         ? '已生成默认视频提示词并回填时长。'

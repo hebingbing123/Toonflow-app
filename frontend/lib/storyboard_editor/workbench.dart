@@ -51,6 +51,10 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _latestExportWritebackSynced = false;
   String? _productionError;
   String? _workbenchLine;
+  String? _lastGeneratedVideoPromptText;
+  String? _lastGeneratedVideoPromptSignature;
+  bool _videoPromptEditedAfterAutoGenerate = false;
+  bool _syncingGeneratedVideoPrompt = false;
   String _mode = 'standard';
   String _resolution = '1080p';
   bool _audio = false;
@@ -130,6 +134,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _videoPromptCtrl = TextEditingController();
     _negativeVideoPromptCtrl = TextEditingController();
     _videoDurationCtrl = TextEditingController(text: '5');
+    _videoPromptCtrl.addListener(_handleVideoPromptChanged);
     Future<void>.microtask(
       () => _refreshAll(syncImageUrl: true, syncTrackId: true),
     );
@@ -137,6 +142,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
 
   @override
   void dispose() {
+    _videoPromptCtrl.removeListener(_handleVideoPromptChanged);
     _imageUrlCtrl.dispose();
     _trackIdCtrl.dispose();
     _trackNameCtrl.dispose();
@@ -144,6 +150,19 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _negativeVideoPromptCtrl.dispose();
     _videoDurationCtrl.dispose();
     super.dispose();
+  }
+
+  void _handleVideoPromptChanged() {
+    if (_syncingGeneratedVideoPrompt) {
+      return;
+    }
+    final generated = _lastGeneratedVideoPromptText?.trim();
+    if (generated == null || generated.isEmpty) {
+      _videoPromptEditedAfterAutoGenerate = false;
+      return;
+    }
+    _videoPromptEditedAfterAutoGenerate =
+        _videoPromptCtrl.text.trim() != generated;
   }
 
   String _storyboardProductionMetaLine(ProductionStoryboardItemV1? row) {
