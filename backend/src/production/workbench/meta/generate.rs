@@ -3025,6 +3025,9 @@ fn select_video_prompt_memory_notes(
                         })
                 })?;
             let continuity_score = score_continuity_note(&note, structured_fields.as_ref());
+            if continuity_score <= 0 {
+                return None;
+            }
             Some((score + continuity_score, continuity_score, note))
         })
         .collect::<Vec<_>>();
@@ -4420,6 +4423,24 @@ mod tests {
             select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
             vec!["保留上一镜头走位连续".to_string()]
         );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_drops_generic_auto_scope_summary_without_continuity_guidance(
+    ) {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=当前镜头已确认"
+                    .to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)).is_empty());
     }
 
     #[test]
