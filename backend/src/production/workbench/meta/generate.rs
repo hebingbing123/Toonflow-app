@@ -1052,8 +1052,8 @@ fn build_video_prompt(
         clauses.push("Use the supplied frame as the visual reference.".to_string());
     }
     clauses.push(build_video_prompt_quality_tail(
-        context,
         structured_fields.as_ref(),
+        &style_anchors,
         &continuity_notes,
     ));
     clauses.join(" ")
@@ -1134,8 +1134,8 @@ fn prompt_style_fragment_overlaps_field(fragment: &str, field: &str) -> bool {
 }
 
 fn build_video_prompt_quality_tail(
-    context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    style_anchors: &[String],
     continuity_notes: &[String],
 ) -> String {
     let camera = structured_fields
@@ -1148,9 +1148,9 @@ fn build_video_prompt_quality_tail(
         .unwrap_or_default();
     let continuity_is_explicit = !continuity_notes.is_empty()
         || continuity_tail_matches(&camera)
-        || context
-            .and_then(|ctx| ctx.project_director_manual.as_deref())
-            .is_some_and(continuity_tail_matches);
+        || style_anchors
+            .iter()
+            .any(|anchor| continuity_tail_matches(anchor));
 
     if continuity_is_explicit {
         "Natural motion, no extra shot changes.".to_string()
@@ -1695,6 +1695,9 @@ fn compact_selected_script_asset_anchor(
     if normalized_name.is_empty() {
         return None;
     }
+    if script_asset_anchor_note_is_generic_placeholder(note) {
+        return None;
+    }
 
     let mut fragments = note
         .split(['，', ',', '；', ';', '。', '\n'])
@@ -1716,6 +1719,13 @@ fn compact_selected_script_asset_anchor(
     }
 
     Some(format!("{normalized_name}:{}", fragments.join("，")))
+}
+
+fn script_asset_anchor_note_is_generic_placeholder(note: &str) -> bool {
+    matches!(
+        normalize_prompt_text(note).as_str(),
+        "视觉设定延续" | "场景设定延续" | "道具设定延续"
+    )
 }
 
 fn script_asset_anchor_fragment_is_covered(
@@ -2817,13 +2827,7 @@ fn compact_script_asset_anchor(row: ScriptRolePromptSeedRow) -> Option<ScriptAss
         .as_deref()
         .map(normalize_prompt_text)
         .filter(|text| !text.is_empty())
-        .map(|text| clip_prompt_fragment(&text, max_chars))
-        .unwrap_or_else(|| match asset_type.as_str() {
-            "role" => "视觉设定延续".to_string(),
-            "scene" => "场景设定延续".to_string(),
-            "tool" => "道具设定延续".to_string(),
-            _ => String::new(),
-        });
+        .map(|text| clip_prompt_fragment(&text, max_chars))?;
     Some(ScriptAssetPromptAnchor {
         asset_type,
         value: format!("{name}: {describe}"),
@@ -3517,13 +3521,13 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         build_video_prompt, compact_negative_constraint_against_storyboard_style,
-        parse_structured_storyboard_description, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
-        select_best_video_prompt_observation_note, select_video_prompt_memory_notes,
-        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
-        video_prompt_observation_conflicts_with_style,
+        compact_script_asset_anchor, parse_structured_storyboard_description,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
+        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        select_video_prompt_memory_notes, select_video_prompt_style_notes,
+        trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
-        VideoPromptContext,
+        ScriptRolePromptSeedRow, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
@@ -4057,6 +4061,27 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_skips_generic_role_anchor_without_describe() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 视觉设定延续".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Character anchor:"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_adds_matching_scene_and_tool_anchors() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -4085,6 +4110,28 @@ mod tests {
         assert!(!prompt.contains("街角:雨夜霓虹"));
         assert!(!prompt.contains("雨伞:黑伞"));
         assert!(!prompt.contains("Setting: 旧宅走廊."));
+    }
+
+    #[test]
+    fn build_video_prompt_skips_generic_scene_and_tool_anchor_without_describe() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec!["旧宅走廊: 场景设定延续".into()],
+            script_tool_anchors: vec!["青铜匕首: 道具设定延续".into()],
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Scene anchor:"), "{prompt}");
+        assert!(!prompt.contains("Prop anchor:"), "{prompt}");
     }
 
     #[test]
@@ -4364,6 +4411,28 @@ mod tests {
     }
 
     #[test]
+    fn compact_script_asset_anchor_skips_empty_describe_instead_of_emitting_generic_placeholder() {
+        assert!(compact_script_asset_anchor(ScriptRolePromptSeedRow {
+            asset_type: "role".into(),
+            name: Some("主角".into()),
+            describe: None,
+        })
+        .is_none());
+        assert!(compact_script_asset_anchor(ScriptRolePromptSeedRow {
+            asset_type: "scene".into(),
+            name: Some("旧宅走廊".into()),
+            describe: Some("   ".into()),
+        })
+        .is_none());
+        assert!(compact_script_asset_anchor(ScriptRolePromptSeedRow {
+            asset_type: "tool".into(),
+            name: Some("青铜匕首".into()),
+            describe: None,
+        })
+        .is_none());
+    }
+
+    #[test]
     fn build_video_prompt_skips_continuity_fragments_already_covered_by_anchors() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -4616,6 +4685,64 @@ mod tests {
         );
 
         assert!(prompt.contains("Natural motion, stable continuity, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_full_quality_tail_when_generic_director_continuity_is_trimmed() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("镜头衔接统一".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片悬疑."), "{prompt}");
+        assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
+        assert!(
+            prompt.contains("Natural motion, stable continuity, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_shortens_quality_tail_when_director_continuity_survives_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("保持稳定跟拍，质感克制粗粝".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片悬疑; 保持稳定跟拍, 质感克制粗粝."),
+            "{prompt}"
+        );
+        assert!(
+            prompt.contains("Natural motion, no extra shot changes."),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Natural motion, stable continuity, no extra shot changes."),
+            "{prompt}"
+        );
     }
 
     #[test]
