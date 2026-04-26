@@ -805,6 +805,10 @@ fn build_video_prompt(
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
+    let style_anchors =
+        build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
+    let mut style_coverage = Vec::new();
+    extend_prompt_coverage(&mut style_coverage, &style_anchors);
     match structured_fields.as_ref() {
         Some(fields) => {
             let mut subject =
@@ -834,10 +838,13 @@ fn build_video_prompt(
             if !camera.is_empty() {
                 clauses.push(format!("Camera: {}.", clip_prompt_fragment(&camera, 40)));
             }
-            if !fields.mood.is_empty() {
+            if !fields.mood.is_empty() && !prompt_fragment_is_covered(&fields.mood, &style_coverage)
+            {
                 clauses.push(format!("Mood: {}.", clip_prompt_fragment(&fields.mood, 36)));
             }
-            if !fields.lighting.is_empty() {
+            if !fields.lighting.is_empty()
+                && !prompt_fragment_is_covered(&fields.lighting, &style_coverage)
+            {
                 clauses.push(format!(
                     "Lighting: {}.",
                     clip_prompt_fragment(&fields.lighting, 44)
@@ -864,8 +871,6 @@ fn build_video_prompt(
         }
     }
 
-    let style_anchors =
-        build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
     if !style_anchors.is_empty() {
         clauses.push(format!("Style anchor: {}.", style_anchors.join("; ")));
     }
@@ -975,9 +980,14 @@ fn build_project_visual_anchors(
         anchors.push(note);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
     }
+    let has_base_style_anchor = !anchors.is_empty();
     for note in &ctx.memory_style_notes {
-        let Some(note) = compact_memory_style_anchor(note, structured_fields, &style_coverage)
-        else {
+        let Some(note) = compact_memory_style_anchor(
+            note,
+            structured_fields,
+            &style_coverage,
+            has_base_style_anchor,
+        ) else {
             continue;
         };
         if anchors.iter().any(|existing| existing == &note) {
@@ -994,6 +1004,7 @@ fn compact_memory_style_anchor(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
+    allow_prompt_covered_style_fragments: bool,
 ) -> Option<String> {
     let normalized = normalize_prompt_text(note);
     if normalized.is_empty() {
@@ -1012,11 +1023,18 @@ fn compact_memory_style_anchor(
         .filter(|fragment| style_fragment_prefix(fragment))
         .filter(|fragment| {
             if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
-                if continuity_fragment_matches_fields(fragment, fields, camera) {
+                if continuity_fragment_matches_fields(fragment, fields, camera)
+                    && !(allow_prompt_covered_style_fragments
+                        && style_fragment_matches_prompt_style_field(fragment, fields))
+                {
                     return false;
                 }
             }
             !prompt_fragment_is_covered(fragment, prompt_coverage)
+                || structured_fields.is_some_and(|fields| {
+                    allow_prompt_covered_style_fragments
+                        && style_fragment_matches_prompt_style_field(fragment, fields)
+                })
         })
         .collect::<Vec<_>>();
     if fragments.is_empty() {
@@ -1026,6 +1044,16 @@ fn compact_memory_style_anchor(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn style_fragment_matches_prompt_style_field(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> bool {
+    let canonical = canonical_continuity_fragment(fragment);
+    !canonical.is_empty()
+        && ((!fields.mood.is_empty() && canonical == fields.mood)
+            || (!fields.lighting.is_empty() && canonical == fields.lighting))
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
@@ -2222,6 +2250,52 @@ mod tests {
         assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 镜头低机位压迫感，情绪冷色压迫感."));
         assert!(prompt.contains("Continuity notes: 保持上一镜头走位连续."));
         assert!(!prompt.contains("Continuity notes: 镜头低机位压迫感"));
+    }
+
+    #[test]
+    fn build_video_prompt_skips_mood_and_lighting_when_style_anchor_already_covers_them() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、冷峻压迫、冷调逆光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪冷峻压迫，光影冷调逆光".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 情绪冷峻压迫，光影冷调逆光."));
+        assert!(!prompt.contains("Mood: 冷峻压迫."));
+        assert!(!prompt.contains("Lighting: 冷调逆光."));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_mood_and_lighting_when_style_anchor_is_generic() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、冷峻压迫、冷调逆光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("镜头衔接统一".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片悬疑; 镜头衔接统一."));
+        assert!(prompt.contains("Mood: 冷峻压迫."));
+        assert!(prompt.contains("Lighting: 冷调逆光."));
     }
 
     #[test]
