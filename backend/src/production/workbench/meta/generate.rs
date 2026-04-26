@@ -13,7 +13,8 @@ use crate::production::workbench::meta::common::{
     parse_structured_storyboard_description,
 };
 use crate::production::workbench::video_prompt_memory::{
-    select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+    select_neighbor_selected_video_memory_notes, select_selected_video_memory_notes,
+    AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -187,6 +188,14 @@ async fn load_video_prompt_memory_notes(
     let selected_notes = select_selected_video_memory_notes(&rows, storyboard_numeric_id);
     if !selected_notes.is_empty() {
         return Ok(selected_notes);
+    }
+    let neighbor_notes = select_neighbor_selected_video_memory_notes(
+        &rows,
+        storyboard_numeric_id,
+        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+    );
+    if !neighbor_notes.is_empty() {
+        return Ok(neighbor_notes);
     }
     Ok(select_video_prompt_memory_notes(
         &rows,
@@ -482,7 +491,9 @@ mod tests {
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
         select_video_prompt_memory_notes, VideoPromptContext,
     };
-    use crate::production::workbench::video_prompt_memory::AgentMemoryRow;
+    use crate::production::workbench::video_prompt_memory::{
+        select_neighbor_selected_video_memory_notes, AgentMemoryRow,
+    };
 
     #[test]
     fn build_video_prompt_compacts_structured_storyboard_description() {
@@ -588,6 +599,25 @@ mod tests {
                 "保持女主冷色调近景".to_string(),
                 "补图时保持镜头方向连续".to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn neighbor_selected_video_memory_notes_are_available_before_auto_scope_fallback() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | note=保持冷色压迫感和稳定近景".into(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=次级摘要".to_string(),
+            },
+        ];
+
+        assert_eq!(
+            select_neighbor_selected_video_memory_notes(&rows, 12, 2),
+            vec!["保持冷色压迫感和稳定近景".to_string()]
         );
     }
 }

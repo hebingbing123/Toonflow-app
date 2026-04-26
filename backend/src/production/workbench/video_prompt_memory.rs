@@ -197,6 +197,49 @@ pub(crate) fn select_selected_video_memory_notes(
     notes
 }
 
+pub(crate) fn select_neighbor_selected_video_memory_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    limit: usize,
+) -> Vec<String> {
+    if storyboard_numeric_id <= 0 || limit == 0 {
+        return Vec::new();
+    }
+    let mut scored = rows
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, row)| {
+            if row.name != SELECTED_VIDEO_MEMORY_NAME {
+                return None;
+            }
+            let storyboard_ids = extract_storyboard_ids(&row.content);
+            if storyboard_ids.is_empty() || storyboard_ids.contains(&storyboard_numeric_id) {
+                return None;
+            }
+            let distance = storyboard_ids
+                .iter()
+                .map(|id| (storyboard_numeric_id - *id).abs())
+                .min()?;
+            let note = extract_key_value(&row.content, "note")
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))?;
+            Some((distance, idx, note))
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
+
+    let mut notes = Vec::new();
+    for (_, _, note) in scored {
+        if notes.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        notes.push(note);
+        if notes.len() >= limit {
+            break;
+        }
+    }
+    notes
+}
+
 pub(crate) fn normalize_prompt_text(text: &str) -> String {
     text.split_whitespace().collect::<Vec<_>>().join(" ")
 }
@@ -344,21 +387,26 @@ fn resolve_duration_label(row: &StoryboardPromptSeedRow) -> Option<String> {
 }
 
 fn memory_matches_storyboard(content: &str, storyboard_numeric_id: i32) -> bool {
+    extract_storyboard_ids(content).contains(&storyboard_numeric_id)
+}
+
+fn extract_storyboard_ids(content: &str) -> Vec<i32> {
     extract_key_value(content, "storyboardIds")
         .map(|raw| {
             raw.split(',')
                 .filter_map(|value| value.trim().parse::<i32>().ok())
-                .any(|value| value == storyboard_numeric_id)
+                .filter(|value| *value > 0)
+                .collect()
         })
-        .unwrap_or(false)
+        .unwrap_or_default()
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
         build_selected_video_memory, clear_selected_video_memory,
-        parse_structured_storyboard_description, select_selected_video_memory_notes,
-        AgentMemoryRow, StoryboardPromptSeedRow,
+        parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
+        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -416,6 +464,40 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["保持冷调近景和稳定推进".to_string()]);
+    }
+
+    #[test]
+    fn select_neighbor_selected_video_memory_notes_prefers_nearest_storyboards() {
+        let notes = select_neighbor_selected_video_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=5 | note=保留暖金色逆光和慢推镜头".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=16 | note=维持冷色夜景和稳定跟拍".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=11 | note=保持人物近景与压迫感".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | note=当前镜头已确认".into(),
+                },
+            ],
+            12,
+            2,
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "保持人物近景与压迫感".to_string(),
+                "维持冷色夜景和稳定跟拍".to_string()
+            ]
+        );
     }
 
     #[tokio::test]
