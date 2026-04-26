@@ -242,31 +242,27 @@ pub(crate) async fn persist_selected_video_memory(
     script_numeric_id: i32,
     content: &str,
 ) -> Result<(), ApiError> {
-    let latest: Option<String> = sqlx::query_scalar(
-        r#"
-        SELECT content
-        FROM app_agent_memory
-        WHERE owner_user_id = $1
-          AND numeric_project_id = $2
-          AND episodes_id = $3
-          AND agent_type = 'productionAgent'
-          AND memory_type = 'summary'
-          AND name = $4
-        ORDER BY create_time_ms DESC
-        LIMIT 1
-        "#,
+    let latest_same_scope = load_latest_selected_video_memory_for_scope(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        content,
     )
-    .bind(user_id)
-    .bind(project_numeric_id)
-    .bind(script_numeric_id)
-    .bind(SELECTED_VIDEO_MEMORY_NAME)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .await?;
 
-    if latest.as_deref() == Some(content) {
+    if latest_same_scope.as_deref() == Some(content) {
         return Ok(());
     }
+
+    delete_selected_video_memory_for_scope(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        content,
+    )
+    .await?;
 
     sqlx::query(
         r#"
@@ -308,6 +304,103 @@ pub(crate) async fn persist_selected_video_memory(
     .bind(script_numeric_id)
     .bind(SELECTED_VIDEO_MEMORY_NAME)
     .bind(SELECTED_VIDEO_MEMORY_KEEP_ROWS)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
+async fn load_latest_selected_video_memory_for_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    content: &str,
+) -> Result<Option<String>, ApiError> {
+    let Some(scope) = selected_video_memory_scope(content) else {
+        return Ok(None);
+    };
+
+    let rows = sqlx::query_scalar::<_, String>(
+        r#"
+        SELECT content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(SELECTED_VIDEO_MEMORY_NAME)
+    .bind(SELECTED_VIDEO_MEMORY_KEEP_ROWS)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(rows
+        .into_iter()
+        .find(|existing| selected_video_memory_scope(existing).as_ref() == Some(&scope)))
+}
+
+async fn delete_selected_video_memory_for_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    content: &str,
+) -> Result<(), ApiError> {
+    let Some(scope) = selected_video_memory_scope(content) else {
+        return Ok(());
+    };
+
+    let rows = sqlx::query_as::<_, (i64, String)>(
+        r#"
+        SELECT id, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(SELECTED_VIDEO_MEMORY_NAME)
+    .bind(SELECTED_VIDEO_MEMORY_KEEP_ROWS)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let duplicate_ids = rows
+        .into_iter()
+        .filter_map(|(id, existing)| {
+            (selected_video_memory_scope(&existing).as_ref() == Some(&scope)).then_some(id)
+        })
+        .collect::<Vec<_>>();
+    if duplicate_ids.is_empty() {
+        return Ok(());
+    }
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id = ANY($1)
+        "#,
+    )
+    .bind(&duplicate_ids)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -1472,6 +1565,20 @@ pub(crate) fn extract_key_value(row: &str, key: &str) -> Option<String> {
     } else {
         Some(value)
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct SelectedVideoMemoryScope {
+    storyboard_ids: String,
+    prompt_seed: Option<String>,
+}
+
+fn selected_video_memory_scope(content: &str) -> Option<SelectedVideoMemoryScope> {
+    let storyboard_ids = extract_key_value(content, "storyboardIds")?;
+    Some(SelectedVideoMemoryScope {
+        storyboard_ids,
+        prompt_seed: extract_key_value(content, "promptSeed"),
+    })
 }
 
 fn rejected_video_negative_rejection_count(content: &str) -> u32 {
@@ -3213,7 +3320,8 @@ mod tests {
         select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
         select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
         select_script_video_style_memory_notes, select_selected_video_memory_notes,
-        storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow, StoryboardPromptSeedRow,
+        selected_video_memory_scope, storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow,
+        SelectedVideoMemoryScope, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -3605,6 +3713,39 @@ mod tests {
         );
 
         assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn selected_video_memory_scope_uses_storyboard_and_prompt_seed() {
+        let scope = selected_video_memory_scope(
+            "storyboardIds=12 | promptSeed=seed-12-current | style=镜头近景稳定跟拍，情绪压迫",
+        )
+        .expect("scope");
+
+        assert_eq!(
+            scope,
+            SelectedVideoMemoryScope {
+                storyboard_ids: "12".to_string(),
+                prompt_seed: Some("seed-12-current".to_string()),
+            }
+        );
+    }
+
+    #[test]
+    fn selected_video_memory_scope_distinguishes_prompt_seed_variants() {
+        let current = selected_video_memory_scope(
+            "storyboardIds=12 | promptSeed=seed-current | note=主角回头",
+        )
+        .expect("current scope");
+        let stale =
+            selected_video_memory_scope("storyboardIds=12 | promptSeed=seed-stale | note=主角回头")
+                .expect("stale scope");
+        let unseeded =
+            selected_video_memory_scope("storyboardIds=12 | note=主角回头").expect("unseeded");
+
+        assert_ne!(current, stale);
+        assert_ne!(current, unseeded);
+        assert_ne!(stale, unseeded);
     }
 
     #[test]
