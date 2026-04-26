@@ -1677,33 +1677,39 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
 }
 
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
-    distinct_selected_video_style_notes_by_scope(rows.iter().map(|row| {
-        (
-            row.name.as_str(),
-            row.content.as_str(),
-            extract_key_value(&row.content, "storyboardIds")
-                .map(|storyboard_id| format!("script:{storyboard_id}")),
-            None,
-        )
-    }), None)
+    distinct_selected_video_style_notes_by_scope(
+        rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds")
+                    .map(|storyboard_id| format!("script:{storyboard_id}")),
+                None,
+            )
+        }),
+        None,
+    )
 }
 
 fn distinct_project_selected_video_style_notes(rows: &[ScopedAgentMemoryRow]) -> Vec<String> {
-    distinct_selected_video_style_notes_by_scope(rows.iter().map(|row| {
-        (
-            row.name.as_str(),
-            row.content.as_str(),
-            extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
-                format!(
-                    "{}:{storyboard_id}",
-                    row.episodes_id
-                        .map(|value| value.to_string())
-                        .unwrap_or_else(|| "project".to_string())
-                )
-            }),
-            row.episodes_id.map(|value| value.to_string()),
-        )
-    }), Some(PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT))
+    distinct_selected_video_style_notes_by_scope(
+        rows.iter().map(|row| {
+            (
+                row.name.as_str(),
+                row.content.as_str(),
+                extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                    format!(
+                        "{}:{storyboard_id}",
+                        row.episodes_id
+                            .map(|value| value.to_string())
+                            .unwrap_or_else(|| "project".to_string())
+                    )
+                }),
+                row.episodes_id.map(|value| value.to_string()),
+            )
+        }),
+        Some(PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT),
+    )
 }
 
 fn distinct_selected_video_style_notes_by_scope<'a>(
@@ -2888,27 +2894,37 @@ mod tests {
         let summary = build_project_video_style_memory(&[
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=1 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                content:
+                    "storyboardIds=1 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
+                        .into(),
                 episodes_id: Some(1),
             },
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=2 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                content:
+                    "storyboardIds=2 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
+                        .into(),
                 episodes_id: Some(1),
             },
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=3 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                content:
+                    "storyboardIds=3 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
+                        .into(),
                 episodes_id: Some(1),
             },
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=4 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                content:
+                    "storyboardIds=4 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=..."
+                        .into(),
                 episodes_id: Some(2),
             },
             ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                content:
+                    "storyboardIds=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=..."
+                        .into(),
                 episodes_id: Some(2),
             },
         ])
