@@ -2701,6 +2701,10 @@ fn compact_project_director_note(
             Some(fragment)
         };
         let Some(fragment) = fragment else { continue };
+        let fragment = compact_project_director_fragment_language(&fragment);
+        if fragment.is_empty() {
+            continue;
+        }
         if scored
             .iter()
             .any(|(_, _, existing): &(i32, usize, String)| existing == &fragment)
@@ -2736,6 +2740,26 @@ fn compact_project_director_note(
         .map(|(_, _, fragment)| fragment)
         .collect::<Vec<_>>();
     Some(clip_prompt_fragment(&fragments.join(", "), 48))
+}
+
+fn compact_project_director_fragment_language(fragment: &str) -> String {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty()
+        || continuity_note_adds_specific_guidance(&normalized)
+        || ["上一镜头", "衔接", "连续", "统一", "一致"]
+            .iter()
+            .any(|keyword| normalized.contains(keyword))
+        || !project_director_fragment_adds_visual_style_guidance(&normalized)
+    {
+        return normalized;
+    }
+
+    let trimmed = ["保持", "维持", "延续"]
+        .iter()
+        .find_map(|prefix| normalized.strip_prefix(prefix))
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty());
+    trimmed.unwrap_or(normalized)
 }
 
 fn trim_project_director_fragment_against_storyboard_fields(
@@ -3764,7 +3788,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感; 情绪冷峻压迫."),
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感; 情绪冷峻压迫."),
             "{prompt}"
         );
         assert!(!prompt.contains("镜头稳定跟拍"));
@@ -3840,7 +3864,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感."),
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感."),
             "{prompt}"
         );
         assert_eq!(prompt.matches("低机位压迫感").count(), 1, "{prompt}");
@@ -3907,7 +3931,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 光影偏冷."),
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感, 光影偏冷."),
             "{prompt}"
         );
         assert!(!prompt.contains("Format:"));
@@ -4004,7 +4028,7 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 质感克制粗粝."));
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感, 质感克制粗粝."));
         assert!(!prompt.contains("场景旧宅走廊"));
         assert!(!prompt.contains("镜头衔接统一"));
     }
@@ -4456,12 +4480,16 @@ mod tests {
         assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
         assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
         assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
-        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."));
-        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续."));
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感."),
+            "{prompt}"
+        );
+        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续."), "{prompt}");
         assert!(!prompt.contains("Continuity notes: 黑色风衣"));
         assert!(!prompt.contains("Continuity notes: 冷色长廊"));
         assert!(!prompt.contains("Continuity notes: 刀身旧磨损"));
         assert!(!prompt.contains("Continuity notes: 保持低机位压迫感"));
+        assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
     }
 
     #[test]
@@ -4600,7 +4628,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感."),
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感."),
             "{prompt}"
         );
         assert!(
@@ -4732,7 +4760,7 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片悬疑; 保持稳定跟拍, 质感克制粗粝."),
+            prompt.contains("Style anchor: 胶片悬疑; 稳定跟拍, 质感克制粗粝."),
             "{prompt}"
         );
         assert!(
