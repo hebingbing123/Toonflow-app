@@ -86,7 +86,7 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
   - `GET /api/v1/models?type=text|image|video|all` — `all` 不含 `video`
   - `GET /api/v1/models/detail?model_id={vendor_id}:{model_name}` — 如 `1:gpt-4o-mini`
 - Agent 记忆（Postgres **`app_agent_memory`**；需已迁移；Bearer JWT；需用户拥有对应 **`app_project.numeric_id`**）：
-  - `POST /api/v1/agents/memory/query` — 列出 message 行（camelCase body，对齐旧 **`/api/agents/getMemory`**）
+  - `POST /api/v1/agents/memory/query` — 默认列出 `message` 行；可用 `memoryType: message|summary|all` 读取自动摘要记忆或合并视图（camelCase body，对齐旧 **`/api/agents/getMemory`** 并扩展 summary 检查）
   - `POST /api/v1/agents/memory/clear` — 清除语义对齐旧 **`/api/agents/clearMemory`**（`type` 或 `clearType`：`all` / `message` / `summary`）
   - `POST /api/v1/agents/memory/append` — 追加一条 message（不做 Node 侧自动摘要压缩）
 

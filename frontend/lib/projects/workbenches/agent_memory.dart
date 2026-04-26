@@ -20,6 +20,9 @@ class ProjectsAgentMemoryWorkbenchDialog extends StatefulWidget {
 
 class _ProjectsAgentMemoryWorkbenchDialogState
     extends State<ProjectsAgentMemoryWorkbenchDialog> {
+  static const List<String> _queryTypes = <String>['summary', 'message', 'all'];
+  static const List<String> _clearTypes = <String>['summary', 'message', 'all'];
+
   late final TextEditingController _projectIdCtrl;
   late final TextEditingController _agentTypeCtrl;
   late final TextEditingController _episodesIdCtrl;
@@ -47,10 +50,10 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     );
     _agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     _episodesIdCtrl = TextEditingController();
-    _queryTypeCtrl = TextEditingController(text: 'message');
+    _queryTypeCtrl = TextEditingController(text: 'summary');
     _appendContentCtrl = TextEditingController();
     _appendRoleCtrl = TextEditingController(text: 'user');
-    _clearTypeCtrl = TextEditingController(text: 'message');
+    _clearTypeCtrl = TextEditingController(text: 'summary');
     _projects = List<ProjectRow>.from(widget.initialProjects);
   }
 
@@ -68,6 +71,25 @@ class _ProjectsAgentMemoryWorkbenchDialogState
 
   int? get _projectId => int.tryParse(_projectIdCtrl.text.trim());
   int? get _episodesId => int.tryParse(_episodesIdCtrl.text.trim());
+  String get _queryType => _normalizedSelection(
+    _queryTypeCtrl.text,
+    supported: _queryTypes,
+    fallback: 'summary',
+  );
+  String get _clearType => _normalizedSelection(
+    _clearTypeCtrl.text,
+    supported: _clearTypes,
+    fallback: 'summary',
+  );
+
+  String _normalizedSelection(
+    String raw, {
+    required List<String> supported,
+    required String fallback,
+  }) {
+    final value = raw.trim();
+    return supported.contains(value) ? value : fallback;
+  }
 
   Future<void> _reloadProjects() async {
     setState(() {
@@ -103,9 +125,9 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   Future<void> _queryMemory() async {
     final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
-    final memoryType = _queryTypeCtrl.text.trim();
-    if (projectId == null || agentType.isEmpty || memoryType.isEmpty) {
-      setState(() => _statusLine = '请填写合法的项目 numeric ID、agent type 和 query type。');
+    final memoryType = _queryType;
+    if (projectId == null || agentType.isEmpty) {
+      setState(() => _statusLine = '请填写合法的项目 numeric ID 和 agent type。');
       return;
     }
     setState(() {
@@ -191,9 +213,9 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   Future<void> _clearMemory() async {
     final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
-    final clearType = _clearTypeCtrl.text.trim();
-    if (projectId == null || agentType.isEmpty || clearType.isEmpty) {
-      setState(() => _statusLine = '清理记忆前请填写项目、agent type 和 clear type。');
+    final clearType = _clearType;
+    if (projectId == null || agentType.isEmpty) {
+      setState(() => _statusLine = '清理记忆前请填写项目和 agent type。');
       return;
     }
     setState(() {
@@ -241,6 +263,10 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         loadingMemory: _loadingMemory,
         appendingMemory: _appendingMemory,
         clearingMemory: _clearingMemory,
+        queryType: _queryType,
+        clearType: _clearType,
+        queryTypeOptions: _queryTypes,
+        clearTypeOptions: _clearTypes,
         projectIdCtrl: _projectIdCtrl,
         agentTypeCtrl: _agentTypeCtrl,
         episodesIdCtrl: _episodesIdCtrl,
@@ -254,6 +280,8 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         onQueryMemory: _queryMemory,
         onAppendMemory: _appendMemory,
         onClearMemory: _clearMemory,
+        onQueryTypeChanged: (value) => _queryTypeCtrl.text = value,
+        onClearTypeChanged: (value) => _clearTypeCtrl.text = value,
         onClose: () => Navigator.of(context).pop(),
       ),
     );

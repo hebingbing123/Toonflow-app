@@ -37,12 +37,18 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
           <String, Object?>{
             'id': 'memory-1',
             'role': 'user',
-            'content': '先补齐第一幕的角色动机和冲突。',
+            'content': <Map<String, String>>[
+              <String, String>{'data': '先补齐第一幕的角色动机和冲突。'},
+            ],
           },
           <String, Object?>{
             'id': 'memory-2',
             'role': 'assistant',
-            'content': 'production agent 建议先刷新 storyboardTable 再补镜头。',
+            'content': <Map<String, String>>[
+              <String, String>{
+                'data': 'production agent 建议先刷新 storyboardTable 再补镜头。',
+              },
+            ],
           },
         ],
     memorySummary: memorySummary,
@@ -51,6 +57,10 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
     loadingMemory: loadingMemory,
     appendingMemory: appendingMemory,
     clearingMemory: clearingMemory,
+    queryType: queryTypeCtrl.text,
+    clearType: clearTypeCtrl.text,
+    queryTypeOptions: const <String>['summary', 'message', 'all'],
+    clearTypeOptions: const <String>['summary', 'message', 'all'],
     projectIdCtrl: projectIdCtrl,
     agentTypeCtrl: agentTypeCtrl,
     episodesIdCtrl: episodesIdCtrl,
@@ -73,6 +83,8 @@ ProjectsAgentMemoryWorkbenchDialogViewCallbacks buildCallbacks({
     onQueryMemory: onQueryMemory ?? () async {},
     onAppendMemory: onAppendMemory ?? () async {},
     onClearMemory: onClearMemory ?? () async {},
+    onQueryTypeChanged: (_) {},
+    onClearTypeChanged: (_) {},
     onClose: onClose ?? () {},
   );
 }
@@ -103,7 +115,7 @@ void main() {
     queryTypeCtrl = TextEditingController(text: 'summary');
     appendContentCtrl = TextEditingController(text: '需要补一个反转伏笔。');
     appendRoleCtrl = TextEditingController(text: 'user');
-    clearTypeCtrl = TextEditingController(text: 'message');
+    clearTypeCtrl = TextEditingController(text: 'summary');
   });
 
   tearDown(() {
@@ -141,11 +153,16 @@ void main() {
     expect(find.text('Agent 记忆工作台'), findsOneWidget);
     expect(find.textContaining('项目 2 个'), findsOneWidget);
     expect(find.text('已读取 2 条记忆。'), findsOneWidget);
-    expect(find.text('message / summary / all'), findsOneWidget);
+    expect(find.text('summary / message / all'), findsNWidgets(2));
+    expect(
+      find.text('自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。'),
+      findsOneWidget,
+    );
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
     expect(find.textContaining('memory-1'), findsOneWidget);
+    expect(find.textContaining('先补齐第一幕的角色动机和冲突'), findsOneWidget);
   });
 
   testWidgets('agent memory workbench view disables busy actions', (

@@ -128,6 +128,22 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         assert!(appended["id"].as_str().is_some());
     }
 
+    sqlx::query(
+        r#"
+        INSERT INTO public.app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, 'scriptAgent', 'summary', 'assistant', 'auto_scope_memory', 'episode scoped summary', 1, 1)
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .bind(7_i32)
+    .execute(&pool)
+    .await
+    .expect("insert summary memory");
+
     let res = app
         .clone()
         .oneshot(
@@ -151,6 +167,58 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         episode_memory[0]["content"][0]["data"].as_str(),
         Some("episode scoped memory")
     );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/agents/memory/query")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"agentType":"scriptAgent","episodesId":7,"memoryType":"summary"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, episode_summary_memory) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "episode_summary_memory={episode_summary_memory}"
+    );
+    assert_eq!(episode_summary_memory.as_array().map(|a| a.len()), Some(1));
+    assert_eq!(
+        episode_summary_memory[0]["content"][0]["data"].as_str(),
+        Some("episode scoped summary")
+    );
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/agents/memory/query")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(format!(
+                    r#"{{"projectId":{project_id},"agentType":"scriptAgent","episodesId":7,"memoryType":"all"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, episode_all_memory) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "episode_all_memory={episode_all_memory}"
+    );
+    assert_eq!(episode_all_memory.as_array().map(|a| a.len()), Some(2));
 
     let res = app
         .clone()

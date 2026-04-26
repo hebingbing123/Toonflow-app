@@ -12,6 +12,10 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
     required this.loadingMemory,
     required this.appendingMemory,
     required this.clearingMemory,
+    required this.queryType,
+    required this.clearType,
+    required this.queryTypeOptions,
+    required this.clearTypeOptions,
     required this.projectIdCtrl,
     required this.agentTypeCtrl,
     required this.episodesIdCtrl,
@@ -29,6 +33,10 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   final bool loadingMemory;
   final bool appendingMemory;
   final bool clearingMemory;
+  final String queryType;
+  final String clearType;
+  final List<String> queryTypeOptions;
+  final List<String> clearTypeOptions;
   final TextEditingController projectIdCtrl;
   final TextEditingController agentTypeCtrl;
   final TextEditingController episodesIdCtrl;
@@ -44,6 +52,8 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
     required this.onQueryMemory,
     required this.onAppendMemory,
     required this.onClearMemory,
+    required this.onQueryTypeChanged,
+    required this.onClearTypeChanged,
     required this.onClose,
   });
 
@@ -51,6 +61,8 @@ class ProjectsAgentMemoryWorkbenchDialogViewCallbacks {
   final Future<void> Function() onQueryMemory;
   final Future<void> Function() onAppendMemory;
   final Future<void> Function() onClearMemory;
+  final ValueChanged<String> onQueryTypeChanged;
+  final ValueChanged<String> onClearTypeChanged;
   final VoidCallback onClose;
 }
 
@@ -143,12 +155,32 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'episodes id（可空）'),
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: model.queryTypeCtrl,
+              DropdownButtonFormField<String>(
+                initialValue: model.queryType,
                 decoration: const InputDecoration(
                   labelText: 'query type',
-                  helperText: 'message / summary / all',
+                  helperText: 'summary / message / all',
                 ),
+                items: model.queryTypeOptions
+                    .map(
+                      (value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    callbacks.onQueryTypeChanged(value);
+                  }
+                },
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               if (model.memorySummary != null) ...[
                 const SizedBox(height: 8),
@@ -171,7 +203,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       : <String, dynamic>{};
                   final role = map['role']?.toString() ?? 'unknown';
                   final rawContent = map['content'];
-                  final blocks = rawContent is List ? rawContent : const <dynamic>[];
+                  final blocks = rawContent is List
+                      ? rawContent
+                      : const <dynamic>[];
                   final content = blocks.isNotEmpty && blocks.first is Map
                       ? (blocks.first as Map)['data']?.toString() ?? ''
                       : rawContent?.toString() ?? '';
@@ -224,12 +258,25 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: model.clearTypeCtrl,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: model.clearType,
                       decoration: const InputDecoration(
                         labelText: 'clear type',
-                        helperText: 'all / message / summary',
+                        helperText: 'summary / message / all',
                       ),
+                      items: model.clearTypeOptions
+                          .map(
+                            (value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          callbacks.onClearTypeChanged(value);
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
