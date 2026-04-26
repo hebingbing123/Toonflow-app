@@ -32,6 +32,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   String accessToken, {
   required int projectId,
   required int scriptId,
+  int? storyboardId,
   String? imageUrl,
   String? description,
   int? durationHint,
@@ -40,6 +41,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
     '$kApiBaseUrl/api/v1/production/workbench/generate-video-prompt',
   );
   final body = <String, dynamic>{'projectId': projectId, 'scriptId': scriptId};
+  if (storyboardId != null) body['storyboardId'] = storyboardId;
   if (imageUrl != null) body['imageUrl'] = imageUrl;
   if (description != null) body['description'] = description;
   if (durationHint != null) body['durationHint'] = durationHint;

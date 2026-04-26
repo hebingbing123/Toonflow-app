@@ -248,6 +248,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       widget.token,
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
+      storyboardId: widget.storyNumericId,
       imageUrl: resolveStoryboardSourceImageUrl(
         productionStoryboard: _productionRow,
         draftImageUrl: _imageUrlCtrl.text,

@@ -4,11 +4,17 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::scope::http::require_authenticated;
-use crate::scope::http::require_owned_numeric_script_access;
+use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
+
+const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 6;
+const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
+const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -16,7 +22,8 @@ pub(in crate::production) struct GenerateVideoPromptBody {
     project_id: i32,
     script_id: i32,
     #[serde(default)]
-    #[allow(dead_code)]
+    storyboard_id: Option<i32>,
+    #[serde(default)]
     image_url: Option<String>,
     #[serde(default)]
     description: Option<String>,
@@ -55,10 +62,32 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     headers: HeaderMap,
     Json(body): Json<GenerateVideoPromptBody>,
 ) -> Result<JsonResponse<GenerateVideoPromptResponse>, ApiError> {
-    require_owned_numeric_script_access(&state, &headers, body.project_id, body.script_id).await?;
+    let (user_id, pool) = require_owned_numeric_script_scope_user_pool(
+        &state,
+        &headers,
+        body.project_id,
+        body.script_id,
+    )
+    .await?;
+    let context = load_video_prompt_context(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
 
-    let prompt = build_video_prompt(body.description.as_deref(), body.image_url.as_deref());
-    let duration = resolve_video_prompt_duration(body.duration_hint, body.description.as_deref());
+    let prompt = build_video_prompt(
+        body.description.as_deref(),
+        body.image_url.as_deref(),
+        context.as_ref(),
+    );
+    let duration = resolve_video_prompt_duration(
+        body.duration_hint,
+        body.description.as_deref(),
+        context.as_ref(),
+    );
 
     Ok(JsonResponse(GenerateVideoPromptResponse {
         prompt,
@@ -67,11 +96,113 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     }))
 }
 
-fn build_video_prompt(description: Option<&str>, image_url: Option<&str>) -> String {
+#[derive(Debug, Clone, Default)]
+struct VideoPromptContext {
+    storyboard_prompt: Option<String>,
+    storyboard_video_desc: Option<String>,
+    storyboard_duration: Option<String>,
+    continuity_notes: Vec<String>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct StoryboardPromptRow {
+    prompt: Option<String>,
+    video_desc: Option<String>,
+    duration: Option<String>,
+}
+
+async fn load_video_prompt_context(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: i32,
+    script_id: i32,
+    storyboard_id: Option<i32>,
+) -> Result<Option<VideoPromptContext>, ApiError> {
+    let Some(storyboard_numeric_id) = storyboard_id.filter(|id| *id > 0) else {
+        return Ok(None);
+    };
+    let storyboard_uuid = crate::scope::owned_storyboard_in_script_scope(
+        pool,
+        user_id,
+        project_id,
+        script_id,
+        storyboard_numeric_id,
+    )
+    .await
+    .map_err(|e| e.into_api_error())?
+    .storyboard_id;
+    let row = sqlx::query_as::<_, StoryboardPromptRow>(
+        r#"
+        SELECT prompt, video_desc, duration
+        FROM app_storyboard
+        WHERE id = $1
+        "#,
+    )
+    .bind(storyboard_uuid)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    let continuity_notes =
+        load_video_prompt_memory_notes(pool, user_id, project_id, script_id, storyboard_numeric_id)
+            .await?;
+
+    Ok(Some(VideoPromptContext {
+        storyboard_prompt: row.prompt,
+        storyboard_video_desc: row.video_desc,
+        storyboard_duration: row.duration,
+        continuity_notes,
+    }))
+}
+
+async fn load_video_prompt_memory_notes(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<Vec<String>, ApiError> {
+    let rows = sqlx::query_scalar(
+        r#"
+        SELECT content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'auto_scope_memory'
+        ORDER BY create_time_ms DESC
+        LIMIT $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(VIDEO_PROMPT_MEMORY_ROW_LIMIT)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(select_video_prompt_memory_notes(
+        &rows,
+        storyboard_numeric_id,
+    ))
+}
+
+fn build_video_prompt(
+    description: Option<&str>,
+    image_url: Option<&str>,
+    context: Option<&VideoPromptContext>,
+) -> String {
     let mut clauses = Vec::new();
     clauses.push("Single cinematic shot.".to_string());
 
-    match description.and_then(parse_structured_storyboard_description) {
+    let resolved_description = resolve_video_prompt_description(description, context);
+    match resolved_description
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+    {
         Some(fields) => {
             if !fields.subject.is_empty() {
                 clauses.push(format!(
@@ -122,14 +253,16 @@ fn build_video_prompt(description: Option<&str>, image_url: Option<&str>) -> Str
             }
         }
         None => {
-            let fallback = description
-                .map(normalize_prompt_text)
+            let fallback = resolved_description
                 .filter(|text| !text.is_empty())
                 .unwrap_or_else(|| "Clear subject, natural motion, stable continuity.".to_string());
             clauses.push(format!("Scene: {}.", clip_prompt_fragment(&fallback, 160)));
         }
     }
 
+    if let Some(note) = build_continuity_clause(context) {
+        clauses.push(note);
+    }
     if image_url.is_some() {
         clauses.push("Use the supplied frame as the visual reference.".to_string());
     }
@@ -137,13 +270,63 @@ fn build_video_prompt(description: Option<&str>, image_url: Option<&str>) -> Str
     clauses.join(" ")
 }
 
-fn resolve_video_prompt_duration(duration_hint: Option<i32>, description: Option<&str>) -> i32 {
+fn resolve_video_prompt_description(
+    description: Option<&str>,
+    context: Option<&VideoPromptContext>,
+) -> Option<String> {
+    let description = description
+        .map(normalize_prompt_text)
+        .filter(|text| !text.is_empty());
+    if description.is_some() {
+        return description;
+    }
+    context.and_then(|ctx| {
+        ctx.storyboard_video_desc
+            .as_deref()
+            .map(normalize_prompt_text)
+            .filter(|text| !text.is_empty())
+            .or_else(|| {
+                ctx.storyboard_prompt
+                    .as_deref()
+                    .map(normalize_prompt_text)
+                    .filter(|text| !text.is_empty())
+            })
+    })
+}
+
+fn build_continuity_clause(context: Option<&VideoPromptContext>) -> Option<String> {
+    let notes = context
+        .map(|ctx| {
+            ctx.continuity_notes
+                .iter()
+                .map(|note| clip_prompt_fragment(note, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if notes.is_empty() {
+        return None;
+    }
+    Some(format!("Continuity notes: {}.", notes.join("; ")))
+}
+
+fn resolve_video_prompt_duration(
+    duration_hint: Option<i32>,
+    description: Option<&str>,
+    context: Option<&VideoPromptContext>,
+) -> i32 {
     if let Some(value) = duration_hint.filter(|value| *value > 0) {
         return value.clamp(2, 16);
     }
-    if let Some(parsed) = description
+    if let Some(parsed) = resolve_video_prompt_description(description, context)
+        .as_deref()
         .and_then(parse_structured_storyboard_description)
         .and_then(|fields| fields.duration_seconds)
+    {
+        return parsed.clamp(2, 16);
+    }
+    if let Some(parsed) = context
+        .and_then(|ctx| ctx.storyboard_duration.as_deref())
+        .and_then(parse_positive_int)
     {
         return parsed.clamp(2, 16);
     }
@@ -235,6 +418,94 @@ fn parse_positive_int(text: &str) -> Option<i32> {
     digits.parse::<i32>().ok().filter(|value| *value > 0)
 }
 
+fn select_video_prompt_memory_notes(rows: &[String], storyboard_numeric_id: i32) -> Vec<String> {
+    let mut scored = rows
+        .iter()
+        .filter_map(|row| {
+            let tool = extract_key_value(row, "tool")?;
+            if !matches!(
+                tool.as_str(),
+                "run_sub_agent_storyboard_panel"
+                    | "run_sub_agent_storyboard_gen"
+                    | "run_sub_agent_production_supervision"
+                    | "run_sub_agent_director_plan"
+            ) {
+                return None;
+            }
+            let score = memory_storyboard_overlap_score(row, storyboard_numeric_id);
+            if score <= 0 {
+                return None;
+            }
+            let note = extract_key_value(row, "summary")
+                .or_else(|| extract_key_value(row, "result"))
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))?;
+            Some((score, note))
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.0.cmp(&a.0));
+
+    let mut notes = Vec::new();
+    for (_, note) in scored {
+        if notes.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        notes.push(note);
+        if notes.len() >= VIDEO_PROMPT_MEMORY_NOTE_LIMIT {
+            break;
+        }
+    }
+    notes
+}
+
+fn memory_storyboard_overlap_score(row: &str, storyboard_numeric_id: i32) -> i32 {
+    if storyboard_numeric_id <= 0 {
+        return 0;
+    }
+    let key = "storyboardIds";
+    let mut remainder = row;
+    let mut score = 0;
+    while let Some(found) = remainder.find(key) {
+        let next = &remainder[found + key.len()..];
+        let Some(after_equal) = next.strip_prefix('=') else {
+            remainder = next;
+            continue;
+        };
+        let ids = parse_csv_positive_ints(after_equal);
+        if ids.contains(&storyboard_numeric_id) {
+            score += 10;
+        }
+        remainder = after_equal;
+    }
+    score
+}
+
+fn parse_csv_positive_ints(text: &str) -> Vec<i32> {
+    let raw = text
+        .chars()
+        .take_while(|ch| ch.is_ascii_digit() || *ch == ',' || ch.is_ascii_whitespace())
+        .collect::<String>();
+    raw.split(',')
+        .filter_map(|part| part.trim().parse::<i32>().ok())
+        .filter(|value| *value > 0)
+        .collect()
+}
+
+fn extract_key_value(row: &str, key: &str) -> Option<String> {
+    let marker = format!("{key}=");
+    let start = row.find(&marker)? + marker.len();
+    let rest = &row[start..];
+    let end = rest
+        .find(" | ")
+        .or_else(|| rest.find("; "))
+        .unwrap_or(rest.len());
+    let value = normalize_prompt_text(rest[..end].trim());
+    if value.is_empty() {
+        None
+    } else {
+        Some(value)
+    }
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(in crate::production) struct VideoModelDetailResponse {
@@ -288,6 +559,7 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
+        select_video_prompt_memory_notes, VideoPromptContext,
     };
 
     #[test]
@@ -295,6 +567,7 @@ mod tests {
         let prompt = build_video_prompt(
             Some("（主角独立城楼远眺苍茫大地、城楼、主角/城楼、4s、全景、缓慢推进、负手而立衣袂翻飞、坚定压抑、黄昏冷调侧逆光、无台词、风声衣袂声、A001/A003）"),
             Some("https://example.com/frame.png"),
+            None,
         );
 
         assert!(prompt.contains("Single cinematic shot."));
@@ -322,6 +595,7 @@ mod tests {
             resolve_video_prompt_duration(
                 Some(8),
                 Some("（主角、城楼、主角、4s、全景、静止、站立、冷峻、冷光、无台词、风声、A1）"),
+                None,
             ),
             8
         );
@@ -329,9 +603,57 @@ mod tests {
             resolve_video_prompt_duration(
                 None,
                 Some("（主角、城楼、主角、4s、全景、静止、站立、冷峻、冷光、无台词、风声、A1）"),
+                None,
             ),
             4
         );
-        assert_eq!(resolve_video_prompt_duration(None, Some("普通描述")), 5);
+        assert_eq!(
+            resolve_video_prompt_duration(None, Some("普通描述"), None),
+            5
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_uses_storyboard_context_and_memory_notes() {
+        let context = VideoPromptContext {
+            storyboard_prompt: Some("主角转身冲向门外".into()),
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            continuity_notes: vec!["保持上一镜头已确认的冷调压迫感".into()],
+        };
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Subject: 主角冲出旧宅."));
+        assert!(prompt.contains("Dialogue or voice-over: 别回头."));
+        assert!(prompt.contains("Continuity notes: 保持上一镜头已确认的冷调压迫感."));
+    }
+
+    #[test]
+    fn resolve_video_prompt_duration_falls_back_to_storyboard_context() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: None,
+            storyboard_duration: Some("7 秒".into()),
+            continuity_notes: Vec::new(),
+        };
+        assert_eq!(resolve_video_prompt_duration(None, None, Some(&context)), 7);
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_keeps_only_matching_storyboard_entries() {
+        let rows = vec![
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=保持女主冷色调近景".to_string(),
+            "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=补图时保持镜头方向连续".to_string(),
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=7 | review=target=storyboardTable; summary=别的镜头".to_string(),
+            "tool=run_sub_agent_derive_assets | scope=storyboardIds=12 | result=无关素材".to_string(),
+        ];
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12),
+            vec![
+                "保持女主冷色调近景".to_string(),
+                "补图时保持镜头方向连续".to_string()
+            ]
+        );
     }
 }
