@@ -12,6 +12,7 @@ const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
+const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
@@ -141,7 +142,7 @@ pub(crate) fn build_rejected_video_negative_memory(
     }
 
     Some(format!(
-        "storyboardIds={storyboard_numeric_id} | avoid={}",
+        "storyboardIds={storyboard_numeric_id} | rejectionCount=1 | avoid={}",
         fragments.join(", ")
     ))
 }
@@ -306,7 +307,13 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    if latest.as_deref() == Some(content) {
+    let next_content = if let Some(latest) = latest.as_deref() {
+        merge_rejected_video_negative_memory(latest, content)
+    } else {
+        content.to_string()
+    };
+
+    if latest.as_deref() == Some(next_content.as_str()) {
         return Ok(());
     }
 
@@ -332,7 +339,7 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
-    .bind(content)
+    .bind(&next_content)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -505,6 +512,10 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
     rows.iter()
         .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
         .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
+        .filter(|row| {
+            rejected_video_negative_rejection_count(&row.content)
+                >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+        })
         .filter_map(|row| extract_key_value(&row.content, "avoid"))
         .take(1)
         .collect()
@@ -656,6 +667,48 @@ pub(crate) fn extract_key_value(row: &str, key: &str) -> Option<String> {
     } else {
         Some(value)
     }
+}
+
+fn rejected_video_negative_rejection_count(content: &str) -> u32 {
+    extract_key_value(content, "rejectionCount")
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|count| *count > 0)
+        .unwrap_or(1)
+}
+
+fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> String {
+    let storyboard_numeric_id = extract_key_value(incoming, "storyboardIds")
+        .or_else(|| extract_key_value(existing, "storyboardIds"))
+        .unwrap_or_default();
+    let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
+    let avoid = merge_rejected_negative_avoid(
+        extract_key_value(existing, "avoid").as_deref(),
+        extract_key_value(incoming, "avoid").as_deref(),
+    );
+
+    let mut parts = Vec::new();
+    if !storyboard_numeric_id.is_empty() {
+        parts.push(format!("storyboardIds={storyboard_numeric_id}"));
+    }
+    parts.push(format!("rejectionCount={rejection_count}"));
+    if !avoid.is_empty() {
+        parts.push(format!("avoid={avoid}"));
+    }
+    parts.join(" | ")
+}
+
+fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>) -> String {
+    let mut fragments = Vec::new();
+    for value in [existing, incoming].into_iter().flatten() {
+        for fragment in value.split(',') {
+            let fragment = normalize_prompt_text(fragment);
+            if fragment.is_empty() || fragments.iter().any(|existing| existing == &fragment) {
+                continue;
+            }
+            fragments.push(fragment);
+        }
+    }
+    fragments.join(", ")
 }
 
 fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -1184,7 +1237,8 @@ mod tests {
         build_project_video_style_memory, build_rejected_video_negative_memory,
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
-        compact_video_continuity_note, parse_structured_storyboard_description,
+        compact_video_continuity_note, merge_rejected_video_negative_memory,
+        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
@@ -1238,6 +1292,7 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("storyboardIds=12"));
+        assert!(content.contains("rejectionCount=1"));
         assert!(content.contains("avoid=avoid repeating stable follow camera"));
         assert!(content.contains("avoid oppressive or frantic mood"));
         assert!(content.contains("avoid flat cold lighting"));
@@ -1306,11 +1361,13 @@ mod tests {
             &[
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
-                    content: "storyboardIds=9 | avoid=avoid shaky handheld motion".into(),
+                    content:
+                        "storyboardIds=9 | rejectionCount=3 | avoid=avoid shaky handheld motion"
+                            .into(),
                 },
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
-                    content: "storyboardIds=12 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood".into(),
+                    content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood".into(),
                 },
             ],
             12,
@@ -1320,6 +1377,32 @@ mod tests {
             notes,
             vec!["avoid flat cold lighting, avoid oppressive or frantic mood"]
         );
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_skips_single_rejection_noise() {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion"
+                    .into(),
+            }],
+            12,
+        );
+
+        assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_accumulates_rejection_count_and_deduplicates() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid shaky handheld motion, avoid flat cold lighting",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("storyboardIds=12"));
+        assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting, avoid oppressive or frantic mood"));
     }
 
     #[test]

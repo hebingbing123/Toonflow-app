@@ -733,11 +733,11 @@ mod tests {
         let rows = vec![
             AgentMemoryRow {
                 name: "rejected_video_negative_memory".into(),
-                content: "storyboardIds=12 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood".into(),
+                content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood".into(),
             },
             AgentMemoryRow {
                 name: "rejected_video_negative_memory".into(),
-                content: "storyboardIds=9 | avoid=avoid shaky handheld motion".into(),
+                content: "storyboardIds=9 | rejectionCount=2 | avoid=avoid shaky handheld motion".into(),
             },
         ];
         let merged = merge_negative_prompts(
@@ -795,11 +795,15 @@ mod tests {
             &[
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
-                    content: "storyboardIds=13 | avoid=avoid flat cold lighting".into(),
+                    content:
+                        "storyboardIds=13 | rejectionCount=2 | avoid=avoid flat cold lighting"
+                            .into(),
                 },
                 AgentMemoryRow {
                     name: "rejected_video_negative_memory".into(),
-                    content: "storyboardIds=12 | avoid=avoid oppressive or frantic mood".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=2 | avoid=avoid oppressive or frantic mood"
+                            .into(),
                 },
             ],
         );
