@@ -898,13 +898,7 @@ fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
 }
 
 fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
-    compact_rejected_negative_fragment_families(
-        avoid
-            .split(',')
-            .map(normalize_prompt_text)
-            .filter(|fragment| !fragment.is_empty())
-            .collect(),
-    )
+    compact_rejected_negative_fragment_families(split_prompt_note_fragments(avoid).collect())
 }
 
 fn compact_rejected_negative_avoid(avoid: &str) -> String {
@@ -4026,6 +4020,23 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_parses_ascii_and_cjk_delimiters() {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=3 | avoid=avoid flicker；avoid flat cold lighting, avoid harsh backlight silhouette".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid flicker or motion jitter, avoid flat cold lighting".to_string()]
+        );
+    }
+
+    #[test]
     fn select_pending_rejected_video_observation_note_reads_single_rejection_noise() {
         let note = select_pending_rejected_video_observation_note(
             &[AgentMemoryRow {
@@ -4304,6 +4315,26 @@ mod tests {
         assert_eq!(
             notes,
             vec!["avoid warped anatomy, blur, flicker".to_string(),]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_parse_mixed_delimiters() {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting；avoid harsh backlight silhouette, avoid shaky handheld motion".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid shaky handheld motion".to_string(),
+                "avoid flat cold lighting or harsh backlight silhouette".to_string(),
+            ]
         );
     }
 
