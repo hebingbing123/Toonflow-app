@@ -2381,6 +2381,8 @@ pub(crate) fn compact_video_style_prompt_note(note: &str) -> Option<String> {
         }
     }
 
+    compact_cross_fragment_style_redundancy(&mut fragments);
+
     if fragments.is_empty() {
         return fallback_shot;
     }
@@ -2409,6 +2411,33 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
         ));
     }
     None
+}
+
+fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
+    if fragments.len() < 2 {
+        return;
+    }
+
+    let lighting_fragments = fragments
+        .iter()
+        .filter_map(|fragment| fragment.strip_prefix("光影"))
+        .map(normalize_prompt_text)
+        .collect::<Vec<_>>();
+    if lighting_fragments.is_empty() {
+        return;
+    }
+
+    fragments.retain(|fragment| {
+        let Some(mood) = fragment.strip_prefix("情绪").map(normalize_prompt_text) else {
+            return true;
+        };
+        if !matches!(mood.as_str(), "冷调" | "冷色") {
+            return true;
+        }
+        !lighting_fragments
+            .iter()
+            .any(|lighting| lighting.contains(&mood))
+    });
 }
 
 fn compact_prefixed_style_fragment_with_keywords(
@@ -2909,9 +2938,9 @@ mod tests {
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
         compact_selected_memory_setting, compact_video_continuity_note,
-        compact_video_style_prompt_note,
-        merge_rejected_video_negative_memory, parse_structured_storyboard_description,
-        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        compact_video_style_prompt_note, merge_rejected_video_negative_memory,
+        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
+        select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
@@ -3619,6 +3648,21 @@ mod tests {
     }
 
     #[test]
+    fn compact_video_style_prompt_note_drops_generic_cold_mood_when_lighting_already_covers_it() {
+        let note = compact_video_style_prompt_note("情绪冷调，光影冷调逆光").expect("style note");
+
+        assert_eq!(note, "光影冷调逆光");
+    }
+
+    #[test]
+    fn compact_video_style_prompt_note_keeps_distinct_mood_when_lighting_is_cold() {
+        let note =
+            compact_video_style_prompt_note("情绪冷峻压迫，光影冷调逆光").expect("style note");
+
+        assert_eq!(note, "情绪冷峻压迫，光影冷调逆光");
+    }
+
+    #[test]
     fn select_script_video_style_memory_notes_reads_summary_note() {
         let notes = select_script_video_style_memory_notes(&[
             AgentMemoryRow {
@@ -3785,6 +3829,32 @@ mod tests {
     }
 
     #[test]
+    fn build_project_video_style_memory_drops_generic_cold_mood_if_lighting_already_carries_it() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | style=情绪冷调，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=情绪冷调，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=17 | style=情绪冷调，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(3),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"));
+        assert!(summary.contains("style=光影冷调逆光"));
+        assert!(!summary.contains("情绪冷调"));
+    }
+
+    #[test]
     fn build_script_video_style_memory_summarizes_recurring_keywords_from_variant_notes() {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
@@ -3909,6 +3979,25 @@ mod tests {
         assert!(summary.contains("style=光影冷调逆光"));
         assert!(!summary.contains("情绪冷峻压迫"));
         assert!(!summary.contains("情绪悲怆"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_drops_generic_cold_mood_if_lighting_already_carries_it() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=情绪冷调，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=情绪冷调，光影冷调逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=2"));
+        assert!(summary.contains("style=光影冷调逆光"));
+        assert!(!summary.contains("情绪冷调"));
     }
 
     #[test]
