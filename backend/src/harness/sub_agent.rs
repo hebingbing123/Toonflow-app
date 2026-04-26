@@ -637,6 +637,19 @@ fn compact_auto_memory_entry_for_scope(entry: &str, current_scope: &ScopeSignatu
         .join(" | ")
 }
 
+fn dedupe_auto_memory_entries(entries: Vec<String>) -> Vec<String> {
+    let mut seen = std::collections::HashSet::new();
+    let mut deduped = Vec::with_capacity(entries.len());
+    for entry in entries {
+        let normalized = entry.trim();
+        if normalized.is_empty() || !seen.insert(normalized.to_string()) {
+            continue;
+        }
+        deduped.push(normalized.to_string());
+    }
+    deduped
+}
+
 fn script_scope_note(arguments: &Value) -> Option<String> {
     let focus_sections = parse_focus_section_list(arguments, "focusSections");
     let novel_ids = parse_positive_id_list(arguments, "novelIds");
@@ -953,6 +966,7 @@ async fn load_auto_memory_note(
     .into_iter()
     .map(|entry| compact_auto_memory_entry_for_scope(&entry, &current_scope))
     .collect::<Vec<_>>();
+    let rows = dedupe_auto_memory_entries(rows);
     if rows.is_empty() {
         return Ok(None);
     }
@@ -1228,10 +1242,10 @@ pub async fn invoke_sub_agent_tool(
 mod tests {
     use super::{
         build_auto_memory_snapshot, compact_auto_memory_entry_for_scope,
-        filter_auto_scope_memory_rows, format_storyboard_prompt_seed_scope, parse_review_summary,
-        parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
-        scope_signature_from_args, select_auto_memory_entries, sub_agent_prompt_from_args,
-        AutoMemoryRow,
+        dedupe_auto_memory_entries, filter_auto_scope_memory_rows,
+        format_storyboard_prompt_seed_scope, parse_review_summary, parse_scope_signature,
+        parse_storyboard_prompt_seed_scope, parse_tag_attributes, scope_signature_from_args,
+        select_auto_memory_entries, sub_agent_prompt_from_args, AutoMemoryRow,
     };
     use serde_json::json;
 
@@ -1578,6 +1592,23 @@ mod tests {
         assert_eq!(
             compacted,
             "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12,14 | storyboardPromptSeeds=12:seed-12-current,14:seed-14-current | summary=保持当前镜头角色站位"
+        );
+    }
+
+    #[test]
+    fn dedupe_auto_memory_entries_drops_scope_compaction_duplicates() {
+        let rows = dedupe_auto_memory_entries(vec![
+            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
+            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
+            "tool=run_sub_agent_storyboard_panel | summary=补充环境光位".to_string(),
+        ]);
+
+        assert_eq!(
+            rows,
+            vec![
+                "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位".to_string(),
+                "tool=run_sub_agent_storyboard_panel | summary=补充环境光位".to_string()
+            ]
         );
     }
 }
