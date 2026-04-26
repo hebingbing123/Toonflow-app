@@ -14,11 +14,12 @@ use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
 use crate::production::workbench::video_prompt_memory::{
-    normalize_prompt_text, parse_structured_storyboard_description,
-    select_prioritized_video_style_note, select_project_video_style_memory_notes,
-    select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
-    select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow, StructuredStoryboardDescription,
+    clip_prompt_fragment, compact_video_style_prompt_note, normalize_prompt_text,
+    parse_structured_storyboard_description, select_prioritized_video_style_note,
+    select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    StructuredStoryboardDescription,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -653,6 +654,7 @@ fn resolve_negative_filter_style_note(
                 current_prompt_seed,
                 storyboard_row,
             )
+            .and_then(|note| compact_contextual_negative_style_note(&note, storyboard_row))
         })
         .or_else(|| select_contextual_summary_style_note(selected_rows, storyboard_row))
 }
@@ -670,7 +672,8 @@ fn select_contextual_summary_style_note(
         .chain(select_project_video_style_memory_notes(selected_rows))
         .filter_map(|note| {
             let evidence = style_note_context_evidence(&note, &context);
-            (evidence >= 2).then_some((evidence, note))
+            let compacted = compact_contextual_negative_style_note(&note, storyboard_row)?;
+            (evidence >= 2).then_some((evidence, compacted))
         })
         .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
             left_evidence
@@ -678,6 +681,139 @@ fn select_contextual_summary_style_note(
                 .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
         })
         .map(|(_, note)| note)
+}
+
+fn compact_contextual_negative_style_note(
+    note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return compact_video_style_prompt_note(&normalized);
+    };
+
+    let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .filter(|part| !part.is_empty())
+        .collect::<String>();
+    let fragments = normalized
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| {
+            negative_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
+        })
+        .filter_map(|fragment| trim_negative_style_fragment_against_storyboard(&fragment, &fields))
+        .map(|fragment| clip_prompt_fragment(&fragment, 56))
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(&fragments.join("，"), 56))
+}
+
+fn negative_style_fragment_matches_storyboard(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    expected_camera: &str,
+) -> bool {
+    if fragment.starts_with("镜头") {
+        return negative_style_fragment_overlaps_field(fragment, &fields.shot, expected_camera)
+            || negative_style_fragment_overlaps_field(
+                fragment,
+                &fields.camera_move,
+                expected_camera,
+            );
+    }
+    if fragment.starts_with("情绪") {
+        return negative_style_fragment_overlaps_field(fragment, &fields.mood, expected_camera);
+    }
+    if fragment.starts_with("光影") {
+        return negative_style_fragment_overlaps_field(fragment, &fields.lighting, expected_camera);
+    }
+    false
+}
+
+fn trim_negative_style_fragment_against_storyboard(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Option<String> {
+    if fragment.starts_with("镜头") {
+        return trim_negative_style_fragment_prefix(
+            fragment,
+            "镜头",
+            &[fields.shot.as_str(), fields.camera_move.as_str()],
+        );
+    }
+    if fragment.starts_with("情绪") {
+        return trim_negative_style_fragment_prefix(fragment, "情绪", &[fields.mood.as_str()]);
+    }
+    if fragment.starts_with("光影") {
+        return trim_negative_style_fragment_prefix(fragment, "光影", &[fields.lighting.as_str()]);
+    }
+    Some(fragment.to_string())
+}
+
+fn trim_negative_style_fragment_prefix(
+    fragment: &str,
+    prefix: &str,
+    fields: &[&str],
+) -> Option<String> {
+    let body = fragment.strip_prefix(prefix).unwrap_or(fragment);
+    let mut residual = normalize_prompt_text(body);
+    for field in fields {
+        let normalized_field = normalize_prompt_text(field);
+        if normalized_field.is_empty() {
+            continue;
+        }
+        if residual == normalized_field {
+            return None;
+        }
+        residual = residual.replace(&normalized_field, "");
+    }
+    let residual = normalize_prompt_text(&residual);
+    if residual.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{residual}"))
+    }
+}
+
+fn negative_style_fragment_overlaps_field(
+    fragment: &str,
+    field: &str,
+    expected_camera: &str,
+) -> bool {
+    let normalized_field = normalize_prompt_text(field);
+    if normalized_field.is_empty() {
+        return false;
+    }
+    let canonical = canonical_negative_style_fragment(fragment);
+    !canonical.is_empty()
+        && (canonical == normalized_field
+            || canonical.contains(&normalized_field)
+            || normalized_field.contains(&canonical)
+            || (!expected_camera.is_empty()
+                && canonical == expected_camera
+                && (expected_camera.contains(&normalized_field)
+                    || normalized_field.contains(expected_camera))))
+}
+
+fn canonical_negative_style_fragment(fragment: &str) -> String {
+    normalize_prompt_text(
+        fragment
+            .strip_prefix("镜头")
+            .or_else(|| fragment.strip_prefix("情绪"))
+            .or_else(|| fragment.strip_prefix("光影"))
+            .unwrap_or(fragment),
+    )
 }
 
 fn style_note_context_evidence(
@@ -2109,7 +2245,7 @@ mod tests {
     }
 
     #[test]
-    fn negative_filter_style_note_prefers_shorter_contextual_summary_when_signal_is_equal() {
+    fn negative_filter_style_note_skips_contextual_summary_when_it_only_repeats_storyboard_axes() {
         let rows = vec![
             AgentMemoryRow {
                 name: "project_video_style_memory".into(),
@@ -2128,7 +2264,25 @@ mod tests {
 
         assert_eq!(
             resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None),
-            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
+            None
+        );
+    }
+
+    #[test]
+    fn negative_filter_style_note_skips_summary_that_only_repeats_storyboard_fields() {
+        let rows = vec![AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光 | note=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5".into()),
+        };
+
+        assert_eq!(
+            resolve_negative_filter_style_note(&rows, 12, None, Some(&storyboard_row), None),
+            None
         );
     }
 
