@@ -938,10 +938,41 @@ fn compact_auto_memory_summary_text(text: &str) -> Option<String> {
         .split('，')
         .map(strip_auto_memory_scaffolding)
         .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| !is_low_signal_auto_memory_summary_fragment(fragment))
         .collect::<Vec<_>>()
         .join("，");
     let compacted = normalize_whitespace(compacted.trim());
     (!compacted.is_empty()).then_some(truncate_chars(&compacted, AUTO_MEMORY_MAX_CHARS))
+}
+
+fn is_low_signal_auto_memory_summary_fragment(fragment: &str) -> bool {
+    let normalized = fragment
+        .chars()
+        .filter(|ch| !ch.is_whitespace() && !"，,。；;：:!！?？".contains(*ch))
+        .collect::<String>()
+        .to_ascii_lowercase();
+    if normalized.is_empty() {
+        return true;
+    }
+
+    matches!(
+        normalized.as_str(),
+        "风格统一"
+            | "镜头语言统一"
+            | "镜头衔接统一"
+            | "画面风格统一"
+            | "视觉风格统一"
+            | "光影一致"
+            | "情绪一致"
+            | "情绪延续"
+            | "风格延续"
+            | "保持一致"
+            | "保持统一"
+            | "视觉设定延续"
+            | "场景设定延续"
+            | "道具设定延续"
+            | "角色设定延续"
+    )
 }
 
 fn strip_auto_memory_scaffolding(fragment: &str) -> String {
@@ -1929,5 +1960,46 @@ mod tests {
 
         assert!(snapshot.contains("summary=角色站位不要跳轴"));
         assert!(!snapshot.contains("当前镜头"));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_drops_generic_review_summary_placeholder() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_production_supervision",
+            &json!({"storyboardIds": [12]}),
+            "unused",
+            Some(&json!({
+                "target": "storyboardTable",
+                "grade": "B",
+                "nextAction": "check_storyboard",
+                "summary": "当前镜头风格统一，情绪延续"
+            })),
+            Some("promptSeed=seed-12-current"),
+        )
+        .expect("snapshot");
+
+        assert!(!snapshot.contains("summary="));
+        assert!(!snapshot.contains("风格统一"));
+        assert!(!snapshot.contains("情绪延续"));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_keeps_specific_review_constraint_while_dropping_generic_prefix() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_production_supervision",
+            &json!({"storyboardIds": [12]}),
+            "unused",
+            Some(&json!({
+                "target": "storyboardTable",
+                "grade": "B",
+                "nextAction": "check_storyboard",
+                "summary": "当前镜头风格统一，人物站位不要跳轴"
+            })),
+            Some("promptSeed=seed-12-current"),
+        )
+        .expect("snapshot");
+
+        assert!(snapshot.contains("summary=人物站位不要跳轴"));
+        assert!(!snapshot.contains("风格统一"));
     }
 }
