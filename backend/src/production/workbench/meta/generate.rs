@@ -30,6 +30,10 @@ const VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
+const VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT: i64 = 24;
+const VIDEO_PROMPT_OBSERVATION_REJECTION_ROW_LIMIT: usize = 8;
+const VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT: usize = 1;
+const VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
@@ -612,14 +616,15 @@ async fn load_pending_video_observation_note(
                 'script_video_style_memory'
             ))
             OR (episodes_id IS NULL AND name = 'project_video_style_memory')
-          )
+        )
         ORDER BY create_time_ms DESC
-        LIMIT 12
+        LIMIT $4
         "#,
     )
     .bind(user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
+    .bind(VIDEO_PROMPT_OBSERVATION_FETCH_ROW_LIMIT)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -632,6 +637,7 @@ async fn load_pending_video_observation_note(
         storyboard_numeric_id,
     )
     .await?;
+    let rows = trim_video_prompt_observation_rows(rows, storyboard_numeric_id, current_prompt_seed);
     let prioritized_style_note = resolve_observation_filter_style_note(
         &rows,
         storyboard_numeric_id,
@@ -659,6 +665,60 @@ async fn load_pending_video_observation_note(
     );
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
+}
+
+fn trim_video_prompt_observation_rows(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> Vec<AgentMemoryRow> {
+    let mut rejection_candidates = Vec::new();
+    let mut script_style_candidates = Vec::new();
+    let mut project_style_candidates = Vec::new();
+
+    for (idx, row) in rows.into_iter().enumerate() {
+        match row.name.as_str() {
+            "rejected_video_negative_memory" => rejection_candidates.push((idx, row)),
+            "script_video_style_memory" | "selected_video_memory" => {
+                script_style_candidates.push((idx, row))
+            }
+            "project_video_style_memory" => project_style_candidates.push((idx, row)),
+            _ => {}
+        }
+    }
+
+    let mut kept = std::collections::HashSet::new();
+    for idx in prioritize_storyboard_memory_indices(
+        &rejection_candidates,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        VIDEO_PROMPT_OBSERVATION_REJECTION_ROW_LIMIT,
+    ) {
+        kept.insert(idx);
+    }
+    for idx in prioritize_storyboard_memory_indices(
+        &script_style_candidates,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        VIDEO_PROMPT_OBSERVATION_SCRIPT_STYLE_ROW_LIMIT,
+    ) {
+        kept.insert(idx);
+    }
+    for (idx, _) in project_style_candidates
+        .iter()
+        .take(VIDEO_PROMPT_OBSERVATION_PROJECT_STYLE_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
+
+    let mut all_rows = rejection_candidates;
+    all_rows.extend(script_style_candidates);
+    all_rows.extend(project_style_candidates);
+    all_rows.sort_by_key(|(idx, _)| *idx);
+    all_rows
+        .into_iter()
+        .filter_map(|(idx, row)| kept.contains(&idx).then_some(row))
+        .collect()
 }
 
 fn resolve_observation_filter_style_note(
@@ -3671,7 +3731,8 @@ mod tests {
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
         score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
         select_video_prompt_memory_notes, select_video_prompt_style_notes,
-        trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
+        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
+        video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
         ScriptRolePromptSeedRow, VideoPromptContext,
     };
@@ -5472,6 +5533,70 @@ mod tests {
                     .content
                     .contains("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current")
         }));
+    }
+
+    #[test]
+    fn trim_video_prompt_observation_rows_keeps_matching_rejection_row_over_newer_style_noise() {
+        let mut rows = Vec::new();
+        for _ in 0..12 {
+            rows.push(AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=88 | promptSeed=noise-seed | style=别的镜头风格".into(),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "rejected_video_negative_memory".into(),
+            content: "storyboardIds=12 | promptSeed=seed-12-current | rejectionCount=1 | avoid=avoid shaky handheld motion".into(),
+        });
+
+        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"));
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "rejected_video_negative_memory"
+                && row.content.contains("storyboardIds=12")
+                && row.content.contains("promptSeed=seed-12-current")
+        }));
+    }
+
+    #[test]
+    fn trim_video_prompt_observation_rows_prefers_current_prompt_seed_over_newer_stale_rejection_rows(
+    ) {
+        let mut rows = Vec::new();
+        for stale_seed in [
+            "seed-12-stale-8",
+            "seed-12-stale-7",
+            "seed-12-stale-6",
+            "seed-12-stale-5",
+            "seed-12-stale-4",
+            "seed-12-stale-3",
+            "seed-12-stale-2",
+            "seed-12-stale-1",
+        ] {
+            rows.push(AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: format!(
+                    "storyboardIds=12 | promptSeed={stale_seed} | rejectionCount=1 | avoid=avoid flat cold lighting"
+                ),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "rejected_video_negative_memory".into(),
+            content: "storyboardIds=12 | promptSeed=seed-12-current | rejectionCount=1 | avoid=avoid shaky handheld motion".into(),
+        });
+
+        let trimmed = trim_video_prompt_observation_rows(rows, 12, Some("seed-12-current"));
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "rejected_video_negative_memory"
+                && row.content.contains("promptSeed=seed-12-current")
+        }));
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "rejected_video_negative_memory")
+                .count(),
+            8
+        );
     }
 
     #[test]
