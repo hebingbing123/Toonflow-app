@@ -33,6 +33,9 @@ const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const LOCAL_SHOT_FRAMING_KEYWORDS: [&str; 7] =
     ["低机位", "高机位", "特写", "近景", "中景", "全景", "远景"];
+const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
+    "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
+];
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -1360,11 +1363,82 @@ fn compact_prompt_clause(
     }
 
     let mut compacted = strip_leading_covered_prompt_fragment(&normalized, asset_coverage);
+    compacted = strip_action_object_prefix(&compacted, asset_coverage, kind);
     compacted = normalize_prompt_clause_compaction(&compacted, kind);
     if compacted.is_empty() {
         return None;
     }
     Some(compacted)
+}
+
+fn strip_action_object_prefix(
+    fragment: &str,
+    coverage: &[String],
+    kind: PromptClauseKind,
+) -> String {
+    if !matches!(kind, PromptClauseKind::Action) {
+        return fragment.to_string();
+    }
+
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut candidates = coverage
+        .iter()
+        .map(|entry| canonical_prompt_fragment(entry))
+        .filter(|entry| !entry.is_empty())
+        .collect::<Vec<_>>();
+    candidates.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &candidates {
+            if candidate.chars().count() < 2 {
+                continue;
+            }
+            for verb in ACTION_OBJECT_PREFIX_VERBS {
+                let Some(stripped) = compacted.strip_prefix(verb) else {
+                    continue;
+                };
+                let Some(stripped) = stripped.strip_prefix(candidate) else {
+                    continue;
+                };
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(
+                            ch,
+                            ':' | '：'
+                                | ';'
+                                | '；'
+                                | ','
+                                | '，'
+                                | '/'
+                                | '／'
+                                | '、'
+                                | '的'
+                                | '着'
+                                | '后'
+                        )
+                });
+                if stripped.chars().count() < 2 {
+                    continue;
+                }
+                compacted = stripped.to_string();
+                changed = true;
+                break;
+            }
+            if changed {
+                break;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
 }
 
 fn prompt_fragment_has_direct_coverage(fragment: &str, coverage: &[String]) -> bool {
@@ -2418,6 +2492,50 @@ mod tests {
         assert!(prompt.contains("Subject: 冲出旧宅走廊."));
         assert!(prompt.contains("Action: 快步推门冲出."));
         assert!(!prompt.contains("Action: 主角快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_tool_prefix_action_when_anchor_already_covers_prop() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首快步穿行、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧青铜匕首快步穿行并回头确认、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
+        assert!(prompt.contains("Action: 快步穿行并回头确认."));
+        assert!(!prompt.contains("Action: 握紧青铜匕首快步穿行并回头确认."));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_tool_prefix_action_when_no_followup_motion_exists() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧青铜匕首、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Action: 握紧青铜匕首."));
     }
 
     #[test]
