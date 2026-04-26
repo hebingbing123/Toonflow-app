@@ -702,11 +702,11 @@ mod tests {
     }
 
     #[test]
-    fn neighbor_selected_video_memory_notes_are_available_before_auto_scope_fallback() {
+    fn neighbor_selected_video_memory_notes_use_only_style_fragments_before_auto_scope_fallback() {
         let rows = vec![
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=11 | note=保持冷色压迫感和稳定近景".into(),
+                content: "storyboardIds=11 | note=女主贴墙前行，镜头稳定近景，情绪冷色压迫感".into(),
             },
             AgentMemoryRow {
                 name: "auto_scope_memory".into(),
@@ -716,7 +716,7 @@ mod tests {
 
         assert_eq!(
             select_neighbor_selected_video_memory_notes(&rows, 12, 2),
-            vec!["保持冷色压迫感和稳定近景".to_string()]
+            vec!["镜头稳定近景，情绪冷色压迫感".to_string()]
         );
     }
 

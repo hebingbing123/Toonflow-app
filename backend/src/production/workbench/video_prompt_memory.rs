@@ -9,6 +9,7 @@ const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
+const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
@@ -216,7 +217,7 @@ pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) ->
     rows.iter()
         .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
         .filter_map(|row| extract_key_value(&row.content, "note"))
-        .map(|note| clip_prompt_fragment(&note, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .filter_map(|note| style_only_note(&note))
         .take(1)
         .collect()
 }
@@ -274,7 +275,7 @@ pub(crate) fn select_neighbor_selected_video_memory_notes(
                 .map(|id| (storyboard_numeric_id - *id).abs())
                 .min()?;
             let note = extract_key_value(&row.content, "note")
-                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))?;
+                .and_then(|value| style_only_note(&value))?;
             Some((distance, idx, note))
         })
         .collect::<Vec<_>>();
@@ -493,11 +494,26 @@ fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
         }
     }
 
-    if let Some(fragment) = pick_recurring_unprefixed_fragment(&parsed) {
-        recurring.push(fragment);
-    }
-
     recurring
+}
+
+fn style_only_note(note: &str) -> Option<String> {
+    let fragments = note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| {
+            STYLE_NOTE_PREFIXES
+                .iter()
+                .any(|prefix| fragment.starts_with(prefix))
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
 }
 
 fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) -> Option<String> {
@@ -505,36 +521,6 @@ fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) 
     for (note_idx, fragments) in parsed_notes.iter().enumerate() {
         for fragment in fragments {
             if !fragment.starts_with(prefix) {
-                continue;
-            }
-            if let Some(existing) = counts.iter_mut().find(|(value, _, _)| value == fragment) {
-                existing.1 += 1;
-                existing.2 = existing.2.min(note_idx);
-            } else {
-                counts.push((fragment.clone(), 1, note_idx));
-            }
-        }
-    }
-
-    counts
-        .into_iter()
-        .filter(|(_, count, _)| *count >= 2)
-        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)))
-        .map(|(value, _, _)| value)
-}
-
-fn pick_recurring_unprefixed_fragment(parsed_notes: &[Vec<String>]) -> Option<String> {
-    let mut counts: Vec<(String, usize, usize)> = Vec::new();
-    for (note_idx, fragments) in parsed_notes.iter().enumerate() {
-        for fragment in fragments {
-            if fragment.starts_with("镜头")
-                || fragment.starts_with("情绪")
-                || fragment.starts_with("光影")
-                || fragment.starts_with("场景")
-            {
-                continue;
-            }
-            if fragment.chars().count() < 4 {
                 continue;
             }
             if let Some(existing) = counts.iter_mut().find(|(value, _, _)| value == fragment) {
@@ -704,15 +690,20 @@ mod tests {
             &[
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content: "storyboardIds=5 | note=保留暖金色逆光和慢推镜头".into(),
+                    content:
+                        "storyboardIds=5 | note=主角推门而入，镜头中景慢推，情绪压迫，光影暖金逆光"
+                            .into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content: "storyboardIds=16 | note=维持冷色夜景和稳定跟拍".into(),
+                    content:
+                        "storyboardIds=16 | note=反派逼近，镜头中景稳定跟拍，情绪冷峻，光影冷色夜景"
+                            .into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
-                    content: "storyboardIds=11 | note=保持人物近景与压迫感".into(),
+                    content: "storyboardIds=11 | note=女主贴墙前行，镜头近景稳定跟拍，情绪压迫"
+                        .into(),
                 },
                 AgentMemoryRow {
                     name: "selected_video_memory".into(),
@@ -726,8 +717,8 @@ mod tests {
         assert_eq!(
             notes,
             vec![
-                "保持人物近景与压迫感".to_string(),
-                "维持冷色夜景和稳定跟拍".to_string()
+                "镜头近景稳定跟拍，情绪压迫".to_string(),
+                "镜头中景稳定跟拍，情绪冷峻，光影冷色夜景".to_string()
             ]
         );
     }
@@ -755,6 +746,7 @@ mod tests {
         assert!(summary.contains("情绪冷峻压迫"));
         assert!(summary.contains("光影冷调逆光"));
         assert!(summary.contains("场景旧宅走廊"));
+        assert!(!summary.contains("女主"));
     }
 
     #[test]
@@ -762,7 +754,7 @@ mod tests {
         let notes = select_script_video_style_memory_notes(&[
             AgentMemoryRow {
                 name: "script_video_style_memory".into(),
-                content: "sampleCount=3 | note=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+                content: "sampleCount=3 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
