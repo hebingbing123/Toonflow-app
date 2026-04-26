@@ -3816,10 +3816,11 @@ fn compact_auto_scope_continuity_fragments(fragments: Vec<String>) -> Vec<String
     let has_specific_guidance = kept
         .iter()
         .any(|fragment| continuity_note_adds_specific_guidance(fragment));
-    kept.into_iter()
+    kept.iter()
         .filter(|fragment| {
             !auto_scope_continuity_fragment_is_covered(fragment, &kept, has_specific_guidance)
         })
+        .cloned()
         .collect()
 }
 

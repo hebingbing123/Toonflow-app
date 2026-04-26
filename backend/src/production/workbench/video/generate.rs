@@ -632,8 +632,10 @@ fn build_storyboard_negative_prompts(
                 review_fragments,
                 &rejected_fragments,
             );
-            let review_prompt =
-                merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
+            let review_prompt = merge_prioritized_negative_prompt_fragment_groups(&[
+                rejected_fragments,
+                review_fragments,
+            ]);
             (storyboard_id, review_prompt)
         })
         .collect()
@@ -1398,6 +1400,102 @@ fn merge_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<Strin
     } else {
         Some(budgeted.join(", "))
     }
+}
+
+fn merge_prioritized_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<String> {
+    let mut candidates = Vec::new();
+    for (group_idx, group) in groups.iter().enumerate() {
+        for (fragment_idx, fragment) in group.iter().enumerate() {
+            candidates.push(PrioritizedNegativePromptFragment {
+                score: score_negative_prompt_budget_fragment(fragment),
+                char_len: negative_fragment_information_score(fragment),
+                group_idx,
+                fragment_idx,
+                fragment: fragment.clone(),
+            });
+        }
+    }
+    candidates.sort_by(|a, b| {
+        b.score
+            .cmp(&a.score)
+            .then(a.char_len.cmp(&b.char_len))
+            .then(a.group_idx.cmp(&b.group_idx))
+            .then(a.fragment_idx.cmp(&b.fragment_idx))
+            .then(a.fragment.cmp(&b.fragment))
+    });
+
+    let mut fragments = Vec::new();
+    for candidate in candidates {
+        push_negative_fragment_without_budget(&mut fragments, &candidate.fragment);
+    }
+    fragments = compact_negative_fragment_families(fragments);
+    fragments.sort_by(|left, right| {
+        score_negative_prompt_budget_fragment(right)
+            .cmp(&score_negative_prompt_budget_fragment(left))
+            .then(
+                negative_fragment_information_score(left)
+                    .cmp(&negative_fragment_information_score(right)),
+            )
+            .then(left.cmp(right))
+    });
+
+    let mut budgeted = Vec::new();
+    for fragment in fragments {
+        push_negative_fragment_with_budget(&mut budgeted, &fragment);
+    }
+    if budgeted.is_empty() {
+        None
+    } else {
+        Some(budgeted.join(", "))
+    }
+}
+
+#[derive(Debug)]
+struct PrioritizedNegativePromptFragment {
+    score: i32,
+    char_len: usize,
+    group_idx: usize,
+    fragment_idx: usize,
+    fragment: String,
+}
+
+fn score_negative_prompt_budget_fragment(fragment: &str) -> i32 {
+    let canonical = canonical_negative_fragment(fragment);
+    let family_score = match negative_fragment_family(fragment) {
+        "flicker_motion_jitter" => 36,
+        "shot_change_framing" | "camera_framing" => 34,
+        "lighting_backlight" => 22,
+        "mood_tone" => 16,
+        _ => 14,
+    };
+    let detail_score = if canonical.contains("face")
+        || canonical.contains("costume")
+        || canonical.contains("character")
+    {
+        40
+    } else if canonical.contains("warped")
+        || canonical.contains("anatom")
+        || canonical.contains("blur")
+    {
+        38
+    } else if canonical.contains("setting") {
+        18
+    } else {
+        0
+    };
+    let breadth_score = [
+        canonical.contains("warped") || canonical.contains("anatom"),
+        canonical.contains("blur"),
+        canonical.contains("flicker") || canonical.contains("jitter"),
+        canonical.contains("face") || canonical.contains("identity"),
+        canonical.contains("costume") || canonical.contains("character"),
+    ]
+    .into_iter()
+    .filter(|present| *present)
+    .count() as i32
+        * 4;
+    family_score + detail_score + breadth_score
+        - negative_fragment_information_score(fragment) as i32 / 8
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -2503,7 +2601,8 @@ mod tests {
     }
 
     #[test]
-    fn build_storyboard_negative_prompts_prioritizes_storyboard_memory_over_global_review_tail() {
+    fn build_storyboard_negative_prompts_keeps_storyboard_memory_axis_when_global_review_is_higher_value(
+    ) {
         let prompts = build_storyboard_negative_prompts(
             &[12],
             &[
@@ -2533,9 +2632,48 @@ mod tests {
             .and_then(|value| value.as_deref())
             .expect("storyboard 12 prompt");
 
-        assert!(prompt.contains("avoid oppressive or frantic mood"));
         assert!(prompt.contains("avoid flat cold lighting"));
-        assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS + 3);
+        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(prompt.contains("avoid warped anatomy, blur, flicker"));
+        assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS);
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_prioritizes_higher_value_constraints_under_budget() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("visual_error".into()),
+                    comments: Some("明显闪烁，手部也会变形".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("character_break".into()),
+                    comments: Some("角色服装和脸都会漂移".into()),
+                },
+            ],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid oppressive or frantic mood, avoid flat cold lighting".into(),
+            }],
+            &[],
+            &HashMap::new(),
+        );
+
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+
+        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(prompt.contains("avoid warped anatomy, blur, flicker"));
+        assert!(prompt.contains("avoid flat cold lighting"));
+        assert!(!prompt.contains("avoid oppressive or frantic mood"));
+        assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS);
     }
 
     #[test]
