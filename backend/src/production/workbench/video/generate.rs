@@ -1384,22 +1384,55 @@ fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Opti
 }
 
 fn merge_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<String> {
+    let fragments = compact_negative_prompt_fragment_groups(groups);
+    let joined = fragments.join(", ");
+    let budgeted = if joined.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS {
+        fragments
+    } else {
+        prioritize_negative_prompt_fragments_for_budget(fragments)
+    };
+    if budgeted.is_empty() {
+        None
+    } else {
+        Some(budgeted.join(", "))
+    }
+}
+
+fn compact_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Vec<String> {
     let mut fragments = Vec::new();
     for group in groups {
         for fragment in group {
             push_negative_fragment_without_budget(&mut fragments, fragment);
         }
     }
-    fragments = compact_negative_fragment_families(fragments);
+    compact_negative_fragment_families(fragments)
+}
+
+fn prioritize_negative_prompt_fragments_for_budget(fragments: Vec<String>) -> Vec<String> {
+    let mut prioritized = fragments
+        .into_iter()
+        .enumerate()
+        .map(|(idx, fragment)| {
+            (
+                score_negative_prompt_budget_fragment(&fragment),
+                negative_fragment_information_score(&fragment),
+                idx,
+                fragment,
+            )
+        })
+        .collect::<Vec<_>>();
+    prioritized.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(a.1.cmp(&b.1))
+            .then(a.2.cmp(&b.2))
+            .then(a.3.cmp(&b.3))
+    });
+
     let mut budgeted = Vec::new();
-    for fragment in fragments {
+    for (_, _, _, fragment) in prioritized {
         push_negative_fragment_with_budget(&mut budgeted, &fragment);
     }
-    if budgeted.is_empty() {
-        None
-    } else {
-        Some(budgeted.join(", "))
-    }
+    budgeted
 }
 
 fn merge_prioritized_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<String> {
@@ -2271,7 +2304,7 @@ mod tests {
         )
         .expect("merged prompt");
 
-        assert_eq!(merged, "avoid flicker or motion jitter, avoid blur");
+        assert_eq!(merged, "avoid blur, avoid flicker or motion jitter");
     }
 
     #[test]
@@ -2316,7 +2349,7 @@ mod tests {
 
         assert_eq!(
             merged,
-            "avoid extreme camera angle or overly tight close-up framing, avoid overly cold, oppressive, or frantic mood"
+            "avoid extreme camera angle or overly tight close-up framing, avoid flat cold lighting or harsh backlight silhouette"
         );
     }
 
@@ -2462,6 +2495,24 @@ mod tests {
             merged,
             "avoid flicker, avoid flat cold lighting or harsh backlight silhouette"
         );
+    }
+
+    #[test]
+    fn merge_negative_prompts_prioritizes_higher_value_automatic_constraints_when_over_budget() {
+        let merged = merge_negative_prompts(
+            Some(
+                "avoid extra shot changes or wrong framing, avoid overly cold, oppressive, or frantic mood, avoid flat cold lighting or harsh backlight silhouette, avoid wrong setting details",
+            ),
+            Some(
+                "avoid face distortion or identity drift, avoid costume or character drift, avoid warped hands or limbs, avoid blur, avoid flicker",
+            ),
+        )
+        .expect("merged");
+
+        assert!(merged.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(merged.contains("avoid warped anatomy, blur, flicker"));
+        assert!(!merged.contains("avoid overly cold, oppressive, or frantic mood"));
+        assert!(merged.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS);
     }
 
     #[test]
