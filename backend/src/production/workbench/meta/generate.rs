@@ -13,8 +13,9 @@ use crate::production::workbench::meta::common::{
     parse_structured_storyboard_description, StructuredStoryboardDescription,
 };
 use crate::production::workbench::video_prompt_memory::{
-    select_neighbor_selected_video_memory_notes, select_script_video_style_memory_notes,
-    select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+    compact_video_continuity_note, select_neighbor_selected_video_memory_notes,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -452,7 +453,14 @@ fn select_video_prompt_memory_notes(
             }
             let note = extract_key_value(content, "summary")
                 .or_else(|| extract_key_value(content, "result"))
-                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))?;
+                .and_then(|value| compact_video_continuity_note(&value))
+                .or_else(|| {
+                    extract_key_value(content, "summary")
+                        .or_else(|| extract_key_value(content, "result"))
+                        .map(|value| {
+                            clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+                        })
+                })?;
             Some((score, note))
         })
         .collect::<Vec<_>>();
@@ -676,11 +684,11 @@ mod tests {
         let rows = vec![
             AgentMemoryRow {
                 name: "auto_scope_memory".into(),
-                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=保持女主冷色调近景".to_string(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=女主转身回望，保持女主冷色调近景".to_string(),
             },
             AgentMemoryRow {
                 name: "auto_scope_memory".into(),
-                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=补图时保持镜头方向连续".to_string(),
+                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=补图时主角冲向巷口，保持镜头方向连续".to_string(),
             },
             AgentMemoryRow {
                 name: "auto_scope_memory".into(),
@@ -696,7 +704,7 @@ mod tests {
             select_video_prompt_memory_notes(&rows, 12),
             vec![
                 "保持女主冷色调近景".to_string(),
-                "补图时保持镜头方向连续".to_string()
+                "保持镜头方向连续".to_string()
             ]
         );
     }

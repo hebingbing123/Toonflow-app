@@ -10,6 +10,9 @@ const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
+const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
+    "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
+];
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
@@ -516,6 +519,29 @@ fn style_only_note(note: &str) -> Option<String> {
     ))
 }
 
+pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
+    let fragments = note
+        .split(['，', '；', ';', '。'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| {
+            STYLE_NOTE_PREFIXES
+                .iter()
+                .any(|prefix| fragment.starts_with(prefix))
+                || CONTINUITY_NOTE_KEYWORDS
+                    .iter()
+                    .any(|keyword| fragment.contains(keyword))
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
 fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) -> Option<String> {
     let mut counts: Vec<(String, usize, usize)> = Vec::new();
     for (note_idx, fragments) in parsed_notes.iter().enumerate() {
@@ -622,9 +648,9 @@ async fn replace_summary_memory(
 mod tests {
     use super::{
         build_script_video_style_memory, build_selected_video_memory, clear_selected_video_memory,
-        parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
-        select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
-        StoryboardPromptSeedRow,
+        compact_video_continuity_note, parse_structured_storyboard_description,
+        select_neighbor_selected_video_memory_notes, select_script_video_style_memory_notes,
+        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -766,6 +792,17 @@ mod tests {
             notes,
             vec!["镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
         );
+    }
+
+    #[test]
+    fn compact_video_continuity_note_keeps_only_style_and_continuity_fragments() {
+        let note = compact_video_continuity_note(
+            "女主推门冲出；保持冷调压迫感；镜头中景稳定跟拍；后续反派从暗处逼近",
+        )
+        .expect("note");
+
+        assert_eq!(note, "保持冷调压迫感，镜头中景稳定跟拍");
+        assert!(!note.contains("反派"));
     }
 
     #[tokio::test]
