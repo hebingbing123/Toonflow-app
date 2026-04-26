@@ -867,12 +867,22 @@ fn rejected_video_negative_rejection_count(content: &str) -> u32 {
         .unwrap_or(1)
 }
 
+fn rejected_video_memory_prompt_seed(content: &str) -> Option<String> {
+    extract_key_value(content, "promptSeed")
+}
+
 fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> String {
+    let incoming_prompt_seed = rejected_video_memory_prompt_seed(incoming);
+    let existing_prompt_seed = rejected_video_memory_prompt_seed(existing);
+    if incoming_prompt_seed != existing_prompt_seed {
+        return incoming.to_string();
+    }
+
     let storyboard_numeric_id = extract_key_value(incoming, "storyboardIds")
         .or_else(|| extract_key_value(existing, "storyboardIds"))
         .unwrap_or_default();
-    let prompt_seed = extract_key_value(incoming, "promptSeed")
-        .or_else(|| extract_key_value(existing, "promptSeed"))
+    let prompt_seed = incoming_prompt_seed
+        .or(existing_prompt_seed)
         .unwrap_or_default();
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
     let avoid = merge_rejected_negative_avoid(
@@ -1708,6 +1718,21 @@ mod tests {
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("storyboardIds=12"));
         assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting, avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_resets_when_prompt_seed_changes() {
+        let incoming =
+            "storyboardIds=12 | promptSeed=newseed000002 | rejectionCount=1 | avoid=avoid flat cold lighting";
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | promptSeed=oldseed000001 | rejectionCount=3 | avoid=avoid shaky handheld motion, avoid oppressive or frantic mood",
+            incoming,
+        );
+
+        assert_eq!(merged, incoming);
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 1);
+        assert!(merged.contains("promptSeed=newseed000002"));
+        assert!(!merged.contains("avoid shaky handheld motion"));
     }
 
     #[test]
