@@ -420,8 +420,8 @@ mod tests {
 
     #[tokio::test]
     async fn clear_selected_video_memory_ignores_invalid_storyboard_id() {
-        let pool = PgPool::connect_lazy("postgresql://user:pass@localhost/db")
-            .expect("lazy pg pool");
+        let pool =
+            PgPool::connect_lazy("postgresql://user:pass@localhost/db").expect("lazy pg pool");
         let result = clear_selected_video_memory(&pool, Uuid::nil(), 1, 2, 0).await;
 
         assert!(result.is_ok());
