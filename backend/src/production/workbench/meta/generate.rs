@@ -25,6 +25,7 @@ use crate::state::AppState;
 const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 8;
 const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
+const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -323,7 +324,7 @@ async fn load_video_prompt_memory_notes(
             current_prompt_seed,
             Some(storyboard_row),
         ),
-        select_video_prompt_memory_notes(&rows, storyboard_numeric_id),
+        select_video_prompt_memory_notes(&rows, storyboard_numeric_id, Some(storyboard_row)),
     ))
 }
 
@@ -1003,7 +1004,7 @@ fn build_continuity_notes(
     structured_fields: Option<&StructuredStoryboardDescription>,
     prompt_coverage: &[String],
 ) -> Vec<String> {
-    let notes = context
+    let mut notes = context
         .map(|ctx| {
             ctx.continuity_notes
                 .iter()
@@ -1013,6 +1014,13 @@ fn build_continuity_notes(
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    notes.sort_by(|a, b| {
+        score_continuity_note(b, structured_fields)
+            .cmp(&score_continuity_note(a, structured_fields))
+            .then(a.len().cmp(&b.len()))
+            .then(a.cmp(b))
+    });
+    notes.truncate(VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT);
     notes
 }
 
@@ -1343,7 +1351,11 @@ fn looks_like_silence(text: &str) -> bool {
 fn select_video_prompt_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
+    let structured_fields = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description);
     let mut scored = rows
         .iter()
         .filter_map(|row| {
@@ -1375,22 +1387,78 @@ fn select_video_prompt_memory_notes(
                             clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
                         })
                 })?;
-            Some((score, note))
+            let continuity_score = score_continuity_note(&note, structured_fields.as_ref());
+            Some((score + continuity_score, continuity_score, note))
         })
         .collect::<Vec<_>>();
-    scored.sort_by(|a, b| b.0.cmp(&a.0));
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(b.1.cmp(&a.1))
+            .then(a.2.len().cmp(&b.2.len()))
+            .then(a.2.cmp(&b.2))
+    });
 
     let mut notes = Vec::new();
-    for (_, note) in scored {
+    for (_, _, note) in scored {
         if notes.iter().any(|existing| existing == &note) {
             continue;
         }
         notes.push(note);
-        if notes.len() >= VIDEO_PROMPT_MEMORY_NOTE_LIMIT {
+        if notes.len() >= VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT {
             break;
         }
     }
     notes
+}
+
+fn score_continuity_note(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> i32 {
+    let mut score = 0;
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return score;
+    }
+    for fragment in normalized.split('，').map(normalize_prompt_text) {
+        if fragment.is_empty() {
+            continue;
+        }
+        if fragment.contains("上一镜头") {
+            score += 24;
+        }
+        if [
+            "走位", "站位", "方向", "构图", "衔接", "连续", "延续", "保持", "统一",
+        ]
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
+        {
+            score += 12;
+        }
+        if ["镜头", "情绪", "光影", "场景"]
+            .iter()
+            .any(|prefix| fragment.starts_with(prefix))
+        {
+            score += 2;
+        }
+    }
+
+    if let Some(fields) = structured_fields {
+        let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
+            .into_iter()
+            .filter(|part| !part.is_empty())
+            .collect::<String>();
+        for fragment in normalized.split('，').map(normalize_prompt_text) {
+            if fragment.is_empty() {
+                continue;
+            }
+            if continuity_fragment_matches_fields(&fragment, fields, &expected_camera) {
+                score -= 8;
+            }
+        }
+    }
+
+    score
 }
 
 fn memory_storyboard_overlap_score(row: &str, storyboard_numeric_id: i32) -> i32 {
@@ -1813,6 +1881,38 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_keeps_single_strongest_continuity_note() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("保持低机位压迫感，镜头衔接统一".into()),
+            project_video_ratio: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec![
+                "黑色风衣，冷色长廊，刀身旧磨损，保持低机位压迫感".into(),
+                "保留上一镜头走位连续，人物站位不要跳轴".into(),
+            ],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+        let continuity_clause = prompt
+            .split("Continuity notes: ")
+            .nth(1)
+            .and_then(|value| value.split('.').next())
+            .unwrap_or("");
+
+        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续，人物站位不要跳轴."));
+        assert_eq!(prompt.matches("Continuity notes:").count(), 1);
+        assert!(!continuity_clause.contains("保持低机位压迫感"));
+    }
+
+    #[test]
     fn select_video_prompt_memory_notes_keeps_only_matching_storyboard_entries() {
         let rows = vec![
             AgentMemoryRow {
@@ -1832,13 +1932,15 @@ mod tests {
                 content: "tool=run_sub_agent_derive_assets | scope=storyboardIds=12 | result=无关素材".to_string(),
             },
         ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主转身回望".into()),
+            video_desc: Some("（女主转身回望、旧宅走廊、女主、5秒、近景、稳定跟拍、回头确认身后动静、紧张、冷调逆光、无台词、脚步回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
 
         assert_eq!(
-            select_video_prompt_memory_notes(&rows, 12),
-            vec![
-                "保持女主冷色调近景".to_string(),
-                "保持镜头方向连续".to_string()
-            ]
+            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            vec!["保持镜头方向连续".to_string()]
         );
     }
 
