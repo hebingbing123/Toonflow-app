@@ -1165,12 +1165,9 @@ fn build_video_prompt(
             if let Some(action) = action.as_ref() {
                 clauses.push(format!("Action: {}.", clip_prompt_fragment(&action, 72)));
             }
-            let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
-                .into_iter()
-                .filter(|part| !part.is_empty())
-                .collect::<Vec<_>>()
-                .join(", ");
-            if !camera.is_empty() {
+            if let Some(camera) =
+                compact_camera_clause(&fields.shot, &fields.camera_move, &style_coverage)
+            {
                 clauses.push(format!("Camera: {}.", clip_prompt_fragment(&camera, 40)));
             }
             if !fields.mood.is_empty() && !prompt_fragment_is_covered(&fields.mood, &style_coverage)
@@ -1336,6 +1333,24 @@ fn continuity_tail_matches(value: &str) -> bool {
         && ["稳定", "跟拍", "衔接", "连续", "一致", "统一"]
             .iter()
             .any(|keyword| normalized.contains(keyword))
+}
+
+fn compact_camera_clause(
+    shot: &str,
+    camera_move: &str,
+    style_coverage: &[String],
+) -> Option<String> {
+    let parts = [shot, camera_move]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .filter(|part| !part.is_empty())
+        .filter(|part| !prompt_fragment_is_covered(part, style_coverage))
+        .collect::<Vec<_>>();
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join(", "))
+    }
 }
 
 fn continuity_note_adds_specific_guidance(fragment: &str) -> bool {
@@ -3735,13 +3750,13 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_video_prompt, compact_negative_constraint_against_storyboard_style,
-        compact_script_asset_anchor, parse_structured_storyboard_description,
-        resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
-        select_video_prompt_memory_notes, select_video_prompt_style_notes,
-        trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
-        video_prompt_observation_conflicts_with_style,
+        build_video_prompt, compact_camera_clause,
+        compact_negative_constraint_against_storyboard_style, compact_script_asset_anchor,
+        parse_structured_storyboard_description, resolve_observation_filter_style_note,
+        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
+        select_best_video_prompt_observation_note, select_video_prompt_memory_notes,
+        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
+        trim_video_prompt_observation_rows, video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
         ScriptRolePromptSeedRow, VideoPromptContext,
     };
@@ -4035,6 +4050,24 @@ mod tests {
         assert!(!prompt.contains("镜头中景稳定跟拍"), "{prompt}");
         assert!(prompt.contains("Mood: 急迫."), "{prompt}");
         assert!(prompt.contains("Lighting: 阴天冷光."), "{prompt}");
+    }
+
+    #[test]
+    fn compact_camera_clause_drops_axes_already_covered_by_style_anchor() {
+        let camera = compact_camera_clause(
+            "低机位近景",
+            "稳定跟拍",
+            &["镜头低机位近景稳定跟拍电影感".to_string()],
+        );
+
+        assert_eq!(camera, None);
+    }
+
+    #[test]
+    fn compact_camera_clause_keeps_only_uncovered_axis() {
+        let camera = compact_camera_clause("中景", "稳定跟拍", &["镜头稳定跟拍压迫感".to_string()]);
+
+        assert_eq!(camera.as_deref(), Some("中景"));
     }
 
     #[test]
