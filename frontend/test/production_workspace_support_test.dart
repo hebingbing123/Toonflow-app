@@ -243,6 +243,59 @@ void main() {
   );
 
   test(
+    'buildProductionSuggestedSubAgentArgs narrows derive-assets from script plan asset ids',
+    () {
+      final args = buildProductionSuggestedSubAgentArgs(
+        subAgentTool: 'run_sub_agent_derive_assets',
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'scriptPlan',
+        result: <String, dynamic>{
+          'data': '''
+<scriptPlan>
+先核对资产 #12、7 和 asset 5，再补齐缺失衍生素材。
+</scriptPlan>
+''',
+        },
+      );
+
+      expect(args, <String, dynamic>{
+        'assetIds': <int>[5, 7, 12],
+      });
+    },
+  );
+
+  test(
+    'buildProductionSuggestedSubAgentArgs narrows storyboard generation to missing shots and related assets',
+    () {
+      final args = buildProductionSuggestedSubAgentArgs(
+        subAgentTool: 'run_sub_agent_storyboard_gen',
+        toolName: 'get_flowData',
+        suggestedFlowKey: 'storyboard',
+        result: <String, dynamic>{
+          'data': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 11,
+              'associateAssetsIds': <int>[7, 12],
+              'shouldGenerateImage': true,
+            },
+            <String, dynamic>{
+              'id': 12,
+              'src': 'https://example.com/12.png',
+              'associateAssetsIds': <int>[30],
+              'shouldGenerateImage': true,
+            },
+          ],
+        },
+      );
+
+      expect(args, <String, dynamic>{
+        'storyboardIds': <int>[11],
+        'assetIds': <int>[7, 12],
+      });
+    },
+  );
+
+  test(
     'buildProductionWorkspaceRecipes narrows asset refresh after asset sub-agent run',
     () {
       final recipes = buildProductionWorkspaceRecipes(

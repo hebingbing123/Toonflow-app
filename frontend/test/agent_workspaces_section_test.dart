@@ -22,6 +22,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -40,6 +41,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -59,6 +61,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -125,6 +129,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -146,6 +151,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -165,6 +171,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -180,8 +188,24 @@ void main() {
                 workspaceScriptPlanWritebackCandidate: null,
                 workspaceScriptPlanRowId: null,
                 workspaceScriptWritebackSource: null,
-                workspaceLastToolResultLine: 'line',
-                workspaceSuggestedFlowKey: null,
+                workspaceLastToolResultLine: 'get_flowData => storyboard',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'id': 101,
+                      'shouldGenerateImage': true,
+                      'associateAssetsIds': <int>[7, 12],
+                    },
+                    <String, dynamic>{
+                      'id': 102,
+                      'src': 'https://example.com/102.png',
+                      'shouldGenerateImage': true,
+                      'associateAssetsIds': <int>[30],
+                    },
+                  ],
+                },
+                workspaceSuggestedFlowKey: 'storyboard',
                 workspaceWritebackLine: null,
                 onRunScriptWorkspace: () {},
                 onRunProductionWorkspace: () {},
@@ -247,6 +271,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -263,6 +288,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -282,6 +308,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -360,6 +388,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -376,6 +405,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -395,6 +425,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -464,6 +496,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -486,6 +519,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -505,6 +539,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -603,6 +639,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -623,6 +660,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -643,6 +681,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -735,6 +775,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -755,6 +796,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -774,6 +816,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -971,6 +1015,7 @@ void main() {
       text: 'get_flowData',
     );
     final productionDomainArgsController = TextEditingController(text: '{}');
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
     final scriptSubAgentToolController = TextEditingController(
       text: 'run_sub_agent_storySkeleton',
     );
@@ -991,6 +1036,7 @@ void main() {
       flowKeyController.dispose();
       productionDomainToolController.dispose();
       productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
       scriptSubAgentToolController.dispose();
       productionSubAgentToolController.dispose();
     });
@@ -1010,6 +1056,8 @@ void main() {
                 flowKeyController: flowKeyController,
                 productionDomainToolController: productionDomainToolController,
                 productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
                 loadingScriptWorkspaceRun: false,
                 loadingProductionWorkspaceRun: false,
                 loadingScriptDomainProbe: false,
@@ -1025,8 +1073,24 @@ void main() {
                 workspaceScriptPlanWritebackCandidate: null,
                 workspaceScriptPlanRowId: null,
                 workspaceScriptWritebackSource: null,
-                workspaceLastToolResultLine: 'line',
-                workspaceSuggestedFlowKey: null,
+                workspaceLastToolResultLine: 'get_flowData => storyboard',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'id': 101,
+                      'shouldGenerateImage': true,
+                      'associateAssetsIds': <int>[7, 12],
+                    },
+                    <String, dynamic>{
+                      'id': 102,
+                      'src': 'https://example.com/102.png',
+                      'shouldGenerateImage': true,
+                      'associateAssetsIds': <int>[30],
+                    },
+                  ],
+                },
+                workspaceSuggestedFlowKey: 'storyboard',
                 workspaceWritebackLine: null,
                 onRunScriptWorkspace: () {},
                 onRunProductionWorkspace: () {},
@@ -1065,6 +1129,7 @@ void main() {
       productionSubAgentToolController.text,
       'run_sub_agent_derive_assets',
     );
+    expect(productionSubAgentArgsController.text, '{"assetIds":[7,12,30]}');
     expect(productionPromptController.text, isNotEmpty);
     expect(productionSubAgentCalls, 1);
 
@@ -1084,6 +1149,10 @@ void main() {
       productionSubAgentToolController.text,
       'run_sub_agent_storyboard_gen',
     );
+    expect(
+      productionSubAgentArgsController.text,
+      '{"storyboardIds":[101],"assetIds":[7,12]}',
+    );
     expect(productionSubAgentCalls, 2);
 
     await tester.tap(find.text('6) 运行导演计划子代理'));
@@ -1093,7 +1162,130 @@ void main() {
       productionSubAgentToolController.text,
       'run_sub_agent_director_plan',
     );
+    expect(
+      productionSubAgentArgsController.text,
+      '{"storyboardIds":[101],"assetIds":[7,12,30]}',
+    );
     expect(productionSubAgentCalls, 3);
+  });
+
+  testWidgets('Production sub-agent dropdown auto-fills focused args', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final projectIdController = TextEditingController(text: '1');
+    final scriptIdController = TextEditingController(text: '2');
+    final scriptPromptController = TextEditingController(text: '');
+    final scriptDomainArgsController = TextEditingController(text: '{}');
+    final productionPromptController = TextEditingController(text: '');
+    final flowKeyController = TextEditingController(text: 'scriptPlan');
+    final productionDomainToolController = TextEditingController(
+      text: 'get_flowData',
+    );
+    final productionDomainArgsController = TextEditingController(
+      text: '{"key":"scriptPlan"}',
+    );
+    final productionSubAgentArgsController = TextEditingController(text: '{}');
+    final scriptSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_storySkeleton',
+    );
+    final productionSubAgentToolController = TextEditingController(
+      text: 'run_sub_agent_director_plan',
+    );
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      projectIdController.dispose();
+      scriptIdController.dispose();
+      scriptPromptController.dispose();
+      scriptDomainArgsController.dispose();
+      productionPromptController.dispose();
+      flowKeyController.dispose();
+      productionDomainToolController.dispose();
+      productionDomainArgsController.dispose();
+      productionSubAgentArgsController.dispose();
+      scriptSubAgentToolController.dispose();
+      productionSubAgentToolController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: 1800,
+              child: AgentWorkspacesSection(
+                initialPane: AgentWorkspacePane.production,
+                projectIdController: projectIdController,
+                scriptIdController: scriptIdController,
+                scriptPromptController: scriptPromptController,
+                scriptDomainArgsController: scriptDomainArgsController,
+                productionPromptController: productionPromptController,
+                flowKeyController: flowKeyController,
+                productionDomainToolController: productionDomainToolController,
+                productionDomainArgsController: productionDomainArgsController,
+                productionSubAgentArgsController:
+                    productionSubAgentArgsController,
+                loadingScriptWorkspaceRun: false,
+                loadingProductionWorkspaceRun: false,
+                loadingScriptDomainProbe: false,
+                loadingProductionFlowProbe: false,
+                loadingScriptSubAgentRun: false,
+                loadingProductionSubAgentRun: false,
+                loadingScriptResultWriteback: false,
+                loadingScriptPlanResultWriteback: false,
+                loadingProductionResultWriteback: false,
+                wsLog: const <String>[],
+                workspaceAssistantText: '',
+                workspaceScriptWritebackCandidate: null,
+                workspaceScriptPlanWritebackCandidate: null,
+                workspaceScriptPlanRowId: null,
+                workspaceScriptWritebackSource: null,
+                workspaceLastToolResultLine: 'get_flowData => scriptPlan',
+                workspaceLastToolName: 'get_flowData',
+                workspaceLastToolResultData: const <String, dynamic>{
+                  'data': '''
+<scriptPlan>
+先核对资产 #12、7 和 asset 5，再补齐缺失衍生素材。
+</scriptPlan>
+''',
+                },
+                workspaceSuggestedFlowKey: 'scriptPlan',
+                workspaceWritebackLine: null,
+                onRunScriptWorkspace: () {},
+                onRunProductionWorkspace: () {},
+                onProbeScriptDomainTool: (_, _) {},
+                onProbeProductionDomainTool: () {},
+                scriptSubAgentToolController: scriptSubAgentToolController,
+                productionSubAgentToolController:
+                    productionSubAgentToolController,
+                onRunScriptSubAgentTool: () {},
+                onRunProductionSubAgentTool: () {},
+                onWriteBackScriptResult: () {},
+                onWriteBackScriptPlanResult: () {},
+                onWriteBackScriptPlanViaUpdateData: () {},
+                onWriteBackProductionFlowResult: () {},
+                onApplySuggestedFlowKey: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('run_sub_agent_director_plan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('run_sub_agent_derive_assets').last);
+    await tester.pumpAndSettle();
+
+    expect(
+      productionSubAgentToolController.text,
+      'run_sub_agent_derive_assets',
+    );
+    expect(productionSubAgentArgsController.text, '{"assetIds":[5,7,12]}');
   });
 
   testWidgets('Production form blocks invalid JSON args before probe', (
@@ -1622,10 +1814,7 @@ void main() {
                       'shouldGenerateImage': true,
                       'associateAssetsIds': <int>[7, 12],
                     },
-                    <String, dynamic>{
-                      'id': 102,
-                      'shouldGenerateImage': false,
-                    },
+                    <String, dynamic>{'id': 102, 'shouldGenerateImage': false},
                   ],
                 },
                 workspaceSuggestedFlowKey: 'storyboard',
@@ -1920,8 +2109,10 @@ void main() {
                   scriptDomainArgsController: scriptDomainArgsController,
                   productionPromptController: productionPromptController,
                   flowKeyController: flowKeyController,
-                  productionDomainToolController: productionDomainToolController,
-                  productionDomainArgsController: productionDomainArgsController,
+                  productionDomainToolController:
+                      productionDomainToolController,
+                  productionDomainArgsController:
+                      productionDomainArgsController,
                   loadingScriptWorkspaceRun: false,
                   loadingProductionWorkspaceRun: false,
                   loadingScriptDomainProbe: false,

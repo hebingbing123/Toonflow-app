@@ -552,6 +552,24 @@ Map<String, dynamic> buildProductionAssetTypeReadArgs({
   };
 }
 
+Map<String, dynamic> _buildProductionSubAgentArgsFromAssetReadArgs(
+  Map<String, dynamic> args,
+) {
+  final ids = args['ids'];
+  if (ids is List) {
+    return buildProductionSubAgentArgs(
+      assetIds: ids.map(_parseLooseInt).where((id) => id > 0).toList(),
+    );
+  }
+  final assetTypes = args['assetTypes'];
+  if (assetTypes is List) {
+    return buildProductionSubAgentArgs(
+      assetTypes: assetTypes.whereType<String>().toList(growable: false),
+    );
+  }
+  return const <String, dynamic>{};
+}
+
 List<int> extractProductionReferencedAssetIds(Object? flowData) {
   final ids = <int>{};
 
@@ -800,6 +818,96 @@ Map<String, dynamic> buildProductionSubAgentArgs({
     payload['assetTypes'] = normalizedAssetTypes;
   }
   return payload;
+}
+
+Map<String, dynamic> buildProductionSuggestedSubAgentArgs({
+  required String? subAgentTool,
+  required String? toolName,
+  required String? suggestedFlowKey,
+  required Object? result,
+  Map<String, dynamic>? toolArguments,
+}) {
+  final normalizedSubAgentTool = subAgentTool?.trim() ?? '';
+  final normalizedToolName = toolName?.trim() ?? '';
+  final normalizedFlowKey = suggestedFlowKey?.trim() ?? '';
+  final review = parseProductionSupervisionReview(result);
+
+  if (review != null) {
+    switch (normalizedSubAgentTool) {
+      case 'run_sub_agent_director_plan':
+        return buildProductionSubAgentArgs(
+          storyboardIds: review.storyboardIds,
+          assetIds: review.assetIds,
+          assetTypes: review.assetIds.isEmpty
+              ? review.assetTypes
+              : const <String>[],
+        );
+      case 'run_sub_agent_derive_assets':
+      case 'run_sub_agent_generate_assets':
+        return buildProductionReviewAssetSubAgentArgs(review);
+      case 'run_sub_agent_storyboard_gen':
+      case 'run_sub_agent_storyboard_panel':
+      case 'run_sub_agent_storyboard_table':
+        return buildProductionReviewStoryboardSubAgentArgs(review);
+    }
+  }
+
+  switch (normalizedSubAgentTool) {
+    case 'run_sub_agent_generate_assets':
+      return _buildProductionGenerateAssetsSubAgentArgs(
+        toolName: normalizedToolName,
+        suggestedFlowKey: normalizedFlowKey,
+        result: result,
+        toolArguments: toolArguments,
+      );
+    case 'run_sub_agent_derive_assets':
+      return _buildProductionDeriveAssetsSubAgentArgs(
+        toolName: normalizedToolName,
+        suggestedFlowKey: normalizedFlowKey,
+        result: result,
+      );
+    case 'run_sub_agent_storyboard_gen':
+    case 'run_sub_agent_storyboard_panel':
+      return _buildProductionStoryboardSubAgentArgs(
+        toolName: normalizedToolName,
+        suggestedFlowKey: normalizedFlowKey,
+        result: result,
+        toolArguments: toolArguments,
+      );
+    case 'run_sub_agent_storyboard_table':
+      return _buildProductionStoryboardTableSubAgentArgs(
+        toolName: normalizedToolName,
+        suggestedFlowKey: normalizedFlowKey,
+        result: result,
+        toolArguments: toolArguments,
+      );
+    case 'run_sub_agent_director_plan':
+      return _buildProductionDirectorPlanSubAgentArgs(
+        toolName: normalizedToolName,
+        suggestedFlowKey: normalizedFlowKey,
+        result: result,
+      );
+    default:
+      return const <String, dynamic>{};
+  }
+}
+
+Map<String, dynamic> buildProductionReviewAssetSubAgentArgs(
+  ProductionSupervisionReview review,
+) {
+  return _buildProductionSubAgentArgsFromAssetReadArgs(
+    buildProductionReviewAssetArgs(review),
+  );
+}
+
+Map<String, dynamic> buildProductionReviewStoryboardSubAgentArgs(
+  ProductionSupervisionReview review,
+) {
+  return buildProductionSubAgentArgs(
+    storyboardIds: review.storyboardIds,
+    assetIds: review.assetIds,
+    assetTypes: review.assetIds.isEmpty ? review.assetTypes : const <String>[],
+  );
 }
 
 List<int> extractProductionStoryboardIds(Object? flowData) {
@@ -1215,6 +1323,170 @@ List<ProductionWorkspaceArgumentSuggestion> _buildIdSuggestions(List<int> ids) {
         payload: <String, dynamic>{'ids': ids},
       ),
   ];
+}
+
+Map<String, dynamic> _buildProductionGenerateAssetsSubAgentArgs({
+  required String toolName,
+  required String suggestedFlowKey,
+  required Object? result,
+  Map<String, dynamic>? toolArguments,
+}) {
+  final candidateIds = extractProductionActionCandidateIds(
+    selectedTool: 'generate_deriveAsset',
+    toolName: toolName,
+    suggestedFlowKey: suggestedFlowKey,
+    result: result,
+    toolArguments: toolArguments,
+  );
+  if (candidateIds.isNotEmpty) {
+    return buildProductionSubAgentArgs(assetIds: candidateIds);
+  }
+  if (toolName == 'get_flowData' &&
+      suggestedFlowKey == 'assets' &&
+      result is Map<String, dynamic>) {
+    final pendingIds = extractProductionPendingDeriveAssetIds(result['data']);
+    if (pendingIds.isNotEmpty) {
+      return buildProductionSubAgentArgs(assetIds: pendingIds);
+    }
+  }
+  return const <String, dynamic>{};
+}
+
+Map<String, dynamic> _buildProductionDeriveAssetsSubAgentArgs({
+  required String toolName,
+  required String suggestedFlowKey,
+  required Object? result,
+}) {
+  if (toolName != 'get_flowData' || result is! Map<String, dynamic>) {
+    return const <String, dynamic>{};
+  }
+  switch (suggestedFlowKey) {
+    case 'scriptPlan':
+      return _buildProductionSubAgentArgsFromAssetReadArgs(
+        buildProductionScriptPlanAssetArgs(result['data']),
+      );
+    case 'storyboard':
+    case 'storyboardTable':
+      return buildProductionSubAgentArgs(
+        assetIds: extractProductionReferencedAssetIds(result['data']),
+      );
+    case 'assets':
+      final pendingIds = extractProductionPendingDeriveAssetIds(result['data']);
+      if (pendingIds.isNotEmpty) {
+        return buildProductionSubAgentArgs(assetIds: pendingIds);
+      }
+      return const <String, dynamic>{};
+    default:
+      return const <String, dynamic>{};
+  }
+}
+
+Map<String, dynamic> _buildProductionStoryboardSubAgentArgs({
+  required String toolName,
+  required String suggestedFlowKey,
+  required Object? result,
+  Map<String, dynamic>? toolArguments,
+}) {
+  final storyboardIds = extractProductionActionCandidateIds(
+    selectedTool: 'generate_storyboard',
+    toolName: toolName,
+    suggestedFlowKey: suggestedFlowKey,
+    result: result,
+    toolArguments: toolArguments,
+  );
+  if (storyboardIds.isNotEmpty) {
+    final flowData = result is Map<String, dynamic> ? result['data'] : null;
+    return buildProductionSubAgentArgs(
+      storyboardIds: storyboardIds,
+      assetIds: extractProductionReferencedAssetIdsForStoryboardIds(
+        flowData,
+        storyboardIds,
+      ),
+    );
+  }
+  if (toolName == 'get_flowData' &&
+      suggestedFlowKey == 'storyboard' &&
+      result is Map<String, dynamic>) {
+    final flowData = result['data'];
+    final missingIds = extractProductionStoryboardMissingImageIds(flowData);
+    if (missingIds.isNotEmpty) {
+      return buildProductionSubAgentArgs(
+        storyboardIds: missingIds,
+        assetIds: extractProductionReferencedAssetIdsForStoryboardIds(
+          flowData,
+          missingIds,
+        ),
+      );
+    }
+  }
+  return const <String, dynamic>{};
+}
+
+Map<String, dynamic> _buildProductionStoryboardTableSubAgentArgs({
+  required String toolName,
+  required String suggestedFlowKey,
+  required Object? result,
+  Map<String, dynamic>? toolArguments,
+}) {
+  final storyboardIds = extractProductionStoryboardPromptScopeIds(
+    toolName,
+    toolArguments,
+  );
+  if (storyboardIds.isNotEmpty) {
+    return buildProductionSubAgentArgs(storyboardIds: storyboardIds);
+  }
+  if (toolName == 'get_flowData' && result is Map<String, dynamic>) {
+    if (suggestedFlowKey == 'storyboard') {
+      final missingIds = extractProductionStoryboardMissingImageIds(
+        result['data'],
+      );
+      if (missingIds.isNotEmpty) {
+        return buildProductionSubAgentArgs(storyboardIds: missingIds);
+      }
+    }
+    if (suggestedFlowKey == 'storyboardTable') {
+      final ids = extractProductionStoryboardIds(result['data']);
+      if (ids.isNotEmpty) {
+        return buildProductionSubAgentArgs(storyboardIds: ids);
+      }
+    }
+  }
+  return const <String, dynamic>{};
+}
+
+Map<String, dynamic> _buildProductionDirectorPlanSubAgentArgs({
+  required String toolName,
+  required String suggestedFlowKey,
+  required Object? result,
+}) {
+  if (toolName != 'get_flowData' || result is! Map<String, dynamic>) {
+    return const <String, dynamic>{};
+  }
+  switch (suggestedFlowKey) {
+    case 'scriptPlan':
+      return _buildProductionSubAgentArgsFromAssetReadArgs(
+        buildProductionScriptPlanAssetArgs(result['data']),
+      );
+    case 'storyboard':
+      final missingIds = extractProductionStoryboardMissingImageIds(
+        result['data'],
+      );
+      final storyboardIds = missingIds.isNotEmpty
+          ? missingIds
+          : extractProductionStoryboardIds(result['data']);
+      return buildProductionSubAgentArgs(
+        storyboardIds: storyboardIds,
+        assetIds: extractProductionReferencedAssetIds(result['data']),
+      );
+    case 'assets':
+      final pendingIds = extractProductionPendingDeriveAssetIds(result['data']);
+      if (pendingIds.isNotEmpty) {
+        return buildProductionSubAgentArgs(assetIds: pendingIds);
+      }
+      return const <String, dynamic>{};
+    default:
+      return const <String, dynamic>{};
+  }
 }
 
 List<int> _extractDeriveAssetIds(Object? value) {

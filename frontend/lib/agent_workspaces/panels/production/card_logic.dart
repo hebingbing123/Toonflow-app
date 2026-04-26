@@ -141,6 +141,18 @@ extension _AgentWorkspaceProductionCardLogic
     widget.productionPromptController.text = prompt;
   }
 
+  void _applySuggestedSubAgentArgs(String toolName) {
+    widget.productionSubAgentArgsController.text = jsonEncode(
+      buildProductionSuggestedSubAgentArgs(
+        subAgentTool: toolName,
+        toolName: widget.workspaceLastToolName,
+        suggestedFlowKey: widget.workspaceSuggestedFlowKey,
+        result: widget.workspaceLastToolResultData,
+        toolArguments: widget.workspaceLastToolArguments,
+      ),
+    );
+  }
+
   String get _selectedProductionTool =>
       widget.productionDomainToolController.text.trim();
 
@@ -156,7 +168,7 @@ extension _AgentWorkspaceProductionCardLogic
       onRunAssetsSubAgent: () {
         _applyProductionPromptIfEmpty('请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。');
         widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
-        widget.productionSubAgentArgsController.text = '{}';
+        _applySuggestedSubAgentArgs('run_sub_agent_derive_assets');
         _runProductionSubAgentTool();
       },
       onPullStoryboardFlow: () {
@@ -169,7 +181,7 @@ extension _AgentWorkspaceProductionCardLogic
         widget.onFlowKeyChanged('storyboard');
         _applyProductionPromptIfEmpty('请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。');
         widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
-        widget.productionSubAgentArgsController.text = '{}';
+        _applySuggestedSubAgentArgs('run_sub_agent_storyboard_gen');
         _runProductionSubAgentTool();
       },
       onRunDirectorPlanSubAgent: () {
@@ -178,7 +190,7 @@ extension _AgentWorkspaceProductionCardLogic
           '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
         );
         widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
-        widget.productionSubAgentArgsController.text = '{}';
+        _applySuggestedSubAgentArgs('run_sub_agent_director_plan');
         _runProductionSubAgentTool();
       },
     );

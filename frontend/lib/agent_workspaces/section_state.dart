@@ -78,6 +78,22 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         );
   }
 
+  void _maybeApplyProductionSubAgentArgsPreset(String toolName) {
+    final current = _productionSubAgentArgsController.text;
+    if (!_isDefaultJsonObject(current)) {
+      return;
+    }
+    _productionSubAgentArgsController.text = jsonEncode(
+      buildProductionSuggestedSubAgentArgs(
+        subAgentTool: toolName,
+        toolName: widget.workspaceLastToolName,
+        suggestedFlowKey: widget.workspaceSuggestedFlowKey,
+        result: widget.workspaceLastToolResultData,
+        toolArguments: widget.workspaceLastToolArguments,
+      ),
+    );
+  }
+
   bool get _busy =>
       widget.loadingScriptWorkspaceRun ||
       widget.loadingProductionWorkspaceRun ||
@@ -189,6 +205,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             setState(() {
               widget.productionSubAgentToolController.text = value;
               _productionSubAgentArgsController.text = '{}';
+              _maybeApplyProductionSubAgentArgsPreset(value);
             });
           },
           onRunProductionSubAgentTool: widget.onRunProductionSubAgentTool,
