@@ -498,7 +498,10 @@ fn select_prioritized_video_style_notes(
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
     let context = build_style_note_selection_context(storyboard_row);
-    let mut candidates = collect_ranked_video_style_note_candidates(rows, storyboard_numeric_id);
+    let mut candidates = collect_ranked_video_style_note_candidates(rows, storyboard_numeric_id)
+        .into_iter()
+        .filter(|candidate| ranked_style_note_is_worth_recalling(candidate, &context))
+        .collect::<Vec<_>>();
     candidates.sort_by(|a, b| {
         score_ranked_style_note(b, &context)
             .cmp(&score_ranked_style_note(a, &context))
@@ -694,6 +697,93 @@ fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionC
         }
     }
     score
+}
+
+fn ranked_style_note_is_worth_recalling(
+    note: &RankedStyleNote,
+    context: &StyleNoteSelectionContext,
+) -> bool {
+    if style_note_selection_context_is_empty(context) {
+        return true;
+    }
+
+    let evidence = score_style_note_context_evidence(note, context);
+    match note.source_name.as_str() {
+        "selected_video_memory" => evidence >= 1,
+        "script_video_style_memory" => evidence >= 2,
+        "project_video_style_memory" => evidence >= 3,
+        _ => false,
+    }
+}
+
+fn style_note_selection_context_is_empty(context: &StyleNoteSelectionContext) -> bool {
+    [
+        context.description.as_str(),
+        context.subject.as_str(),
+        context.action.as_str(),
+        context.shot.as_str(),
+        context.camera_move.as_str(),
+        context.mood.as_str(),
+        context.lighting.as_str(),
+    ]
+    .into_iter()
+    .all(|value| value.is_empty())
+}
+
+fn score_style_note_context_evidence(
+    note: &RankedStyleNote,
+    context: &StyleNoteSelectionContext,
+) -> usize {
+    let mut evidence = 0usize;
+    let fragments = note
+        .note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>();
+
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("情绪") && !context.mood.is_empty() && fragment.contains(&context.mood)
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("光影")
+            && !context.lighting.is_empty()
+            && fragment.contains(&context.lighting)
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("镜头")
+            && ((!context.shot.is_empty() && fragment.contains(&context.shot))
+                || (!context.camera_move.is_empty() && fragment.contains(&context.camera_move)))
+    }) {
+        evidence += 2;
+    }
+    if !context.subject.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| fragment.contains(&context.subject))
+    {
+        evidence += 1;
+    }
+    if !context.action.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| fragment.contains(&context.action))
+    {
+        evidence += 1;
+    }
+    if !context.description.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| context.description.contains(fragment))
+    {
+        evidence += 1;
+    }
+
+    evidence
 }
 
 fn local_shot_framing_fragment(fragment: &str) -> bool {
@@ -3155,6 +3245,53 @@ mod tests {
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["情绪冷色压迫感，光影冷调逆光".to_string()]
+        );
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_skips_script_and_project_style_when_context_mismatch_is_weak()
+    {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=8 | style=镜头环绕，情绪热烈，光影暖金逆光 | note=镜头环绕，情绪热烈，光影暖金逆光".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、静止镜头、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(select_prioritized_video_style_notes(&rows, 12, None, Some(&storyboard_row))
+            .is_empty());
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_allows_script_summary_when_multiple_fields_match() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光 | note=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=8 | style=镜头环绕，情绪热烈，光影暖金逆光 | note=镜头环绕，情绪热烈，光影暖金逆光".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_prioritized_video_style_notes(&rows, 12, None, Some(&storyboard_row)),
+            vec!["镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".to_string()]
         );
     }
 
