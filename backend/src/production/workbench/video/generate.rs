@@ -859,7 +859,14 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
         ),
         (
             &[
-                "压迫", "紧张", "太冷", "冷调", "冷峻", "frantic", "oppressive", "cold mood",
+                "压迫",
+                "紧张",
+                "太冷",
+                "冷调",
+                "冷峻",
+                "frantic",
+                "oppressive",
+                "cold mood",
             ][..],
             "avoid overly cold, oppressive, or frantic mood",
         ),
@@ -868,7 +875,14 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
             "avoid harsh backlight silhouette",
         ),
         (
-            &["冷光", "色温", "曝光死", "光太平", "flat lighting", "cold lighting"][..],
+            &[
+                "冷光",
+                "色温",
+                "曝光死",
+                "光太平",
+                "flat lighting",
+                "cold lighting",
+            ][..],
             "avoid flat cold lighting",
         ),
         (
