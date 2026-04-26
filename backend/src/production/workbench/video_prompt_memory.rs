@@ -14,6 +14,7 @@ const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
+const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
@@ -527,7 +528,11 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
             rejected_video_negative_rejection_count(&row.content)
                 >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
-        .filter_map(|row| extract_key_value(&row.content, "avoid"))
+        .filter_map(|row| {
+            extract_key_value(&row.content, "avoid")
+                .map(|avoid| compact_rejected_negative_avoid(&avoid))
+                .filter(|avoid| !avoid.is_empty())
+        })
         .take(1)
         .collect()
 }
@@ -560,16 +565,90 @@ pub(crate) fn select_pending_rejected_video_observation_note(
 }
 
 fn select_primary_observation_fragment(avoid: &str) -> Option<String> {
-    avoid
-        .split(',')
-        .map(normalize_prompt_text)
-        .filter(|fragment| !fragment.is_empty())
+    rejected_negative_fragments(avoid)
+        .into_iter()
         .map(|fragment| {
             let note = clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
             (score_pending_observation_note(&note), note)
         })
         .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.len().cmp(&a.1.len())))
         .map(|(_, note)| note)
+}
+
+fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
+    avoid
+        .split(',')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect()
+}
+
+fn compact_rejected_negative_avoid(avoid: &str) -> String {
+    let mut scored = rejected_negative_fragments(avoid)
+        .into_iter()
+        .enumerate()
+        .map(|(idx, fragment)| {
+            (
+                score_rejected_negative_fragment(&fragment),
+                idx,
+                clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS),
+            )
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+
+    let mut selected = Vec::new();
+    for (_, _, fragment) in scored {
+        if selected.iter().any(|existing| existing == &fragment) {
+            continue;
+        }
+        selected.push(fragment);
+        if selected.len() >= REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT {
+            break;
+        }
+    }
+    selected.join(", ")
+}
+
+fn score_rejected_negative_fragment(fragment: &str) -> i32 {
+    let normalized = normalize_prompt_text(fragment).to_lowercase();
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    for keyword in [
+        "shaky", "handheld", "motion", "camera", "shot", "framing", "镜头", "运镜", "抖动",
+        "跳轴", "机位",
+    ] {
+        if normalized.contains(keyword) {
+            score += 20;
+        }
+    }
+    for keyword in [
+        "flicker", "jitter", "stutter", "blur", "warped", "anatom", "face", "identity",
+        "costume", "flash", "闪烁", "变形", "崩坏",
+    ] {
+        if normalized.contains(keyword) {
+            score += 18;
+        }
+    }
+    for keyword in [
+        "lighting", "light", "silhouette", "backlight", "cold", "neon", "flat", "光影", "逆光",
+        "冷光", "曝光", "反光",
+    ] {
+        if normalized.contains(keyword) {
+            score += 12;
+        }
+    }
+    for keyword in [
+        "mood", "emotion", "oppressive", "frantic", "tone", "情绪", "压迫", "冷调", "悲怆",
+    ] {
+        if normalized.contains(keyword) {
+            score += 8;
+        }
+    }
+    score - normalized.chars().count() as i32 / 8
 }
 
 fn score_pending_observation_note(note: &str) -> i32 {
@@ -1392,7 +1471,8 @@ mod tests {
         build_project_video_style_memory, build_rejected_video_negative_memory,
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
-        compact_video_continuity_note, merge_rejected_video_negative_memory,
+        compact_rejected_negative_avoid, compact_video_continuity_note,
+        merge_rejected_video_negative_memory,
         parse_structured_storyboard_description, rejected_video_negative_rejection_count,
         select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
@@ -1556,6 +1636,23 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_keeps_two_strongest_fragments() {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=3 | avoid=avoid oppressive or frantic mood, avoid flat cold lighting, avoid shaky handheld motion".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid shaky handheld motion, avoid flat cold lighting".to_string()]
+        );
+    }
+
+    #[test]
     fn select_pending_rejected_video_observation_note_reads_single_rejection_noise() {
         let note = select_pending_rejected_video_observation_note(
             &[AgentMemoryRow {
@@ -1663,6 +1760,18 @@ mod tests {
         );
 
         assert_eq!(note, Some("avoid shaky handheld motion".into()));
+    }
+
+    #[test]
+    fn compact_rejected_negative_avoid_preserves_original_order_for_same_priority() {
+        let compacted = compact_rejected_negative_avoid(
+            "avoid flat cold lighting, avoid harsh backlight silhouette, avoid oppressive or frantic mood",
+        );
+
+        assert_eq!(
+            compacted,
+            "avoid flat cold lighting, avoid harsh backlight silhouette"
+        );
     }
 
     #[test]

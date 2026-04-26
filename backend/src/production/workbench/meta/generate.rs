@@ -763,8 +763,46 @@ fn build_video_prompt(
     if image_url.is_some() {
         clauses.push("Use the supplied frame as the visual reference.".to_string());
     }
-    clauses.push("Natural motion, stable continuity, no extra shot changes.".to_string());
+    clauses.push(build_video_prompt_quality_tail(
+        context,
+        structured_fields.as_ref(),
+        &continuity_notes,
+    ));
     clauses.join(" ")
+}
+
+fn build_video_prompt_quality_tail(
+    context: Option<&VideoPromptContext>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    continuity_notes: &[String],
+) -> String {
+    let camera = structured_fields
+        .map(|fields| {
+            [fields.shot.as_str(), fields.camera_move.as_str()]
+                .into_iter()
+                .filter(|part| !part.is_empty())
+                .collect::<String>()
+        })
+        .unwrap_or_default();
+    let continuity_is_explicit = !continuity_notes.is_empty()
+        || continuity_tail_matches(&camera)
+        || context
+            .and_then(|ctx| ctx.project_director_manual.as_deref())
+            .is_some_and(continuity_tail_matches);
+
+    if continuity_is_explicit {
+        "Natural motion, no extra shot changes.".to_string()
+    } else {
+        "Natural motion, stable continuity, no extra shot changes.".to_string()
+    }
+}
+
+fn continuity_tail_matches(value: &str) -> bool {
+    let normalized = normalize_prompt_text(value);
+    !normalized.is_empty()
+        && ["稳定", "跟拍", "衔接", "连续", "一致", "统一"]
+            .iter()
+            .any(|keyword| normalized.contains(keyword))
 }
 
 fn resolve_video_prompt_description(
@@ -1910,6 +1948,56 @@ mod tests {
         assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续，人物站位不要跳轴."));
         assert_eq!(prompt.matches("Continuity notes:").count(), 1);
         assert!(!continuity_clause.contains("保持低机位压迫感"));
+        assert!(prompt.contains("Natural motion, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_shortens_quality_tail_when_camera_already_implies_stability() {
+        let prompt = build_video_prompt(
+            Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）"),
+            None,
+            Some(&VideoPromptContext {
+                storyboard_prompt: None,
+                storyboard_video_desc: None,
+                storyboard_duration: None,
+                storyboard_prompt_seed: None,
+                project_art_style: None,
+                project_director_manual: None,
+                project_video_ratio: None,
+                script_role_anchors: Vec::new(),
+                script_scene_anchors: Vec::new(),
+                script_tool_anchors: Vec::new(),
+                memory_style_notes: Vec::new(),
+                continuity_notes: Vec::new(),
+            }),
+        );
+
+        assert!(prompt.contains("Natural motion, no extra shot changes."));
+        assert!(!prompt.contains("Natural motion, stable continuity, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_full_quality_tail_without_continuity_signal() {
+        let prompt = build_video_prompt(
+            Some("主角在空旷仓库内缓慢抬头，周围静止无风。"),
+            None,
+            Some(&VideoPromptContext {
+                storyboard_prompt: None,
+                storyboard_video_desc: None,
+                storyboard_duration: None,
+                storyboard_prompt_seed: None,
+                project_art_style: None,
+                project_director_manual: None,
+                project_video_ratio: None,
+                script_role_anchors: Vec::new(),
+                script_scene_anchors: Vec::new(),
+                script_tool_anchors: Vec::new(),
+                memory_style_notes: Vec::new(),
+                continuity_notes: Vec::new(),
+            }),
+        );
+
+        assert!(prompt.contains("Natural motion, stable continuity, no extra shot changes."));
     }
 
     #[test]
