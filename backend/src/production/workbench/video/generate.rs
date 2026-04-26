@@ -1411,6 +1411,7 @@ struct CharacterConsistencyFlags {
 
 #[derive(Debug, Default, Clone, Copy)]
 struct VisualStyleConstraintFlags {
+    unnecessary_shot_changes: bool,
     extreme_camera_angle: bool,
     tight_close_up: bool,
     oppressive_or_frantic_mood: bool,
@@ -1445,6 +1446,7 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
         }
         if let Some(flags) = parse_visual_style_constraint_fragment(&fragment) {
             visual_style_idx.get_or_insert(idx);
+            visual_style_flags.unnecessary_shot_changes |= flags.unnecessary_shot_changes;
             visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
             visual_style_flags.tight_close_up |= flags.tight_close_up;
             visual_style_flags.oppressive_or_frantic_mood |= flags.oppressive_or_frantic_mood;
@@ -1477,10 +1479,12 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
         }
     }
     compacted.sort_by(|a, b| a.0.cmp(&b.0));
-    compacted
-        .into_iter()
-        .map(|(_, fragment)| fragment)
-        .collect()
+    compact_rushed_motion_and_jerky_fragment_pair(
+        compacted
+            .into_iter()
+            .map(|(_, fragment)| fragment)
+            .collect(),
+    )
 }
 
 fn parse_character_consistency_fragment(fragment: &str) -> Option<CharacterConsistencyFlags> {
@@ -1518,6 +1522,16 @@ fn render_character_consistency_fragment(flags: CharacterConsistencyFlags) -> St
 fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleConstraintFlags> {
     let canonical = canonical_negative_fragment(fragment);
     match canonical.as_str() {
+        "avoid unnecessary shot changes" => Some(VisualStyleConstraintFlags {
+            unnecessary_shot_changes: true,
+            ..Default::default()
+        }),
+        "avoid extra shot changes or wrong framing" => Some(VisualStyleConstraintFlags {
+            unnecessary_shot_changes: true,
+            extreme_camera_angle: true,
+            tight_close_up: true,
+            ..Default::default()
+        }),
         "avoid extreme camera angle" => Some(VisualStyleConstraintFlags {
             extreme_camera_angle: true,
             ..Default::default()
@@ -1567,7 +1581,11 @@ fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleC
 
 fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -> Vec<String> {
     let mut fragments = Vec::new();
-    if flags.extreme_camera_angle && flags.tight_close_up {
+    if flags.unnecessary_shot_changes && (flags.extreme_camera_angle || flags.tight_close_up) {
+        fragments.push("avoid extra shot changes or wrong framing".to_string());
+    } else if flags.unnecessary_shot_changes {
+        fragments.push("avoid unnecessary shot changes".to_string());
+    } else if flags.extreme_camera_angle && flags.tight_close_up {
         fragments.push("avoid extreme camera angle or overly tight close-up framing".to_string());
     } else if flags.extreme_camera_angle {
         fragments.push("avoid extreme camera angle".to_string());
@@ -1692,6 +1710,34 @@ fn negative_fragment_is_covered(candidate: &str, existing_fragments: &[String]) 
         .any(|existing| negative_fragment_covers(existing, candidate))
 }
 
+fn character_consistency_flags_cover(
+    existing: CharacterConsistencyFlags,
+    candidate: CharacterConsistencyFlags,
+) -> bool {
+    (!candidate.face_distortion || existing.face_distortion)
+        && (!candidate.identity_drift || existing.identity_drift)
+        && (!candidate.costume_inconsistency || existing.costume_inconsistency)
+}
+
+fn visual_error_flags_cover(existing: VisualErrorFlags, candidate: VisualErrorFlags) -> bool {
+    (!candidate.warped_anatomy || existing.warped_anatomy)
+        && (!candidate.blur || existing.blur)
+        && (!candidate.flicker || existing.flicker)
+}
+
+fn visual_style_constraint_flags_cover(
+    existing: VisualStyleConstraintFlags,
+    candidate: VisualStyleConstraintFlags,
+) -> bool {
+    (!candidate.unnecessary_shot_changes || existing.unnecessary_shot_changes)
+        && (!candidate.extreme_camera_angle || existing.extreme_camera_angle)
+        && (!candidate.tight_close_up || existing.tight_close_up)
+        && (!candidate.oppressive_or_frantic_mood || existing.oppressive_or_frantic_mood)
+        && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
+        && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
+        && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
+}
+
 fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
     if let (Some(existing_flags), Some(candidate_flags)) = (
         parse_visual_error_fragment(existing),
@@ -1718,31 +1764,31 @@ fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
     negative_fragment_contains(existing, candidate)
 }
 
-fn character_consistency_flags_cover(
-    existing: CharacterConsistencyFlags,
-    candidate: CharacterConsistencyFlags,
-) -> bool {
-    (!candidate.face_distortion || existing.face_distortion)
-        && (!candidate.identity_drift || existing.identity_drift)
-        && (!candidate.costume_inconsistency || existing.costume_inconsistency)
-}
+fn compact_rushed_motion_and_jerky_fragment_pair(fragments: Vec<String>) -> Vec<String> {
+    let mut compacted = Vec::with_capacity(fragments.len());
+    let mut saw_rushed_motion = false;
+    let mut saw_motion_jitter = false;
 
-fn visual_error_flags_cover(existing: VisualErrorFlags, candidate: VisualErrorFlags) -> bool {
-    (!candidate.warped_anatomy || existing.warped_anatomy)
-        && (!candidate.blur || existing.blur)
-        && (!candidate.flicker || existing.flicker)
-}
+    for fragment in fragments {
+        match canonical_negative_fragment(&fragment).as_str() {
+            "avoid rushed motion" => saw_rushed_motion = true,
+            "avoid flicker or motion jitter" => saw_motion_jitter = true,
+            _ => compacted.push(fragment),
+        }
+    }
 
-fn visual_style_constraint_flags_cover(
-    existing: VisualStyleConstraintFlags,
-    candidate: VisualStyleConstraintFlags,
-) -> bool {
-    (!candidate.extreme_camera_angle || existing.extreme_camera_angle)
-        && (!candidate.tight_close_up || existing.tight_close_up)
-        && (!candidate.oppressive_or_frantic_mood || existing.oppressive_or_frantic_mood)
-        && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
-        && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
-        && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
+    if saw_rushed_motion && saw_motion_jitter {
+        compacted.push("avoid rushed or jerky motion".to_string());
+    } else {
+        if saw_rushed_motion {
+            compacted.push("avoid rushed motion".to_string());
+        }
+        if saw_motion_jitter {
+            compacted.push("avoid flicker or motion jitter".to_string());
+        }
+    }
+
+    compacted
 }
 
 fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {
@@ -2176,6 +2222,28 @@ mod tests {
             merged,
             "avoid extreme camera angle or overly tight close-up framing, avoid overly cold, oppressive, or frantic mood"
         );
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_shot_change_and_framing_into_single_fragment() {
+        let merged = merge_negative_prompts(
+            Some("avoid unnecessary shot changes"),
+            Some("avoid extreme camera angle or overly tight close-up framing"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid extra shot changes or wrong framing");
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_rushed_and_jerky_motion_into_single_fragment() {
+        let merged = merge_negative_prompts(
+            Some("avoid rushed motion"),
+            Some("avoid flicker or motion jitter"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid rushed or jerky motion");
     }
 
     #[test]
