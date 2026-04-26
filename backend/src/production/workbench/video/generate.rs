@@ -27,6 +27,13 @@ const VIDEO_NEGATIVE_PROMPT_MAX_CHARS: usize = 120;
 const VIDEO_NEGATIVE_REVIEW_BASE_LIMIT: i64 = 8;
 const VIDEO_NEGATIVE_REVIEW_PER_STORYBOARD_ROWS: i64 = 4;
 const VIDEO_NEGATIVE_REVIEW_MAX_LIMIT: i64 = 24;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_PER_STORYBOARD_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_REJECTED_MEMORY_MAX_LIMIT: i64 = 12;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_PER_STORYBOARD_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_SUMMARY_ROWS: i64 = 2;
+const VIDEO_NEGATIVE_SELECTED_MEMORY_MAX_LIMIT: i64 = 14;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -396,11 +403,17 @@ pub(crate) async fn load_auto_negative_prompts(
         user_id,
         project_numeric_id,
         script_numeric_id,
+        storyboard_ids.len(),
     )
     .await?;
-    let selected_rows =
-        load_selected_video_memory_rows(pool, user_id, project_numeric_id, script_numeric_id)
-            .await?;
+    let selected_rows = load_selected_video_memory_rows(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids.len(),
+    )
+    .await?;
     let storyboard_seed_rows = load_storyboard_prompt_seed_rows(
         pool,
         user_id,
@@ -435,7 +448,9 @@ async fn load_rejected_video_negative_memory_rows(
     user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
+    storyboard_count: usize,
 ) -> Result<Vec<AgentMemoryRow>, ApiError> {
+    let rejected_memory_row_limit = rejected_negative_memory_fetch_limit(storyboard_count);
     sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
@@ -447,12 +462,13 @@ async fn load_rejected_video_negative_memory_rows(
           AND memory_type = 'summary'
           AND name = 'rejected_video_negative_memory'
         ORDER BY create_time_ms DESC
-        LIMIT 8
+        LIMIT $4
         "#,
     )
     .bind(user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
+    .bind(rejected_memory_row_limit)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
@@ -505,7 +521,9 @@ async fn load_selected_video_memory_rows(
     user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
+    storyboard_count: usize,
 ) -> Result<Vec<AgentMemoryRow>, ApiError> {
+    let selected_memory_row_limit = selected_memory_fetch_limit(storyboard_count);
     sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
@@ -519,15 +537,41 @@ async fn load_selected_video_memory_rows(
             OR (episodes_id IS NULL AND name = 'project_video_style_memory')
           )
         ORDER BY create_time_ms DESC
-        LIMIT 8
+        LIMIT $4
         "#,
     )
     .bind(user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
+    .bind(selected_memory_row_limit)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
+fn rejected_negative_memory_fetch_limit(storyboard_count: usize) -> i64 {
+    if storyboard_count == 0 {
+        return VIDEO_NEGATIVE_REJECTED_MEMORY_BASE_LIMIT;
+    }
+
+    let storyboard_count = i64::try_from(storyboard_count).unwrap_or(i64::MAX);
+    (VIDEO_NEGATIVE_REJECTED_MEMORY_BASE_LIMIT
+        .max(storyboard_count.saturating_mul(VIDEO_NEGATIVE_REJECTED_MEMORY_PER_STORYBOARD_ROWS)))
+    .min(VIDEO_NEGATIVE_REJECTED_MEMORY_MAX_LIMIT)
+}
+
+fn selected_memory_fetch_limit(storyboard_count: usize) -> i64 {
+    if storyboard_count == 0 {
+        return VIDEO_NEGATIVE_SELECTED_MEMORY_BASE_LIMIT;
+    }
+
+    let storyboard_count = i64::try_from(storyboard_count).unwrap_or(i64::MAX);
+    (VIDEO_NEGATIVE_SELECTED_MEMORY_BASE_LIMIT.max(
+        storyboard_count
+            .saturating_mul(VIDEO_NEGATIVE_SELECTED_MEMORY_PER_STORYBOARD_ROWS)
+            .saturating_add(VIDEO_NEGATIVE_SELECTED_MEMORY_SUMMARY_ROWS),
+    ))
+    .min(VIDEO_NEGATIVE_SELECTED_MEMORY_MAX_LIMIT)
 }
 
 fn build_storyboard_negative_prompts(
@@ -1590,8 +1634,9 @@ mod tests {
         compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
         load_auto_negative_prompts, map_bad_case_category_with_comments, merge_negative_prompts,
         negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
-        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
-        review_fragment_is_irrelevant_to_storyboard, storyboard_dialogue_is_empty,
+        quality_review_row_matches_storyboard, rejected_negative_memory_fetch_limit,
+        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
+        selected_memory_fetch_limit, storyboard_dialogue_is_empty,
         storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
         QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
@@ -2431,5 +2476,21 @@ mod tests {
         assert_eq!(compact_video_ratio("horizontal"), Some("16:9".into()));
         assert_eq!(compact_video_ratio("square 1:1"), Some("1:1".into()));
         assert_eq!(compact_video_ratio(""), None);
+    }
+
+    #[test]
+    fn rejected_negative_memory_fetch_limit_scales_up_to_keep_window() {
+        assert_eq!(rejected_negative_memory_fetch_limit(0), 8);
+        assert_eq!(rejected_negative_memory_fetch_limit(1), 8);
+        assert_eq!(rejected_negative_memory_fetch_limit(5), 10);
+        assert_eq!(rejected_negative_memory_fetch_limit(9), 12);
+    }
+
+    #[test]
+    fn selected_memory_fetch_limit_reserves_room_for_summary_rows() {
+        assert_eq!(selected_memory_fetch_limit(0), 8);
+        assert_eq!(selected_memory_fetch_limit(1), 8);
+        assert_eq!(selected_memory_fetch_limit(4), 10);
+        assert_eq!(selected_memory_fetch_limit(8), 14);
     }
 }
