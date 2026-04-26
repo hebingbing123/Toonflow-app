@@ -496,6 +496,7 @@ pub(crate) async fn refresh_project_video_style_memory(
     .await
 }
 
+#[cfg(test)]
 pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
@@ -504,6 +505,7 @@ pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) ->
         .collect()
 }
 
+#[cfg(test)]
 pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == PROJECT_VIDEO_STYLE_MEMORY_NAME)
@@ -581,6 +583,7 @@ pub(crate) fn select_selected_video_memory_notes(
     notes
 }
 
+#[cfg(test)]
 pub(crate) fn select_neighbor_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
