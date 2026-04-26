@@ -19,6 +19,8 @@ pub(crate) struct WorkbenchGenerateVideoBody {
     pub(crate) script_id: i32,
     pub(crate) upload_data: Vec<GenerateVideoUploadItem>,
     pub(crate) prompt: String,
+    #[serde(default)]
+    pub(crate) negative_prompt: Option<String>,
     pub(crate) model: String,
     pub(crate) mode: String,
     pub(crate) resolution: String,

@@ -7,9 +7,11 @@ use crate::error::ApiError;
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
 const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
 const PROJECT_VIDEO_STYLE_MEMORY_NAME: &str = "project_video_style_memory";
+const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
+const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
@@ -106,6 +108,45 @@ pub(crate) fn build_selected_video_memory(
         parts.push(format!("duration={duration}"));
     }
     Some(parts.join(" | "))
+}
+
+pub(crate) fn build_rejected_video_negative_memory(
+    storyboard_numeric_id: i32,
+    row: &StoryboardPromptSeedRow,
+) -> Option<String> {
+    if storyboard_numeric_id <= 0 {
+        return None;
+    }
+
+    let fields = row
+        .video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)?;
+    let mut fragments = Vec::new();
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_shot_or_camera_fragment(&fields.shot),
+    );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_shot_or_camera_fragment(&fields.camera_move),
+    );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_mood_fragment(&fields.mood),
+    );
+    push_rejected_negative_fragment(
+        &mut fragments,
+        map_rejected_lighting_fragment(&fields.lighting),
+    );
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(format!(
+        "storyboardIds={storyboard_numeric_id} | avoid={}",
+        fragments.join(", ")
+    ))
 }
 
 pub(crate) async fn persist_selected_video_memory(
@@ -222,6 +263,120 @@ pub(crate) async fn clear_selected_video_memory(
     Ok(())
 }
 
+pub(crate) async fn persist_rejected_video_negative_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    content: &str,
+) -> Result<(), ApiError> {
+    let latest: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC
+        LIMIT 1
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if latest.as_deref() == Some(content) {
+        return Ok(());
+    }
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(content)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id IN (
+          SELECT id
+          FROM app_agent_memory
+          WHERE owner_user_id = $1
+            AND numeric_project_id = $2
+            AND episodes_id = $3
+            AND agent_type = 'productionAgent'
+            AND memory_type = 'summary'
+            AND name = $4
+          ORDER BY create_time_ms DESC
+          OFFSET $5
+        )
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
+pub(crate) async fn clear_rejected_video_negative_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<(), ApiError> {
+    if storyboard_numeric_id <= 0 {
+        return Ok(());
+    }
+    let storyboard_key = format!("storyboardIds={storyboard_numeric_id}");
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+          AND content LIKE $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(format!("%{storyboard_key}%"))
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    Ok(())
+}
+
 pub(crate) async fn refresh_script_video_style_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -314,6 +469,18 @@ pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -
     rows.iter()
         .filter(|row| row.name == PROJECT_VIDEO_STYLE_MEMORY_NAME)
         .filter_map(selected_video_style_value)
+        .take(1)
+        .collect()
+}
+
+pub(crate) fn select_rejected_video_negative_memory_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+) -> Vec<String> {
+    rows.iter()
+        .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+        .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
+        .filter_map(|row| extract_key_value(&row.content, "avoid"))
         .take(1)
         .collect()
 }
@@ -761,6 +928,70 @@ fn extract_style_keywords<'a>(
     matched
 }
 
+fn push_rejected_negative_fragment(target: &mut Vec<&'static str>, candidate: Option<&'static str>) {
+    let Some(candidate) = candidate else {
+        return;
+    };
+    if target.iter().any(|existing| existing == &candidate) {
+        return;
+    }
+    target.push(candidate);
+}
+
+fn map_rejected_shot_or_camera_fragment(value: &str) -> Option<&'static str> {
+    let value = normalize_prompt_text(value);
+    if value.is_empty() {
+        return None;
+    }
+    if value.contains("稳定跟拍") || value.contains("跟拍") || value.contains("推进") || value.contains("慢推") {
+        return Some("avoid repeating stable follow camera");
+    }
+    if value.contains("手持") {
+        return Some("avoid shaky handheld motion");
+    }
+    if value.contains("低机位") || value.contains("高机位") {
+        return Some("avoid extreme camera angle");
+    }
+    if value.contains("特写") || value.contains("近景") {
+        return Some("avoid overly tight close-up framing");
+    }
+    None
+}
+
+fn map_rejected_mood_fragment(value: &str) -> Option<&'static str> {
+    let value = normalize_prompt_text(value);
+    if value.is_empty() {
+        return None;
+    }
+    if value.contains("压迫") || value.contains("紧张") || value.contains("急迫") {
+        return Some("avoid oppressive or frantic mood");
+    }
+    if value.contains("冷峻") || value.contains("冷调") || value.contains("冷色") {
+        return Some("avoid overly cold emotional tone");
+    }
+    if value.contains("悲怆") {
+        return Some("avoid heavy tragic mood");
+    }
+    None
+}
+
+fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {
+    let value = normalize_prompt_text(value);
+    if value.is_empty() {
+        return None;
+    }
+    if value.contains("逆光") {
+        return Some("avoid harsh backlight silhouette");
+    }
+    if value.contains("冷光") || value.contains("阴天冷光") || value.contains("冷调") {
+        return Some("avoid flat cold lighting");
+    }
+    if value.contains("霓虹") || value.contains("反光") {
+        return Some("avoid distracting neon reflections");
+    }
+    None
+}
+
 async fn replace_summary_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -919,10 +1150,12 @@ async fn replace_project_summary_memory(
 mod tests {
     use super::{
         build_project_video_style_memory, build_script_video_style_memory,
-        build_selected_video_memory, clear_selected_video_memory, compact_video_continuity_note,
+        build_rejected_video_negative_memory, build_selected_video_memory,
+        clear_selected_video_memory, compact_video_continuity_note,
         parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
-        select_project_video_style_memory_notes, select_script_video_style_memory_notes,
-        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+        select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
+        select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -958,6 +1191,24 @@ mod tests {
         assert!(content.contains("镜头中景稳定跟拍"));
         assert!(content.contains("情绪急迫"));
         assert!(content.contains("duration=5s"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_extracts_short_retry_constraints() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角在走廊里冲出门外".into()),
+                video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("storyboardIds=12"));
+        assert!(content.contains("avoid=avoid repeating stable follow camera"));
+        assert!(content.contains("avoid oppressive or frantic mood"));
+        assert!(content.contains("avoid flat cold lighting"));
     }
 
     #[test]
@@ -1014,6 +1265,28 @@ mod tests {
                 "镜头近景稳定跟拍，情绪压迫".to_string(),
                 "镜头中景稳定跟拍，情绪冷峻，光影冷色夜景".to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn select_rejected_video_negative_memory_notes_keeps_matching_storyboard_only() {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=9 | avoid=avoid shaky handheld motion".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood".into(),
+                },
+            ],
+            12,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid flat cold lighting, avoid oppressive or frantic mood"]
         );
     }
 

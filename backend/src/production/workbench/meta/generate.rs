@@ -8,6 +8,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::meta::common::{
     clip_prompt_fragment, extract_key_value, normalize_prompt_text, parse_positive_int,
     parse_structured_storyboard_description, StructuredStoryboardDescription,
@@ -44,6 +45,7 @@ pub(in crate::production) struct GenerateVideoPromptBody {
 #[serde(rename_all = "camelCase")]
 pub(in crate::production) struct GenerateVideoPromptResponse {
     prompt: String,
+    negative_prompt: Option<String>,
     model: String,
     duration: i32,
 }
@@ -92,6 +94,18 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         body.image_url.as_deref(),
         context.as_ref(),
     );
+    let negative_prompt = if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+        load_auto_negative_prompt(
+            pool,
+            user_id,
+            body.project_id,
+            body.script_id,
+            &[storyboard_id],
+        )
+        .await?
+    } else {
+        None
+    };
     let duration = resolve_video_prompt_duration(
         body.duration_hint,
         body.description.as_deref(),
@@ -100,6 +114,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
 
     Ok(JsonResponse(GenerateVideoPromptResponse {
         prompt,
+        negative_prompt,
         model: "runway-gen-2".to_string(),
         duration,
     }))
