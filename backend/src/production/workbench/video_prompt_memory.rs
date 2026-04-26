@@ -15,6 +15,51 @@ const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
     "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
 ];
+const SHOT_STYLE_KEYWORDS: [&str; 16] = [
+    "低机位",
+    "高机位",
+    "特写",
+    "近景",
+    "中景",
+    "全景",
+    "远景",
+    "稳定跟拍",
+    "手持跟拍",
+    "稳定",
+    "手持",
+    "跟拍",
+    "慢推",
+    "推进",
+    "拉远",
+    "环绕",
+];
+const MOOD_STYLE_KEYWORDS: [&str; 11] = [
+    "冷峻压迫",
+    "紧张压迫",
+    "压迫感",
+    "压迫",
+    "冷峻",
+    "紧张",
+    "克制",
+    "悬疑",
+    "冷调",
+    "冷色",
+    "悲怆",
+];
+const LIGHTING_STYLE_KEYWORDS: [&str; 12] = [
+    "阴天冷光",
+    "暖金逆光",
+    "冷调逆光",
+    "冷色逆光",
+    "霓虹反光",
+    "潮湿反光",
+    "侧逆光",
+    "逆光",
+    "冷调",
+    "冷光",
+    "暖光",
+    "霓虹",
+];
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
@@ -566,7 +611,7 @@ fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
     let mut recurring = Vec::new();
 
     for prefix in ["镜头", "情绪", "光影", "场景"] {
-        if let Some(fragment) = pick_recurring_prefixed_fragment(&parsed, prefix) {
+        if let Some(fragment) = summarize_recurring_prefixed_fragment(&parsed, prefix) {
             recurring.push(fragment);
         }
     }
@@ -643,6 +688,77 @@ fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) 
         .filter(|(_, count, _)| *count >= 2)
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)))
         .map(|(value, _, _)| value)
+}
+
+fn summarize_recurring_prefixed_fragment(
+    parsed_notes: &[Vec<String>],
+    prefix: &str,
+) -> Option<String> {
+    pick_recurring_prefixed_fragment(parsed_notes, prefix)
+        .or_else(|| summarize_recurring_style_keywords(parsed_notes, prefix))
+}
+
+fn summarize_recurring_style_keywords(
+    parsed_notes: &[Vec<String>],
+    prefix: &str,
+) -> Option<String> {
+    let keywords = match prefix {
+        "镜头" => &SHOT_STYLE_KEYWORDS[..],
+        "情绪" => &MOOD_STYLE_KEYWORDS[..],
+        "光影" => &LIGHTING_STYLE_KEYWORDS[..],
+        _ => return None,
+    };
+
+    let mut counts = Vec::<(&'static str, usize)>::new();
+    for fragments in parsed_notes {
+        let matched = fragments
+            .iter()
+            .filter(|fragment| fragment.starts_with(prefix))
+            .flat_map(|fragment| extract_style_keywords(fragment, prefix, keywords))
+            .collect::<Vec<_>>();
+        for keyword in matched {
+            if let Some(existing) = counts.iter_mut().find(|(value, _)| *value == keyword) {
+                existing.1 += 1;
+            } else {
+                counts.push((keyword, 1));
+            }
+        }
+    }
+
+    let summary = keywords
+        .iter()
+        .filter(|keyword| {
+            counts
+                .iter()
+                .any(|(value, count)| value == *keyword && *count >= 2)
+        })
+        .take(match prefix {
+            "镜头" => 3,
+            _ => 2,
+        })
+        .copied()
+        .collect::<Vec<_>>();
+    if summary.is_empty() {
+        return None;
+    }
+
+    Some(format!("{prefix}{}", summary.join("")))
+}
+
+fn extract_style_keywords<'a>(
+    fragment: &str,
+    prefix: &str,
+    keywords: &'a [&'static str],
+) -> Vec<&'a str> {
+    let value = fragment.strip_prefix(prefix).unwrap_or(fragment);
+    let mut matched = Vec::new();
+    for keyword in keywords {
+        if !value.contains(keyword) || matched.iter().any(|existing| existing == keyword) {
+            continue;
+        }
+        matched.push(*keyword);
+    }
+    matched
 }
 
 async fn replace_summary_memory(
@@ -966,6 +1082,32 @@ mod tests {
 
         assert!(summary.contains("sampleCount=3"));
         assert!(summary.contains("style=镜头中景稳定跟拍，情绪冷峻压迫"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_summarizes_recurring_keywords_from_variant_notes() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影阴天冷光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景稳定跟拍，情绪紧张压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=镜头低机位稳定跟拍，情绪冷峻压迫，光影阴天冷光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"));
+        assert!(summary.contains("style=镜头稳定跟拍"));
+        assert!(summary.contains("情绪冷峻压迫"));
+        assert!(summary.contains("光影阴天冷光"));
+        assert!(!summary.contains("近景"));
+        assert!(!summary.contains("低机位"));
     }
 
     #[test]
