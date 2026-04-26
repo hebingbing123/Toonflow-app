@@ -732,8 +732,52 @@ fn compact_review_fragments_against_rejected_memory(
 ) -> Vec<String> {
     review_fragments
         .into_iter()
-        .filter(|fragment| !negative_fragment_is_covered(fragment, rejected_fragments))
+        .filter_map(|fragment| {
+            compact_review_fragment_against_rejected_memory(&fragment, rejected_fragments)
+        })
         .collect()
+}
+
+fn compact_review_fragment_against_rejected_memory(
+    fragment: &str,
+    rejected_fragments: &[String],
+) -> Option<String> {
+    let trimmed = fragment.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let covered = |value: &str| negative_fragment_is_covered(value, rejected_fragments);
+    match canonical_negative_fragment(trimmed).as_str() {
+        "avoid extra shot changes or wrong framing" => compact_rejected_overlap_pair(
+            trimmed,
+            "avoid unnecessary shot changes",
+            "avoid extreme camera angle or overly tight close-up framing",
+            covered,
+        ),
+        "avoid rushed or jerky motion" => compact_rejected_overlap_pair(
+            trimmed,
+            "avoid rushed motion",
+            "avoid flicker or motion jitter",
+            covered,
+        ),
+        _ => (!covered(trimmed)).then_some(trimmed.to_string()),
+    }
+}
+
+fn compact_rejected_overlap_pair(
+    original: &str,
+    lhs: &str,
+    rhs: &str,
+    covered: impl Fn(&str) -> bool,
+) -> Option<String> {
+    let lhs_covered = covered(lhs);
+    let rhs_covered = covered(rhs);
+    match (lhs_covered, rhs_covered) {
+        (false, false) => Some(original.to_string()),
+        (true, false) => Some(rhs.to_string()),
+        (false, true) => Some(lhs.to_string()),
+        (true, true) => None,
+    }
 }
 
 fn review_fragment_conflicts_with_selected_style(
@@ -2292,6 +2336,30 @@ mod tests {
                 "avoid harsh backlight silhouette".to_string(),
                 "avoid face drift or costume inconsistency".to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn compact_review_fragments_against_rejected_memory_trims_storyboard_mismatch_bundle_to_new_axis(
+    ) {
+        let review_fragments = vec!["avoid extra shot changes or wrong framing".to_string()];
+        let rejected_fragments =
+            vec!["avoid extreme camera angle or overly tight close-up framing".to_string()];
+
+        assert_eq!(
+            compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments),
+            vec!["avoid unnecessary shot changes".to_string()]
+        );
+    }
+
+    #[test]
+    fn compact_review_fragments_against_rejected_memory_trims_pacing_bundle_to_new_axis() {
+        let review_fragments = vec!["avoid rushed or jerky motion".to_string()];
+        let rejected_fragments = vec!["avoid flicker or motion jitter".to_string()];
+
+        assert_eq!(
+            compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments),
+            vec!["avoid rushed motion".to_string()]
         );
     }
 
