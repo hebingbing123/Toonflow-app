@@ -239,6 +239,64 @@ fn parse_asset_type_list(arguments: &Value, key: &str) -> Vec<&'static str> {
     types
 }
 
+fn parse_focus_section_list(arguments: &Value, key: &str) -> Vec<&'static str> {
+    let mut sections = arguments
+        .get(key)
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .filter_map(|value| match value.trim() {
+            "storySkeleton" => Some("storySkeleton"),
+            "adaptationStrategy" => Some("adaptationStrategy"),
+            "script" => Some("script"),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    sections.sort_unstable();
+    sections.dedup();
+    sections
+}
+
+fn parse_relative_script_offset(arguments: &Value, key: &str) -> Option<i64> {
+    match arguments.get(key).and_then(Value::as_i64) {
+        Some(-1) => Some(-1),
+        Some(1) => Some(1),
+        _ => None,
+    }
+}
+
+fn script_scope_note(arguments: &Value) -> Option<String> {
+    let focus_sections = parse_focus_section_list(arguments, "focusSections");
+    let novel_ids = parse_positive_id_list(arguments, "novelIds");
+    let relative_script_offset = parse_relative_script_offset(arguments, "relativeScriptOffset");
+    if focus_sections.is_empty() && novel_ids.is_empty() && relative_script_offset.is_none() {
+        return None;
+    }
+
+    let mut attrs = Vec::new();
+    if !focus_sections.is_empty() {
+        attrs.push(format!("focusSections=\"{}\"", focus_sections.join(",")));
+    }
+    if !novel_ids.is_empty() {
+        attrs.push(format!(
+            "novelIds=\"{}\"",
+            novel_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+    if let Some(offset) = relative_script_offset {
+        attrs.push(format!("relativeScriptOffset=\"{offset}\""));
+    }
+    Some(format!(
+        "<scope {} />\n仅限此范围；不足再最小补读。",
+        attrs.join(" ")
+    ))
+}
+
 fn production_scope_note(arguments: &Value) -> Option<String> {
     let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
     let asset_ids = parse_positive_id_list(arguments, "assetIds");
@@ -290,6 +348,12 @@ fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<Stri
         ));
     }
     let scoped_prompt = match tool_name {
+        "run_sub_agent_storySkeleton"
+        | "run_sub_agent_adaptationStrategy"
+        | "run_sub_agent_script"
+        | "run_supervision_agent" => script_scope_note(arguments)
+            .map(|note| format!("{prompt}\n\n{note}"))
+            .unwrap_or_else(|| prompt.to_string()),
         "run_sub_agent_derive_assets"
         | "run_sub_agent_generate_assets"
         | "run_sub_agent_director_plan"
@@ -451,16 +515,21 @@ mod tests {
     }
 
     #[test]
-    fn sub_agent_prompt_from_args_ignores_scope_for_script_tools() {
+    fn sub_agent_prompt_from_args_appends_compact_scope_for_script_tools() {
         let prompt = sub_agent_prompt_from_args(
             "run_sub_agent_script",
             &json!({
                 "prompt": "继续写剧本。",
-                "storyboardIds": [1, 2, 3]
+                "focusSections": ["adaptationStrategy", "storySkeleton", "storySkeleton"],
+                "novelIds": [12, 7, 12],
+                "relativeScriptOffset": -1
             }),
         )
         .expect("prompt");
 
-        assert_eq!(prompt, "继续写剧本。");
+        assert!(prompt.contains("继续写剧本。"));
+        assert!(prompt.contains(
+            r#"<scope focusSections="adaptationStrategy,storySkeleton" novelIds="7,12" relativeScriptOffset="-1" />"#
+        ));
     }
 }

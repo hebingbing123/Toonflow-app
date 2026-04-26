@@ -158,8 +158,14 @@ class WorkspaceRunController {
 
     _prepareWorkspaceRun();
     _operationController.setLoading(WorkspaceOperation.scriptSubAgentRun, true);
-    final arguments = <String, dynamic>{'prompt': prompt, 'scriptId': scriptId}
-      ..removeWhere((_, Object? value) => value == null);
+    final arguments = _buildScriptSubAgentArguments(
+      toolName: toolName,
+      prompt: prompt,
+      scriptId: scriptId,
+      lastToolName: _outputController.lastToolName,
+      lastToolResult: _outputController.lastToolResultData,
+      lastToolArguments: _outputController.lastToolArguments,
+    );
     final sent = await _requestSender(token, <Map<String, dynamic>>[
       <String, dynamic>{
         'type': 'agent.script.attach',

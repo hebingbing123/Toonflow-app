@@ -241,6 +241,26 @@ fn tool_parameters_schema(name: &str) -> Value {
                     "items": { "type": "integer" },
                     "minItems": 1,
                     "description": "Optional focused production storyboard numeric ids."
+                },
+                "focusSections": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["storySkeleton", "adaptationStrategy", "script"]
+                    },
+                    "minItems": 1,
+                    "description": "Optional focused script-side sections to read before widening context."
+                },
+                "novelIds": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "description": "Optional focused novel numeric ids for script-side context reads."
+                },
+                "relativeScriptOffset": {
+                    "type": "integer",
+                    "enum": [-1, 1],
+                    "description": "Optional neighboring script episode offset when continuity must be checked."
                 }
             },
             "additionalProperties": false

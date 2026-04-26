@@ -33,3 +33,25 @@ fn production_sub_agent_tools_allow_scope_ids() {
         Some(Value::Object(_))
     ));
 }
+
+#[test]
+fn script_sub_agent_tools_allow_compact_script_scope() {
+    let tools = harness_openai_tools();
+    let script_tool = tools
+        .iter()
+        .find(|tool| tool["function"]["name"].as_str() == Some("run_sub_agent_script"))
+        .expect("script sub-agent tool");
+    let properties = script_tool["function"]["parameters"]["properties"]
+        .as_object()
+        .expect("schema properties");
+
+    assert!(matches!(
+        properties.get("focusSections"),
+        Some(Value::Object(_))
+    ));
+    assert!(matches!(properties.get("novelIds"), Some(Value::Object(_))));
+    assert!(matches!(
+        properties.get("relativeScriptOffset"),
+        Some(Value::Object(_))
+    ));
+}
