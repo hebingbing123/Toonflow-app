@@ -110,7 +110,17 @@ struct VideoPromptContext {
     storyboard_prompt: Option<String>,
     storyboard_video_desc: Option<String>,
     storyboard_duration: Option<String>,
+    project_art_style: Option<String>,
+    project_director_manual: Option<String>,
+    project_video_ratio: Option<String>,
     continuity_notes: Vec<String>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct ProjectPromptSeedRow {
+    art_style: Option<String>,
+    director_manual: Option<String>,
+    video_ratio: Option<String>,
 }
 
 async fn load_video_prompt_context(
@@ -149,11 +159,29 @@ async fn load_video_prompt_context(
     let continuity_notes =
         load_video_prompt_memory_notes(pool, user_id, project_id, script_id, storyboard_numeric_id)
             .await?;
+    let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
+        r#"
+        SELECT art_style, director_manual, video_ratio
+        FROM app_project
+        WHERE owner_user_id = $1
+          AND numeric_id = $2
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     Ok(Some(VideoPromptContext {
         storyboard_prompt: row.prompt,
         storyboard_video_desc: row.video_desc,
         storyboard_duration: row.duration,
+        project_art_style: project_row.as_ref().and_then(|row| row.art_style.clone()),
+        project_director_manual: project_row
+            .as_ref()
+            .and_then(|row| row.director_manual.clone()),
+        project_video_ratio: project_row.and_then(|row| row.video_ratio),
         continuity_notes,
     }))
 }
@@ -373,6 +401,9 @@ fn build_video_prompt(
         }
     }
 
+    if let Some(note) = build_project_visual_clause(context, structured_fields.as_ref()) {
+        clauses.push(note);
+    }
     if let Some(note) = build_continuity_clause(context, structured_fields.as_ref()) {
         clauses.push(note);
     }
@@ -405,6 +436,43 @@ fn resolve_video_prompt_description(
                     .filter(|text| !text.is_empty())
             })
     })
+}
+
+fn build_project_visual_clause(
+    context: Option<&VideoPromptContext>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let ctx = context?;
+
+    let mut anchors = Vec::new();
+    if let Some(style) = ctx
+        .project_art_style
+        .as_deref()
+        .map(normalize_prompt_text)
+        .filter(|text| !text.is_empty())
+    {
+        anchors.push(clip_prompt_fragment(&style, 32));
+    }
+    if let Some(note) = ctx
+        .project_director_manual
+        .as_deref()
+        .and_then(|value| compact_project_director_note(value, structured_fields))
+    {
+        anchors.push(note);
+    }
+    if anchors.is_empty() {
+        return None;
+    }
+
+    let mut clauses = vec![format!("Style anchor: {}.", anchors.join("; "))];
+    if let Some(ratio) = ctx
+        .project_video_ratio
+        .as_deref()
+        .and_then(format_video_ratio_hint)
+    {
+        clauses.push(format!("Format: {ratio}."));
+    }
+    Some(clauses.join(" "))
 }
 
 fn build_continuity_clause(
@@ -459,6 +527,90 @@ fn compact_continuity_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn compact_project_director_note(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let expected_camera = structured_fields.map(|fields| {
+        [fields.shot.as_str(), fields.camera_move.as_str()]
+            .into_iter()
+            .filter(|part| !part.is_empty())
+            .collect::<String>()
+    });
+    let mut fragments = Vec::new();
+    for fragment in note
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+    {
+        if fragment.is_empty()
+            || fragments.iter().any(|existing| existing == &fragment)
+            || !project_director_fragment_relevant(&fragment)
+        {
+            continue;
+        }
+        if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
+            if continuity_fragment_matches_fields(&fragment, fields, camera)
+                || fragment == fields.mood
+                || fragment == fields.lighting
+                || fragment == fields.setting
+            {
+                continue;
+            }
+        }
+        fragments.push(fragment);
+        if fragments.len() >= 2 {
+            break;
+        }
+    }
+    if fragments.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(&fragments.join(", "), 48))
+}
+
+fn project_director_fragment_relevant(fragment: &str) -> bool {
+    [
+        "镜头",
+        "构图",
+        "机位",
+        "运镜",
+        "景别",
+        "光",
+        "色",
+        "色调",
+        "质感",
+        "氛围",
+        "节奏",
+        "场景",
+        "情绪",
+        "风格",
+        "统一",
+        "连续",
+        "延续",
+        "保持",
+        "camera",
+        "lighting",
+        "mood",
+        "style",
+        "tone",
+        "frame",
+        "composition",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+}
+
+fn format_video_ratio_hint(value: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(value).replace(' ', "");
+    match normalized.as_str() {
+        "" => None,
+        "9:16" => Some("vertical 9:16".to_string()),
+        "16:9" => Some("horizontal 16:9".to_string()),
+        "1:1" => Some("square 1:1".to_string()),
+        _ => Some(clip_prompt_fragment(&normalized, 16)),
+    }
 }
 
 fn continuity_fragment_matches_fields(
@@ -725,6 +877,9 @@ mod tests {
             storyboard_prompt: Some("主角转身冲向门外".into()),
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
             continuity_notes: vec!["保持上一镜头已确认的冷调压迫感".into()],
         };
         let prompt = build_video_prompt(None, None, Some(&context));
@@ -740,6 +895,9 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊".into()],
         };
 
@@ -755,6 +913,9 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，保持上一镜头压迫感".into()],
         };
 
@@ -770,9 +931,31 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: None,
             storyboard_duration: Some("7 秒".into()),
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
             continuity_notes: Vec::new(),
         };
         assert_eq!(resolve_video_prompt_duration(None, None, Some(&context)), 7);
+    }
+
+    #[test]
+    fn build_video_prompt_adds_compact_project_visual_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("保持低机位压迫感，镜头衔接统一，光影偏冷".into()),
+            project_video_ratio: Some("9:16".into()),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."));
+        assert!(prompt.contains("Format: vertical 9:16."));
+        assert!(!prompt.contains("光影偏冷"));
     }
 
     #[test]
