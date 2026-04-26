@@ -114,6 +114,8 @@ struct VideoPromptContext {
     project_director_manual: Option<String>,
     project_video_ratio: Option<String>,
     script_role_anchors: Vec<String>,
+    script_scene_anchors: Vec<String>,
+    script_tool_anchors: Vec<String>,
     continuity_notes: Vec<String>,
 }
 
@@ -126,6 +128,7 @@ struct ProjectPromptSeedRow {
 
 #[derive(Debug, sqlx::FromRow)]
 struct ScriptRolePromptSeedRow {
+    asset_type: String,
     name: Option<String>,
     describe: Option<String>,
 }
@@ -181,7 +184,7 @@ async fn load_video_prompt_context(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let script_role_rows = sqlx::query_as::<_, ScriptRolePromptSeedRow>(
         r#"
-        SELECT a.name, a.describe
+        SELECT a.asset_type, a.name, a.describe
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
         INNER JOIN app_script_asset sa ON sa.asset_id = a.id
@@ -189,9 +192,9 @@ async fn load_video_prompt_context(
         WHERE p.owner_user_id = $1
           AND p.numeric_id = $2
           AND sc.numeric_id = $3
-          AND a.asset_type = 'role'
+          AND a.asset_type IN ('role', 'scene', 'tool')
         ORDER BY a.created_at DESC
-        LIMIT 8
+        LIMIT 16
         "#,
     )
     .bind(user_id)
@@ -200,6 +203,21 @@ async fn load_video_prompt_context(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut script_role_anchors = Vec::new();
+    let mut script_scene_anchors = Vec::new();
+    let mut script_tool_anchors = Vec::new();
+    for row in script_role_rows {
+        let Some(anchor) = compact_script_asset_anchor(row) else {
+            continue;
+        };
+        match anchor.asset_type.as_str() {
+            "role" => script_role_anchors.push(anchor.value),
+            "scene" => script_scene_anchors.push(anchor.value),
+            "tool" => script_tool_anchors.push(anchor.value),
+            _ => {}
+        }
+    }
 
     Ok(Some(VideoPromptContext {
         storyboard_prompt: row.prompt,
@@ -210,10 +228,9 @@ async fn load_video_prompt_context(
             .as_ref()
             .and_then(|row| row.director_manual.clone()),
         project_video_ratio: project_row.and_then(|row| row.video_ratio),
-        script_role_anchors: script_role_rows
-            .into_iter()
-            .filter_map(compact_script_role_anchor)
-            .collect(),
+        script_role_anchors,
+        script_scene_anchors,
+        script_tool_anchors,
         continuity_notes,
     }))
 }
@@ -376,6 +393,20 @@ fn build_video_prompt(
         .as_deref()
         .and_then(parse_structured_storyboard_description);
     if let Some(note) = build_script_role_clause(
+        context,
+        resolved_description.as_deref(),
+        structured_fields.as_ref(),
+    ) {
+        clauses.push(note);
+    }
+    if let Some(note) = build_script_scene_clause(
+        context,
+        resolved_description.as_deref(),
+        structured_fields.as_ref(),
+    ) {
+        clauses.push(note);
+    }
+    if let Some(note) = build_script_tool_clause(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
@@ -555,6 +586,92 @@ fn build_script_role_clause(
     Some(format!("Character anchor: {}.", anchors.join("; ")))
 }
 
+fn build_script_scene_clause(
+    context: Option<&VideoPromptContext>,
+    description: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let ctx = context?;
+    if ctx.script_scene_anchors.is_empty() {
+        return None;
+    }
+
+    let description = description.map(normalize_prompt_text).unwrap_or_default();
+    let setting = structured_fields
+        .map(|fields| normalize_prompt_text(&fields.setting))
+        .unwrap_or_default();
+    let mut anchors = Vec::new();
+    for anchor in &ctx.script_scene_anchors {
+        let Some((name, note)) = anchor.split_once(':') else {
+            continue;
+        };
+        let name = normalize_prompt_text(name);
+        let setting_matches =
+            !setting.is_empty() && (setting.contains(&name) || name.contains(&setting));
+        if name.is_empty() || (!description.contains(&name) && !setting_matches) {
+            continue;
+        }
+        let candidate = format!("{name}:{}", note.trim());
+        if anchors.iter().any(|existing| existing == &candidate) {
+            continue;
+        }
+        anchors.push(candidate);
+        if !anchors.is_empty() {
+            break;
+        }
+    }
+
+    if anchors.is_empty() {
+        return None;
+    }
+    Some(format!("Scene anchor: {}.", anchors.join("; ")))
+}
+
+fn build_script_tool_clause(
+    context: Option<&VideoPromptContext>,
+    description: Option<&str>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let ctx = context?;
+    if ctx.script_tool_anchors.is_empty() {
+        return None;
+    }
+
+    let description = description.map(normalize_prompt_text).unwrap_or_default();
+    let subject = structured_fields
+        .map(|fields| normalize_prompt_text(&fields.subject))
+        .unwrap_or_default();
+    let action = structured_fields
+        .map(|fields| normalize_prompt_text(&fields.action))
+        .unwrap_or_default();
+    let mut anchors = Vec::new();
+    for anchor in &ctx.script_tool_anchors {
+        let Some((name, note)) = anchor.split_once(':') else {
+            continue;
+        };
+        let name = normalize_prompt_text(name);
+        let structured_match = (!subject.is_empty()
+            && (subject.contains(&name) || name.contains(&subject)))
+            || (!action.is_empty() && action.contains(&name));
+        if name.is_empty() || (!description.contains(&name) && !structured_match) {
+            continue;
+        }
+        let candidate = format!("{name}:{}", note.trim());
+        if anchors.iter().any(|existing| existing == &candidate) {
+            continue;
+        }
+        anchors.push(candidate);
+        if !anchors.is_empty() {
+            break;
+        }
+    }
+
+    if anchors.is_empty() {
+        return None;
+    }
+    Some(format!("Prop anchor: {}.", anchors.join("; ")))
+}
+
 fn build_continuity_clause(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -650,7 +767,19 @@ fn compact_project_director_note(
     Some(clip_prompt_fragment(&fragments.join(", "), 48))
 }
 
-fn compact_script_role_anchor(row: ScriptRolePromptSeedRow) -> Option<String> {
+struct ScriptAssetPromptAnchor {
+    asset_type: String,
+    value: String,
+}
+
+fn compact_script_asset_anchor(row: ScriptRolePromptSeedRow) -> Option<ScriptAssetPromptAnchor> {
+    let asset_type = normalize_prompt_text(&row.asset_type).to_lowercase();
+    let max_chars = match asset_type.as_str() {
+        "role" => 24,
+        "scene" => 22,
+        "tool" => 20,
+        _ => return None,
+    };
     let name = row
         .name
         .as_deref()
@@ -661,9 +790,17 @@ fn compact_script_role_anchor(row: ScriptRolePromptSeedRow) -> Option<String> {
         .as_deref()
         .map(normalize_prompt_text)
         .filter(|text| !text.is_empty())
-        .map(|text| clip_prompt_fragment(&text, 24))
-        .unwrap_or_else(|| "视觉设定延续".to_string());
-    Some(format!("{name}: {describe}"))
+        .map(|text| clip_prompt_fragment(&text, max_chars))
+        .unwrap_or_else(|| match asset_type.as_str() {
+            "role" => "视觉设定延续".to_string(),
+            "scene" => "场景设定延续".to_string(),
+            "tool" => "道具设定延续".to_string(),
+            _ => String::new(),
+        });
+    Some(ScriptAssetPromptAnchor {
+        asset_type,
+        value: format!("{name}: {describe}"),
+    })
 }
 
 fn project_director_fragment_relevant(fragment: &str) -> bool {
@@ -977,6 +1114,8 @@ mod tests {
             project_director_manual: None,
             project_video_ratio: None,
             script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: vec!["保持上一镜头已确认的冷调压迫感".into()],
         };
         let prompt = build_video_prompt(None, None, Some(&context));
@@ -996,6 +1135,8 @@ mod tests {
             project_director_manual: None,
             project_video_ratio: None,
             script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊".into()],
         };
 
@@ -1015,6 +1156,8 @@ mod tests {
             project_director_manual: None,
             project_video_ratio: None,
             script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，保持上一镜头压迫感".into()],
         };
 
@@ -1034,6 +1177,8 @@ mod tests {
             project_director_manual: None,
             project_video_ratio: None,
             script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: Vec::new(),
         };
         assert_eq!(resolve_video_prompt_duration(None, None, Some(&context)), 7);
@@ -1049,6 +1194,8 @@ mod tests {
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一，光影偏冷".into()),
             project_video_ratio: Some("9:16".into()),
             script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: Vec::new(),
         };
 
@@ -1072,6 +1219,8 @@ mod tests {
                 "主角: 黑色风衣，短发，克制冷峻".into(),
                 "路人: 灰色外套".into(),
             ],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
             continuity_notes: Vec::new(),
         };
 
@@ -1079,6 +1228,35 @@ mod tests {
 
         assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
         assert!(!prompt.contains("路人:灰色外套"));
+    }
+
+    #[test]
+    fn build_video_prompt_adds_matching_scene_and_tool_anchors() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            project_art_style: None,
+            project_director_manual: None,
+            project_video_ratio: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec![
+                "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
+                "街角: 雨夜霓虹".into(),
+            ],
+            script_tool_anchors: vec![
+                "青铜匕首: 刀身旧磨损，寒光克制".into(),
+                "雨伞: 黑伞".into(),
+            ],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
+        assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
+        assert!(!prompt.contains("街角:雨夜霓虹"));
+        assert!(!prompt.contains("雨伞:黑伞"));
     }
 
     #[test]
