@@ -1,4 +1,6 @@
 use serde_json::{json, Value};
+use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::harness::HarnessContext;
 use crate::llm::chat_completion_assistant_text;
@@ -13,6 +15,10 @@ struct SubAgentSpec {
     format_hint: Option<&'static str>,
     execution_hint: Option<&'static str>,
 }
+
+const AUTO_MEMORY_SUMMARY_LIMIT: i64 = 3;
+const AUTO_MEMORY_KEEP_ROWS: i64 = 8;
+const AUTO_MEMORY_MAX_CHARS: usize = 320;
 
 fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<String, Value>> {
     let trimmed = line.trim();
@@ -85,6 +91,23 @@ fn parse_review_summary(text: &str) -> Option<Value> {
         .find(|line| line.starts_with("<reviewSummary "))?;
     let attrs = parse_tag_attributes(summary_line, "reviewSummary")?;
     Some(Value::Object(attrs))
+}
+
+fn agent_memory_type_for_tool(tool_name: &str) -> Option<&'static str> {
+    match tool_name {
+        "run_sub_agent_storySkeleton"
+        | "run_sub_agent_adaptationStrategy"
+        | "run_sub_agent_script"
+        | "run_supervision_agent" => Some("scriptAgent"),
+        "run_sub_agent_derive_assets"
+        | "run_sub_agent_generate_assets"
+        | "run_sub_agent_director_plan"
+        | "run_sub_agent_storyboard_gen"
+        | "run_sub_agent_storyboard_panel"
+        | "run_sub_agent_storyboard_table"
+        | "run_sub_agent_production_supervision" => Some("productionAgent"),
+        _ => None,
+    }
 }
 
 fn sub_agent_spec(tool_name: &str) -> Option<SubAgentSpec> {
@@ -335,6 +358,232 @@ fn production_scope_note(arguments: &Value) -> Option<String> {
     ))
 }
 
+fn normalize_whitespace(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn truncate_chars(text: &str, max_chars: usize) -> String {
+    let char_count = text.chars().count();
+    if char_count <= max_chars {
+        return text.to_string();
+    }
+    let truncated = text
+        .chars()
+        .take(max_chars.saturating_sub(1))
+        .collect::<String>();
+    format!("{truncated}…")
+}
+
+fn summarize_result_excerpt(text: &str) -> String {
+    let normalized = normalize_whitespace(text);
+    if normalized.is_empty() {
+        return "本轮执行完成。".to_string();
+    }
+    truncate_chars(&normalized, 180)
+}
+
+fn scope_summary(arguments: &Value) -> Option<String> {
+    let mut parts = Vec::new();
+
+    let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
+    if !storyboard_ids.is_empty() {
+        parts.push(format!(
+            "storyboardIds={}",
+            storyboard_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+
+    let asset_ids = parse_positive_id_list(arguments, "assetIds");
+    if !asset_ids.is_empty() {
+        parts.push(format!(
+            "assetIds={}",
+            asset_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+
+    let asset_types = parse_asset_type_list(arguments, "assetTypes");
+    if !asset_types.is_empty() {
+        parts.push(format!("assetTypes={}", asset_types.join(",")));
+    }
+
+    let focus_sections = parse_focus_section_list(arguments, "focusSections");
+    if !focus_sections.is_empty() {
+        parts.push(format!("focusSections={}", focus_sections.join(",")));
+    }
+
+    let novel_ids = parse_positive_id_list(arguments, "novelIds");
+    if !novel_ids.is_empty() {
+        parts.push(format!(
+            "novelIds={}",
+            novel_ids
+                .iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(",")
+        ));
+    }
+
+    if let Some(offset) = parse_relative_script_offset(arguments, "relativeScriptOffset") {
+        parts.push(format!("relativeScriptOffset={offset}"));
+    }
+
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join("; "))
+    }
+}
+
+fn build_auto_memory_snapshot(
+    tool_name: &str,
+    arguments: &Value,
+    result_text: &str,
+    review: Option<&Value>,
+) -> String {
+    let mut parts = vec![format!("tool={tool_name}")];
+    if let Some(scope) = scope_summary(arguments) {
+        parts.push(format!("scope={scope}"));
+    }
+
+    if let Some(review) = review {
+        let mut review_parts = Vec::new();
+        if let Some(target) = review.get("target").and_then(Value::as_str) {
+            review_parts.push(format!("target={target}"));
+        }
+        if let Some(grade) = review.get("grade").and_then(Value::as_str) {
+            review_parts.push(format!("grade={grade}"));
+        }
+        if let Some(next_action) = review.get("nextAction").and_then(Value::as_str) {
+            review_parts.push(format!("next={next_action}"));
+        }
+        if let Some(summary) = review.get("summary").and_then(Value::as_str) {
+            review_parts.push(format!("summary={summary}"));
+        }
+        if let Some(asset_types) = review.get("assetTypes").and_then(Value::as_str) {
+            review_parts.push(format!("assetTypes={asset_types}"));
+        }
+        if let Some(asset_ids) = review.get("assetIds").and_then(Value::as_str) {
+            review_parts.push(format!("assetIds={asset_ids}"));
+        }
+        if let Some(storyboard_ids) = review.get("storyboardIds").and_then(Value::as_str) {
+            review_parts.push(format!("storyboardIds={storyboard_ids}"));
+        }
+        if !review_parts.is_empty() {
+            parts.push(format!("review={}", review_parts.join("; ")));
+        }
+    } else {
+        parts.push(format!("result={}", summarize_result_excerpt(result_text)));
+    }
+
+    truncate_chars(&parts.join(" | "), AUTO_MEMORY_MAX_CHARS)
+}
+
+async fn load_auto_memory_note(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+) -> Result<Option<String>, InvokeError> {
+    let rows: Vec<String> = sqlx::query_scalar(
+        r#"
+        SELECT content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id IS NOT DISTINCT FROM $3
+          AND agent_type = $4
+          AND memory_type = 'summary'
+        ORDER BY create_time_ms DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(AUTO_MEMORY_SUMMARY_LIMIT)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    if rows.is_empty() {
+        return Ok(None);
+    }
+
+    let items = rows
+        .into_iter()
+        .map(|entry| format!("- {}", truncate_chars(entry.trim(), AUTO_MEMORY_MAX_CHARS)))
+        .collect::<Vec<_>>()
+        .join("\n");
+    Ok(Some(format!(
+        "Recent scoped memory from the same user/project/script:\n{items}\n仅把这些内容当作已知进展与决策线索；若本轮需要落地写入，先最小核对相关工具数据。"
+    )))
+}
+
+async fn persist_auto_memory_snapshot(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+    content: &str,
+) -> Result<(), InvokeError> {
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, $4, 'summary', 'assistant', 'auto_scope_memory', $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(content)
+    .execute(pool)
+    .await
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id IN (
+          SELECT id
+          FROM app_agent_memory
+          WHERE owner_user_id = $1
+            AND numeric_project_id = $2
+            AND episodes_id IS NOT DISTINCT FROM $3
+            AND agent_type = $4
+            AND memory_type = 'summary'
+            AND name = 'auto_scope_memory'
+          ORDER BY create_time_ms DESC
+          OFFSET $5
+        )
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .bind(AUTO_MEMORY_KEEP_ROWS)
+    .execute(pool)
+    .await
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
 fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<String, InvokeError> {
     let prompt = arguments
         .get("prompt")
@@ -400,21 +649,39 @@ pub async fn invoke_sub_agent_tool(
     let context_note = format!(
         "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
     );
+    let memory_note = match (
+        ctx.pool.as_ref(),
+        ctx.project_numeric_id,
+        agent_memory_type_for_tool(tool_name),
+    ) {
+        (Some(pool), Some(project_numeric_id), Some(agent_type)) => {
+            load_auto_memory_note(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                agent_type,
+            )
+            .await?
+        }
+        _ => None,
+    };
     let execution_note = spec.execution_hint.unwrap_or(
         "Use the narrowest tool call that can solve the task before requesting broader context.",
     );
-    let text = chat_completion_assistant_text(
-        cfg,
-        client,
-        vec![
-            json!({"role":"system","content":system}),
-            json!({"role":"assistant","content":context_note}),
-            json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}),
-            json!({"role":"user","content":prompt}),
-        ],
-    )
-    .await
-    .map_err(InvokeError::LlmError)?;
+    let mut messages = vec![
+        json!({"role":"system","content":system}),
+        json!({"role":"assistant","content":context_note}),
+    ];
+    if let Some(memory_note) = memory_note {
+        messages.push(json!({"role":"assistant","content":memory_note}));
+    }
+    messages
+        .push(json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}));
+    messages.push(json!({"role":"user","content":prompt}));
+    let text = chat_completion_assistant_text(cfg, client, messages)
+        .await
+        .map_err(InvokeError::LlmError)?;
 
     let review = match tool_name {
         "run_supervision_agent" | "run_sub_agent_production_supervision" => {
@@ -422,6 +689,23 @@ pub async fn invoke_sub_agent_tool(
         }
         _ => None,
     };
+
+    if let (Some(pool), Some(project_numeric_id), Some(agent_type)) = (
+        ctx.pool.as_ref(),
+        ctx.project_numeric_id,
+        agent_memory_type_for_tool(tool_name),
+    ) {
+        let snapshot = build_auto_memory_snapshot(tool_name, arguments, &text, review.as_ref());
+        persist_auto_memory_snapshot(
+            pool,
+            ctx.user_id,
+            project_numeric_id,
+            ctx.script_numeric_id,
+            agent_type,
+            &snapshot,
+        )
+        .await?;
+    }
 
     Ok(json!({
         "tool": tool_name,
@@ -433,7 +717,10 @@ pub async fn invoke_sub_agent_tool(
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_review_summary, parse_tag_attributes, sub_agent_prompt_from_args};
+    use super::{
+        build_auto_memory_snapshot, parse_review_summary, parse_tag_attributes,
+        sub_agent_prompt_from_args,
+    };
     use serde_json::json;
 
     #[test]
@@ -531,5 +818,41 @@ mod tests {
         assert!(prompt.contains(
             r#"<scope focusSections="adaptationStrategy,storySkeleton" novelIds="7,12" relativeScriptOffset="-1" />"#
         ));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_prefers_review_fields() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_production_supervision",
+            &json!({"assetTypes": ["scene", "role"], "storyboardIds": [9, 3]}),
+            "unused",
+            Some(&json!({
+                "target": "scriptPlan",
+                "grade": "B",
+                "nextAction": "check_assets",
+                "summary": "导演规划可用但资产还需对齐",
+                "assetIds": "7,8"
+            })),
+        );
+
+        assert!(snapshot.contains("tool=run_sub_agent_production_supervision"));
+        assert!(snapshot.contains("scope=storyboardIds=3,9; assetTypes=role,scene"));
+        assert!(snapshot.contains("review=target=scriptPlan; grade=B; next=check_assets"));
+        assert!(snapshot.contains("summary=导演规划可用但资产还需对齐"));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_truncates_plain_result() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_storyboard_table",
+            &json!({"assetIds": [5, 1, 5]}),
+            "  第一行结果  \n\n第二行结果  ",
+            None,
+        );
+
+        assert!(snapshot.contains("tool=run_sub_agent_storyboard_table"));
+        assert!(snapshot.contains("scope=assetIds=1,5"));
+        assert!(snapshot.contains("result=第一行结果 第二行结果"));
+        assert!(snapshot.chars().count() <= 320);
     }
 }
