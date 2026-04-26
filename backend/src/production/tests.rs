@@ -47,6 +47,15 @@ fn workbench_generate_video_body_accepts_with_audio() {
 }
 
 #[test]
+fn workbench_generate_video_body_accepts_negative_prompt() {
+    let b: WorkbenchGenerateVideoBody = serde_json::from_str(
+        r#"{"projectId":1,"scriptId":2,"uploadData":[{"id":1,"sources":"url"}],"prompt":"test","negativePrompt":"avoid blur","model":"runway","mode":"standard","resolution":"1080p","duration":5,"trackId":1}"#,
+    )
+    .unwrap();
+    assert_eq!(b.negative_prompt.as_deref(), Some("avoid blur"));
+}
+
+#[test]
 fn router_builds_without_generic_stub_paths() {
     let app = router();
     let _ = app;

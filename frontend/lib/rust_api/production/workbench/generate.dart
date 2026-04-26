@@ -10,17 +10,20 @@ import 'tracks.dart';
 class GenerateVideoPromptResponse {
   const GenerateVideoPromptResponse({
     required this.prompt,
+    this.negativePrompt,
     required this.model,
     required this.duration,
   });
 
   final String prompt;
+  final String? negativePrompt;
   final String model;
   final int duration;
 
   factory GenerateVideoPromptResponse.fromJson(Map<String, dynamic> json) {
     return GenerateVideoPromptResponse(
       prompt: json['prompt'] as String,
+      negativePrompt: json['negativePrompt'] as String?,
       model: json['model'] as String,
       duration: (json['duration'] as num).toInt(),
     );

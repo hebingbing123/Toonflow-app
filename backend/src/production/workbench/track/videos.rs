@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
 use crate::production::workbench::video_prompt_memory::{
-    build_selected_video_memory, clear_selected_video_memory, persist_selected_video_memory,
+    build_rejected_video_negative_memory, build_selected_video_memory,
+    clear_rejected_video_negative_memory, clear_selected_video_memory,
+    persist_rejected_video_negative_memory, persist_selected_video_memory,
     refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated_user;
@@ -78,6 +80,33 @@ pub(in crate::production) async fn post_workbench_delete_video(
         return Err(ApiError::NotFound);
     }
 
+    let prompt_seed = sqlx::query_as::<_, StoryboardPromptSeedRow>(
+        r#"
+        SELECT prompt, video_desc, duration
+        FROM app_storyboard
+        WHERE script_id = $1
+          AND numeric_id = $2
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .bind(body.storyboard_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if let Some(prompt_seed) = prompt_seed {
+        if let Some(memory_content) =
+            build_rejected_video_negative_memory(body.storyboard_id, &prompt_seed)
+        {
+            persist_rejected_video_negative_memory(
+                pool,
+                user_id,
+                body.project_id,
+                body.script_id,
+                &memory_content,
+            )
+            .await?;
+        }
+    }
     clear_selected_video_memory(
         pool,
         user_id,
@@ -177,6 +206,14 @@ pub(in crate::production) async fn post_workbench_select_video(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    clear_rejected_video_negative_memory(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
     if let Some(prompt_seed) = prompt_seed {
         if let Some(memory_content) = build_selected_video_memory(body.storyboard_id, &prompt_seed)
         {

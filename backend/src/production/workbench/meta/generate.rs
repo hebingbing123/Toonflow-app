@@ -8,11 +8,11 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
-use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::meta::common::{
     clip_prompt_fragment, extract_key_value, normalize_prompt_text, parse_positive_int,
     parse_structured_storyboard_description, StructuredStoryboardDescription,
 };
+use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_neighbor_selected_video_memory_notes,
     select_project_video_style_memory_notes, select_script_video_style_memory_notes,

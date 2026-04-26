@@ -63,9 +63,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
         ));
     }
     if body.upload_data.is_empty() {
-        return Err(ApiError::BadRequest(
-            "uploadData must not be empty".into(),
-        ));
+        return Err(ApiError::BadRequest("uploadData must not be empty".into()));
     }
     if body.prompt.trim().is_empty() {
         return Err(ApiError::BadRequest("prompt must not be empty".into()));
@@ -84,7 +82,13 @@ pub(in crate::production) async fn post_workbench_generate_video(
             .await?;
     let upload_sources = normalize_upload_sources(&body.upload_data)?;
     let storyboard_ids = upload_sources.keys().copied().collect::<Vec<_>>();
-    ensure_track_in_scope(pool, scope_row.project_id, scope_row.script_id, body.track_id).await?;
+    ensure_track_in_scope(
+        pool,
+        scope_row.project_id,
+        scope_row.script_id,
+        body.track_id,
+    )
+    .await?;
     ensure_storyboards_in_scope(pool, scope_row.script_id, &storyboard_ids).await?;
 
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
@@ -161,7 +165,9 @@ pub(in crate::production) async fn post_workbench_generate_video(
     }))
 }
 
-fn normalize_upload_sources(items: &[GenerateVideoUploadItem]) -> Result<HashMap<i32, String>, ApiError> {
+fn normalize_upload_sources(
+    items: &[GenerateVideoUploadItem],
+) -> Result<HashMap<i32, String>, ApiError> {
     let mut seen = BTreeSet::new();
     let mut normalized = HashMap::with_capacity(items.len());
     for item in items {
@@ -440,7 +446,9 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
     let mut fragments = Vec::new();
     let keyword_groups = [
         (
-            &["手", "手指", "肢体", "四肢", "畸形", "变形", "anatom", "limb"][..],
+            &[
+                "手", "手指", "肢体", "四肢", "畸形", "变形", "anatom", "limb",
+            ][..],
             "avoid warped hands or limbs",
         ),
         (
@@ -481,7 +489,10 @@ fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Opti
             if fragment.is_empty() {
                 continue;
             }
-            if fragments.iter().any(|existing: &String| existing == fragment) {
+            if fragments
+                .iter()
+                .any(|existing: &String| existing == fragment)
+            {
                 continue;
             }
             fragments.push(fragment.to_string());
@@ -527,10 +538,10 @@ mod tests {
         load_rejected_video_negative_prompt, merge_negative_prompts, normalize_upload_sources,
         QualityReviewSeedRow,
     };
+    use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
         select_rejected_video_negative_memory_notes, AgentMemoryRow,
     };
-    use crate::production::types::GenerateVideoUploadItem;
     use sqlx::PgPool;
     use uuid::Uuid;
 
@@ -575,9 +586,8 @@ mod tests {
 
     #[test]
     fn infer_negative_fragments_from_comments_matches_cn_and_en_keywords() {
-        let fragments = infer_negative_fragments_from_comments(
-            "面部崩坏并且 flicker，镜头切换也多",
-        );
+        let fragments =
+            infer_negative_fragments_from_comments("面部崩坏并且 flicker，镜头切换也多");
         assert!(fragments.contains(&"avoid face distortion or identity drift"));
         assert!(fragments.contains(&"avoid flicker or motion jitter"));
         assert!(fragments.contains(&"avoid unnecessary shot changes"));
@@ -590,7 +600,10 @@ mod tests {
             Some("avoid flicker, avoid wrong setting details"),
         )
         .expect("merged prompt");
-        assert_eq!(merged, "avoid blur, avoid flicker, avoid wrong setting details");
+        assert_eq!(
+            merged,
+            "avoid blur, avoid flicker, avoid wrong setting details"
+        );
         assert!(clip_negative_prompt(&"a".repeat(160)).ends_with("..."));
     }
 

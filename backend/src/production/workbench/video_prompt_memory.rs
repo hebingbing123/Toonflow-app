@@ -11,7 +11,7 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memor
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
-const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 1;
+const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
@@ -131,10 +131,7 @@ pub(crate) fn build_rejected_video_negative_memory(
         &mut fragments,
         map_rejected_shot_or_camera_fragment(&fields.camera_move),
     );
-    push_rejected_negative_fragment(
-        &mut fragments,
-        map_rejected_mood_fragment(&fields.mood),
-    );
+    push_rejected_negative_fragment(&mut fragments, map_rejected_mood_fragment(&fields.mood));
     push_rejected_negative_fragment(
         &mut fragments,
         map_rejected_lighting_fragment(&fields.lighting),
@@ -147,6 +144,14 @@ pub(crate) fn build_rejected_video_negative_memory(
         "storyboardIds={storyboard_numeric_id} | avoid={}",
         fragments.join(", ")
     ))
+}
+
+fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
+    if storyboard_numeric_id > 0 {
+        Some(format!("storyboardIds={storyboard_numeric_id}"))
+    } else {
+        None
+    }
 }
 
 pub(crate) async fn persist_selected_video_memory(
@@ -270,6 +275,13 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     script_numeric_id: i32,
     content: &str,
 ) -> Result<(), ApiError> {
+    let Some(storyboard_numeric_id) = extract_key_value(content, "storyboardIds")
+        .and_then(|value| value.parse::<i32>().ok())
+        .filter(|id| *id > 0)
+    else {
+        return Ok(());
+    };
+    let storyboard_key = format!("storyboardIds={storyboard_numeric_id}");
     let latest: Option<String> = sqlx::query_scalar(
         r#"
         SELECT content
@@ -280,6 +292,7 @@ pub(crate) async fn persist_rejected_video_negative_memory(
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
           AND name = $4
+          AND content LIKE $5
         ORDER BY create_time_ms DESC
         LIMIT 1
         "#,
@@ -288,6 +301,7 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+    .bind(format!("%{storyboard_key}%"))
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -295,6 +309,15 @@ pub(crate) async fn persist_rejected_video_negative_memory(
     if latest.as_deref() == Some(content) {
         return Ok(());
     }
+
+    clear_rejected_video_negative_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_numeric_id,
+    )
+    .await?;
 
     sqlx::query(
         r#"
@@ -353,7 +376,9 @@ pub(crate) async fn clear_rejected_video_negative_memory(
     if storyboard_numeric_id <= 0 {
         return Ok(());
     }
-    let storyboard_key = format!("storyboardIds={storyboard_numeric_id}");
+    let Some(storyboard_key) = storyboard_memory_key(storyboard_numeric_id) else {
+        return Ok(());
+    };
     sqlx::query(
         r#"
         DELETE FROM app_agent_memory
@@ -928,7 +953,10 @@ fn extract_style_keywords<'a>(
     matched
 }
 
-fn push_rejected_negative_fragment(target: &mut Vec<&'static str>, candidate: Option<&'static str>) {
+fn push_rejected_negative_fragment(
+    target: &mut Vec<&'static str>,
+    candidate: Option<&'static str>,
+) {
     let Some(candidate) = candidate else {
         return;
     };
@@ -943,7 +971,11 @@ fn map_rejected_shot_or_camera_fragment(value: &str) -> Option<&'static str> {
     if value.is_empty() {
         return None;
     }
-    if value.contains("稳定跟拍") || value.contains("跟拍") || value.contains("推进") || value.contains("慢推") {
+    if value.contains("稳定跟拍")
+        || value.contains("跟拍")
+        || value.contains("推进")
+        || value.contains("慢推")
+    {
         return Some("avoid repeating stable follow camera");
     }
     if value.contains("手持") {
@@ -1149,13 +1181,12 @@ async fn replace_project_summary_memory(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_project_video_style_memory, build_script_video_style_memory,
-        build_rejected_video_negative_memory, build_selected_video_memory,
-        clear_selected_video_memory, compact_video_continuity_note,
-        parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
-        select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
-        select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
-        StoryboardPromptSeedRow,
+        build_project_video_style_memory, build_rejected_video_negative_memory,
+        build_script_video_style_memory, build_selected_video_memory, clear_selected_video_memory,
+        compact_video_continuity_note, parse_structured_storyboard_description,
+        select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
+        select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
+        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -1415,6 +1446,15 @@ mod tests {
         let pool =
             PgPool::connect_lazy("postgresql://user:pass@localhost/db").expect("lazy pg pool");
         let result = clear_selected_video_memory(&pool, Uuid::nil(), 1, 2, 0).await;
+
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn clear_rejected_video_negative_memory_ignores_invalid_storyboard_id() {
+        let pool =
+            PgPool::connect_lazy("postgresql://user:pass@localhost/db").expect("lazy pg pool");
+        let result = clear_rejected_video_negative_memory(&pool, Uuid::nil(), 1, 2, 0).await;
 
         assert!(result.is_ok());
     }

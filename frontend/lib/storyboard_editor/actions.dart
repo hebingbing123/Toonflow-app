@@ -55,6 +55,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     if (prompt.isEmpty) {
       throw const FormatException('视频提示词不能为空');
     }
+    final negativePrompt = _negativeVideoPromptCtrl.text.trim();
     final status = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
@@ -63,6 +64,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
         <String, dynamic>{'id': widget.storyNumericId, 'sources': sourceImage},
       ],
       prompt: prompt,
+      negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
       model: _modelDetail?.modelId ?? 'kling-v1',
       mode: _mode,
       resolution: _resolution,
@@ -257,6 +259,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       durationHint: request.durationSeconds,
     );
     _videoPromptCtrl.text = generated.prompt;
+    _negativeVideoPromptCtrl.text = generated.negativePrompt ?? '';
     _videoDurationCtrl.text = generated.duration.toString();
     if (!mounted) return;
     _applyWorkbenchState(() => _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。'));

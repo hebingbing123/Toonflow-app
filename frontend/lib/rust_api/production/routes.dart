@@ -10,7 +10,10 @@ class ProductionExportZipResponse {
   final String? filename;
   final Uint8List bytes;
 
-  const ProductionExportZipResponse({required this.filename, required this.bytes});
+  const ProductionExportZipResponse({
+    required this.filename,
+    required this.bytes,
+  });
 }
 
 Future<int> postProductionGetProductionDataV1(
@@ -119,6 +122,7 @@ Future<int> postProductionWorkbenchGenerateVideoV1(
   required int scriptId,
   required List<Map<String, dynamic>> uploadData,
   required String prompt,
+  String? negativePrompt,
   required String model,
   required String mode,
   required String resolution,
@@ -140,6 +144,7 @@ Future<int> postProductionWorkbenchGenerateVideoV1(
     'duration': duration,
     'trackId': trackId,
   };
+  if (negativePrompt != null) body['negativePrompt'] = negativePrompt;
   if (audio != null) body['audio'] = audio;
   final res = await http
       .post(

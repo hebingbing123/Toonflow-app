@@ -35,6 +35,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   late final TextEditingController _trackIdCtrl;
   late final TextEditingController _trackNameCtrl;
   late final TextEditingController _videoPromptCtrl;
+  late final TextEditingController _negativeVideoPromptCtrl;
   late final TextEditingController _videoDurationCtrl;
 
   bool _saving = false;
@@ -127,6 +128,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _trackIdCtrl = TextEditingController();
     _trackNameCtrl = TextEditingController();
     _videoPromptCtrl = TextEditingController();
+    _negativeVideoPromptCtrl = TextEditingController();
     _videoDurationCtrl = TextEditingController(text: '5');
     Future<void>.microtask(
       () => _refreshAll(syncImageUrl: true, syncTrackId: true),
@@ -139,6 +141,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _trackIdCtrl.dispose();
     _trackNameCtrl.dispose();
     _videoPromptCtrl.dispose();
+    _negativeVideoPromptCtrl.dispose();
     _videoDurationCtrl.dispose();
     super.dispose();
   }
@@ -203,6 +206,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           trackNameCtrl: _trackNameCtrl,
           videoDescriptionCtrl: widget.videoDescriptionCtrl,
           videoPromptCtrl: _videoPromptCtrl,
+          negativeVideoPromptCtrl: _negativeVideoPromptCtrl,
           videoDurationCtrl: _videoDurationCtrl,
           resolution: _resolution,
           mode: _mode,

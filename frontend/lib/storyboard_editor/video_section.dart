@@ -10,6 +10,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.trackNameCtrl,
     required this.videoDescriptionCtrl,
     required this.videoPromptCtrl,
+    required this.negativeVideoPromptCtrl,
     required this.videoDurationCtrl,
     required this.resolution,
     required this.mode,
@@ -43,6 +44,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final TextEditingController trackNameCtrl;
   final TextEditingController videoDescriptionCtrl;
   final TextEditingController videoPromptCtrl;
+  final TextEditingController negativeVideoPromptCtrl;
   final TextEditingController videoDurationCtrl;
   final String resolution;
   final String mode;
@@ -149,6 +151,17 @@ class _StoryboardVideoSection extends StatelessWidget {
           maxLines: 6,
           decoration: const InputDecoration(
             labelText: '视频生成提示词',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: negativeVideoPromptCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '负向提示词',
+            helperText: '会自动回填当前分镜的失败约束，可按需继续删减或补充。',
             alignLabelWithHint: true,
           ),
         ),
