@@ -684,11 +684,17 @@ fn build_video_prompt(
     extend_prompt_coverage(&mut style_coverage, &style_anchors);
     match structured_fields.as_ref() {
         Some(fields) => {
+            let compacted_dialogue = compact_dialogue_clause(&fields.dialogue);
             let mut subject =
                 compact_subject_clause(&fields.subject, &asset_coverage, &prompt_coverage);
             let setting =
                 compact_setting_clause(&fields.setting, &asset_coverage, &prompt_coverage);
-            let action = compact_action_clause(&fields.action, &asset_coverage, &prompt_coverage);
+            let action = compact_action_clause(
+                &fields.action,
+                &asset_coverage,
+                &prompt_coverage,
+                compacted_dialogue.as_deref(),
+            );
 
             if prompt_clauses_substantially_overlap(subject.as_deref(), action.as_deref()) {
                 subject = None;
@@ -723,7 +729,6 @@ fn build_video_prompt(
                     clip_prompt_fragment(&fields.lighting, 44)
                 ));
             }
-            let compacted_dialogue = compact_dialogue_clause(&fields.dialogue);
             if let Some(dialogue) = compacted_dialogue.as_deref() {
                 clauses.push(format!(
                     "Dialogue or voice-over: {}.",
@@ -1420,13 +1425,19 @@ fn compact_action_clause(
     action: &str,
     asset_coverage: &[String],
     prompt_coverage: &[String],
+    dialogue: Option<&str>,
 ) -> Option<String> {
-    compact_prompt_clause(
+    let compacted = compact_prompt_clause(
         action,
         asset_coverage,
         prompt_coverage,
         PromptClauseKind::Action,
-    )
+    )?;
+
+    let trimmed = dialogue
+        .and_then(|line| strip_dialogue_covered_action_suffix(&compacted, line))
+        .unwrap_or(compacted);
+    (!trimmed.is_empty()).then_some(trimmed)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1625,6 +1636,81 @@ fn normalize_prompt_clause_compaction(fragment: &str, kind: PromptClauseKind) ->
             .to_string(),
         PromptClauseKind::Subject | PromptClauseKind::Action => compacted,
     }
+}
+
+fn strip_dialogue_covered_action_suffix(action: &str, dialogue: &str) -> Option<String> {
+    let canonical_dialogue = canonical_dialogue_fragment(dialogue);
+    if canonical_dialogue.is_empty() {
+        return None;
+    }
+
+    let normalized_action = normalize_prompt_text(action);
+    if normalized_action.is_empty() {
+        return None;
+    }
+
+    for speech_prefix in [
+        "低声说",
+        "轻声说",
+        "小声说",
+        "喃喃道",
+        "喃喃说",
+        "呢喃",
+        "说道",
+        "说出",
+        "说",
+        "喊道",
+        "喊出",
+        "大喊",
+        "呼喊",
+        "叫喊",
+        "质问",
+        "回答",
+        "回应",
+        "重复",
+    ] {
+        let patterns = [
+            format!("并{speech_prefix}{canonical_dialogue}"),
+            format!("后{speech_prefix}{canonical_dialogue}"),
+            format!("再{speech_prefix}{canonical_dialogue}"),
+            format!("{speech_prefix}{canonical_dialogue}"),
+        ];
+        for pattern in patterns {
+            let Some(prefix) = normalized_action.strip_suffix(&pattern) else {
+                continue;
+            };
+            let normalized_prefix = normalize_prompt_text(prefix);
+            let trimmed = normalized_prefix.trim_end_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        ',' | '，' | ';' | '；' | ':' | '：' | '、' | '并' | '后' | '再'
+                    )
+            });
+            if trimmed.chars().count() < 2 || action_fragment_is_speech_delivery_only(trimmed) {
+                continue;
+            }
+            return Some(trimmed.to_string());
+        }
+    }
+
+    None
+}
+
+fn action_fragment_is_speech_delivery_only(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    !normalized.is_empty()
+        && [
+            "低声",
+            "轻声",
+            "小声",
+            "喃喃",
+            "呢喃",
+            "压低声音",
+            "提高嗓门",
+        ]
+        .iter()
+        .any(|value| normalized == *value)
 }
 
 fn prompt_clauses_substantially_overlap(lhs: Option<&str>, rhs: Option<&str>) -> bool {
@@ -2946,6 +3032,40 @@ mod tests {
 
         assert!(!prompt.contains("Subject:"));
         assert!(prompt.contains("Action: 快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_dialogue_payload_from_action_when_motion_remains() {
+        let prompt = build_video_prompt(
+            Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、驻足回头并低声说你终于来了、压抑、冷调逆光、轻声说：你终于来了、风声回响、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Action: 驻足回头."), "{prompt}");
+        assert!(
+            !prompt.contains("Action: 驻足回头并低声说你终于来了."),
+            "{prompt}"
+        );
+        assert!(
+            prompt.contains("Dialogue or voice-over: 你终于来了."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_action_when_only_dialogue_delivery_remains() {
+        let prompt = build_video_prompt(
+            Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、低声说你终于来了、压抑、冷调逆光、轻声说：你终于来了、风声回响、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Action: 低声说你终于来了."), "{prompt}");
+        assert!(
+            prompt.contains("Dialogue or voice-over: 你终于来了."),
+            "{prompt}"
+        );
     }
 
     #[test]
