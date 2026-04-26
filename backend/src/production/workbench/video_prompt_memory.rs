@@ -1295,6 +1295,7 @@ pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
 }
 
 fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) -> Option<String> {
+    let min_support = recurring_fragment_support_threshold(parsed_notes.len());
     let mut counts: Vec<(String, usize, usize)> = Vec::new();
     for (note_idx, fragments) in parsed_notes.iter().enumerate() {
         for fragment in fragments {
@@ -1312,7 +1313,7 @@ fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) 
 
     counts
         .into_iter()
-        .filter(|(_, count, _)| *count >= 2)
+        .filter(|(_, count, _)| *count >= min_support)
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)))
         .map(|(value, _, _)| value)
 }
@@ -1351,6 +1352,7 @@ fn summarize_recurring_style_keywords(
         "光影" => &LIGHTING_STYLE_KEYWORDS[..],
         _ => return None,
     };
+    let min_support = recurring_fragment_support_threshold(parsed_notes.len());
 
     let mut counts = Vec::<(&'static str, usize)>::new();
     for fragments in parsed_notes {
@@ -1373,7 +1375,7 @@ fn summarize_recurring_style_keywords(
         .filter(|keyword| {
             counts
                 .iter()
-                .any(|(value, count)| value == *keyword && *count >= 2)
+                .any(|(value, count)| value == *keyword && *count >= min_support)
         })
         .take(match prefix {
             "镜头" => 3,
@@ -1386,6 +1388,14 @@ fn summarize_recurring_style_keywords(
     }
 
     Some(format!("{prefix}{}", summary.join("")))
+}
+
+fn recurring_fragment_support_threshold(sample_count: usize) -> usize {
+    match sample_count {
+        0 | 1 => usize::MAX,
+        2 | 3 => 2,
+        _ => (sample_count / 2) + 1,
+    }
 }
 
 fn extract_style_keywords<'a>(
@@ -2048,6 +2058,43 @@ mod tests {
     }
 
     #[test]
+    fn build_project_video_style_memory_requires_majority_support_when_samples_are_dense() {
+        let summary = build_project_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=1 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=2 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
+                        .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | style=镜头稳定跟拍，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=4 | style=镜头稳定跟拍，情绪悲怆，光影冷调逆光 | note=..."
+                    .into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=5 | style=镜头近景手持，情绪悲怆，光影暖光 | note=..."
+                    .into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=5"));
+        assert!(summary.contains("style=镜头稳定跟拍，光影冷调逆光"));
+        assert!(!summary.contains("情绪冷峻压迫"));
+    }
+
+    #[test]
     fn build_script_video_style_memory_summarizes_recurring_keywords_from_variant_notes() {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
@@ -2121,6 +2168,34 @@ mod tests {
         assert!(summary.contains("sampleCount=2"));
         assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
         assert!(!summary.contains("中景"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_skips_low_support_keywords_when_note_pool_is_large() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=13 | style=情绪悲怆，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=14 | style=情绪悲怆，光影暖光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=4"));
+        assert!(summary.contains("style=光影冷调逆光"));
+        assert!(!summary.contains("情绪冷峻压迫"));
+        assert!(!summary.contains("情绪悲怆"));
     }
 
     #[test]
