@@ -1206,10 +1206,74 @@ pub(crate) fn select_selected_video_memory_notes(
         }
     }
 
-    if let Some(note) = style_notes.into_iter().next() {
+    if let Some(note) = select_best_selected_video_style_note(style_notes) {
         return vec![note];
     }
     fallback_notes.into_iter().take(1).collect()
+}
+
+fn select_best_selected_video_style_note(notes: Vec<String>) -> Option<String> {
+    notes.into_iter().max_by(|a, b| {
+        score_selected_video_style_note(a)
+            .cmp(&score_selected_video_style_note(b))
+            .then(count_selected_video_style_axes(a).cmp(&count_selected_video_style_axes(b)))
+            .then(b.chars().count().cmp(&a.chars().count()))
+            .then(b.cmp(a))
+    })
+}
+
+fn score_selected_video_style_note(note: &str) -> i32 {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0i32;
+    for fragment in &fragments {
+        if fragment.starts_with("情绪") {
+            score += 6;
+        } else if fragment.starts_with("光影") {
+            score += 6;
+        } else if fragment.starts_with("镜头") {
+            score += if is_local_framing_only_fragment(fragment) {
+                1
+            } else {
+                4
+            };
+        } else {
+            score += 2;
+        }
+    }
+    if count_selected_video_style_axes(note) >= 2 {
+        score += 2;
+    }
+    score
+}
+
+fn count_selected_video_style_axes(note: &str) -> usize {
+    let fragments = split_prompt_note_fragments(note).collect::<Vec<_>>();
+    [
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("镜头")),
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("情绪")),
+        fragments
+            .iter()
+            .any(|fragment| fragment.starts_with("光影")),
+    ]
+    .into_iter()
+    .filter(|present| *present)
+    .count()
+}
+
+fn is_local_framing_only_fragment(fragment: &str) -> bool {
+    fragment == "镜头近景"
+        || fragment == "镜头中景"
+        || fragment == "镜头远景"
+        || fragment == "镜头特写"
+        || fragment == "镜头全景"
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -3820,6 +3884,26 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["情绪压迫".to_string()]);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_prefers_richer_older_style_over_newer_single_axis_note() {
+        let notes = select_selected_video_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | style=情绪压迫 | note=当前镜头情绪压迫".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | style=情绪压迫，光影冷调逆光 | note=保持情绪压迫和冷调逆光".into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(notes, vec!["情绪压迫，光影冷调逆光".to_string()]);
     }
 
     #[test]
