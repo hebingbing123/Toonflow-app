@@ -188,10 +188,9 @@ pub(crate) fn build_rejected_video_negative_memory(
         &mut fragments,
         map_rejected_lighting_fragment(&fields.lighting),
     );
-    let fragments = compact_rejected_negative_fragment_families(
+    let fragments = compact_rejected_negative_memory_fragments_for_storage(
         fragments.into_iter().map(str::to_string).collect(),
     );
-    let fragments = compact_rejected_negative_memory_fragments(fragments);
     if fragments.is_empty() {
         return None;
     }
@@ -225,6 +224,22 @@ fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<Str
     }
 
     compacted
+}
+
+fn compact_rejected_negative_memory_fragments_for_storage(fragments: Vec<String>) -> Vec<String> {
+    let mut scored = compact_rejected_negative_memory_fragments(
+        compact_rejected_negative_fragment_families(fragments),
+    )
+    .into_iter()
+    .enumerate()
+    .map(|(idx, fragment)| (score_rejected_negative_fragment(&fragment), idx, fragment))
+    .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    scored
+        .into_iter()
+        .map(|(_, _, fragment)| fragment)
+        .take(REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT)
+        .collect()
 }
 
 fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
@@ -957,8 +972,8 @@ fn score_rejected_negative_fragment(fragment: &str) -> i32 {
 
     let mut score = 0;
     for keyword in [
-        "shaky", "handheld", "motion", "camera", "shot", "framing", "镜头", "运镜", "抖动", "跳轴",
-        "机位",
+        "shaky", "handheld", "motion", "camera", "follow", "stable", "shot", "framing", "镜头",
+        "运镜", "抖动", "跳轴", "机位",
     ] {
         if normalized.contains(keyword) {
             score += 20;
@@ -1634,7 +1649,7 @@ fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>)
             fragments.push(fragment);
         }
     }
-    compact_rejected_negative_fragment_families(fragments).join(", ")
+    compact_rejected_negative_memory_fragments_for_storage(fragments).join(", ")
 }
 
 fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -3644,9 +3659,9 @@ mod tests {
         assert!(content.contains("storyboardIds=12"));
         assert!(content.contains("promptSeed="));
         assert!(content.contains("rejectionCount=1"));
-        assert!(content.contains("avoid=avoid repeating stable follow camera"));
-        assert!(content.contains("avoid oppressive or frantic mood"));
+        assert!(content.contains("avoid repeating stable follow camera"));
         assert!(content.contains("avoid flat cold lighting"));
+        assert!(!content.contains("avoid oppressive or frantic mood"));
     }
 
     #[test]
@@ -4073,7 +4088,8 @@ mod tests {
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("storyboardIds=12"));
-        assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting, avoid oppressive or frantic mood"));
+        assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
+        assert!(!merged.contains("avoid oppressive or frantic mood"));
     }
 
     #[test]
@@ -4360,6 +4376,31 @@ mod tests {
     }
 
     #[test]
+    fn merge_rejected_video_negative_memory_keeps_only_top_storage_fragments() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid shaky handheld motion, avoid flat cold lighting",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid oppressive or frantic mood",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting"));
+        assert!(!merged.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_prioritizes_character_consistency_over_mood() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid face distortion or identity drift, avoid flat cold lighting",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid oppressive or frantic mood",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid face distortion or identity drift"));
+        assert!(merged.contains("avoid flat cold lighting"));
+        assert!(!merged.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
     fn merge_rejected_video_negative_memory_parses_ascii_and_cjk_delimiters() {
         let merged = merge_rejected_video_negative_memory(
             "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting；avoid harsh backlight silhouette",
@@ -4367,9 +4408,8 @@ mod tests {
         );
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
-        assert!(merged.contains(
-            "avoid=avoid flicker or motion jitter, avoid flat cold lighting or harsh backlight silhouette"
-        ));
+        assert!(merged.contains("avoid flicker or motion jitter"));
+        assert!(merged.contains("avoid flat cold lighting or harsh backlight silhouette"));
     }
 
     #[test]
