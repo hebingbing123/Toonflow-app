@@ -15,7 +15,8 @@ use crate::production::workbench::meta::common::{
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_pending_rejected_video_observation_candidates,
-    select_prioritized_video_style_note, storyboard_prompt_seed, AgentMemoryRow,
+    select_prioritized_video_style_note, select_project_video_style_memory_notes,
+    select_script_video_style_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
     StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
@@ -428,7 +429,7 @@ async fn load_pending_video_observation_note(
         storyboard_numeric_id,
     )
     .await?;
-    let prioritized_style_note = select_prioritized_video_style_note(
+    let prioritized_style_note = resolve_observation_filter_style_note(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
@@ -445,6 +446,63 @@ async fn load_pending_video_observation_note(
     });
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
+}
+
+fn resolve_observation_filter_style_note(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    select_prioritized_video_style_note(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        storyboard_row,
+    )
+    .or_else(|| select_contextual_observation_summary_style_note(rows, storyboard_row))
+}
+
+fn select_contextual_observation_summary_style_note(
+    rows: &[AgentMemoryRow],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let context = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)?;
+
+    select_script_video_style_memory_notes(rows)
+        .into_iter()
+        .chain(select_project_video_style_memory_notes(rows))
+        .find(|note| observation_style_note_context_evidence(note, &context) >= 2)
+}
+
+fn observation_style_note_context_evidence(
+    style_note: &str,
+    context: &StructuredStoryboardDescription,
+) -> usize {
+    let note = normalize_prompt_text(style_note);
+    let mut evidence = 0usize;
+
+    let mood = normalize_prompt_text(&context.mood);
+    if !mood.is_empty() && note.contains(&mood) {
+        evidence += 1;
+    }
+
+    let lighting = normalize_prompt_text(&context.lighting);
+    if !lighting.is_empty() && note.contains(&lighting) {
+        evidence += 1;
+    }
+
+    let shot = normalize_prompt_text(&context.shot);
+    let camera_move = normalize_prompt_text(&context.camera_move);
+    if (!shot.is_empty() && note.contains(&shot))
+        || (!camera_move.is_empty() && note.contains(&camera_move))
+    {
+        evidence += 1;
+    }
+
+    evidence
 }
 
 async fn load_storyboard_prompt_seed_row(
@@ -2030,7 +2088,8 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
+        build_video_prompt, parse_structured_storyboard_description,
+        resolve_observation_filter_style_note, resolve_video_prompt_duration,
         select_video_prompt_memory_notes, trim_video_prompt_memory_rows,
         video_prompt_observation_conflicts_with_style, GenerateVideoPromptResponse,
         VideoPromptContext,
@@ -3151,5 +3210,40 @@ mod tests {
         });
 
         assert_eq!(note, Some("avoid shaky handheld motion".to_string()));
+    }
+
+    #[test]
+    fn observation_filter_style_note_can_fall_back_to_contextual_summary() {
+        let rows = vec![AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("门厅对峙".into()),
+            video_desc: Some("（主角对峙、旧宅门厅、主角、5秒、中景、稳定跟拍、逼近对手、冷峻压迫、冷调逆光、、、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)),
+            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_skips_contextual_summary_when_storyboard_mismatches() {
+        let rows = vec![AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("暖光会面".into()),
+            video_desc: Some("（主角寒暄、茶馆包间、主角、5秒、中景、轻推、坐下寒暄、温和克制、室内暖光、、、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)).is_none()
+        );
     }
 }
