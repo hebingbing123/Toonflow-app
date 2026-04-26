@@ -21,23 +21,16 @@ const STYLE_PROMPT_PREFIXES: [&str; 3] = ["镜头", "情绪", "光影"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
     "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
 ];
-const SHOT_STYLE_KEYWORDS: [&str; 16] = [
-    "低机位",
-    "高机位",
-    "特写",
-    "近景",
-    "中景",
-    "全景",
-    "远景",
+const SHOT_STYLE_KEYWORDS: [&str; 9] = [
     "稳定跟拍",
     "手持跟拍",
-    "稳定",
-    "手持",
-    "跟拍",
     "慢推",
     "推进",
     "拉远",
     "环绕",
+    "稳定",
+    "手持",
+    "跟拍",
 ];
 const MOOD_STYLE_KEYWORDS: [&str; 11] = [
     "冷峻压迫",
@@ -1207,8 +1200,24 @@ fn summarize_recurring_prefixed_fragment(
     parsed_notes: &[Vec<String>],
     prefix: &str,
 ) -> Option<String> {
-    pick_recurring_prefixed_fragment(parsed_notes, prefix)
-        .or_else(|| summarize_recurring_style_keywords(parsed_notes, prefix))
+    if prefix == "镜头" {
+        summarize_recurring_style_keywords(parsed_notes, prefix)
+            .or_else(|| summarize_recurring_stable_shot_fragment(parsed_notes))
+    } else {
+        pick_recurring_prefixed_fragment(parsed_notes, prefix)
+            .or_else(|| summarize_recurring_style_keywords(parsed_notes, prefix))
+    }
+}
+
+fn summarize_recurring_stable_shot_fragment(parsed_notes: &[Vec<String>]) -> Option<String> {
+    pick_recurring_prefixed_fragment(parsed_notes, "镜头").and_then(|fragment| {
+        let matched = extract_style_keywords(&fragment, "镜头", &SHOT_STYLE_KEYWORDS);
+        if matched.is_empty() {
+            None
+        } else {
+            Some(format!("镜头{}", matched.join("")))
+        }
+    })
 }
 
 fn summarize_recurring_style_keywords(
@@ -1266,7 +1275,15 @@ fn extract_style_keywords<'a>(
     let value = fragment.strip_prefix(prefix).unwrap_or(fragment);
     let mut matched = Vec::new();
     for keyword in keywords {
-        if !value.contains(keyword) || matched.iter().any(|existing| existing == keyword) {
+        if !value.contains(keyword)
+            || matched.iter().any(|existing: &&str| existing == keyword)
+        {
+            continue;
+        }
+        if matched
+            .iter()
+            .any(|existing: &&str| existing.contains(keyword) || keyword.contains(existing))
+        {
             continue;
         }
         matched.push(*keyword);
@@ -1841,7 +1858,8 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("sampleCount=3"));
-        assert!(summary.contains("镜头中景稳定跟拍"));
+        assert!(summary.contains("镜头稳定跟拍"));
+        assert!(!summary.contains("中景"));
         assert!(summary.contains("情绪冷峻压迫"));
         assert!(summary.contains("光影冷调逆光"));
         assert!(!summary.contains("场景旧宅走廊"));
@@ -1886,7 +1904,8 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("sampleCount=3"));
-        assert!(summary.contains("style=镜头中景稳定跟拍，情绪冷峻压迫"));
+        assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫"));
+        assert!(!summary.contains("中景"));
         assert!(!summary.contains("场景废弃走廊"));
     }
 
@@ -1917,6 +1936,29 @@ mod tests {
     }
 
     #[test]
+    fn build_script_video_style_memory_drops_recurring_local_framing_without_stable_shot_language() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=镜头近景，情绪紧张压迫，光影阴天冷光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("情绪冷峻压迫"));
+        assert!(summary.contains("光影阴天冷光"));
+        assert!(!summary.contains("镜头近景"));
+    }
+
+    #[test]
     fn build_script_video_style_memory_deduplicates_same_storyboard_prompt_seed_samples() {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
@@ -1935,7 +1977,8 @@ mod tests {
         .expect("summary");
 
         assert!(summary.contains("sampleCount=2"));
-        assert!(summary.contains("style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
+        assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
+        assert!(!summary.contains("中景"));
     }
 
     #[test]
@@ -1943,7 +1986,7 @@ mod tests {
         let notes = select_project_video_style_memory_notes(&[
             AgentMemoryRow {
                 name: "project_video_style_memory".into(),
-                content: "sampleCount=6 | style=镜头中景稳定跟拍，情绪冷峻压迫 | note=镜头中景稳定跟拍，情绪冷峻压迫".into(),
+                content: "sampleCount=6 | style=镜头稳定跟拍，情绪冷峻压迫 | note=镜头稳定跟拍，情绪冷峻压迫".into(),
             },
             AgentMemoryRow {
                 name: "script_video_style_memory".into(),
@@ -1951,7 +1994,7 @@ mod tests {
             },
         ]);
 
-        assert_eq!(notes, vec!["镜头中景稳定跟拍，情绪冷峻压迫".to_string()]);
+        assert_eq!(notes, vec!["镜头稳定跟拍，情绪冷峻压迫".to_string()]);
     }
 
     #[test]
