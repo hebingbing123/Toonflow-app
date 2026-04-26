@@ -75,6 +75,9 @@ const LIGHTING_STYLE_KEYWORDS: [&str; 12] = [
 const ACTION_PACE_PREFIXES: [&str; 9] = [
     "快步", "缓步", "迅速", "缓慢", "慢慢", "急忙", "猛地", "立刻", "立即",
 ];
+const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
+    "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
+];
 const ACTION_SUBJECT_PREFIXES: [&str; 10] = [
     "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
 ];
@@ -103,6 +106,7 @@ struct ScopedAgentMemoryRow {
 pub(crate) struct StructuredStoryboardDescription {
     pub(crate) subject: String,
     pub(crate) setting: String,
+    pub(crate) subject_refs: String,
     pub(crate) duration_seconds: Option<i32>,
     pub(crate) shot: String,
     pub(crate) camera_move: String,
@@ -1107,6 +1111,7 @@ pub(crate) fn parse_structured_storyboard_description(
     Some(StructuredStoryboardDescription {
         subject: parts.first().cloned().unwrap_or_default(),
         setting: parts.get(1).cloned().unwrap_or_default(),
+        subject_refs: parts.get(2).cloned().unwrap_or_default(),
         duration_seconds: parts.get(3).and_then(|value| parse_positive_int(value)),
         shot: parts.get(4).cloned().unwrap_or_default(),
         camera_move: parts.get(5).cloned().unwrap_or_default(),
@@ -1217,8 +1222,12 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             subject.as_deref(),
             Some(fields.action.as_str()),
         );
-        let action =
-            compact_selected_memory_action(&fields.action, subject.as_deref(), &fields.mood);
+        let action = compact_selected_memory_action(
+            &fields.action,
+            subject.as_deref(),
+            Some(fields.subject_refs.as_str()),
+            &fields.mood,
+        );
 
         if let Some(subject) = subject {
             fragments.push(clip_prompt_fragment(&subject, 20));
@@ -1283,6 +1292,7 @@ fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String
 fn compact_selected_memory_action(
     action: &str,
     subject: Option<&str>,
+    subject_coverage: Option<&str>,
     mood: &str,
 ) -> Option<String> {
     let mut action = normalize_prompt_text(action);
@@ -1322,6 +1332,8 @@ fn compact_selected_memory_action(
         }
     }
 
+    action = strip_selected_memory_action_object_prefix(&action, subject_coverage);
+
     if !normalize_prompt_text(mood).is_empty() {
         for prefix in ACTION_PACE_PREFIXES {
             if let Some(stripped) = action.strip_prefix(prefix) {
@@ -1340,6 +1352,63 @@ fn compact_selected_memory_action(
         return None;
     }
     Some(action)
+}
+
+fn strip_selected_memory_action_object_prefix(
+    action: &str,
+    subject_coverage: Option<&str>,
+) -> String {
+    let mut compacted = normalize_prompt_text(action);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut coverage = subject_coverage
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .split(['/', '／', '、', ',', '，'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>();
+    coverage.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &coverage {
+            if candidate.chars().count() < 2 {
+                continue;
+            }
+            for verb in ACTION_OBJECT_PREFIX_VERBS {
+                let Some(stripped) = compacted.strip_prefix(verb) else {
+                    continue;
+                };
+                let Some(stripped) = stripped.strip_prefix(candidate) else {
+                    continue;
+                };
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(
+                            ch,
+                            '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                        )
+                });
+                if stripped.chars().count() < 2 {
+                    continue;
+                }
+                compacted = stripped.to_string();
+                changed = true;
+                break;
+            }
+            if changed {
+                break;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
 }
 
 fn compact_selected_memory_setting(
@@ -2429,9 +2498,31 @@ mod tests {
     }
 
     #[test]
+    fn build_selected_video_memory_trims_object_prefix_from_action_when_subject_lists_prop() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角握紧匕首穿过走廊".into()),
+                video_desc: Some("（主角穿过走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧青铜匕首转身格挡、紧张、阴天冷光、无台词、脚步回响、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("note=主角穿过走廊"), "{content}");
+        assert!(content.contains("转身格挡"), "{content}");
+        assert!(!content.contains("握紧青铜匕首转身格挡"), "{content}");
+    }
+
+    #[test]
     fn compact_selected_memory_action_keeps_pace_prefix_when_mood_is_missing() {
-        let action = compact_selected_memory_action("女主缓步后退躲避", Some("女主后退躲避"), "")
-            .expect("action");
+        let action = compact_selected_memory_action(
+            "女主缓步后退躲避",
+            Some("女主后退躲避"),
+            Some("女主"),
+            "",
+        )
+        .expect("action");
 
         assert_eq!(action, "缓步后退躲避");
     }
