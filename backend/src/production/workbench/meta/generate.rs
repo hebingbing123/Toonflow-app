@@ -907,6 +907,7 @@ fn compact_neighbor_video_style_note(
         .filter(|fragment| {
             neighbor_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
         })
+        .filter_map(|fragment| trim_style_fragment_against_storyboard_fields(&fragment, &fields))
         .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         .collect::<Vec<_>>();
     if fragments.is_empty() {
@@ -1192,6 +1193,12 @@ fn compact_memory_style_anchor(
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| style_fragment_prefix(fragment))
+        .filter_map(|fragment| {
+            if let Some(fields) = structured_fields {
+                return trim_style_fragment_against_storyboard_fields(&fragment, fields);
+            }
+            Some(fragment)
+        })
         .filter(|fragment| {
             if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
                 if continuity_fragment_matches_fields(fragment, fields, camera)
@@ -1215,6 +1222,56 @@ fn compact_memory_style_anchor(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn trim_style_fragment_against_storyboard_fields(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Option<String> {
+    if fragment.starts_with("镜头") {
+        return trim_prefixed_style_fragment(
+            fragment,
+            "镜头",
+            &[fields.shot.as_str(), fields.camera_move.as_str()],
+        );
+    }
+    if fragment.starts_with("情绪") {
+        return trim_prefixed_style_fragment(fragment, "情绪", &[fields.mood.as_str()]);
+    }
+    if fragment.starts_with("光影") {
+        return trim_prefixed_style_fragment(fragment, "光影", &[fields.lighting.as_str()]);
+    }
+    Some(fragment.to_string())
+}
+
+fn trim_prefixed_style_fragment(fragment: &str, prefix: &str, fields: &[&str]) -> Option<String> {
+    let body = fragment.strip_prefix(prefix).unwrap_or(fragment).trim();
+    if body.is_empty() {
+        return None;
+    }
+
+    let mut trimmed = body.to_string();
+    for field in fields
+        .iter()
+        .map(|field| normalize_prompt_text(field))
+        .filter(|field| !field.is_empty())
+    {
+        trimmed = trimmed.replace(&field, "");
+    }
+    let trimmed = trimmed
+        .trim_matches(|ch: char| {
+            ch.is_whitespace()
+                || matches!(
+                    ch,
+                    ',' | '，' | ';' | '；' | ':' | '：' | '/' | '／' | '、' | '|' | '-' | ' '
+                )
+        })
+        .to_string();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
 }
 
 fn style_fragment_matches_prompt_style_field(
@@ -2844,9 +2901,9 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 情绪冷峻压迫，光影冷调逆光."));
-        assert!(!prompt.contains("Mood: 冷峻压迫."));
-        assert!(!prompt.contains("Lighting: 冷调逆光."));
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑."), "{prompt}");
+        assert!(prompt.contains("Mood: 冷峻压迫."), "{prompt}");
+        assert!(prompt.contains("Lighting: 冷调逆光."), "{prompt}");
     }
 
     #[test]
@@ -2923,6 +2980,56 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_trims_redundant_camera_half_but_keeps_extra_style_hint() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、稳定跟拍、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头稳定跟拍压迫感，光影冷调逆光颗粒".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 镜头压迫感，光影颗粒."),
+            "{prompt}"
+        );
+        assert_eq!(prompt.matches("稳定跟拍").count(), 1, "{prompt}");
+        assert!(!prompt.contains("光影冷调逆光颗粒"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_trims_exact_storyboard_style_from_selected_memory_note() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头中景稳定跟拍，情绪急迫，光影阴天冷光".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑."), "{prompt}");
+        assert!(!prompt.contains("镜头中景稳定跟拍"), "{prompt}");
+        assert!(prompt.contains("Mood: 急迫."), "{prompt}");
+        assert!(prompt.contains("Lighting: 阴天冷光."), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_deduplicates_semantic_style_fragments_across_sources() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -2941,11 +3048,12 @@ mod tests {
         let prompt = build_video_prompt(None, None, Some(&context));
 
         assert!(
-            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感; 情绪冷峻压迫."),
+            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感."),
             "{prompt}"
         );
         assert_eq!(prompt.matches("低机位压迫感").count(), 1, "{prompt}");
         assert!(!prompt.contains("镜头低机位压迫感"), "{prompt}");
+        assert!(prompt.contains("Mood: 冷峻压迫."), "{prompt}");
     }
 
     #[test]
