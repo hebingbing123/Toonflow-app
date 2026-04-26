@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -101,6 +102,9 @@ pub(crate) fn build_selected_video_memory(
 
     let note = selected_video_memory_note(row)?;
     let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
+    if let Some(prompt_seed) = storyboard_prompt_seed(row) {
+        parts.push(format!("promptSeed={prompt_seed}"));
+    }
     if let Some(style) = style_only_note(&note) {
         parts.push(format!("style={style}"));
     }
@@ -141,10 +145,13 @@ pub(crate) fn build_rejected_video_negative_memory(
         return None;
     }
 
-    Some(format!(
-        "storyboardIds={storyboard_numeric_id} | rejectionCount=1 | avoid={}",
-        fragments.join(", ")
-    ))
+    let mut parts = vec![format!("storyboardIds={storyboard_numeric_id}")];
+    if let Some(prompt_seed) = storyboard_prompt_seed(row) {
+        parts.push(format!("promptSeed={prompt_seed}"));
+    }
+    parts.push("rejectionCount=1".to_string());
+    parts.push(format!("avoid={}", fragments.join(", ")));
+    Some(parts.join(" | "))
 }
 
 fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
@@ -508,10 +515,12 @@ pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -
 pub(crate) fn select_rejected_video_negative_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
         .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
+        .filter(|row| memory_matches_prompt_seed(&row.content, current_prompt_seed))
         .filter(|row| {
             rejected_video_negative_rejection_count(&row.content)
                 >= REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
@@ -524,10 +533,12 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
 pub(crate) fn select_pending_rejected_video_observation_note(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Option<String> {
     rows.iter()
         .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
         .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
+        .filter(|row| memory_matches_prompt_seed(&row.content, current_prompt_seed))
         .find(|row| {
             rejected_video_negative_rejection_count(&row.content)
                 < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
@@ -539,6 +550,7 @@ pub(crate) fn select_pending_rejected_video_observation_note(
 pub(crate) fn select_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
     if storyboard_numeric_id <= 0 {
         return Vec::new();
@@ -549,6 +561,9 @@ pub(crate) fn select_selected_video_memory_notes(
             continue;
         }
         if !memory_matches_storyboard(&row.content, storyboard_numeric_id) {
+            continue;
+        }
+        if !memory_matches_prompt_seed(&row.content, current_prompt_seed) {
             continue;
         }
         let Some(note) = selected_video_style_value(row).or_else(|| {
@@ -695,6 +710,9 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
     let storyboard_numeric_id = extract_key_value(incoming, "storyboardIds")
         .or_else(|| extract_key_value(existing, "storyboardIds"))
         .unwrap_or_default();
+    let prompt_seed = extract_key_value(incoming, "promptSeed")
+        .or_else(|| extract_key_value(existing, "promptSeed"))
+        .unwrap_or_default();
     let rejection_count = rejected_video_negative_rejection_count(existing).saturating_add(1);
     let avoid = merge_rejected_negative_avoid(
         extract_key_value(existing, "avoid").as_deref(),
@@ -704,6 +722,9 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
     let mut parts = Vec::new();
     if !storyboard_numeric_id.is_empty() {
         parts.push(format!("storyboardIds={storyboard_numeric_id}"));
+    }
+    if !prompt_seed.is_empty() {
+        parts.push(format!("promptSeed={prompt_seed}"));
     }
     parts.push(format!("rejectionCount={rejection_count}"));
     if !avoid.is_empty() {
@@ -782,6 +803,36 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         })
 }
 
+pub(crate) fn storyboard_prompt_seed(row: &StoryboardPromptSeedRow) -> Option<String> {
+    let prompt = row
+        .prompt
+        .as_deref()
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .unwrap_or_default();
+    let video_desc = row
+        .video_desc
+        .as_deref()
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .unwrap_or_default();
+    let duration = row
+        .duration
+        .as_deref()
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .unwrap_or_default();
+    let source = [prompt, video_desc, duration].join("\n");
+    if source.trim().is_empty() {
+        return None;
+    }
+
+    let mut hasher = Sha256::new();
+    hasher.update(source.as_bytes());
+    let hex = format!("{:x}", hasher.finalize());
+    Some(hex[..12].to_string())
+}
+
 fn resolve_duration_label(row: &StoryboardPromptSeedRow) -> Option<String> {
     row.video_desc
         .as_deref()
@@ -798,6 +849,15 @@ fn resolve_duration_label(row: &StoryboardPromptSeedRow) -> Option<String> {
 
 fn memory_matches_storyboard(content: &str, storyboard_numeric_id: i32) -> bool {
     extract_storyboard_ids(content).contains(&storyboard_numeric_id)
+}
+
+fn memory_matches_prompt_seed(content: &str, current_prompt_seed: Option<&str>) -> bool {
+    match current_prompt_seed {
+        Some(seed) if !seed.is_empty() => {
+            extract_key_value(content, "promptSeed").as_deref() == Some(seed)
+        }
+        _ => true,
+    }
 }
 
 fn extract_storyboard_ids(content: &str) -> Vec<i32> {
@@ -1257,7 +1317,8 @@ mod tests {
         select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
-        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+        select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -1288,6 +1349,7 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("storyboardIds=12"));
+        assert!(content.contains("promptSeed="));
         assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊"));
         assert!(content.contains("note=主角冲出旧宅"));
         assert!(content.contains("镜头中景稳定跟拍"));
@@ -1308,6 +1370,7 @@ mod tests {
         .expect("content");
 
         assert!(content.contains("storyboardIds=12"));
+        assert!(content.contains("promptSeed="));
         assert!(content.contains("rejectionCount=1"));
         assert!(content.contains("avoid=avoid repeating stable follow camera"));
         assert!(content.contains("avoid oppressive or frantic mood"));
@@ -1332,6 +1395,7 @@ mod tests {
                 },
             ],
             12,
+            None,
         );
 
         assert_eq!(notes, vec!["镜头冷调近景，情绪压迫".to_string()]);
@@ -1387,6 +1451,7 @@ mod tests {
                 },
             ],
             12,
+            None,
         );
 
         assert_eq!(
@@ -1404,6 +1469,7 @@ mod tests {
                     .into(),
             }],
             12,
+            None,
         );
 
         assert!(notes.is_empty());
@@ -1417,6 +1483,7 @@ mod tests {
                 content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion, avoid flat cold lighting".into(),
             }],
             12,
+            None,
         );
 
         assert_eq!(
@@ -1434,6 +1501,7 @@ mod tests {
                     .into(),
             }],
             12,
+            None,
         );
 
         assert_eq!(note, None);
@@ -1449,6 +1517,52 @@ mod tests {
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("storyboardIds=12"));
         assert!(merged.contains("avoid=avoid shaky handheld motion, avoid flat cold lighting, avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn storyboard_prompt_seed_changes_with_storyboard_version() {
+        let first = storyboard_prompt_seed(&StoryboardPromptSeedRow {
+            prompt: Some("主角在走廊里冲出门外".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            duration: Some("5".into()),
+        })
+        .expect("first seed");
+        let second = storyboard_prompt_seed(&StoryboardPromptSeedRow {
+            prompt: Some("主角在楼梯口停步回望".into()),
+            video_desc: Some("（主角停在楼梯口、旧宅楼梯、主角、5秒、近景、缓慢推进、停步回望、压迫、冷调逆光、无台词、风声、A12）".into()),
+            duration: Some("5".into()),
+        })
+        .expect("second seed");
+
+        assert_ne!(first, second);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_skips_stale_prompt_seed() {
+        let notes = select_selected_video_memory_notes(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | promptSeed=oldseed000001 | style=镜头冷调近景，情绪压迫 | note=保持冷调近景和稳定推进".into(),
+            }],
+            12,
+            Some("newseed000002"),
+        );
+
+        assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_skips_stale_prompt_seed() {
+        let note = select_pending_rejected_video_observation_note(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | promptSeed=oldseed000001 | rejectionCount=1 | avoid=avoid shaky handheld motion".into(),
+            }],
+            12,
+            Some("newseed000002"),
+        );
+
+        assert_eq!(note, None);
     }
 
     #[test]

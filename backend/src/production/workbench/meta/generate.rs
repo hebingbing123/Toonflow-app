@@ -16,8 +16,8 @@ use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_neighbor_selected_video_memory_notes,
     select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
-    select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -108,6 +108,9 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     } else {
         None
     };
+    let current_prompt_seed = context
+        .as_ref()
+        .and_then(|value| value.storyboard_prompt_seed.as_deref());
     let observation_note = if negative_prompt.is_none() {
         if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
             load_pending_video_observation_note(
@@ -116,6 +119,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
                 body.project_id,
                 body.script_id,
                 storyboard_id,
+                current_prompt_seed,
             )
             .await?
         } else {
@@ -144,6 +148,7 @@ struct VideoPromptContext {
     storyboard_prompt: Option<String>,
     storyboard_video_desc: Option<String>,
     storyboard_duration: Option<String>,
+    storyboard_prompt_seed: Option<String>,
     project_art_style: Option<String>,
     project_director_manual: Option<String>,
     project_video_ratio: Option<String>,
@@ -201,9 +206,16 @@ async fn load_video_prompt_context(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    let (memory_style_notes, continuity_notes) =
-        load_video_prompt_memory_notes(pool, user_id, project_id, script_id, storyboard_numeric_id)
-            .await?;
+    let current_prompt_seed = storyboard_prompt_seed(&row);
+    let (memory_style_notes, continuity_notes) = load_video_prompt_memory_notes(
+        pool,
+        user_id,
+        project_id,
+        script_id,
+        storyboard_numeric_id,
+        current_prompt_seed.as_deref(),
+    )
+    .await?;
     let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
         r#"
         SELECT art_style, director_manual, video_ratio
@@ -258,6 +270,7 @@ async fn load_video_prompt_context(
         storyboard_prompt: row.prompt,
         storyboard_video_desc: row.video_desc,
         storyboard_duration: row.duration,
+        storyboard_prompt_seed: current_prompt_seed,
         project_art_style: project_row.as_ref().and_then(|row| row.art_style.clone()),
         project_director_manual: project_row
             .as_ref()
@@ -277,6 +290,7 @@ async fn load_video_prompt_memory_notes(
     project_numeric_id: i32,
     script_numeric_id: i32,
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Result<(Vec<String>, Vec<String>), ApiError> {
     let rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
@@ -302,7 +316,7 @@ async fn load_video_prompt_memory_notes(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok((
-        select_prioritized_video_style_notes(&rows, storyboard_numeric_id),
+        select_prioritized_video_style_notes(&rows, storyboard_numeric_id, current_prompt_seed),
         select_video_prompt_memory_notes(&rows, storyboard_numeric_id),
     ))
 }
@@ -313,6 +327,7 @@ async fn load_pending_video_observation_note(
     project_numeric_id: i32,
     script_numeric_id: i32,
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Result<Option<String>, ApiError> {
     let rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
@@ -335,17 +350,21 @@ async fn load_pending_video_observation_note(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(
-        select_pending_rejected_video_observation_note(&rows, storyboard_numeric_id)
-            .map(|note| format!("待观察失败倾向：{note}")),
+    Ok(select_pending_rejected_video_observation_note(
+        &rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
     )
+    .map(|note| format!("待观察失败倾向：{note}")))
 }
 
 fn select_prioritized_video_style_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
 ) -> Vec<String> {
-    let selected_notes = select_selected_video_memory_notes(rows, storyboard_numeric_id);
+    let selected_notes =
+        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed);
     if !selected_notes.is_empty() {
         return selected_notes;
     }
@@ -1271,6 +1290,7 @@ mod tests {
             storyboard_prompt: Some("主角转身冲向门外".into()),
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1293,6 +1313,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1315,6 +1336,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1337,6 +1359,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: None,
             project_video_ratio: None,
@@ -1360,6 +1383,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: None,
             storyboard_duration: Some("7 秒".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1378,6 +1402,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一，光影偏冷".into()),
             project_video_ratio: Some("9:16".into()),
@@ -1401,6 +1426,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1426,6 +1452,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
             project_video_ratio: None,
@@ -1456,6 +1483,7 @@ mod tests {
             storyboard_prompt: None,
             storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
             storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一".into()),
             project_video_ratio: None,
@@ -1587,7 +1615,7 @@ mod tests {
         ];
 
         assert_eq!(
-            select_prioritized_video_style_notes(&rows, 12),
+            select_prioritized_video_style_notes(&rows, 12, None),
             vec!["镜头稳定近景，情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".to_string()]
         );
     }
@@ -1606,7 +1634,7 @@ mod tests {
         ];
 
         assert_eq!(
-            select_prioritized_video_style_notes(&rows, 12),
+            select_prioritized_video_style_notes(&rows, 12, None),
             vec!["镜头低机位压迫感，情绪克制".to_string()]
         );
     }

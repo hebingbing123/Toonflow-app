@@ -13,7 +13,8 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::video_prompt_memory::{
-    select_rejected_video_negative_memory_notes, AgentMemoryRow,
+    select_rejected_video_negative_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -381,11 +382,20 @@ pub(crate) async fn load_auto_negative_prompts(
         script_numeric_id,
     )
     .await?;
+    let prompt_seed_map = load_storyboard_prompt_seed_map(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+    )
+    .await?;
 
     Ok(build_storyboard_negative_prompts(
         storyboard_ids,
         &rows,
         &rejected_rows,
+        &prompt_seed_map,
     ))
 }
 
@@ -417,10 +427,51 @@ async fn load_rejected_video_negative_memory_rows(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
+async fn load_storyboard_prompt_seed_map(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<HashMap<i32, String>, ApiError> {
+    let rows = sqlx::query_as::<_, (i32, Option<String>, Option<String>, Option<String>)>(
+        r#"
+        SELECT sb.numeric_id, sb.prompt, sb.video_desc, sb.duration
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
+          AND sb.numeric_id = ANY($4)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(storyboard_ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(rows
+        .into_iter()
+        .filter_map(|(storyboard_id, prompt, video_desc, duration)| {
+            storyboard_prompt_seed(&StoryboardPromptSeedRow {
+                prompt,
+                video_desc,
+                duration,
+            })
+            .map(|seed| (storyboard_id, seed))
+        })
+        .collect())
+}
+
 fn build_storyboard_negative_prompts(
     storyboard_ids: &[i32],
     review_rows: &[QualityReviewSeedRow],
     rejected_rows: &[AgentMemoryRow],
+    prompt_seed_map: &HashMap<i32, String>,
 ) -> HashMap<i32, Option<String>> {
     storyboard_ids
         .iter()
@@ -433,10 +484,13 @@ fn build_storyboard_negative_prompts(
                     .cloned()
                     .collect::<Vec<_>>(),
             );
-            let rejected_prompt =
-                select_rejected_video_negative_memory_notes(rejected_rows, storyboard_id)
-                    .into_iter()
-                    .next();
+            let rejected_prompt = select_rejected_video_negative_memory_notes(
+                rejected_rows,
+                storyboard_id,
+                prompt_seed_map.get(&storyboard_id).map(String::as_str),
+            )
+            .into_iter()
+            .next();
             (
                 storyboard_id,
                 merge_negative_prompts(review_prompt.as_deref(), rejected_prompt.as_deref()),
@@ -639,6 +693,7 @@ mod tests {
         select_rejected_video_negative_memory_notes, AgentMemoryRow,
     };
     use sqlx::PgPool;
+    use std::collections::HashMap;
     use uuid::Uuid;
 
     #[test]
@@ -742,7 +797,7 @@ mod tests {
         ];
         let merged = merge_negative_prompts(
             Some("avoid flicker"),
-            select_rejected_video_negative_memory_notes(&rows, 12)
+            select_rejected_video_negative_memory_notes(&rows, 12, None)
                 .first()
                 .map(String::as_str),
         )
@@ -806,6 +861,7 @@ mod tests {
                             .into(),
                 },
             ],
+            &HashMap::new(),
         );
 
         let prompt_12 = prompts
