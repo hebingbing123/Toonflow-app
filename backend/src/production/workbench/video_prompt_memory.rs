@@ -905,6 +905,13 @@ fn score_pending_observation_note(note: &str) -> i32 {
         }
     }
     for keyword in [
+        "blur", "warped", "anatom", "face", "identity", "costume", "模糊", "变形", "崩坏",
+    ] {
+        if normalized.contains(keyword) {
+            score += 12;
+        }
+    }
+    for keyword in [
         "mood",
         "emotion",
         "oppressive",
@@ -971,6 +978,10 @@ fn observation_note_family(value: &str) -> &'static str {
         "avoid flat cold lighting"
         | "avoid harsh backlight silhouette"
         | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
+        "avoid warped hands or limbs"
+        | "avoid warped anatomy"
+        | "avoid blur"
+        | "avoid warped anatomy, blur, flicker" => "visual_error",
         "avoid face distortion or identity drift"
         | "avoid costume or character drift"
         | "avoid face drift or costume inconsistency"
@@ -1033,6 +1044,13 @@ struct ObservationCharacterConsistencyFlags {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
+struct ObservationVisualErrorFlags {
+    warped_anatomy: bool,
+    blur: bool,
+    flicker: bool,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
 struct ObservationVisualStyleConstraintFlags {
     extreme_camera_angle: bool,
     tight_close_up: bool,
@@ -1046,6 +1064,8 @@ fn compact_rejected_negative_fragment_families(fragments: Vec<String>) -> Vec<St
     let mut compacted = Vec::with_capacity(fragments.len());
     let mut character_flags = ObservationCharacterConsistencyFlags::default();
     let mut character_idx = None;
+    let mut visual_error_flags = ObservationVisualErrorFlags::default();
+    let mut visual_error_idx = None;
     let mut visual_style_flags = ObservationVisualStyleConstraintFlags::default();
     let mut visual_style_idx = None;
 
@@ -1055,6 +1075,13 @@ fn compact_rejected_negative_fragment_families(fragments: Vec<String>) -> Vec<St
             character_flags.face_distortion |= flags.face_distortion;
             character_flags.identity_drift |= flags.identity_drift;
             character_flags.costume_inconsistency |= flags.costume_inconsistency;
+            continue;
+        }
+        if let Some(flags) = parse_observation_visual_error_fragment(&fragment) {
+            visual_error_idx.get_or_insert(idx);
+            visual_error_flags.warped_anatomy |= flags.warped_anatomy;
+            visual_error_flags.blur |= flags.blur;
+            visual_error_flags.flicker |= flags.flicker;
             continue;
         }
         if let Some(flags) = parse_observation_visual_style_constraint_fragment(&fragment) {
@@ -1075,6 +1102,11 @@ fn compact_rejected_negative_fragment_families(fragments: Vec<String>) -> Vec<St
             idx,
             render_observation_character_consistency_fragment(character_flags),
         ));
+    }
+    if let Some(idx) = visual_error_idx {
+        for fragment in render_observation_visual_error_fragments(visual_error_flags) {
+            compacted.push((idx, fragment));
+        }
     }
     if let Some(idx) = visual_style_idx {
         for fragment in render_observation_visual_style_constraint_fragments(visual_style_flags) {
@@ -1128,6 +1160,49 @@ fn render_observation_character_consistency_fragment(
     } else {
         "avoid face distortion or identity drift".to_string()
     }
+}
+
+fn parse_observation_visual_error_fragment(fragment: &str) -> Option<ObservationVisualErrorFlags> {
+    match canonical_observation_note(fragment).as_str() {
+        "avoid warped hands or limbs" | "avoid warped anatomy" => {
+            Some(ObservationVisualErrorFlags {
+                warped_anatomy: true,
+                ..Default::default()
+            })
+        }
+        "avoid blur" => Some(ObservationVisualErrorFlags {
+            blur: true,
+            ..Default::default()
+        }),
+        "avoid flicker" | "avoid flicker or motion jitter" => Some(ObservationVisualErrorFlags {
+            flicker: true,
+            ..Default::default()
+        }),
+        "avoid warped anatomy, blur, flicker" => Some(ObservationVisualErrorFlags {
+            warped_anatomy: true,
+            blur: true,
+            flicker: true,
+        }),
+        _ => None,
+    }
+}
+
+fn render_observation_visual_error_fragments(flags: ObservationVisualErrorFlags) -> Vec<String> {
+    if flags.warped_anatomy && flags.blur && flags.flicker {
+        return vec!["avoid warped anatomy, blur, flicker".to_string()];
+    }
+
+    let mut fragments = Vec::new();
+    if flags.warped_anatomy {
+        fragments.push("avoid warped anatomy".to_string());
+    }
+    if flags.blur {
+        fragments.push("avoid blur".to_string());
+    }
+    if flags.flicker {
+        fragments.push("avoid flicker or motion jitter".to_string());
+    }
+    fragments
 }
 
 fn parse_observation_visual_style_constraint_fragment(
@@ -3671,6 +3746,25 @@ mod tests {
     }
 
     #[test]
+    fn select_pending_rejected_video_observation_candidates_compacts_visual_error_family() {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=1 | avoid=avoid warped anatomy, avoid blur, avoid flicker"
+                        .into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid warped anatomy, blur, flicker".to_string(),]
+        );
+    }
+
+    #[test]
     fn merge_rejected_video_negative_memory_compacts_family_fragments() {
         let merged = merge_rejected_video_negative_memory(
             "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting",
@@ -3679,6 +3773,17 @@ mod tests {
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("avoid=avoid flat cold lighting or harsh backlight silhouette"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_compacts_visual_error_family_fragments() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid warped anatomy, avoid blur",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid flicker",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid=avoid warped anatomy, blur, flicker"));
     }
 
     #[test]
