@@ -2992,7 +2992,8 @@ fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {
 fn rejected_negative_memory_fragment_is_low_signal(fragment: &str) -> bool {
     matches!(
         canonical_observation_note(fragment).as_str(),
-        "avoid oppressive or frantic mood"
+        "avoid repeating stable follow camera"
+            | "avoid oppressive or frantic mood"
             | "avoid overly cold emotional tone"
             | "avoid heavy tragic mood"
             | "avoid overly cold, oppressive, or frantic mood"
@@ -3446,6 +3447,23 @@ mod tests {
                 prompt: Some("主角停在门口".into()),
                 video_desc: Some(
                     "（主角停在门口、旧宅门厅、主角、5秒、中景、固定、停步凝视、压迫、暖光、无台词、风声、A12）"
+                        .into(),
+                ),
+                duration: Some("5".into()),
+            },
+        );
+
+        assert!(content.is_none());
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_skips_repeat_follow_camera_only_memory() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角穿过走廊".into()),
+                video_desc: Some(
+                    "（主角穿过走廊、旧宅走廊、主角、5秒、中景、稳定跟拍、穿过走廊、平静、暖光、无台词、脚步声、A12）"
                         .into(),
                 ),
                 duration: Some("5".into()),
