@@ -748,8 +748,17 @@ fn select_contextual_observation_summary_style_note(
     select_script_video_style_memory_notes(rows)
         .into_iter()
         .chain(select_project_video_style_memory_notes(rows))
-        .filter(|note| observation_style_note_context_evidence(note, &context) >= 2)
-        .find_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
+        .filter_map(|note| {
+            let compacted = compact_contextual_video_style_note(&note, storyboard_row)?;
+            let evidence = observation_style_note_context_evidence(&compacted, &context);
+            (evidence >= 2).then_some((evidence, compacted))
+        })
+        .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
+            left_evidence
+                .cmp(right_evidence)
+                .then_with(|| right_note.chars().count().cmp(&left_note.chars().count()))
+        })
+        .map(|(_, note)| note)
 }
 
 fn observation_style_note_context_evidence(
@@ -6037,6 +6046,30 @@ mod tests {
 
         assert!(
             resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)).is_none()
+        );
+    }
+
+    #[test]
+    fn observation_filter_style_note_prefers_shorter_contextual_summary_when_signal_is_equal() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光，人物持续逼近 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光，人物持续逼近".into(),
+            },
+            AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("门厅对峙".into()),
+            video_desc: Some("（主角对峙、旧宅门厅、主角、5秒、中景、稳定跟拍、逼近对手、冷峻压迫、冷调逆光、、、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)),
+            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
         );
     }
 }
