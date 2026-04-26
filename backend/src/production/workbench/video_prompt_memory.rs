@@ -561,6 +561,7 @@ pub(crate) fn select_prioritized_video_style_note(
     candidates.sort_by(|a, b| {
         score_ranked_style_note(b, &context)
             .cmp(&score_ranked_style_note(a, &context))
+            .then(a.note.chars().count().cmp(&b.note.chars().count()))
             .then(b.score.cmp(&a.score))
             .then(a.recency_idx.cmp(&b.recency_idx))
             .then(a.note.cmp(&b.note))
@@ -1570,14 +1571,13 @@ fn selected_video_style_value_from_content(content: &str) -> Option<String> {
 }
 
 fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionContext) -> i32 {
-    let mut score = note.score - note.recency_idx as i32;
+    let mut score = note.score;
     let fragments = note
         .note
         .split('，')
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
-    score += fragments.len() as i32 * 12;
     for fragment in fragments {
         if fragment.is_empty() {
             continue;

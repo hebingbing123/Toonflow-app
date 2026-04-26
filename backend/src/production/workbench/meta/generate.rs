@@ -4097,6 +4097,30 @@ mod tests {
     }
 
     #[test]
+    fn prioritized_video_prompt_memory_prefers_shorter_summary_when_context_signal_is_equal() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷色压迫感，光影冷调逆光 | note=镜头稳定跟拍，情绪冷色压迫感，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=5 | style=情绪冷色压迫感，光影冷调逆光 | note=情绪冷色压迫感，光影冷调逆光".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角在走廊里停步回头".into()),
+            video_desc: Some("（主角停步回头、旧宅走廊、主角、5秒、中景、静止、停步回头、冷色压迫感、冷调逆光、无台词、风声回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_prioritized_video_style_note(&rows, 12, None, Some(&storyboard_row)),
+            Some("情绪冷色压迫感，光影冷调逆光".to_string())
+        );
+    }
+
+    #[test]
     fn generate_video_prompt_response_serializes_observation_note() {
         let value = serde_json::to_value(GenerateVideoPromptResponse {
             prompt: "Single cinematic shot.".into(),
