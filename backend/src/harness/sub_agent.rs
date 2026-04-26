@@ -792,11 +792,7 @@ fn compact_auto_memory_result_fragment(fragment: &str) -> String {
         }
     }
 
-    if is_low_signal_auto_memory_result_fragment(&compacted) {
-        return String::new();
-    }
-
-    compacted
+    compact_auto_memory_result_clause_group(&compacted)
 }
 
 fn is_low_signal_auto_memory_result_fragment(fragment: &str) -> bool {
@@ -844,6 +840,24 @@ fn is_low_signal_auto_memory_result_fragment(fragment: &str) -> bool {
             | "script"
             | "scriptplan"
     )
+}
+
+fn compact_auto_memory_result_clause_group(fragment: &str) -> String {
+    let clauses =
+        fragment
+            .split(['，', ','])
+            .map(|clause| {
+                normalize_whitespace(clause.trim_matches(|ch: char| {
+                    ch.is_whitespace() || "，,。；;：:!！?？".contains(ch)
+                }))
+            })
+            .filter(|clause| !clause.is_empty())
+            .filter(|clause| !is_low_signal_auto_memory_result_fragment(clause))
+            .collect::<Vec<_>>();
+    if clauses.is_empty() {
+        return String::new();
+    }
+    clauses.join("，")
 }
 
 fn compact_exact_scope_auto_memory_entry(entry: &str) -> String {
@@ -1940,6 +1954,21 @@ mod tests {
 
         assert!(snapshot.contains("result=主角冲向巷口，保持镜头方向连续"));
         assert!(!snapshot.contains("已生成"));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_drops_low_signal_result_tail_clause() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_storyboard_gen",
+            &json!({"storyboardIds": [12]}),
+            "主角冲向巷口，保持镜头方向连续，已写入工作区。",
+            None,
+            None,
+        )
+        .expect("snapshot");
+
+        assert!(snapshot.contains("result=主角冲向巷口，保持镜头方向连续"));
+        assert!(!snapshot.contains("已写入工作区"));
     }
 
     #[test]
