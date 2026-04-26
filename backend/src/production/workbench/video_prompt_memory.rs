@@ -120,10 +120,18 @@ pub(crate) fn build_selected_video_memory(
     if let Some(prompt_seed) = storyboard_prompt_seed(row) {
         parts.push(format!("promptSeed={prompt_seed}"));
     }
-    if let Some(style) = style_only_note(&note) {
+    let style = style_only_note(&note);
+    if let Some(style) = style.as_ref() {
         parts.push(format!("style={style}"));
     }
-    parts.push(format!("note={note}"));
+    let residual_note = if style.is_some() {
+        non_style_note(&note)
+    } else {
+        Some(note)
+    };
+    if let Some(note) = residual_note {
+        parts.push(format!("note={note}"));
+    }
     if let Some(duration) = resolve_duration_label(row) {
         parts.push(format!("duration={duration}"));
     }
@@ -1861,6 +1869,26 @@ fn style_only_note(note: &str) -> Option<String> {
     compact_video_style_prompt_note(&fragments.join("，"))
 }
 
+fn non_style_note(note: &str) -> Option<String> {
+    let fragments = note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| {
+            !fragment.is_empty()
+                && !STYLE_NOTE_PREFIXES
+                    .iter()
+                    .any(|prefix| fragment.starts_with(prefix))
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
 fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
     if let Some(value) = extract_key_value(&row.content, "style") {
         return compact_video_style_prompt_note(&value);
@@ -2292,11 +2320,12 @@ mod tests {
 
         assert!(content.contains("storyboardIds=12"));
         assert!(content.contains("promptSeed="));
-        assert!(content.contains("style=镜头稳定跟拍，情绪急迫，光影阴天冷光"));
+        assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光"));
         assert!(content.contains("note=主角冲出旧宅"));
-        assert!(content.contains("镜头中景稳定跟拍"));
-        assert!(content.contains("情绪急迫"));
-        assert!(content.contains("场景旧宅走廊"));
+        assert!(content.contains("快步推门冲出"));
+        assert!(!content.contains("note=主角冲出旧宅，镜头中景稳定跟拍"));
+        assert!(!content.contains("note=主角冲出旧宅，快步推门冲出，情绪急迫"));
+        assert!(!content.contains("场景旧宅走廊"));
         assert!(content.contains("duration=5s"));
     }
 
@@ -2312,8 +2341,8 @@ mod tests {
         )
         .expect("content");
 
-        assert!(!content.contains("note=主角在旧宅走廊尽头停步回头"));
-        assert!(content.contains("note=镜头中景稳定跟拍"));
+        assert!(content.contains("note=主角在旧宅走廊尽头停步回头"));
+        assert!(!content.contains("note=主角在旧宅走廊尽头停步回头，镜头中景稳定跟拍"));
         assert!(!content.contains("场景旧宅走廊尽头"));
         assert!(content.contains("情绪压抑"));
     }
