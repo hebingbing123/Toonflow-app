@@ -1512,6 +1512,9 @@ fn compact_continuity_note(
         .filter_map(|fragment| {
             trim_continuity_fragment_against_storyboard_fields(&fragment, fields)
         })
+        .map(|fragment| {
+            trim_continuity_fragment_against_prompt_coverage(&fragment, prompt_coverage)
+        })
         .filter(|fragment| {
             let normalized_core = continuity_fragment_core(fragment);
             !continuity_fragment_matches_fields(fragment, fields, &expected_camera)
@@ -1531,6 +1534,39 @@ fn compact_continuity_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn trim_continuity_fragment_against_prompt_coverage(
+    fragment: &str,
+    prompt_coverage: &[String],
+) -> String {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return normalized;
+    }
+
+    let trimmed = strip_leading_covered_prompt_fragment(&normalized, prompt_coverage);
+    if trimmed == normalized || trimmed.is_empty() {
+        return normalized;
+    }
+
+    continuity_fragment_still_specific_after_coverage_trim(&trimmed)
+        .then_some(trimmed)
+        .unwrap_or(normalized)
+}
+
+fn continuity_fragment_still_specific_after_coverage_trim(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return false;
+    }
+
+    [
+        "保持", "保留", "延续", "走位", "站位", "方向", "构图", "衔接", "连续", "统一", "一致",
+        "跳轴",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
 }
 
 fn trim_continuity_fragment_against_storyboard_fields(
@@ -3239,7 +3275,10 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 光影颗粒."), "{prompt}");
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 光影颗粒."),
+            "{prompt}"
+        );
         assert!(!prompt.contains("光影冷调逆光颗粒"), "{prompt}");
     }
 
@@ -3658,6 +3697,34 @@ mod tests {
         assert_eq!(prompt.matches("Continuity notes:").count(), 1);
         assert!(!continuity_clause.contains("保持低机位压迫感"));
         assert!(prompt.contains("Natural motion, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_leading_asset_coverage_from_fused_continuity_fragment() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["黑色风衣主角保留上一镜头走位连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 保留上一镜头走位连续."),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Continuity notes: 黑色风衣主角"),
+            "{prompt}"
+        );
     }
 
     #[test]
