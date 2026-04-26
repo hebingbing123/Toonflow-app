@@ -538,15 +538,76 @@ pub(crate) fn select_pending_rejected_video_observation_note(
     current_prompt_seed: Option<&str>,
 ) -> Option<String> {
     rows.iter()
-        .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
-        .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
-        .filter(|row| memory_matches_prompt_seed(&row.content, current_prompt_seed))
-        .find(|row| {
+        .enumerate()
+        .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+        .filter_map(|(idx, row)| {
+            memory_matches_storyboard(&row.content, storyboard_numeric_id).then_some((idx, row))
+        })
+        .filter(|(_, row)| memory_matches_prompt_seed(&row.content, current_prompt_seed))
+        .filter(|(_, row)| {
             rejected_video_negative_rejection_count(&row.content)
                 < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
         })
-        .and_then(|row| extract_key_value(&row.content, "avoid"))
-        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .filter_map(|(idx, row)| {
+            let avoid = extract_key_value(&row.content, "avoid")?;
+            let note = select_primary_observation_fragment(&avoid).unwrap_or_else(|| {
+                clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+            });
+            Some((score_pending_observation_note(&note), idx, note))
+        })
+        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
+        .map(|(_, _, note)| note)
+}
+
+fn select_primary_observation_fragment(avoid: &str) -> Option<String> {
+    avoid
+        .split(',')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .map(|fragment| {
+            let note = clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+            (score_pending_observation_note(&note), note)
+        })
+        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.len().cmp(&a.1.len())))
+        .map(|(_, note)| note)
+}
+
+fn score_pending_observation_note(note: &str) -> i32 {
+    let normalized = normalize_prompt_text(note).to_lowercase();
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    for keyword in [
+        "shaky", "handheld", "motion", "camera", "镜头", "运镜", "抖动", "跳轴", "站位", "走位",
+    ] {
+        if normalized.contains(keyword) {
+            score += 16;
+        }
+    }
+    for keyword in [
+        "lighting", "light", "flat", "flicker", "冷光", "光影", "曝光", "闪烁", "色温",
+    ] {
+        if normalized.contains(keyword) {
+            score += 12;
+        }
+    }
+    for keyword in [
+        "mood",
+        "emotion",
+        "oppressive",
+        "frantic",
+        "情绪",
+        "压迫",
+        "节奏",
+        "表演",
+    ] {
+        if normalized.contains(keyword) {
+            score += 8;
+        }
+    }
+    score - normalized.chars().count() as i32 / 6
 }
 
 pub(crate) fn select_selected_video_memory_notes(
@@ -1505,10 +1566,7 @@ mod tests {
             None,
         );
 
-        assert_eq!(
-            note,
-            Some("avoid shaky handheld motion, avoid flat cold lighting".into())
-        );
+        assert_eq!(note, Some("avoid shaky handheld motion".into()));
     }
 
     #[test]
@@ -1582,6 +1640,29 @@ mod tests {
         );
 
         assert_eq!(note, None);
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_prefers_stronger_camera_warning() {
+        let note = select_pending_rejected_video_observation_note(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion"
+                            .into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(note, Some("avoid shaky handheld motion".into()));
     }
 
     #[test]
