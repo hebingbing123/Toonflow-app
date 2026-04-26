@@ -2074,6 +2074,12 @@ fn compact_project_director_note(
         if fragment.is_empty() || !project_director_fragment_relevant(&fragment) {
             continue;
         }
+        let fragment = if let Some(fields) = structured_fields {
+            trim_project_director_fragment_against_storyboard_fields(&fragment, fields)
+        } else {
+            Some(fragment)
+        };
+        let Some(fragment) = fragment else { continue };
         if scored
             .iter()
             .any(|(_, _, existing): &(i32, usize, String)| existing == &fragment)
@@ -2109,6 +2115,19 @@ fn compact_project_director_note(
         .map(|(_, _, fragment)| fragment)
         .collect::<Vec<_>>();
     Some(clip_prompt_fragment(&fragments.join(", "), 48))
+}
+
+fn trim_project_director_fragment_against_storyboard_fields(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Option<String> {
+    if ["镜头", "情绪", "光影"]
+        .iter()
+        .any(|prefix| fragment.starts_with(prefix))
+    {
+        return trim_style_fragment_against_storyboard_fields(fragment, fields);
+    }
+    Some(fragment.to_string())
 }
 
 fn score_project_director_fragment(
@@ -3200,6 +3219,28 @@ mod tests {
         );
         assert!(!prompt.contains("Format:"));
         assert!(!prompt.contains("镜头衔接统一"));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_project_director_style_half_already_covered_by_storyboard() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("光影冷调逆光颗粒，镜头衔接统一".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 光影颗粒."), "{prompt}");
+        assert!(!prompt.contains("光影冷调逆光颗粒"), "{prompt}");
     }
 
     #[test]
