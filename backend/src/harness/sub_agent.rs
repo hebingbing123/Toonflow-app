@@ -21,6 +21,7 @@ const AUTO_MEMORY_SUMMARY_LIMIT: i64 = 3;
 const AUTO_MEMORY_FALLBACK_LIMIT: usize = 1;
 const AUTO_MEMORY_KEEP_ROWS: i64 = 8;
 const AUTO_MEMORY_MAX_CHARS: usize = 320;
+const AUTO_MEMORY_FETCH_LIMIT: i64 = AUTO_MEMORY_KEEP_ROWS;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct ScopeSignature {
@@ -39,6 +40,12 @@ struct ScopedStoryboardPromptSeedRow {
     prompt: Option<String>,
     video_desc: Option<String>,
     duration: Option<String>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct AutoMemoryRow {
+    name: String,
+    content: String,
 }
 
 fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<String, Value>> {
@@ -475,6 +482,36 @@ fn prompt_seed_overlap_score(current: &ScopeSignature, candidate: &ScopeSignatur
         .count()
 }
 
+fn scope_has_matching_storyboard_prompt_seed(
+    scope: &ScopeSignature,
+    storyboard_id: i64,
+    prompt_seed: &str,
+) -> bool {
+    scope
+        .storyboard_prompt_seeds
+        .iter()
+        .any(|(candidate_storyboard_id, candidate_prompt_seed)| {
+            *candidate_storyboard_id == storyboard_id && candidate_prompt_seed == prompt_seed
+        })
+}
+
+fn scope_has_conflicting_storyboard_prompt_seed(
+    current: &ScopeSignature,
+    candidate: &ScopeSignature,
+) -> bool {
+    candidate
+        .storyboard_prompt_seeds
+        .iter()
+        .any(|(storyboard_id, candidate_prompt_seed)| {
+            current.storyboard_prompt_seeds.iter().any(
+                |(current_storyboard_id, current_prompt_seed)| {
+                    current_storyboard_id == storyboard_id
+                        && current_prompt_seed != candidate_prompt_seed
+                },
+            )
+        })
+}
+
 fn scope_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> usize {
     let mut score = 0;
     score += prompt_seed_overlap_score(current, candidate) * 16;
@@ -516,26 +553,58 @@ fn select_auto_memory_entries(
             (
                 scope_overlap_score(&current_scope, &candidate_scope),
                 index,
+                candidate_scope,
                 row,
             )
         })
         .collect::<Vec<_>>();
 
-    let matched_count = scored.iter().filter(|(score, _, _)| *score > 0).count();
+    let matched_count = scored.iter().filter(|(score, _, _, _)| *score > 0).count();
     if matched_count == 0 {
         return scored
             .into_iter()
-            .map(|(_, _, row)| row)
+            .map(|(_, _, _, row)| row)
             .take(AUTO_MEMORY_FALLBACK_LIMIT)
             .collect::<Vec<_>>();
     }
 
+    let has_matching_prompt_seed_storyboards = current_scope
+        .storyboard_prompt_seeds
+        .iter()
+        .filter(|(storyboard_id, prompt_seed)| {
+            scored.iter().any(|(_, _, candidate_scope, _)| {
+                scope_has_matching_storyboard_prompt_seed(
+                    candidate_scope,
+                    *storyboard_id,
+                    prompt_seed,
+                )
+            })
+        })
+        .map(|(storyboard_id, _)| *storyboard_id)
+        .collect::<Vec<_>>();
+
     scored.sort_by(|left, right| right.0.cmp(&left.0).then(left.1.cmp(&right.1)));
     scored
         .into_iter()
-        .filter(|(score, _, _)| *score > 0)
+        .filter(|(score, _, candidate_scope, _)| {
+            if *score <= 0 {
+                return false;
+            }
+            if has_matching_prompt_seed_storyboards.is_empty() {
+                return true;
+            }
+            if !scope_has_conflicting_storyboard_prompt_seed(&current_scope, candidate_scope) {
+                return true;
+            }
+            !candidate_scope
+                .storyboard_prompt_seeds
+                .iter()
+                .any(|(storyboard_id, _)| {
+                    has_matching_prompt_seed_storyboards.contains(storyboard_id)
+                })
+        })
         .take(AUTO_MEMORY_SUMMARY_LIMIT as usize)
-        .map(|(_, _, row)| row)
+        .map(|(_, _, _, row)| row)
         .collect::<Vec<_>>()
 }
 
@@ -823,15 +892,16 @@ async fn load_auto_memory_note(
     arguments: &Value,
     prompt_seed_scope: Option<&str>,
 ) -> Result<Option<String>, InvokeError> {
-    let rows = sqlx::query_scalar(
+    let rows = sqlx::query_as::<_, AutoMemoryRow>(
         r#"
-        SELECT content
+        SELECT name, content
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
           AND episodes_id IS NOT DISTINCT FROM $3
           AND agent_type = $4
           AND memory_type = 'summary'
+          AND name = 'auto_scope_memory'
         ORDER BY create_time_ms DESC
         LIMIT $5
         "#,
@@ -840,12 +910,16 @@ async fn load_auto_memory_note(
     .bind(project_numeric_id)
     .bind(episodes_id)
     .bind(agent_type)
-    .bind(AUTO_MEMORY_SUMMARY_LIMIT)
+    .bind(AUTO_MEMORY_FETCH_LIMIT)
     .fetch_all(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
-    let rows = select_auto_memory_entries(arguments, prompt_seed_scope, rows);
+    let rows = select_auto_memory_entries(
+        arguments,
+        prompt_seed_scope,
+        filter_auto_scope_memory_rows(rows),
+    );
     if rows.is_empty() {
         return Ok(None);
     }
@@ -858,6 +932,14 @@ async fn load_auto_memory_note(
     Ok(Some(format!(
         "同 scope 最近记忆：\n{items}\n只把它们当作延续线索；真正写入前先最小核对工具数据。"
     )))
+}
+
+fn filter_auto_scope_memory_rows(rows: Vec<AutoMemoryRow>) -> Vec<String> {
+    rows.into_iter()
+        .filter(|row| row.name == "auto_scope_memory")
+        .map(|row| row.content.trim().to_string())
+        .filter(|content| !content.is_empty())
+        .collect()
 }
 
 async fn should_persist_auto_memory_snapshot(
@@ -1112,9 +1194,10 @@ pub async fn invoke_sub_agent_tool(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, format_storyboard_prompt_seed_scope, parse_review_summary,
-        parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
-        scope_signature_from_args, select_auto_memory_entries, sub_agent_prompt_from_args,
+        build_auto_memory_snapshot, filter_auto_scope_memory_rows,
+        format_storyboard_prompt_seed_scope, parse_review_summary, parse_scope_signature,
+        parse_storyboard_prompt_seed_scope, parse_tag_attributes, scope_signature_from_args,
+        select_auto_memory_entries, sub_agent_prompt_from_args, AutoMemoryRow,
     };
     use serde_json::json;
 
@@ -1376,7 +1459,51 @@ mod tests {
             ],
         );
 
-        assert_eq!(rows.len(), 2);
+        assert_eq!(rows.len(), 1);
+        assert!(rows[0].contains("promptSeed=seed-12-current"));
+    }
+
+    #[test]
+    fn filter_auto_scope_memory_rows_skips_other_summary_types_and_blank_content() {
+        let rows = filter_auto_scope_memory_rows(vec![
+            AutoMemoryRow {
+                name: "selected_video_memory".to_string(),
+                content: "storyboardIds=12 | promptSeed=seed-12-current | style=镜头近景".to_string(),
+            },
+            AutoMemoryRow {
+                name: "auto_scope_memory".to_string(),
+                content: " tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=当前镜头角色站位 ".to_string(),
+            },
+            AutoMemoryRow {
+                name: "auto_scope_memory".to_string(),
+                content: "   ".to_string(),
+            },
+        ]);
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(
+            rows[0],
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=当前镜头角色站位"
+        );
+    }
+
+    #[test]
+    fn select_auto_memory_entries_keeps_older_matching_scope_when_newer_rows_are_noise() {
+        let rows = select_auto_memory_entries(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+            vec![
+                "tool=noise_a | scope=storyboardIds=31 | promptSeed=seed-31 | summary=别的镜头31".to_string(),
+                "tool=noise_b | scope=storyboardIds=32 | promptSeed=seed-32 | summary=别的镜头32".to_string(),
+                "tool=noise_c | scope=storyboardIds=33 | promptSeed=seed-33 | summary=别的镜头33".to_string(),
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=当前镜头角色站位".to_string(),
+            ],
+        );
+
+        assert_eq!(rows.len(), 1);
+        assert!(rows[0].contains("storyboardIds=12"));
         assert!(rows[0].contains("promptSeed=seed-12-current"));
     }
 }
