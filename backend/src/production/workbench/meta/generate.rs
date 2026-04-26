@@ -56,6 +56,12 @@ const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
 ];
 const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
 
+fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
+    note.split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateVideoPromptBody {
@@ -1286,7 +1292,7 @@ fn compact_contextual_video_style_note(
         .filter(|part| !part.is_empty())
         .collect::<String>();
     let fragments = normalized
-        .split('，')
+        .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| {
@@ -1592,7 +1598,7 @@ fn compact_memory_style_anchor(
             .collect::<String>()
     });
     let fragments = normalized
-        .split('，')
+        .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| style_fragment_prefix(fragment))
@@ -2079,7 +2085,7 @@ fn compact_continuity_note(
         .filter(|part| !part.is_empty())
         .collect::<String>();
     let fragments = normalized
-        .split('，')
+        .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter_map(|fragment| {
@@ -3082,7 +3088,7 @@ fn strip_generic_director_continuity_subfragments(fragment: &str) -> String {
         .into_iter()
         .fold(normalized.clone(), |acc, needle| acc.replace(needle, "，"));
     let kept = separated
-        .split('，')
+        .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|part| !part.is_empty())
         .filter(|part| !project_director_fragment_is_generic_quality_tail_overlap(part))
@@ -3822,7 +3828,7 @@ fn compact_storyboard_memory_continuity_note(
     };
 
     let fragments = compacted
-        .split('，')
+        .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter_map(|fragment| {
@@ -3848,7 +3854,7 @@ fn score_continuity_note(
     if normalized.is_empty() {
         return score;
     }
-    for fragment in normalized.split('，').map(normalize_prompt_text) {
+    for fragment in split_prompt_note_fragments(&normalized) {
         if fragment.is_empty() {
             continue;
         }
@@ -3876,7 +3882,7 @@ fn score_continuity_note(
             .into_iter()
             .filter(|part| !part.is_empty())
             .collect::<String>();
-        for fragment in normalized.split('，').map(normalize_prompt_text) {
+        for fragment in split_prompt_note_fragments(&normalized) {
             if fragment.is_empty() {
                 continue;
             }
@@ -5581,6 +5587,38 @@ mod tests {
         assert!(prompt.contains("Continuity notes: 人物站位不要跳轴."));
         assert!(!prompt.contains("Continuity notes: 保持上一镜头衔接统一"));
         assert!(prompt.contains("Natural motion, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_supports_ascii_delimited_memory_style_and_continuity_notes() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、冷峻压迫、冷调逆光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头低机位压迫感, 情绪冷峻压迫; 光影冷调逆光颗粒".into()],
+            continuity_notes: vec!["保持上一镜头冷峻压迫, 人物站位不要跳轴".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片悬疑; 镜头低机位压迫感，光影颗粒."),
+            "{prompt}"
+        );
+        assert!(
+            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Continuity notes: 保持上一镜头冷峻压迫"),
+            "{prompt}"
+        );
     }
 
     #[test]

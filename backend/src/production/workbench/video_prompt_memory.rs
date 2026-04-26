@@ -93,6 +93,12 @@ const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
 ];
 const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
 
+fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
+    note.split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+}
+
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
     pub(crate) prompt: Option<String>,
@@ -1354,7 +1360,7 @@ pub(crate) fn select_neighbor_selected_video_memory_notes(
                 .or_else(|| {
                     extract_key_value(&row.content, "note").and_then(|value| {
                         let fragments = value
-                            .split('，')
+                            .split(['，', ',', '；', ';', '。', '\n'])
                             .map(normalize_prompt_text)
                             .filter(|fragment| {
                                 STYLE_NOTE_PREFIXES
@@ -2603,10 +2609,7 @@ pub(crate) fn compact_video_style_prompt_note(note: &str) -> Option<String> {
     let mut fragments = Vec::new();
     let mut fallback_shot = None;
 
-    for fragment in note.split('，').map(normalize_prompt_text) {
-        if fragment.is_empty() {
-            continue;
-        }
+    for fragment in split_prompt_note_fragments(note) {
         if let Some(compacted) = compact_prompt_style_fragment(&fragment) {
             if fragments.iter().any(|existing| existing == &compacted) {
                 continue;
@@ -2757,9 +2760,7 @@ fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
 }
 
 fn style_only_note(note: &str) -> Option<String> {
-    let fragments = note
-        .split('，')
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(note)
         .filter(|fragment| {
             STYLE_NOTE_PREFIXES
                 .iter()
@@ -2773,9 +2774,7 @@ fn style_only_note(note: &str) -> Option<String> {
 }
 
 fn non_style_note(note: &str) -> Option<String> {
-    let fragments = note
-        .split('，')
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(note)
         .filter(|fragment| {
             !fragment.is_empty()
                 && !STYLE_NOTE_PREFIXES
@@ -4155,6 +4154,14 @@ mod tests {
             compact_video_style_prompt_note("情绪冷峻压迫，光影冷调逆光").expect("style note");
 
         assert_eq!(note, "情绪冷峻压迫，光影冷调逆光");
+    }
+
+    #[test]
+    fn compact_video_style_prompt_note_supports_ascii_delimiters() {
+        let note = compact_video_style_prompt_note("镜头稳定跟拍, 情绪冷峻压迫; 光影冷调逆光")
+            .expect("style note");
+
+        assert_eq!(note, "镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光");
     }
 
     #[test]
