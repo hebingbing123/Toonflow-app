@@ -13,8 +13,8 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::video_prompt_memory::{
-    select_rejected_video_negative_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_rejected_video_negative_memory_notes, select_selected_video_memory_notes,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -382,6 +382,9 @@ pub(crate) async fn load_auto_negative_prompts(
         script_numeric_id,
     )
     .await?;
+    let selected_rows =
+        load_selected_video_memory_rows(pool, user_id, project_numeric_id, script_numeric_id)
+            .await?;
     let prompt_seed_map = load_storyboard_prompt_seed_map(
         pool,
         user_id,
@@ -395,6 +398,7 @@ pub(crate) async fn load_auto_negative_prompts(
         storyboard_ids,
         &rows,
         &rejected_rows,
+        &selected_rows,
         &prompt_seed_map,
     ))
 }
@@ -467,23 +471,62 @@ async fn load_storyboard_prompt_seed_map(
         .collect())
 }
 
+async fn load_selected_video_memory_rows(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<Vec<AgentMemoryRow>, ApiError> {
+    sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'selected_video_memory'
+        ORDER BY create_time_ms DESC
+        LIMIT 8
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
+
 fn build_storyboard_negative_prompts(
     storyboard_ids: &[i32],
     review_rows: &[QualityReviewSeedRow],
     rejected_rows: &[AgentMemoryRow],
+    selected_rows: &[AgentMemoryRow],
     prompt_seed_map: &HashMap<i32, String>,
 ) -> HashMap<i32, Option<String>> {
     storyboard_ids
         .iter()
         .copied()
         .map(|storyboard_id| {
-            let review_fragments = collect_negative_review_fragments(
-                &review_rows
-                    .iter()
-                    .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
-                    .cloned()
-                    .collect::<Vec<_>>(),
+            let selected_style_note = select_selected_video_memory_notes(
+                selected_rows,
                 storyboard_id,
+                prompt_seed_map.get(&storyboard_id).map(String::as_str),
+            )
+            .into_iter()
+            .next();
+            let review_fragments = filter_conflicting_review_fragments(
+                collect_negative_review_fragments(
+                    &review_rows
+                        .iter()
+                        .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
+                        .cloned()
+                        .collect::<Vec<_>>(),
+                    storyboard_id,
+                ),
+                selected_style_note.as_deref(),
             );
             let rejected_fragments = split_negative_prompt_fragments(
                 select_rejected_video_negative_memory_notes(
@@ -500,6 +543,52 @@ fn build_storyboard_negative_prompts(
             (storyboard_id, review_prompt)
         })
         .collect()
+}
+
+fn filter_conflicting_review_fragments(
+    fragments: Vec<String>,
+    selected_style_note: Option<&str>,
+) -> Vec<String> {
+    let Some(note) = selected_style_note else {
+        return fragments;
+    };
+    fragments
+        .into_iter()
+        .filter(|fragment| !review_fragment_conflicts_with_selected_style(fragment, note))
+        .collect()
+}
+
+fn review_fragment_conflicts_with_selected_style(
+    fragment: &str,
+    selected_style_note: &str,
+) -> bool {
+    let fragment = canonical_negative_fragment(fragment);
+    let note = selected_style_note.trim();
+    if fragment.is_empty() || note.is_empty() {
+        return false;
+    }
+
+    if fragment == canonical_negative_fragment("avoid overly tight close-up framing") {
+        return note.contains("近景") || note.contains("特写");
+    }
+    if fragment == canonical_negative_fragment("avoid extreme camera angle") {
+        return note.contains("低机位") || note.contains("高机位");
+    }
+    if fragment == canonical_negative_fragment("avoid oppressive or frantic mood") {
+        return note.contains("压迫") || note.contains("紧张") || note.contains("冷峻");
+    }
+    if fragment == canonical_negative_fragment("avoid overly cold emotional tone") {
+        return note.contains("冷调") || note.contains("冷色") || note.contains("冷峻");
+    }
+    if fragment == canonical_negative_fragment("avoid flat cold lighting") {
+        return note.contains("光影")
+            && (note.contains("冷调") || note.contains("冷光") || note.contains("逆光"));
+    }
+    if fragment == canonical_negative_fragment("avoid harsh backlight silhouette") {
+        return note.contains("光影") && note.contains("逆光");
+    }
+
+    false
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -776,7 +865,8 @@ mod tests {
         compact_negative_review_constraints, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
         merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
-        QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        review_fragment_conflicts_with_selected_style, QualityReviewSeedRow,
+        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -951,6 +1041,7 @@ mod tests {
                             .into(),
                 },
             ],
+            &[],
             &HashMap::new(),
         );
 
@@ -995,6 +1086,7 @@ mod tests {
                 name: "rejected_video_negative_memory".into(),
                 content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid oppressive or frantic mood, avoid flat cold lighting".into(),
             }],
+            &[],
             &HashMap::new(),
         );
 
@@ -1006,6 +1098,65 @@ mod tests {
         assert!(prompt.contains("avoid oppressive or frantic mood"));
         assert!(prompt.contains("avoid flat cold lighting"));
         assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS + 3);
+    }
+
+    #[test]
+    fn selected_video_style_can_suppress_conflicting_review_fragments() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("近景太近，情绪太冷太压迫，逆光太重".into()),
+            }],
+            &[],
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | promptSeed=seed000000001 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=镜头近景，情绪冷峻压迫，光影冷调逆光".into(),
+            }],
+            &HashMap::from([(12, "seed000000001".to_string())]),
+        );
+
+        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        assert_eq!(prompt, None);
+    }
+
+    #[test]
+    fn selected_video_style_does_not_suppress_non_conflicting_review_fragments() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: Some("character_break".into()),
+                comments: Some("角色脸不稳定".into()),
+            }],
+            &[],
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | promptSeed=seed000000001 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=镜头近景，情绪冷峻压迫，光影冷调逆光".into(),
+            }],
+            &HashMap::from([(12, "seed000000001".to_string())]),
+        );
+
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+        assert!(prompt.contains("avoid face drift or costume inconsistency"));
+    }
+
+    #[test]
+    fn review_fragment_conflict_filter_is_limited_to_exact_selected_style_signals() {
+        assert!(review_fragment_conflicts_with_selected_style(
+            "avoid overly tight close-up framing",
+            "镜头近景，情绪冷峻压迫，光影冷调逆光"
+        ));
+        assert!(!review_fragment_conflicts_with_selected_style(
+            "avoid wrong setting details",
+            "镜头近景，情绪冷峻压迫，光影冷调逆光"
+        ));
     }
 
     #[test]

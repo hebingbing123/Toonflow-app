@@ -618,31 +618,49 @@ fn score_rejected_negative_fragment(fragment: &str) -> i32 {
 
     let mut score = 0;
     for keyword in [
-        "shaky", "handheld", "motion", "camera", "shot", "framing", "镜头", "运镜", "抖动",
-        "跳轴", "机位",
+        "shaky", "handheld", "motion", "camera", "shot", "framing", "镜头", "运镜", "抖动", "跳轴",
+        "机位",
     ] {
         if normalized.contains(keyword) {
             score += 20;
         }
     }
     for keyword in [
-        "flicker", "jitter", "stutter", "blur", "warped", "anatom", "face", "identity",
-        "costume", "flash", "闪烁", "变形", "崩坏",
+        "flicker", "jitter", "stutter", "blur", "warped", "anatom", "face", "identity", "costume",
+        "flash", "闪烁", "变形", "崩坏",
     ] {
         if normalized.contains(keyword) {
             score += 18;
         }
     }
     for keyword in [
-        "lighting", "light", "silhouette", "backlight", "cold", "neon", "flat", "光影", "逆光",
-        "冷光", "曝光", "反光",
+        "lighting",
+        "light",
+        "silhouette",
+        "backlight",
+        "cold",
+        "neon",
+        "flat",
+        "光影",
+        "逆光",
+        "冷光",
+        "曝光",
+        "反光",
     ] {
         if normalized.contains(keyword) {
             score += 12;
         }
     }
     for keyword in [
-        "mood", "emotion", "oppressive", "frantic", "tone", "情绪", "压迫", "冷调", "悲怆",
+        "mood",
+        "emotion",
+        "oppressive",
+        "frantic",
+        "tone",
+        "情绪",
+        "压迫",
+        "冷调",
+        "悲怆",
     ] {
         if normalized.contains(keyword) {
             score += 8;
@@ -1472,9 +1490,8 @@ mod tests {
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_video_continuity_note,
-        merge_rejected_video_negative_memory,
-        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
-        select_neighbor_selected_video_memory_notes,
+        merge_rejected_video_negative_memory, parse_structured_storyboard_description,
+        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
