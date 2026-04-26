@@ -185,6 +185,7 @@ pub(crate) fn build_rejected_video_negative_memory(
     let fragments = compact_rejected_negative_fragment_families(
         fragments.into_iter().map(str::to_string).collect(),
     );
+    let fragments = compact_rejected_negative_memory_fragments(fragments);
     if fragments.is_empty() {
         return None;
     }
@@ -196,6 +197,28 @@ pub(crate) fn build_rejected_video_negative_memory(
     parts.push("rejectionCount=1".to_string());
     parts.push(format!("avoid={}", fragments.join(", ")));
     Some(parts.join(" | "))
+}
+
+fn compact_rejected_negative_memory_fragments(fragments: Vec<String>) -> Vec<String> {
+    let mut compacted = fragments;
+    let has_cold_lighting = compacted
+        .iter()
+        .any(|fragment| canonical_observation_note(fragment) == "avoid flat cold lighting");
+    if has_cold_lighting {
+        compacted.retain(|fragment| {
+            canonical_observation_note(fragment) != "avoid overly cold emotional tone"
+        });
+    }
+
+    if compacted.len() == 1
+        && compacted
+            .first()
+            .is_some_and(|fragment| rejected_negative_memory_fragment_is_low_signal(fragment))
+    {
+        return Vec::new();
+    }
+
+    compacted
 }
 
 fn storyboard_memory_key(storyboard_numeric_id: i32) -> Option<String> {
@@ -2966,6 +2989,16 @@ fn map_rejected_lighting_fragment(value: &str) -> Option<&'static str> {
     None
 }
 
+fn rejected_negative_memory_fragment_is_low_signal(fragment: &str) -> bool {
+    matches!(
+        canonical_observation_note(fragment).as_str(),
+        "avoid oppressive or frantic mood"
+            | "avoid overly cold emotional tone"
+            | "avoid heavy tragic mood"
+            | "avoid overly cold, oppressive, or frantic mood"
+    )
+}
+
 async fn replace_summary_memory(
     pool: &PgPool,
     user_id: Uuid,
@@ -3403,6 +3436,42 @@ mod tests {
         );
         assert!(!content
             .contains("avoid=avoid overly tight close-up framing, avoid extreme camera angle"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_skips_low_signal_mood_only_memory() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角停在门口".into()),
+                video_desc: Some(
+                    "（主角停在门口、旧宅门厅、主角、5秒、中景、固定、停步凝视、压迫、暖光、无台词、风声、A12）"
+                        .into(),
+                ),
+                duration: Some("5".into()),
+            },
+        );
+
+        assert!(content.is_none());
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_drops_cold_mood_when_cold_lighting_already_exists() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角停在楼梯口".into()),
+                video_desc: Some(
+                    "（主角停在楼梯口、旧宅楼梯、主角、5秒、中景、固定、停步回望、冷调、阴天冷光、无台词、风声、A12）"
+                        .into(),
+                ),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("avoid=avoid flat cold lighting"));
+        assert!(!content.contains("avoid overly cold emotional tone"));
     }
 
     #[test]
