@@ -4015,6 +4015,39 @@ mod tests {
     }
 
     #[test]
+    fn observation_note_conflict_filter_understands_handheld_follow_and_neon_context() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角穿过霓虹雨巷".into()),
+            video_desc: Some(
+                "（主角穿过霓虹雨巷、雨夜巷口、主角、5秒、中景、手持跟拍、踩水快步穿行、悲怆、霓虹反光、无台词、雨声脚步声、A14）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid shaky handheld motion",
+            None,
+            Some(&storyboard_row),
+        ));
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid distracting neon reflections",
+            None,
+            Some(&storyboard_row),
+        ));
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid heavy tragic mood",
+            None,
+            Some(&storyboard_row),
+        ));
+        assert!(!video_prompt_observation_conflicts_with_style(
+            "avoid lip-sync mismatch",
+            None,
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
     fn observation_note_irrelevant_filter_skips_lip_sync_for_silent_storyboard() {
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角贴墙前行".into()),

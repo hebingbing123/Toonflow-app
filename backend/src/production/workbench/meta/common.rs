@@ -50,6 +50,21 @@ fn negative_constraint_conflicts_with_style_note(constraint: &str, style_note: &
         return note.contains("光影")
             && (note.contains("逆光") || note.contains("背光") || note.contains("剪影"));
     }
+    if negative_constraint_targets_handheld_motion(constraint) {
+        return note.contains("手持");
+    }
+    if negative_constraint_targets_stable_follow_camera(constraint) {
+        return note.contains("稳定跟拍")
+            || note.contains("跟拍")
+            || note.contains("推进")
+            || note.contains("慢推");
+    }
+    if negative_constraint_targets_neon_reflections(constraint) {
+        return note.contains("霓虹") || note.contains("反光");
+    }
+    if negative_constraint_targets_tragic_mood(constraint) {
+        return note.contains("悲怆");
+    }
 
     false
 }
@@ -90,6 +105,23 @@ fn negative_constraint_conflicts_with_storyboard_context(
             || fields.lighting.contains("背光")
             || fields.lighting.contains("剪影");
     }
+    if negative_constraint_targets_handheld_motion(constraint) {
+        return fields.camera_move.contains("手持");
+    }
+    if negative_constraint_targets_stable_follow_camera(constraint) {
+        return fields.camera_move.contains("稳定跟拍")
+            || fields.camera_move.contains("跟拍")
+            || fields.camera_move.contains("推进")
+            || fields.camera_move.contains("慢推");
+    }
+    if negative_constraint_targets_neon_reflections(constraint) {
+        return fields.lighting.contains("霓虹")
+            || fields.lighting.contains("反光")
+            || fields.setting.contains("霓虹");
+    }
+    if negative_constraint_targets_tragic_mood(constraint) {
+        return fields.mood.contains("悲怆");
+    }
 
     false
 }
@@ -120,4 +152,20 @@ fn negative_constraint_targets_cold_lighting(constraint: &str) -> bool {
 fn negative_constraint_targets_backlight(constraint: &str) -> bool {
     constraint == "avoid harsh backlight silhouette"
         || constraint == "avoid flat cold lighting or harsh backlight silhouette"
+}
+
+fn negative_constraint_targets_handheld_motion(constraint: &str) -> bool {
+    constraint == "avoid shaky handheld motion"
+}
+
+fn negative_constraint_targets_stable_follow_camera(constraint: &str) -> bool {
+    constraint == "avoid repeating stable follow camera"
+}
+
+fn negative_constraint_targets_neon_reflections(constraint: &str) -> bool {
+    constraint == "avoid distracting neon reflections"
+}
+
+fn negative_constraint_targets_tragic_mood(constraint: &str) -> bool {
+    constraint == "avoid heavy tragic mood"
 }
