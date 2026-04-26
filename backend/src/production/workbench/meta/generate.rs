@@ -224,7 +224,7 @@ fn select_prioritized_video_prompt_memory_notes(
         VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
     );
     if !notes.is_empty() {
-        return notes;
+        return compact_unique_memory_notes(notes);
     }
     select_video_prompt_memory_notes(rows, storyboard_numeric_id)
 }
@@ -242,6 +242,65 @@ fn append_unique_notes(target: &mut Vec<String>, candidate_notes: Vec<String>, l
             break;
         }
     }
+}
+
+fn compact_unique_memory_notes(notes: Vec<String>) -> Vec<String> {
+    let mut fragments = Vec::new();
+    for note in notes {
+        for fragment in note.split('，').map(normalize_prompt_text) {
+            if fragment.is_empty() || fragments.iter().any(|existing| existing == &fragment) {
+                continue;
+            }
+            fragments.push(fragment);
+        }
+    }
+    pack_memory_fragments(
+        fragments,
+        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    )
+}
+
+fn pack_memory_fragments(fragments: Vec<String>, limit: usize, max_chars: usize) -> Vec<String> {
+    if limit == 0 || max_chars == 0 {
+        return Vec::new();
+    }
+
+    let mut packed = Vec::new();
+    let mut current = Vec::new();
+    let mut current_len = 0usize;
+
+    for fragment in fragments {
+        let fragment = clip_prompt_fragment(&fragment, max_chars);
+        if fragment.is_empty() {
+            continue;
+        }
+        let fragment_len = fragment.chars().count();
+        let candidate_len = if current.is_empty() {
+            fragment_len
+        } else {
+            current_len + 1 + fragment_len
+        };
+
+        if !current.is_empty() && candidate_len > max_chars {
+            packed.push(current.join("，"));
+            if packed.len() >= limit {
+                return packed;
+            }
+            current = vec![fragment];
+            current_len = fragment_len;
+            continue;
+        }
+
+        current.push(fragment);
+        current_len = candidate_len;
+    }
+
+    if !current.is_empty() && packed.len() < limit {
+        packed.push(current.join("，"));
+    }
+
+    packed
 }
 
 fn build_video_prompt(
@@ -812,7 +871,7 @@ mod tests {
             },
             AgentMemoryRow {
                 name: "script_video_style_memory".into(),
-                content: "sampleCount=3 | style=光影冷调逆光，场景旧宅走廊 | note=光影冷调逆光，场景旧宅走廊".into(),
+                content: "sampleCount=3 | style=情绪冷色压迫感，光影冷调逆光，场景旧宅走廊 | note=情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".into(),
             },
             AgentMemoryRow {
                 name: "auto_scope_memory".into(),
@@ -822,10 +881,7 @@ mod tests {
 
         assert_eq!(
             select_prioritized_video_prompt_memory_notes(&rows, 12),
-            vec![
-                "镜头稳定近景，情绪冷色压迫感".to_string(),
-                "光影冷调逆光，场景旧宅走廊".to_string()
-            ]
+            vec!["镜头稳定近景，情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".to_string()]
         );
     }
 
