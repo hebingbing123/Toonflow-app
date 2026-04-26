@@ -72,6 +72,12 @@ const LIGHTING_STYLE_KEYWORDS: [&str; 12] = [
     "暖光",
     "霓虹",
 ];
+const ACTION_PACE_PREFIXES: [&str; 9] = [
+    "快步", "缓步", "迅速", "缓慢", "慢慢", "急忙", "猛地", "立刻", "立即",
+];
+const ACTION_SUBJECT_PREFIXES: [&str; 10] = [
+    "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
+];
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
@@ -1210,7 +1216,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             subject.as_deref(),
             Some(fields.action.as_str()),
         );
-        let action = compact_selected_memory_action(&fields.action, subject.as_deref());
+        let action =
+            compact_selected_memory_action(&fields.action, subject.as_deref(), &fields.mood);
 
         if let Some(subject) = subject {
             fragments.push(clip_prompt_fragment(&subject, 20));
@@ -1272,11 +1279,62 @@ fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String
     Some(subject)
 }
 
-fn compact_selected_memory_action(action: &str, subject: Option<&str>) -> Option<String> {
-    let action = normalize_prompt_text(action);
+fn compact_selected_memory_action(
+    action: &str,
+    subject: Option<&str>,
+    mood: &str,
+) -> Option<String> {
+    let mut action = normalize_prompt_text(action);
     if action.is_empty() {
         return None;
     }
+
+    if let Some(subject) = subject
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+    {
+        if action == subject {
+            return None;
+        }
+        if let Some(stripped) = action.strip_prefix(&subject) {
+            let stripped = stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(ch, '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、')
+            });
+            if stripped.chars().count() >= 2 {
+                action = stripped.to_string();
+            }
+        }
+        if let Some(prefix) = ACTION_SUBJECT_PREFIXES.iter().find(|prefix| {
+            action.starts_with(**prefix)
+                && (subject.starts_with(**prefix) || subject.contains(**prefix))
+        }) {
+            if let Some(stripped) = action.strip_prefix(prefix) {
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(ch, '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、')
+                });
+                if stripped.chars().count() >= 2 {
+                    action = stripped.to_string();
+                }
+            }
+        }
+    }
+
+    if !normalize_prompt_text(mood).is_empty() {
+        for prefix in ACTION_PACE_PREFIXES {
+            if let Some(stripped) = action.strip_prefix(prefix) {
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace() || matches!(ch, '地' | '着' | ':' | '：' | ',' | '，' | '、')
+                });
+                if stripped.chars().count() >= 2 {
+                    action = stripped.to_string();
+                    break;
+                }
+            }
+        }
+    }
+
     if subject.is_some_and(|value| prompt_fragments_substantially_overlap(value, &action)) {
         return None;
     }
@@ -2281,9 +2339,10 @@ mod tests {
         build_project_video_style_memory, build_rejected_video_negative_memory,
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
-        compact_rejected_negative_avoid, compact_video_continuity_note,
-        merge_rejected_video_negative_memory, parse_structured_storyboard_description,
-        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        compact_rejected_negative_avoid, compact_selected_memory_action,
+        compact_video_continuity_note, merge_rejected_video_negative_memory,
+        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
+        select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
@@ -2322,7 +2381,8 @@ mod tests {
         assert!(content.contains("promptSeed="));
         assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光"));
         assert!(content.contains("note=主角冲出旧宅"));
-        assert!(content.contains("快步推门冲出"));
+        assert!(content.contains("推门冲出"));
+        assert!(!content.contains("快步推门冲出"));
         assert!(!content.contains("note=主角冲出旧宅，镜头中景稳定跟拍"));
         assert!(!content.contains("note=主角冲出旧宅，快步推门冲出，情绪急迫"));
         assert!(!content.contains("场景旧宅走廊"));
@@ -2345,6 +2405,35 @@ mod tests {
         assert!(!content.contains("note=主角在旧宅走廊尽头停步回头，镜头中景稳定跟拍"));
         assert!(!content.contains("场景旧宅走廊尽头"));
         assert!(content.contains("情绪压抑"));
+    }
+
+    #[test]
+    fn build_selected_video_memory_trims_subject_and_pace_prefix_from_action_when_mood_exists() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("女主冲出旧宅".into()),
+                video_desc: Some("（女主冲出旧宅、旧宅门厅、女主、5秒、中景、稳定跟拍、女主快步推门冲出、急迫、阴天冷光、无台词、门响脚步声、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("note=女主冲出旧宅"));
+        assert!(content.contains("推门冲出"));
+        assert!(!content.contains("女主快步推门冲出"), "{content}");
+        assert!(
+            !content.contains("note=女主冲出旧宅，快步推门冲出"),
+            "{content}"
+        );
+    }
+
+    #[test]
+    fn compact_selected_memory_action_keeps_pace_prefix_when_mood_is_missing() {
+        let action = compact_selected_memory_action("女主缓步后退躲避", Some("女主后退躲避"), "")
+            .expect("action");
+
+        assert_eq!(action, "缓步后退躲避");
     }
 
     #[test]
