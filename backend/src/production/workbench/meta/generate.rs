@@ -15,8 +15,7 @@ use crate::production::workbench::meta::common::{
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_pending_rejected_video_observation_note,
-    select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -368,15 +367,9 @@ async fn load_pending_video_observation_note(
 fn select_prioritized_video_style_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
-    current_prompt_seed: Option<&str>,
+    _current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    let selected_notes =
-        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed);
-    if !selected_notes.is_empty() {
-        return selected_notes;
-    }
-
     let context = build_style_note_selection_context(storyboard_row);
     let mut candidates = collect_ranked_video_style_note_candidates(rows, storyboard_numeric_id);
     candidates.sort_by(|a, b| {
@@ -2333,7 +2326,7 @@ mod tests {
     }
 
     #[test]
-    fn prioritized_video_prompt_memory_keeps_exact_storyboard_selection_exclusive() {
+    fn prioritized_video_prompt_memory_skips_exact_storyboard_selection_when_it_only_repeats_current_prompt() {
         let rows = vec![
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
@@ -2347,8 +2340,18 @@ mod tests {
 
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, None),
-            vec!["镜头低机位压迫感，情绪克制".to_string()]
+            vec!["光影冷调逆光，场景旧宅走廊".to_string()]
         );
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_returns_empty_when_only_exact_storyboard_selection_exists() {
+        let rows = vec![AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=12 | style=镜头低机位压迫感，情绪克制 | note=镜头低机位压迫感，情绪克制".into(),
+        }];
+
+        assert!(select_prioritized_video_style_notes(&rows, 12, None, None).is_empty());
     }
 
     #[test]
