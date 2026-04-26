@@ -12,6 +12,7 @@ use super::WorkbenchGenerateVideoBody;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
+use crate::production::workbench::meta::common::negative_constraint_conflicts_with_storyboard_style;
 use crate::production::workbench::video_prompt_memory::{
     normalize_prompt_text, parse_structured_storyboard_description,
     select_prioritized_video_style_note, select_project_video_style_memory_notes,
@@ -550,6 +551,7 @@ fn build_storyboard_negative_prompts(
                     storyboard_id,
                 ),
                 prioritized_style_note.as_deref(),
+                storyboard_row,
             );
             let rejected_fragments = filter_conflicting_review_fragments(
                 split_negative_prompt_fragments(
@@ -563,6 +565,7 @@ fn build_storyboard_negative_prompts(
                     .as_deref(),
                 ),
                 prioritized_style_note.as_deref(),
+                storyboard_row,
             );
             let review_prompt =
                 merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
@@ -635,69 +638,30 @@ fn style_note_context_evidence(
 fn filter_conflicting_review_fragments(
     fragments: Vec<String>,
     selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
-    let Some(note) = selected_style_note else {
-        return fragments;
-    };
     fragments
         .into_iter()
-        .filter(|fragment| !review_fragment_conflicts_with_selected_style(fragment, note))
+        .filter(|fragment| {
+            !review_fragment_conflicts_with_selected_style(
+                fragment,
+                selected_style_note,
+                storyboard_row,
+            )
+        })
         .collect()
 }
 
 fn review_fragment_conflicts_with_selected_style(
     fragment: &str,
-    selected_style_note: &str,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
-    let fragment = canonical_negative_fragment(fragment);
-    let note = selected_style_note.trim();
-    if fragment.is_empty() || note.is_empty() {
-        return false;
-    }
-
-    if fragment == canonical_negative_fragment("avoid overly tight close-up framing") {
-        return note.contains("近景") || note.contains("特写");
-    }
-    if fragment == canonical_negative_fragment("avoid extreme camera angle") {
-        return note.contains("低机位") || note.contains("高机位");
-    }
-    if negative_fragment_targets_cold_oppressive_mood(&fragment) {
-        return note.contains("压迫") || note.contains("紧张") || note.contains("冷峻");
-    }
-    if negative_fragment_targets_cold_emotional_tone(&fragment) {
-        return note.contains("冷调") || note.contains("冷色") || note.contains("冷峻");
-    }
-    if negative_fragment_targets_cold_lighting(&fragment) {
-        return note.contains("光影")
-            && (note.contains("冷调") || note.contains("冷光") || note.contains("逆光"));
-    }
-    if negative_fragment_targets_backlight(&fragment) {
-        return note.contains("光影") && note.contains("逆光");
-    }
-
-    false
-}
-
-fn negative_fragment_targets_cold_oppressive_mood(fragment: &str) -> bool {
-    fragment == canonical_negative_fragment("avoid oppressive or frantic mood")
-        || fragment == canonical_negative_fragment("avoid overly cold, oppressive, or frantic mood")
-}
-
-fn negative_fragment_targets_cold_emotional_tone(fragment: &str) -> bool {
-    fragment == canonical_negative_fragment("avoid overly cold emotional tone")
-        || fragment == canonical_negative_fragment("avoid overly cold, oppressive, or frantic mood")
-}
-
-fn negative_fragment_targets_cold_lighting(fragment: &str) -> bool {
-    fragment == canonical_negative_fragment("avoid flat cold lighting")
-        || fragment
-            == canonical_negative_fragment("avoid flat cold lighting or harsh backlight silhouette")
-}
-
-fn negative_fragment_targets_backlight(fragment: &str) -> bool {
-    fragment == canonical_negative_fragment("avoid harsh backlight silhouette")
-        || fragment
-            == canonical_negative_fragment("avoid flat cold lighting or harsh backlight silhouette")
+    negative_constraint_conflicts_with_storyboard_style(
+        &canonical_negative_fragment(fragment),
+        selected_style_note,
+        storyboard_row,
+    )
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -1713,6 +1677,30 @@ mod tests {
     }
 
     #[test]
+    fn storyboard_context_can_suppress_conflicting_review_fragments_without_style_memory() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("近景太近，情绪太冷太压迫，逆光太重".into()),
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[(
+                12,
+                Some("门厅对峙"),
+                Some("（主角对峙、旧宅门厅、主角、5秒、近景、静止、盯住来人、冷峻压迫、冷调逆光、、、A12）"),
+                Some("5s"),
+            )]),
+        );
+
+        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        assert_eq!(prompt, None);
+    }
+
+    #[test]
     fn script_video_style_summary_can_suppress_conflicting_review_fragments() {
         let prompts = build_storyboard_negative_prompts(
             &[12],
@@ -1888,11 +1876,13 @@ mod tests {
     fn review_fragment_conflict_filter_is_limited_to_exact_selected_style_signals() {
         assert!(review_fragment_conflicts_with_selected_style(
             "avoid overly tight close-up framing",
-            "镜头近景，情绪冷峻压迫，光影冷调逆光"
+            Some("镜头近景，情绪冷峻压迫，光影冷调逆光"),
+            None,
         ));
         assert!(!review_fragment_conflicts_with_selected_style(
             "avoid wrong setting details",
-            "镜头近景，情绪冷峻压迫，光影冷调逆光"
+            Some("镜头近景，情绪冷峻压迫，光影冷调逆光"),
+            None,
         ));
     }
 

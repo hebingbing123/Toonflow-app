@@ -9,8 +9,9 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::production::workbench::meta::common::{
-    clip_prompt_fragment, extract_key_value, normalize_prompt_text, parse_positive_int,
-    parse_structured_storyboard_description, StructuredStoryboardDescription,
+    clip_prompt_fragment, extract_key_value, negative_constraint_conflicts_with_storyboard_style,
+    normalize_prompt_text, parse_positive_int, parse_structured_storyboard_description,
+    StructuredStoryboardDescription,
 };
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
@@ -525,7 +526,11 @@ async fn load_pending_video_observation_note(
     )
     .into_iter()
     .find(|note| {
-        !video_prompt_observation_conflicts_with_style(note, prioritized_style_note.as_deref())
+        !video_prompt_observation_conflicts_with_style(
+            note,
+            prioritized_style_note.as_deref(),
+            storyboard_row.as_ref(),
+        )
     });
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
@@ -620,63 +625,13 @@ async fn load_storyboard_prompt_seed_row(
 fn video_prompt_observation_conflicts_with_style(
     observation_note: &str,
     selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> bool {
-    let Some(note) = selected_style_note else {
-        return false;
-    };
-    let observation = observation_note.trim();
-    let style_note = note.trim();
-    if observation.is_empty() || style_note.is_empty() {
-        return false;
-    }
-
-    if observation == "avoid overly tight close-up framing" {
-        return style_note.contains("近景") || style_note.contains("特写");
-    }
-    if observation == "avoid extreme camera angle" {
-        return style_note.contains("低机位") || style_note.contains("高机位");
-    }
-    if observation_targets_cold_oppressive_mood(observation) {
-        return style_note.contains("压迫")
-            || style_note.contains("紧张")
-            || style_note.contains("冷峻");
-    }
-    if observation_targets_cold_emotional_tone(observation) {
-        return style_note.contains("冷调")
-            || style_note.contains("冷色")
-            || style_note.contains("冷峻");
-    }
-    if observation_targets_cold_lighting(observation) {
-        return style_note.contains("光影")
-            && (style_note.contains("冷调")
-                || style_note.contains("冷光")
-                || style_note.contains("逆光"));
-    }
-    if observation_targets_backlight(observation) {
-        return style_note.contains("光影") && style_note.contains("逆光");
-    }
-
-    false
-}
-
-fn observation_targets_cold_oppressive_mood(observation: &str) -> bool {
-    observation == "avoid oppressive or frantic mood"
-        || observation == "avoid overly cold, oppressive, or frantic mood"
-}
-
-fn observation_targets_cold_emotional_tone(observation: &str) -> bool {
-    observation == "avoid overly cold emotional tone"
-        || observation == "avoid overly cold, oppressive, or frantic mood"
-}
-
-fn observation_targets_cold_lighting(observation: &str) -> bool {
-    observation == "avoid flat cold lighting"
-        || observation == "avoid flat cold lighting or harsh backlight silhouette"
-}
-
-fn observation_targets_backlight(observation: &str) -> bool {
-    observation == "avoid harsh backlight silhouette"
-        || observation == "avoid flat cold lighting or harsh backlight silhouette"
+    negative_constraint_conflicts_with_storyboard_style(
+        observation_note.trim(),
+        selected_style_note,
+        storyboard_row,
+    )
 }
 
 fn build_video_prompt(
@@ -3556,10 +3511,12 @@ mod tests {
         assert!(video_prompt_observation_conflicts_with_style(
             "avoid flat cold lighting",
             Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+            None,
         ));
         assert!(video_prompt_observation_conflicts_with_style(
             "avoid oppressive or frantic mood",
             Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+            None,
         ));
     }
 
@@ -3568,9 +3525,11 @@ mod tests {
         assert!(!video_prompt_observation_conflicts_with_style(
             "avoid face drift or costume inconsistency",
             Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+            None,
         ));
         assert!(!video_prompt_observation_conflicts_with_style(
             "avoid flat cold lighting",
+            None,
             None,
         ));
     }
@@ -3586,10 +3545,34 @@ mod tests {
             !video_prompt_observation_conflicts_with_style(
                 note,
                 Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+                None,
             )
         });
 
         assert_eq!(note, Some("avoid shaky handheld motion".to_string()));
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_uses_storyboard_context_without_style_memory() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("门厅对峙".into()),
+            video_desc: Some(
+                "（主角对峙、旧宅门厅、主角、5秒、近景、静止、盯住来人、冷峻压迫、冷调逆光、、、A12）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid overly tight close-up framing",
+            None,
+            Some(&storyboard_row),
+        ));
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid flat cold lighting",
+            None,
+            Some(&storyboard_row),
+        ));
     }
 
     #[test]
