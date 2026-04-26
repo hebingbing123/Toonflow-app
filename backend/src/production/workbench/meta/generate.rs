@@ -735,8 +735,11 @@ fn build_video_prompt(
                     clip_prompt_fragment(dialogue, 60)
                 ));
             }
-            if let Some(sound) = compact_sound_clause(&fields.sound, compacted_dialogue.as_deref())
-            {
+            if let Some(sound) = compact_sound_clause(
+                &fields.sound,
+                compacted_dialogue.as_deref(),
+                action.as_deref(),
+            ) {
                 clauses.push(format!("Sound: {}.", clip_prompt_fragment(&sound, 44)));
             }
         }
@@ -2070,7 +2073,11 @@ fn compact_dialogue_clause(dialogue: &str) -> Option<String> {
     }
 }
 
-fn compact_sound_clause(sound: &str, dialogue: Option<&str>) -> Option<String> {
+fn compact_sound_clause(
+    sound: &str,
+    dialogue: Option<&str>,
+    action: Option<&str>,
+) -> Option<String> {
     let normalized = normalize_prompt_text(sound);
     if normalized.is_empty() || looks_like_silence(&normalized) {
         return None;
@@ -2091,6 +2098,12 @@ fn compact_sound_clause(sound: &str, dialogue: Option<&str>) -> Option<String> {
         if dialogue
             .as_deref()
             .is_some_and(|line| sound_fragment_is_dialogue_covered(&fragment, line))
+        {
+            continue;
+        }
+        if action
+            .as_deref()
+            .is_some_and(|line| sound_fragment_is_action_covered(&fragment, line))
         {
             continue;
         }
@@ -2180,6 +2193,78 @@ fn sound_fragment_is_dialogue_covered(fragment: &str, dialogue: &str) -> bool {
         && (canonical_fragment == canonical_dialogue
             || canonical_fragment.contains(&canonical_dialogue)
             || canonical_dialogue.contains(&canonical_fragment))
+}
+
+fn sound_fragment_is_action_covered(fragment: &str, action: &str) -> bool {
+    let fragment = normalize_prompt_text(fragment);
+    let action = normalize_prompt_text(action);
+    if fragment.is_empty() || action.is_empty() {
+        return false;
+    }
+    if sound_fragment_has_high_value_acoustic_detail(&fragment) {
+        return false;
+    }
+
+    if sound_fragment_matches_footstep_action(&fragment, &action) {
+        return true;
+    }
+    if sound_fragment_matches_door_action(&fragment, &action) {
+        return true;
+    }
+    false
+}
+
+fn sound_fragment_has_high_value_acoustic_detail(fragment: &str) -> bool {
+    [
+        "急促",
+        "沉重",
+        "细碎",
+        "凌乱",
+        "由远及近",
+        "回响",
+        "回荡",
+        "吱呀",
+        "砰",
+        "轰",
+        "巨响",
+        "闷响",
+        "脆响",
+        "刺耳",
+        "低鸣",
+        "风声",
+        "雨声",
+        "滴答",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+}
+
+fn sound_fragment_matches_footstep_action(fragment: &str, action: &str) -> bool {
+    (fragment.contains("脚步") || fragment.contains("足音"))
+        && [
+            "走近", "逼近", "靠近", "走来", "奔来", "跑来", "冲来", "踏入", "闯入", "离开", "走开",
+            "退开",
+        ]
+        .iter()
+        .any(|keyword| action.contains(keyword))
+}
+
+fn sound_fragment_matches_door_action(fragment: &str, action: &str) -> bool {
+    let is_door_sound = [
+        "敲门声",
+        "敲门",
+        "门响",
+        "开门声",
+        "关门声",
+        "门被推开",
+        "门被拉开",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword));
+    is_door_sound
+        && ["推门", "开门", "关门", "拉门", "夺门", "闯入"]
+            .iter()
+            .any(|keyword| action.contains(keyword))
 }
 
 fn canonical_dialogue_fragment(value: &str) -> String {
@@ -3351,6 +3436,30 @@ mod tests {
 
         assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
         assert!(!prompt.contains("Sound:"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_drops_generic_footstep_sound_when_action_already_covers_it() {
+        let prompt = build_video_prompt(
+            Some("（黑衣人、走廊尽头、黑衣人、5秒、中景、慢推、脚步逼近门口、紧张、冷光、、脚步声逼近、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Action: 脚步逼近门口."), "{prompt}");
+        assert!(!prompt.contains("Sound:"), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_detailed_door_sound_even_when_action_mentions_door() {
+        let prompt = build_video_prompt(
+            Some("（林夏、旧宅门厅、林夏、5秒、中景、推进、推门闯入、压迫、冷调逆光、、门轴吱呀作响、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Action: 推门闯入."), "{prompt}");
+        assert!(prompt.contains("Sound: 门轴吱呀作响."), "{prompt}");
     }
 
     #[test]
