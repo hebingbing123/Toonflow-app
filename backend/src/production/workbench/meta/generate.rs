@@ -1510,8 +1510,12 @@ fn build_continuity_notes(
         })
         .unwrap_or_default();
     notes.sort_by(|a, b| {
-        score_continuity_note(b, structured_fields)
-            .cmp(&score_continuity_note(a, structured_fields))
+        score_continuity_specificity(b)
+            .cmp(&score_continuity_specificity(a))
+            .then(
+                score_continuity_note(b, structured_fields)
+                    .cmp(&score_continuity_note(a, structured_fields)),
+            )
             .then(a.len().cmp(&b.len()))
             .then(a.cmp(b))
     });
@@ -3028,18 +3032,25 @@ fn select_video_prompt_memory_notes(
             if continuity_score <= 0 {
                 return None;
             }
-            Some((score + continuity_score, continuity_score, note))
+            let specificity_score = score_continuity_specificity(&note);
+            Some((
+                score + continuity_score + specificity_score,
+                specificity_score,
+                continuity_score,
+                note,
+            ))
         })
         .collect::<Vec<_>>();
     scored.sort_by(|a, b| {
-        b.0.cmp(&a.0)
-            .then(b.1.cmp(&a.1))
-            .then(a.2.len().cmp(&b.2.len()))
-            .then(a.2.cmp(&b.2))
+        b.1.cmp(&a.1)
+            .then(b.0.cmp(&a.0))
+            .then(b.2.cmp(&a.2))
+            .then(a.3.len().cmp(&b.3.len()))
+            .then(a.3.cmp(&b.3))
     });
 
     let mut notes = Vec::new();
-    for (_, _, note) in scored {
+    for (_, _, _, note) in scored {
         if notes.iter().any(|existing| existing == &note) {
             continue;
         }
@@ -3126,6 +3137,44 @@ fn score_continuity_note(
     }
 
     score
+}
+
+fn score_continuity_specificity(note: &str) -> i32 {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    normalized
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .map(|fragment| {
+            let mut score = 0;
+            if fragment.contains("跳轴") {
+                score += 20;
+            }
+            if ["视线", "构图", "方向"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+            {
+                score += 16;
+            }
+            if ["站位", "走位", "位置", "前后景"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+            {
+                score += 12;
+            }
+            if ["节奏", "动作"]
+                .iter()
+                .any(|keyword| fragment.contains(keyword))
+            {
+                score += 8;
+            }
+            score
+        })
+        .sum()
 }
 
 fn memory_storyboard_overlap_score(row: &str, storyboard_numeric_id: i32) -> i32 {
@@ -4073,6 +4122,38 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_prefers_axis_guidance_over_generic_continuity_under_single_note_budget() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角握紧青铜匕首穿过旧宅走廊、旧宅走廊、主角/青铜匕首、5秒、中景、稳定跟拍、握紧匕首快步穿行、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保留上一镜头走位连续".into(), "人物站位不要跳轴".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Continuity notes: 保留上一镜头走位连续."),
+            "{prompt}"
+        );
+        assert!(
+            prompt.contains("Natural motion, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
     fn build_video_prompt_trims_leading_asset_coverage_from_fused_continuity_fragment() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -4422,6 +4503,30 @@ mod tests {
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
             vec!["保留上一镜头走位连续".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_prefers_specific_axis_guidance_over_generic_continuity() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=保留上一镜头走位连续".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物站位不要跳轴".to_string(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            vec!["人物站位不要跳轴".to_string()]
         );
     }
 
