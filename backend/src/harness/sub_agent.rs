@@ -17,8 +17,19 @@ struct SubAgentSpec {
 }
 
 const AUTO_MEMORY_SUMMARY_LIMIT: i64 = 3;
+const AUTO_MEMORY_FALLBACK_LIMIT: usize = 1;
 const AUTO_MEMORY_KEEP_ROWS: i64 = 8;
 const AUTO_MEMORY_MAX_CHARS: usize = 320;
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct ScopeSignature {
+    storyboard_ids: Vec<i64>,
+    asset_ids: Vec<i64>,
+    asset_types: Vec<&'static str>,
+    focus_sections: Vec<&'static str>,
+    novel_ids: Vec<i64>,
+    relative_script_offset: Option<i64>,
+}
 
 fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<String, Value>> {
     let trimmed = line.trim();
@@ -289,6 +300,162 @@ fn parse_relative_script_offset(arguments: &Value, key: &str) -> Option<i64> {
     }
 }
 
+fn scope_signature_from_args(arguments: &Value) -> ScopeSignature {
+    ScopeSignature {
+        storyboard_ids: parse_positive_id_list(arguments, "storyboardIds"),
+        asset_ids: parse_positive_id_list(arguments, "assetIds"),
+        asset_types: parse_asset_type_list(arguments, "assetTypes"),
+        focus_sections: parse_focus_section_list(arguments, "focusSections"),
+        novel_ids: parse_positive_id_list(arguments, "novelIds"),
+        relative_script_offset: parse_relative_script_offset(arguments, "relativeScriptOffset"),
+    }
+}
+
+fn parse_scope_list(segment: Option<&str>) -> Vec<i64> {
+    let mut values = segment
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|value| value.trim().parse::<i64>().ok())
+        .filter(|value| *value > 0)
+        .collect::<Vec<_>>();
+    values.sort_unstable();
+    values.dedup();
+    values
+}
+
+fn parse_scope_enum_list<T>(segment: Option<&str>, normalize: impl Fn(&str) -> Option<T>) -> Vec<T>
+where
+    T: Ord,
+{
+    let mut values = segment
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|value| normalize(value.trim()))
+        .collect::<Vec<_>>();
+    values.sort_unstable();
+    values.dedup();
+    values
+}
+
+fn parse_scope_signature(content: &str) -> ScopeSignature {
+    let Some(scope_segment) = content
+        .split(" | ")
+        .find_map(|segment| segment.strip_prefix("scope="))
+    else {
+        return ScopeSignature::default();
+    };
+
+    let mut signature = ScopeSignature::default();
+    for entry in scope_segment.split("; ") {
+        let Some((key, value)) = entry.split_once('=') else {
+            continue;
+        };
+        match key {
+            "storyboardIds" => signature.storyboard_ids = parse_scope_list(Some(value)),
+            "assetIds" => signature.asset_ids = parse_scope_list(Some(value)),
+            "assetTypes" => {
+                signature.asset_types = parse_scope_enum_list(Some(value), |raw| {
+                    match raw.to_ascii_lowercase().as_str() {
+                        "role" => Some("role"),
+                        "scene" => Some("scene"),
+                        "tool" => Some("tool"),
+                        _ => None,
+                    }
+                })
+            }
+            "focusSections" => {
+                signature.focus_sections = parse_scope_enum_list(Some(value), |raw| match raw {
+                    "storySkeleton" => Some("storySkeleton"),
+                    "adaptationStrategy" => Some("adaptationStrategy"),
+                    "script" => Some("script"),
+                    _ => None,
+                })
+            }
+            "novelIds" => signature.novel_ids = parse_scope_list(Some(value)),
+            "relativeScriptOffset" => {
+                signature.relative_script_offset = value.parse::<i64>().ok().filter(|v| *v != 0)
+            }
+            _ => {}
+        }
+    }
+    signature
+}
+
+fn has_scope(signature: &ScopeSignature) -> bool {
+    !signature.storyboard_ids.is_empty()
+        || !signature.asset_ids.is_empty()
+        || !signature.asset_types.is_empty()
+        || !signature.focus_sections.is_empty()
+        || !signature.novel_ids.is_empty()
+        || signature.relative_script_offset.is_some()
+}
+
+fn overlap_count<T: Eq>(current: &[T], candidate: &[T]) -> usize {
+    current
+        .iter()
+        .filter(|value| candidate.iter().any(|other| other == *value))
+        .count()
+}
+
+fn scope_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> usize {
+    let mut score = 0;
+    score += overlap_count(&current.storyboard_ids, &candidate.storyboard_ids) * 8;
+    score += overlap_count(&current.asset_ids, &candidate.asset_ids) * 5;
+    score += overlap_count(&current.asset_types, &candidate.asset_types) * 3;
+    score += overlap_count(&current.focus_sections, &candidate.focus_sections) * 3;
+    score += overlap_count(&current.novel_ids, &candidate.novel_ids) * 2;
+    if current.relative_script_offset.is_some()
+        && current.relative_script_offset == candidate.relative_script_offset
+    {
+        score += 1;
+    }
+    score
+}
+
+fn select_auto_memory_entries(arguments: &Value, rows: Vec<String>) -> Vec<String> {
+    if rows.is_empty() {
+        return rows;
+    }
+
+    let current_scope = scope_signature_from_args(arguments);
+    if !has_scope(&current_scope) {
+        return rows
+            .into_iter()
+            .take(AUTO_MEMORY_FALLBACK_LIMIT)
+            .collect::<Vec<_>>();
+    }
+
+    let mut scored = rows
+        .into_iter()
+        .enumerate()
+        .map(|(index, row)| {
+            let candidate_scope = parse_scope_signature(&row);
+            (
+                scope_overlap_score(&current_scope, &candidate_scope),
+                index,
+                row,
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let matched_count = scored.iter().filter(|(score, _, _)| *score > 0).count();
+    if matched_count == 0 {
+        return scored
+            .into_iter()
+            .map(|(_, _, row)| row)
+            .take(AUTO_MEMORY_FALLBACK_LIMIT)
+            .collect::<Vec<_>>();
+    }
+
+    scored.sort_by(|left, right| right.0.cmp(&left.0).then(left.1.cmp(&right.1)));
+    scored
+        .into_iter()
+        .filter(|(score, _, _)| *score > 0)
+        .take(AUTO_MEMORY_SUMMARY_LIMIT as usize)
+        .map(|(_, _, row)| row)
+        .collect::<Vec<_>>()
+}
+
 fn script_scope_note(arguments: &Value) -> Option<String> {
     let focus_sections = parse_focus_section_list(arguments, "focusSections");
     let novel_ids = parse_positive_id_list(arguments, "novelIds");
@@ -492,8 +659,9 @@ async fn load_auto_memory_note(
     project_numeric_id: i32,
     episodes_id: Option<i32>,
     agent_type: &str,
+    arguments: &Value,
 ) -> Result<Option<String>, InvokeError> {
-    let rows: Vec<String> = sqlx::query_scalar(
+    let rows = sqlx::query_scalar(
         r#"
         SELECT content
         FROM app_agent_memory
@@ -515,6 +683,7 @@ async fn load_auto_memory_note(
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
+    let rows = select_auto_memory_entries(arguments, rows);
     if rows.is_empty() {
         return Ok(None);
     }
@@ -525,8 +694,41 @@ async fn load_auto_memory_note(
         .collect::<Vec<_>>()
         .join("\n");
     Ok(Some(format!(
-        "Recent scoped memory from the same user/project/script:\n{items}\n仅把这些内容当作已知进展与决策线索；若本轮需要落地写入，先最小核对相关工具数据。"
+        "同 scope 最近记忆：\n{items}\n只把它们当作延续线索；真正写入前先最小核对工具数据。"
     )))
+}
+
+async fn should_persist_auto_memory_snapshot(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    episodes_id: Option<i32>,
+    agent_type: &str,
+    content: &str,
+) -> Result<bool, InvokeError> {
+    let latest: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id IS NOT DISTINCT FROM $3
+          AND agent_type = $4
+          AND memory_type = 'summary'
+          AND name = 'auto_scope_memory'
+        ORDER BY create_time_ms DESC
+        LIMIT 1
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(episodes_id)
+    .bind(agent_type)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    Ok(latest.as_deref() != Some(content))
 }
 
 async fn persist_auto_memory_snapshot(
@@ -537,6 +739,19 @@ async fn persist_auto_memory_snapshot(
     agent_type: &str,
     content: &str,
 ) -> Result<(), InvokeError> {
+    if !should_persist_auto_memory_snapshot(
+        pool,
+        user_id,
+        project_numeric_id,
+        episodes_id,
+        agent_type,
+        content,
+    )
+    .await?
+    {
+        return Ok(());
+    }
+
     sqlx::query(
         r#"
         INSERT INTO app_agent_memory (
@@ -661,6 +876,7 @@ pub async fn invoke_sub_agent_tool(
                 project_numeric_id,
                 ctx.script_numeric_id,
                 agent_type,
+                arguments,
             )
             .await?
         }
@@ -718,7 +934,8 @@ pub async fn invoke_sub_agent_tool(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, parse_review_summary, parse_tag_attributes,
+        build_auto_memory_snapshot, parse_review_summary, parse_scope_signature,
+        parse_tag_attributes, scope_signature_from_args, select_auto_memory_entries,
         sub_agent_prompt_from_args,
     };
     use serde_json::json;
@@ -854,5 +1071,70 @@ mod tests {
         assert!(snapshot.contains("scope=assetIds=1,5"));
         assert!(snapshot.contains("result=第一行结果 第二行结果"));
         assert!(snapshot.chars().count() <= 320);
+    }
+
+    #[test]
+    fn scope_signature_from_args_keeps_compact_sorted_scope() {
+        let signature = scope_signature_from_args(&json!({
+            "storyboardIds": [9, 1, 9],
+            "assetIds": [5, 2, 5],
+            "assetTypes": ["scene", "role", "scene"],
+            "focusSections": ["script", "storySkeleton", "script"],
+            "novelIds": [8, 3, 8],
+            "relativeScriptOffset": -1
+        }));
+
+        assert_eq!(signature.storyboard_ids, vec![1, 9]);
+        assert_eq!(signature.asset_ids, vec![2, 5]);
+        assert_eq!(signature.asset_types, vec!["role", "scene"]);
+        assert_eq!(signature.focus_sections, vec!["script", "storySkeleton"]);
+        assert_eq!(signature.novel_ids, vec![3, 8]);
+        assert_eq!(signature.relative_script_offset, Some(-1));
+    }
+
+    #[test]
+    fn parse_scope_signature_reads_snapshot_scope_segment() {
+        let signature = parse_scope_signature(
+            "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=3,9; assetIds=5,7; assetTypes=role,scene | result=done",
+        );
+
+        assert_eq!(signature.storyboard_ids, vec![3, 9]);
+        assert_eq!(signature.asset_ids, vec![5, 7]);
+        assert_eq!(signature.asset_types, vec!["role", "scene"]);
+    }
+
+    #[test]
+    fn select_auto_memory_entries_prefers_overlapping_scope() {
+        let rows = select_auto_memory_entries(
+            &json!({
+                "storyboardIds": [9],
+                "assetIds": [7],
+                "assetTypes": ["scene"]
+            }),
+            vec![
+                "tool=a | scope=storyboardIds=1; assetIds=2 | result=older".to_string(),
+                "tool=b | scope=storyboardIds=9; assetIds=7; assetTypes=scene | result=best"
+                    .to_string(),
+                "tool=c | scope=storyboardIds=9 | result=good".to_string(),
+            ],
+        );
+
+        assert_eq!(rows.len(), 2);
+        assert!(rows[0].contains("result=best"));
+        assert!(rows[1].contains("result=good"));
+    }
+
+    #[test]
+    fn select_auto_memory_entries_falls_back_to_latest_when_scope_missing() {
+        let rows = select_auto_memory_entries(
+            &json!({}),
+            vec![
+                "tool=a | scope=storyboardIds=1 | result=latest".to_string(),
+                "tool=b | scope=storyboardIds=9 | result=older".to_string(),
+            ],
+        );
+
+        assert_eq!(rows.len(), 1);
+        assert!(rows[0].contains("result=latest"));
     }
 }
