@@ -1436,8 +1436,16 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             &fields.mood,
         );
 
-        if let Some(subject) = subject {
-            fragments.push(clip_prompt_fragment(&subject, 20));
+        match merge_selected_memory_subject_action(subject.as_deref(), action.as_deref()) {
+            Some(merged) => fragments.push(clip_prompt_fragment(&merged, 20)),
+            None => {
+                if let Some(subject) = subject.as_ref() {
+                    fragments.push(clip_prompt_fragment(subject, 20));
+                }
+                if let Some(action) = action.as_ref() {
+                    fragments.push(clip_prompt_fragment(action, 18));
+                }
+            }
         }
         let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
@@ -1446,9 +1454,6 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
             .join("");
         if !camera.is_empty() {
             fragments.push(format!("镜头{}", clip_prompt_fragment(&camera, 14)));
-        }
-        if let Some(action) = action {
-            fragments.push(clip_prompt_fragment(&action, 18));
         }
         if !fields.mood.is_empty() {
             fragments.push(format!("情绪{}", clip_prompt_fragment(&fields.mood, 12)));
@@ -1494,6 +1499,55 @@ fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String
         return None;
     }
     Some(subject)
+}
+
+fn merge_selected_memory_subject_action(
+    subject: Option<&str>,
+    action: Option<&str>,
+) -> Option<String> {
+    let subject = subject.map(normalize_prompt_text)?;
+    let action = action.map(normalize_prompt_text)?;
+    if subject.is_empty()
+        || action.is_empty()
+        || subject == action
+        || subject.contains('在')
+        || action.chars().count() < 4
+    {
+        return None;
+    }
+
+    let subject_chars = subject.chars().count();
+    let action_chars = action.chars().count();
+    let max_overlap = action_chars.min(4);
+    for overlap_len in (2..=max_overlap).rev() {
+        let overlap = action
+            .chars()
+            .rev()
+            .take(overlap_len)
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect::<String>();
+        let Some(start) = subject.find(&overlap) else {
+            continue;
+        };
+        if start == 0 {
+            continue;
+        }
+        let end = start + overlap.len();
+        let merged = format!("{}{}{}", &subject[..start], action, &subject[end..]);
+        let merged = normalize_prompt_text(&merged);
+        if merged == subject
+            || merged == action
+            || merged.chars().count() >= subject_chars + action_chars
+            || merged.contains("，，")
+        {
+            continue;
+        }
+        return Some(merged);
+    }
+
+    None
 }
 
 fn compact_selected_memory_action(
@@ -2987,9 +3041,9 @@ mod tests {
         assert!(content.contains("storyboardIds=12"));
         assert!(content.contains("promptSeed="));
         assert!(content.contains("style=镜头稳定跟拍，情绪急迫，光影阴天冷光"));
-        assert!(content.contains("note=主角冲出旧宅"));
-        assert!(content.contains("推门冲出"));
+        assert!(content.contains("note=主角推门冲出旧宅"));
         assert!(!content.contains("快步推门冲出"));
+        assert!(!content.contains("note=主角冲出旧宅，推门冲出"));
         assert!(!content.contains("note=主角冲出旧宅，镜头中景稳定跟拍"));
         assert!(!content.contains("note=主角冲出旧宅，快步推门冲出，情绪急迫"));
         assert!(!content.contains("场景旧宅走廊"));
@@ -3026,8 +3080,7 @@ mod tests {
         )
         .expect("content");
 
-        assert!(content.contains("note=女主冲出旧宅"));
-        assert!(content.contains("推门冲出"));
+        assert!(content.contains("note=女主推门冲出旧宅"));
         assert!(!content.contains("女主快步推门冲出"), "{content}");
         assert!(
             !content.contains("note=女主冲出旧宅，快步推门冲出"),
@@ -3110,6 +3163,22 @@ mod tests {
         .expect("action");
 
         assert_eq!(action, "停步回头");
+    }
+
+    #[test]
+    fn merge_selected_memory_subject_action_merges_shared_motion_tail() {
+        let merged = merge_selected_memory_subject_action(Some("主角冲出旧宅"), Some("推门冲出"))
+            .expect("merged");
+
+        assert_eq!(merged, "主角推门冲出旧宅");
+    }
+
+    #[test]
+    fn merge_selected_memory_subject_action_skips_locative_subjects() {
+        assert_eq!(
+            merge_selected_memory_subject_action(Some("主角在旧宅走廊尽头回头"), Some("停步回头"),),
+            None
+        );
     }
 
     #[test]
