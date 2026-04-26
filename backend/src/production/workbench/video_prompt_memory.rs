@@ -1007,7 +1007,8 @@ pub(crate) fn select_selected_video_memory_notes(
     if storyboard_numeric_id <= 0 {
         return Vec::new();
     }
-    let mut notes = Vec::new();
+    let mut style_notes = Vec::new();
+    let mut fallback_notes = Vec::new();
     for row in rows {
         if row.name != SELECTED_VIDEO_MEMORY_NAME {
             continue;
@@ -1018,19 +1019,28 @@ pub(crate) fn select_selected_video_memory_notes(
         if !memory_matches_prompt_seed(&row.content, current_prompt_seed) {
             continue;
         }
-        let Some(note) = selected_video_style_value(row).or_else(|| {
-            extract_key_value(&row.content, "note")
-                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
-        }) else {
-            continue;
-        };
-        if notes.iter().any(|existing| existing == &note) {
+        if let Some(note) = selected_video_style_value(row) {
+            if style_notes.iter().all(|existing| existing != &note) {
+                style_notes.push(note);
+            }
             continue;
         }
-        notes.push(note);
-        break;
+
+        let Some(note) = extract_key_value(&row.content, "note")
+            .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+            .filter(|value| !is_low_signal_selected_memory_note(value))
+        else {
+            continue;
+        };
+        if fallback_notes.iter().all(|existing| existing != &note) {
+            fallback_notes.push(note);
+        }
     }
-    notes
+
+    if let Some(note) = style_notes.into_iter().next() {
+        return vec![note];
+    }
+    fallback_notes.into_iter().take(1).collect()
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -2708,11 +2718,32 @@ fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
         return compact_video_style_prompt_note(&value);
     }
     extract_key_value(&row.content, "note").and_then(|note| {
+        if is_low_signal_selected_memory_note(&note) {
+            return None;
+        }
         compact_video_style_prompt_note(&note).or_else(|| {
             extract_key_value(&row.content, "note")
                 .map(|raw| clip_prompt_fragment(&raw, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         })
     })
+}
+
+fn is_low_signal_selected_memory_note(note: &str) -> bool {
+    let normalized = normalize_prompt_text(note)
+        .trim_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ',' | '，' | ';' | '；' | '.' | '。' | ':' | '：')
+        })
+        .to_string();
+    if normalized.is_empty() {
+        return true;
+    }
+
+    matches!(
+        normalized.as_str(),
+        "当前镜头已确认" | "镜头已确认" | "当前分镜已确认" | "重复确认同镜头" | "同镜头重复确认"
+    ) || ((normalized.contains("镜头") || normalized.contains("分镜"))
+        && normalized.contains("确认")
+        && normalized.chars().count() <= 10)
 }
 
 pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
@@ -3396,6 +3427,40 @@ mod tests {
         );
 
         assert_eq!(notes, vec!["情绪压迫".to_string()]);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_prefers_older_style_over_newer_confirmation_note() {
+        let notes = select_selected_video_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | note=当前镜头已确认".into(),
+                },
+                AgentMemoryRow {
+                    name: "selected_video_memory".into(),
+                    content: "storyboardIds=12 | style=镜头冷调近景，情绪压迫 | note=保持冷调近景和稳定推进".into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(notes, vec!["情绪压迫".to_string()]);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_skips_confirmation_note_without_style() {
+        let notes = select_selected_video_memory_notes(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | note=当前镜头已确认".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert!(notes.is_empty());
     }
 
     #[test]
