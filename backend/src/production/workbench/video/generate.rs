@@ -24,6 +24,9 @@ use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
 
 const VIDEO_NEGATIVE_PROMPT_MAX_CHARS: usize = 120;
+const VIDEO_NEGATIVE_REVIEW_BASE_LIMIT: i64 = 8;
+const VIDEO_NEGATIVE_REVIEW_PER_STORYBOARD_ROWS: i64 = 4;
+const VIDEO_NEGATIVE_REVIEW_MAX_LIMIT: i64 = 24;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -348,6 +351,7 @@ pub(crate) async fn load_auto_negative_prompts(
     if storyboard_ids.is_empty() {
         return Ok(HashMap::new());
     }
+    let review_row_limit = negative_review_fetch_limit(storyboard_ids.len());
     let storyboard_target_ids = storyboard_ids
         .iter()
         .map(ToString::to_string)
@@ -376,13 +380,14 @@ pub(crate) async fn load_auto_negative_prompts(
             ELSE 2
           END,
           created_at DESC
-        LIMIT 8
+        LIMIT $5
         "#,
     )
     .bind(user_id)
     .bind(project_numeric_id)
     .bind(script_numeric_id)
     .bind(&storyboard_target_ids)
+    .bind(review_row_limit)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -412,6 +417,17 @@ pub(crate) async fn load_auto_negative_prompts(
         &selected_rows,
         &storyboard_seed_rows,
     ))
+}
+
+fn negative_review_fetch_limit(storyboard_count: usize) -> i64 {
+    if storyboard_count == 0 {
+        return VIDEO_NEGATIVE_REVIEW_BASE_LIMIT;
+    }
+
+    let storyboard_count = i64::try_from(storyboard_count).unwrap_or(i64::MAX);
+    (VIDEO_NEGATIVE_REVIEW_BASE_LIMIT
+        + storyboard_count.saturating_mul(VIDEO_NEGATIVE_REVIEW_PER_STORYBOARD_ROWS))
+    .min(VIDEO_NEGATIVE_REVIEW_MAX_LIMIT)
 }
 
 async fn load_rejected_video_negative_memory_rows(
@@ -1499,7 +1515,7 @@ mod tests {
         compact_negative_constraint_against_storyboard_style, compact_negative_review_constraints,
         compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
         load_auto_negative_prompts, map_bad_case_category_with_comments, merge_negative_prompts,
-        normalize_upload_sources, pacing_issue_category_is_redundant,
+        negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
         quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
         review_fragment_is_irrelevant_to_storyboard, storyboard_dialogue_is_empty,
         storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
@@ -1847,6 +1863,14 @@ mod tests {
             .await
             .expect("prompts");
         assert!(prompts.is_empty());
+    }
+
+    #[test]
+    fn negative_review_fetch_limit_scales_with_storyboard_batch_size() {
+        assert_eq!(negative_review_fetch_limit(0), 8);
+        assert_eq!(negative_review_fetch_limit(1), 12);
+        assert_eq!(negative_review_fetch_limit(3), 20);
+        assert_eq!(negative_review_fetch_limit(8), 24);
     }
 
     #[test]
