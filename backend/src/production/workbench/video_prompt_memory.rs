@@ -517,6 +517,33 @@ pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -
         .collect()
 }
 
+pub(crate) fn select_prioritized_video_style_note(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let context = build_style_note_selection_context(storyboard_row);
+    let mut candidates = collect_ranked_video_style_note_candidates(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+    )
+    .into_iter()
+    .filter(|candidate| ranked_style_note_is_worth_recalling(candidate, &context))
+    .collect::<Vec<_>>();
+    candidates.sort_by(|a, b| {
+        score_ranked_style_note(b, &context)
+            .cmp(&score_ranked_style_note(a, &context))
+            .then(b.score.cmp(&a.score))
+            .then(a.recency_idx.cmp(&b.recency_idx))
+            .then(a.note.cmp(&b.note))
+    });
+    candidates.into_iter().find_map(|candidate| {
+        compact_video_style_prompt_note(&candidate.note).filter(|note| !note.is_empty())
+    })
+}
+
 pub(crate) fn select_rejected_video_negative_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1100,6 +1127,277 @@ fn extract_storyboard_ids(content: &str) -> Vec<i32> {
                 .collect()
         })
         .unwrap_or_default()
+}
+
+#[derive(Debug, Clone)]
+struct StyleNoteSelectionContext {
+    description: String,
+    subject: String,
+    action: String,
+    shot: String,
+    camera_move: String,
+    mood: String,
+    lighting: String,
+}
+
+#[derive(Debug, Clone)]
+struct RankedStyleNote {
+    note: String,
+    score: i32,
+    recency_idx: usize,
+    source_name: String,
+}
+
+fn build_style_note_selection_context(
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> StyleNoteSelectionContext {
+    let description = storyboard_row
+        .and_then(|row| {
+            row.video_desc
+                .as_deref()
+                .map(normalize_prompt_text)
+                .filter(|text| !text.is_empty())
+                .or_else(|| {
+                    row.prompt
+                        .as_deref()
+                        .map(normalize_prompt_text)
+                        .filter(|text| !text.is_empty())
+                })
+        })
+        .unwrap_or_default();
+    let fields = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description);
+    StyleNoteSelectionContext {
+        description,
+        subject: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.subject))
+            .unwrap_or_default(),
+        action: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.action))
+            .unwrap_or_default(),
+        shot: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.shot))
+            .unwrap_or_default(),
+        camera_move: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.camera_move))
+            .unwrap_or_default(),
+        mood: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.mood))
+            .unwrap_or_default(),
+        lighting: fields
+            .as_ref()
+            .map(|value| normalize_prompt_text(&value.lighting))
+            .unwrap_or_default(),
+    }
+}
+
+fn collect_ranked_video_style_note_candidates(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> Vec<RankedStyleNote> {
+    let mut candidates = Vec::new();
+    for (idx, row) in rows.iter().enumerate() {
+        let (base_score, note) = match row.name.as_str() {
+            SELECTED_VIDEO_MEMORY_NAME => {
+                if !memory_row_is_neighbor_selected_style(
+                    row,
+                    storyboard_numeric_id,
+                    current_prompt_seed,
+                ) {
+                    continue;
+                }
+                (120, extract_style_note_value(row))
+            }
+            SCRIPT_VIDEO_STYLE_MEMORY_NAME => (90, extract_style_note_value(row)),
+            PROJECT_VIDEO_STYLE_MEMORY_NAME => (70, extract_style_note_value(row)),
+            _ => continue,
+        };
+        let Some(note) = note else {
+            continue;
+        };
+        let sample_count = extract_key_value(&row.content, "sampleCount")
+            .and_then(|value| value.parse::<i32>().ok())
+            .unwrap_or(1)
+            .clamp(1, 8);
+        candidates.push(RankedStyleNote {
+            note,
+            score: base_score + sample_count * 4,
+            recency_idx: idx,
+            source_name: row.name.clone(),
+        });
+    }
+    candidates
+}
+
+fn memory_row_is_neighbor_selected_style(
+    row: &AgentMemoryRow,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> bool {
+    if !memory_matches_prompt_seed(&row.content, current_prompt_seed) {
+        return false;
+    }
+    let storyboard_ids = extract_storyboard_ids(&row.content);
+    !storyboard_ids.is_empty() && !storyboard_ids.contains(&storyboard_numeric_id)
+}
+
+fn extract_style_note_value(row: &AgentMemoryRow) -> Option<String> {
+    if let Some(value) = extract_key_value(&row.content, "style") {
+        return compact_video_style_prompt_note(&value);
+    }
+    extract_key_value(&row.content, "note")
+        .and_then(|value| compact_video_style_prompt_note(&value))
+        .filter(|value| !value.is_empty())
+}
+
+fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionContext) -> i32 {
+    let mut score = note.score - note.recency_idx as i32;
+    let fragments = note
+        .note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>();
+    score += fragments.len() as i32 * 12;
+    for fragment in fragments {
+        if fragment.is_empty() {
+            continue;
+        }
+        if note.source_name == SELECTED_VIDEO_MEMORY_NAME
+            && fragment.starts_with("镜头")
+            && local_shot_framing_fragment(&fragment)
+        {
+            score -= 18;
+        }
+        if !context.mood.is_empty()
+            && fragment.starts_with("情绪")
+            && fragment.contains(&context.mood)
+        {
+            score += 24;
+        }
+        if !context.lighting.is_empty()
+            && fragment.starts_with("光影")
+            && fragment.contains(&context.lighting)
+        {
+            score += 24;
+        }
+        if fragment.starts_with("镜头")
+            && ((!context.shot.is_empty() && fragment.contains(&context.shot))
+                || (!context.camera_move.is_empty() && fragment.contains(&context.camera_move)))
+        {
+            score += 24;
+        }
+        if !context.subject.is_empty() && fragment.contains(&context.subject) {
+            score += 18;
+        }
+        if !context.action.is_empty() && fragment.contains(&context.action) {
+            score += 14;
+        }
+        if !context.description.is_empty() && context.description.contains(&fragment) {
+            score += 12;
+        }
+    }
+    score
+}
+
+fn ranked_style_note_is_worth_recalling(
+    note: &RankedStyleNote,
+    context: &StyleNoteSelectionContext,
+) -> bool {
+    if style_note_selection_context_is_empty(context) {
+        return true;
+    }
+
+    let evidence = score_style_note_context_evidence(note, context);
+    match note.source_name.as_str() {
+        SELECTED_VIDEO_MEMORY_NAME => evidence >= 1,
+        SCRIPT_VIDEO_STYLE_MEMORY_NAME => evidence >= 2,
+        PROJECT_VIDEO_STYLE_MEMORY_NAME => evidence >= 3,
+        _ => false,
+    }
+}
+
+fn style_note_selection_context_is_empty(context: &StyleNoteSelectionContext) -> bool {
+    [
+        context.description.as_str(),
+        context.subject.as_str(),
+        context.action.as_str(),
+        context.shot.as_str(),
+        context.camera_move.as_str(),
+        context.mood.as_str(),
+        context.lighting.as_str(),
+    ]
+    .into_iter()
+    .all(|value| value.is_empty())
+}
+
+fn score_style_note_context_evidence(
+    note: &RankedStyleNote,
+    context: &StyleNoteSelectionContext,
+) -> usize {
+    let mut evidence = 0usize;
+    let fragments = note
+        .note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>();
+
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("情绪") && !context.mood.is_empty() && fragment.contains(&context.mood)
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("光影")
+            && !context.lighting.is_empty()
+            && fragment.contains(&context.lighting)
+    }) {
+        evidence += 2;
+    }
+    if fragments.iter().any(|fragment| {
+        fragment.starts_with("镜头")
+            && ((!context.shot.is_empty() && fragment.contains(&context.shot))
+                || (!context.camera_move.is_empty() && fragment.contains(&context.camera_move)))
+    }) {
+        evidence += 2;
+    }
+    if !context.subject.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| fragment.contains(&context.subject))
+    {
+        evidence += 1;
+    }
+    if !context.action.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| fragment.contains(&context.action))
+    {
+        evidence += 1;
+    }
+    if !context.description.is_empty()
+        && fragments
+            .iter()
+            .any(|fragment| context.description.contains(fragment))
+    {
+        evidence += 1;
+    }
+
+    evidence
+}
+
+fn local_shot_framing_fragment(fragment: &str) -> bool {
+    ["低机位", "高机位", "特写", "近景", "中景", "全景", "远景"]
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
 }
 
 fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
