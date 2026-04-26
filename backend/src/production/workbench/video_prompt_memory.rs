@@ -715,6 +715,13 @@ pub(crate) fn select_pending_rejected_video_observation_candidates(
         .filter_map(|(idx, row)| {
             let avoid = extract_key_value(&row.content, "avoid")?;
             let ranked = ranked_observation_fragments(&avoid);
+            if ranked.len() == 1
+                && ranked
+                    .first()
+                    .is_some_and(|note| rejected_negative_memory_fragment_is_low_signal(note))
+            {
+                return None;
+            }
             if ranked.is_empty() {
                 let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
                 return Some(vec![(
@@ -3836,6 +3843,22 @@ mod tests {
         );
 
         assert_eq!(note, Some("avoid shaky handheld motion".into()));
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_skips_single_low_signal_mood_retry() {
+        let note = select_pending_rejected_video_observation_note(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=1 | avoid=avoid overly cold emotional tone"
+                        .into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(note, None);
     }
 
     #[test]
