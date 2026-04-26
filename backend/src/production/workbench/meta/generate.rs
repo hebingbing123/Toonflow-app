@@ -1921,6 +1921,9 @@ fn compact_selected_script_asset_anchor(
         .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
+        .filter_map(|fragment| {
+            trim_script_asset_anchor_fragment_against_storyboard_style(fragment, structured_fields)
+        })
         .filter(|fragment| {
             !script_asset_anchor_fragment_is_covered(
                 fragment,
@@ -1962,6 +1965,36 @@ fn script_asset_anchor_fragment_is_covered(
     match kind {
         ScriptAssetAnchorKind::Role => fragment_mostly_repeats_prompt_mood(fragment, &fields.mood),
         ScriptAssetAnchorKind::Scene | ScriptAssetAnchorKind::Tool => false,
+    }
+}
+
+fn trim_script_asset_anchor_fragment_against_storyboard_style(
+    fragment: String,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let Some(fields) = structured_fields else {
+        return Some(fragment);
+    };
+
+    let trimmed = trim_fragment_by_exact_field_overlap(&fragment, &fields.mood).unwrap_or(fragment);
+    trim_fragment_by_exact_field_overlap(&trimmed, &fields.lighting).or(Some(trimmed))
+}
+
+fn trim_fragment_by_exact_field_overlap(fragment: &str, field: &str) -> Option<String> {
+    let normalized_fragment = normalize_prompt_text(fragment);
+    let normalized_field = normalize_prompt_text(field);
+    if normalized_fragment.is_empty() || normalized_field.is_empty() {
+        return Some(normalized_fragment);
+    }
+    if !normalized_fragment.contains(&normalized_field) {
+        return Some(normalized_fragment);
+    }
+
+    let residual = normalize_prompt_text(&normalized_fragment.replace(&normalized_field, ""));
+    if residual.chars().count() <= 2 {
+        None
+    } else {
+        Some(residual)
     }
 }
 
@@ -4755,6 +4788,33 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_trims_role_anchor_fragment_that_repeats_prompt_lighting() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（黑色风衣主角停步回头、旧宅走廊、主角、5秒、中景、稳定跟拍、停步回头、冷峻、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，阴天冷光侧边高光".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Character anchor: 主角:侧边高光."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("Character anchor: 主角:黑色风衣，阴天冷光侧边高光."));
+        assert_eq!(prompt.matches("阴天冷光").count(), 1, "{prompt}");
+        assert_eq!(prompt.matches("黑色风衣").count(), 1, "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_drops_scene_anchor_when_it_only_repeats_existing_setting() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -4774,6 +4834,32 @@ mod tests {
 
         assert!(!prompt.contains("Scene anchor:"), "{prompt}");
         assert!(!prompt.contains("Setting: 潮湿斑驳的旧宅走廊."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_trims_scene_anchor_fragment_that_repeats_prompt_lighting() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角驻足观察、旧宅走廊、主角、5秒、中景、稳定跟拍、驻足抬眼观察、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，阴天冷光积水反光".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，积水反光."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("旧宅走廊:潮湿斑驳，阴天冷光积水反光."));
+        assert_eq!(prompt.matches("阴天冷光").count(), 1, "{prompt}");
     }
 
     #[test]
