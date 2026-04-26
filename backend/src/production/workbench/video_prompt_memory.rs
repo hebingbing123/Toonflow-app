@@ -2825,9 +2825,7 @@ fn is_low_signal_selected_memory_note(note: &str) -> bool {
 }
 
 pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
-    let fragments = note
-        .split(['，', '；', ';', '。'])
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(note)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| {
             STYLE_NOTE_PREFIXES
@@ -4601,6 +4599,18 @@ mod tests {
 
         assert_eq!(note, "保持冷调压迫感，镜头中景稳定跟拍");
         assert!(!note.contains("反派"));
+    }
+
+    #[test]
+    fn compact_video_continuity_note_supports_ascii_delimiters_and_drops_unrelated_fragments() {
+        let note = compact_video_continuity_note(
+            "后续反派从暗处逼近, 保持冷调压迫感; 镜头中景稳定跟拍\n无关素材提示",
+        )
+        .expect("note");
+
+        assert_eq!(note, "保持冷调压迫感，镜头中景稳定跟拍");
+        assert!(!note.contains("反派"));
+        assert!(!note.contains("素材"));
     }
 
     #[tokio::test]

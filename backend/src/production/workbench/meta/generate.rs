@@ -3774,9 +3774,8 @@ fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
         return None;
     }
 
-    let fragments = normalized
-        .split('，')
-        .map(strip_auto_scope_continuity_scaffolding)
+    let fragments = split_prompt_note_fragments(&normalized)
+        .map(|fragment| strip_auto_scope_continuity_scaffolding(&fragment))
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
     if fragments.is_empty() {
@@ -5819,6 +5818,24 @@ mod tests {
         let rows = vec![AgentMemoryRow {
             name: "auto_scope_memory".into(),
             content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=保持当前镜头角色站位不要跳轴".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
+            vec!["保持角色站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_supports_ascii_delimited_auto_scope_summary() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=后续反派从暗处逼近, 保持当前镜头角色站位不要跳轴; 镜头中景稳定跟拍".to_string(),
         }];
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角冲出旧宅".into()),
