@@ -525,13 +525,15 @@ async fn load_pending_video_observation_note(
         current_prompt_seed,
     )
     .into_iter()
+    .filter_map(|note| {
+        compact_negative_constraint_against_storyboard_style(
+            &note,
+            prioritized_style_note.as_deref(),
+            storyboard_row.as_ref(),
+        )
+    })
     .find(|note| {
         !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
-            && !video_prompt_observation_conflicts_with_style(
-                note,
-                prioritized_style_note.as_deref(),
-                storyboard_row.as_ref(),
-            )
     });
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
@@ -678,6 +680,65 @@ fn canonical_observation_note(value: &str) -> String {
         .collect::<Vec<_>>()
         .join(" ")
         .to_ascii_lowercase()
+}
+
+fn compact_negative_constraint_against_storyboard_style(
+    fragment: &str,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let trimmed = fragment.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let conflicts = |value: &str| {
+        negative_constraint_conflicts_with_storyboard_style(
+            value.trim(),
+            selected_style_note,
+            storyboard_row,
+        )
+    };
+    match canonical_observation_note(trimmed).as_str() {
+        "avoid extreme camera angle or overly tight close-up framing" => {
+            compact_conflicting_negative_pair(
+                trimmed,
+                "avoid extreme camera angle",
+                "avoid overly tight close-up framing",
+                conflicts,
+            )
+        }
+        "avoid overly cold, oppressive, or frantic mood" => compact_conflicting_negative_pair(
+            trimmed,
+            "avoid oppressive or frantic mood",
+            "avoid overly cold emotional tone",
+            conflicts,
+        ),
+        "avoid flat cold lighting or harsh backlight silhouette" => {
+            compact_conflicting_negative_pair(
+                trimmed,
+                "avoid flat cold lighting",
+                "avoid harsh backlight silhouette",
+                conflicts,
+            )
+        }
+        _ => (!conflicts(trimmed)).then_some(trimmed.to_string()),
+    }
+}
+
+fn compact_conflicting_negative_pair(
+    original: &str,
+    lhs: &str,
+    rhs: &str,
+    conflicts: impl Fn(&str) -> bool,
+) -> Option<String> {
+    let lhs_conflicts = conflicts(lhs);
+    let rhs_conflicts = conflicts(rhs);
+    match (lhs_conflicts, rhs_conflicts) {
+        (false, false) => Some(original.to_string()),
+        (true, false) => Some(rhs.to_string()),
+        (false, true) => Some(lhs.to_string()),
+        (true, true) => None,
+    }
 }
 
 fn build_video_prompt(
@@ -2611,10 +2672,11 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_video_prompt, parse_structured_storyboard_description,
-        resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        select_video_prompt_memory_notes, select_video_prompt_style_notes,
-        trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
+        build_video_prompt, compact_negative_constraint_against_storyboard_style,
+        parse_structured_storyboard_description, resolve_observation_filter_style_note,
+        resolve_video_prompt_duration, select_video_prompt_memory_notes,
+        select_video_prompt_style_notes, trim_video_prompt_memory_rows,
+        video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
         VideoPromptContext,
     };
@@ -4012,6 +4074,43 @@ mod tests {
             None,
             Some(&storyboard_row),
         ));
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_keeps_non_conflicting_half_of_combined_warning() {
+        let close_up_storyboard = StoryboardPromptSeedRow {
+            prompt: Some("门口逼视".into()),
+            video_desc: Some(
+                "（主角逼视来人、旧宅门口、主角、5秒、近景、静止、逼近对手、克制、侧逆光、、、A15）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid extreme camera angle or overly tight close-up framing",
+                None,
+                Some(&close_up_storyboard),
+            ),
+            Some("avoid extreme camera angle".to_string())
+        );
+
+        let cold_light_storyboard = StoryboardPromptSeedRow {
+            prompt: Some("冷光对峙".into()),
+            video_desc: Some(
+                "（主角对峙、旧宅门厅、主角、5秒、中景、静止、盯住来人、冷峻压迫、室内冷光、、、A16）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid flat cold lighting or harsh backlight silhouette",
+                None,
+                Some(&cold_light_storyboard),
+            ),
+            Some("avoid harsh backlight silhouette".to_string())
+        );
     }
 
     #[test]

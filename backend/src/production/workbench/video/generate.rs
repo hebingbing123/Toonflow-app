@@ -642,9 +642,9 @@ fn filter_conflicting_review_fragments(
 ) -> Vec<String> {
     fragments
         .into_iter()
-        .filter(|fragment| {
-            !review_fragment_conflicts_with_selected_style(
-                fragment,
+        .filter_map(|fragment| {
+            compact_negative_constraint_against_storyboard_style(
+                &fragment,
                 selected_style_note,
                 storyboard_row,
             )
@@ -696,6 +696,65 @@ fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
         .iter()
         .map(|marker| normalize_prompt_text(marker).to_ascii_lowercase())
         .any(|marker| normalized_ascii == marker)
+}
+
+fn compact_negative_constraint_against_storyboard_style(
+    fragment: &str,
+    selected_style_note: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let trimmed = fragment.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let conflicts = |value: &str| {
+        negative_constraint_conflicts_with_storyboard_style(
+            value.trim(),
+            selected_style_note,
+            storyboard_row,
+        )
+    };
+    match canonical_negative_fragment(trimmed).as_str() {
+        "avoid extreme camera angle or overly tight close-up framing" => {
+            compact_conflicting_negative_pair(
+                trimmed,
+                "avoid extreme camera angle",
+                "avoid overly tight close-up framing",
+                conflicts,
+            )
+        }
+        "avoid overly cold, oppressive, or frantic mood" => compact_conflicting_negative_pair(
+            trimmed,
+            "avoid oppressive or frantic mood",
+            "avoid overly cold emotional tone",
+            conflicts,
+        ),
+        "avoid flat cold lighting or harsh backlight silhouette" => {
+            compact_conflicting_negative_pair(
+                trimmed,
+                "avoid flat cold lighting",
+                "avoid harsh backlight silhouette",
+                conflicts,
+            )
+        }
+        _ => (!conflicts(trimmed)).then_some(trimmed.to_string()),
+    }
+}
+
+fn compact_conflicting_negative_pair(
+    original: &str,
+    lhs: &str,
+    rhs: &str,
+    conflicts: impl Fn(&str) -> bool,
+) -> Option<String> {
+    let lhs_conflicts = conflicts(lhs);
+    let rhs_conflicts = conflicts(rhs);
+    match (lhs_conflicts, rhs_conflicts) {
+        (false, false) => Some(original.to_string()),
+        (true, false) => Some(rhs.to_string()),
+        (false, true) => Some(lhs.to_string()),
+        (true, true) => None,
+    }
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -1437,13 +1496,14 @@ fn infer_video_provider(model: &str) -> &'static str {
 mod tests {
     use super::{
         build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
-        compact_negative_review_constraints, compact_video_ratio,
-        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
-        map_bad_case_category_with_comments, merge_negative_prompts, normalize_upload_sources,
-        pacing_issue_category_is_redundant, quality_review_row_matches_storyboard,
-        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
-        storyboard_dialogue_is_empty, storyboard_mismatch_category_is_redundant,
-        visual_error_category_is_redundant, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        compact_negative_constraint_against_storyboard_style, compact_negative_review_constraints,
+        compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
+        load_auto_negative_prompts, map_bad_case_category_with_comments, merge_negative_prompts,
+        normalize_upload_sources, pacing_issue_category_is_redundant,
+        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
+        review_fragment_is_irrelevant_to_storyboard, storyboard_dialogue_is_empty,
+        storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
+        QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -1669,6 +1729,43 @@ mod tests {
         assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
         assert!(!fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
         assert!(!fragments.contains(&"avoid rushed or jerky motion".to_string()));
+    }
+
+    #[test]
+    fn compact_negative_constraint_against_storyboard_style_keeps_non_conflicting_half() {
+        let close_up_storyboard = StoryboardPromptSeedRow {
+            prompt: Some("门口逼视".into()),
+            video_desc: Some(
+                "（主角逼视来人、旧宅门口、主角、5秒、近景、静止、逼近对手、克制、侧逆光、、、A15）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid extreme camera angle or overly tight close-up framing",
+                None,
+                Some(&close_up_storyboard),
+            ),
+            Some("avoid extreme camera angle".to_string())
+        );
+
+        let cold_light_storyboard = StoryboardPromptSeedRow {
+            prompt: Some("冷光对峙".into()),
+            video_desc: Some(
+                "（主角对峙、旧宅门厅、主角、5秒、中景、静止、盯住来人、冷峻压迫、室内冷光、、、A16）"
+                    .into(),
+            ),
+            duration: Some("5s".into()),
+        };
+        assert_eq!(
+            compact_negative_constraint_against_storyboard_style(
+                "avoid flat cold lighting or harsh backlight silhouette",
+                None,
+                Some(&cold_light_storyboard),
+            ),
+            Some("avoid harsh backlight silhouette".to_string())
+        );
     }
 
     #[test]
