@@ -14,8 +14,9 @@ use crate::production::workbench::meta::common::{
 };
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
-    compact_video_continuity_note, select_pending_rejected_video_observation_note,
-    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    compact_video_continuity_note, compact_video_style_prompt_note,
+    select_pending_rejected_video_observation_note, storyboard_prompt_seed, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -576,27 +577,24 @@ fn memory_row_is_neighbor_selected_style(row: &AgentMemoryRow, storyboard_numeri
 }
 
 fn extract_style_note_value(row: &AgentMemoryRow) -> Option<String> {
-    extract_key_value(&row.content, "style")
-        .or_else(|| extract_key_value(&row.content, "note"))
-        .map(|value| {
-            let fragments = value
-                .split('，')
-                .map(normalize_prompt_text)
-                .filter(|fragment| !fragment.is_empty())
-                .filter(|fragment| style_fragment_prefix(fragment))
-                .collect::<Vec<_>>();
-            if fragments.is_empty() {
-                clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
-            } else {
-                clip_prompt_fragment(&fragments.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
-            }
-        })
+    if let Some(value) = extract_key_value(&row.content, "style") {
+        return compact_video_style_prompt_note(&value);
+    }
+    extract_key_value(&row.content, "note")
+        .and_then(|value| compact_video_style_prompt_note(&value))
         .filter(|value| !value.is_empty())
 }
 
 fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionContext) -> i32 {
     let mut score = note.score - note.recency_idx as i32;
-    for fragment in note.note.split('，').map(normalize_prompt_text) {
+    let fragments = note
+        .note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>();
+    score += fragments.len() as i32 * 12;
+    for fragment in fragments {
         if fragment.is_empty() {
             continue;
         }
@@ -2514,7 +2512,7 @@ mod tests {
 
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, None),
-            vec!["镜头稳定近景，情绪冷色压迫感".to_string()]
+            vec!["情绪冷色压迫感".to_string()]
         );
     }
 

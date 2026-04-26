@@ -18,6 +18,16 @@ const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const STYLE_NOTE_PREFIXES: [&str; 4] = ["镜头", "情绪", "光影", "场景"];
 const STYLE_PROMPT_PREFIXES: [&str; 3] = ["镜头", "情绪", "光影"];
+const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
+    "稳定跟拍",
+    "手持跟拍",
+    "慢推",
+    "推进",
+    "拉远",
+    "环绕",
+    "手持",
+    "跟拍",
+];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
     "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
 ];
@@ -1120,16 +1130,26 @@ fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
     recurring
 }
 
-fn compact_style_note_with_prefixes(note: &str, prefixes: &[&str]) -> Option<String> {
-    let fragments = note
-        .split('，')
-        .map(normalize_prompt_text)
-        .filter(|fragment| {
-            prefixes.iter().any(|prefix| fragment.starts_with(prefix))
-        })
-        .collect::<Vec<_>>();
+pub(crate) fn compact_video_style_prompt_note(note: &str) -> Option<String> {
+    let mut fragments = Vec::new();
+    let mut fallback_shot = None;
+
+    for fragment in note.split('，').map(normalize_prompt_text) {
+        if fragment.is_empty() {
+            continue;
+        }
+        if let Some(compacted) = compact_prompt_style_fragment(&fragment) {
+            if fragments.iter().any(|existing| existing == &compacted) {
+                continue;
+            }
+            fragments.push(compacted);
+        } else if fragment.starts_with("镜头") && fallback_shot.is_none() {
+            fallback_shot = Some(clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS));
+        }
+    }
+
     if fragments.is_empty() {
-        return None;
+        return fallback_shot;
     }
     Some(clip_prompt_fragment(
         &fragments.join("，"),
@@ -1137,17 +1157,56 @@ fn compact_style_note_with_prefixes(note: &str, prefixes: &[&str]) -> Option<Str
     ))
 }
 
+fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
+    if fragment.starts_with("镜头") {
+        return compact_prompt_shot_style_fragment(fragment);
+    }
+    if STYLE_PROMPT_PREFIXES
+        .iter()
+        .any(|prefix| *prefix != "镜头" && fragment.starts_with(prefix))
+    {
+        return Some(clip_prompt_fragment(fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS));
+    }
+    None
+}
+
+fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
+    let matched = extract_style_keywords(fragment, "镜头", &STABLE_PROMPT_SHOT_KEYWORDS);
+    if matched.is_empty() {
+        return None;
+    }
+    Some(clip_prompt_fragment(
+        &format!("镜头{}", matched.join("")),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
 fn style_only_note(note: &str) -> Option<String> {
-    compact_style_note_with_prefixes(note, &STYLE_NOTE_PREFIXES)
+    let fragments = note
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| {
+            STYLE_NOTE_PREFIXES
+                .iter()
+                .any(|prefix| fragment.starts_with(prefix))
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+    compact_video_style_prompt_note(&fragments.join("，"))
 }
 
 fn selected_video_style_value(row: &AgentMemoryRow) -> Option<String> {
-    extract_key_value(&row.content, "style")
-        .and_then(|value| compact_style_note_with_prefixes(&value, &STYLE_PROMPT_PREFIXES))
-        .or_else(|| {
+    if let Some(value) = extract_key_value(&row.content, "style") {
+        return compact_video_style_prompt_note(&value);
+    }
+    extract_key_value(&row.content, "note").and_then(|note| {
+        compact_video_style_prompt_note(&note).or_else(|| {
             extract_key_value(&row.content, "note")
-                .and_then(|note| compact_style_note_with_prefixes(&note, &STYLE_PROMPT_PREFIXES))
+                .map(|raw| clip_prompt_fragment(&raw, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         })
+    })
 }
 
 pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
@@ -1560,10 +1619,11 @@ mod tests {
 
         assert!(content.contains("storyboardIds=12"));
         assert!(content.contains("promptSeed="));
-        assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊"));
+        assert!(content.contains("style=镜头稳定跟拍，情绪急迫，光影阴天冷光"));
         assert!(content.contains("note=主角冲出旧宅"));
         assert!(content.contains("镜头中景稳定跟拍"));
         assert!(content.contains("情绪急迫"));
+        assert!(content.contains("场景旧宅走廊"));
         assert!(content.contains("duration=5s"));
     }
 
@@ -1608,7 +1668,7 @@ mod tests {
             None,
         );
 
-        assert_eq!(notes, vec!["镜头冷调近景，情绪压迫".to_string()]);
+        assert_eq!(notes, vec!["情绪压迫".to_string()]);
     }
 
     #[test]
@@ -2010,8 +2070,38 @@ mod tests {
 
         assert_eq!(
             notes,
-            vec!["镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
+            vec!["镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
         );
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_drop_local_framing_when_other_style_fragments_exist() {
+        let notes = select_selected_video_memory_notes(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content:
+                    "storyboardIds=12 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=..."
+                        .into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(notes, vec!["情绪冷峻压迫，光影阴天冷光".to_string()]);
+    }
+
+    #[test]
+    fn select_selected_video_memory_notes_keep_local_framing_when_it_is_only_style_signal() {
+        let notes = select_selected_video_memory_notes(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=镜头近景 | note=...".into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(notes, vec!["镜头近景".to_string()]);
     }
 
     #[test]
