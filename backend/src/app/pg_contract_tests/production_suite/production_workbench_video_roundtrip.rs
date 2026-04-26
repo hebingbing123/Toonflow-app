@@ -620,6 +620,28 @@ async fn production_workbench_video_roundtrip() {
         selected_memory_count, 1,
         "select-video should persist storyboard-scoped selected video memory"
     );
+    let script_style_memory_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'script_video_style_memory'
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .bind(script_id)
+    .fetch_one(&pool)
+    .await
+    .expect("query script video style memory after first select");
+    assert_eq!(
+        script_style_memory_count, 0,
+        "single approved video should not yet create script style summary"
+    );
 
     let res = app
         .clone()
@@ -840,6 +862,28 @@ async fn production_workbench_video_roundtrip() {
     assert_eq!(
         selected_memory_after_delete, 0,
         "delete-video should clear stale selected video memory for the storyboard"
+    );
+    let script_style_memory_after_delete: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'script_video_style_memory'
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .bind(script_id)
+    .fetch_one(&pool)
+    .await
+    .expect("query script video style memory after delete");
+    assert_eq!(
+        script_style_memory_after_delete, 0,
+        "delete-video should also leave no script style memory when no approved videos remain"
     );
 
     let res = app

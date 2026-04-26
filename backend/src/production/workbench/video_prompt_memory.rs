@@ -5,7 +5,9 @@ use uuid::Uuid;
 use crate::error::ApiError;
 
 const SELECTED_VIDEO_MEMORY_NAME: &str = "selected_video_memory";
+const SCRIPT_VIDEO_STYLE_MEMORY_NAME: &str = "script_video_style_memory";
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
+const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
@@ -166,6 +168,57 @@ pub(crate) async fn clear_selected_video_memory(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     Ok(())
+}
+
+pub(crate) async fn refresh_script_video_style_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+) -> Result<(), ApiError> {
+    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        ORDER BY create_time_ms DESC
+        LIMIT $5
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(SELECTED_VIDEO_MEMORY_NAME)
+    .bind(SELECTED_VIDEO_MEMORY_KEEP_ROWS)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let summarized = build_script_video_style_memory(&rows);
+    replace_summary_memory(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        SCRIPT_VIDEO_STYLE_MEMORY_NAME,
+        summarized.as_deref(),
+        SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS,
+    )
+    .await
+}
+
+pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
+    rows.iter()
+        .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
+        .filter_map(|row| extract_key_value(&row.content, "note"))
+        .map(|note| clip_prompt_fragment(&note, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .take(1)
+        .collect()
 }
 
 pub(crate) fn select_selected_video_memory_notes(
@@ -401,12 +454,191 @@ fn extract_storyboard_ids(content: &str) -> Vec<i32> {
         .unwrap_or_default()
 }
 
+fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
+    let notes = rows
+        .iter()
+        .filter(|row| row.name == SELECTED_VIDEO_MEMORY_NAME)
+        .filter_map(|row| extract_key_value(&row.content, "note"))
+        .collect::<Vec<_>>();
+    if notes.len() < 2 {
+        return None;
+    }
+
+    let recurring = recurring_style_fragments(&notes);
+    if recurring.is_empty() {
+        return None;
+    }
+
+    Some(format!(
+        "sampleCount={} | note={}",
+        notes.len(),
+        clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+    ))
+}
+
+fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
+    let parsed = notes
+        .iter()
+        .map(|note| {
+            note.split('，')
+                .map(normalize_prompt_text)
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    let mut recurring = Vec::new();
+
+    for prefix in ["镜头", "情绪", "光影", "场景"] {
+        if let Some(fragment) = pick_recurring_prefixed_fragment(&parsed, prefix) {
+            recurring.push(fragment);
+        }
+    }
+
+    if let Some(fragment) = pick_recurring_unprefixed_fragment(&parsed) {
+        recurring.push(fragment);
+    }
+
+    recurring
+}
+
+fn pick_recurring_prefixed_fragment(parsed_notes: &[Vec<String>], prefix: &str) -> Option<String> {
+    let mut counts: Vec<(String, usize, usize)> = Vec::new();
+    for (note_idx, fragments) in parsed_notes.iter().enumerate() {
+        for fragment in fragments {
+            if !fragment.starts_with(prefix) {
+                continue;
+            }
+            if let Some(existing) = counts.iter_mut().find(|(value, _, _)| value == fragment) {
+                existing.1 += 1;
+                existing.2 = existing.2.min(note_idx);
+            } else {
+                counts.push((fragment.clone(), 1, note_idx));
+            }
+        }
+    }
+
+    counts
+        .into_iter()
+        .filter(|(_, count, _)| *count >= 2)
+        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)))
+        .map(|(value, _, _)| value)
+}
+
+fn pick_recurring_unprefixed_fragment(parsed_notes: &[Vec<String>]) -> Option<String> {
+    let mut counts: Vec<(String, usize, usize)> = Vec::new();
+    for (note_idx, fragments) in parsed_notes.iter().enumerate() {
+        for fragment in fragments {
+            if fragment.starts_with("镜头")
+                || fragment.starts_with("情绪")
+                || fragment.starts_with("光影")
+                || fragment.starts_with("场景")
+            {
+                continue;
+            }
+            if fragment.chars().count() < 4 {
+                continue;
+            }
+            if let Some(existing) = counts.iter_mut().find(|(value, _, _)| value == fragment) {
+                existing.1 += 1;
+                existing.2 = existing.2.min(note_idx);
+            } else {
+                counts.push((fragment.clone(), 1, note_idx));
+            }
+        }
+    }
+
+    counts
+        .into_iter()
+        .filter(|(_, count, _)| *count >= 2)
+        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)))
+        .map(|(value, _, _)| value)
+}
+
+async fn replace_summary_memory(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    name: &str,
+    content: Option<&str>,
+    keep_rows: i64,
+) -> Result<(), ApiError> {
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = $4
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(name)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let Some(content) = content else {
+        return Ok(());
+    };
+
+    sqlx::query(
+        r#"
+        INSERT INTO app_agent_memory (
+          owner_user_id, numeric_project_id, episodes_id, agent_type,
+          memory_type, role, name, content, summarized, create_time_ms
+        )
+        VALUES ($1, $2, $3, 'productionAgent', 'summary', 'assistant', $4, $5, 1, EXTRACT(EPOCH FROM NOW()) * 1000)
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(name)
+    .bind(content)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    sqlx::query(
+        r#"
+        DELETE FROM app_agent_memory
+        WHERE id IN (
+          SELECT id
+          FROM app_agent_memory
+          WHERE owner_user_id = $1
+            AND numeric_project_id = $2
+            AND episodes_id = $3
+            AND agent_type = 'productionAgent'
+            AND memory_type = 'summary'
+            AND name = $4
+          ORDER BY create_time_ms DESC
+          OFFSET $5
+        )
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(name)
+    .bind(keep_rows)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        build_selected_video_memory, clear_selected_video_memory,
+        build_script_video_style_memory, build_selected_video_memory, clear_selected_video_memory,
         parse_structured_storyboard_description, select_neighbor_selected_video_memory_notes,
-        select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+        select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -497,6 +729,50 @@ mod tests {
                 "保持人物近景与压迫感".to_string(),
                 "维持冷色夜景和稳定跟拍".to_string()
             ]
+        );
+    }
+
+    #[test]
+    fn build_script_video_style_memory_extracts_recurring_style_fragments() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | note=女主压门回望，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅走廊".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | note=女主贴墙前行，镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光，场景旧宅楼梯".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | note=反派逼近，镜头近景手持跟拍，情绪紧张压迫，光影冷调逆光，场景旧宅走廊".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"));
+        assert!(summary.contains("镜头中景稳定跟拍"));
+        assert!(summary.contains("情绪冷峻压迫"));
+        assert!(summary.contains("光影冷调逆光"));
+        assert!(summary.contains("场景旧宅走廊"));
+    }
+
+    #[test]
+    fn select_script_video_style_memory_notes_reads_summary_note() {
+        let notes = select_script_video_style_memory_notes(&[
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=3 | note=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | note=别的内容".into(),
+            },
+        ]);
+
+        assert_eq!(
+            notes,
+            vec!["镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string()]
         );
     }
 
