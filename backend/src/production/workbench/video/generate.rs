@@ -39,6 +39,13 @@ struct QualityReviewSeedRow {
     comments: Option<String>,
 }
 
+#[derive(Debug)]
+struct ScoredNegativeFragment {
+    score: i32,
+    order: usize,
+    fragment: String,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct StoryboardNegativePrompt {
@@ -630,51 +637,78 @@ fn collect_negative_review_fragments(
     rows: &[QualityReviewSeedRow],
     storyboard_id: i32,
 ) -> Vec<String> {
+    let mut candidates = Vec::new();
+    let mut order = 0usize;
+    for row in rows
+        .iter()
+        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(category) = row.bad_case_category.as_deref() {
+            push_scored_negative_fragment(
+                &mut candidates,
+                &mut order,
+                map_bad_case_category(category),
+                true,
+                false,
+            );
+        }
+    }
+    for row in rows
+        .iter()
+        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(comments) = row.comments.as_deref() {
+            for fragment in infer_negative_fragments_from_comments(comments) {
+                push_scored_negative_fragment(
+                    &mut candidates,
+                    &mut order,
+                    Some(fragment),
+                    true,
+                    true,
+                );
+            }
+        }
+    }
+    for row in rows
+        .iter()
+        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(category) = row.bad_case_category.as_deref() {
+            push_scored_negative_fragment(
+                &mut candidates,
+                &mut order,
+                map_bad_case_category(category),
+                false,
+                false,
+            );
+        }
+    }
+    for row in rows
+        .iter()
+        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(comments) = row.comments.as_deref() {
+            for fragment in infer_negative_fragments_from_comments(comments) {
+                push_scored_negative_fragment(
+                    &mut candidates,
+                    &mut order,
+                    Some(fragment),
+                    false,
+                    true,
+                );
+            }
+        }
+    }
+    candidates.sort_by(|a, b| {
+        b.score
+            .cmp(&a.score)
+            .then(a.order.cmp(&b.order))
+            .then(a.fragment.cmp(&b.fragment))
+    });
+
     let mut fragments = Vec::new();
-    for row in rows
-        .iter()
-        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
-    {
-        if let Some(category) = row.bad_case_category.as_deref() {
-            push_unique_negative_fragment(&mut fragments, map_bad_case_category(category));
-        }
-        if fragments.len() >= 4 {
-            break;
-        }
-    }
-    for row in rows
-        .iter()
-        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
-    {
-        if let Some(comments) = row.comments.as_deref() {
-            for fragment in infer_negative_fragments_from_comments(comments) {
-                push_unique_negative_fragment(&mut fragments, Some(fragment));
-            }
-        }
-        if fragments.len() >= 4 {
-            break;
-        }
-    }
-    for row in rows
-        .iter()
-        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
-    {
-        if let Some(category) = row.bad_case_category.as_deref() {
-            push_unique_negative_fragment(&mut fragments, map_bad_case_category(category));
-        }
-        if fragments.len() >= 6 {
-            break;
-        }
-    }
-    for row in rows
-        .iter()
-        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
-    {
-        if let Some(comments) = row.comments.as_deref() {
-            for fragment in infer_negative_fragments_from_comments(comments) {
-                push_unique_negative_fragment(&mut fragments, Some(fragment));
-            }
-        }
+    for candidate in candidates {
+        push_negative_fragment_without_budget(&mut fragments, &candidate.fragment);
         if fragments.len() >= 6 {
             break;
         }
@@ -702,6 +736,24 @@ fn push_unique_negative_fragment(target: &mut Vec<String>, candidate: Option<&'s
     }
     target.retain(|existing| !negative_fragment_covers(candidate, existing));
     target.push(candidate.to_string());
+}
+
+fn push_scored_negative_fragment(
+    target: &mut Vec<ScoredNegativeFragment>,
+    order: &mut usize,
+    candidate: Option<&'static str>,
+    storyboard_scoped: bool,
+    from_comments: bool,
+) {
+    let Some(fragment) = candidate else {
+        return;
+    };
+    target.push(ScoredNegativeFragment {
+        score: score_review_negative_fragment(fragment, storyboard_scoped, from_comments),
+        order: *order,
+        fragment: fragment.to_string(),
+    });
+    *order += 1;
 }
 
 fn map_bad_case_category(category: &str) -> Option<&'static str> {
@@ -755,6 +807,40 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
     fragments
 }
 
+fn score_review_negative_fragment(
+    fragment: &str,
+    storyboard_scoped: bool,
+    from_comments: bool,
+) -> i32 {
+    let source_score = if storyboard_scoped { 48 } else { 0 };
+    let detail_score = if from_comments { 8 } else { 0 };
+    let family_score = match negative_fragment_family(fragment) {
+        "flicker_motion_jitter" => 36,
+        "shot_change_framing" | "camera_framing" => 34,
+        "lighting_backlight" => 20,
+        "mood_tone" => 16,
+        _ => {
+            let canonical = canonical_negative_fragment(fragment);
+            if canonical.contains("face")
+                || canonical.contains("costume")
+                || canonical.contains("character")
+            {
+                40
+            } else if canonical.contains("warped")
+                || canonical.contains("anatom")
+                || canonical.contains("blur")
+            {
+                38
+            } else if canonical.contains("setting") {
+                18
+            } else {
+                14
+            }
+        }
+    };
+    source_score + detail_score + family_score - negative_fragment_information_score(fragment) as i32 / 6
+}
+
 fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Option<String> {
     merge_negative_prompt_fragment_groups(&[
         split_negative_prompt_fragments(manual),
@@ -788,10 +874,22 @@ struct CharacterConsistencyFlags {
     costume_inconsistency: bool,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct VisualStyleConstraintFlags {
+    extreme_camera_angle: bool,
+    tight_close_up: bool,
+    oppressive_or_frantic_mood: bool,
+    overly_cold_emotional_tone: bool,
+    flat_cold_lighting: bool,
+    harsh_backlight_silhouette: bool,
+}
+
 fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     let mut compacted = Vec::with_capacity(fragments.len());
     let mut character_flags = CharacterConsistencyFlags::default();
     let mut character_idx = None;
+    let mut visual_style_flags = VisualStyleConstraintFlags::default();
+    let mut visual_style_idx = None;
 
     for (idx, fragment) in fragments.into_iter().enumerate() {
         if let Some(flags) = parse_character_consistency_fragment(&fragment) {
@@ -801,11 +899,29 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             character_flags.costume_inconsistency |= flags.costume_inconsistency;
             continue;
         }
+        if let Some(flags) = parse_visual_style_constraint_fragment(&fragment) {
+            visual_style_idx.get_or_insert(idx);
+            visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
+            visual_style_flags.tight_close_up |= flags.tight_close_up;
+            visual_style_flags.oppressive_or_frantic_mood |=
+                flags.oppressive_or_frantic_mood;
+            visual_style_flags.overly_cold_emotional_tone |=
+                flags.overly_cold_emotional_tone;
+            visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
+            visual_style_flags.harsh_backlight_silhouette |=
+                flags.harsh_backlight_silhouette;
+            continue;
+        }
         compacted.push((idx, fragment));
     }
 
     if let Some(idx) = character_idx {
         compacted.push((idx, render_character_consistency_fragment(character_flags)));
+    }
+    if let Some(idx) = visual_style_idx {
+        for fragment in render_visual_style_constraint_fragments(visual_style_flags) {
+            compacted.push((idx, fragment));
+        }
     }
     compacted.sort_by(|a, b| a.0.cmp(&b.0));
     compacted.into_iter().map(|(_, fragment)| fragment).collect()
@@ -841,6 +957,85 @@ fn render_character_consistency_fragment(flags: CharacterConsistencyFlags) -> St
     } else {
         "avoid face distortion or identity drift".to_string()
     }
+}
+
+fn parse_visual_style_constraint_fragment(fragment: &str) -> Option<VisualStyleConstraintFlags> {
+    let canonical = canonical_negative_fragment(fragment);
+    match canonical.as_str() {
+        "avoid extreme camera angle" => Some(VisualStyleConstraintFlags {
+            extreme_camera_angle: true,
+            ..Default::default()
+        }),
+        "avoid overly tight close-up framing" => Some(VisualStyleConstraintFlags {
+            tight_close_up: true,
+            ..Default::default()
+        }),
+        "avoid extreme camera angle or overly tight close-up framing" => {
+            Some(VisualStyleConstraintFlags {
+                extreme_camera_angle: true,
+                tight_close_up: true,
+                ..Default::default()
+            })
+        }
+        "avoid oppressive or frantic mood" => Some(VisualStyleConstraintFlags {
+            oppressive_or_frantic_mood: true,
+            ..Default::default()
+        }),
+        "avoid overly cold emotional tone" => Some(VisualStyleConstraintFlags {
+            overly_cold_emotional_tone: true,
+            ..Default::default()
+        }),
+        "avoid overly cold, oppressive, or frantic mood" => Some(VisualStyleConstraintFlags {
+            oppressive_or_frantic_mood: true,
+            overly_cold_emotional_tone: true,
+            ..Default::default()
+        }),
+        "avoid flat cold lighting" => Some(VisualStyleConstraintFlags {
+            flat_cold_lighting: true,
+            ..Default::default()
+        }),
+        "avoid harsh backlight silhouette" => Some(VisualStyleConstraintFlags {
+            harsh_backlight_silhouette: true,
+            ..Default::default()
+        }),
+        "avoid flat cold lighting or harsh backlight silhouette" => {
+            Some(VisualStyleConstraintFlags {
+                flat_cold_lighting: true,
+                harsh_backlight_silhouette: true,
+                ..Default::default()
+            })
+        }
+        _ => None,
+    }
+}
+
+fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -> Vec<String> {
+    let mut fragments = Vec::new();
+    if flags.extreme_camera_angle && flags.tight_close_up {
+        fragments.push("avoid extreme camera angle or overly tight close-up framing".to_string());
+    } else if flags.extreme_camera_angle {
+        fragments.push("avoid extreme camera angle".to_string());
+    } else if flags.tight_close_up {
+        fragments.push("avoid overly tight close-up framing".to_string());
+    }
+
+    if flags.oppressive_or_frantic_mood && flags.overly_cold_emotional_tone {
+        fragments.push("avoid overly cold, oppressive, or frantic mood".to_string());
+    } else if flags.oppressive_or_frantic_mood {
+        fragments.push("avoid oppressive or frantic mood".to_string());
+    } else if flags.overly_cold_emotional_tone {
+        fragments.push("avoid overly cold emotional tone".to_string());
+    }
+
+    if flags.flat_cold_lighting && flags.harsh_backlight_silhouette {
+        fragments.push("avoid flat cold lighting or harsh backlight silhouette".to_string());
+    } else if flags.flat_cold_lighting {
+        fragments.push("avoid flat cold lighting".to_string());
+    } else if flags.harsh_backlight_silhouette {
+        fragments.push("avoid harsh backlight silhouette".to_string());
+    }
+
+    fragments
 }
 
 fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
@@ -901,11 +1096,44 @@ fn negative_fragment_is_covered(candidate: &str, existing_fragments: &[String]) 
 }
 
 fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
+    if let (Some(existing_flags), Some(candidate_flags)) = (
+        parse_character_consistency_fragment(existing),
+        parse_character_consistency_fragment(candidate),
+    ) {
+        return character_consistency_flags_cover(existing_flags, candidate_flags);
+    }
+    if let (Some(existing_flags), Some(candidate_flags)) = (
+        parse_visual_style_constraint_fragment(existing),
+        parse_visual_style_constraint_fragment(candidate),
+    ) {
+        return visual_style_constraint_flags_cover(existing_flags, candidate_flags);
+    }
     if negative_fragment_same_family(existing, candidate) {
         return negative_fragment_information_score(existing)
             >= negative_fragment_information_score(candidate);
     }
     negative_fragment_contains(existing, candidate)
+}
+
+fn character_consistency_flags_cover(
+    existing: CharacterConsistencyFlags,
+    candidate: CharacterConsistencyFlags,
+) -> bool {
+    (!candidate.face_distortion || existing.face_distortion)
+        && (!candidate.identity_drift || existing.identity_drift)
+        && (!candidate.costume_inconsistency || existing.costume_inconsistency)
+}
+
+fn visual_style_constraint_flags_cover(
+    existing: VisualStyleConstraintFlags,
+    candidate: VisualStyleConstraintFlags,
+) -> bool {
+    (!candidate.extreme_camera_angle || existing.extreme_camera_angle)
+        && (!candidate.tight_close_up || existing.tight_close_up)
+        && (!candidate.oppressive_or_frantic_mood || existing.oppressive_or_frantic_mood)
+        && (!candidate.overly_cold_emotional_tone || existing.overly_cold_emotional_tone)
+        && (!candidate.flat_cold_lighting || existing.flat_cold_lighting)
+        && (!candidate.harsh_backlight_silhouette || existing.harsh_backlight_silhouette)
 }
 
 fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {
@@ -936,6 +1164,15 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid unnecessary shot changes" | "avoid extra shot changes or wrong framing" => {
             "shot_change_framing"
         }
+        "avoid extreme camera angle"
+        | "avoid overly tight close-up framing"
+        | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
+        "avoid oppressive or frantic mood"
+        | "avoid overly cold emotional tone"
+        | "avoid overly cold, oppressive, or frantic mood" => "mood_tone",
+        "avoid flat cold lighting"
+        | "avoid harsh backlight silhouette"
+        | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
         _ => "",
     }
 }
@@ -985,10 +1222,11 @@ fn infer_video_provider(model: &str) -> &'static str {
 mod tests {
     use super::{
         build_storyboard_negative_prompts, clip_negative_prompt,
-        compact_negative_review_constraints, compact_video_ratio,
-        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
-        merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
-        review_fragment_conflicts_with_selected_style, QualityReviewSeedRow,
+        collect_negative_review_fragments, compact_negative_review_constraints,
+        compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
+        load_auto_negative_prompts, merge_negative_prompts, normalize_upload_sources,
+        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
+        QualityReviewSeedRow,
         VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
@@ -1053,6 +1291,40 @@ mod tests {
     }
 
     #[test]
+    fn collect_negative_review_fragments_prioritizes_storyboard_specific_high_value_constraints() {
+        let fragments = collect_negative_review_fragments(
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: Some("storyboard_mismatch".into()),
+                    comments: None,
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: Some("visual_error".into()),
+                    comments: Some("背景不对而且镜头切换太多".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("character_break".into()),
+                    comments: Some("角色脸不稳定，服装漂移".into()),
+                },
+            ],
+            12,
+        );
+
+        assert_eq!(
+            fragments.first().map(String::as_str),
+            Some("avoid face drift or costume inconsistency")
+        );
+        assert!(fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
+        assert!(fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
+    }
+
+    #[test]
     fn merge_negative_prompts_deduplicates_and_clips() {
         let merged = merge_negative_prompts(
             Some("avoid blur, avoid flicker"),
@@ -1102,6 +1374,24 @@ mod tests {
         );
     }
 
+    #[test]
+    fn merge_negative_prompts_compacts_visual_style_families() {
+        let merged = merge_negative_prompts(
+            Some(
+                "avoid extreme camera angle, avoid oppressive or frantic mood, avoid flat cold lighting",
+            ),
+            Some(
+                "avoid overly tight close-up framing, avoid overly cold emotional tone, avoid harsh backlight silhouette",
+            ),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(
+            merged,
+            "avoid extreme camera angle or overly tight close-up framing, avoid overly cold, oppressive, or frantic mood"
+        );
+    }
+
     #[tokio::test]
     async fn load_auto_negative_prompts_returns_empty_without_storyboards() {
         let pool = PgPool::connect_lazy("postgres://postgres:postgres@localhost/postgres")
@@ -1134,7 +1424,21 @@ mod tests {
 
         assert_eq!(
             merged,
-            "avoid flicker, avoid flat cold lighting, avoid oppressive or frantic mood"
+            "avoid flicker, avoid oppressive or frantic mood, avoid flat cold lighting"
+        );
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_lighting_family_before_budgeting() {
+        let merged = merge_negative_prompts(
+            Some("avoid flicker"),
+            Some("avoid flat cold lighting, avoid harsh backlight silhouette"),
+        )
+        .expect("merged");
+
+        assert_eq!(
+            merged,
+            "avoid flicker, avoid flat cold lighting or harsh backlight silhouette"
         );
     }
 
