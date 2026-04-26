@@ -860,7 +860,7 @@ fn build_project_visual_anchors(
     if let Some(note) = ctx
         .project_director_manual
         .as_deref()
-        .and_then(|value| compact_project_director_note(value, structured_fields))
+        .and_then(|value| compact_project_director_note(value, structured_fields, &style_coverage))
     {
         anchors.push(note);
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
@@ -1023,12 +1023,7 @@ fn build_script_tool_anchors(
     select_script_asset_anchor(scored)
 }
 
-fn score_script_asset_anchor(
-    name: &str,
-    description: &str,
-    primary: &str,
-    secondary: &str,
-) -> i32 {
+fn score_script_asset_anchor(name: &str, description: &str, primary: &str, secondary: &str) -> i32 {
     if name.is_empty() {
         return 0;
     }
@@ -1218,6 +1213,7 @@ fn canonical_prompt_fragment(fragment: &str) -> String {
 fn compact_project_director_note(
     note: &str,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
 ) -> Option<String> {
     let expected_camera = structured_fields.map(|fields| {
         [fields.shot.as_str(), fields.camera_move.as_str()]
@@ -1225,15 +1221,22 @@ fn compact_project_director_note(
             .filter(|part| !part.is_empty())
             .collect::<String>()
     });
-    let mut fragments = Vec::new();
-    for fragment in note
+    let mut scored = Vec::new();
+    for (idx, fragment) in note
         .split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
+        .enumerate()
     {
-        if fragment.is_empty()
-            || fragments.iter().any(|existing| existing == &fragment)
-            || !project_director_fragment_relevant(&fragment)
+        if fragment.is_empty() || !project_director_fragment_relevant(&fragment) {
+            continue;
+        }
+        if scored
+            .iter()
+            .any(|(_, _, existing): &(i32, usize, String)| existing == &fragment)
         {
+            continue;
+        }
+        if prompt_fragment_is_covered(&fragment, prompt_coverage) {
             continue;
         }
         if let (Some(fields), Some(camera)) = (structured_fields, expected_camera.as_deref()) {
@@ -1245,15 +1248,73 @@ fn compact_project_director_note(
                 continue;
             }
         }
-        fragments.push(fragment);
-        if fragments.len() >= 2 {
-            break;
-        }
+        let score = score_project_director_fragment(&fragment, structured_fields);
+        scored.push((score, idx, fragment));
     }
-    if fragments.is_empty() {
+    if scored.is_empty() {
         return None;
     }
+    scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+    let mut fragments = scored.into_iter().take(2).collect::<Vec<_>>();
+    fragments.sort_by(|a, b| a.1.cmp(&b.1).then(a.2.cmp(&b.2)));
+    let fragments = fragments
+        .into_iter()
+        .map(|(_, _, fragment)| fragment)
+        .collect::<Vec<_>>();
     Some(clip_prompt_fragment(&fragments.join(", "), 48))
+}
+
+fn score_project_director_fragment(
+    fragment: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> i32 {
+    let mut score = 0;
+    if ["统一", "连续", "衔接", "延续", "保持"]
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
+    {
+        score += 18;
+    }
+    if [
+        "镜头",
+        "构图",
+        "机位",
+        "运镜",
+        "景别",
+        "frame",
+        "composition",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+    {
+        score += 14;
+    }
+    if [
+        "光", "色", "色调", "质感", "氛围", "情绪", "风格", "tone", "style",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+    {
+        score += 8;
+    }
+    if let Some(fields) = structured_fields {
+        if !fields.shot.is_empty() && fragment.contains(&fields.shot) {
+            score -= 10;
+        }
+        if !fields.camera_move.is_empty() && fragment.contains(&fields.camera_move) {
+            score -= 10;
+        }
+        if !fields.mood.is_empty() && fragment.contains(&fields.mood) {
+            score -= 8;
+        }
+        if !fields.lighting.is_empty() && fragment.contains(&fields.lighting) {
+            score -= 8;
+        }
+        if !fields.setting.is_empty() && fragment.contains(&fields.setting) {
+            score -= 6;
+        }
+    }
+    score - fragment.chars().count() as i32 / 2
 }
 
 struct ScriptAssetPromptAnchor {
@@ -1795,8 +1856,12 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt
-            .contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一; 情绪冷峻压迫."));
+        assert!(
+            prompt.contains(
+                "Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一; 情绪冷峻压迫."
+            ),
+            "{prompt}"
+        );
         assert!(!prompt.contains("镜头稳定跟拍"));
         assert!(!prompt.contains("场景旧宅走廊"));
     }
@@ -1862,9 +1927,61 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."));
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."),
+            "{prompt}"
+        );
         assert!(prompt.contains("Format: vertical 9:16."));
         assert!(!prompt.contains("光影偏冷"));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_director_manual_fragments_already_covered_by_storyboard() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("镜头稳定跟拍，情绪急迫，光影阴天冷光，镜头衔接统一".into()),
+            project_video_ratio: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 镜头衔接统一."));
+        assert!(!prompt.contains("镜头稳定跟拍"));
+        assert!(!prompt.contains("情绪急迫"));
+        assert!(!prompt.contains("光影阴天冷光"));
+    }
+
+    #[test]
+    fn build_video_prompt_prioritizes_high_value_director_manual_fragments() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("场景旧宅走廊，保持低机位压迫感，镜头衔接统一，质感克制粗粝".into()),
+            project_video_ratio: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."));
+        assert!(!prompt.contains("场景旧宅走廊"));
+        assert!(!prompt.contains("质感克制粗粝"));
     }
 
     #[test]
@@ -1889,9 +2006,7 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(
-            prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."),
-        );
+        assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."),);
         assert!(!prompt.contains("路人:灰色外套"));
         assert!(!prompt.contains("Subject: 主角."));
     }
