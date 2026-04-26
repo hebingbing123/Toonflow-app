@@ -608,6 +608,35 @@ fn select_auto_memory_entries(
         .collect::<Vec<_>>()
 }
 
+fn compact_auto_memory_entry_for_scope(entry: &str, current_scope: &ScopeSignature) -> String {
+    if !has_scope(current_scope) {
+        return entry.trim().to_string();
+    }
+
+    let candidate_scope = parse_scope_signature(entry);
+    let scope_matches_exactly = candidate_scope.storyboard_ids == current_scope.storyboard_ids
+        && candidate_scope.storyboard_prompt_seeds == current_scope.storyboard_prompt_seeds
+        && candidate_scope.asset_ids == current_scope.asset_ids
+        && candidate_scope.asset_types == current_scope.asset_types
+        && candidate_scope.focus_sections == current_scope.focus_sections
+        && candidate_scope.novel_ids == current_scope.novel_ids
+        && candidate_scope.relative_script_offset == current_scope.relative_script_offset;
+    if !scope_matches_exactly {
+        return entry.trim().to_string();
+    }
+
+    entry
+        .split(" | ")
+        .map(str::trim)
+        .filter(|segment| {
+            !segment.starts_with("scope=")
+                && !segment.starts_with("promptSeed=")
+                && !segment.starts_with("storyboardPromptSeeds=")
+        })
+        .collect::<Vec<_>>()
+        .join(" | ")
+}
+
 fn script_scope_note(arguments: &Value) -> Option<String> {
     let focus_sections = parse_focus_section_list(arguments, "focusSections");
     let novel_ids = parse_positive_id_list(arguments, "novelIds");
@@ -892,6 +921,7 @@ async fn load_auto_memory_note(
     arguments: &Value,
     prompt_seed_scope: Option<&str>,
 ) -> Result<Option<String>, InvokeError> {
+    let current_scope = scope_signature_from_args(arguments, prompt_seed_scope);
     let rows = sqlx::query_as::<_, AutoMemoryRow>(
         r#"
         SELECT name, content
@@ -919,7 +949,10 @@ async fn load_auto_memory_note(
         arguments,
         prompt_seed_scope,
         filter_auto_scope_memory_rows(rows),
-    );
+    )
+    .into_iter()
+    .map(|entry| compact_auto_memory_entry_for_scope(&entry, &current_scope))
+    .collect::<Vec<_>>();
     if rows.is_empty() {
         return Ok(None);
     }
@@ -1194,10 +1227,11 @@ pub async fn invoke_sub_agent_tool(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, filter_auto_scope_memory_rows,
-        format_storyboard_prompt_seed_scope, parse_review_summary, parse_scope_signature,
-        parse_storyboard_prompt_seed_scope, parse_tag_attributes, scope_signature_from_args,
-        select_auto_memory_entries, sub_agent_prompt_from_args, AutoMemoryRow,
+        build_auto_memory_snapshot, compact_auto_memory_entry_for_scope,
+        filter_auto_scope_memory_rows, format_storyboard_prompt_seed_scope, parse_review_summary,
+        parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
+        scope_signature_from_args, select_auto_memory_entries, sub_agent_prompt_from_args,
+        AutoMemoryRow,
     };
     use serde_json::json;
 
@@ -1505,5 +1539,45 @@ mod tests {
         assert_eq!(rows.len(), 1);
         assert!(rows[0].contains("storyboardIds=12"));
         assert!(rows[0].contains("promptSeed=seed-12-current"));
+    }
+
+    #[test]
+    fn compact_auto_memory_entry_for_scope_drops_redundant_scope_and_seed_prefix() {
+        let current_scope = scope_signature_from_args(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+        );
+
+        let compacted = compact_auto_memory_entry_for_scope(
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=当前镜头角色站位",
+            &current_scope,
+        );
+
+        assert_eq!(
+            compacted,
+            "tool=run_sub_agent_storyboard_panel | summary=当前镜头角色站位"
+        );
+    }
+
+    #[test]
+    fn compact_auto_memory_entry_for_scope_keeps_scope_when_candidate_differs() {
+        let current_scope = scope_signature_from_args(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+        );
+
+        let compacted = compact_auto_memory_entry_for_scope(
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12,14 | storyboardPromptSeeds=12:seed-12-current,14:seed-14-current | summary=保持当前镜头角色站位",
+            &current_scope,
+        );
+
+        assert_eq!(
+            compacted,
+            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12,14 | storyboardPromptSeeds=12:seed-12-current,14:seed-14-current | summary=保持当前镜头角色站位"
+        );
     }
 }
