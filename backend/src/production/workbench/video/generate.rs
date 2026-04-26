@@ -627,6 +627,10 @@ fn build_storyboard_negative_prompts(
                 prioritized_style_note.as_deref(),
                 storyboard_row,
             );
+            let review_fragments = compact_review_fragments_against_rejected_memory(
+                review_fragments,
+                &rejected_fragments,
+            );
             let review_prompt =
                 merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
             (storyboard_id, review_prompt)
@@ -719,6 +723,16 @@ fn filter_conflicting_review_fragments(
             )
         })
         .filter(|fragment| !review_fragment_is_irrelevant_to_storyboard(fragment, storyboard_row))
+        .collect()
+}
+
+fn compact_review_fragments_against_rejected_memory(
+    review_fragments: Vec<String>,
+    rejected_fragments: &[String],
+) -> Vec<String> {
+    review_fragments
+        .into_iter()
+        .filter(|fragment| !negative_fragment_is_covered(fragment, rejected_fragments))
         .collect()
 }
 
@@ -1640,9 +1654,10 @@ mod tests {
     use super::{
         build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
         compact_negative_constraint_against_storyboard_style, compact_negative_review_constraints,
-        compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
-        load_auto_negative_prompts, map_bad_case_category_with_comments, merge_negative_prompts,
-        negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
+        compact_review_fragments_against_rejected_memory, compact_video_ratio,
+        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
+        map_bad_case_category_with_comments, merge_negative_prompts, negative_review_fetch_limit,
+        normalize_upload_sources, pacing_issue_category_is_redundant,
         quality_review_row_matches_storyboard, rejected_negative_memory_fetch_limit,
         resolve_negative_filter_style_note, review_fragment_conflicts_with_selected_style,
         review_fragment_is_irrelevant_to_storyboard, selected_memory_fetch_limit,
@@ -2257,6 +2272,59 @@ mod tests {
         assert!(prompt.contains("avoid oppressive or frantic mood"));
         assert!(prompt.contains("avoid flat cold lighting"));
         assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS + 3);
+    }
+
+    #[test]
+    fn compact_review_fragments_against_rejected_memory_drops_covered_global_tail_only() {
+        let review_fragments = vec![
+            "avoid flicker".to_string(),
+            "avoid harsh backlight silhouette".to_string(),
+            "avoid face drift or costume inconsistency".to_string(),
+        ];
+        let rejected_fragments = vec![
+            "avoid flicker or motion jitter".to_string(),
+            "avoid flat cold lighting".to_string(),
+        ];
+
+        assert_eq!(
+            compact_review_fragments_against_rejected_memory(review_fragments, &rejected_fragments),
+            vec![
+                "avoid harsh backlight silhouette".to_string(),
+                "avoid face drift or costume inconsistency".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_global_tail_only_when_it_adds_new_axis() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: None,
+                    comments: Some("闪烁明显".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: None,
+                    comments: Some("逆光太重".into()),
+                },
+            ],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=3 | avoid=avoid flicker or motion jitter, avoid flat cold lighting".into(),
+            }],
+            &[],
+            &HashMap::new(),
+        );
+
+        assert_eq!(
+            prompts.get(&12).and_then(|value| value.as_deref()),
+            Some("avoid flicker or motion jitter, avoid flat cold lighting or harsh backlight silhouette")
+        );
     }
 
     #[test]
