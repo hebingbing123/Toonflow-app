@@ -1182,7 +1182,8 @@ async fn replace_project_summary_memory(
 mod tests {
     use super::{
         build_project_video_style_memory, build_rejected_video_negative_memory,
-        build_script_video_style_memory, build_selected_video_memory, clear_selected_video_memory,
+        build_script_video_style_memory, build_selected_video_memory,
+        clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_video_continuity_note, parse_structured_storyboard_description,
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
