@@ -927,8 +927,16 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         .and_then(parse_structured_storyboard_description)
     {
         let mut fragments = Vec::new();
-        if !fields.subject.is_empty() {
-            fragments.push(clip_prompt_fragment(&fields.subject, 20));
+        let subject = compact_selected_memory_subject(&fields.subject, &fields.action);
+        let setting = compact_selected_memory_setting(
+            &fields.setting,
+            subject.as_deref(),
+            Some(fields.action.as_str()),
+        );
+        let action = compact_selected_memory_action(&fields.action, subject.as_deref());
+
+        if let Some(subject) = subject {
+            fragments.push(clip_prompt_fragment(&subject, 20));
         }
         let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
             .into_iter()
@@ -938,8 +946,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         if !camera.is_empty() {
             fragments.push(format!("镜头{}", clip_prompt_fragment(&camera, 14)));
         }
-        if !fields.action.is_empty() {
-            fragments.push(clip_prompt_fragment(&fields.action, 18));
+        if let Some(action) = action {
+            fragments.push(clip_prompt_fragment(&action, 18));
         }
         if !fields.mood.is_empty() {
             fragments.push(format!("情绪{}", clip_prompt_fragment(&fields.mood, 12)));
@@ -950,8 +958,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
                 clip_prompt_fragment(&fields.lighting, 14)
             ));
         }
-        if !fields.setting.is_empty() {
-            fragments.push(format!("场景{}", clip_prompt_fragment(&fields.setting, 12)));
+        if let Some(setting) = setting {
+            fragments.push(format!("场景{}", clip_prompt_fragment(&setting, 12)));
         }
         let note = fragments.join("，");
         if !note.is_empty() {
@@ -974,6 +982,56 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
                 .filter(|text| !text.is_empty())
                 .map(|text| clip_prompt_fragment(&text, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
         })
+}
+
+fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String> {
+    let subject = normalize_prompt_text(subject);
+    if subject.is_empty() {
+        return None;
+    }
+    if prompt_fragments_substantially_overlap(&subject, action) {
+        return None;
+    }
+    Some(subject)
+}
+
+fn compact_selected_memory_action(action: &str, subject: Option<&str>) -> Option<String> {
+    let action = normalize_prompt_text(action);
+    if action.is_empty() {
+        return None;
+    }
+    if subject.is_some_and(|value| prompt_fragments_substantially_overlap(value, &action)) {
+        return None;
+    }
+    Some(action)
+}
+
+fn compact_selected_memory_setting(
+    setting: &str,
+    subject: Option<&str>,
+    action: Option<&str>,
+) -> Option<String> {
+    let setting = normalize_prompt_text(setting);
+    if setting.is_empty() {
+        return None;
+    }
+    if subject.is_some_and(|value| prompt_fragments_substantially_overlap(value, &setting))
+        || action.is_some_and(|value| prompt_fragments_substantially_overlap(value, &setting))
+    {
+        return None;
+    }
+    Some(setting)
+}
+
+fn prompt_fragments_substantially_overlap(lhs: &str, rhs: &str) -> bool {
+    let lhs = normalize_prompt_text(lhs);
+    let rhs = normalize_prompt_text(rhs);
+    if lhs.is_empty() || rhs.is_empty() {
+        return false;
+    }
+    lhs == rhs
+        || (lhs.chars().count() >= 6 && rhs.contains(&lhs))
+        || (rhs.chars().count() >= 6 && lhs.contains(&rhs))
 }
 
 pub(crate) fn storyboard_prompt_seed(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -1142,7 +1200,10 @@ pub(crate) fn compact_video_style_prompt_note(note: &str) -> Option<String> {
             }
             fragments.push(compacted);
         } else if fragment.starts_with("镜头") && fallback_shot.is_none() {
-            fallback_shot = Some(clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS));
+            fallback_shot = Some(clip_prompt_fragment(
+                &fragment,
+                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+            ));
         }
     }
 
@@ -1163,7 +1224,10 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
         .iter()
         .any(|prefix| *prefix != "镜头" && fragment.starts_with(prefix))
     {
-        return Some(clip_prompt_fragment(fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS));
+        return Some(clip_prompt_fragment(
+            fragment,
+            VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+        ));
     }
     None
 }
@@ -1332,9 +1396,7 @@ fn extract_style_keywords<'a>(
     let value = fragment.strip_prefix(prefix).unwrap_or(fragment);
     let mut matched = Vec::new();
     for keyword in keywords {
-        if !value.contains(keyword)
-            || matched.iter().any(|existing: &&str| existing == keyword)
-        {
+        if !value.contains(keyword) || matched.iter().any(|existing: &&str| existing == keyword) {
             continue;
         }
         if matched
@@ -1623,6 +1685,24 @@ mod tests {
         assert!(content.contains("情绪急迫"));
         assert!(content.contains("场景旧宅走廊"));
         assert!(content.contains("duration=5s"));
+    }
+
+    #[test]
+    fn build_selected_video_memory_drops_duplicate_subject_and_scene_fragments() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角在旧宅走廊尽头停步回头".into()),
+                video_desc: Some("（主角在旧宅走廊尽头停步回头、旧宅走廊尽头、主角、5秒、中景、稳定跟拍、主角在旧宅走廊尽头停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(!content.contains("note=主角在旧宅走廊尽头停步回头"));
+        assert!(content.contains("note=镜头中景稳定跟拍"));
+        assert!(!content.contains("场景旧宅走廊尽头"));
+        assert!(content.contains("情绪压抑"));
     }
 
     #[test]
@@ -1994,19 +2074,23 @@ mod tests {
     }
 
     #[test]
-    fn build_script_video_style_memory_drops_recurring_local_framing_without_stable_shot_language() {
+    fn build_script_video_style_memory_drops_recurring_local_framing_without_stable_shot_language()
+    {
         let summary = build_script_video_style_memory(&[
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=9 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=...".into(),
+                content: "storyboardIds=9 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=..."
+                    .into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=10 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                content: "storyboardIds=10 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=..."
+                    .into(),
             },
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content: "storyboardIds=11 | style=镜头近景，情绪紧张压迫，光影阴天冷光 | note=...".into(),
+                content: "storyboardIds=11 | style=镜头近景，情绪紧张压迫，光影阴天冷光 | note=..."
+                    .into(),
             },
         ])
         .expect("summary");
@@ -2077,9 +2161,8 @@ mod tests {
         let notes = select_selected_video_memory_notes(
             &[AgentMemoryRow {
                 name: "selected_video_memory".into(),
-                content:
-                    "storyboardIds=12 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=..."
-                        .into(),
+                content: "storyboardIds=12 | style=镜头近景，情绪冷峻压迫，光影阴天冷光 | note=..."
+                    .into(),
             }],
             12,
             None,
