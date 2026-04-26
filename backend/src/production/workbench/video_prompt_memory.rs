@@ -153,9 +153,6 @@ pub(crate) fn build_selected_video_memory(
     if let Some(note) = residual_note {
         parts.push(format!("note={note}"));
     }
-    if let Some(duration) = resolve_duration_label(row) {
-        parts.push(format!("duration={duration}"));
-    }
     Some(parts.join(" | "))
 }
 
@@ -1566,7 +1563,8 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
 }
 
 fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String> {
-    let subject = normalize_prompt_text(subject);
+    let subject = trim_selected_memory_subject_action_overlap(subject, action)
+        .unwrap_or_else(|| normalize_prompt_text(subject));
     if subject.is_empty() {
         return None;
     }
@@ -1574,6 +1572,43 @@ fn compact_selected_memory_subject(subject: &str, action: &str) -> Option<String
         return None;
     }
     Some(subject)
+}
+
+fn trim_selected_memory_subject_action_overlap(subject: &str, action: &str) -> Option<String> {
+    let subject = normalize_prompt_text(subject);
+    let action = normalize_prompt_text(action);
+    if subject.is_empty() || action.is_empty() {
+        return None;
+    }
+
+    let Some(identity_tail) = strip_selected_memory_subject_role_prefix(&subject) else {
+        return None;
+    };
+    if identity_tail.chars().count() < 3 {
+        return None;
+    }
+
+    for overlap_len in (3..=identity_tail.chars().count().min(12)).rev() {
+        let overlap = identity_tail.chars().take(overlap_len).collect::<String>();
+        if !action.contains(&overlap) {
+            continue;
+        }
+        let Some(trimmed) = subject.strip_suffix(&overlap) else {
+            continue;
+        };
+        let trimmed = normalize_prompt_text(trimmed)
+            .trim_end_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(ch, ':' | '：' | ';' | '；' | ',' | '，' | '/' | '／' | '、')
+            })
+            .to_string();
+        if trimmed.chars().count() < 2 || trimmed == subject {
+            continue;
+        }
+        return Some(trimmed);
+    }
+
+    None
 }
 
 fn merge_selected_memory_subject_action(
@@ -2041,20 +2076,6 @@ pub(crate) fn storyboard_prompt_seed(row: &StoryboardPromptSeedRow) -> Option<St
     hasher.update(source.as_bytes());
     let hex = format!("{:x}", hasher.finalize());
     Some(hex[..12].to_string())
-}
-
-fn resolve_duration_label(row: &StoryboardPromptSeedRow) -> Option<String> {
-    row.video_desc
-        .as_deref()
-        .and_then(parse_structured_storyboard_description)
-        .and_then(|fields| fields.duration_seconds)
-        .map(|value| format!("{value}s"))
-        .or_else(|| {
-            row.duration
-                .as_deref()
-                .and_then(parse_positive_int)
-                .map(|value| format!("{value}s"))
-        })
 }
 
 fn memory_matches_storyboard(content: &str, storyboard_numeric_id: i32) -> bool {
@@ -3075,10 +3096,11 @@ mod tests {
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
-        compact_selected_memory_setting, compact_video_continuity_note,
-        compact_video_style_prompt_note, merge_rejected_video_negative_memory,
-        merge_selected_memory_subject_action, parse_structured_storyboard_description,
-        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        compact_selected_memory_setting, compact_selected_memory_subject,
+        compact_video_continuity_note, compact_video_style_prompt_note,
+        merge_rejected_video_negative_memory, merge_selected_memory_subject_action,
+        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
+        select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
@@ -3122,7 +3144,7 @@ mod tests {
         assert!(!content.contains("note=主角冲出旧宅，镜头中景稳定跟拍"));
         assert!(!content.contains("note=主角冲出旧宅，快步推门冲出，情绪急迫"));
         assert!(!content.contains("场景旧宅走廊"));
-        assert!(content.contains("duration=5s"));
+        assert!(!content.contains("duration="));
     }
 
     #[test]
@@ -3137,8 +3159,9 @@ mod tests {
         )
         .expect("content");
 
-        assert!(content.contains("note=主角在旧宅走廊尽头停步回头"));
+        assert!(content.contains("note=主角，停步回头"));
         assert!(!content.contains("note=主角在旧宅走廊尽头停步回头，镜头中景稳定跟拍"));
+        assert!(!content.contains("note=主角在旧宅走廊尽头停步回头"));
         assert!(!content.contains("场景旧宅走廊尽头"));
         assert!(content.contains("情绪压抑"));
     }
@@ -3159,6 +3182,28 @@ mod tests {
         assert!(!content.contains("女主快步推门冲出"), "{content}");
         assert!(
             !content.contains("note=女主冲出旧宅，快步推门冲出"),
+            "{content}"
+        );
+    }
+
+    #[test]
+    fn build_selected_video_memory_trims_subject_action_overlap_when_identity_remains() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角冲出旧宅".into()),
+                video_desc: Some("（主角冲出旧宅、旧宅门厅、主角、5秒、中景、稳定跟拍、快步推门冲出旧宅后回望、急迫、阴天冷光、无台词、门响脚步声、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("note=主角，推门冲出旧宅后回望"),
+            "{content}"
+        );
+        assert!(
+            !content.contains("note=主角冲出旧宅，快步推门冲出旧宅后回望"),
             "{content}"
         );
     }
@@ -3246,6 +3291,14 @@ mod tests {
             .expect("merged");
 
         assert_eq!(merged, "主角推门冲出旧宅");
+    }
+
+    #[test]
+    fn compact_selected_memory_subject_trims_shared_action_overlap() {
+        let subject = compact_selected_memory_subject("主角冲出旧宅", "快步推门冲出旧宅后回望")
+            .expect("subject");
+
+        assert_eq!(subject, "主角");
     }
 
     #[test]
