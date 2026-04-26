@@ -736,12 +736,114 @@ fn truncate_chars(text: &str, max_chars: usize) -> String {
     format!("{truncated}…")
 }
 
-fn summarize_result_excerpt(text: &str) -> String {
+fn summarize_result_excerpt(text: &str) -> Option<String> {
     let normalized = normalize_whitespace(text);
     if normalized.is_empty() {
-        return "本轮执行完成。".to_string();
+        return None;
     }
-    truncate_chars(&normalized, 180)
+
+    let compacted = normalized
+        .split(['。', '！', '？', '；'])
+        .map(compact_auto_memory_result_fragment)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>()
+        .join("，");
+    let compacted = normalize_whitespace(compacted.trim());
+    (!compacted.is_empty()).then(|| truncate_chars(&compacted, 180))
+}
+
+fn compact_auto_memory_result_fragment(fragment: &str) -> String {
+    let mut compacted = normalize_whitespace(
+        fragment.trim_matches(|ch: char| ch.is_whitespace() || "，,。；;：:!！?？".contains(ch)),
+    );
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    for prefix in [
+        "本轮执行完成",
+        "本轮已完成",
+        "执行完成",
+        "生成完成",
+        "读取完成",
+        "写入完成",
+        "同步完成",
+        "更新完成",
+        "检查完成",
+        "核对完成",
+        "已完成",
+        "已生成",
+        "已读取 flow",
+        "已读取 Flow",
+        "已读取",
+        "已写入工作区",
+        "已写入",
+        "已同步",
+        "已更新",
+        "已检查",
+        "已核对",
+    ] {
+        if let Some(stripped) = compacted.strip_prefix(prefix) {
+            compacted =
+                normalize_whitespace(stripped.trim_matches(|ch: char| {
+                    ch.is_whitespace() || "，,。；;：:!！?？".contains(ch)
+                }));
+            break;
+        }
+    }
+
+    if is_low_signal_auto_memory_result_fragment(&compacted) {
+        return String::new();
+    }
+
+    compacted
+}
+
+fn is_low_signal_auto_memory_result_fragment(fragment: &str) -> bool {
+    if fragment.is_empty() {
+        return true;
+    }
+
+    let normalized = fragment
+        .chars()
+        .filter(|ch| !ch.is_whitespace())
+        .collect::<String>()
+        .to_ascii_lowercase();
+
+    matches!(
+        normalized.as_str(),
+        "完成"
+            | "完成了"
+            | "执行完成"
+            | "本轮执行完成"
+            | "已完成"
+            | "已生成"
+            | "已读取"
+            | "已读取flow"
+            | "已写入"
+            | "已写入工作区"
+            | "已同步"
+            | "已更新"
+            | "已检查"
+            | "已核对"
+            | "结果"
+            | "内容"
+            | "工作区"
+            | "flow"
+            | "分镜"
+            | "分镜图"
+            | "分镜表"
+            | "剧本"
+            | "脚本"
+            | "提示词"
+            | "素材"
+            | "资产"
+            | "导演规划"
+            | "storyboard"
+            | "storyboardtable"
+            | "script"
+            | "scriptplan"
+    )
 }
 
 fn compact_exact_scope_auto_memory_entry(entry: &str) -> String {
@@ -938,7 +1040,7 @@ fn build_auto_memory_snapshot(
     result_text: &str,
     review: Option<&Value>,
     prompt_seed_scope: Option<&str>,
-) -> String {
+) -> Option<String> {
     let mut parts = vec![format!("tool={tool_name}")];
     if let Some(scope) = scope_summary(arguments) {
         parts.push(format!("scope={scope}"));
@@ -974,10 +1076,11 @@ fn build_auto_memory_snapshot(
             parts.push(format!("review={}", review_parts.join("; ")));
         }
     } else {
-        parts.push(format!("result={}", summarize_result_excerpt(result_text)));
+        let summary = summarize_result_excerpt(result_text)?;
+        parts.push(format!("result={summary}"));
     }
 
-    truncate_chars(&parts.join(" | "), AUTO_MEMORY_MAX_CHARS)
+    Some(truncate_chars(&parts.join(" | "), AUTO_MEMORY_MAX_CHARS))
 }
 
 fn format_storyboard_prompt_seed_scope(
@@ -1341,22 +1444,23 @@ pub async fn invoke_sub_agent_tool(
         ctx.project_numeric_id,
         agent_memory_type_for_tool(tool_name),
     ) {
-        let snapshot = build_auto_memory_snapshot(
+        if let Some(snapshot) = build_auto_memory_snapshot(
             tool_name,
             arguments,
             &text,
             review.as_ref(),
             prompt_seed_scope.as_deref(),
-        );
-        persist_auto_memory_snapshot(
-            pool,
-            ctx.user_id,
-            project_numeric_id,
-            ctx.script_numeric_id,
-            agent_type,
-            &snapshot,
-        )
-        .await?;
+        ) {
+            persist_auto_memory_snapshot(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                agent_type,
+                &snapshot,
+            )
+            .await?;
+        }
     }
 
     Ok(json!({
@@ -1489,7 +1593,8 @@ mod tests {
                 "assetIds": "7,8"
             })),
             None,
-        );
+        )
+        .expect("snapshot");
 
         assert!(snapshot.contains("tool=run_sub_agent_production_supervision"));
         assert!(snapshot.contains("scope=storyboardIds=3,9; assetTypes=role,scene"));
@@ -1505,7 +1610,8 @@ mod tests {
             "  第一行结果  \n\n第二行结果  ",
             None,
             None,
-        );
+        )
+        .expect("snapshot");
 
         assert!(snapshot.contains("tool=run_sub_agent_storyboard_table"));
         assert!(snapshot.contains("scope=assetIds=1,5"));
@@ -1529,7 +1635,8 @@ mod tests {
             "补齐分镜连续性",
             None,
             Some("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current"),
-        );
+        )
+        .expect("snapshot");
 
         assert!(snapshot.contains("scope=storyboardIds=12,14"));
         assert!(snapshot.contains("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current"));
@@ -1770,5 +1877,33 @@ mod tests {
                 "panel: 补充环境光位".to_string()
             ]
         );
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_drops_low_signal_plain_result() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_storyboard_gen",
+            &json!({"storyboardIds": [12]}),
+            "本轮执行完成。已读取 flow。已写入工作区。",
+            None,
+            None,
+        );
+
+        assert!(snapshot.is_none());
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_strips_generic_result_prefix_and_keeps_constraint() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_storyboard_gen",
+            &json!({"storyboardIds": [12]}),
+            "已生成主角冲向巷口，保持镜头方向连续。",
+            None,
+            None,
+        )
+        .expect("snapshot");
+
+        assert!(snapshot.contains("result=主角冲向巷口，保持镜头方向连续"));
+        assert!(!snapshot.contains("已生成"));
     }
 }
