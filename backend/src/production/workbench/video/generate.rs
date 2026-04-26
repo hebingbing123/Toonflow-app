@@ -540,15 +540,22 @@ fn build_storyboard_negative_prompts(
                     .or(script_style_note.as_deref())
                     .or(project_style_note.as_deref()),
             );
-            let rejected_fragments = split_negative_prompt_fragments(
-                select_rejected_video_negative_memory_notes(
-                    rejected_rows,
-                    storyboard_id,
-                    prompt_seed_map.get(&storyboard_id).map(String::as_str),
-                )
-                .into_iter()
-                .next()
-                .as_deref(),
+            let prioritized_style_note = selected_style_note
+                .as_deref()
+                .or(script_style_note.as_deref())
+                .or(project_style_note.as_deref());
+            let rejected_fragments = filter_conflicting_review_fragments(
+                split_negative_prompt_fragments(
+                    select_rejected_video_negative_memory_notes(
+                        rejected_rows,
+                        storyboard_id,
+                        prompt_seed_map.get(&storyboard_id).map(String::as_str),
+                    )
+                    .into_iter()
+                    .next()
+                    .as_deref(),
+                ),
+                prioritized_style_note,
             );
             let review_prompt =
                 merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
@@ -1156,6 +1163,57 @@ mod tests {
 
         let prompt = prompts.get(&12).and_then(|value| value.as_deref());
         assert_eq!(prompt, None);
+    }
+
+    #[test]
+    fn script_video_style_summary_can_suppress_conflicting_rejected_fragments() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood"
+                        .into(),
+            }],
+            &[AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content:
+                    "style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"
+                        .into(),
+            }],
+            &HashMap::new(),
+        );
+
+        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        assert_eq!(prompt, None);
+    }
+
+    #[test]
+    fn rejected_fragments_keep_non_conflicting_constraints_under_style_memory() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting, avoid face drift or costume inconsistency"
+                        .into(),
+            }],
+            &[AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content:
+                    "style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"
+                        .into(),
+            }],
+            &HashMap::new(),
+        );
+
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+        assert_eq!(prompt, "avoid face drift or costume inconsistency");
     }
 
     #[test]
