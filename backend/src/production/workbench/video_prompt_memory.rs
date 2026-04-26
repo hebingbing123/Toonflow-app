@@ -2394,16 +2394,78 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
     if fragment.starts_with("镜头") {
         return compact_prompt_shot_style_fragment(fragment);
     }
-    if STYLE_PROMPT_PREFIXES
-        .iter()
-        .any(|prefix| *prefix != "镜头" && fragment.starts_with(prefix))
-    {
-        return Some(clip_prompt_fragment(
+    if fragment.starts_with("情绪") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
             fragment,
-            VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+            "情绪",
+            &MOOD_STYLE_KEYWORDS,
+        ));
+    }
+    if fragment.starts_with("光影") {
+        return Some(compact_prefixed_style_fragment_with_keywords(
+            fragment,
+            "光影",
+            &LIGHTING_STYLE_KEYWORDS,
         ));
     }
     None
+}
+
+fn compact_prefixed_style_fragment_with_keywords(
+    fragment: &str,
+    prefix: &str,
+    keywords: &[&'static str],
+) -> String {
+    let body = fragment.strip_prefix(prefix).unwrap_or(fragment).trim();
+    if body.is_empty() {
+        return clip_prompt_fragment(fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+    }
+
+    let compacted = compact_style_body_by_keywords(body, keywords)
+        .filter(|value| value != body)
+        .map(|value| format!("{prefix}{value}"))
+        .unwrap_or_else(|| fragment.to_string());
+    clip_prompt_fragment(&compacted, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+}
+
+fn compact_style_body_by_keywords(body: &str, keywords: &[&'static str]) -> Option<String> {
+    let mut matches = keywords
+        .iter()
+        .enumerate()
+        .filter_map(|(priority, keyword)| {
+            body.find(keyword)
+                .map(|start| (start, start + keyword.len(), keyword, priority))
+        })
+        .collect::<Vec<_>>();
+    if matches.is_empty() {
+        return None;
+    }
+    matches.sort_by(|a, b| {
+        a.0.cmp(&b.0)
+            .then((b.1 - b.0).cmp(&(a.1 - a.0)))
+            .then(a.3.cmp(&b.3))
+    });
+
+    let mut covered = vec![false; body.len()];
+    let mut selected = Vec::new();
+    let mut covered_len = 0usize;
+
+    for (start, end, keyword, _) in matches {
+        if (start..end).any(|idx| covered[idx]) {
+            continue;
+        }
+        for idx in start..end {
+            covered[idx] = true;
+        }
+        covered_len += end - start;
+        selected.push(*keyword);
+    }
+
+    if selected.is_empty() || covered_len * 2 < body.len() {
+        return None;
+    }
+
+    Some(selected.join(""))
 }
 
 fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
@@ -2847,6 +2909,7 @@ mod tests {
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
         compact_selected_memory_setting, compact_video_continuity_note,
+        compact_video_style_prompt_note,
         merge_rejected_video_negative_memory, parse_structured_storyboard_description,
         rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
@@ -3536,6 +3599,23 @@ mod tests {
         assert!(summary.contains("光影冷调逆光"));
         assert!(!summary.contains("场景旧宅走廊"));
         assert!(!summary.contains("女主"));
+    }
+
+    #[test]
+    fn compact_video_style_prompt_note_trims_keyword_covered_mood_and_lighting_suffix_noise() {
+        let note = compact_video_style_prompt_note("情绪紧张压迫感，光影冷调逆光颗粒")
+            .expect("style note");
+
+        assert_eq!(note, "情绪紧张压迫，光影冷调逆光");
+    }
+
+    #[test]
+    fn compact_video_style_prompt_note_keeps_partial_lighting_context_when_keyword_coverage_is_weak(
+    ) {
+        let note =
+            compact_video_style_prompt_note("情绪克制，光影潮湿路灯暖光").expect("style note");
+
+        assert_eq!(note, "情绪克制，光影潮湿路灯暖光");
     }
 
     #[test]

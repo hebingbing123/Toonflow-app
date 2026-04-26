@@ -5133,10 +5133,7 @@ mod tests {
             "avoid harsh backlight silhouette".to_string(),
         ]);
 
-        assert_eq!(
-            note,
-            Some("avoid harsh backlight silhouette".to_string())
-        );
+        assert_eq!(note, Some("avoid harsh backlight silhouette".to_string()));
     }
 
     #[test]
