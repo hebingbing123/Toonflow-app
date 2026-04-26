@@ -131,6 +131,7 @@ struct VideoPromptContext {
     script_role_anchors: Vec<String>,
     script_scene_anchors: Vec<String>,
     script_tool_anchors: Vec<String>,
+    memory_style_notes: Vec<String>,
     continuity_notes: Vec<String>,
 }
 
@@ -181,7 +182,7 @@ async fn load_video_prompt_context(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    let continuity_notes =
+    let (memory_style_notes, continuity_notes) =
         load_video_prompt_memory_notes(pool, user_id, project_id, script_id, storyboard_numeric_id)
             .await?;
     let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
@@ -246,6 +247,7 @@ async fn load_video_prompt_context(
         script_role_anchors,
         script_scene_anchors,
         script_tool_anchors,
+        memory_style_notes,
         continuity_notes,
     }))
 }
@@ -256,7 +258,7 @@ async fn load_video_prompt_memory_notes(
     project_numeric_id: i32,
     script_numeric_id: i32,
     storyboard_numeric_id: i32,
-) -> Result<Vec<String>, ApiError> {
+) -> Result<(Vec<String>, Vec<String>), ApiError> {
     let rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
@@ -280,13 +282,13 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    Ok(select_prioritized_video_prompt_memory_notes(
-        &rows,
-        storyboard_numeric_id,
+    Ok((
+        select_prioritized_video_style_notes(&rows, storyboard_numeric_id),
+        select_video_prompt_memory_notes(&rows, storyboard_numeric_id),
     ))
 }
 
-fn select_prioritized_video_prompt_memory_notes(
+fn select_prioritized_video_style_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
 ) -> Vec<String> {
@@ -318,7 +320,7 @@ fn select_prioritized_video_prompt_memory_notes(
     if !notes.is_empty() {
         return compact_unique_memory_notes(notes);
     }
-    select_video_prompt_memory_notes(rows, storyboard_numeric_id)
+    Vec::new()
 }
 
 fn append_unique_notes(target: &mut Vec<String>, candidate_notes: Vec<String>, limit: usize) {
@@ -567,6 +569,14 @@ fn build_project_visual_anchors(
         .and_then(|value| compact_project_director_note(value, structured_fields))
     {
         anchors.push(note);
+    }
+    for note in &ctx.memory_style_notes {
+        let note = normalize_prompt_text(note);
+        if note.is_empty() || anchors.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        anchors.push(note);
+        break;
     }
     anchors
 }
@@ -1143,8 +1153,7 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
-        select_prioritized_video_prompt_memory_notes, select_video_prompt_memory_notes,
-        VideoPromptContext,
+        select_prioritized_video_style_notes, select_video_prompt_memory_notes, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
@@ -1214,6 +1223,7 @@ mod tests {
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: vec!["保持上一镜头已确认的冷调压迫感".into()],
         };
         let prompt = build_video_prompt(None, None, Some(&context));
@@ -1235,6 +1245,7 @@ mod tests {
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊".into()],
         };
 
@@ -1256,6 +1267,7 @@ mod tests {
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，保持上一镜头压迫感".into()],
         };
 
@@ -1263,6 +1275,29 @@ mod tests {
 
         assert!(prompt.contains("Continuity notes: 保持上一镜头压迫感."));
         assert!(!prompt.contains("镜头中景稳定跟拍，情绪急迫"));
+    }
+
+    #[test]
+    fn build_video_prompt_promotes_memory_style_notes_into_style_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            project_video_ratio: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头低机位压迫感，情绪冷色压迫感".into()],
+            continuity_notes: vec!["保持上一镜头走位连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 镜头低机位压迫感，情绪冷色压迫感."));
+        assert!(prompt.contains("Continuity notes: 保持上一镜头走位连续."));
+        assert!(!prompt.contains("Continuity notes: 镜头低机位压迫感"));
     }
 
     #[test]
@@ -1277,6 +1312,7 @@ mod tests {
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: Vec::new(),
         };
         assert_eq!(resolve_video_prompt_duration(None, None, Some(&context)), 7);
@@ -1294,6 +1330,7 @@ mod tests {
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: Vec::new(),
         };
 
@@ -1319,6 +1356,7 @@ mod tests {
             ],
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
             continuity_notes: Vec::new(),
         };
 
@@ -1346,6 +1384,7 @@ mod tests {
                 "青铜匕首: 刀身旧磨损，寒光克制".into(),
                 "雨伞: 黑伞".into(),
             ],
+            memory_style_notes: Vec::new(),
             continuity_notes: Vec::new(),
         };
 
@@ -1369,6 +1408,7 @@ mod tests {
             script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
             script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
             script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
+            memory_style_notes: Vec::new(),
             continuity_notes: vec![
                 "黑色风衣，冷色长廊，刀身旧磨损，保持低机位压迫感，保留上一镜头走位连续"
                     .into(),
@@ -1493,7 +1533,7 @@ mod tests {
         ];
 
         assert_eq!(
-            select_prioritized_video_prompt_memory_notes(&rows, 12),
+            select_prioritized_video_style_notes(&rows, 12),
             vec!["镜头稳定近景，情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".to_string()]
         );
     }
@@ -1512,7 +1552,7 @@ mod tests {
         ];
 
         assert_eq!(
-            select_prioritized_video_prompt_memory_notes(&rows, 12),
+            select_prioritized_video_style_notes(&rows, 12),
             vec!["镜头低机位压迫感，情绪克制".to_string()]
         );
     }
