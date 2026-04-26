@@ -856,11 +856,9 @@ fn build_video_prompt(
                     clip_prompt_fragment(&fields.dialogue, 60)
                 ));
             }
-            if !fields.sound.is_empty() && !looks_like_silence(&fields.sound) {
-                clauses.push(format!(
-                    "Sound: {}.",
-                    clip_prompt_fragment(&fields.sound, 44)
-                ));
+            if let Some(sound) = compact_sound_clause(&fields.sound, Some(fields.dialogue.as_str()))
+            {
+                clauses.push(format!("Sound: {}.", clip_prompt_fragment(&sound, 44)));
             }
         }
         None => {
@@ -1904,6 +1902,138 @@ fn looks_like_silence(text: &str) -> bool {
         || normalized == "no sound"
 }
 
+fn compact_sound_clause(sound: &str, dialogue: Option<&str>) -> Option<String> {
+    let normalized = normalize_prompt_text(sound);
+    if normalized.is_empty() || looks_like_silence(&normalized) {
+        return None;
+    }
+
+    let dialogue = dialogue
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty() && !looks_like_silence(value));
+    let mut kept = Vec::new();
+    for fragment in split_prompt_clause_fragments(&normalized) {
+        if looks_like_silence(&fragment) {
+            continue;
+        }
+        if dialogue
+            .as_deref()
+            .is_some_and(|line| sound_fragment_is_dialogue_covered(&fragment, line))
+        {
+            continue;
+        }
+        if kept.iter().any(|existing| existing == &fragment) {
+            continue;
+        }
+        kept.push(fragment);
+    }
+
+    if kept.is_empty() {
+        None
+    } else {
+        Some(kept.join("，"))
+    }
+}
+
+fn split_prompt_clause_fragments(value: &str) -> Vec<String> {
+    value
+        .split(['，', ',', '；', ';', '。', '！', '!', '？', '?', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .collect()
+}
+
+fn sound_fragment_is_dialogue_covered(fragment: &str, dialogue: &str) -> bool {
+    let canonical_dialogue = canonical_dialogue_fragment(dialogue);
+    if canonical_dialogue.is_empty() {
+        return false;
+    }
+    let canonical_fragment = canonical_dialogue_fragment(fragment);
+    if canonical_fragment.is_empty() {
+        return false;
+    }
+
+    speech_like_fragment(fragment)
+        && (canonical_fragment == canonical_dialogue
+            || canonical_fragment.contains(&canonical_dialogue)
+            || canonical_dialogue.contains(&canonical_fragment))
+}
+
+fn canonical_dialogue_fragment(value: &str) -> String {
+    let mut canonical = normalize_prompt_text(value)
+        .trim_matches(|ch: char| {
+            ch.is_whitespace()
+                || matches!(
+                    ch,
+                    '"' | '\'' | '“' | '”' | '‘' | '’' | '「' | '」' | '『' | '』' | ':' | '：'
+                )
+        })
+        .to_string();
+    loop {
+        let mut changed = false;
+        for prefix in [
+            "低声说",
+            "轻声说",
+            "小声说",
+            "喃喃道",
+            "喃喃说",
+            "呢喃",
+            "说道",
+            "说出",
+            "说",
+            "喊道",
+            "喊出",
+            "大喊",
+            "呼喊",
+            "叫喊",
+            "质问",
+            "回答",
+            "回应",
+            "重复",
+            "台词",
+            "对白",
+            "旁白",
+        ] {
+            if let Some(stripped) = canonical.strip_prefix(prefix) {
+                canonical = stripped
+                    .trim_start_matches(|ch: char| {
+                        ch.is_whitespace()
+                            || matches!(
+                                ch,
+                                '"' | '\''
+                                    | '“'
+                                    | '”'
+                                    | '‘'
+                                    | '’'
+                                    | '「'
+                                    | '」'
+                                    | '『'
+                                    | '』'
+                                    | ':'
+                                    | '：'
+                            )
+                    })
+                    .to_string();
+                changed = true;
+                break;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    canonical
+}
+
+fn speech_like_fragment(fragment: &str) -> bool {
+    [
+        "说", "喊", "台词", "对白", "旁白", "低声", "轻声", "呢喃", "喃喃", "口播", "voice",
+        "dialogue",
+    ]
+    .iter()
+    .any(|keyword| fragment.contains(keyword))
+}
+
 fn select_video_prompt_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -2820,6 +2950,31 @@ mod tests {
         );
 
         assert!(prompt.contains("Natural motion, stable continuity, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_sound_fragments_already_covered_by_dialogue() {
+        let prompt = build_video_prompt(
+            Some("（主角贴墙疾行、旧宅走廊、主角、5秒、中景、稳定跟拍、屏息快步贴墙前进、紧张、阴天冷光、别回头、低声说别回头，脚步声逼近、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Dialogue or voice-over: 别回头."));
+        assert!(prompt.contains("Sound: 脚步声逼近."));
+        assert!(!prompt.contains("Sound: 低声说别回头"));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_sound_clause_when_only_dialogue_wrapper_remains() {
+        let prompt = build_video_prompt(
+            Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、驻足回头、压抑、冷调逆光、你终于来了、轻声说你终于来了、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
+        assert!(!prompt.contains("Sound:"));
     }
 
     #[test]
