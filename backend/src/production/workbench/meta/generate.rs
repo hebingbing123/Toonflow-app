@@ -39,6 +39,7 @@ const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCENE_ASSET_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_TOOL_ASSET_ROW_LIMIT: usize = 6;
+const VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT: usize = 2;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -1795,6 +1796,14 @@ fn build_script_role_anchors(
     let action = structured_fields
         .map(|fields| normalize_prompt_text(&fields.action))
         .unwrap_or_default();
+    let subject_refs = structured_fields
+        .map(structured_subject_ref_names)
+        .unwrap_or_default();
+    let role_anchor_limit = if subject_refs.len() > 1 {
+        VIDEO_PROMPT_MULTI_ROLE_ANCHOR_LIMIT.min(subject_refs.len())
+    } else {
+        1
+    };
     let mut scored = Vec::new();
     for (idx, anchor) in ctx.script_role_anchors.iter().enumerate() {
         let Some((name, note)) = anchor.split_once(':') else {
@@ -1810,13 +1819,14 @@ fn build_script_role_anchors(
         ) else {
             continue;
         };
-        let score = score_script_asset_anchor(&name, &description, &subject, &action);
+        let score = score_script_asset_anchor(&name, &description, &subject, &action)
+            + score_subject_ref_match(&name, &subject_refs);
         if name.is_empty() || score <= 0 {
             continue;
         }
         scored.push((score, idx, anchor));
     }
-    select_script_asset_anchor(scored)
+    select_script_asset_anchors(scored, role_anchor_limit)
 }
 
 fn build_script_scene_anchors(
@@ -1857,7 +1867,7 @@ fn build_script_scene_anchors(
         }
         scored.push((score, idx, anchor));
     }
-    select_script_asset_anchor(scored)
+    select_script_asset_anchors(scored, 1)
 }
 
 fn build_script_tool_anchors(
@@ -1901,7 +1911,7 @@ fn build_script_tool_anchors(
         }
         scored.push((score, idx, anchor));
     }
-    select_script_asset_anchor(scored)
+    select_script_asset_anchors(scored, 1)
 }
 
 fn score_script_asset_anchor(name: &str, description: &str, primary: &str, secondary: &str) -> i32 {
@@ -1942,14 +1952,51 @@ fn score_script_asset_anchor(name: &str, description: &str, primary: &str, secon
     score - name.chars().count() as i32
 }
 
-fn select_script_asset_anchor(mut scored: Vec<(i32, usize, String)>) -> Vec<String> {
+fn score_subject_ref_match(name: &str, subject_refs: &[String]) -> i32 {
+    if name.is_empty() {
+        return 0;
+    }
+
+    subject_refs
+        .iter()
+        .enumerate()
+        .find_map(|(idx, subject_ref)| {
+            (subject_ref == name || subject_ref.contains(name) || name.contains(subject_ref))
+                .then_some(220 - (idx.min(4) as i32 * 8))
+        })
+        .unwrap_or(0)
+}
+
+fn structured_subject_ref_names(fields: &StructuredStoryboardDescription) -> Vec<String> {
+    fields
+        .subject_refs
+        .split(['/', '／', ',', '，', '、', ';', '；', '|'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .fold(Vec::new(), |mut refs, value| {
+            if !refs.iter().any(|existing| existing == &value) {
+                refs.push(value);
+            }
+            refs
+        })
+}
+
+fn select_script_asset_anchors(mut scored: Vec<(i32, usize, String)>, limit: usize) -> Vec<String> {
+    if limit == 0 {
+        return Vec::new();
+    }
     scored.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
-    scored
-        .into_iter()
-        .map(|(_, _, anchor)| anchor)
-        .next()
-        .into_iter()
-        .collect()
+    let mut selected = Vec::new();
+    for (_, _, anchor) in scored {
+        if selected.iter().any(|existing| existing == &anchor) {
+            continue;
+        }
+        selected.push(anchor);
+        if selected.len() >= limit {
+            break;
+        }
+    }
+    selected
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -4184,11 +4231,12 @@ mod tests {
         parse_structured_storyboard_description, prune_low_signal_observation_candidates,
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
         score_video_prompt_observation_specificity, select_best_video_prompt_observation_note,
+        select_script_asset_anchors, select_video_prompt_asset_seed_rows,
         select_video_prompt_memory_notes, select_video_prompt_style_notes,
         trim_video_prompt_memory_rows, trim_video_prompt_observation_rows,
         video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
-        ScriptRolePromptSeedRow, VideoPromptContext,
+        ScriptRolePromptSeedRow, VideoPromptContext, VIDEO_PROMPT_ROLE_ASSET_ROW_LIMIT,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
@@ -5059,6 +5107,37 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_uses_subject_refs_to_keep_two_role_anchors_for_multi_character_shot() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（两人巷口对峙、雨夜巷口、主角/反派、5秒、中景、稳定跟拍、互相逼近、紧张压迫、冷调逆光、无台词、雨声脚步声、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec![
+                "主角: 黑色风衣，短发，左脸旧疤".into(),
+                "反派: 湿发，深灰长外套，压低肩线".into(),
+                "路人: 模糊背影".into(),
+            ],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains(
+                "Character anchor: 主角:黑色风衣，短发，左脸旧疤; 反派:湿发，深灰长外套，压低肩线."
+            ),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("路人:模糊背影"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_drops_scene_anchor_when_it_only_repeats_existing_setting() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -5411,6 +5490,23 @@ mod tests {
 
         assert_eq!(selected.len(), 1);
         assert_eq!(selected[0].asset_type, "role");
+    }
+
+    #[test]
+    fn select_script_asset_anchors_keeps_multiple_ranked_results_when_requested() {
+        let selected = select_script_asset_anchors(
+            vec![
+                (120, 0, "主角:黑色风衣".into()),
+                (110, 1, "反派:深灰长外套".into()),
+                (90, 2, "路人:模糊背影".into()),
+            ],
+            2,
+        );
+
+        assert_eq!(
+            selected,
+            vec!["主角:黑色风衣".to_string(), "反派:深灰长外套".to_string()]
+        );
     }
 
     #[test]
