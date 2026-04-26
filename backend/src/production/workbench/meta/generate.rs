@@ -383,16 +383,7 @@ fn select_video_prompt_style_notes(
         return exact;
     }
 
-    let neighbor = collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
-        .into_iter()
-        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-        .take(1)
-        .collect::<Vec<_>>();
-    if !neighbor.is_empty() {
-        return neighbor;
-    }
-
-    select_prioritized_video_style_note(
+    let prioritized = select_prioritized_video_style_note(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
@@ -400,7 +391,16 @@ fn select_video_prompt_style_notes(
     )
     .into_iter()
     .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
-    .collect()
+    .collect::<Vec<_>>();
+    if !prioritized.is_empty() {
+        return prioritized;
+    }
+
+    collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
+        .into_iter()
+        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+        .take(1)
+        .collect()
 }
 
 fn collect_neighbor_video_prompt_style_notes(
@@ -6140,7 +6140,31 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
-            vec!["镜头稳定近景".to_string()]
+            vec!["镜头稳定".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_prefers_script_summary_over_neighbor_local_framing() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=镜头稳定近景，情绪克制 | note=镜头稳定近景，情绪克制".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=6 | style=情绪克制，光影潮湿路灯暖光，场景雨夜街口 | note=情绪克制，光影潮湿路灯暖光，场景雨夜街口".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、近景、稳定跟拍、停步抬头看向路灯、克制、暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            vec!["光影潮湿路灯".to_string()]
         );
     }
 
