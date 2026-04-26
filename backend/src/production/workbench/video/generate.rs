@@ -700,7 +700,7 @@ fn push_unique_negative_fragment(target: &mut Vec<String>, candidate: Option<&'s
     if negative_fragment_is_covered(candidate, target) {
         return;
     }
-    target.retain(|existing| !negative_fragment_contains(candidate, existing));
+    target.retain(|existing| !negative_fragment_covers(candidate, existing));
     target.push(candidate.to_string());
 }
 
@@ -787,7 +787,7 @@ fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
             if negative_fragment_is_covered(fragment, &fragments) {
                 continue;
             }
-            fragments.retain(|existing| !negative_fragment_contains(fragment, existing));
+            fragments.retain(|existing| !negative_fragment_covers(fragment, existing));
             fragments.push(fragment.to_string());
         }
     }
@@ -798,7 +798,7 @@ fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str)
     if negative_fragment_is_covered(candidate, target) {
         return;
     }
-    target.retain(|existing| !negative_fragment_contains(candidate, existing));
+    target.retain(|existing| !negative_fragment_covers(candidate, existing));
     let mut next = target.clone();
     next.push(candidate.to_string());
     let joined = next.join(", ");
@@ -822,7 +822,15 @@ fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str)
 fn negative_fragment_is_covered(candidate: &str, existing_fragments: &[String]) -> bool {
     existing_fragments
         .iter()
-        .any(|existing| negative_fragment_contains(existing, candidate))
+        .any(|existing| negative_fragment_covers(existing, candidate))
+}
+
+fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
+    if negative_fragment_same_family(existing, candidate) {
+        return negative_fragment_information_score(existing)
+            >= negative_fragment_information_score(candidate);
+    }
+    negative_fragment_contains(existing, candidate)
 }
 
 fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {
@@ -838,6 +846,27 @@ fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {
     existing.len() >= candidate.len()
         && candidate.len() >= min_overlap_len
         && existing.contains(&candidate)
+}
+
+fn negative_fragment_same_family(existing: &str, candidate: &str) -> bool {
+    let existing = negative_fragment_family(existing);
+    let candidate = negative_fragment_family(candidate);
+    !existing.is_empty() && existing == candidate
+}
+
+fn negative_fragment_family(value: &str) -> &'static str {
+    let canonical = canonical_negative_fragment(value);
+    match canonical.as_str() {
+        "avoid flicker" | "avoid flicker or motion jitter" => "flicker_motion_jitter",
+        "avoid unnecessary shot changes" | "avoid extra shot changes or wrong framing" => {
+            "shot_change_framing"
+        }
+        _ => "",
+    }
+}
+
+fn negative_fragment_information_score(value: &str) -> usize {
+    canonical_negative_fragment(value).chars().count()
 }
 
 fn canonical_negative_fragment(value: &str) -> String {
@@ -970,6 +999,17 @@ mod tests {
         .expect("merged prompt");
 
         assert_eq!(merged, "avoid flicker or motion jitter, avoid blur");
+    }
+
+    #[test]
+    fn merge_negative_prompts_prefers_more_informative_shot_change_fragment() {
+        let merged = merge_negative_prompts(
+            Some("avoid unnecessary shot changes"),
+            Some("avoid extra shot changes or wrong framing, avoid blur"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid extra shot changes or wrong framing, avoid blur");
     }
 
     #[tokio::test]
