@@ -526,11 +526,12 @@ async fn load_pending_video_observation_note(
     )
     .into_iter()
     .find(|note| {
-        !video_prompt_observation_conflicts_with_style(
-            note,
-            prioritized_style_note.as_deref(),
-            storyboard_row.as_ref(),
-        )
+        !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
+            && !video_prompt_observation_conflicts_with_style(
+                note,
+                prioritized_style_note.as_deref(),
+                storyboard_row.as_ref(),
+            )
     });
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
@@ -632,6 +633,51 @@ fn video_prompt_observation_conflicts_with_style(
         selected_style_note,
         storyboard_row,
     )
+}
+
+fn video_prompt_observation_is_irrelevant_to_storyboard(
+    observation_note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> bool {
+    canonical_observation_note(observation_note) == "avoid lip-sync mismatch"
+        && storyboard_row.is_some_and(storyboard_dialogue_is_empty_row)
+}
+
+fn storyboard_dialogue_is_empty_row(row: &StoryboardPromptSeedRow) -> bool {
+    row.video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .is_some_and(|fields| storyboard_dialogue_is_empty(&fields.dialogue))
+}
+
+fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
+    let normalized = normalize_prompt_text(dialogue);
+    let normalized_ascii = normalized.to_ascii_lowercase();
+    normalized.is_empty()
+        || [
+            "无台词",
+            "无对白",
+            "无旁白",
+            "无语音",
+            "no dialogue",
+            "no voice-over",
+            "silent",
+        ]
+        .iter()
+        .map(|marker| normalize_prompt_text(marker).to_ascii_lowercase())
+        .any(|marker| normalized_ascii == marker)
+}
+
+fn canonical_observation_note(value: &str) -> String {
+    value
+        .trim()
+        .trim_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ',' | ';' | '，' | '；' | '.' | '。' | ':' | '：')
+        })
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
 }
 
 fn build_video_prompt(
@@ -2569,7 +2615,8 @@ mod tests {
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
         select_video_prompt_memory_notes, select_video_prompt_style_notes,
         trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
-        GenerateVideoPromptResponse, VideoPromptContext,
+        video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
+        VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
@@ -3963,6 +4010,44 @@ mod tests {
         assert!(video_prompt_observation_conflicts_with_style(
             "avoid flat cold lighting",
             None,
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
+    fn observation_note_irrelevant_filter_skips_lip_sync_for_silent_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角贴墙前行".into()),
+            video_desc: Some(
+                "（主角贴墙前行、旧宅走廊、主角、5秒、近景、稳定跟拍、贴墙前行、压迫、冷调逆光、无台词、风声回响、A12）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+
+        assert!(video_prompt_observation_is_irrelevant_to_storyboard(
+            "avoid lip-sync mismatch",
+            Some(&storyboard_row),
+        ));
+        assert!(!video_prompt_observation_is_irrelevant_to_storyboard(
+            "avoid shaky handheld motion",
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
+    fn observation_note_irrelevant_filter_keeps_lip_sync_for_dialogue_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角低声说你终于来了".into()),
+            video_desc: Some(
+                "（主角低声说你终于来了、旧宅门口、主角、5秒、近景、稳定跟拍、停步低声说出、压迫、冷调逆光、你终于来了、风声压过呼吸声、A13）"
+                    .into(),
+            ),
+            duration: Some("5".into()),
+        };
+
+        assert!(!video_prompt_observation_is_irrelevant_to_storyboard(
+            "avoid lip-sync mismatch",
             Some(&storyboard_row),
         ));
     }
