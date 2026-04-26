@@ -1232,8 +1232,12 @@ fn compact_continuity_note(
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| {
+            let normalized_core = continuity_fragment_core(fragment);
             !continuity_fragment_matches_fields(fragment, fields, &expected_camera)
                 && !prompt_fragment_is_covered(fragment, prompt_coverage)
+                && normalized_core
+                    .as_deref()
+                    .is_none_or(|core| !prompt_fragment_is_covered(core, prompt_coverage))
         })
         .collect::<Vec<_>>();
 
@@ -1245,6 +1249,38 @@ fn compact_continuity_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn continuity_fragment_core(fragment: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return None;
+    }
+    [
+        "保持上一镜头已确认的",
+        "保持上一镜头已确认",
+        "保留上一镜头已确认的",
+        "保留上一镜头已确认",
+        "延续上一镜头已确认的",
+        "延续上一镜头已确认",
+        "保持上一镜头的",
+        "保留上一镜头的",
+        "延续上一镜头的",
+        "保持上一镜头",
+        "保留上一镜头",
+        "延续上一镜头",
+        "保持",
+        "保留",
+        "延续",
+    ]
+    .into_iter()
+    .find_map(|prefix| {
+        normalized
+            .strip_prefix(prefix)
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+    })
 }
 
 fn collect_prompt_coverage(
@@ -1934,6 +1970,29 @@ mod tests {
         assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 镜头低机位压迫感，情绪冷色压迫感."));
         assert!(prompt.contains("Continuity notes: 保持上一镜头走位连续."));
         assert!(!prompt.contains("Continuity notes: 镜头低机位压迫感"));
+    }
+
+    #[test]
+    fn build_video_prompt_skips_continuity_fragments_covered_after_prefix_trim() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪冷峻压迫，光影冷调逆光".into()],
+            continuity_notes: vec!["保持上一镜头冷峻压迫，保留上一镜头走位连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Style anchor: 胶片冷调悬疑; 情绪冷峻压迫，光影冷调逆光."));
+        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续."));
+        assert!(!prompt.contains("Continuity notes: 保持上一镜头冷峻压迫"));
     }
 
     #[test]
