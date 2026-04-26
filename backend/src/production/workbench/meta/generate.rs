@@ -1617,7 +1617,7 @@ fn compact_memory_style_anchor(
                     return false;
                 }
             }
-            !style_fragment_is_semantically_covered(fragment, prompt_coverage)
+            !style_fragment_or_body_is_semantically_covered(fragment, prompt_coverage)
                 || structured_fields.is_some_and(|fields| {
                     allow_prompt_covered_style_fragments
                         && style_fragment_matches_prompt_style_field(fragment, fields)
@@ -1697,6 +1697,21 @@ fn style_fragment_prefix(fragment: &str) -> bool {
     ["镜头", "情绪", "光影"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
+}
+
+fn style_fragment_body(fragment: &str) -> Option<String> {
+    ["镜头", "情绪", "光影"]
+        .iter()
+        .find_map(|prefix| fragment.strip_prefix(prefix))
+        .map(normalize_prompt_text)
+        .filter(|body| !body.is_empty())
+}
+
+fn style_fragment_or_body_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
+    style_fragment_is_semantically_covered(fragment, coverage)
+        || style_fragment_body(fragment)
+            .as_deref()
+            .is_some_and(|body| prompt_fragment_is_covered(body, coverage))
 }
 
 fn style_fragment_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
@@ -4363,6 +4378,35 @@ mod tests {
         assert_eq!(prompt.matches("低机位压迫感").count(), 1, "{prompt}");
         assert!(!prompt.contains("镜头低机位压迫感"), "{prompt}");
         assert!(prompt.contains("Mood: 冷峻压迫."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_deduplicates_prefixed_memory_style_against_director_style_phrase() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻压迫、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("保持冷峻压迫风格，冷调逆光质感".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["情绪冷峻压迫，光影冷调逆光，镜头低机位压迫感".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt
+                .contains("Style anchor: 胶片悬疑; 冷峻压迫风格, 冷调逆光质感; 镜头低机位压迫感."),
+            "{prompt}"
+        );
+        assert_eq!(prompt.matches("冷峻压迫").count(), 2, "{prompt}");
+        assert_eq!(prompt.matches("冷调逆光").count(), 2, "{prompt}");
+        assert!(!prompt.contains("情绪冷峻压迫"), "{prompt}");
+        assert!(!prompt.contains("光影冷调逆光"), "{prompt}");
     }
 
     #[test]
