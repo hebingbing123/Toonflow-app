@@ -911,6 +911,35 @@ fn continuity_tail_matches(value: &str) -> bool {
             .any(|keyword| normalized.contains(keyword))
 }
 
+fn continuity_note_adds_specific_guidance(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    !normalized.is_empty()
+        && [
+            "走位",
+            "站位",
+            "跳轴",
+            "方向",
+            "构图",
+            "视线",
+            "节奏",
+            "动作",
+            "位置",
+            "前后景",
+        ]
+        .iter()
+        .any(|keyword| normalized.contains(keyword))
+}
+
+fn continuity_fragment_is_generic_quality_tail_overlap(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() || continuity_note_adds_specific_guidance(&normalized) {
+        return false;
+    }
+    continuity_fragment_core(&normalized)
+        .as_deref()
+        .is_some_and(continuity_tail_matches)
+}
+
 fn resolve_video_prompt_description(
     description: Option<&str>,
     context: Option<&VideoPromptContext>,
@@ -1284,6 +1313,7 @@ fn compact_continuity_note(
         .filter(|fragment| {
             let normalized_core = continuity_fragment_core(fragment);
             !continuity_fragment_matches_fields(fragment, fields, &expected_camera)
+                && !continuity_fragment_is_generic_quality_tail_overlap(fragment)
                 && !prompt_fragment_is_covered(fragment, prompt_coverage)
                 && normalized_core
                     .as_deref()
@@ -3025,6 +3055,51 @@ mod tests {
         );
 
         assert!(prompt.contains("Natural motion, stable continuity, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_generic_continuity_note_when_tail_already_covers_it() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、静止、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头衔接统一".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Continuity notes:"));
+        assert!(prompt.contains("Natural motion, stable continuity, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_specific_continuity_guidance_while_dropping_generic_fragment() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、静止、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头衔接统一，人物站位不要跳轴".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Continuity notes: 人物站位不要跳轴."));
+        assert!(!prompt.contains("Continuity notes: 保持上一镜头衔接统一"));
+        assert!(prompt.contains("Natural motion, no extra shot changes."));
     }
 
     #[test]
