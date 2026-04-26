@@ -1593,6 +1593,7 @@ fn trim_continuity_fragment_against_storyboard_fields(
     {
         trimmed = trimmed.replace(&field, "");
     }
+    trimmed = trim_continuity_fragment_storyboard_lead_in(&trimmed, fields);
     let trimmed = trimmed
         .trim_matches(|ch: char| {
             ch.is_whitespace()
@@ -1613,6 +1614,83 @@ fn trim_continuity_fragment_against_storyboard_fields(
     } else {
         Some(format!("{prefix}{trimmed}"))
     }
+}
+
+fn trim_continuity_fragment_storyboard_lead_in(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> String {
+    const CONTINUITY_LEAD_ROLE_PREFIXES: [&str; 10] = [
+        "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
+    ];
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    for field in [fields.subject.as_str(), fields.action.as_str()]
+        .into_iter()
+        .map(normalize_prompt_text)
+        .filter(|field| !field.is_empty())
+    {
+        let candidate = compacted.replace(&field, "");
+        let candidate = candidate
+            .trim_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        ',' | '，' | ';' | '；' | ':' | '：' | '/' | '／' | '、' | '|' | '-' | ' '
+                    )
+            })
+            .to_string();
+        if candidate.is_empty()
+            || !candidate.contains("上一镜头")
+                && ![
+                    "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
+                ]
+                .iter()
+                .any(|keyword| candidate.contains(keyword))
+        {
+            continue;
+        }
+        compacted = candidate;
+    }
+
+    loop {
+        let mut changed = false;
+        for prefix in CONTINUITY_LEAD_ROLE_PREFIXES {
+            let Some(stripped) = compacted.strip_prefix(prefix) else {
+                continue;
+            };
+            let candidate = stripped
+                .trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(
+                            ch,
+                            '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                        )
+                })
+                .to_string();
+            if candidate.is_empty()
+                || !candidate.contains("上一镜头")
+                    && ![
+                        "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
+                    ]
+                    .iter()
+                    .any(|keyword| candidate.contains(keyword))
+            {
+                continue;
+            }
+            compacted = candidate;
+            changed = true;
+            break;
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
 }
 
 fn continuity_fragment_core(fragment: &str) -> Option<String> {
@@ -2697,7 +2775,9 @@ fn select_video_prompt_memory_notes(
             }
             let note = extract_key_value(content, "summary")
                 .or_else(|| extract_key_value(content, "result"))
-                .and_then(|value| compact_video_continuity_note(&value))
+                .and_then(|value| {
+                    compact_storyboard_memory_continuity_note(&value, structured_fields.as_ref())
+                })
                 .or_else(|| {
                     extract_key_value(content, "summary")
                         .or_else(|| extract_key_value(content, "result"))
@@ -2727,6 +2807,33 @@ fn select_video_prompt_memory_notes(
         }
     }
     notes
+}
+
+fn compact_storyboard_memory_continuity_note(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let compacted = compact_video_continuity_note(note)?;
+    let Some(fields) = structured_fields else {
+        return Some(compacted);
+    };
+
+    let fragments = compacted
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter_map(|fragment| {
+            trim_continuity_fragment_against_storyboard_fields(&fragment, fields)
+        })
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
 }
 
 fn score_continuity_note(
@@ -3728,6 +3835,31 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_trims_storyboard_subject_and_action_from_continuity_fragment() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["主角快步推门冲出保留上一镜头走位连续".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Continuity notes: 保留上一镜头走位连续."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("主角快步推门冲出"), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_drops_continuity_style_note_when_style_anchor_already_covers_it() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -4006,6 +4138,24 @@ mod tests {
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
             vec!["保持镜头方向连续".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_trim_storyboard_subject_and_action_from_auto_scope_note() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=主角快步推门冲出保留上一镜头走位连续".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            vec!["保留上一镜头走位连续".to_string()]
         );
     }
 
