@@ -21,7 +21,11 @@ use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
 
-const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 8;
+const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 24;
+const VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT: usize = 6;
+const VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT: usize = 6;
+const VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
+const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
@@ -316,6 +320,7 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let rows = trim_video_prompt_memory_rows(rows);
     Ok((
         select_prioritized_video_style_notes(
             &rows,
@@ -325,6 +330,57 @@ async fn load_video_prompt_memory_notes(
         ),
         select_video_prompt_memory_notes(&rows, storyboard_numeric_id, Some(storyboard_row)),
     ))
+}
+
+fn trim_video_prompt_memory_rows(rows: Vec<AgentMemoryRow>) -> Vec<AgentMemoryRow> {
+    let mut selected_count = 0usize;
+    let mut auto_scope_count = 0usize;
+    let mut script_style_count = 0usize;
+    let mut project_style_count = 0usize;
+    let mut trimmed = Vec::new();
+
+    for row in rows {
+        let allowed = match row.name.as_str() {
+            "selected_video_memory" => {
+                if selected_count >= VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT {
+                    false
+                } else {
+                    selected_count += 1;
+                    true
+                }
+            }
+            "auto_scope_memory" => {
+                if auto_scope_count >= VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT {
+                    false
+                } else {
+                    auto_scope_count += 1;
+                    true
+                }
+            }
+            "script_video_style_memory" => {
+                if script_style_count >= VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT {
+                    false
+                } else {
+                    script_style_count += 1;
+                    true
+                }
+            }
+            "project_video_style_memory" => {
+                if project_style_count >= VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT {
+                    false
+                } else {
+                    project_style_count += 1;
+                    true
+                }
+            }
+            _ => false,
+        };
+        if allowed {
+            trimmed.push(row);
+        }
+    }
+
+    trimmed
 }
 
 async fn load_pending_video_observation_note(
@@ -1679,7 +1735,7 @@ mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
         select_prioritized_video_style_notes, select_video_prompt_memory_notes,
-        GenerateVideoPromptResponse, VideoPromptContext,
+        trim_video_prompt_memory_rows, GenerateVideoPromptResponse, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
@@ -2295,6 +2351,70 @@ mod tests {
             select_project_video_style_memory_notes(&rows),
             vec!["镜头中景稳定跟拍，情绪冷峻压迫".to_string()]
         );
+    }
+
+    #[test]
+    fn trim_video_prompt_memory_rows_keeps_summary_memories_when_selected_rows_are_dense() {
+        let mut rows = Vec::new();
+        for id in (1..=8).rev() {
+            rows.push(AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: format!("storyboardIds={id} | style=镜头中景稳定跟拍{id}"),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=4 | style=情绪冷峻压迫，光影冷调逆光".into(),
+        });
+        rows.push(AgentMemoryRow {
+            name: "project_video_style_memory".into(),
+            content: "sampleCount=7 | style=镜头中景稳定跟拍，情绪冷峻压迫".into(),
+        });
+        rows.push(AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=保持走位连续"
+                    .into(),
+        });
+
+        let trimmed = trim_video_prompt_memory_rows(rows);
+
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "selected_video_memory")
+                .count(),
+            6
+        );
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "script_video_style_memory")
+                .count(),
+            1
+        );
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "project_video_style_memory")
+                .count(),
+            1
+        );
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "auto_scope_memory")
+                .count(),
+            1
+        );
+        assert!(trimmed.iter().any(|row| {
+            row.name == "script_video_style_memory"
+                && row.content.contains("情绪冷峻压迫，光影冷调逆光")
+        }));
+        assert!(trimmed.iter().any(|row| {
+            row.name == "project_video_style_memory"
+                && row.content.contains("镜头中景稳定跟拍，情绪冷峻压迫")
+        }));
     }
 
     #[test]
