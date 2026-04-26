@@ -85,6 +85,13 @@ pub(crate) struct AgentMemoryRow {
     pub(crate) content: String,
 }
 
+#[derive(Debug, Clone, sqlx::FromRow)]
+struct ScopedAgentMemoryRow {
+    name: String,
+    content: String,
+    episodes_id: Option<i32>,
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct StructuredStoryboardDescription {
     pub(crate) subject: String,
@@ -470,9 +477,9 @@ pub(crate) async fn refresh_project_video_style_memory(
     user_id: Uuid,
     project_numeric_id: i32,
 ) -> Result<(), ApiError> {
-    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+    let rows = sqlx::query_as::<_, ScopedAgentMemoryRow>(
         r#"
-        SELECT name, content
+        SELECT name, content, episodes_id
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
@@ -1483,10 +1490,14 @@ fn memory_row_is_neighbor_selected_style(
 }
 
 fn extract_style_note_value(row: &AgentMemoryRow) -> Option<String> {
-    if let Some(value) = extract_key_value(&row.content, "style") {
+    selected_video_style_value_from_content(&row.content)
+}
+
+fn selected_video_style_value_from_content(content: &str) -> Option<String> {
+    if let Some(value) = extract_key_value(content, "style") {
         return compact_video_style_prompt_note(&value);
     }
-    extract_key_value(&row.content, "note")
+    extract_key_value(content, "note")
         .and_then(|value| compact_video_style_prompt_note(&value))
         .filter(|value| !value.is_empty())
 }
@@ -1654,8 +1665,8 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     ))
 }
 
-fn build_project_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
-    let notes = distinct_selected_video_style_notes(rows);
+fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<String> {
+    let notes = distinct_project_selected_video_style_notes(rows);
     if notes.len() < 3 {
         return None;
     }
@@ -1675,23 +1686,63 @@ fn build_project_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
 }
 
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
+    distinct_selected_video_style_notes_by_scope(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds")
+                .map(|storyboard_id| format!("script:{storyboard_id}")),
+        )
+    }))
+}
+
+fn distinct_project_selected_video_style_notes(rows: &[ScopedAgentMemoryRow]) -> Vec<String> {
+    distinct_selected_video_style_notes_by_scope(rows.iter().map(|row| {
+        (
+            row.name.as_str(),
+            row.content.as_str(),
+            extract_key_value(&row.content, "storyboardIds").map(|storyboard_id| {
+                format!(
+                    "{}:{storyboard_id}",
+                    row.episodes_id
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| "project".to_string())
+                )
+            }),
+        )
+    }))
+}
+
+fn distinct_selected_video_style_notes_by_scope<'a>(
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>)>,
+) -> Vec<String> {
+    let mut storyboard_keys = Vec::new();
     let mut sample_keys = Vec::new();
     let mut notes = Vec::new();
 
-    for row in rows {
-        if row.name != SELECTED_VIDEO_MEMORY_NAME {
+    for (name, content, scoped_storyboard_key) in rows {
+        if name != SELECTED_VIDEO_MEMORY_NAME {
             continue;
         }
-        let Some(note) = selected_video_style_value(row) else {
+        let Some(note) = selected_video_style_value_from_content(content) else {
             continue;
         };
-        let storyboard_key = extract_key_value(&row.content, "storyboardIds").unwrap_or_default();
-        let prompt_seed = extract_key_value(&row.content, "promptSeed").unwrap_or_default();
-        let sample_key = format!("{storyboard_key}|{prompt_seed}");
-        if sample_key == "|" || sample_keys.iter().any(|existing| existing == &sample_key) {
-            continue;
+        if let Some(storyboard_key) = scoped_storyboard_key {
+            if storyboard_keys
+                .iter()
+                .any(|existing| existing == &storyboard_key)
+            {
+                continue;
+            }
+            storyboard_keys.push(storyboard_key);
+        } else {
+            let prompt_seed = extract_key_value(content, "promptSeed").unwrap_or_default();
+            let sample_key = prompt_seed;
+            if sample_key.is_empty() || sample_keys.iter().any(|existing| existing == &sample_key) {
+                continue;
+            }
+            sample_keys.push(sample_key);
         }
-        sample_keys.push(sample_key);
         notes.push(note);
     }
 
@@ -2198,7 +2249,7 @@ mod tests {
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
-        StoryboardPromptSeedRow,
+        ScopedAgentMemoryRow, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -2730,17 +2781,20 @@ mod tests {
     #[test]
     fn build_project_video_style_memory_extracts_cross_script_recurring_style() {
         let summary = build_project_video_style_memory(&[
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=3 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=9 | style=镜头中景稳定跟拍，情绪冷峻压迫，场景废弃走廊 | note=...".into(),
+                episodes_id: Some(2),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=17 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(3),
             },
         ])
         .expect("summary");
@@ -2754,31 +2808,36 @@ mod tests {
     #[test]
     fn build_project_video_style_memory_requires_majority_support_when_samples_are_dense() {
         let summary = build_project_video_style_memory(&[
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content:
                     "storyboardIds=1 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
                         .into(),
+                episodes_id: Some(1),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content:
                     "storyboardIds=2 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=..."
                         .into(),
+                episodes_id: Some(1),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=3 | style=镜头稳定跟拍，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=4 | style=镜头稳定跟拍，情绪悲怆，光影冷调逆光 | note=..."
                     .into(),
+                episodes_id: Some(2),
             },
-            AgentMemoryRow {
+            ScopedAgentMemoryRow {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=5 | style=镜头近景手持，情绪悲怆，光影暖光 | note=..."
                     .into(),
+                episodes_id: Some(2),
             },
         ])
         .expect("summary");
@@ -2786,6 +2845,37 @@ mod tests {
         assert!(summary.contains("sampleCount=5"));
         assert!(summary.contains("style=镜头稳定跟拍，光影冷调逆光"));
         assert!(!summary.contains("情绪冷峻压迫"));
+    }
+
+    #[test]
+    fn build_project_video_style_memory_prefers_latest_prompt_seed_within_each_script_storyboard() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=newseed000002 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                episodes_id: Some(7),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=oldseed000001 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(7),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=seed000000003 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                episodes_id: Some(8),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | promptSeed=seed000000004 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                episodes_id: Some(7),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=3"));
+        assert!(summary.contains("光影暖金逆光"));
+        assert!(!summary.contains("光影冷调逆光"));
     }
 
     #[test]
@@ -2862,6 +2952,29 @@ mod tests {
         assert!(summary.contains("sampleCount=2"));
         assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
         assert!(!summary.contains("中景"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_prefers_latest_prompt_seed_per_storyboard() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=newseed000002 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=oldseed000001 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | promptSeed=seed000000003 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=2"));
+        assert!(summary.contains("光影暖金逆光"));
+        assert!(!summary.contains("光影冷调逆光"));
     }
 
     #[test]
