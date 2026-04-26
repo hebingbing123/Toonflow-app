@@ -26,12 +26,22 @@ pub(in crate::production) struct WorkbenchGenerateVideoResponse {
     enqueued: Vec<JobRow>,
     total: usize,
     negative_prompt: Option<String>,
+    storyboard_negative_prompts: Vec<StoryboardNegativePrompt>,
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 struct QualityReviewSeedRow {
+    target_type: Option<String>,
+    target_id: Option<String>,
     bad_case_category: Option<String>,
     comments: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StoryboardNegativePrompt {
+    storyboard_id: i32,
+    negative_prompt: Option<String>,
 }
 
 #[utoipa::path(
@@ -94,7 +104,7 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
         .await?
         .unwrap_or_else(|| "16:9".to_string());
-    let auto_negative_prompt = load_auto_negative_prompt(
+    let storyboard_negative_prompts = load_auto_negative_prompts(
         pool,
         user_id,
         body.project_id,
@@ -102,10 +112,6 @@ pub(in crate::production) async fn post_workbench_generate_video(
         &storyboard_ids,
     )
     .await?;
-    let merged_negative_prompt = merge_negative_prompts(
-        body.negative_prompt.as_deref(),
-        auto_negative_prompt.as_deref(),
-    );
     let provider = infer_video_provider(&body.model);
     let duration_label = format!("{}s", body.duration);
     let prompt = body.prompt.trim().to_string();
@@ -114,7 +120,14 @@ pub(in crate::production) async fn post_workbench_generate_video(
     let mode = body.mode.trim().to_string();
 
     let mut enqueued = Vec::with_capacity(upload_sources.len());
+    let mut response_negative_prompts = Vec::with_capacity(storyboard_ids.len());
     for (storyboard_numeric_id, source_url) in upload_sources {
+        let merged_negative_prompt = merge_negative_prompts(
+            body.negative_prompt.as_deref(),
+            storyboard_negative_prompts
+                .get(&storyboard_numeric_id)
+                .and_then(|value| value.as_deref()),
+        );
         sqlx::query(
             r#"
             UPDATE app_storyboard
@@ -155,13 +168,18 @@ pub(in crate::production) async fn post_workbench_generate_video(
         });
         let row = enqueue_generation_job(pool, user_id, JOB_KIND_VIDEO_GENERATE, payload).await?;
         enqueued.push(row);
+        response_negative_prompts.push(StoryboardNegativePrompt {
+            storyboard_id: storyboard_numeric_id,
+            negative_prompt: merged_negative_prompt,
+        });
     }
 
     let total = enqueued.len();
     Ok(JsonResponse(WorkbenchGenerateVideoResponse {
         enqueued,
         total,
-        negative_prompt: merged_negative_prompt,
+        negative_prompt: body.negative_prompt.clone(),
+        storyboard_negative_prompts: response_negative_prompts,
     }))
 }
 
@@ -295,8 +313,28 @@ pub(crate) async fn load_auto_negative_prompt(
     script_numeric_id: i32,
     storyboard_ids: &[i32],
 ) -> Result<Option<String>, ApiError> {
+    let prompts = load_auto_negative_prompts(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_ids,
+    )
+    .await?;
+    Ok(storyboard_ids
+        .iter()
+        .find_map(|storyboard_id| prompts.get(storyboard_id).cloned().flatten()))
+}
+
+pub(crate) async fn load_auto_negative_prompts(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<HashMap<i32, Option<String>>, ApiError> {
     if storyboard_ids.is_empty() {
-        return Ok(None);
+        return Ok(HashMap::new());
     }
     let storyboard_target_ids = storyboard_ids
         .iter()
@@ -304,7 +342,7 @@ pub(crate) async fn load_auto_negative_prompt(
         .collect::<Vec<_>>();
     let rows = sqlx::query_as::<_, QualityReviewSeedRow>(
         r#"
-        SELECT bad_case_category, comments
+        SELECT target_type, target_id, bad_case_category, comments
         FROM app_quality_review
         WHERE user_id = $1
           AND project_id = $2
@@ -336,33 +374,28 @@ pub(crate) async fn load_auto_negative_prompt(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let review_prompt = compact_negative_review_constraints(&rows);
-    let rejected_prompt = load_rejected_video_negative_prompt(
+    let rejected_rows = load_rejected_video_negative_memory_rows(
         pool,
         user_id,
         project_numeric_id,
         script_numeric_id,
-        storyboard_ids,
     )
     .await?;
-    Ok(merge_negative_prompts(
-        review_prompt.as_deref(),
-        rejected_prompt.as_deref(),
+
+    Ok(build_storyboard_negative_prompts(
+        storyboard_ids,
+        &rows,
+        &rejected_rows,
     ))
 }
 
-async fn load_rejected_video_negative_prompt(
+async fn load_rejected_video_negative_memory_rows(
     pool: &PgPool,
     user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
-    storyboard_ids: &[i32],
-) -> Result<Option<String>, ApiError> {
-    if storyboard_ids.is_empty() {
-        return Ok(None);
-    }
-
-    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+) -> Result<Vec<AgentMemoryRow>, ApiError> {
+    sqlx::query_as::<_, AgentMemoryRow>(
         r#"
         SELECT name, content
         FROM app_agent_memory
@@ -381,16 +414,46 @@ async fn load_rejected_video_negative_prompt(
     .bind(script_numeric_id)
     .fetch_all(pool)
     .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
+}
 
-    let mut merged = None;
-    for storyboard_id in storyboard_ids {
-        let prompt = select_rejected_video_negative_memory_notes(&rows, *storyboard_id)
-            .into_iter()
-            .next();
-        merged = merge_negative_prompts(merged.as_deref(), prompt.as_deref());
+fn build_storyboard_negative_prompts(
+    storyboard_ids: &[i32],
+    review_rows: &[QualityReviewSeedRow],
+    rejected_rows: &[AgentMemoryRow],
+) -> HashMap<i32, Option<String>> {
+    storyboard_ids
+        .iter()
+        .copied()
+        .map(|storyboard_id| {
+            let review_prompt = compact_negative_review_constraints(
+                &review_rows
+                    .iter()
+                    .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
+                    .cloned()
+                    .collect::<Vec<_>>(),
+            );
+            let rejected_prompt =
+                select_rejected_video_negative_memory_notes(rejected_rows, storyboard_id)
+                    .into_iter()
+                    .next();
+            (
+                storyboard_id,
+                merge_negative_prompts(review_prompt.as_deref(), rejected_prompt.as_deref()),
+            )
+        })
+        .collect()
+}
+
+fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
+    match row.target_type.as_deref().map(str::trim) {
+        Some("storyboard") => row
+            .target_id
+            .as_deref()
+            .and_then(|value| value.trim().parse::<i32>().ok())
+            .is_some_and(|value| value == storyboard_id),
+        _ => true,
     }
-    Ok(merged)
 }
 
 fn compact_negative_review_constraints(rows: &[QualityReviewSeedRow]) -> Option<String> {
@@ -533,9 +596,10 @@ fn infer_video_provider(model: &str) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::{
-        clip_negative_prompt, compact_negative_review_constraints, compact_video_ratio,
-        infer_negative_fragments_from_comments, infer_video_provider,
-        load_rejected_video_negative_prompt, merge_negative_prompts, normalize_upload_sources,
+        build_storyboard_negative_prompts, clip_negative_prompt,
+        compact_negative_review_constraints, compact_video_ratio,
+        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
+        merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
         QualityReviewSeedRow,
     };
     use crate::production::types::GenerateVideoUploadItem;
@@ -569,10 +633,14 @@ mod tests {
     fn compact_negative_review_constraints_prefers_short_visual_failures() {
         let prompt = compact_negative_review_constraints(&[
             QualityReviewSeedRow {
+                target_type: None,
+                target_id: None,
                 bad_case_category: Some("visual_error".into()),
                 comments: Some("手指变形且有闪烁".into()),
             },
             QualityReviewSeedRow {
+                target_type: None,
+                target_id: None,
                 bad_case_category: Some("character_break".into()),
                 comments: Some("角色脸不稳定，服装漂移".into()),
             },
@@ -608,13 +676,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn load_rejected_video_negative_prompt_returns_none_without_storyboards() {
+    async fn load_auto_negative_prompts_returns_empty_without_storyboards() {
         let pool = PgPool::connect_lazy("postgres://postgres:postgres@localhost/postgres")
             .expect("lazy pool");
-        let prompt = load_rejected_video_negative_prompt(&pool, Uuid::nil(), 1, 2, &[])
+        let prompts = load_auto_negative_prompts(&pool, Uuid::nil(), 1, 2, &[])
             .await
-            .expect("prompt");
-        assert_eq!(prompt, None);
+            .expect("prompts");
+        assert!(prompts.is_empty());
     }
 
     #[test]
@@ -641,6 +709,77 @@ mod tests {
             merged,
             "avoid flicker, avoid flat cold lighting, avoid oppressive or frantic mood"
         );
+    }
+
+    #[test]
+    fn quality_review_row_matches_storyboard_keeps_storyboard_scope_isolated() {
+        let storyboard_row = QualityReviewSeedRow {
+            target_type: Some("storyboard".into()),
+            target_id: Some("12".into()),
+            bad_case_category: Some("storyboard_mismatch".into()),
+            comments: None,
+        };
+        let global_row = QualityReviewSeedRow {
+            target_type: Some("video".into()),
+            target_id: None,
+            bad_case_category: Some("visual_error".into()),
+            comments: None,
+        };
+
+        assert!(quality_review_row_matches_storyboard(&storyboard_row, 12));
+        assert!(!quality_review_row_matches_storyboard(&storyboard_row, 9));
+        assert!(quality_review_row_matches_storyboard(&global_row, 9));
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_keeps_each_storyboard_prompt_independent() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12, 13],
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("storyboard_mismatch".into()),
+                    comments: None,
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: Some("visual_error".into()),
+                    comments: Some("有明显闪烁".into()),
+                },
+            ],
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=13 | avoid=avoid flat cold lighting".into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | avoid=avoid oppressive or frantic mood".into(),
+                },
+            ],
+        );
+
+        let prompt_12 = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+        let prompt_13 = prompts
+            .get(&13)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 13 prompt");
+
+        assert!(prompt_12.contains("avoid extra shot changes or wrong framing"));
+        assert!(prompt_12.contains("avoid warped anatomy, blur, flicker"));
+        assert!(prompt_12.contains("avoid flicker or motion jitter"));
+        assert!(prompt_12.contains("avoid op"));
+        assert!(!prompt_12.contains("avoid flat cold lighting"));
+
+        assert!(prompt_13.contains("avoid warped anatomy, blur, flicker"));
+        assert!(prompt_13.contains("avoid flicker or motion jitter"));
+        assert!(prompt_13.contains("avoid flat cold lighting"));
+        assert!(!prompt_13.contains("avoid extra shot changes or wrong framing"));
     }
 
     #[test]
