@@ -29,8 +29,6 @@ const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "手持",
     "跟拍",
 ];
-const PROMPT_SHOT_FRAMING_KEYWORDS: [&str; 7] =
-    ["特写", "近景", "中景", "全景", "远景", "低机位", "高机位"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
     "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
 ];
@@ -81,6 +79,19 @@ const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
 const ACTION_SUBJECT_PREFIXES: [&str; 10] = [
     "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
 ];
+const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
+    "身后的",
+    "身后",
+    "旁边的",
+    "旁的",
+    "旁边",
+    "面前的",
+    "前的",
+    "后的",
+    "所在的",
+    "附近的",
+];
+const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
 
 #[derive(Debug, Deserialize, sqlx::FromRow)]
 pub(crate) struct StoryboardPromptSeedRow {
@@ -1220,12 +1231,14 @@ fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
         let setting = compact_selected_memory_setting(
             &fields.setting,
             subject.as_deref(),
+            Some(fields.subject_refs.as_str()),
             Some(fields.action.as_str()),
         );
         let action = compact_selected_memory_action(
             &fields.action,
             subject.as_deref(),
             Some(fields.subject_refs.as_str()),
+            Some(fields.setting.as_str()),
             &fields.mood,
         );
 
@@ -1293,6 +1306,7 @@ fn compact_selected_memory_action(
     action: &str,
     subject: Option<&str>,
     subject_coverage: Option<&str>,
+    setting: Option<&str>,
     mood: &str,
 ) -> Option<String> {
     let mut action = normalize_prompt_text(action);
@@ -1333,6 +1347,7 @@ fn compact_selected_memory_action(
     }
 
     action = strip_selected_memory_action_object_prefix(&action, subject_coverage);
+    action = strip_selected_memory_action_setting_prefix(&action, setting);
 
     if !normalize_prompt_text(mood).is_empty() {
         for prefix in ACTION_PACE_PREFIXES {
@@ -1411,21 +1426,257 @@ fn strip_selected_memory_action_object_prefix(
     compacted
 }
 
+fn strip_selected_memory_action_setting_prefix(action: &str, setting: Option<&str>) -> String {
+    let mut compacted = normalize_prompt_text(action);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut candidates = build_selected_memory_setting_prefix_candidates(setting);
+    candidates.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &candidates {
+            if candidate.chars().count() < 4 {
+                continue;
+            }
+            let Some(stripped) = strip_selected_memory_prefix_candidate(&compacted, candidate)
+            else {
+                continue;
+            };
+            let stripped = stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                    )
+            });
+            if stripped.chars().count() < 2 {
+                continue;
+            }
+            compacted = stripped.to_string();
+            changed = true;
+            break;
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
+}
+
 fn compact_selected_memory_setting(
     setting: &str,
     subject: Option<&str>,
+    subject_coverage: Option<&str>,
     action: Option<&str>,
 ) -> Option<String> {
-    let setting = normalize_prompt_text(setting);
+    let mut setting = normalize_prompt_text(setting);
     if setting.is_empty() {
         return None;
     }
+
+    setting = strip_selected_memory_setting_subject_prefix(&setting, subject_coverage);
+    setting = strip_selected_memory_setting_context_prefix(&setting, subject, action);
+
     if subject.is_some_and(|value| prompt_fragments_substantially_overlap(value, &setting))
         || action.is_some_and(|value| prompt_fragments_substantially_overlap(value, &setting))
     {
         return None;
     }
     Some(setting)
+}
+
+fn strip_selected_memory_setting_subject_prefix(
+    setting: &str,
+    subject_coverage: Option<&str>,
+) -> String {
+    let mut compacted = normalize_prompt_text(setting);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut coverage = subject_coverage
+        .map(normalize_prompt_text)
+        .unwrap_or_default()
+        .split(['/', '／', '、', ',', '，'])
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>();
+    coverage.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &coverage {
+            if candidate.chars().count() < 2 || !compacted.starts_with(candidate) {
+                continue;
+            }
+            let rest = compacted[candidate.len()..].trim_start();
+            for suffix in SETTING_SUBJECT_LEAD_IN_SUFFIXES {
+                let Some(stripped) = rest.strip_prefix(suffix) else {
+                    continue;
+                };
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(
+                            ch,
+                            '的' | '里' | '中' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                        )
+                });
+                if stripped.chars().count() < 2 {
+                    continue;
+                }
+                compacted = stripped.to_string();
+                changed = true;
+                break;
+            }
+            if changed {
+                break;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
+}
+
+fn strip_selected_memory_setting_context_prefix(
+    setting: &str,
+    subject: Option<&str>,
+    action: Option<&str>,
+) -> String {
+    let compacted = normalize_prompt_text(setting);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let Some(locative_lead_in) = selected_memory_setting_locative_lead_in(&compacted) else {
+        return compacted;
+    };
+    if locative_lead_in.chars().count() < 4 {
+        return compacted;
+    }
+
+    let covered_by_context = subject
+        .into_iter()
+        .chain(action)
+        .map(selected_memory_context_variants)
+        .flatten()
+        .any(|candidate| candidate.starts_with(&locative_lead_in));
+    if !covered_by_context {
+        return compacted;
+    }
+
+    let Some((_, suffix)) = strip_selected_memory_setting_descriptive_lead_in(&compacted) else {
+        return compacted;
+    };
+    let suffix = suffix.trim_start_matches(|ch: char| {
+        ch.is_whitespace()
+            || matches!(
+                ch,
+                '的' | '里' | '中' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+            )
+    });
+    if suffix.chars().count() < 2 {
+        return compacted;
+    }
+
+    suffix.to_string()
+}
+
+fn build_selected_memory_setting_prefix_candidates(setting: Option<&str>) -> Vec<String> {
+    let mut candidates = Vec::new();
+    let Some(setting) = setting
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+    else {
+        return candidates;
+    };
+
+    candidates.push(setting.clone());
+    if let Some(stripped) = strip_selected_memory_leading_bridge(&setting) {
+        candidates.push(stripped.to_string());
+    }
+    if let Some((prefix, _)) = strip_selected_memory_setting_descriptive_lead_in(&setting) {
+        candidates.push(prefix.to_string());
+        if let Some(stripped) = strip_selected_memory_leading_bridge(prefix) {
+            candidates.push(stripped.to_string());
+        }
+    }
+    candidates.sort();
+    candidates.dedup();
+    candidates
+}
+
+fn selected_memory_setting_locative_lead_in(setting: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(setting);
+    let (prefix, _) = strip_selected_memory_setting_descriptive_lead_in(&normalized)?;
+    let prefix = strip_selected_memory_leading_bridge(prefix).unwrap_or(prefix);
+    let prefix = normalize_prompt_text(prefix);
+    (!prefix.is_empty()).then_some(prefix)
+}
+
+fn strip_selected_memory_setting_descriptive_lead_in(setting: &str) -> Option<(&str, &str)> {
+    let normalized = setting.trim();
+    let split_at = normalized.find('的')?;
+    let (prefix, suffix_with_marker) = normalized.split_at(split_at);
+    let suffix = suffix_with_marker.strip_prefix('的')?;
+    let prefix = prefix.trim();
+    let suffix = suffix.trim();
+    (!prefix.is_empty() && !suffix.is_empty()).then_some((prefix, suffix))
+}
+
+fn selected_memory_context_variants(value: &str) -> Vec<String> {
+    let normalized = normalize_prompt_text(value);
+    if normalized.is_empty() {
+        return Vec::new();
+    }
+
+    let mut variants = vec![normalized.clone()];
+    if let Some(stripped) = strip_selected_memory_subject_role_prefix(&normalized) {
+        variants.push(stripped.to_string());
+        if let Some(bridge) = strip_selected_memory_leading_bridge(stripped) {
+            variants.push(bridge.to_string());
+        }
+    }
+    if let Some(stripped) = strip_selected_memory_leading_bridge(&normalized) {
+        variants.push(stripped.to_string());
+    }
+    variants.sort();
+    variants.dedup();
+    variants
+}
+
+fn strip_selected_memory_subject_role_prefix(value: &str) -> Option<&str> {
+    ACTION_SUBJECT_PREFIXES.iter().find_map(|prefix| {
+        value.strip_prefix(prefix).map(|stripped| {
+            stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(ch, '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、')
+            })
+        })
+    })
+}
+
+fn strip_selected_memory_prefix_candidate<'a>(
+    fragment: &'a str,
+    candidate: &str,
+) -> Option<&'a str> {
+    fragment.strip_prefix(candidate).or_else(|| {
+        strip_selected_memory_leading_bridge(fragment)
+            .and_then(|value| value.strip_prefix(candidate))
+    })
+}
+
+fn strip_selected_memory_leading_bridge(fragment: &str) -> Option<&str> {
+    let trimmed = fragment.trim_start();
+    PROMPT_LEADING_BRIDGES
+        .into_iter()
+        .find_map(|prefix| trimmed.strip_prefix(prefix))
 }
 
 fn prompt_fragments_substantially_overlap(lhs: &str, rhs: &str) -> bool {
@@ -1962,15 +2213,7 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
 }
 
 fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
-    let mut matched = extract_style_keywords(fragment, "镜头", &PROMPT_SHOT_FRAMING_KEYWORDS);
-    for keyword in extract_style_keywords(fragment, "镜头", &STABLE_PROMPT_SHOT_KEYWORDS) {
-        if matched.iter().any(|existing| {
-            existing == &keyword || existing.contains(&keyword) || keyword.contains(existing)
-        }) {
-            continue;
-        }
-        matched.push(keyword);
-    }
+    let matched = extract_style_keywords(fragment, "镜头", &STABLE_PROMPT_SHOT_KEYWORDS);
     if matched.is_empty() {
         return None;
     }
@@ -2409,9 +2652,9 @@ mod tests {
         build_script_video_style_memory, build_selected_video_memory,
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_rejected_negative_avoid, compact_selected_memory_action,
-        compact_video_continuity_note, merge_rejected_video_negative_memory,
-        parse_structured_storyboard_description, rejected_video_negative_rejection_count,
-        select_neighbor_selected_video_memory_notes,
+        compact_selected_memory_setting, compact_video_continuity_note,
+        merge_rejected_video_negative_memory, parse_structured_storyboard_description,
+        rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
         select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
@@ -2448,7 +2691,7 @@ mod tests {
 
         assert!(content.contains("storyboardIds=12"));
         assert!(content.contains("promptSeed="));
-        assert!(content.contains("style=镜头中景稳定跟拍，情绪急迫，光影阴天冷光"));
+        assert!(content.contains("style=镜头稳定跟拍，情绪急迫，光影阴天冷光"));
         assert!(content.contains("note=主角冲出旧宅"));
         assert!(content.contains("推门冲出"));
         assert!(!content.contains("快步推门冲出"));
@@ -2515,16 +2758,89 @@ mod tests {
     }
 
     #[test]
+    fn build_selected_video_memory_trims_subject_lead_in_from_setting_when_scene_suffix_remains() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角驻足".into()),
+                video_desc: Some("（主角驻足、主角身后的门厅、主角、5秒、中景、稳定跟拍、抬眼观察、紧张、阴天冷光、无台词、脚步回响、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(!content.contains("场景主角身后的门厅"), "{content}");
+    }
+
+    #[test]
+    fn build_selected_video_memory_trims_setting_lead_in_repeated_by_action_context() {
+        let content = build_selected_video_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("主角在旧宅走廊尽头回头".into()),
+                video_desc: Some("（主角在旧宅走廊尽头回头、在旧宅走廊尽头的门厅、主角、5秒、中景、稳定跟拍、在旧宅走廊尽头停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("停步回头"), "{content}");
+        assert!(!content.contains("场景在旧宅走廊尽头的门厅"), "{content}");
+        assert!(!content.contains("在旧宅走廊尽头停步回头"), "{content}");
+    }
+
+    #[test]
     fn compact_selected_memory_action_keeps_pace_prefix_when_mood_is_missing() {
         let action = compact_selected_memory_action(
             "女主缓步后退躲避",
             Some("女主后退躲避"),
             Some("女主"),
+            None,
             "",
         )
         .expect("action");
 
         assert_eq!(action, "缓步后退躲避");
+    }
+
+    #[test]
+    fn compact_selected_memory_action_strips_setting_prefix_when_followup_motion_remains() {
+        let action = compact_selected_memory_action(
+            "在旧宅走廊尽头停步回头",
+            Some("主角在旧宅走廊尽头回头"),
+            Some("主角"),
+            Some("在旧宅走廊尽头的门厅"),
+            "压抑",
+        )
+        .expect("action");
+
+        assert_eq!(action, "停步回头");
+    }
+
+    #[test]
+    fn compact_selected_memory_setting_strips_prop_or_subject_lead_in() {
+        let setting = compact_selected_memory_setting(
+            "青铜匕首旁的供桌边",
+            None,
+            Some("主角/青铜匕首"),
+            None,
+        )
+        .expect("setting");
+
+        assert_eq!(setting, "供桌边");
+    }
+
+    #[test]
+    fn compact_selected_memory_setting_strips_locative_lead_in_when_subject_or_action_covers_it() {
+        let setting = compact_selected_memory_setting(
+            "在旧宅走廊尽头的门厅",
+            Some("主角在旧宅走廊尽头回头"),
+            Some("主角"),
+            Some("在旧宅走廊尽头停步回头"),
+        )
+        .expect("setting");
+
+        assert_eq!(setting, "门厅");
     }
 
     #[test]
