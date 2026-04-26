@@ -1998,6 +1998,10 @@ fn compact_sound_clause(sound: &str, dialogue: Option<&str>) -> Option<String> {
         if looks_like_silence(&fragment) {
             continue;
         }
+        let fragment = compact_sound_fragment(&fragment);
+        if fragment.is_empty() || looks_like_silence(&fragment) {
+            continue;
+        }
         if dialogue
             .as_deref()
             .is_some_and(|line| sound_fragment_is_dialogue_covered(&fragment, line))
@@ -2015,6 +2019,57 @@ fn compact_sound_clause(sound: &str, dialogue: Option<&str>) -> Option<String> {
     } else {
         Some(kept.join("，"))
     }
+}
+
+fn compact_sound_fragment(fragment: &str) -> String {
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    loop {
+        let mut changed = false;
+        for prefix in [
+            "伴随",
+            "伴着",
+            "伴有",
+            "夹杂着",
+            "夹杂",
+            "传来",
+            "响起",
+            "回荡着",
+            "回荡",
+            "只剩下",
+            "只剩",
+            "能听见",
+            "听见",
+            "可闻",
+            "耳边传来",
+            "空气里只剩",
+        ] {
+            let Some(stripped) = compacted.strip_prefix(prefix) else {
+                continue;
+            };
+            let stripped = stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        ':' | '：' | ';' | '；' | ',' | '，' | '/' | '／' | '、' | '的'
+                    )
+            });
+            if stripped.chars().count() < 2 {
+                continue;
+            }
+            compacted = stripped.to_string();
+            changed = true;
+            break;
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
 }
 
 fn split_prompt_clause_fragments(value: &str) -> Vec<String> {
@@ -3151,6 +3206,31 @@ mod tests {
 
         assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
         assert!(!prompt.contains("Sound:"));
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_sound_wrapper_prefixes() {
+        let prompt = build_video_prompt(
+            Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、驻足回头、压抑、冷调逆光、无台词、伴随风声回响，传来木门吱呀声、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Sound: 风声回响，木门吱呀声."), "{prompt}");
+        assert!(!prompt.contains("Sound: 伴随风声回响"));
+        assert!(!prompt.contains("传来木门吱呀声"));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_sound_wrapper_when_only_dialogue_payload_remains() {
+        let prompt = build_video_prompt(
+            Some("（主角驻足回头、旧宅门厅、主角、5秒、中景、静止、驻足回头、压抑、冷调逆光、你终于来了、耳边传来轻声说你终于来了，空气里只剩无音效、A12）"),
+            None,
+            None,
+        );
+
+        assert!(prompt.contains("Dialogue or voice-over: 你终于来了."));
+        assert!(!prompt.contains("Sound:"), "{prompt}");
     }
 
     #[test]
