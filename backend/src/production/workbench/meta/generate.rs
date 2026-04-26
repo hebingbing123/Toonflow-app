@@ -1135,8 +1135,12 @@ fn build_video_prompt(
     match structured_fields.as_ref() {
         Some(fields) => {
             let compacted_dialogue = compact_dialogue_clause(&fields.dialogue);
-            let mut subject =
-                compact_subject_clause(&fields.subject, &asset_coverage, &prompt_coverage);
+            let mut subject = compact_subject_clause(
+                &fields.subject,
+                &asset_coverage,
+                &prompt_coverage,
+                Some(fields.action.as_str()),
+            );
             let setting = compact_setting_clause(
                 &fields.setting,
                 &asset_coverage,
@@ -2271,8 +2275,10 @@ fn compact_subject_clause(
     subject: &str,
     asset_coverage: &[String],
     _prompt_coverage: &[String],
+    action: Option<&str>,
 ) -> Option<String> {
-    compact_prompt_clause(subject, asset_coverage, None, PromptClauseKind::Subject)
+    let subject = trim_subject_action_overlap(subject, action).unwrap_or_else(|| subject.into());
+    compact_prompt_clause(&subject, asset_coverage, None, PromptClauseKind::Subject)
 }
 
 fn compact_setting_clause(
@@ -2694,6 +2700,40 @@ fn strip_prompt_subject_role_prefix(value: &str) -> Option<&str> {
             })
         })
     })
+}
+
+fn trim_subject_action_overlap(subject: &str, action: Option<&str>) -> Option<String> {
+    let subject = normalize_prompt_text(subject);
+    let action = action.map(normalize_prompt_text).unwrap_or_default();
+    if subject.is_empty() || action.is_empty() {
+        return None;
+    }
+
+    let Some(identity_tail) = strip_prompt_subject_role_prefix(&subject) else {
+        return None;
+    };
+    if identity_tail.chars().count() < 3 {
+        return None;
+    }
+
+    for overlap_len in (3..=identity_tail.chars().count().min(12)).rev() {
+        let overlap = identity_tail.chars().take(overlap_len).collect::<String>();
+        if overlap.chars().count() < 3 || !action.contains(&overlap) {
+            continue;
+        }
+        let Some(trimmed) = subject.strip_suffix(&overlap) else {
+            continue;
+        };
+        let trimmed = normalize_prompt_clause_compaction(trimmed, PromptClauseKind::Subject);
+        if trimmed.chars().count() < 2
+            || canonical_prompt_fragment(&trimmed) == canonical_prompt_fragment(&subject)
+        {
+            continue;
+        }
+        return Some(trimmed);
+    }
+
+    None
 }
 
 fn normalize_prompt_clause_compaction(fragment: &str, kind: PromptClauseKind) -> String {
@@ -4405,6 +4445,59 @@ mod tests {
         assert!(prompt.contains("Subject: 冲出旧宅走廊."));
         assert!(prompt.contains("Action: 快步推门冲出."));
         assert!(!prompt.contains("Action: 主角快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_subject_action_overlap_when_subject_identity_remains() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出旧宅后回望、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Subject: 主角."), "{prompt}");
+        assert!(
+            prompt.contains("Action: 快步推门冲出旧宅后回望."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("Subject: 主角冲出旧宅."), "{prompt}");
+    }
+
+    #[test]
+    fn build_video_prompt_drops_subject_after_overlap_trim_when_role_anchor_already_covers_identity(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出旧宅后回望、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
+        assert!(!prompt.contains("Subject:"), "{prompt}");
+        assert!(
+            prompt.contains("Action: 快步推门冲出旧宅后回望."),
+            "{prompt}"
+        );
     }
 
     #[test]
