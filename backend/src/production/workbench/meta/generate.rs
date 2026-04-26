@@ -31,15 +31,8 @@ const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
-const LOCAL_SHOT_FRAMING_KEYWORDS: [&str; 7] = [
-    "低机位",
-    "高机位",
-    "特写",
-    "近景",
-    "中景",
-    "全景",
-    "远景",
-];
+const LOCAL_SHOT_FRAMING_KEYWORDS: [&str; 7] =
+    ["低机位", "高机位", "特写", "近景", "中景", "全景", "远景"];
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -426,25 +419,25 @@ async fn load_pending_video_observation_note(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let note =
-        select_pending_rejected_video_observation_note(&rows, storyboard_numeric_id, current_prompt_seed);
-    let prioritized_style_note = select_selected_video_memory_notes(
+    let note = select_pending_rejected_video_observation_note(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
-    )
-    .into_iter()
-    .next()
-    .or_else(|| {
-        select_script_video_style_memory_notes(&rows)
+    );
+    let prioritized_style_note =
+        select_selected_video_memory_notes(&rows, storyboard_numeric_id, current_prompt_seed)
             .into_iter()
             .next()
-    })
-    .or_else(|| {
-        select_project_video_style_memory_notes(&rows)
-            .into_iter()
-            .next()
-    });
+            .or_else(|| {
+                select_script_video_style_memory_notes(&rows)
+                    .into_iter()
+                    .next()
+            })
+            .or_else(|| {
+                select_project_video_style_memory_notes(&rows)
+                    .into_iter()
+                    .next()
+            });
 
     Ok(note
         .filter(|note| {
@@ -473,10 +466,14 @@ fn video_prompt_observation_conflicts_with_style(
         return style_note.contains("低机位") || style_note.contains("高机位");
     }
     if observation == "avoid oppressive or frantic mood" {
-        return style_note.contains("压迫") || style_note.contains("紧张") || style_note.contains("冷峻");
+        return style_note.contains("压迫")
+            || style_note.contains("紧张")
+            || style_note.contains("冷峻");
     }
     if observation == "avoid overly cold emotional tone" {
-        return style_note.contains("冷调") || style_note.contains("冷色") || style_note.contains("冷峻");
+        return style_note.contains("冷调")
+            || style_note.contains("冷色")
+            || style_note.contains("冷峻");
     }
     if observation == "avoid flat cold lighting" {
         return style_note.contains("光影")
@@ -807,27 +804,24 @@ fn build_video_prompt(
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
     match structured_fields.as_ref() {
         Some(fields) => {
-            if !fields.subject.is_empty()
-                && !prompt_fragment_is_covered(&fields.subject, &asset_coverage)
-            {
-                clauses.push(format!(
-                    "Subject: {}.",
-                    clip_prompt_fragment(&fields.subject, 72)
-                ));
+            let mut subject =
+                compact_subject_clause(&fields.subject, &asset_coverage, &prompt_coverage);
+            let setting =
+                compact_setting_clause(&fields.setting, &asset_coverage, &prompt_coverage);
+            let action = compact_action_clause(&fields.action, &asset_coverage, &prompt_coverage);
+
+            if prompt_clauses_substantially_overlap(subject.as_deref(), action.as_deref()) {
+                subject = None;
             }
-            if !fields.setting.is_empty()
-                && !prompt_fragment_is_covered(&fields.setting, &asset_coverage)
-            {
-                clauses.push(format!(
-                    "Setting: {}.",
-                    clip_prompt_fragment(&fields.setting, 48)
-                ));
+
+            if let Some(subject) = subject {
+                clauses.push(format!("Subject: {}.", clip_prompt_fragment(&subject, 72)));
             }
-            if !fields.action.is_empty() {
-                clauses.push(format!(
-                    "Action: {}.",
-                    clip_prompt_fragment(&fields.action, 72)
-                ));
+            if let Some(setting) = setting {
+                clauses.push(format!("Setting: {}.", clip_prompt_fragment(&setting, 48)));
+            }
+            if let Some(action) = action {
+                clauses.push(format!("Action: {}.", clip_prompt_fragment(&action, 72)));
             }
             let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
                 .into_iter()
@@ -1306,6 +1300,190 @@ fn collect_prompt_coverage(
     .map(normalize_prompt_text)
     .filter(|fragment| !fragment.is_empty())
     .collect()
+}
+
+fn compact_subject_clause(
+    subject: &str,
+    asset_coverage: &[String],
+    prompt_coverage: &[String],
+) -> Option<String> {
+    compact_prompt_clause(
+        subject,
+        asset_coverage,
+        prompt_coverage,
+        PromptClauseKind::Subject,
+    )
+}
+
+fn compact_setting_clause(
+    setting: &str,
+    asset_coverage: &[String],
+    prompt_coverage: &[String],
+) -> Option<String> {
+    compact_prompt_clause(
+        setting,
+        asset_coverage,
+        prompt_coverage,
+        PromptClauseKind::Setting,
+    )
+}
+
+fn compact_action_clause(
+    action: &str,
+    asset_coverage: &[String],
+    prompt_coverage: &[String],
+) -> Option<String> {
+    compact_prompt_clause(
+        action,
+        asset_coverage,
+        prompt_coverage,
+        PromptClauseKind::Action,
+    )
+}
+
+#[derive(Debug, Clone, Copy)]
+enum PromptClauseKind {
+    Subject,
+    Setting,
+    Action,
+}
+
+fn compact_prompt_clause(
+    raw: &str,
+    asset_coverage: &[String],
+    _prompt_coverage: &[String],
+    kind: PromptClauseKind,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(raw);
+    if normalized.is_empty() || prompt_fragment_has_direct_coverage(&normalized, asset_coverage) {
+        return None;
+    }
+
+    let mut compacted = strip_leading_covered_prompt_fragment(&normalized, asset_coverage);
+    compacted = normalize_prompt_clause_compaction(&compacted, kind);
+    if compacted.is_empty() {
+        return None;
+    }
+    Some(compacted)
+}
+
+fn prompt_fragment_has_direct_coverage(fragment: &str, coverage: &[String]) -> bool {
+    let canonical_fragment = canonical_prompt_fragment(fragment);
+    if canonical_fragment.is_empty() {
+        return false;
+    }
+    coverage
+        .iter()
+        .map(|entry| canonical_prompt_fragment(entry))
+        .any(|existing| !existing.is_empty() && existing == canonical_fragment)
+}
+
+fn strip_leading_covered_prompt_fragment(fragment: &str, coverage: &[String]) -> String {
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut candidates = coverage
+        .iter()
+        .map(|entry| canonical_prompt_fragment(entry))
+        .filter(|entry| !entry.is_empty())
+        .collect::<Vec<_>>();
+    candidates.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &candidates {
+            if candidate.chars().count() < 2 {
+                continue;
+            }
+            let stripped = strip_prompt_prefix_candidate(&compacted, candidate);
+            let Some(stripped) = stripped else { continue };
+            let stripped = stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        ':' | '：'
+                            | ';'
+                            | '；'
+                            | ','
+                            | '，'
+                            | '/'
+                            | '／'
+                            | '、'
+                            | '的'
+                            | '在'
+                            | '向'
+                            | '朝'
+                            | '往'
+                            | '从'
+                    )
+            });
+            if stripped.chars().count() < 2 {
+                continue;
+            }
+            compacted = stripped.to_string();
+            changed = true;
+            break;
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
+}
+
+fn strip_prompt_prefix_candidate<'a>(fragment: &'a str, candidate: &str) -> Option<&'a str> {
+    fragment.strip_prefix(candidate).or_else(|| {
+        strip_prompt_leading_bridge(fragment).and_then(|value| value.strip_prefix(candidate))
+    })
+}
+
+fn strip_prompt_leading_bridge(fragment: &str) -> Option<&str> {
+    let trimmed = fragment.trim_start();
+    ["在", "于", "向", "朝", "往", "从", "自"]
+        .into_iter()
+        .find_map(|prefix| trimmed.strip_prefix(prefix))
+}
+
+fn normalize_prompt_clause_compaction(fragment: &str, kind: PromptClauseKind) -> String {
+    let compacted = normalize_prompt_text(fragment)
+        .trim_matches(|ch: char| {
+            ch.is_whitespace()
+                || matches!(
+                    ch,
+                    ':' | '：' | ';' | '；' | ',' | '，' | '/' | '／' | '、' | '和' | '与'
+                )
+        })
+        .to_string();
+    if compacted.is_empty() {
+        return compacted;
+    }
+    match kind {
+        PromptClauseKind::Setting => compacted
+            .trim_start_matches(|ch: char| matches!(ch, '的'))
+            .to_string(),
+        PromptClauseKind::Subject | PromptClauseKind::Action => compacted,
+    }
+}
+
+fn prompt_clauses_substantially_overlap(lhs: Option<&str>, rhs: Option<&str>) -> bool {
+    let Some(lhs) = lhs
+        .map(canonical_prompt_fragment)
+        .filter(|value| !value.is_empty())
+    else {
+        return false;
+    };
+    let Some(rhs) = rhs
+        .map(canonical_prompt_fragment)
+        .filter(|value| !value.is_empty())
+    else {
+        return false;
+    };
+    lhs == rhs
+        || (lhs.chars().count() >= 6 && rhs.contains(&lhs))
+        || (rhs.chars().count() >= 6 && lhs.contains(&rhs))
 }
 
 fn extend_prompt_coverage(target: &mut Vec<String>, anchors: &[String]) {
@@ -2219,6 +2397,99 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_compacts_subject_and_action_leading_role_name_when_anchored() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅走廊、旧宅走廊、主角、5秒、中景、稳定跟拍、主角快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."));
+        assert!(prompt.contains("Subject: 冲出旧宅走廊."));
+        assert!(prompt.contains("Action: 快步推门冲出."));
+        assert!(!prompt.contains("Action: 主角快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_setting_prefix_already_covered_by_scene_anchor() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角驻足观察、旧宅走廊尽头的门厅、主角、5秒、中景、稳定跟拍、缓慢停步抬头观察、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Scene anchor: 旧宅走廊:潮湿斑驳，冷色长廊."));
+        assert!(prompt.contains("Setting: 尽头的门厅."));
+        assert!(!prompt.contains("Setting: 旧宅走廊尽头的门厅."));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_subject_when_compaction_makes_it_duplicate_action() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角快步推门冲出、旧宅走廊、主角、5秒、中景、稳定跟拍、主角快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Subject:"));
+        assert!(prompt.contains("Action: 快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_compacts_leading_bridge_before_scene_prefix() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角在旧宅走廊尽头回头、在旧宅走廊尽头的门厅、主角、5秒、中景、稳定跟拍、在旧宅走廊尽头停步回头、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Setting: 尽头的门厅."), "{prompt}");
+        assert!(prompt.contains("Action: 尽头停步回头."), "{prompt}");
+        assert!(!prompt.contains("Setting: 在旧宅走廊尽头的门厅."));
+        assert!(!prompt.contains("Action: 在旧宅走廊尽头停步回头."));
+    }
+
+    #[test]
     fn build_video_prompt_keeps_only_strongest_matching_scene_and_tool_anchor() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -2541,7 +2812,8 @@ mod tests {
     }
 
     #[test]
-    fn prioritized_video_prompt_memory_skips_exact_storyboard_selection_when_it_only_repeats_current_prompt() {
+    fn prioritized_video_prompt_memory_skips_exact_storyboard_selection_when_it_only_repeats_current_prompt(
+    ) {
         let rows = vec![
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
@@ -2570,7 +2842,8 @@ mod tests {
     }
 
     #[test]
-    fn prioritized_video_prompt_memory_prefers_script_summary_over_neighbor_local_framing_when_context_is_missing() {
+    fn prioritized_video_prompt_memory_prefers_script_summary_over_neighbor_local_framing_when_context_is_missing(
+    ) {
         let rows = vec![
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
