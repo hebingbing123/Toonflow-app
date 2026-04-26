@@ -31,12 +31,21 @@ mod tests {
 
     #[test]
     fn query_body_accepts_camel_case() {
-        let b: QueryMemoryBody =
-            serde_json::from_str(r#"{"projectId":1,"agentType":"scriptAgent","episodesId":2}"#)
-                .unwrap();
+        let b: QueryMemoryBody = serde_json::from_str(
+            r#"{"projectId":1,"agentType":"scriptAgent","episodesId":2,"memoryType":"summary"}"#,
+        )
+        .unwrap();
         assert_eq!(b.project_id, 1);
         assert_eq!(b.agent_type, "scriptAgent");
         assert_eq!(b.episodes_id, Some(2));
+        assert_eq!(b.memory_type, "summary");
+    }
+
+    #[test]
+    fn query_defaults_to_message_memory_type() {
+        let b: QueryMemoryBody =
+            serde_json::from_str(r#"{"projectId":1,"agentType":"scriptAgent"}"#).unwrap();
+        assert_eq!(b.memory_type, "message");
     }
 
     #[test]

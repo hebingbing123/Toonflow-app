@@ -11,6 +11,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
   required TextEditingController projectIdCtrl,
   required TextEditingController agentTypeCtrl,
   required TextEditingController episodesIdCtrl,
+  required TextEditingController queryTypeCtrl,
   required TextEditingController appendContentCtrl,
   required TextEditingController appendRoleCtrl,
   required TextEditingController clearTypeCtrl,
@@ -53,6 +54,7 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
     projectIdCtrl: projectIdCtrl,
     agentTypeCtrl: agentTypeCtrl,
     episodesIdCtrl: episodesIdCtrl,
+    queryTypeCtrl: queryTypeCtrl,
     appendContentCtrl: appendContentCtrl,
     appendRoleCtrl: appendRoleCtrl,
     clearTypeCtrl: clearTypeCtrl,
@@ -89,6 +91,7 @@ void main() {
   late TextEditingController projectIdCtrl;
   late TextEditingController agentTypeCtrl;
   late TextEditingController episodesIdCtrl;
+  late TextEditingController queryTypeCtrl;
   late TextEditingController appendContentCtrl;
   late TextEditingController appendRoleCtrl;
   late TextEditingController clearTypeCtrl;
@@ -97,6 +100,7 @@ void main() {
     projectIdCtrl = TextEditingController(text: '11');
     agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     episodesIdCtrl = TextEditingController(text: '3');
+    queryTypeCtrl = TextEditingController(text: 'summary');
     appendContentCtrl = TextEditingController(text: '需要补一个反转伏笔。');
     appendRoleCtrl = TextEditingController(text: 'user');
     clearTypeCtrl = TextEditingController(text: 'message');
@@ -106,6 +110,7 @@ void main() {
     projectIdCtrl.dispose();
     agentTypeCtrl.dispose();
     episodesIdCtrl.dispose();
+    queryTypeCtrl.dispose();
     appendContentCtrl.dispose();
     appendRoleCtrl.dispose();
     clearTypeCtrl.dispose();
@@ -122,6 +127,7 @@ void main() {
               projectIdCtrl: projectIdCtrl,
               agentTypeCtrl: agentTypeCtrl,
               episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
               appendContentCtrl: appendContentCtrl,
               appendRoleCtrl: appendRoleCtrl,
               clearTypeCtrl: clearTypeCtrl,
@@ -135,6 +141,7 @@ void main() {
     expect(find.text('Agent 记忆工作台'), findsOneWidget);
     expect(find.textContaining('项目 2 个'), findsOneWidget);
     expect(find.text('已读取 2 条记忆。'), findsOneWidget);
+    expect(find.text('message / summary / all'), findsOneWidget);
     expect(find.text('2 条记忆'), findsOneWidget);
     expect(find.text('追加记忆'), findsNWidgets(2));
     expect(find.text('清理记忆'), findsOneWidget);
@@ -152,6 +159,7 @@ void main() {
               projectIdCtrl: projectIdCtrl,
               agentTypeCtrl: agentTypeCtrl,
               episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
               appendContentCtrl: appendContentCtrl,
               appendRoleCtrl: appendRoleCtrl,
               clearTypeCtrl: clearTypeCtrl,
@@ -186,6 +194,7 @@ void main() {
               projectIdCtrl: projectIdCtrl,
               agentTypeCtrl: agentTypeCtrl,
               episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
               appendContentCtrl: appendContentCtrl,
               appendRoleCtrl: appendRoleCtrl,
               clearTypeCtrl: clearTypeCtrl,

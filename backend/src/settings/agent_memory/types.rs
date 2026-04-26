@@ -9,6 +9,13 @@ pub(crate) struct QueryMemoryBody {
     pub(crate) agent_type: String,
     #[serde(default)]
     pub(crate) episodes_id: Option<i32>,
+    /// `message` | `summary` | `all` — default `message` to preserve Electron-era query behavior.
+    #[serde(default = "default_query_memory_type")]
+    pub(crate) memory_type: String,
+}
+
+fn default_query_memory_type() -> String {
+    "message".to_string()
 }
 
 #[derive(Debug, Deserialize)]

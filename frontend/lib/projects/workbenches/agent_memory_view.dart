@@ -15,6 +15,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
     required this.projectIdCtrl,
     required this.agentTypeCtrl,
     required this.episodesIdCtrl,
+    required this.queryTypeCtrl,
     required this.appendContentCtrl,
     required this.appendRoleCtrl,
     required this.clearTypeCtrl,
@@ -31,6 +32,7 @@ class ProjectsAgentMemoryWorkbenchDialogViewModel {
   final TextEditingController projectIdCtrl;
   final TextEditingController agentTypeCtrl;
   final TextEditingController episodesIdCtrl;
+  final TextEditingController queryTypeCtrl;
   final TextEditingController appendContentCtrl;
   final TextEditingController appendRoleCtrl;
   final TextEditingController clearTypeCtrl;
@@ -140,6 +142,14 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 controller: model.episodesIdCtrl,
                 decoration: const InputDecoration(labelText: 'episodes id（可空）'),
               ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: model.queryTypeCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'query type',
+                  helperText: 'message / summary / all',
+                ),
+              ),
               if (model.memorySummary != null) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -160,7 +170,11 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       ? Map<String, dynamic>.from(row)
                       : <String, dynamic>{};
                   final role = map['role']?.toString() ?? 'unknown';
-                  final content = map['content']?.toString() ?? '';
+                  final rawContent = map['content'];
+                  final blocks = rawContent is List ? rawContent : const <dynamic>[];
+                  final content = blocks.isNotEmpty && blocks.first is Map
+                      ? (blocks.first as Map)['data']?.toString() ?? ''
+                      : rawContent?.toString() ?? '';
                   final shortContent = content.length > 60
                       ? '${content.substring(0, 60)}…'
                       : content;

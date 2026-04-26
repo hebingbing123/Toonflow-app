@@ -23,6 +23,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   late final TextEditingController _projectIdCtrl;
   late final TextEditingController _agentTypeCtrl;
   late final TextEditingController _episodesIdCtrl;
+  late final TextEditingController _queryTypeCtrl;
   late final TextEditingController _appendContentCtrl;
   late final TextEditingController _appendRoleCtrl;
   late final TextEditingController _clearTypeCtrl;
@@ -46,6 +47,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     );
     _agentTypeCtrl = TextEditingController(text: 'scriptAgent');
     _episodesIdCtrl = TextEditingController();
+    _queryTypeCtrl = TextEditingController(text: 'message');
     _appendContentCtrl = TextEditingController();
     _appendRoleCtrl = TextEditingController(text: 'user');
     _clearTypeCtrl = TextEditingController(text: 'message');
@@ -57,6 +59,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     _projectIdCtrl.dispose();
     _agentTypeCtrl.dispose();
     _episodesIdCtrl.dispose();
+    _queryTypeCtrl.dispose();
     _appendContentCtrl.dispose();
     _appendRoleCtrl.dispose();
     _clearTypeCtrl.dispose();
@@ -100,8 +103,9 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   Future<void> _queryMemory() async {
     final projectId = _projectId;
     final agentType = _agentTypeCtrl.text.trim();
-    if (projectId == null || agentType.isEmpty) {
-      setState(() => _statusLine = '请填写合法的项目 numeric ID 和 agent type。');
+    final memoryType = _queryTypeCtrl.text.trim();
+    if (projectId == null || agentType.isEmpty || memoryType.isEmpty) {
+      setState(() => _statusLine = '请填写合法的项目 numeric ID、agent type 和 query type。');
       return;
     }
     setState(() {
@@ -114,11 +118,12 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         projectId: projectId,
         agentType: agentType,
         episodesId: _episodesId,
+        memoryType: memoryType,
       );
       if (!mounted) return;
       setState(() {
         _memoryRows = rows;
-        _memorySummary = '已读取 ${rows.length} 条记忆。';
+        _memorySummary = '已读取 ${rows.length} 条 $memoryType 记忆。';
         _loadingMemory = false;
       });
     } on RustApiException catch (e) {
@@ -239,6 +244,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         projectIdCtrl: _projectIdCtrl,
         agentTypeCtrl: _agentTypeCtrl,
         episodesIdCtrl: _episodesIdCtrl,
+        queryTypeCtrl: _queryTypeCtrl,
         appendContentCtrl: _appendContentCtrl,
         appendRoleCtrl: _appendRoleCtrl,
         clearTypeCtrl: _clearTypeCtrl,

@@ -30,6 +30,16 @@ pub(crate) async fn query_memory(
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
     let pool = state.require_pool()?;
+    let memory_type = match body.memory_type.trim() {
+        "" | "message" => "message",
+        "summary" => "summary",
+        "all" => "all",
+        other => {
+            return Err(ApiError::BadRequest(format!(
+                "memoryType must be one of: message, summary, all (got {other})"
+            )));
+        }
+    };
 
     ensure_project_owned(pool, uid, body.project_id).await?;
     observe::memory_http(uid, body.project_id, "query");
@@ -42,7 +52,7 @@ pub(crate) async fn query_memory(
           AND numeric_project_id = $2
           AND agent_type = $3
           AND episodes_id IS NOT DISTINCT FROM $4
-          AND memory_type = 'message'
+          AND ($5 = 'all' OR memory_type = $5)
         ORDER BY create_time_ms ASC
         "#,
     )
@@ -50,6 +60,7 @@ pub(crate) async fn query_memory(
     .bind(body.project_id)
     .bind(agent_type)
     .bind(body.episodes_id)
+    .bind(memory_type)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

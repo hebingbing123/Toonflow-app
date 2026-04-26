@@ -12,12 +12,14 @@ Future<List<dynamic>> queryAgentMemory(
   required int projectId,
   required String agentType,
   int? episodesId,
+  String memoryType = 'message',
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/agents/memory/query');
   final body = <String, dynamic>{
     'projectId': projectId,
     'agentType': agentType,
     'episodesId': episodesId,
+    'memoryType': memoryType,
   };
   final res = await http
       .post(
