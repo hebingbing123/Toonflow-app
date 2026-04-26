@@ -677,19 +677,27 @@ fn build_video_prompt(
     if !tool_anchors.is_empty() {
         clauses.push(format!("Prop anchor: {}.", tool_anchors.join("; ")));
     }
+    let mut asset_coverage = Vec::new();
+    extend_prompt_coverage(&mut asset_coverage, &role_anchors);
+    extend_prompt_coverage(&mut asset_coverage, &scene_anchors);
+    extend_prompt_coverage(&mut asset_coverage, &tool_anchors);
     let mut prompt_coverage = collect_prompt_coverage(structured_fields.as_ref());
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
     match structured_fields.as_ref() {
         Some(fields) => {
-            if !fields.subject.is_empty() {
+            if !fields.subject.is_empty()
+                && !prompt_fragment_is_covered(&fields.subject, &asset_coverage)
+            {
                 clauses.push(format!(
                     "Subject: {}.",
                     clip_prompt_fragment(&fields.subject, 72)
                 ));
             }
-            if !fields.setting.is_empty() {
+            if !fields.setting.is_empty()
+                && !prompt_fragment_is_covered(&fields.setting, &asset_coverage)
+            {
                 clauses.push(format!(
                     "Setting: {}.",
                     clip_prompt_fragment(&fields.setting, 48)
@@ -1885,6 +1893,7 @@ mod tests {
             prompt.contains("Character anchor: 主角:黑色风衣，短发，克制冷峻."),
         );
         assert!(!prompt.contains("路人:灰色外套"));
+        assert!(!prompt.contains("Subject: 主角."));
     }
 
     #[test]
@@ -1942,6 +1951,7 @@ mod tests {
         assert!(prompt.contains("Prop anchor: 青铜匕首:刀身旧磨损，寒光克制."));
         assert!(!prompt.contains("街角:雨夜霓虹"));
         assert!(!prompt.contains("雨伞:黑伞"));
+        assert!(!prompt.contains("Setting: 旧宅走廊."));
     }
 
     #[test]
