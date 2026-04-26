@@ -3549,11 +3549,15 @@ fn select_video_prompt_memory_notes(
                 .and_then(|value| {
                     compact_storyboard_memory_continuity_note(&value, structured_fields.as_ref())
                 })
+                .and_then(|value| compact_auto_scope_continuity_summary(&value))
                 .or_else(|| {
                     extract_key_value(content, "summary")
                         .or_else(|| extract_key_value(content, "result"))
-                        .map(|value| {
-                            clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
+                        .and_then(|value| {
+                            compact_auto_scope_continuity_summary(&clip_prompt_fragment(
+                                &value,
+                                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+                            ))
                         })
                 })?;
             let continuity_score = score_continuity_note(&note, structured_fields.as_ref());
@@ -3588,6 +3592,56 @@ fn select_video_prompt_memory_notes(
         }
     }
     notes
+}
+
+fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let fragments = normalized
+        .split('，')
+        .map(strip_auto_scope_continuity_scaffolding)
+        .filter(|fragment| !fragment.is_empty())
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
+fn strip_auto_scope_continuity_scaffolding(fragment: &str) -> String {
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    for pattern in [
+        "当前镜头已确认的",
+        "当前分镜已确认的",
+        "本镜头已确认的",
+        "该镜头已确认的",
+        "当前镜头已确认",
+        "当前分镜已确认",
+        "本镜头已确认",
+        "该镜头已确认",
+    ] {
+        compacted = compacted.replace(pattern, "");
+    }
+    for pattern in ["当前镜头", "当前分镜", "本镜头", "该镜头"] {
+        compacted = compacted.replace(pattern, "");
+    }
+    compacted = normalize_prompt_text(&compacted);
+    if compacted == "已确认" || compacted == "镜头已确认" || compacted == "分镜已确认"
+    {
+        return String::new();
+    }
+    clip_prompt_fragment(&compacted, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
 }
 
 fn compact_storyboard_memory_continuity_note(
@@ -5379,6 +5433,39 @@ mod tests {
             content:
                 "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=当前镜头已确认"
                     .to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)).is_empty());
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_strips_current_shot_scaffolding_from_auto_scope_summary() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=保持当前镜头角色站位不要跳轴".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            vec!["保持角色站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_drops_auto_scope_summary_after_scaffolding_becomes_empty() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=当前分镜已确认".to_string(),
         }];
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("主角冲出旧宅".into()),
