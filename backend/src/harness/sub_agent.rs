@@ -25,6 +25,7 @@ const AUTO_MEMORY_MAX_CHARS: usize = 320;
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct ScopeSignature {
     storyboard_ids: Vec<i64>,
+    storyboard_prompt_seeds: Vec<(i64, String)>,
     asset_ids: Vec<i64>,
     asset_types: Vec<&'static str>,
     focus_sections: Vec<&'static str>,
@@ -309,9 +310,47 @@ fn parse_relative_script_offset(arguments: &Value, key: &str) -> Option<i64> {
     }
 }
 
-fn scope_signature_from_args(arguments: &Value) -> ScopeSignature {
+fn parse_storyboard_prompt_seed_scope(scope: Option<&str>) -> Vec<(i64, String)> {
+    let Some(scope) = scope.map(str::trim).filter(|value| !value.is_empty()) else {
+        return Vec::new();
+    };
+    if let Some(prompt_seed) = scope.strip_prefix("promptSeed=") {
+        let prompt_seed = prompt_seed.trim();
+        return (!prompt_seed.is_empty())
+            .then(|| vec![(0_i64, prompt_seed.to_string())])
+            .unwrap_or_default();
+    }
+
+    let Some(mapped) = scope.strip_prefix("storyboardPromptSeeds=") else {
+        return Vec::new();
+    };
+    let mut seeds = mapped
+        .split(',')
+        .filter_map(|entry| {
+            let (storyboard_id, prompt_seed) = entry.trim().split_once(':')?;
+            let storyboard_id = storyboard_id.trim().parse::<i64>().ok()?;
+            let prompt_seed = prompt_seed.trim();
+            (storyboard_id > 0 && !prompt_seed.is_empty())
+                .then(|| (storyboard_id, prompt_seed.to_string()))
+        })
+        .collect::<Vec<_>>();
+    seeds.sort_by(|left, right| left.0.cmp(&right.0).then(left.1.cmp(&right.1)));
+    seeds.dedup();
+    seeds
+}
+
+fn scope_signature_from_args(arguments: &Value, prompt_seed_scope: Option<&str>) -> ScopeSignature {
+    let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
+    let mut storyboard_prompt_seeds = parse_storyboard_prompt_seed_scope(prompt_seed_scope);
+    if storyboard_ids.len() == 1
+        && storyboard_prompt_seeds.len() == 1
+        && storyboard_prompt_seeds[0].0 == 0
+    {
+        storyboard_prompt_seeds[0].0 = storyboard_ids[0];
+    }
     ScopeSignature {
-        storyboard_ids: parse_positive_id_list(arguments, "storyboardIds"),
+        storyboard_ids,
+        storyboard_prompt_seeds,
         asset_ids: parse_positive_id_list(arguments, "assetIds"),
         asset_types: parse_asset_type_list(arguments, "assetTypes"),
         focus_sections: parse_focus_section_list(arguments, "focusSections"),
@@ -347,44 +386,59 @@ where
 }
 
 fn parse_scope_signature(content: &str) -> ScopeSignature {
-    let Some(scope_segment) = content
-        .split(" | ")
-        .find_map(|segment| segment.strip_prefix("scope="))
-    else {
-        return ScopeSignature::default();
-    };
-
     let mut signature = ScopeSignature::default();
-    for entry in scope_segment.split("; ") {
-        let Some((key, value)) = entry.split_once('=') else {
-            continue;
-        };
-        match key {
-            "storyboardIds" => signature.storyboard_ids = parse_scope_list(Some(value)),
-            "assetIds" => signature.asset_ids = parse_scope_list(Some(value)),
-            "assetTypes" => {
-                signature.asset_types = parse_scope_enum_list(Some(value), |raw| {
-                    match raw.to_ascii_lowercase().as_str() {
-                        "role" => Some("role"),
-                        "scene" => Some("scene"),
-                        "tool" => Some("tool"),
-                        _ => None,
+    for segment in content.split(" | ") {
+        if let Some(scope_segment) = segment.strip_prefix("scope=") {
+            for entry in scope_segment.split("; ") {
+                let Some((key, value)) = entry.split_once('=') else {
+                    continue;
+                };
+                match key {
+                    "storyboardIds" => signature.storyboard_ids = parse_scope_list(Some(value)),
+                    "assetIds" => signature.asset_ids = parse_scope_list(Some(value)),
+                    "assetTypes" => {
+                        signature.asset_types = parse_scope_enum_list(Some(value), |raw| match raw
+                            .to_ascii_lowercase()
+                            .as_str()
+                        {
+                            "role" => Some("role"),
+                            "scene" => Some("scene"),
+                            "tool" => Some("tool"),
+                            _ => None,
+                        })
                     }
-                })
+                    "focusSections" => {
+                        signature.focus_sections =
+                            parse_scope_enum_list(Some(value), |raw| match raw {
+                                "storySkeleton" => Some("storySkeleton"),
+                                "adaptationStrategy" => Some("adaptationStrategy"),
+                                "script" => Some("script"),
+                                _ => None,
+                            })
+                    }
+                    "novelIds" => signature.novel_ids = parse_scope_list(Some(value)),
+                    "relativeScriptOffset" => {
+                        signature.relative_script_offset =
+                            value.parse::<i64>().ok().filter(|v| *v != 0)
+                    }
+                    _ => {}
+                }
             }
-            "focusSections" => {
-                signature.focus_sections = parse_scope_enum_list(Some(value), |raw| match raw {
-                    "storySkeleton" => Some("storySkeleton"),
-                    "adaptationStrategy" => Some("adaptationStrategy"),
-                    "script" => Some("script"),
-                    _ => None,
-                })
+            continue;
+        }
+        if let Some(prompt_seed_segment) = segment.strip_prefix("promptSeed=") {
+            let prompt_seed = prompt_seed_segment.trim();
+            if let Some(storyboard_id) = signature.storyboard_ids.first().copied() {
+                if !prompt_seed.is_empty() {
+                    signature
+                        .storyboard_prompt_seeds
+                        .push((storyboard_id, prompt_seed.to_string()));
+                }
             }
-            "novelIds" => signature.novel_ids = parse_scope_list(Some(value)),
-            "relativeScriptOffset" => {
-                signature.relative_script_offset = value.parse::<i64>().ok().filter(|v| *v != 0)
-            }
-            _ => {}
+            continue;
+        }
+        if segment.starts_with("storyboardPromptSeeds=") {
+            signature.storyboard_prompt_seeds = parse_storyboard_prompt_seed_scope(Some(segment));
         }
     }
     signature
@@ -392,6 +446,7 @@ fn parse_scope_signature(content: &str) -> ScopeSignature {
 
 fn has_scope(signature: &ScopeSignature) -> bool {
     !signature.storyboard_ids.is_empty()
+        || !signature.storyboard_prompt_seeds.is_empty()
         || !signature.asset_ids.is_empty()
         || !signature.asset_types.is_empty()
         || !signature.focus_sections.is_empty()
@@ -406,8 +461,23 @@ fn overlap_count<T: Eq>(current: &[T], candidate: &[T]) -> usize {
         .count()
 }
 
+fn prompt_seed_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> usize {
+    current
+        .storyboard_prompt_seeds
+        .iter()
+        .filter(|(storyboard_id, prompt_seed)| {
+            candidate.storyboard_prompt_seeds.iter().any(
+                |(candidate_storyboard_id, candidate_prompt_seed)| {
+                    candidate_storyboard_id == storyboard_id && candidate_prompt_seed == prompt_seed
+                },
+            )
+        })
+        .count()
+}
+
 fn scope_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> usize {
     let mut score = 0;
+    score += prompt_seed_overlap_score(current, candidate) * 16;
     score += overlap_count(&current.storyboard_ids, &candidate.storyboard_ids) * 8;
     score += overlap_count(&current.asset_ids, &candidate.asset_ids) * 5;
     score += overlap_count(&current.asset_types, &candidate.asset_types) * 3;
@@ -421,12 +491,16 @@ fn scope_overlap_score(current: &ScopeSignature, candidate: &ScopeSignature) -> 
     score
 }
 
-fn select_auto_memory_entries(arguments: &Value, rows: Vec<String>) -> Vec<String> {
+fn select_auto_memory_entries(
+    arguments: &Value,
+    prompt_seed_scope: Option<&str>,
+    rows: Vec<String>,
+) -> Vec<String> {
     if rows.is_empty() {
         return rows;
     }
 
-    let current_scope = scope_signature_from_args(arguments);
+    let current_scope = scope_signature_from_args(arguments, prompt_seed_scope);
     if !has_scope(&current_scope) {
         return rows
             .into_iter()
@@ -747,6 +821,7 @@ async fn load_auto_memory_note(
     episodes_id: Option<i32>,
     agent_type: &str,
     arguments: &Value,
+    prompt_seed_scope: Option<&str>,
 ) -> Result<Option<String>, InvokeError> {
     let rows = sqlx::query_scalar(
         r#"
@@ -770,7 +845,7 @@ async fn load_auto_memory_note(
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
 
-    let rows = select_auto_memory_entries(arguments, rows);
+    let rows = select_auto_memory_entries(arguments, prompt_seed_scope, rows);
     if rows.is_empty() {
         return Ok(None);
     }
@@ -951,12 +1026,21 @@ pub async fn invoke_sub_agent_tool(
     let context_note = format!(
         "Harness context: {project_hint}, {script_hint}. Keep answer concise and actionable."
     );
+    let mut prompt_seed_scope = None;
     let memory_note = match (
         ctx.pool.as_ref(),
         ctx.project_numeric_id,
         agent_memory_type_for_tool(tool_name),
     ) {
         (Some(pool), Some(project_numeric_id), Some(agent_type)) => {
+            prompt_seed_scope = resolve_storyboard_prompt_seed_scope(
+                pool,
+                ctx.user_id,
+                project_numeric_id,
+                ctx.script_numeric_id,
+                arguments,
+            )
+            .await?;
             load_auto_memory_note(
                 pool,
                 ctx.user_id,
@@ -964,6 +1048,7 @@ pub async fn invoke_sub_agent_tool(
                 ctx.script_numeric_id,
                 agent_type,
                 arguments,
+                prompt_seed_scope.as_deref(),
             )
             .await?
         }
@@ -998,14 +1083,6 @@ pub async fn invoke_sub_agent_tool(
         ctx.project_numeric_id,
         agent_memory_type_for_tool(tool_name),
     ) {
-        let prompt_seed_scope = resolve_storyboard_prompt_seed_scope(
-            pool,
-            ctx.user_id,
-            project_numeric_id,
-            ctx.script_numeric_id,
-            arguments,
-        )
-        .await?;
         let snapshot = build_auto_memory_snapshot(
             tool_name,
             arguments,
@@ -1036,8 +1113,8 @@ pub async fn invoke_sub_agent_tool(
 mod tests {
     use super::{
         build_auto_memory_snapshot, format_storyboard_prompt_seed_scope, parse_review_summary,
-        parse_scope_signature, parse_tag_attributes, scope_signature_from_args,
-        select_auto_memory_entries, sub_agent_prompt_from_args,
+        parse_scope_signature, parse_storyboard_prompt_seed_scope, parse_tag_attributes,
+        scope_signature_from_args, select_auto_memory_entries, sub_agent_prompt_from_args,
     };
     use serde_json::json;
 
@@ -1200,16 +1277,20 @@ mod tests {
 
     #[test]
     fn scope_signature_from_args_keeps_compact_sorted_scope() {
-        let signature = scope_signature_from_args(&json!({
-            "storyboardIds": [9, 1, 9],
-            "assetIds": [5, 2, 5],
-            "assetTypes": ["scene", "role", "scene"],
-            "focusSections": ["script", "storySkeleton", "script"],
-            "novelIds": [8, 3, 8],
-            "relativeScriptOffset": -1
-        }));
+        let signature = scope_signature_from_args(
+            &json!({
+                "storyboardIds": [9, 1, 9],
+                "assetIds": [5, 2, 5],
+                "assetTypes": ["scene", "role", "scene"],
+                "focusSections": ["script", "storySkeleton", "script"],
+                "novelIds": [8, 3, 8],
+                "relativeScriptOffset": -1
+            }),
+            None,
+        );
 
         assert_eq!(signature.storyboard_ids, vec![1, 9]);
+        assert!(signature.storyboard_prompt_seeds.is_empty());
         assert_eq!(signature.asset_ids, vec![2, 5]);
         assert_eq!(signature.asset_types, vec!["role", "scene"]);
         assert_eq!(signature.focus_sections, vec!["script", "storySkeleton"]);
@@ -1220,12 +1301,29 @@ mod tests {
     #[test]
     fn parse_scope_signature_reads_snapshot_scope_segment() {
         let signature = parse_scope_signature(
-            "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=3,9; assetIds=5,7; assetTypes=role,scene | result=done",
+            "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=3,9; assetIds=5,7; assetTypes=role,scene | storyboardPromptSeeds=3:seed-3,9:seed-9 | result=done",
         );
 
         assert_eq!(signature.storyboard_ids, vec![3, 9]);
+        assert_eq!(
+            signature.storyboard_prompt_seeds,
+            vec![(3, "seed-3".to_string()), (9, "seed-9".to_string())]
+        );
         assert_eq!(signature.asset_ids, vec![5, 7]);
         assert_eq!(signature.asset_types, vec!["role", "scene"]);
+    }
+
+    #[test]
+    fn parse_storyboard_prompt_seed_scope_reads_multi_storyboard_seed_map() {
+        assert_eq!(
+            parse_storyboard_prompt_seed_scope(Some(
+                "storyboardPromptSeeds=14:seed-14-current,12:seed-12-current"
+            )),
+            vec![
+                (12, "seed-12-current".to_string()),
+                (14, "seed-14-current".to_string())
+            ]
+        );
     }
 
     #[test]
@@ -1236,6 +1334,7 @@ mod tests {
                 "assetIds": [7],
                 "assetTypes": ["scene"]
             }),
+            None,
             vec![
                 "tool=a | scope=storyboardIds=1; assetIds=2 | result=older".to_string(),
                 "tool=b | scope=storyboardIds=9; assetIds=7; assetTypes=scene | result=best"
@@ -1253,6 +1352,7 @@ mod tests {
     fn select_auto_memory_entries_falls_back_to_latest_when_scope_missing() {
         let rows = select_auto_memory_entries(
             &json!({}),
+            None,
             vec![
                 "tool=a | scope=storyboardIds=1 | result=latest".to_string(),
                 "tool=b | scope=storyboardIds=9 | result=older".to_string(),
@@ -1261,5 +1361,22 @@ mod tests {
 
         assert_eq!(rows.len(), 1);
         assert!(rows[0].contains("result=latest"));
+    }
+
+    #[test]
+    fn select_auto_memory_entries_prefers_matching_prompt_seed_over_stale_same_storyboard() {
+        let rows = select_auto_memory_entries(
+            &json!({
+                "storyboardIds": [12]
+            }),
+            Some("promptSeed=seed-12-current"),
+            vec![
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-stale | summary=旧版镜头走位".to_string(),
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=当前镜头角色站位".to_string(),
+            ],
+        );
+
+        assert_eq!(rows.len(), 2);
+        assert!(rows[0].contains("promptSeed=seed-12-current"));
     }
 }
