@@ -766,13 +766,80 @@ fn merge_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<Strin
     let mut fragments = Vec::new();
     for group in groups {
         for fragment in group {
-            push_negative_fragment_with_budget(&mut fragments, fragment);
+            push_negative_fragment_without_budget(&mut fragments, fragment);
         }
     }
-    if fragments.is_empty() {
+    fragments = compact_negative_fragment_families(fragments);
+    let mut budgeted = Vec::new();
+    for fragment in fragments {
+        push_negative_fragment_with_budget(&mut budgeted, &fragment);
+    }
+    if budgeted.is_empty() {
         None
     } else {
-        Some(fragments.join(", "))
+        Some(budgeted.join(", "))
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+struct CharacterConsistencyFlags {
+    face_distortion: bool,
+    identity_drift: bool,
+    costume_inconsistency: bool,
+}
+
+fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
+    let mut compacted = Vec::with_capacity(fragments.len());
+    let mut character_flags = CharacterConsistencyFlags::default();
+    let mut character_idx = None;
+
+    for (idx, fragment) in fragments.into_iter().enumerate() {
+        if let Some(flags) = parse_character_consistency_fragment(&fragment) {
+            character_idx.get_or_insert(idx);
+            character_flags.face_distortion |= flags.face_distortion;
+            character_flags.identity_drift |= flags.identity_drift;
+            character_flags.costume_inconsistency |= flags.costume_inconsistency;
+            continue;
+        }
+        compacted.push((idx, fragment));
+    }
+
+    if let Some(idx) = character_idx {
+        compacted.push((idx, render_character_consistency_fragment(character_flags)));
+    }
+    compacted.sort_by(|a, b| a.0.cmp(&b.0));
+    compacted.into_iter().map(|(_, fragment)| fragment).collect()
+}
+
+fn parse_character_consistency_fragment(fragment: &str) -> Option<CharacterConsistencyFlags> {
+    let canonical = canonical_negative_fragment(fragment);
+    match canonical.as_str() {
+        "avoid face distortion or identity drift" => Some(CharacterConsistencyFlags {
+            face_distortion: true,
+            identity_drift: true,
+            costume_inconsistency: false,
+        }),
+        "avoid costume or character drift" => Some(CharacterConsistencyFlags {
+            face_distortion: false,
+            identity_drift: true,
+            costume_inconsistency: true,
+        }),
+        "avoid face drift or costume inconsistency" => Some(CharacterConsistencyFlags {
+            face_distortion: false,
+            identity_drift: true,
+            costume_inconsistency: true,
+        }),
+        _ => None,
+    }
+}
+
+fn render_character_consistency_fragment(flags: CharacterConsistencyFlags) -> String {
+    if flags.face_distortion && flags.costume_inconsistency {
+        "avoid face distortion, identity drift, costume drift".to_string()
+    } else if flags.costume_inconsistency {
+        "avoid face drift or costume inconsistency".to_string()
+    } else {
+        "avoid face distortion or identity drift".to_string()
     }
 }
 
@@ -792,6 +859,14 @@ fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
         }
     }
     fragments
+}
+
+fn push_negative_fragment_without_budget(target: &mut Vec<String>, candidate: &str) {
+    if negative_fragment_is_covered(candidate, target) {
+        return;
+    }
+    target.retain(|existing| !negative_fragment_covers(candidate, existing));
+    target.push(candidate.to_string());
 }
 
 fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str) {
@@ -964,7 +1039,8 @@ mod tests {
 
         assert!(prompt.contains("avoid warped anatomy, blur, flicker"));
         assert!(prompt.contains("avoid warped hands or limbs"));
-        assert!(prompt.contains("avoid face drift or costume inconsistency"));
+        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(!prompt.contains("avoid costume or character drift"));
     }
 
     #[test]
@@ -1010,6 +1086,20 @@ mod tests {
         .expect("merged prompt");
 
         assert_eq!(merged, "avoid extra shot changes or wrong framing, avoid blur");
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_character_consistency_family() {
+        let merged = merge_negative_prompts(
+            Some("avoid face drift or costume inconsistency"),
+            Some("avoid face distortion or identity drift, avoid costume or character drift"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(
+            merged,
+            "avoid face distortion, identity drift, costume drift"
+        );
     }
 
     #[tokio::test]
@@ -1278,7 +1368,7 @@ mod tests {
             .get(&12)
             .and_then(|value| value.as_deref())
             .expect("storyboard 12 prompt");
-        assert!(prompt.contains("avoid face drift or costume inconsistency"));
+        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
     }
 
     #[test]
