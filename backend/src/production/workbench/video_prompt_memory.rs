@@ -501,6 +501,7 @@ pub(crate) async fn refresh_project_video_style_memory(
     .await
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == SCRIPT_VIDEO_STYLE_MEMORY_NAME)
@@ -509,6 +510,7 @@ pub(crate) fn select_script_video_style_memory_notes(rows: &[AgentMemoryRow]) ->
         .collect()
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn select_project_video_style_memory_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
     rows.iter()
         .filter(|row| row.name == PROJECT_VIDEO_STYLE_MEMORY_NAME)
@@ -566,12 +568,28 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
         .collect()
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn select_pending_rejected_video_observation_note(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
     current_prompt_seed: Option<&str>,
 ) -> Option<String> {
-    rows.iter()
+    select_pending_rejected_video_observation_candidates(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+    )
+    .into_iter()
+    .next()
+}
+
+pub(crate) fn select_pending_rejected_video_observation_candidates(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> Vec<String> {
+    let mut scored = rows
+        .iter()
         .enumerate()
         .filter(|(_, row)| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
         .filter_map(|(idx, row)| {
@@ -584,24 +602,74 @@ pub(crate) fn select_pending_rejected_video_observation_note(
         })
         .filter_map(|(idx, row)| {
             let avoid = extract_key_value(&row.content, "avoid")?;
-            let note = select_primary_observation_fragment(&avoid).unwrap_or_else(|| {
-                clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS)
-            });
-            Some((score_pending_observation_note(&note), idx, note))
+            let ranked = ranked_observation_fragments(&avoid);
+            if ranked.is_empty() {
+                let note = clip_prompt_fragment(&avoid, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
+                return Some(vec![(
+                    score_pending_observation_note(&note),
+                    idx,
+                    0usize,
+                    note,
+                )]);
+            }
+            Some(
+                ranked
+                    .into_iter()
+                    .enumerate()
+                    .map(|(fragment_idx, note)| {
+                        (
+                            score_pending_observation_note(&note),
+                            idx,
+                            fragment_idx,
+                            note,
+                        )
+                    })
+                    .collect::<Vec<_>>(),
+            )
         })
-        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
-        .map(|(_, _, note)| note)
+        .flatten()
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(a.1.cmp(&b.1))
+            .then(a.2.cmp(&b.2))
+            .then(a.3.cmp(&b.3))
+    });
+
+    let mut notes = Vec::new();
+    for (_, _, _, note) in scored {
+        if notes.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        notes.push(note);
+    }
+    notes
 }
 
-fn select_primary_observation_fragment(avoid: &str) -> Option<String> {
-    rejected_negative_fragments(avoid)
+fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
+    let mut ranked = rejected_negative_fragments(avoid)
         .into_iter()
-        .map(|fragment| {
+        .enumerate()
+        .map(|(idx, fragment)| {
             let note = clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
-            (score_pending_observation_note(&note), note)
+            (score_pending_observation_note(&note), idx, note)
         })
-        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.len().cmp(&a.1.len())))
-        .map(|(_, note)| note)
+        .collect::<Vec<_>>();
+    ranked.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(a.1.cmp(&b.1))
+            .then(a.2.len().cmp(&b.2.len()))
+            .then(a.2.cmp(&b.2))
+    });
+
+    let mut notes = Vec::new();
+    for (_, _, note) in ranked {
+        if notes.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        notes.push(note);
+    }
+    notes
 }
 
 fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
@@ -1952,6 +2020,7 @@ mod tests {
         compact_rejected_negative_avoid, compact_video_continuity_note,
         merge_rejected_video_negative_memory, parse_structured_storyboard_description,
         rejected_video_negative_rejection_count, select_neighbor_selected_video_memory_notes,
+        select_pending_rejected_video_observation_candidates,
         select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
@@ -2271,6 +2340,64 @@ mod tests {
         );
 
         assert_eq!(note, Some("avoid shaky handheld motion".into()));
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_orders_by_strength() {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion"
+                            .into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid shaky handheld motion".to_string(),
+                "avoid flat cold lighting".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_keeps_secondary_fragment_from_same_row()
+    {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting, avoid shaky handheld motion"
+                        .into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid shaky handheld motion".to_string(),
+                "avoid flat cold lighting".to_string(),
+            ]
+        );
     }
 
     #[test]

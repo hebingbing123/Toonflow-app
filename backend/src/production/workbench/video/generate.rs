@@ -13,9 +13,11 @@ use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::types::GenerateVideoUploadItem;
 use crate::production::workbench::video_prompt_memory::{
-    select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
-    select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    normalize_prompt_text, parse_structured_storyboard_description,
+    select_prioritized_video_style_note, select_project_video_style_memory_notes,
+    select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
+    select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
+    StoryboardPromptSeedRow, StructuredStoryboardDescription,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
 use crate::state::AppState;
@@ -393,7 +395,7 @@ pub(crate) async fn load_auto_negative_prompts(
     let selected_rows =
         load_selected_video_memory_rows(pool, user_id, project_numeric_id, script_numeric_id)
             .await?;
-    let prompt_seed_map = load_storyboard_prompt_seed_map(
+    let storyboard_seed_rows = load_storyboard_prompt_seed_rows(
         pool,
         user_id,
         project_numeric_id,
@@ -407,7 +409,7 @@ pub(crate) async fn load_auto_negative_prompts(
         &rows,
         &rejected_rows,
         &selected_rows,
-        &prompt_seed_map,
+        &storyboard_seed_rows,
     ))
 }
 
@@ -439,13 +441,13 @@ async fn load_rejected_video_negative_memory_rows(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
-async fn load_storyboard_prompt_seed_map(
+async fn load_storyboard_prompt_seed_rows(
     pool: &PgPool,
     user_id: Uuid,
     project_numeric_id: i32,
     script_numeric_id: i32,
     storyboard_ids: &[i32],
-) -> Result<HashMap<i32, String>, ApiError> {
+) -> Result<HashMap<i32, StoryboardPromptSeedRow>, ApiError> {
     let rows = sqlx::query_as::<_, (i32, Option<String>, Option<String>, Option<String>)>(
         r#"
         SELECT sb.numeric_id, sb.prompt, sb.video_desc, sb.duration
@@ -468,13 +470,15 @@ async fn load_storyboard_prompt_seed_map(
 
     Ok(rows
         .into_iter()
-        .filter_map(|(storyboard_id, prompt, video_desc, duration)| {
-            storyboard_prompt_seed(&StoryboardPromptSeedRow {
-                prompt,
-                video_desc,
-                duration,
-            })
-            .map(|seed| (storyboard_id, seed))
+        .map(|(storyboard_id, prompt, video_desc, duration)| {
+            (
+                storyboard_id,
+                StoryboardPromptSeedRow {
+                    prompt,
+                    video_desc,
+                    duration,
+                },
+            )
         })
         .collect())
 }
@@ -514,25 +518,28 @@ fn build_storyboard_negative_prompts(
     review_rows: &[QualityReviewSeedRow],
     rejected_rows: &[AgentMemoryRow],
     selected_rows: &[AgentMemoryRow],
-    prompt_seed_map: &HashMap<i32, String>,
+    storyboard_seed_rows: &HashMap<i32, StoryboardPromptSeedRow>,
 ) -> HashMap<i32, Option<String>> {
-    let script_style_note = select_script_video_style_memory_notes(selected_rows)
-        .into_iter()
-        .next();
-    let project_style_note = select_project_video_style_memory_notes(selected_rows)
-        .into_iter()
-        .next();
     storyboard_ids
         .iter()
         .copied()
         .map(|storyboard_id| {
+            let storyboard_row = storyboard_seed_rows.get(&storyboard_id);
+            let current_prompt_seed = storyboard_row.and_then(storyboard_prompt_seed);
             let selected_style_note = select_selected_video_memory_notes(
                 selected_rows,
                 storyboard_id,
-                prompt_seed_map.get(&storyboard_id).map(String::as_str),
+                current_prompt_seed.as_deref(),
             )
             .into_iter()
             .next();
+            let prioritized_style_note = resolve_negative_filter_style_note(
+                selected_rows,
+                storyboard_id,
+                current_prompt_seed.as_deref(),
+                storyboard_row,
+                selected_style_note,
+            );
             let review_fragments = filter_conflicting_review_fragments(
                 collect_negative_review_fragments(
                     &review_rows
@@ -542,33 +549,87 @@ fn build_storyboard_negative_prompts(
                         .collect::<Vec<_>>(),
                     storyboard_id,
                 ),
-                selected_style_note
-                    .as_deref()
-                    .or(script_style_note.as_deref())
-                    .or(project_style_note.as_deref()),
+                prioritized_style_note.as_deref(),
             );
-            let prioritized_style_note = selected_style_note
-                .as_deref()
-                .or(script_style_note.as_deref())
-                .or(project_style_note.as_deref());
             let rejected_fragments = filter_conflicting_review_fragments(
                 split_negative_prompt_fragments(
                     select_rejected_video_negative_memory_notes(
                         rejected_rows,
                         storyboard_id,
-                        prompt_seed_map.get(&storyboard_id).map(String::as_str),
+                        current_prompt_seed.as_deref(),
                     )
                     .into_iter()
                     .next()
                     .as_deref(),
                 ),
-                prioritized_style_note,
+                prioritized_style_note.as_deref(),
             );
             let review_prompt =
                 merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
             (storyboard_id, review_prompt)
         })
         .collect()
+}
+
+fn resolve_negative_filter_style_note(
+    selected_rows: &[AgentMemoryRow],
+    storyboard_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+    selected_style_note: Option<String>,
+) -> Option<String> {
+    selected_style_note
+        .or_else(|| {
+            select_prioritized_video_style_note(
+                selected_rows,
+                storyboard_id,
+                current_prompt_seed,
+                storyboard_row,
+            )
+        })
+        .or_else(|| select_contextual_summary_style_note(selected_rows, storyboard_row))
+}
+
+fn select_contextual_summary_style_note(
+    selected_rows: &[AgentMemoryRow],
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let context = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)?;
+
+    select_script_video_style_memory_notes(selected_rows)
+        .into_iter()
+        .chain(select_project_video_style_memory_notes(selected_rows))
+        .find(|note| style_note_context_evidence(note, &context) >= 2)
+}
+
+fn style_note_context_evidence(
+    style_note: &str,
+    context: &StructuredStoryboardDescription,
+) -> usize {
+    let note = normalize_prompt_text(style_note);
+    let mut evidence = 0usize;
+
+    let mood = normalize_prompt_text(&context.mood);
+    if !mood.is_empty() && note.contains(&mood) {
+        evidence += 1;
+    }
+
+    let lighting = normalize_prompt_text(&context.lighting);
+    if !lighting.is_empty() && note.contains(&lighting) {
+        evidence += 1;
+    }
+
+    let shot = normalize_prompt_text(&context.shot);
+    let camera_move = normalize_prompt_text(&context.camera_move);
+    if (!shot.is_empty() && note.contains(&shot))
+        || (!camera_move.is_empty() && note.contains(&camera_move))
+    {
+        evidence += 1;
+    }
+
+    evidence
 }
 
 fn filter_conflicting_review_fragments(
@@ -600,21 +661,43 @@ fn review_fragment_conflicts_with_selected_style(
     if fragment == canonical_negative_fragment("avoid extreme camera angle") {
         return note.contains("低机位") || note.contains("高机位");
     }
-    if fragment == canonical_negative_fragment("avoid oppressive or frantic mood") {
+    if negative_fragment_targets_cold_oppressive_mood(&fragment) {
         return note.contains("压迫") || note.contains("紧张") || note.contains("冷峻");
     }
-    if fragment == canonical_negative_fragment("avoid overly cold emotional tone") {
+    if negative_fragment_targets_cold_emotional_tone(&fragment) {
         return note.contains("冷调") || note.contains("冷色") || note.contains("冷峻");
     }
-    if fragment == canonical_negative_fragment("avoid flat cold lighting") {
+    if negative_fragment_targets_cold_lighting(&fragment) {
         return note.contains("光影")
             && (note.contains("冷调") || note.contains("冷光") || note.contains("逆光"));
     }
-    if fragment == canonical_negative_fragment("avoid harsh backlight silhouette") {
+    if negative_fragment_targets_backlight(&fragment) {
         return note.contains("光影") && note.contains("逆光");
     }
 
     false
+}
+
+fn negative_fragment_targets_cold_oppressive_mood(fragment: &str) -> bool {
+    fragment == canonical_negative_fragment("avoid oppressive or frantic mood")
+        || fragment == canonical_negative_fragment("avoid overly cold, oppressive, or frantic mood")
+}
+
+fn negative_fragment_targets_cold_emotional_tone(fragment: &str) -> bool {
+    fragment == canonical_negative_fragment("avoid overly cold emotional tone")
+        || fragment == canonical_negative_fragment("avoid overly cold, oppressive, or frantic mood")
+}
+
+fn negative_fragment_targets_cold_lighting(fragment: &str) -> bool {
+    fragment == canonical_negative_fragment("avoid flat cold lighting")
+        || fragment
+            == canonical_negative_fragment("avoid flat cold lighting or harsh backlight silhouette")
+}
+
+fn negative_fragment_targets_backlight(fragment: &str) -> bool {
+    fragment == canonical_negative_fragment("avoid harsh backlight silhouette")
+        || fragment
+            == canonical_negative_fragment("avoid flat cold lighting or harsh backlight silhouette")
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -773,6 +856,20 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
         (
             &["闪烁", "跳帧", "抖动", "flicker", "jitter", "stutter"][..],
             "avoid flicker or motion jitter",
+        ),
+        (
+            &[
+                "压迫", "紧张", "太冷", "冷调", "冷峻", "frantic", "oppressive", "cold mood",
+            ][..],
+            "avoid overly cold, oppressive, or frantic mood",
+        ),
+        (
+            &["逆光", "背光", "剪影", "backlight", "silhouette"][..],
+            "avoid harsh backlight silhouette",
+        ),
+        (
+            &["冷光", "色温", "曝光死", "光太平", "flat lighting", "cold lighting"][..],
+            "avoid flat cold lighting",
         ),
         (
             &["镜头", "构图", "机位", "切镜", "shot", "framing", "camera"][..],
@@ -1231,11 +1328,29 @@ mod tests {
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
-        select_rejected_video_negative_memory_notes, AgentMemoryRow,
+        select_rejected_video_negative_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
+        StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use std::collections::HashMap;
     use uuid::Uuid;
+
+    fn storyboard_seed_rows(
+        rows: &[(i32, Option<&str>, Option<&str>, Option<&str>)],
+    ) -> HashMap<i32, StoryboardPromptSeedRow> {
+        rows.iter()
+            .map(|(storyboard_id, prompt, video_desc, duration)| {
+                (
+                    *storyboard_id,
+                    StoryboardPromptSeedRow {
+                        prompt: prompt.map(str::to_string),
+                        video_desc: video_desc.map(str::to_string),
+                        duration: duration.map(str::to_string),
+                    },
+                )
+            })
+            .collect()
+    }
 
     #[test]
     fn normalize_upload_sources_rejects_duplicate_storyboards() {
@@ -1571,7 +1686,12 @@ mod tests {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=12 | promptSeed=seed000000001 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=镜头近景，情绪冷峻压迫，光影冷调逆光".into(),
             }],
-            &HashMap::from([(12, "seed000000001".to_string())]),
+            &storyboard_seed_rows(&[(
+                12,
+                Some("门厅对峙"),
+                Some("（主角对峙、旧宅门厅、主角、5秒、近景、静止、盯住来人、冷峻压迫、冷调逆光、、、A12）"),
+                Some("5s"),
+            )]),
         );
 
         let prompt = prompts.get(&12).and_then(|value| value.as_deref());
@@ -1668,14 +1788,86 @@ mod tests {
                 name: "selected_video_memory".into(),
                 content: "storyboardIds=12 | promptSeed=seed000000001 | style=镜头近景，情绪冷峻压迫，光影冷调逆光 | note=镜头近景，情绪冷峻压迫，光影冷调逆光".into(),
             }],
-            &HashMap::from([(12, "seed000000001".to_string())]),
+            &storyboard_seed_rows(&[(
+                12,
+                Some("门厅对峙"),
+                Some("（主角对峙、旧宅门厅、主角、5秒、近景、静止、盯住来人、冷峻压迫、冷调逆光、、、A12）"),
+                Some("5s"),
+            )]),
+        );
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
+    }
+
+    #[test]
+    fn script_style_summary_does_not_suppress_conflicting_rejected_fragments_when_storyboard_context_mismatches(
+    ) {
+        let storyboard_rows = storyboard_seed_rows(&[(
+            12,
+            Some("女主在雨夜街口停下"),
+            Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、静止镜头、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）"),
+            Some("5s"),
+        )]);
+        let prompt_seed = storyboard_rows
+            .get(&12)
+            .and_then(storyboard_prompt_seed)
+            .expect("storyboard prompt seed");
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: format!(
+                    "storyboardIds=12 | promptSeed={prompt_seed} | rejectionCount=2 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood"
+                ),
+            }],
+            &[AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=4 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            }],
+            &storyboard_rows,
         );
 
         let prompt = prompts
             .get(&12)
             .and_then(|value| value.as_deref())
             .expect("storyboard 12 prompt");
-        assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
+        assert!(prompt.contains("avoid oppressive or frantic mood"));
+    }
+
+    #[test]
+    fn project_style_summary_still_suppresses_conflicting_review_when_context_matches() {
+        let storyboard_rows = storyboard_seed_rows(&[(
+            12,
+            Some("门厅对峙"),
+            Some("（主角对峙、旧宅门厅、主角、5秒、中景、稳定跟拍、逼近对手、冷峻压迫、冷调逆光、、、A12）"),
+            Some("5s"),
+        )]);
+        let prompt_seed = storyboard_rows
+            .get(&12)
+            .and_then(storyboard_prompt_seed)
+            .expect("storyboard prompt seed");
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: format!(
+                    "storyboardIds=12 | promptSeed={prompt_seed} | rejectionCount=2 | avoid=avoid flat cold lighting, avoid oppressive or frantic mood"
+                ),
+            }],
+            &[AgentMemoryRow {
+                name: "project_video_style_memory".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+            }],
+            &storyboard_rows,
+        );
+
+        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        assert_eq!(prompt, None);
     }
 
     #[test]

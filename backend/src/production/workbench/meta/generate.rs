@@ -14,9 +14,9 @@ use crate::production::workbench::meta::common::{
 };
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
-    compact_video_continuity_note, compact_video_style_prompt_note,
-    select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
-    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    compact_video_continuity_note, select_pending_rejected_video_observation_candidates,
+    select_prioritized_video_style_note, storyboard_prompt_seed, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -27,11 +27,8 @@ const VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT: usize = 6;
 const VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
-const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
-const LOCAL_SHOT_FRAMING_KEYWORDS: [&str; 7] =
-    ["低机位", "高机位", "特写", "近景", "中景", "全景", "远景"];
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
@@ -423,31 +420,60 @@ async fn load_pending_video_observation_note(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    let note = select_pending_rejected_video_observation_note(
+    let storyboard_row = load_storyboard_prompt_seed_row(
+        pool,
+        user_id,
+        project_numeric_id,
+        script_numeric_id,
+        storyboard_numeric_id,
+    )
+    .await?;
+    let prioritized_style_note = select_prioritized_video_style_note(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
+        storyboard_row.as_ref(),
     );
-    let prioritized_style_note =
-        select_selected_video_memory_notes(&rows, storyboard_numeric_id, current_prompt_seed)
-            .into_iter()
-            .next()
-            .or_else(|| {
-                select_script_video_style_memory_notes(&rows)
-                    .into_iter()
-                    .next()
-            })
-            .or_else(|| {
-                select_project_video_style_memory_notes(&rows)
-                    .into_iter()
-                    .next()
-            });
+    let note = select_pending_rejected_video_observation_candidates(
+        &rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+    )
+    .into_iter()
+    .find(|note| {
+        !video_prompt_observation_conflicts_with_style(note, prioritized_style_note.as_deref())
+    });
 
-    Ok(note
-        .filter(|note| {
-            !video_prompt_observation_conflicts_with_style(note, prioritized_style_note.as_deref())
-        })
-        .map(|note| format!("待观察失败倾向：{note}")))
+    Ok(note.map(|note| format!("待观察失败倾向：{note}")))
+}
+
+async fn load_storyboard_prompt_seed_row(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<Option<StoryboardPromptSeedRow>, ApiError> {
+    sqlx::query_as::<_, StoryboardPromptSeedRow>(
+        r#"
+        SELECT sb.prompt, sb.video_desc, sb.duration
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
+          AND sb.numeric_id = $4
+        LIMIT 1
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(storyboard_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))
 }
 
 fn video_prompt_observation_conflicts_with_style(
@@ -469,86 +495,47 @@ fn video_prompt_observation_conflicts_with_style(
     if observation == "avoid extreme camera angle" {
         return style_note.contains("低机位") || style_note.contains("高机位");
     }
-    if observation == "avoid oppressive or frantic mood" {
+    if observation_targets_cold_oppressive_mood(observation) {
         return style_note.contains("压迫")
             || style_note.contains("紧张")
             || style_note.contains("冷峻");
     }
-    if observation == "avoid overly cold emotional tone" {
+    if observation_targets_cold_emotional_tone(observation) {
         return style_note.contains("冷调")
             || style_note.contains("冷色")
             || style_note.contains("冷峻");
     }
-    if observation == "avoid flat cold lighting" {
+    if observation_targets_cold_lighting(observation) {
         return style_note.contains("光影")
             && (style_note.contains("冷调")
                 || style_note.contains("冷光")
                 || style_note.contains("逆光"));
     }
-    if observation == "avoid harsh backlight silhouette" {
+    if observation_targets_backlight(observation) {
         return style_note.contains("光影") && style_note.contains("逆光");
     }
 
     false
 }
 
-fn compact_unique_memory_notes(notes: Vec<String>) -> Vec<String> {
-    let mut fragments = Vec::new();
-    for note in notes {
-        for fragment in note.split('，').map(normalize_prompt_text) {
-            if fragment.is_empty() || fragments.iter().any(|existing| existing == &fragment) {
-                continue;
-            }
-            fragments.push(fragment);
-        }
-    }
-    pack_memory_fragments(
-        fragments,
-        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
-        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
-    )
+fn observation_targets_cold_oppressive_mood(observation: &str) -> bool {
+    observation == "avoid oppressive or frantic mood"
+        || observation == "avoid overly cold, oppressive, or frantic mood"
 }
 
-fn pack_memory_fragments(fragments: Vec<String>, limit: usize, max_chars: usize) -> Vec<String> {
-    if limit == 0 || max_chars == 0 {
-        return Vec::new();
-    }
+fn observation_targets_cold_emotional_tone(observation: &str) -> bool {
+    observation == "avoid overly cold emotional tone"
+        || observation == "avoid overly cold, oppressive, or frantic mood"
+}
 
-    let mut packed = Vec::new();
-    let mut current = Vec::new();
-    let mut current_len = 0usize;
+fn observation_targets_cold_lighting(observation: &str) -> bool {
+    observation == "avoid flat cold lighting"
+        || observation == "avoid flat cold lighting or harsh backlight silhouette"
+}
 
-    for fragment in fragments {
-        let fragment = clip_prompt_fragment(&fragment, max_chars);
-        if fragment.is_empty() {
-            continue;
-        }
-        let fragment_len = fragment.chars().count();
-        let candidate_len = if current.is_empty() {
-            fragment_len
-        } else {
-            current_len + 1 + fragment_len
-        };
-
-        if !current.is_empty() && candidate_len > max_chars {
-            packed.push(current.join("，"));
-            if packed.len() >= limit {
-                return packed;
-            }
-            current = vec![fragment];
-            current_len = fragment_len;
-            continue;
-        }
-
-        current.push(fragment);
-        current_len = candidate_len;
-    }
-
-    if !current.is_empty() && packed.len() < limit {
-        packed.push(current.join("，"));
-    }
-
-    packed
+fn observation_targets_backlight(observation: &str) -> bool {
+    observation == "avoid harsh backlight silhouette"
+        || observation == "avoid flat cold lighting or harsh backlight silhouette"
 }
 
 fn build_video_prompt(
@@ -3147,5 +3134,22 @@ mod tests {
             "avoid flat cold lighting",
             None,
         ));
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_can_fall_back_to_next_candidate() {
+        let note = [
+            "avoid flat cold lighting".to_string(),
+            "avoid shaky handheld motion".to_string(),
+        ]
+        .into_iter()
+        .find(|note| {
+            !video_prompt_observation_conflicts_with_style(
+                note,
+                Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+            )
+        });
+
+        assert_eq!(note, Some("avoid shaky handheld motion".to_string()));
     }
 }
