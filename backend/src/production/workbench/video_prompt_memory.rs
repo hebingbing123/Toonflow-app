@@ -254,6 +254,11 @@ pub(crate) async fn persist_selected_video_memory(
     if latest_same_scope.as_deref() == Some(content) {
         return Ok(());
     }
+    if latest_same_scope.as_deref().is_some_and(|existing| {
+        selected_video_memory_update_would_reduce_quality(existing, content)
+    }) {
+        return Ok(());
+    }
 
     delete_selected_video_memory_for_scope(
         pool,
@@ -2921,6 +2926,71 @@ fn is_low_signal_selected_memory_note(note: &str) -> bool {
         && normalized.chars().count() <= 10)
 }
 
+fn selected_video_memory_update_would_reduce_quality(existing: &str, incoming: &str) -> bool {
+    selected_video_memory_quality_score(existing) > selected_video_memory_quality_score(incoming)
+}
+
+fn selected_video_memory_quality_score(content: &str) -> i32 {
+    let mut score = 0;
+
+    if let Some(style) = selected_video_style_value_from_content(content) {
+        score += 80;
+        score += split_prompt_note_fragments(&style)
+            .map(score_selected_video_memory_style_fragment)
+            .sum::<i32>();
+    }
+
+    if let Some(note) = extract_key_value(content, "note")
+        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .filter(|value| !is_low_signal_selected_memory_note(value))
+    {
+        score += 20;
+        score += split_prompt_note_fragments(&note)
+            .map(score_selected_video_memory_note_fragment)
+            .sum::<i32>();
+    }
+
+    score
+}
+
+fn score_selected_video_memory_style_fragment(fragment: String) -> i32 {
+    let fragment = normalize_prompt_text(&fragment);
+    if fragment.is_empty() {
+        return 0;
+    }
+
+    let mut score = 6;
+    if fragment.starts_with("镜头") {
+        score += 8;
+    }
+    if fragment.starts_with("情绪") {
+        score += 6;
+    }
+    if fragment.starts_with("光影") {
+        score += 6;
+    }
+    if fragment.starts_with("场景") {
+        score += 2;
+    }
+    score + fragment.chars().count().min(18) as i32 / 3
+}
+
+fn score_selected_video_memory_note_fragment(fragment: String) -> i32 {
+    let fragment = normalize_prompt_text(&fragment);
+    if fragment.is_empty() {
+        return 0;
+    }
+
+    let mut score = 4;
+    if STYLE_NOTE_PREFIXES
+        .iter()
+        .any(|prefix| fragment.starts_with(prefix))
+    {
+        score += 3;
+    }
+    score + fragment.chars().count().min(18) as i32 / 6
+}
+
 pub(crate) fn compact_video_continuity_note(note: &str) -> Option<String> {
     let fragments = split_prompt_note_fragments(note)
         .filter(|fragment| !fragment.is_empty())
@@ -3320,8 +3390,9 @@ mod tests {
         select_pending_rejected_video_observation_note, select_prioritized_video_style_note,
         select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
         select_script_video_style_memory_notes, select_selected_video_memory_notes,
-        selected_video_memory_scope, storyboard_prompt_seed, AgentMemoryRow, ScopedAgentMemoryRow,
-        SelectedVideoMemoryScope, StoryboardPromptSeedRow,
+        selected_video_memory_quality_score, selected_video_memory_scope,
+        selected_video_memory_update_would_reduce_quality, storyboard_prompt_seed, AgentMemoryRow,
+        ScopedAgentMemoryRow, SelectedVideoMemoryScope, StoryboardPromptSeedRow,
     };
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -3713,6 +3784,38 @@ mod tests {
         );
 
         assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn selected_video_memory_update_would_reduce_quality_when_incoming_drops_style_signal() {
+        assert!(selected_video_memory_update_would_reduce_quality(
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=主角贴墙前行",
+            "storyboardIds=12 | promptSeed=seed-12 | note=当前镜头已确认"
+        ));
+    }
+
+    #[test]
+    fn selected_video_memory_update_would_reduce_quality_when_incoming_keeps_style_but_loses_useful_note(
+    ) {
+        assert!(selected_video_memory_update_would_reduce_quality(
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行",
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=当前镜头已确认"
+        ));
+    }
+
+    #[test]
+    fn selected_video_memory_quality_score_prefers_incoming_when_it_adds_style_signal() {
+        assert!(
+            selected_video_memory_quality_score(
+                "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行"
+            ) > selected_video_memory_quality_score(
+                "storyboardIds=12 | promptSeed=seed-12 | note=主角贴墙前行"
+            )
+        );
+        assert!(!selected_video_memory_update_would_reduce_quality(
+            "storyboardIds=12 | promptSeed=seed-12 | note=主角贴墙前行",
+            "storyboardIds=12 | promptSeed=seed-12 | style=镜头稳定跟拍，情绪冷峻压迫 | note=主角贴墙前行"
+        ));
     }
 
     #[test]
