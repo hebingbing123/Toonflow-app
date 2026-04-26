@@ -2931,6 +2931,9 @@ fn compact_project_director_note(
         if fragment.is_empty() {
             continue;
         }
+        if project_director_fragment_is_generic_visual_placeholder(&fragment) {
+            continue;
+        }
         if scored
             .iter()
             .any(|(_, _, existing): &(i32, usize, String)| existing == &fragment)
@@ -3006,6 +3009,49 @@ fn strip_generic_director_continuity_subfragments(fragment: &str) -> String {
     } else {
         kept.join("，")
     }
+}
+
+fn project_director_fragment_is_generic_visual_placeholder(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return false;
+    }
+    if !project_director_fragment_relevant(&normalized)
+        || continuity_note_adds_specific_guidance(&normalized)
+    {
+        return false;
+    }
+
+    let stripped = [
+        "镜头语言",
+        "镜头",
+        "画面",
+        "光影",
+        "情绪",
+        "氛围",
+        "风格",
+        "色调",
+        "质感",
+        "节奏",
+        "场景",
+        "camera",
+        "lighting",
+        "mood",
+        "style",
+        "tone",
+        "frame",
+        "composition",
+        "统一",
+        "一致",
+        "连续",
+        "衔接",
+        "保持",
+        "延续",
+        "稳定",
+    ]
+    .into_iter()
+    .fold(normalized.clone(), |acc, token| acc.replace(token, ""));
+    normalize_prompt_text(&stripped).is_empty()
 }
 
 fn trim_project_director_fragment_against_storyboard_fields(
@@ -4303,6 +4349,63 @@ mod tests {
         assert!(prompt.contains("Style anchor: 胶片颗粒."), "{prompt}");
         assert!(!prompt.contains("冷调逆光;"));
         assert!(!prompt.contains("冷峻压迫;"));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_generic_director_visual_placeholders() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、静止、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("镜头语言统一，风格统一，质感克制粗粝".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 质感克制粗粝."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("镜头语言统一"), "{prompt}");
+        assert!(!prompt.contains("风格统一"), "{prompt}");
+        assert!(
+            prompt.contains("Natural motion, stable continuity, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_concrete_director_fragment_while_dropping_generic_visual_placeholder(
+    ) {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、静止、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("镜头语言统一，保持低机位压迫感，光影一致".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("镜头语言统一"), "{prompt}");
+        assert!(!prompt.contains("光影一致"), "{prompt}");
     }
 
     #[test]
