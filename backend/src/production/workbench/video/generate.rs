@@ -728,7 +728,7 @@ fn collect_negative_review_fragments(
             push_scored_negative_fragment(
                 &mut candidates,
                 &mut order,
-                map_bad_case_category(category),
+                map_bad_case_category_with_comments(category, row.comments.as_deref()),
                 true,
                 false,
             );
@@ -758,7 +758,7 @@ fn collect_negative_review_fragments(
             push_scored_negative_fragment(
                 &mut candidates,
                 &mut order,
-                map_bad_case_category(category),
+                map_bad_case_category_with_comments(category, row.comments.as_deref()),
                 false,
                 false,
             );
@@ -837,6 +837,37 @@ fn map_bad_case_category(category: &str) -> Option<&'static str> {
     }
 }
 
+fn map_bad_case_category_with_comments(
+    category: &str,
+    comments: Option<&str>,
+) -> Option<&'static str> {
+    let mapped = map_bad_case_category(category)?;
+    let Some(comments) = comments else {
+        return Some(mapped);
+    };
+    if category.trim() == "visual_error"
+        && visual_error_category_is_redundant(infer_negative_fragments_from_comments(comments))
+    {
+        return None;
+    }
+    Some(mapped)
+}
+
+fn visual_error_category_is_redundant(comment_fragments: Vec<&'static str>) -> bool {
+    let mut has_distortion = false;
+    let mut has_blur = false;
+    let mut has_flicker = false;
+    for fragment in comment_fragments {
+        match canonical_negative_fragment(fragment).as_str() {
+            "avoid warped hands or limbs" | "avoid warped anatomy" => has_distortion = true,
+            "avoid blur" => has_blur = true,
+            "avoid flicker" | "avoid flicker or motion jitter" => has_flicker = true,
+            _ => {}
+        }
+    }
+    has_distortion && has_blur && has_flicker
+}
+
 fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
     let normalized = comments.trim().to_ascii_lowercase();
     let mut fragments = Vec::new();
@@ -854,6 +885,10 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
         (
             &["闪烁", "跳帧", "抖动", "flicker", "jitter", "stutter"][..],
             "avoid flicker or motion jitter",
+        ),
+        (
+            &["模糊", "发糊", "虚焦", "blur", "blurry", "soft focus"][..],
+            "avoid blur",
         ),
         (
             &[
@@ -1335,9 +1370,10 @@ mod tests {
         build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
         compact_negative_review_constraints, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
-        merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
-        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
-        storyboard_dialogue_is_empty, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        map_bad_case_category_with_comments, merge_negative_prompts, normalize_upload_sources,
+        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
+        review_fragment_is_irrelevant_to_storyboard, storyboard_dialogue_is_empty,
+        visual_error_category_is_redundant, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -1403,19 +1439,49 @@ mod tests {
         ])
         .expect("negative prompt");
 
-        assert!(prompt.contains("avoid warped anatomy, blur, flicker"));
-        assert!(prompt.contains("avoid warped hands or limbs"));
+        assert!(
+            prompt.contains("avoid warped hands or limbs")
+                || prompt.contains("avoid warped anatomy, blur, flicker")
+        );
+        assert!(
+            prompt.contains("avoid flicker or motion jitter")
+                || prompt.contains("avoid warped anatomy, blur, flicker")
+        );
         assert!(prompt.contains("avoid face distortion, identity drift, costume drift"));
         assert!(!prompt.contains("avoid costume or character drift"));
     }
 
     #[test]
     fn infer_negative_fragments_from_comments_matches_cn_and_en_keywords() {
-        let fragments =
-            infer_negative_fragments_from_comments("面部崩坏并且 flicker，镜头切换也多");
+        let fragments = infer_negative_fragments_from_comments(
+            "面部崩坏并且 flicker，镜头切换也多而且画面发糊",
+        );
         assert!(fragments.contains(&"avoid face distortion or identity drift"));
         assert!(fragments.contains(&"avoid flicker or motion jitter"));
+        assert!(fragments.contains(&"avoid blur"));
         assert!(fragments.contains(&"avoid unnecessary shot changes"));
+    }
+
+    #[test]
+    fn visual_error_category_is_redundant_when_comments_already_cover_multiple_visual_axes() {
+        assert!(visual_error_category_is_redundant(
+            infer_negative_fragments_from_comments("手指变形、画面模糊还有闪烁")
+        ));
+        assert!(!visual_error_category_is_redundant(
+            infer_negative_fragments_from_comments("手指变形还有闪烁")
+        ));
+    }
+
+    #[test]
+    fn map_bad_case_category_with_comments_skips_visual_error_when_comments_are_specific_enough() {
+        assert_eq!(
+            map_bad_case_category_with_comments("visual_error", Some("手指变形、画面模糊还有闪烁")),
+            None
+        );
+        assert_eq!(
+            map_bad_case_category_with_comments("visual_error", Some("手指变形还有闪烁")),
+            Some("avoid warped anatomy, blur, flicker")
+        );
     }
 
     #[test]
@@ -1450,6 +1516,24 @@ mod tests {
         );
         assert!(fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
         assert!(fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
+    }
+
+    #[test]
+    fn collect_negative_review_fragments_skips_generic_visual_error_when_comments_are_specific() {
+        let fragments = collect_negative_review_fragments(
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: Some("visual_error".into()),
+                comments: Some("手指变形、画面模糊还有闪烁".into()),
+            }],
+            12,
+        );
+
+        assert!(fragments.contains(&"avoid warped hands or limbs".to_string()));
+        assert!(fragments.contains(&"avoid blur".to_string()));
+        assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
+        assert!(!fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
     }
 
     #[test]
