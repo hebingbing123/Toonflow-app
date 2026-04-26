@@ -764,11 +764,13 @@ fn ranked_observation_fragments(avoid: &str) -> Vec<String> {
 }
 
 fn rejected_negative_fragments(avoid: &str) -> Vec<String> {
-    avoid
-        .split(',')
-        .map(normalize_prompt_text)
-        .filter(|fragment| !fragment.is_empty())
-        .collect()
+    compact_rejected_negative_fragment_families(
+        avoid
+            .split(',')
+            .map(normalize_prompt_text)
+            .filter(|fragment| !fragment.is_empty())
+            .collect(),
+    )
 }
 
 fn compact_rejected_negative_avoid(avoid: &str) -> String {
@@ -1020,6 +1022,195 @@ pub(crate) fn select_selected_video_memory_notes(
     notes
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct ObservationCharacterConsistencyFlags {
+    face_distortion: bool,
+    identity_drift: bool,
+    costume_inconsistency: bool,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+struct ObservationVisualStyleConstraintFlags {
+    extreme_camera_angle: bool,
+    tight_close_up: bool,
+    oppressive_or_frantic_mood: bool,
+    overly_cold_emotional_tone: bool,
+    flat_cold_lighting: bool,
+    harsh_backlight_silhouette: bool,
+}
+
+fn compact_rejected_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
+    let mut compacted = Vec::with_capacity(fragments.len());
+    let mut character_flags = ObservationCharacterConsistencyFlags::default();
+    let mut character_idx = None;
+    let mut visual_style_flags = ObservationVisualStyleConstraintFlags::default();
+    let mut visual_style_idx = None;
+
+    for (idx, fragment) in fragments.into_iter().enumerate() {
+        if let Some(flags) = parse_observation_character_consistency_fragment(&fragment) {
+            character_idx.get_or_insert(idx);
+            character_flags.face_distortion |= flags.face_distortion;
+            character_flags.identity_drift |= flags.identity_drift;
+            character_flags.costume_inconsistency |= flags.costume_inconsistency;
+            continue;
+        }
+        if let Some(flags) = parse_observation_visual_style_constraint_fragment(&fragment) {
+            visual_style_idx.get_or_insert(idx);
+            visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
+            visual_style_flags.tight_close_up |= flags.tight_close_up;
+            visual_style_flags.oppressive_or_frantic_mood |= flags.oppressive_or_frantic_mood;
+            visual_style_flags.overly_cold_emotional_tone |= flags.overly_cold_emotional_tone;
+            visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
+            visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
+            continue;
+        }
+        compacted.push((idx, fragment));
+    }
+
+    if let Some(idx) = character_idx {
+        compacted.push((
+            idx,
+            render_observation_character_consistency_fragment(character_flags),
+        ));
+    }
+    if let Some(idx) = visual_style_idx {
+        for fragment in render_observation_visual_style_constraint_fragments(visual_style_flags) {
+            compacted.push((idx, fragment));
+        }
+    }
+    compacted.sort_by(|a, b| a.0.cmp(&b.0));
+    compacted
+        .into_iter()
+        .map(|(_, fragment)| fragment)
+        .collect()
+}
+
+fn parse_observation_character_consistency_fragment(
+    fragment: &str,
+) -> Option<ObservationCharacterConsistencyFlags> {
+    match canonical_observation_note(fragment).as_str() {
+        "avoid face distortion or identity drift" => Some(ObservationCharacterConsistencyFlags {
+            face_distortion: true,
+            identity_drift: true,
+            costume_inconsistency: false,
+        }),
+        "avoid costume or character drift" => Some(ObservationCharacterConsistencyFlags {
+            face_distortion: false,
+            identity_drift: true,
+            costume_inconsistency: true,
+        }),
+        "avoid face drift or costume inconsistency" => Some(ObservationCharacterConsistencyFlags {
+            face_distortion: false,
+            identity_drift: true,
+            costume_inconsistency: true,
+        }),
+        "avoid face distortion, identity drift, costume drift" => {
+            Some(ObservationCharacterConsistencyFlags {
+                face_distortion: true,
+                identity_drift: true,
+                costume_inconsistency: true,
+            })
+        }
+        _ => None,
+    }
+}
+
+fn render_observation_character_consistency_fragment(
+    flags: ObservationCharacterConsistencyFlags,
+) -> String {
+    if flags.face_distortion && flags.costume_inconsistency {
+        "avoid face distortion, identity drift, costume drift".to_string()
+    } else if flags.costume_inconsistency {
+        "avoid face drift or costume inconsistency".to_string()
+    } else {
+        "avoid face distortion or identity drift".to_string()
+    }
+}
+
+fn parse_observation_visual_style_constraint_fragment(
+    fragment: &str,
+) -> Option<ObservationVisualStyleConstraintFlags> {
+    match canonical_observation_note(fragment).as_str() {
+        "avoid extreme camera angle" => Some(ObservationVisualStyleConstraintFlags {
+            extreme_camera_angle: true,
+            ..Default::default()
+        }),
+        "avoid overly tight close-up framing" => Some(ObservationVisualStyleConstraintFlags {
+            tight_close_up: true,
+            ..Default::default()
+        }),
+        "avoid extreme camera angle or overly tight close-up framing" => {
+            Some(ObservationVisualStyleConstraintFlags {
+                extreme_camera_angle: true,
+                tight_close_up: true,
+                ..Default::default()
+            })
+        }
+        "avoid oppressive or frantic mood" => Some(ObservationVisualStyleConstraintFlags {
+            oppressive_or_frantic_mood: true,
+            ..Default::default()
+        }),
+        "avoid overly cold emotional tone" => Some(ObservationVisualStyleConstraintFlags {
+            overly_cold_emotional_tone: true,
+            ..Default::default()
+        }),
+        "avoid overly cold, oppressive, or frantic mood" => {
+            Some(ObservationVisualStyleConstraintFlags {
+                oppressive_or_frantic_mood: true,
+                overly_cold_emotional_tone: true,
+                ..Default::default()
+            })
+        }
+        "avoid flat cold lighting" => Some(ObservationVisualStyleConstraintFlags {
+            flat_cold_lighting: true,
+            ..Default::default()
+        }),
+        "avoid harsh backlight silhouette" => Some(ObservationVisualStyleConstraintFlags {
+            harsh_backlight_silhouette: true,
+            ..Default::default()
+        }),
+        "avoid flat cold lighting or harsh backlight silhouette" => {
+            Some(ObservationVisualStyleConstraintFlags {
+                flat_cold_lighting: true,
+                harsh_backlight_silhouette: true,
+                ..Default::default()
+            })
+        }
+        _ => None,
+    }
+}
+
+fn render_observation_visual_style_constraint_fragments(
+    flags: ObservationVisualStyleConstraintFlags,
+) -> Vec<String> {
+    let mut fragments = Vec::new();
+    if flags.extreme_camera_angle && flags.tight_close_up {
+        fragments.push("avoid extreme camera angle or overly tight close-up framing".to_string());
+    } else if flags.extreme_camera_angle {
+        fragments.push("avoid extreme camera angle".to_string());
+    } else if flags.tight_close_up {
+        fragments.push("avoid overly tight close-up framing".to_string());
+    }
+
+    if flags.oppressive_or_frantic_mood && flags.overly_cold_emotional_tone {
+        fragments.push("avoid overly cold, oppressive, or frantic mood".to_string());
+    } else if flags.oppressive_or_frantic_mood {
+        fragments.push("avoid oppressive or frantic mood".to_string());
+    } else if flags.overly_cold_emotional_tone {
+        fragments.push("avoid overly cold emotional tone".to_string());
+    }
+
+    if flags.flat_cold_lighting && flags.harsh_backlight_silhouette {
+        fragments.push("avoid flat cold lighting or harsh backlight silhouette".to_string());
+    } else if flags.flat_cold_lighting {
+        fragments.push("avoid flat cold lighting".to_string());
+    } else if flags.harsh_backlight_silhouette {
+        fragments.push("avoid harsh backlight silhouette".to_string());
+    }
+
+    fragments
+}
+
 pub(crate) fn select_neighbor_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1217,7 +1408,7 @@ fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>)
             fragments.push(fragment);
         }
     }
-    fragments.join(", ")
+    compact_rejected_negative_fragment_families(fragments).join(", ")
 }
 
 fn selected_video_memory_note(row: &StoryboardPromptSeedRow) -> Option<String> {
@@ -3264,8 +3455,38 @@ mod tests {
 
         assert_eq!(
             compacted,
-            "avoid flat cold lighting, avoid harsh backlight silhouette"
+            "avoid flat cold lighting or harsh backlight silhouette, avoid oppressive or frantic mood"
         );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_compacts_visual_style_family() {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content:
+                    "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting, avoid harsh backlight silhouette"
+                        .into(),
+            }],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid flat cold lighting or harsh backlight silhouette".to_string(),]
+        );
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_compacts_family_fragments() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid harsh backlight silhouette",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains("avoid=avoid flat cold lighting or harsh backlight silhouette"));
     }
 
     #[test]
