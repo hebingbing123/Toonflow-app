@@ -353,7 +353,12 @@ async fn load_video_prompt_memory_notes(
         )
         .into_iter()
         .collect(),
-        select_video_prompt_memory_notes(&rows, storyboard_numeric_id, Some(storyboard_row)),
+        select_video_prompt_memory_notes(
+            &rows,
+            storyboard_numeric_id,
+            current_prompt_seed,
+            Some(storyboard_row),
+        ),
     ))
 }
 
@@ -3564,11 +3569,22 @@ fn speech_like_fragment(fragment: &str) -> bool {
 fn select_video_prompt_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Vec<String> {
     let structured_fields = storyboard_row
         .and_then(|row| row.video_desc.as_deref())
         .and_then(parse_structured_storyboard_description);
+    let seeded_match_exists = rows.iter().any(|row| {
+        row.name == "auto_scope_memory"
+            && auto_scope_memory_tool_matches_video_prompt(row.content.as_str())
+            && memory_storyboard_overlap_score(row.content.as_str(), storyboard_numeric_id) > 0
+            && memory_prompt_seed_matches(
+                row.content.as_str(),
+                storyboard_numeric_id,
+                current_prompt_seed,
+            )
+    });
     let mut scored = rows
         .iter()
         .filter_map(|row| {
@@ -3576,13 +3592,14 @@ fn select_video_prompt_memory_notes(
                 return None;
             }
             let content = row.content.as_str();
-            let tool = extract_key_value(content, "tool")?;
-            if !matches!(
-                tool.as_str(),
-                "run_sub_agent_storyboard_panel"
-                    | "run_sub_agent_storyboard_gen"
-                    | "run_sub_agent_production_supervision"
-                    | "run_sub_agent_director_plan"
+            if !auto_scope_memory_tool_matches_video_prompt(content) {
+                return None;
+            }
+            if !auto_scope_memory_matches_current_prompt_seed(
+                content,
+                storyboard_numeric_id,
+                current_prompt_seed,
+                seeded_match_exists,
             ) {
                 return None;
             }
@@ -3638,6 +3655,33 @@ fn select_video_prompt_memory_notes(
         }
     }
     notes
+}
+
+fn auto_scope_memory_tool_matches_video_prompt(content: &str) -> bool {
+    extract_key_value(content, "tool").is_some_and(|tool| {
+        matches!(
+            tool.as_str(),
+            "run_sub_agent_storyboard_panel"
+                | "run_sub_agent_storyboard_gen"
+                | "run_sub_agent_production_supervision"
+                | "run_sub_agent_director_plan"
+        )
+    })
+}
+
+fn auto_scope_memory_matches_current_prompt_seed(
+    content: &str,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    seeded_match_exists: bool,
+) -> bool {
+    match current_prompt_seed.filter(|seed| !seed.is_empty()) {
+        Some(seed) => match memory_prompt_seed_for_storyboard(content, storyboard_numeric_id) {
+            Some(candidate_seed) => candidate_seed == seed,
+            None => !seeded_match_exists,
+        },
+        None => true,
+    }
 }
 
 fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
@@ -5481,7 +5525,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["保持镜头方向连续".to_string()]
         );
     }
@@ -5499,7 +5543,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["保留上一镜头走位连续".to_string()]
         );
     }
@@ -5523,7 +5567,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["人物站位不要跳轴".to_string()]
         );
     }
@@ -5543,7 +5587,9 @@ mod tests {
             duration: Some("5s".into()),
         };
 
-        assert!(select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)).is_empty());
+        assert!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)).is_empty()
+        );
     }
 
     #[test]
@@ -5559,7 +5605,7 @@ mod tests {
         };
 
         assert_eq!(
-            select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)),
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["保持角色站位不要跳轴".to_string()]
         );
     }
@@ -5576,7 +5622,59 @@ mod tests {
             duration: Some("5s".into()),
         };
 
-        assert!(select_video_prompt_memory_notes(&rows, 12, Some(&storyboard_row)).is_empty());
+        assert!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)).is_empty()
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_skips_stale_auto_scope_prompt_seed_when_current_seed_exists(
+    ) {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | storyboardPromptSeeds=12:seed-new | summary=人物站位不要跳轴".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | storyboardPromptSeeds=12:seed-old | result=保留上一镜头走位连续".to_string(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, Some("seed-new"), Some(&storyboard_row)),
+            vec!["人物站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_skips_unseeded_auto_scope_fallback_when_current_seed_exists(
+    ) {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | storyboardPromptSeeds=12:seed-new | summary=人物站位不要跳轴".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=保留上一镜头走位连续".to_string(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, Some("seed-new"), Some(&storyboard_row)),
+            vec!["人物站位不要跳轴".to_string()]
+        );
     }
 
     #[test]

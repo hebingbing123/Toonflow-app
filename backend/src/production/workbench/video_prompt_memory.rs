@@ -2206,17 +2206,13 @@ fn build_style_note_selection_context(
 fn collect_ranked_video_style_note_candidates(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
-    current_prompt_seed: Option<&str>,
+    _current_prompt_seed: Option<&str>,
 ) -> Vec<RankedStyleNote> {
     let mut candidates = Vec::new();
     for (idx, row) in rows.iter().enumerate() {
         let (base_score, note) = match row.name.as_str() {
             SELECTED_VIDEO_MEMORY_NAME => {
-                if !memory_row_is_neighbor_selected_style(
-                    row,
-                    storyboard_numeric_id,
-                    current_prompt_seed,
-                ) {
+                if !memory_row_is_neighbor_selected_style(row, storyboard_numeric_id) {
                     continue;
                 }
                 (120, extract_style_note_value(row))
@@ -2242,14 +2238,7 @@ fn collect_ranked_video_style_note_candidates(
     candidates
 }
 
-fn memory_row_is_neighbor_selected_style(
-    row: &AgentMemoryRow,
-    storyboard_numeric_id: i32,
-    current_prompt_seed: Option<&str>,
-) -> bool {
-    if !memory_matches_prompt_seed(&row.content, current_prompt_seed) {
-        return false;
-    }
+fn memory_row_is_neighbor_selected_style(row: &AgentMemoryRow, storyboard_numeric_id: i32) -> bool {
     let storyboard_ids = extract_storyboard_ids(&row.content);
     !storyboard_ids.is_empty() && !storyboard_ids.contains(&storyboard_numeric_id)
 }
@@ -3582,6 +3571,27 @@ mod tests {
                 "镜头中景稳定跟拍，情绪冷峻，光影冷色夜景".to_string()
             ]
         );
+    }
+
+    #[test]
+    fn select_prioritized_video_style_note_keeps_neighbor_selected_style_when_current_seed_differs()
+    {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主转身回望".into()),
+            video_desc: Some("（女主转身回望、旧宅走廊、女主、5秒、近景、稳定跟拍、回头确认身后动静、压迫、冷调逆光、无台词、脚步回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+        let note = select_prioritized_video_style_note(
+            &[AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | promptSeed=neighbor-seed-0001 | style=镜头近景稳定跟拍，情绪压迫 | note=女主贴墙前行，镜头近景稳定跟拍，情绪压迫".into(),
+            }],
+            12,
+            Some("current-seed-9999"),
+            Some(&storyboard_row),
+        );
+
+        assert_eq!(note, Some("镜头近景稳定跟拍，情绪压迫".to_string()));
     }
 
     #[test]
