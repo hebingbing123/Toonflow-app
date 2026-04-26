@@ -1060,7 +1060,11 @@ fn build_auto_memory_snapshot(
         if let Some(next_action) = review.get("nextAction").and_then(Value::as_str) {
             review_parts.push(format!("next={next_action}"));
         }
-        if let Some(summary) = review.get("summary").and_then(Value::as_str) {
+        if let Some(summary) = review
+            .get("summary")
+            .and_then(Value::as_str)
+            .and_then(compact_auto_memory_summary_text)
+        {
             review_parts.push(format!("summary={summary}"));
         }
         if let Some(asset_types) = review.get("assetTypes").and_then(Value::as_str) {
@@ -1905,5 +1909,25 @@ mod tests {
 
         assert!(snapshot.contains("result=主角冲向巷口，保持镜头方向连续"));
         assert!(!snapshot.contains("已生成"));
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_compacts_review_summary_before_persisting() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_production_supervision",
+            &json!({"storyboardIds": [12]}),
+            "unused",
+            Some(&json!({
+                "target": "storyboardTable",
+                "grade": "B",
+                "nextAction": "check_storyboard",
+                "summary": "当前镜头角色站位不要跳轴"
+            })),
+            Some("promptSeed=seed-12-current"),
+        )
+        .expect("snapshot");
+
+        assert!(snapshot.contains("summary=角色站位不要跳轴"));
+        assert!(!snapshot.contains("当前镜头"));
     }
 }
