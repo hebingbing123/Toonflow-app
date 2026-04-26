@@ -1627,8 +1627,7 @@ fn merge_rejected_video_negative_memory(existing: &str, incoming: &str) -> Strin
 fn merge_rejected_negative_avoid(existing: Option<&str>, incoming: Option<&str>) -> String {
     let mut fragments = Vec::new();
     for value in [existing, incoming].into_iter().flatten() {
-        for fragment in value.split(',') {
-            let fragment = normalize_prompt_text(fragment);
+        for fragment in split_prompt_note_fragments(value) {
             if fragment.is_empty() || fragments.iter().any(|existing| existing == &fragment) {
                 continue;
             }
@@ -4358,6 +4357,19 @@ mod tests {
 
         assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
         assert!(merged.contains("avoid=avoid warped anatomy, blur, flicker"));
+    }
+
+    #[test]
+    fn merge_rejected_video_negative_memory_parses_ascii_and_cjk_delimiters() {
+        let merged = merge_rejected_video_negative_memory(
+            "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting；avoid harsh backlight silhouette",
+            "storyboardIds=12 | rejectionCount=1 | avoid=avoid flicker",
+        );
+
+        assert_eq!(rejected_video_negative_rejection_count(&merged), 3);
+        assert!(merged.contains(
+            "avoid=avoid flicker or motion jitter, avoid flat cold lighting or harsh backlight silhouette"
+        ));
     }
 
     #[test]
