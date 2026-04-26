@@ -188,30 +188,60 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let selected_notes = select_selected_video_memory_notes(&rows, storyboard_numeric_id);
-    if !selected_notes.is_empty() {
-        return Ok(selected_notes);
-    }
-    let neighbor_notes = select_neighbor_selected_video_memory_notes(
-        &rows,
-        storyboard_numeric_id,
-        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
-    );
-    if !neighbor_notes.is_empty() {
-        return Ok(neighbor_notes);
-    }
-    let style_notes = select_script_video_style_memory_notes(&rows);
-    if !style_notes.is_empty() {
-        return Ok(style_notes);
-    }
-    let project_style_notes = select_project_video_style_memory_notes(&rows);
-    if !project_style_notes.is_empty() {
-        return Ok(project_style_notes);
-    }
-    Ok(select_video_prompt_memory_notes(
+    Ok(select_prioritized_video_prompt_memory_notes(
         &rows,
         storyboard_numeric_id,
     ))
+}
+
+fn select_prioritized_video_prompt_memory_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+) -> Vec<String> {
+    let selected_notes = select_selected_video_memory_notes(rows, storyboard_numeric_id);
+    if !selected_notes.is_empty() {
+        return selected_notes;
+    }
+
+    let mut notes = Vec::new();
+    append_unique_notes(
+        &mut notes,
+        select_neighbor_selected_video_memory_notes(
+            rows,
+            storyboard_numeric_id,
+            VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+        ),
+        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+    );
+    append_unique_notes(
+        &mut notes,
+        select_script_video_style_memory_notes(rows),
+        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+    );
+    append_unique_notes(
+        &mut notes,
+        select_project_video_style_memory_notes(rows),
+        VIDEO_PROMPT_MEMORY_NOTE_LIMIT,
+    );
+    if !notes.is_empty() {
+        return notes;
+    }
+    select_video_prompt_memory_notes(rows, storyboard_numeric_id)
+}
+
+fn append_unique_notes(target: &mut Vec<String>, candidate_notes: Vec<String>, limit: usize) {
+    if limit == 0 || target.len() >= limit {
+        return;
+    }
+    for note in candidate_notes {
+        if target.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        target.push(note);
+        if target.len() >= limit {
+            break;
+        }
+    }
 }
 
 fn build_video_prompt(
@@ -571,7 +601,8 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
-        select_video_prompt_memory_notes, VideoPromptContext,
+        select_prioritized_video_prompt_memory_notes, select_video_prompt_memory_notes,
+        VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
@@ -769,6 +800,51 @@ mod tests {
         assert_eq!(
             select_project_video_style_memory_notes(&rows),
             vec!["镜头中景稳定跟拍，情绪冷峻压迫".to_string()]
+        );
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_combines_neighbor_and_script_style_notes() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=镜头稳定近景，情绪冷色压迫感 | note=女主贴墙前行，镜头稳定近景，情绪冷色压迫感".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=3 | style=光影冷调逆光，场景旧宅走廊 | note=光影冷调逆光，场景旧宅走廊".into(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=保持角色站位".to_string(),
+            },
+        ];
+
+        assert_eq!(
+            select_prioritized_video_prompt_memory_notes(&rows, 12),
+            vec![
+                "镜头稳定近景，情绪冷色压迫感".to_string(),
+                "光影冷调逆光，场景旧宅走廊".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_keeps_exact_storyboard_selection_exclusive() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=镜头低机位压迫感，情绪克制 | note=镜头低机位压迫感，情绪克制".into(),
+            },
+            AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content: "sampleCount=3 | style=光影冷调逆光，场景旧宅走廊 | note=光影冷调逆光，场景旧宅走廊".into(),
+            },
+        ];
+
+        assert_eq!(
+            select_prioritized_video_prompt_memory_notes(&rows, 12),
+            vec!["镜头低机位压迫感，情绪克制".to_string()]
         );
     }
 }
