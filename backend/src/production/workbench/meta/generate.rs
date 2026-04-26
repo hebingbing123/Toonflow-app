@@ -1127,6 +1127,10 @@ fn style_fragment_prefix(fragment: &str) -> bool {
 }
 
 fn style_fragment_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
+    continuity_fragment_is_semantically_covered(fragment, coverage)
+}
+
+fn continuity_fragment_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
     if prompt_fragment_is_covered(fragment, coverage) {
         return true;
     }
@@ -1345,10 +1349,10 @@ fn compact_continuity_note(
             let normalized_core = continuity_fragment_core(fragment);
             !continuity_fragment_matches_fields(fragment, fields, &expected_camera)
                 && !continuity_fragment_is_generic_quality_tail_overlap(fragment)
-                && !prompt_fragment_is_covered(fragment, prompt_coverage)
-                && normalized_core
-                    .as_deref()
-                    .is_none_or(|core| !prompt_fragment_is_covered(core, prompt_coverage))
+                && !continuity_fragment_is_semantically_covered(fragment, prompt_coverage)
+                && normalized_core.as_deref().is_none_or(|core| {
+                    !continuity_fragment_is_semantically_covered(core, prompt_coverage)
+                })
         })
         .collect::<Vec<_>>();
 
@@ -3316,6 +3320,38 @@ mod tests {
         assert_eq!(prompt.matches("Continuity notes:").count(), 1);
         assert!(!continuity_clause.contains("保持低机位压迫感"));
         assert!(prompt.contains("Natural motion, no extra shot changes."));
+    }
+
+    #[test]
+    fn build_video_prompt_drops_continuity_style_note_when_style_anchor_already_covers_it() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻压迫、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("保持低机位压迫感".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: vec!["保持上一镜头低机位压迫感，人物站位不要跳轴".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感."),
+            "{prompt}"
+        );
+        assert!(
+            prompt.contains("Continuity notes: 人物站位不要跳轴."),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Continuity notes: 保持上一镜头低机位压迫感"),
+            "{prompt}"
+        );
     }
 
     #[test]
