@@ -845,15 +845,19 @@ fn map_bad_case_category_with_comments(
     let Some(comments) = comments else {
         return Some(mapped);
     };
-    if category.trim() == "visual_error"
-        && visual_error_category_is_redundant(infer_negative_fragments_from_comments(comments))
-    {
-        return None;
+    let comment_fragments = infer_negative_fragments_from_comments(comments);
+    match category.trim() {
+        "visual_error" if visual_error_category_is_redundant(&comment_fragments) => return None,
+        "storyboard_mismatch" if storyboard_mismatch_category_is_redundant(&comment_fragments) => {
+            return None;
+        }
+        "pacing_issue" if pacing_issue_category_is_redundant(&comment_fragments) => return None,
+        _ => {}
     }
     Some(mapped)
 }
 
-fn visual_error_category_is_redundant(comment_fragments: Vec<&'static str>) -> bool {
+fn visual_error_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
     let mut has_distortion = false;
     let mut has_blur = false;
     let mut has_flicker = false;
@@ -866,6 +870,36 @@ fn visual_error_category_is_redundant(comment_fragments: Vec<&'static str>) -> b
         }
     }
     has_distortion && has_blur && has_flicker
+}
+
+fn storyboard_mismatch_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
+    let mut has_shot_change = false;
+    let mut has_wrong_framing = false;
+    for fragment in comment_fragments {
+        match canonical_negative_fragment(fragment).as_str() {
+            "avoid unnecessary shot changes" => has_shot_change = true,
+            "avoid extreme camera angle"
+            | "avoid overly tight close-up framing"
+            | "avoid extreme camera angle or overly tight close-up framing" => {
+                has_wrong_framing = true;
+            }
+            _ => {}
+        }
+    }
+    has_shot_change && has_wrong_framing
+}
+
+fn pacing_issue_category_is_redundant(comment_fragments: &[&'static str]) -> bool {
+    let mut has_rushed_motion = false;
+    let mut has_jerky_motion = false;
+    for fragment in comment_fragments {
+        match canonical_negative_fragment(fragment).as_str() {
+            "avoid rushed motion" => has_rushed_motion = true,
+            "avoid flicker" | "avoid flicker or motion jitter" => has_jerky_motion = true,
+            _ => {}
+        }
+    }
+    has_rushed_motion && has_jerky_motion
 }
 
 fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
@@ -921,6 +955,40 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
         (
             &["镜头", "构图", "机位", "切镜", "shot", "framing", "camera"][..],
             "avoid unnecessary shot changes",
+        ),
+        (
+            &[
+                "机位太歪",
+                "角度太歪",
+                "角度极端",
+                "仰拍过头",
+                "俯拍过头",
+                "特写太近",
+                "近景太近",
+                "裁切太紧",
+                "close-up too tight",
+                "camera angle too extreme",
+                "extreme angle",
+                "tight close-up",
+            ][..],
+            "avoid extreme camera angle or overly tight close-up framing",
+        ),
+        (
+            &[
+                "太赶",
+                "过赶",
+                "过急",
+                "太急",
+                "过快",
+                "太快",
+                "节奏赶",
+                "动作赶",
+                "rushed",
+                "too fast",
+                "too quick",
+                "rush",
+            ][..],
+            "avoid rushed motion",
         ),
         (
             &["背景", "场景", "空间", "setting", "background"][..],
@@ -1309,6 +1377,7 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid unnecessary shot changes" | "avoid extra shot changes or wrong framing" => {
             "shot_change_framing"
         }
+        "avoid rushed motion" | "avoid rushed or jerky motion" => "rushed_motion",
         "avoid extreme camera angle"
         | "avoid overly tight close-up framing"
         | "avoid extreme camera angle or overly tight close-up framing" => "camera_framing",
@@ -1371,8 +1440,9 @@ mod tests {
         compact_negative_review_constraints, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
         map_bad_case_category_with_comments, merge_negative_prompts, normalize_upload_sources,
-        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
-        review_fragment_is_irrelevant_to_storyboard, storyboard_dialogue_is_empty,
+        pacing_issue_category_is_redundant, quality_review_row_matches_storyboard,
+        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
+        storyboard_dialogue_is_empty, storyboard_mismatch_category_is_redundant,
         visual_error_category_is_redundant, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
@@ -1465,10 +1535,30 @@ mod tests {
     #[test]
     fn visual_error_category_is_redundant_when_comments_already_cover_multiple_visual_axes() {
         assert!(visual_error_category_is_redundant(
-            infer_negative_fragments_from_comments("手指变形、画面模糊还有闪烁")
+            &infer_negative_fragments_from_comments("手指变形、画面模糊还有闪烁")
         ));
         assert!(!visual_error_category_is_redundant(
-            infer_negative_fragments_from_comments("手指变形还有闪烁")
+            &infer_negative_fragments_from_comments("手指变形还有闪烁")
+        ));
+    }
+
+    #[test]
+    fn storyboard_mismatch_category_is_redundant_when_comments_cover_shot_change_and_framing() {
+        assert!(storyboard_mismatch_category_is_redundant(
+            &infer_negative_fragments_from_comments("切镜太多而且近景裁切太紧")
+        ));
+        assert!(!storyboard_mismatch_category_is_redundant(
+            &infer_negative_fragments_from_comments("切镜太多")
+        ));
+    }
+
+    #[test]
+    fn pacing_issue_category_is_redundant_when_comments_cover_rushed_and_jerky_motion() {
+        assert!(pacing_issue_category_is_redundant(
+            &infer_negative_fragments_from_comments("动作太赶，还有明显抖动")
+        ));
+        assert!(!pacing_issue_category_is_redundant(
+            &infer_negative_fragments_from_comments("动作太赶")
         ));
     }
 
@@ -1481,6 +1571,21 @@ mod tests {
         assert_eq!(
             map_bad_case_category_with_comments("visual_error", Some("手指变形还有闪烁")),
             Some("avoid warped anatomy, blur, flicker")
+        );
+        assert_eq!(
+            map_bad_case_category_with_comments(
+                "storyboard_mismatch",
+                Some("切镜太多而且近景裁切太紧")
+            ),
+            None
+        );
+        assert_eq!(
+            map_bad_case_category_with_comments("pacing_issue", Some("动作太赶，还有明显抖动")),
+            None
+        );
+        assert_eq!(
+            map_bad_case_category_with_comments("pacing_issue", Some("动作太赶")),
+            Some("avoid rushed or jerky motion")
         );
     }
 
@@ -1534,6 +1639,36 @@ mod tests {
         assert!(fragments.contains(&"avoid blur".to_string()));
         assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
         assert!(!fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
+    }
+
+    #[test]
+    fn collect_negative_review_fragments_skips_generic_storyboard_and_pacing_tags_when_comments_are_specific(
+    ) {
+        let fragments = collect_negative_review_fragments(
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("storyboard_mismatch".into()),
+                    comments: Some("切镜太多而且近景裁切太紧".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("storyboard".into()),
+                    target_id: Some("12".into()),
+                    bad_case_category: Some("pacing_issue".into()),
+                    comments: Some("动作太赶，还有明显抖动".into()),
+                },
+            ],
+            12,
+        );
+
+        assert!(fragments.contains(&"avoid unnecessary shot changes".to_string()));
+        assert!(fragments
+            .contains(&"avoid extreme camera angle or overly tight close-up framing".to_string()));
+        assert!(fragments.contains(&"avoid rushed motion".to_string()));
+        assert!(fragments.contains(&"avoid flicker or motion jitter".to_string()));
+        assert!(!fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
+        assert!(!fragments.contains(&"avoid rushed or jerky motion".to_string()));
     }
 
     #[test]
