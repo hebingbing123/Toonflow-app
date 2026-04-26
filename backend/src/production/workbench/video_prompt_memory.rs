@@ -872,11 +872,7 @@ fn extract_storyboard_ids(content: &str) -> Vec<i32> {
 }
 
 fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
-    let notes = rows
-        .iter()
-        .filter(|row| row.name == SELECTED_VIDEO_MEMORY_NAME)
-        .filter_map(selected_video_style_value)
-        .collect::<Vec<_>>();
+    let notes = distinct_selected_video_style_notes(rows);
     if notes.len() < 2 {
         return None;
     }
@@ -896,11 +892,7 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
 }
 
 fn build_project_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
-    let notes = rows
-        .iter()
-        .filter(|row| row.name == SELECTED_VIDEO_MEMORY_NAME)
-        .filter_map(selected_video_style_value)
-        .collect::<Vec<_>>();
+    let notes = distinct_selected_video_style_notes(rows);
     if notes.len() < 3 {
         return None;
     }
@@ -917,6 +909,30 @@ fn build_project_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
         style,
         style
     ))
+}
+
+fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
+    let mut sample_keys = Vec::new();
+    let mut notes = Vec::new();
+
+    for row in rows {
+        if row.name != SELECTED_VIDEO_MEMORY_NAME {
+            continue;
+        }
+        let Some(note) = selected_video_style_value(row) else {
+            continue;
+        };
+        let storyboard_key = extract_key_value(&row.content, "storyboardIds").unwrap_or_default();
+        let prompt_seed = extract_key_value(&row.content, "promptSeed").unwrap_or_default();
+        let sample_key = format!("{storyboard_key}|{prompt_seed}");
+        if sample_key == "|" || sample_keys.iter().any(|existing| existing == &sample_key) {
+            continue;
+        }
+        sample_keys.push(sample_key);
+        notes.push(note);
+    }
+
+    notes
 }
 
 fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
@@ -1656,6 +1672,28 @@ mod tests {
         assert!(summary.contains("光影阴天冷光"));
         assert!(!summary.contains("近景"));
         assert!(!summary.contains("低机位"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_deduplicates_same_storyboard_prompt_seed_samples() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=seed000000001 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | promptSeed=seed000000001 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=重复确认同镜头".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | promptSeed=seed000000002 | style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=2"));
+        assert!(summary.contains("style=镜头中景稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
     }
 
     #[test]
