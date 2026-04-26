@@ -649,6 +649,7 @@ fn filter_conflicting_review_fragments(
                 storyboard_row,
             )
         })
+        .filter(|fragment| !review_fragment_is_irrelevant_to_storyboard(fragment, storyboard_row))
         .collect()
 }
 
@@ -662,6 +663,39 @@ fn review_fragment_conflicts_with_selected_style(
         selected_style_note,
         storyboard_row,
     )
+}
+
+fn review_fragment_is_irrelevant_to_storyboard(
+    fragment: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> bool {
+    matches!(negative_fragment_family(fragment), "lip_sync_mismatch")
+        && storyboard_row.is_some_and(storyboard_has_no_dialogue)
+}
+
+fn storyboard_has_no_dialogue(row: &StoryboardPromptSeedRow) -> bool {
+    row.video_desc
+        .as_deref()
+        .and_then(parse_structured_storyboard_description)
+        .is_some_and(|fields| storyboard_dialogue_is_empty(&fields.dialogue))
+}
+
+fn storyboard_dialogue_is_empty(dialogue: &str) -> bool {
+    let normalized = normalize_prompt_text(dialogue);
+    let normalized_ascii = normalized.to_ascii_lowercase();
+    normalized.is_empty()
+        || [
+            "无台词",
+            "无对白",
+            "无旁白",
+            "无语音",
+            "no dialogue",
+            "no voice-over",
+            "silent",
+        ]
+        .iter()
+        .map(|marker| normalize_prompt_text(marker).to_ascii_lowercase())
+        .any(|marker| normalized_ascii == marker)
 }
 
 fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
@@ -1249,6 +1283,7 @@ fn negative_fragment_family(value: &str) -> &'static str {
         "avoid flat cold lighting"
         | "avoid harsh backlight silhouette"
         | "avoid flat cold lighting or harsh backlight silhouette" => "lighting_backlight",
+        "avoid lip-sync mismatch" => "lip_sync_mismatch",
         _ => "",
     }
 }
@@ -1301,8 +1336,8 @@ mod tests {
         compact_negative_review_constraints, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
         merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
-        review_fragment_conflicts_with_selected_style, QualityReviewSeedRow,
-        VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
+        storyboard_dialogue_is_empty, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -1611,6 +1646,67 @@ mod tests {
         assert!(prompt_13.contains("avoid warped anatomy, blur, flicker"));
         assert!(prompt_13.contains("avoid flat cold lighting"));
         assert!(!prompt_13.contains("avoid extra shot changes or wrong framing"));
+    }
+
+    #[test]
+    fn review_fragment_is_irrelevant_to_dialogue_free_storyboard() {
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角贴墙前行".into()),
+            video_desc: Some("（主角贴墙前行、旧宅走廊、主角、5秒、近景、稳定跟拍、贴墙前行、压迫、冷调逆光、无台词、风声回响、A12）".into()),
+            duration: Some("5".into()),
+        };
+
+        assert!(review_fragment_is_irrelevant_to_storyboard(
+            "avoid lip-sync mismatch",
+            Some(&storyboard_row),
+        ));
+        assert!(!review_fragment_is_irrelevant_to_storyboard(
+            "avoid flicker or motion jitter",
+            Some(&storyboard_row),
+        ));
+    }
+
+    #[test]
+    fn storyboard_dialogue_is_empty_recognizes_silent_markers() {
+        assert!(storyboard_dialogue_is_empty("无台词"));
+        assert!(storyboard_dialogue_is_empty("No dialogue"));
+        assert!(storyboard_dialogue_is_empty("silent"));
+        assert!(!storyboard_dialogue_is_empty("你终于来了"));
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_drops_lip_sync_for_silent_storyboard_only() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12, 13],
+            &[QualityReviewSeedRow {
+                target_type: Some("video".into()),
+                target_id: None,
+                bad_case_category: Some("dialogue_issue".into()),
+                comments: None,
+            }],
+            &[],
+            &[],
+            &storyboard_seed_rows(&[
+                (
+                    12,
+                    Some("主角贴墙前行"),
+                    Some("（主角贴墙前行、旧宅走廊、主角、5秒、近景、稳定跟拍、贴墙前行、压迫、冷调逆光、无台词、风声回响、A12）"),
+                    Some("5"),
+                ),
+                (
+                    13,
+                    Some("主角低声说你终于来了"),
+                    Some("（主角低声说你终于来了、旧宅门口、主角、5秒、近景、稳定跟拍、停步低声说出、压迫、冷调逆光、你终于来了、风声压过呼吸声、A13）"),
+                    Some("5"),
+                ),
+            ]),
+        );
+
+        assert_eq!(prompts.get(&12).and_then(|value| value.as_deref()), None);
+        assert_eq!(
+            prompts.get(&13).and_then(|value| value.as_deref()),
+            Some("avoid lip-sync mismatch")
+        );
     }
 
     #[test]
