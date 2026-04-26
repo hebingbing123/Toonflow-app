@@ -749,8 +749,8 @@ fn select_contextual_observation_summary_style_note(
         .into_iter()
         .chain(select_project_video_style_memory_notes(rows))
         .filter_map(|note| {
+            let evidence = observation_style_note_context_evidence(&note, &context);
             let compacted = compact_contextual_video_style_note(&note, storyboard_row)?;
-            let evidence = observation_style_note_context_evidence(&compacted, &context);
             (evidence >= 2).then_some((evidence, compacted))
         })
         .max_by(|(left_evidence, left_note), (right_evidence, right_note)| {
@@ -6054,11 +6054,11 @@ mod tests {
         let rows = vec![
             AgentMemoryRow {
                 name: "project_video_style_memory".into(),
-                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光，人物持续逼近 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光，人物持续逼近".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍推进，情绪冷峻压迫克制，光影冷调逆光颗粒 | note=镜头稳定跟拍推进，情绪冷峻压迫克制，光影冷调逆光颗粒".into(),
             },
             AgentMemoryRow {
                 name: "project_video_style_memory".into(),
-                content: "sampleCount=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".into(),
+                content: "sampleCount=5 | style=镜头稳定跟拍推进，情绪冷峻压迫，光影冷调逆光颗粒 | note=镜头稳定跟拍推进，情绪冷峻压迫，光影冷调逆光颗粒".into(),
             },
         ];
         let storyboard_row = StoryboardPromptSeedRow {
@@ -6069,7 +6069,7 @@ mod tests {
 
         assert_eq!(
             resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)),
-            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光".to_string())
+            Some("镜头推进".to_string())
         );
     }
 }

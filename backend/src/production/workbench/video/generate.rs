@@ -1644,10 +1644,10 @@ mod tests {
         load_auto_negative_prompts, map_bad_case_category_with_comments, merge_negative_prompts,
         negative_review_fetch_limit, normalize_upload_sources, pacing_issue_category_is_redundant,
         quality_review_row_matches_storyboard, rejected_negative_memory_fetch_limit,
-        review_fragment_conflicts_with_selected_style, review_fragment_is_irrelevant_to_storyboard,
-        selected_memory_fetch_limit, storyboard_dialogue_is_empty,
-        storyboard_mismatch_category_is_redundant, visual_error_category_is_redundant,
-        QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
+        resolve_negative_filter_style_note, review_fragment_conflicts_with_selected_style,
+        review_fragment_is_irrelevant_to_storyboard, selected_memory_fetch_limit,
+        storyboard_dialogue_is_empty, storyboard_mismatch_category_is_redundant,
+        visual_error_category_is_redundant, QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
