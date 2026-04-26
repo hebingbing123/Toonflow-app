@@ -15,8 +15,9 @@ use crate::production::workbench::meta::common::{
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, compact_video_style_prompt_note,
-    select_pending_rejected_video_observation_note, storyboard_prompt_seed, AgentMemoryRow,
-    StoryboardPromptSeedRow,
+    select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes,
+    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -404,12 +405,18 @@ async fn load_pending_video_observation_note(
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
-          AND episodes_id = $3
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
-          AND name = 'rejected_video_negative_memory'
+          AND (
+            (episodes_id = $3 AND name IN (
+                'rejected_video_negative_memory',
+                'selected_video_memory',
+                'script_video_style_memory'
+            ))
+            OR (episodes_id IS NULL AND name = 'project_video_style_memory')
+          )
         ORDER BY create_time_ms DESC
-        LIMIT 8
+        LIMIT 12
         "#,
     )
     .bind(user_id)
@@ -419,12 +426,69 @@ async fn load_pending_video_observation_note(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    Ok(select_pending_rejected_video_observation_note(
+    let note =
+        select_pending_rejected_video_observation_note(&rows, storyboard_numeric_id, current_prompt_seed);
+    let prioritized_style_note = select_selected_video_memory_notes(
         &rows,
         storyboard_numeric_id,
         current_prompt_seed,
     )
-    .map(|note| format!("待观察失败倾向：{note}")))
+    .into_iter()
+    .next()
+    .or_else(|| {
+        select_script_video_style_memory_notes(&rows)
+            .into_iter()
+            .next()
+    })
+    .or_else(|| {
+        select_project_video_style_memory_notes(&rows)
+            .into_iter()
+            .next()
+    });
+
+    Ok(note
+        .filter(|note| {
+            !video_prompt_observation_conflicts_with_style(note, prioritized_style_note.as_deref())
+        })
+        .map(|note| format!("待观察失败倾向：{note}")))
+}
+
+fn video_prompt_observation_conflicts_with_style(
+    observation_note: &str,
+    selected_style_note: Option<&str>,
+) -> bool {
+    let Some(note) = selected_style_note else {
+        return false;
+    };
+    let observation = observation_note.trim();
+    let style_note = note.trim();
+    if observation.is_empty() || style_note.is_empty() {
+        return false;
+    }
+
+    if observation == "avoid overly tight close-up framing" {
+        return style_note.contains("近景") || style_note.contains("特写");
+    }
+    if observation == "avoid extreme camera angle" {
+        return style_note.contains("低机位") || style_note.contains("高机位");
+    }
+    if observation == "avoid oppressive or frantic mood" {
+        return style_note.contains("压迫") || style_note.contains("紧张") || style_note.contains("冷峻");
+    }
+    if observation == "avoid overly cold emotional tone" {
+        return style_note.contains("冷调") || style_note.contains("冷色") || style_note.contains("冷峻");
+    }
+    if observation == "avoid flat cold lighting" {
+        return style_note.contains("光影")
+            && (style_note.contains("冷调")
+                || style_note.contains("冷光")
+                || style_note.contains("逆光"));
+    }
+    if observation == "avoid harsh backlight silhouette" {
+        return style_note.contains("光影") && style_note.contains("逆光");
+    }
+
+    false
 }
 
 fn select_prioritized_video_style_notes(
@@ -1724,7 +1788,8 @@ mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
         select_prioritized_video_style_notes, select_video_prompt_memory_notes,
-        trim_video_prompt_memory_rows, GenerateVideoPromptResponse, VideoPromptContext,
+        trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
+        GenerateVideoPromptResponse, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
@@ -2494,5 +2559,29 @@ mod tests {
                 .and_then(serde_json::Value::as_str),
             Some("待观察失败倾向：avoid shaky handheld motion")
         );
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_skips_style_conflicts() {
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid flat cold lighting",
+            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+        ));
+        assert!(video_prompt_observation_conflicts_with_style(
+            "avoid oppressive or frantic mood",
+            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+        ));
+    }
+
+    #[test]
+    fn observation_note_conflict_filter_keeps_non_conflicting_warnings() {
+        assert!(!video_prompt_observation_conflicts_with_style(
+            "avoid face drift or costume inconsistency",
+            Some("镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"),
+        ));
+        assert!(!video_prompt_observation_conflicts_with_style(
+            "avoid flat cold lighting",
+            None,
+        ));
     }
 }
