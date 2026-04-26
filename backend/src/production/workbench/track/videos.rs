@@ -6,6 +6,11 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::error::ApiError;
+use crate::production::workbench::video_prompt_memory::{
+    build_selected_video_memory, clear_selected_video_memory, persist_selected_video_memory,
+    StoryboardPromptSeedRow,
+};
+use crate::scope::http::require_authenticated_user;
 use crate::scope::http::require_owned_numeric_script_scope_row;
 use crate::state::AppState;
 
@@ -50,6 +55,7 @@ pub(in crate::production) async fn post_workbench_delete_video(
     Json(body): Json<DeleteVideoBody>,
 ) -> Result<JsonResponse<DeleteVideoResponse>, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
+    let user_id = require_authenticated_user(&state, &headers)?;
     let (pool, scope_row) =
         require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
             .await?;
@@ -71,6 +77,15 @@ pub(in crate::production) async fn post_workbench_delete_video(
     if updated.rows_affected() == 0 {
         return Err(ApiError::NotFound);
     }
+
+    clear_selected_video_memory(
+        pool,
+        user_id,
+        body.project_id,
+        body.script_id,
+        body.storyboard_id,
+    )
+    .await?;
 
     Ok(JsonResponse(DeleteVideoResponse {
         storyboard_id: body.storyboard_id,
@@ -122,6 +137,7 @@ pub(in crate::production) async fn post_workbench_select_video(
     if body.video_url.trim().is_empty() {
         return Err(ApiError::BadRequest("videoUrl must not be empty".into()));
     }
+    let user_id = require_authenticated_user(&state, &headers)?;
 
     let (pool, scope_row) =
         require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
@@ -144,6 +160,33 @@ pub(in crate::production) async fn post_workbench_select_video(
 
     if updated.rows_affected() == 0 {
         return Err(ApiError::NotFound);
+    }
+
+    let prompt_seed = sqlx::query_as::<_, StoryboardPromptSeedRow>(
+        r#"
+        SELECT prompt, video_desc, duration
+        FROM app_storyboard
+        WHERE script_id = $1
+          AND numeric_id = $2
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .bind(body.storyboard_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    if let Some(prompt_seed) = prompt_seed {
+        if let Some(memory_content) = build_selected_video_memory(body.storyboard_id, &prompt_seed)
+        {
+            persist_selected_video_memory(
+                pool,
+                user_id,
+                body.project_id,
+                body.script_id,
+                &memory_content,
+            )
+            .await?;
+        }
     }
 
     Ok(JsonResponse(SelectVideoResponse {

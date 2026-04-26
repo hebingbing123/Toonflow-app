@@ -8,11 +8,18 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::production::workbench::meta::common::{
+    clip_prompt_fragment, extract_key_value, normalize_prompt_text, parse_positive_int,
+    parse_structured_storyboard_description,
+};
+use crate::production::workbench::video_prompt_memory::{
+    select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+};
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
 use crate::state::AppState;
 
-const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 6;
+const VIDEO_PROMPT_MEMORY_ROW_LIMIT: i64 = 8;
 const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 
@@ -104,13 +111,6 @@ struct VideoPromptContext {
     continuity_notes: Vec<String>,
 }
 
-#[derive(Debug, sqlx::FromRow)]
-struct StoryboardPromptRow {
-    prompt: Option<String>,
-    video_desc: Option<String>,
-    duration: Option<String>,
-}
-
 async fn load_video_prompt_context(
     pool: &PgPool,
     user_id: Uuid,
@@ -131,7 +131,7 @@ async fn load_video_prompt_context(
     .await
     .map_err(|e| e.into_api_error())?
     .storyboard_id;
-    let row = sqlx::query_as::<_, StoryboardPromptRow>(
+    let row = sqlx::query_as::<_, StoryboardPromptSeedRow>(
         r#"
         SELECT prompt, video_desc, duration
         FROM app_storyboard
@@ -163,16 +163,16 @@ async fn load_video_prompt_memory_notes(
     script_numeric_id: i32,
     storyboard_numeric_id: i32,
 ) -> Result<Vec<String>, ApiError> {
-    let rows = sqlx::query_scalar(
+    let rows = sqlx::query_as::<_, AgentMemoryRow>(
         r#"
-        SELECT content
+        SELECT name, content
         FROM app_agent_memory
         WHERE owner_user_id = $1
           AND numeric_project_id = $2
           AND episodes_id = $3
           AND agent_type = 'productionAgent'
           AND memory_type = 'summary'
-          AND name = 'auto_scope_memory'
+          AND name IN ('selected_video_memory', 'auto_scope_memory')
         ORDER BY create_time_ms DESC
         LIMIT $4
         "#,
@@ -184,6 +184,10 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let selected_notes = select_selected_video_memory_notes(&rows, storyboard_numeric_id);
+    if !selected_notes.is_empty() {
+        return Ok(selected_notes);
+    }
     Ok(select_video_prompt_memory_notes(
         &rows,
         storyboard_numeric_id,
@@ -333,68 +337,6 @@ fn resolve_video_prompt_duration(
     5
 }
 
-#[derive(Debug, Clone)]
-struct StructuredStoryboardDescription {
-    subject: String,
-    setting: String,
-    duration_seconds: Option<i32>,
-    shot: String,
-    camera_move: String,
-    action: String,
-    mood: String,
-    lighting: String,
-    dialogue: String,
-    sound: String,
-}
-
-fn parse_structured_storyboard_description(
-    description: &str,
-) -> Option<StructuredStoryboardDescription> {
-    let normalized = description
-        .trim()
-        .trim_start_matches(['（', '('])
-        .trim_end_matches(['）', ')'])
-        .trim();
-    if normalized.is_empty() {
-        return None;
-    }
-    let parts = normalized
-        .split('、')
-        .map(normalize_prompt_text)
-        .filter(|part| !part.is_empty())
-        .collect::<Vec<_>>();
-    if parts.len() < 8 {
-        return None;
-    }
-    Some(StructuredStoryboardDescription {
-        subject: parts.first().cloned().unwrap_or_default(),
-        setting: parts.get(1).cloned().unwrap_or_default(),
-        duration_seconds: parts.get(3).and_then(|value| parse_positive_int(value)),
-        shot: parts.get(4).cloned().unwrap_or_default(),
-        camera_move: parts.get(5).cloned().unwrap_or_default(),
-        action: parts.get(6).cloned().unwrap_or_default(),
-        mood: parts.get(7).cloned().unwrap_or_default(),
-        lighting: parts.get(8).cloned().unwrap_or_default(),
-        dialogue: parts.get(9).cloned().unwrap_or_default(),
-        sound: parts.get(10).cloned().unwrap_or_default(),
-    })
-}
-
-fn normalize_prompt_text(text: &str) -> String {
-    text.split_whitespace().collect::<Vec<_>>().join(" ")
-}
-
-fn clip_prompt_fragment(text: &str, max_chars: usize) -> String {
-    let normalized = normalize_prompt_text(text);
-    let mut chars = normalized.chars();
-    let clipped = chars.by_ref().take(max_chars).collect::<String>();
-    if chars.next().is_some() {
-        format!("{}...", clipped.trim_end())
-    } else {
-        clipped
-    }
-}
-
 fn looks_like_silence(text: &str) -> bool {
     let normalized = text.trim().to_lowercase();
     normalized.is_empty()
@@ -406,23 +348,18 @@ fn looks_like_silence(text: &str) -> bool {
         || normalized == "no sound"
 }
 
-fn parse_positive_int(text: &str) -> Option<i32> {
-    let mut digits = String::new();
-    for ch in text.chars() {
-        if ch.is_ascii_digit() {
-            digits.push(ch);
-        } else if !digits.is_empty() {
-            break;
-        }
-    }
-    digits.parse::<i32>().ok().filter(|value| *value > 0)
-}
-
-fn select_video_prompt_memory_notes(rows: &[String], storyboard_numeric_id: i32) -> Vec<String> {
+fn select_video_prompt_memory_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+) -> Vec<String> {
     let mut scored = rows
         .iter()
         .filter_map(|row| {
-            let tool = extract_key_value(row, "tool")?;
+            if row.name != "auto_scope_memory" {
+                return None;
+            }
+            let content = row.content.as_str();
+            let tool = extract_key_value(content, "tool")?;
             if !matches!(
                 tool.as_str(),
                 "run_sub_agent_storyboard_panel"
@@ -432,12 +369,12 @@ fn select_video_prompt_memory_notes(rows: &[String], storyboard_numeric_id: i32)
             ) {
                 return None;
             }
-            let score = memory_storyboard_overlap_score(row, storyboard_numeric_id);
+            let score = memory_storyboard_overlap_score(content, storyboard_numeric_id);
             if score <= 0 {
                 return None;
             }
-            let note = extract_key_value(row, "summary")
-                .or_else(|| extract_key_value(row, "result"))
+            let note = extract_key_value(content, "summary")
+                .or_else(|| extract_key_value(content, "result"))
                 .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))?;
             Some((score, note))
         })
@@ -488,22 +425,6 @@ fn parse_csv_positive_ints(text: &str) -> Vec<i32> {
         .filter_map(|part| part.trim().parse::<i32>().ok())
         .filter(|value| *value > 0)
         .collect()
-}
-
-fn extract_key_value(row: &str, key: &str) -> Option<String> {
-    let marker = format!("{key}=");
-    let start = row.find(&marker)? + marker.len();
-    let rest = &row[start..];
-    let end = rest
-        .find(" | ")
-        .or_else(|| rest.find("; "))
-        .unwrap_or(rest.len());
-    let value = normalize_prompt_text(rest[..end].trim());
-    if value.is_empty() {
-        None
-    } else {
-        Some(value)
-    }
 }
 
 #[derive(Debug, Serialize)]
@@ -561,6 +482,7 @@ mod tests {
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
         select_video_prompt_memory_notes, VideoPromptContext,
     };
+    use crate::production::workbench::video_prompt_memory::AgentMemoryRow;
 
     #[test]
     fn build_video_prompt_compacts_structured_storyboard_description() {
@@ -642,10 +564,22 @@ mod tests {
     #[test]
     fn select_video_prompt_memory_notes_keeps_only_matching_storyboard_entries() {
         let rows = vec![
-            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=保持女主冷色调近景".to_string(),
-            "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=补图时保持镜头方向连续".to_string(),
-            "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=7 | review=target=storyboardTable; summary=别的镜头".to_string(),
-            "tool=run_sub_agent_derive_assets | scope=storyboardIds=12 | result=无关素材".to_string(),
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | review=target=storyboardTable; summary=保持女主冷色调近景".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_gen | scope=storyboardIds=12 | result=补图时保持镜头方向连续".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=7 | review=target=storyboardTable; summary=别的镜头".to_string(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_derive_assets | scope=storyboardIds=12 | result=无关素材".to_string(),
+            },
         ];
 
         assert_eq!(

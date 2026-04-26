@@ -596,6 +596,30 @@ async fn production_workbench_video_roundtrip() {
     let (status, selected) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "selected={selected}");
     assert_eq!(selected["video_url"].as_str(), Some(selected_video_url));
+    let selected_memory_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'selected_video_memory'
+          AND content LIKE $4
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .bind(script_id)
+    .bind(format!("%storyboardIds={storyboard_id}%"))
+    .fetch_one(&pool)
+    .await
+    .expect("query selected video memory");
+    assert_eq!(
+        selected_memory_count, 1,
+        "select-video should persist storyboard-scoped selected video memory"
+    );
 
     let res = app
         .clone()
@@ -793,6 +817,30 @@ async fn production_workbench_video_roundtrip() {
     );
     assert!(after_delete_video["data"][0]["url"].is_null());
     assert!(after_delete_video["data"][0]["state"].is_null());
+    let selected_memory_after_delete: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'selected_video_memory'
+          AND content LIKE $4
+        "#,
+    )
+    .bind(sub)
+    .bind(project_id)
+    .bind(script_id)
+    .bind(format!("%storyboardIds={storyboard_id}%"))
+    .fetch_one(&pool)
+    .await
+    .expect("query selected video memory after delete");
+    assert_eq!(
+        selected_memory_after_delete, 0,
+        "delete-video should clear stale selected video memory for the storyboard"
+    );
 
     let res = app
         .clone()
