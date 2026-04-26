@@ -12,6 +12,7 @@ const REJECTED_VIDEO_NEGATIVE_MEMORY_NAME: &str = "rejected_video_negative_memor
 const SELECTED_VIDEO_MEMORY_KEEP_ROWS: i64 = 12;
 const SCRIPT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
 const PROJECT_VIDEO_STYLE_MEMORY_KEEP_ROWS: i64 = 1;
+const PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT: usize = 2;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_KEEP_ROWS: i64 = 12;
 const REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS: u32 = 2;
 const REJECTED_VIDEO_NEGATIVE_FRAGMENT_LIMIT: usize = 2;
@@ -1657,12 +1658,7 @@ fn build_script_video_style_memory(rows: &[AgentMemoryRow]) -> Option<String> {
     }
 
     let style = clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
-    Some(format!(
-        "sampleCount={} | style={} | note={}",
-        notes.len(),
-        style,
-        style
-    ))
+    Some(format!("sampleCount={} | style={}", notes.len(), style))
 }
 
 fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<String> {
@@ -1677,12 +1673,7 @@ fn build_project_video_style_memory(rows: &[ScopedAgentMemoryRow]) -> Option<Str
     }
 
     let style = clip_prompt_fragment(&recurring.join("，"), VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS);
-    Some(format!(
-        "sampleCount={} | style={} | note={}",
-        notes.len(),
-        style,
-        style
-    ))
+    Some(format!("sampleCount={} | style={}", notes.len(), style))
 }
 
 fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
@@ -1692,8 +1683,9 @@ fn distinct_selected_video_style_notes(rows: &[AgentMemoryRow]) -> Vec<String> {
             row.content.as_str(),
             extract_key_value(&row.content, "storyboardIds")
                 .map(|storyboard_id| format!("script:{storyboard_id}")),
+            None,
         )
-    }))
+    }), None)
 }
 
 fn distinct_project_selected_video_style_notes(rows: &[ScopedAgentMemoryRow]) -> Vec<String> {
@@ -1709,18 +1701,21 @@ fn distinct_project_selected_video_style_notes(rows: &[ScopedAgentMemoryRow]) ->
                         .unwrap_or_else(|| "project".to_string())
                 )
             }),
+            row.episodes_id.map(|value| value.to_string()),
         )
-    }))
+    }), Some(PROJECT_VIDEO_STYLE_MEMORY_MAX_SAMPLES_PER_SCRIPT))
 }
 
 fn distinct_selected_video_style_notes_by_scope<'a>(
-    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>)>,
+    rows: impl Iterator<Item = (&'a str, &'a str, Option<String>, Option<String>)>,
+    max_samples_per_scope: Option<usize>,
 ) -> Vec<String> {
     let mut storyboard_keys = Vec::new();
     let mut sample_keys = Vec::new();
+    let mut scope_counts = Vec::<(String, usize)>::new();
     let mut notes = Vec::new();
 
-    for (name, content, scoped_storyboard_key) in rows {
+    for (name, content, scoped_storyboard_key, scope_key) in rows {
         if name != SELECTED_VIDEO_MEMORY_NAME {
             continue;
         }
@@ -1742,6 +1737,16 @@ fn distinct_selected_video_style_notes_by_scope<'a>(
                 continue;
             }
             sample_keys.push(sample_key);
+        }
+        if let (Some(scope_key), Some(limit)) = (scope_key, max_samples_per_scope) {
+            if let Some((_, count)) = scope_counts.iter_mut().find(|(key, _)| key == &scope_key) {
+                if *count >= limit {
+                    continue;
+                }
+                *count += 1;
+            } else {
+                scope_counts.push((scope_key, 1));
+            }
         }
         notes.push(note);
     }
@@ -2876,6 +2881,43 @@ mod tests {
         assert!(summary.contains("sampleCount=3"));
         assert!(summary.contains("光影暖金逆光"));
         assert!(!summary.contains("光影冷调逆光"));
+    }
+
+    #[test]
+    fn build_project_video_style_memory_caps_samples_per_script_to_reduce_single_script_bias() {
+        let summary = build_project_video_style_memory(&[
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=1 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=2 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=3 | style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光 | note=...".into(),
+                episodes_id: Some(1),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=4 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                episodes_id: Some(2),
+            },
+            ScopedAgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=5 | style=镜头稳定跟拍，情绪冷峻压迫，光影暖金逆光 | note=...".into(),
+                episodes_id: Some(2),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=4"));
+        assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫"));
+        assert!(!summary.contains("光影冷调逆光"));
+        assert!(!summary.contains("光影暖金逆光"));
     }
 
     #[test]
