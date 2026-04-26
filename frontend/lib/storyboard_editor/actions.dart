@@ -56,7 +56,7 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       throw const FormatException('视频提示词不能为空');
     }
     final negativePrompt = _negativeVideoPromptCtrl.text.trim();
-    final status = await postProductionWorkbenchGenerateVideoV1(
+    final response = await postProductionWorkbenchGenerateVideoV1(
       widget.token,
       projectId: widget.projectNumericId,
       scriptId: widget.scriptNumericId,
@@ -72,11 +72,20 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
       audio: _audio,
       trackId: trackId,
     );
+    final appliedNegativePrompt = response.storyboardNegativePrompts
+        .where((item) => item.storyboardId == widget.storyNumericId)
+        .map((item) => item.negativePrompt?.trim() ?? '')
+        .firstWhere((item) => item.isNotEmpty, orElse: () => '');
+    _negativeVideoPromptCtrl.text = appliedNegativePrompt;
     if (!mounted) return;
     await _refreshWorkbenchData();
     if (!mounted) return;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp('视频任务已提交，HTTP $status。');
+      _setWorkbenchFollowUp(
+        appliedNegativePrompt.isEmpty
+            ? '已提交 ${response.total} 条视频任务。'
+            : '已提交 ${response.total} 条视频任务，并回填最终负向提示词。',
+      );
     });
     await _notifyStoryboardMutated();
   }

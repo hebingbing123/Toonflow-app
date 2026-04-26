@@ -16,6 +16,53 @@ class ProductionExportZipResponse {
   });
 }
 
+class WorkbenchStoryboardNegativePrompt {
+  const WorkbenchStoryboardNegativePrompt({
+    required this.storyboardId,
+    this.negativePrompt,
+  });
+
+  final int storyboardId;
+  final String? negativePrompt;
+
+  factory WorkbenchStoryboardNegativePrompt.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WorkbenchStoryboardNegativePrompt(
+      storyboardId: (json['storyboardId'] as num).toInt(),
+      negativePrompt: json['negativePrompt'] as String?,
+    );
+  }
+}
+
+class WorkbenchGenerateVideoResponse {
+  const WorkbenchGenerateVideoResponse({
+    required this.total,
+    this.negativePrompt,
+    required this.storyboardNegativePrompts,
+  });
+
+  final int total;
+  final String? negativePrompt;
+  final List<WorkbenchStoryboardNegativePrompt> storyboardNegativePrompts;
+
+  factory WorkbenchGenerateVideoResponse.fromJson(Map<String, dynamic> json) {
+    final rawPrompts =
+        json['storyboardNegativePrompts'] as List<dynamic>? ?? const [];
+    return WorkbenchGenerateVideoResponse(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      negativePrompt: json['negativePrompt'] as String?,
+      storyboardNegativePrompts: rawPrompts
+          .map(
+            (item) => WorkbenchStoryboardNegativePrompt.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
   required int projectId,
@@ -115,8 +162,8 @@ Future<int> postProductionSaveFlowDataV1(
 }
 
 /// `POST /api/v1/production/workbench/generate-video` — OpenAPI `postProductionWorkbenchGenerateVideoV1`
-/// (implemented; returns **200** or **404** / **503** when DB-gated).
-Future<int> postProductionWorkbenchGenerateVideoV1(
+/// (implemented; returns final applied negative prompts per storyboard).
+Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   String accessToken, {
   required int projectId,
   required int scriptId,
@@ -156,7 +203,14 @@ Future<int> postProductionWorkbenchGenerateVideoV1(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  if (res.statusCode != 200) {
+    throw RustApiException(res.body, statusCode: res.statusCode);
+  }
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return WorkbenchGenerateVideoResponse.fromJson(map);
 }
 
 /// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1`

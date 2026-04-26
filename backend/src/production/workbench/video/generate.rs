@@ -487,9 +487,10 @@ fn push_unique_negative_fragment(target: &mut Vec<String>, candidate: Option<&'s
     let Some(candidate) = candidate else {
         return;
     };
-    if target.iter().any(|existing| existing == candidate) {
+    if negative_fragment_is_covered(candidate, target) {
         return;
     }
+    target.retain(|existing| !negative_fragment_contains(candidate, existing));
     target.push(candidate.to_string());
 }
 
@@ -552,12 +553,10 @@ fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Opti
             if fragment.is_empty() {
                 continue;
             }
-            if fragments
-                .iter()
-                .any(|existing: &String| existing == fragment)
-            {
+            if negative_fragment_is_covered(fragment, &fragments) {
                 continue;
             }
+            fragments.retain(|existing| !negative_fragment_contains(fragment, existing));
             fragments.push(fragment.to_string());
         }
     }
@@ -566,6 +565,39 @@ fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Opti
     } else {
         Some(clip_negative_prompt(&fragments.join(", ")))
     }
+}
+
+fn negative_fragment_is_covered(candidate: &str, existing_fragments: &[String]) -> bool {
+    existing_fragments
+        .iter()
+        .any(|existing| negative_fragment_contains(existing, candidate))
+}
+
+fn negative_fragment_contains(existing: &str, candidate: &str) -> bool {
+    let existing = canonical_negative_fragment(existing);
+    let candidate = canonical_negative_fragment(candidate);
+    if existing.is_empty() || candidate.is_empty() {
+        return false;
+    }
+    if existing == candidate {
+        return true;
+    }
+    let min_overlap_len = 12;
+    existing.len() >= candidate.len()
+        && candidate.len() >= min_overlap_len
+        && existing.contains(&candidate)
+}
+
+fn canonical_negative_fragment(value: &str) -> String {
+    value
+        .trim()
+        .trim_matches(|ch: char| {
+            ch.is_whitespace() || matches!(ch, ',' | ';' | '，' | '；' | '.' | '。' | ':' | '：')
+        })
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
 }
 
 fn clip_negative_prompt(prompt: &str) -> String {
@@ -673,6 +705,17 @@ mod tests {
             "avoid blur, avoid flicker, avoid wrong setting details"
         );
         assert!(clip_negative_prompt(&"a".repeat(160)).ends_with("..."));
+    }
+
+    #[test]
+    fn merge_negative_prompts_keeps_more_informative_fragment() {
+        let merged = merge_negative_prompts(
+            Some("avoid flicker"),
+            Some("avoid flicker or motion jitter, avoid blur"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid flicker or motion jitter, avoid blur");
     }
 
     #[tokio::test]

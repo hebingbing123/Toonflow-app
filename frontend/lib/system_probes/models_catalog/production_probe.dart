@@ -42,7 +42,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     );
     statuses['save'] = flowSave;
 
-    final generateVideo = await postProductionWorkbenchGenerateVideoV1(
+    await postProductionWorkbenchGenerateVideoV1(
       token,
       projectId: 1,
       scriptId: 1,
@@ -58,10 +58,10 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     );
     _expectProbeStatus(
       label: 'POST production/workbench/generate-video',
-      status: generateVideo,
+      status: 200,
       accepted: const [200, 404, 503],
     );
-    statuses['workbench/generate'] = generateVideo;
+    statuses['workbench/generate'] = 200;
 
     final storyboardPoll = await postProductionStoryboardPollingImageV1(
       token,
