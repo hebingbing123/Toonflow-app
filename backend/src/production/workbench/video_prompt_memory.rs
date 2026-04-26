@@ -93,7 +93,7 @@ const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
 ];
 const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
 
-fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
+pub(crate) fn split_prompt_note_fragments(note: &str) -> impl Iterator<Item = String> + '_ {
     note.split(['，', ',', '；', ';', '。', '\n'])
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
@@ -2331,10 +2331,7 @@ fn selected_video_style_value_from_content(content: &str) -> Option<String> {
 
 fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionContext) -> i32 {
     let mut score = note.score;
-    let fragments = note
-        .note
-        .split('，')
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(&note.note)
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
     for fragment in fragments {
@@ -2414,10 +2411,7 @@ fn score_style_note_context_evidence(
     context: &StyleNoteSelectionContext,
 ) -> usize {
     let mut evidence = 0usize;
-    let fragments = note
-        .note
-        .split('，')
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(&note.note)
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
 
@@ -2588,11 +2582,7 @@ fn distinct_selected_video_style_notes_by_scope<'a>(
 fn recurring_style_fragments(notes: &[String]) -> Vec<String> {
     let parsed = notes
         .iter()
-        .map(|note| {
-            note.split('，')
-                .map(normalize_prompt_text)
-                .collect::<Vec<_>>()
-        })
+        .map(|note| split_prompt_note_fragments(note).collect::<Vec<_>>())
         .collect::<Vec<_>>();
     let mut recurring = Vec::new();
 
@@ -4120,6 +4110,24 @@ mod tests {
         assert!(summary.contains("光影冷调逆光"));
         assert!(!summary.contains("场景旧宅走廊"));
         assert!(!summary.contains("女主"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_extracts_recurring_style_fragments_from_ascii_delimiters() {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=9 | style=镜头中景稳定跟拍, 情绪冷峻压迫; 光影冷调逆光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=10 | style=镜头近景稳定跟拍, 情绪冷峻压迫; 光影冷调逆光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=2"));
+        assert!(summary.contains("style=镜头稳定跟拍，情绪冷峻压迫，光影冷调逆光"));
     }
 
     #[test]

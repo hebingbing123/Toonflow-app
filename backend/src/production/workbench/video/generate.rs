@@ -18,7 +18,7 @@ use crate::production::workbench::video_prompt_memory::{
     parse_structured_storyboard_description, select_prioritized_video_style_note,
     select_project_video_style_memory_notes, select_rejected_video_negative_memory_notes,
     select_script_video_style_memory_notes, select_selected_video_memory_notes,
-    storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
+    split_prompt_note_fragments, storyboard_prompt_seed, AgentMemoryRow, StoryboardPromptSeedRow,
     StructuredStoryboardDescription,
 };
 use crate::scope::http::require_owned_numeric_script_scope;
@@ -702,9 +702,7 @@ fn compact_contextual_negative_style_note(
         .into_iter()
         .filter(|part| !part.is_empty())
         .collect::<String>();
-    let fragments = normalized
-        .split('，')
-        .map(normalize_prompt_text)
+    let fragments = split_prompt_note_fragments(&normalized)
         .filter(|fragment| !fragment.is_empty())
         .filter(|fragment| {
             negative_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
@@ -2686,6 +2684,37 @@ mod tests {
                         .into(),
             }],
             &HashMap::new(),
+        );
+
+        let prompt = prompts.get(&12).and_then(|value| value.as_deref());
+        assert_eq!(prompt, None);
+    }
+
+    #[test]
+    fn script_video_style_summary_with_ascii_delimiters_can_suppress_conflicting_review_fragments()
+    {
+        let storyboard_rows = storyboard_seed_rows(&[(
+            12,
+            Some("门厅对峙"),
+            Some("（主角对峙、旧宅门厅、主角、5秒、近景、静止、盯住来人、冷峻压迫、冷调逆光、、、A12）"),
+            Some("5s"),
+        )]);
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[QualityReviewSeedRow {
+                target_type: Some("storyboard".into()),
+                target_id: Some("12".into()),
+                bad_case_category: None,
+                comments: Some("情绪太冷太压迫，逆光太重".into()),
+            }],
+            &[],
+            &[AgentMemoryRow {
+                name: "script_video_style_memory".into(),
+                content:
+                    "style=镜头稳定跟拍, 情绪冷峻压迫; 光影冷调逆光 | note=镜头稳定跟拍, 情绪冷峻压迫; 光影冷调逆光"
+                        .into(),
+            }],
+            &storyboard_rows,
         );
 
         let prompt = prompts.get(&12).and_then(|value| value.as_deref());
