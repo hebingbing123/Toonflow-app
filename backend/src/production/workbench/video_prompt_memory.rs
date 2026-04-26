@@ -2436,8 +2436,17 @@ fn compact_cross_fragment_style_redundancy(fragments: &mut Vec<String>) {
         }
         !lighting_fragments
             .iter()
-            .any(|lighting| lighting.contains(&mood))
+            .any(|lighting| lighting_fragment_covers_generic_mood_tone(lighting, &mood))
     });
+}
+
+fn lighting_fragment_covers_generic_mood_tone(lighting: &str, mood: &str) -> bool {
+    match mood {
+        "冷调" | "冷色" => ["冷调", "冷色", "冷光"]
+            .iter()
+            .any(|keyword| lighting.contains(keyword)),
+        _ => lighting.contains(mood),
+    }
 }
 
 fn compact_prefixed_style_fragment_with_keywords(
@@ -3663,6 +3672,14 @@ mod tests {
     }
 
     #[test]
+    fn compact_video_style_prompt_note_drops_generic_cold_mood_when_cold_lighting_is_more_specific()
+    {
+        let note = compact_video_style_prompt_note("情绪冷调，光影阴天冷光").expect("style note");
+
+        assert_eq!(note, "光影阴天冷光");
+    }
+
+    #[test]
     fn select_script_video_style_memory_notes_reads_summary_note() {
         let notes = select_script_video_style_memory_notes(&[
             AgentMemoryRow {
@@ -3851,6 +3868,26 @@ mod tests {
 
         assert!(summary.contains("sampleCount=3"));
         assert!(summary.contains("style=光影冷调逆光"));
+        assert!(!summary.contains("情绪冷调"));
+    }
+
+    #[test]
+    fn build_script_video_style_memory_drops_generic_cold_mood_if_specific_cold_lighting_already_carries_it(
+    ) {
+        let summary = build_script_video_style_memory(&[
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | style=情绪冷调，光影阴天冷光 | note=...".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=情绪冷调，光影阴天冷光 | note=...".into(),
+            },
+        ])
+        .expect("summary");
+
+        assert!(summary.contains("sampleCount=2"));
+        assert!(summary.contains("style=光影阴天冷光"));
         assert!(!summary.contains("情绪冷调"));
     }
 
