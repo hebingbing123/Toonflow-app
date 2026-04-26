@@ -706,7 +706,7 @@ fn build_video_prompt(
             if let Some(setting) = setting {
                 clauses.push(format!("Setting: {}.", clip_prompt_fragment(&setting, 48)));
             }
-            if let Some(action) = action {
+            if let Some(action) = action.as_ref() {
                 clauses.push(format!("Action: {}.", clip_prompt_fragment(&action, 72)));
             }
             let camera = [fields.shot.as_str(), fields.camera_move.as_str()]
@@ -1094,7 +1094,7 @@ fn compact_memory_style_anchor(
                     return false;
                 }
             }
-            !prompt_fragment_is_covered(fragment, prompt_coverage)
+            !style_fragment_is_semantically_covered(fragment, prompt_coverage)
                 || structured_fields.is_some_and(|fields| {
                     allow_prompt_covered_style_fragments
                         && style_fragment_matches_prompt_style_field(fragment, fields)
@@ -1124,6 +1124,27 @@ fn style_fragment_prefix(fragment: &str) -> bool {
     ["镜头", "情绪", "光影"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
+}
+
+fn style_fragment_is_semantically_covered(fragment: &str, coverage: &[String]) -> bool {
+    if prompt_fragment_is_covered(fragment, coverage) {
+        return true;
+    }
+
+    let canonical_fragment = canonical_continuity_fragment(fragment);
+    if canonical_fragment.is_empty() {
+        return false;
+    }
+
+    coverage.iter().any(|existing| {
+        let canonical_existing = canonical_continuity_fragment(existing);
+        !canonical_existing.is_empty()
+            && (canonical_existing == canonical_fragment
+                || (canonical_fragment.chars().count() >= 4
+                    && canonical_existing.contains(&canonical_fragment))
+                || (canonical_existing.chars().count() >= 4
+                    && canonical_fragment.contains(&canonical_existing)))
+    })
 }
 
 fn build_script_role_anchors(
@@ -2786,6 +2807,32 @@ mod tests {
         );
         assert!(!prompt.contains("镜头稳定跟拍"));
         assert!(!prompt.contains("场景旧宅走廊"));
+    }
+
+    #[test]
+    fn build_video_prompt_deduplicates_semantic_style_fragments_across_sources() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻压迫、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: Some("保持低机位压迫感".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["镜头低机位压迫感，情绪冷峻压迫".into()],
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感; 情绪冷峻压迫."),
+            "{prompt}"
+        );
+        assert_eq!(prompt.matches("低机位压迫感").count(), 1, "{prompt}");
+        assert!(!prompt.contains("镜头低机位压迫感"), "{prompt}");
     }
 
     #[test]
