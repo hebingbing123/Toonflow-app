@@ -922,10 +922,12 @@ fn build_video_prompt(
     let structured_fields = resolved_description
         .as_deref()
         .and_then(parse_structured_storyboard_description);
+    let mut prompt_coverage = collect_prompt_coverage(structured_fields.as_ref());
     let role_anchors = build_script_role_anchors(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
+        &prompt_coverage,
     );
     if !role_anchors.is_empty() {
         clauses.push(format!("Character anchor: {}.", role_anchors.join("; ")));
@@ -934,6 +936,7 @@ fn build_video_prompt(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
+        &prompt_coverage,
     );
     if !scene_anchors.is_empty() {
         clauses.push(format!("Scene anchor: {}.", scene_anchors.join("; ")));
@@ -942,6 +945,7 @@ fn build_video_prompt(
         context,
         resolved_description.as_deref(),
         structured_fields.as_ref(),
+        &prompt_coverage,
     );
     if !tool_anchors.is_empty() {
         clauses.push(format!("Prop anchor: {}.", tool_anchors.join("; ")));
@@ -950,7 +954,6 @@ fn build_video_prompt(
     extend_prompt_coverage(&mut asset_coverage, &role_anchors);
     extend_prompt_coverage(&mut asset_coverage, &scene_anchors);
     extend_prompt_coverage(&mut asset_coverage, &tool_anchors);
-    let mut prompt_coverage = collect_prompt_coverage(structured_fields.as_ref());
     extend_prompt_coverage(&mut prompt_coverage, &role_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &scene_anchors);
     extend_prompt_coverage(&mut prompt_coverage, &tool_anchors);
@@ -1501,6 +1504,7 @@ fn build_script_role_anchors(
     context: Option<&VideoPromptContext>,
     description: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
 ) -> Vec<String> {
     let Some(ctx) = context else {
         return Vec::new();
@@ -1522,11 +1526,20 @@ fn build_script_role_anchors(
             continue;
         };
         let name = normalize_prompt_text(name);
+        let Some(anchor) = compact_selected_script_asset_anchor(
+            &name,
+            note.trim(),
+            structured_fields,
+            prompt_coverage,
+            ScriptAssetAnchorKind::Role,
+        ) else {
+            continue;
+        };
         let score = score_script_asset_anchor(&name, &description, &subject, &action);
         if name.is_empty() || score <= 0 {
             continue;
         }
-        scored.push((score, idx, format!("{name}:{}", note.trim())));
+        scored.push((score, idx, anchor));
     }
     select_script_asset_anchor(scored)
 }
@@ -1535,6 +1548,7 @@ fn build_script_scene_anchors(
     context: Option<&VideoPromptContext>,
     description: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
 ) -> Vec<String> {
     let Some(ctx) = context else {
         return Vec::new();
@@ -1553,11 +1567,20 @@ fn build_script_scene_anchors(
             continue;
         };
         let name = normalize_prompt_text(name);
+        let Some(anchor) = compact_selected_script_asset_anchor(
+            &name,
+            note.trim(),
+            structured_fields,
+            prompt_coverage,
+            ScriptAssetAnchorKind::Scene,
+        ) else {
+            continue;
+        };
         let score = score_script_asset_anchor(&name, &description, &setting, "");
         if name.is_empty() || score <= 0 {
             continue;
         }
-        scored.push((score, idx, format!("{name}:{}", note.trim())));
+        scored.push((score, idx, anchor));
     }
     select_script_asset_anchor(scored)
 }
@@ -1566,6 +1589,7 @@ fn build_script_tool_anchors(
     context: Option<&VideoPromptContext>,
     description: Option<&str>,
     structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
 ) -> Vec<String> {
     let Some(ctx) = context else {
         return Vec::new();
@@ -1587,11 +1611,20 @@ fn build_script_tool_anchors(
             continue;
         };
         let name = normalize_prompt_text(name);
+        let Some(anchor) = compact_selected_script_asset_anchor(
+            &name,
+            note.trim(),
+            structured_fields,
+            prompt_coverage,
+            ScriptAssetAnchorKind::Tool,
+        ) else {
+            continue;
+        };
         let score = score_script_asset_anchor(&name, &description, &subject, &action);
         if name.is_empty() || score <= 0 {
             continue;
         }
-        scored.push((score, idx, format!("{name}:{}", note.trim())));
+        scored.push((score, idx, anchor));
     }
     select_script_asset_anchor(scored)
 }
@@ -1642,6 +1675,77 @@ fn select_script_asset_anchor(mut scored: Vec<(i32, usize, String)>) -> Vec<Stri
         .next()
         .into_iter()
         .collect()
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ScriptAssetAnchorKind {
+    Role,
+    Scene,
+    Tool,
+}
+
+fn compact_selected_script_asset_anchor(
+    name: &str,
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+    kind: ScriptAssetAnchorKind,
+) -> Option<String> {
+    let normalized_name = normalize_prompt_text(name);
+    if normalized_name.is_empty() {
+        return None;
+    }
+
+    let mut fragments = note
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| {
+            !script_asset_anchor_fragment_is_covered(
+                fragment,
+                structured_fields,
+                prompt_coverage,
+                kind,
+            )
+        })
+        .collect::<Vec<_>>();
+    fragments.dedup();
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(format!("{normalized_name}:{}", fragments.join("，")))
+}
+
+fn script_asset_anchor_fragment_is_covered(
+    fragment: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+    kind: ScriptAssetAnchorKind,
+) -> bool {
+    if prompt_fragment_is_covered(fragment, prompt_coverage) {
+        return true;
+    }
+
+    let Some(fields) = structured_fields else {
+        return false;
+    };
+    match kind {
+        ScriptAssetAnchorKind::Role => fragment_mostly_repeats_prompt_mood(fragment, &fields.mood),
+        ScriptAssetAnchorKind::Scene | ScriptAssetAnchorKind::Tool => false,
+    }
+}
+
+fn fragment_mostly_repeats_prompt_mood(fragment: &str, mood: &str) -> bool {
+    let fragment = normalize_prompt_text(fragment);
+    let mood = normalize_prompt_text(mood);
+    if fragment.is_empty() || mood.is_empty() || !fragment.contains(&mood) {
+        return false;
+    }
+
+    let residual = fragment.replace(&mood, "");
+    normalize_prompt_text(&residual).chars().count() <= 2
 }
 
 fn build_continuity_notes(
@@ -4005,6 +4109,57 @@ mod tests {
         assert!(prompt.contains("Subject: 冲出旧宅走廊."));
         assert!(prompt.contains("Action: 快步推门冲出."));
         assert!(!prompt.contains("Action: 主角快步推门冲出."));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_role_anchor_fragment_that_mostly_repeats_prompt_mood() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（黑色风衣主角停步回头、旧宅走廊、主角、5秒、中景、稳定跟拍、停步回头、冷峻、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Character anchor: 主角:短发."), "{prompt}");
+        assert!(
+            !prompt.contains("Character anchor: 主角:黑色风衣"),
+            "{prompt}"
+        );
+        assert!(
+            !prompt.contains("Character anchor: 主角:短发，克制冷峻"),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_drops_scene_anchor_when_it_only_repeats_existing_setting() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角驻足观察、潮湿斑驳的旧宅走廊、主角、5秒、中景、稳定跟拍、驻足抬眼观察、压抑、阴天冷光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳".into()],
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Scene anchor:"), "{prompt}");
+        assert!(!prompt.contains("Setting: 潮湿斑驳的旧宅走廊."), "{prompt}");
     }
 
     #[test]
