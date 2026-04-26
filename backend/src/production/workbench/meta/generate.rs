@@ -2746,20 +2746,40 @@ fn compact_project_director_fragment_language(fragment: &str) -> String {
     let normalized = normalize_prompt_text(fragment);
     if normalized.is_empty()
         || continuity_note_adds_specific_guidance(&normalized)
-        || ["上一镜头", "衔接", "连续", "统一", "一致"]
-            .iter()
-            .any(|keyword| normalized.contains(keyword))
         || !project_director_fragment_adds_visual_style_guidance(&normalized)
     {
         return normalized;
     }
 
+    let compacted = strip_generic_director_continuity_subfragments(&normalized);
     let trimmed = ["保持", "维持", "延续"]
         .iter()
-        .find_map(|prefix| normalized.strip_prefix(prefix))
+        .find_map(|prefix| compacted.strip_prefix(prefix))
         .map(normalize_prompt_text)
         .filter(|value| !value.is_empty());
-    trimmed.unwrap_or(normalized)
+    trimmed.unwrap_or(compacted)
+}
+
+fn strip_generic_director_continuity_subfragments(fragment: &str) -> String {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return normalized;
+    }
+
+    let separated = ["并且", "同时", "以及", "并", "且"]
+        .into_iter()
+        .fold(normalized.clone(), |acc, needle| acc.replace(needle, "，"));
+    let kept = separated
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|part| !part.is_empty())
+        .filter(|part| !project_director_fragment_is_generic_quality_tail_overlap(part))
+        .collect::<Vec<_>>();
+    if kept.is_empty() {
+        normalized
+    } else {
+        kept.join("，")
+    }
 }
 
 fn trim_project_director_fragment_against_storyboard_fields(
@@ -4484,7 +4504,10 @@ mod tests {
             prompt.contains("Style anchor: 胶片冷调悬疑; 低机位压迫感."),
             "{prompt}"
         );
-        assert!(prompt.contains("Continuity notes: 保留上一镜头走位连续."), "{prompt}");
+        assert!(
+            prompt.contains("Continuity notes: 保留上一镜头走位连续."),
+            "{prompt}"
+        );
         assert!(!prompt.contains("Continuity notes: 黑色风衣"));
         assert!(!prompt.contains("Continuity notes: 冷色长廊"));
         assert!(!prompt.contains("Continuity notes: 刀身旧磨损"));
@@ -4769,6 +4792,65 @@ mod tests {
         );
         assert!(
             !prompt.contains("Natural motion, stable continuity, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_trims_generic_continuity_clause_inside_fused_director_style_fragment() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("保持稳定跟拍且镜头衔接统一，质感克制粗粝".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片悬疑; 稳定跟拍, 质感克制粗粝."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
+        assert!(
+            prompt.contains("Natural motion, no extra shot changes."),
+            "{prompt}"
+        );
+    }
+
+    #[test]
+    fn build_video_prompt_trims_generic_continuity_clause_inside_fused_director_lighting_fragment()
+    {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片悬疑".into()),
+            project_director_manual: Some("光影偏冷并保持镜头衔接统一".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片悬疑; 光影偏冷."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("镜头衔接统一"), "{prompt}");
+        assert!(
+            prompt.contains("Natural motion, stable continuity, no extra shot changes."),
             "{prompt}"
         );
     }
