@@ -339,7 +339,7 @@ async fn load_video_prompt_memory_notes(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-    let rows = trim_video_prompt_memory_rows(rows);
+    let rows = trim_video_prompt_memory_rows(rows, storyboard_numeric_id, current_prompt_seed);
     Ok((
         select_video_prompt_style_notes(
             &rows,
@@ -436,55 +436,127 @@ fn extract_storyboard_ids_from_memory_content(content: &str) -> Vec<i32> {
         .unwrap_or_default()
 }
 
-fn trim_video_prompt_memory_rows(rows: Vec<AgentMemoryRow>) -> Vec<AgentMemoryRow> {
-    let mut selected_count = 0usize;
-    let mut auto_scope_count = 0usize;
-    let mut script_style_count = 0usize;
-    let mut project_style_count = 0usize;
-    let mut trimmed = Vec::new();
+fn trim_video_prompt_memory_rows(
+    rows: Vec<AgentMemoryRow>,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> Vec<AgentMemoryRow> {
+    let mut selected_candidates = Vec::new();
+    let mut auto_scope_candidates = Vec::new();
+    let mut script_style_candidates = Vec::new();
+    let mut project_style_candidates = Vec::new();
 
-    for row in rows {
-        let allowed = match row.name.as_str() {
-            "selected_video_memory" => {
-                if selected_count >= VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT {
-                    false
-                } else {
-                    selected_count += 1;
-                    true
-                }
-            }
-            "auto_scope_memory" => {
-                if auto_scope_count >= VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT {
-                    false
-                } else {
-                    auto_scope_count += 1;
-                    true
-                }
-            }
-            "script_video_style_memory" => {
-                if script_style_count >= VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT {
-                    false
-                } else {
-                    script_style_count += 1;
-                    true
-                }
-            }
-            "project_video_style_memory" => {
-                if project_style_count >= VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT {
-                    false
-                } else {
-                    project_style_count += 1;
-                    true
-                }
-            }
-            _ => false,
-        };
-        if allowed {
-            trimmed.push(row);
+    for (idx, row) in rows.into_iter().enumerate() {
+        match row.name.as_str() {
+            "selected_video_memory" => selected_candidates.push((idx, row)),
+            "auto_scope_memory" => auto_scope_candidates.push((idx, row)),
+            "script_video_style_memory" => script_style_candidates.push((idx, row)),
+            "project_video_style_memory" => project_style_candidates.push((idx, row)),
+            _ => {}
         }
     }
 
-    trimmed
+    let mut kept = std::collections::HashSet::new();
+    for idx in prioritize_storyboard_memory_indices(
+        &selected_candidates,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        VIDEO_PROMPT_SELECTED_MEMORY_ROW_LIMIT,
+    ) {
+        kept.insert(idx);
+    }
+    for idx in prioritize_storyboard_memory_indices(
+        &auto_scope_candidates,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        VIDEO_PROMPT_AUTO_SCOPE_MEMORY_ROW_LIMIT,
+    ) {
+        kept.insert(idx);
+    }
+    for (idx, _) in script_style_candidates
+        .iter()
+        .take(VIDEO_PROMPT_SCRIPT_STYLE_MEMORY_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
+    for (idx, _) in project_style_candidates
+        .iter()
+        .take(VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT)
+    {
+        kept.insert(*idx);
+    }
+
+    let mut all_rows = selected_candidates;
+    all_rows.extend(auto_scope_candidates);
+    all_rows.extend(script_style_candidates);
+    all_rows.extend(project_style_candidates);
+    all_rows.sort_by_key(|(idx, _)| *idx);
+    all_rows
+        .into_iter()
+        .filter_map(|(idx, row)| kept.contains(&idx).then_some(row))
+        .collect()
+}
+
+fn prioritize_storyboard_memory_indices(
+    rows: &[(usize, AgentMemoryRow)],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    limit: usize,
+) -> Vec<usize> {
+    let mut scored = rows
+        .iter()
+        .map(|(idx, row)| {
+            let storyboard_ids = extract_storyboard_ids_from_memory_content(&row.content);
+            let exact_storyboard_match =
+                storyboard_numeric_id > 0 && storyboard_ids.contains(&storyboard_numeric_id);
+            let prompt_seed_match = memory_prompt_seed_matches(&row.content, current_prompt_seed);
+            let prompt_seed_present = extract_key_value(&row.content, "promptSeed").is_some();
+            let storyboard_distance =
+                storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
+                    .unwrap_or(i32::MAX);
+            (
+                *idx,
+                exact_storyboard_match,
+                prompt_seed_match,
+                prompt_seed_present,
+                storyboard_distance,
+            )
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| {
+        b.1.cmp(&a.1)
+            .then(b.2.cmp(&a.2))
+            .then(a.3.cmp(&b.3))
+            .then(a.4.cmp(&b.4))
+            .then(a.0.cmp(&b.0))
+    });
+    scored
+        .into_iter()
+        .take(limit)
+        .map(|(idx, _, _, _, _)| idx)
+        .collect()
+}
+
+fn memory_prompt_seed_matches(content: &str, current_prompt_seed: Option<&str>) -> bool {
+    match current_prompt_seed {
+        Some(seed) if !seed.is_empty() => {
+            extract_key_value(content, "promptSeed").as_deref() == Some(seed)
+        }
+        _ => false,
+    }
+}
+
+fn storyboard_distance_from_memory_content(
+    content: &str,
+    storyboard_numeric_id: i32,
+) -> Option<i32> {
+    if storyboard_numeric_id <= 0 {
+        return None;
+    }
+    extract_storyboard_ids_from_memory_content(content)
+        .into_iter()
+        .map(|id| (storyboard_numeric_id - id).abs())
+        .min()
 }
 
 async fn load_pending_video_observation_note(
@@ -5223,7 +5295,7 @@ mod tests {
                     .into(),
         });
 
-        let trimmed = trim_video_prompt_memory_rows(rows);
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
 
         assert_eq!(
             trimmed
@@ -5261,6 +5333,91 @@ mod tests {
             row.name == "project_video_style_memory"
                 && row.content.contains("镜头中景稳定跟拍，情绪冷峻压迫")
         }));
+    }
+
+    #[test]
+    fn trim_video_prompt_memory_rows_prioritizes_matching_storyboard_memories_over_newer_noise() {
+        let mut rows = Vec::new();
+        for id in (20..=26).rev() {
+            rows.push(AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: format!(
+                    "storyboardIds={id} | promptSeed=seed-{id} | style=镜头中景稳定跟拍{id}"
+                ),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content:
+                "storyboardIds=12 | promptSeed=seed-12-current | style=镜头中景稳定跟拍，情绪冷峻压迫"
+                    .into(),
+        });
+        for id in (30..=36).rev() {
+            rows.push(AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: format!(
+                    "tool=run_sub_agent_storyboard_panel | scope=storyboardIds={id} | summary=别的镜头{id}"
+                ),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content:
+                "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=人物站位不要跳轴"
+                    .into(),
+        });
+
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "selected_video_memory"
+                && row.content.contains("storyboardIds=12")
+                && row.content.contains("promptSeed=seed-12-current")
+        }));
+        assert!(trimmed.iter().any(|row| {
+            row.name == "auto_scope_memory" && row.content.contains("storyboardIds=12")
+        }));
+    }
+
+    #[test]
+    fn trim_video_prompt_memory_rows_keeps_current_prompt_seed_over_newer_stale_same_storyboard_rows(
+    ) {
+        let mut rows = Vec::new();
+        for stale_seed in [
+            "seed-12-stale-6",
+            "seed-12-stale-5",
+            "seed-12-stale-4",
+            "seed-12-stale-3",
+            "seed-12-stale-2",
+            "seed-12-stale-1",
+        ] {
+            rows.push(AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: format!(
+                    "storyboardIds=12 | promptSeed={stale_seed} | style=镜头中景稳定跟拍，情绪冷峻压迫"
+                ),
+            });
+        }
+        rows.push(AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content:
+                "storyboardIds=12 | promptSeed=seed-12-current | style=镜头近景稳定跟拍，情绪紧张压迫"
+                    .into(),
+        });
+
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "selected_video_memory"
+                && row.content.contains("promptSeed=seed-12-current")
+        }));
+        assert_eq!(
+            trimmed
+                .iter()
+                .filter(|row| row.name == "selected_video_memory")
+                .count(),
+            6
+        );
     }
 
     #[test]
