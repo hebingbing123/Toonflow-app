@@ -271,7 +271,10 @@ extension _StoryboardWorkbenchActions on _StoryboardWorkbenchPanelState {
     _negativeVideoPromptCtrl.text = generated.negativePrompt ?? '';
     _videoDurationCtrl.text = generated.duration.toString();
     if (!mounted) return;
-    _applyWorkbenchState(() => _setWorkbenchFollowUp('已生成默认视频提示词并回填时长。'));
+    final followUp = generated.observationNote == null
+        ? '已生成默认视频提示词并回填时长。'
+        : '已生成默认视频提示词并回填时长；${generated.observationNote}。';
+    _applyWorkbenchState(() => _setWorkbenchFollowUp(followUp));
   }
 
   Future<void> _selectVideo(VideoItem video) async {

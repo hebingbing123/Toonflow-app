@@ -521,6 +521,21 @@ pub(crate) fn select_rejected_video_negative_memory_notes(
         .collect()
 }
 
+pub(crate) fn select_pending_rejected_video_observation_note(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+) -> Option<String> {
+    rows.iter()
+        .filter(|row| row.name == REJECTED_VIDEO_NEGATIVE_MEMORY_NAME)
+        .filter(|row| memory_matches_storyboard(&row.content, storyboard_numeric_id))
+        .find(|row| {
+            rejected_video_negative_rejection_count(&row.content)
+                < REJECTED_VIDEO_NEGATIVE_MEMORY_MIN_REJECTIONS
+        })
+        .and_then(|row| extract_key_value(&row.content, "avoid"))
+        .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+}
+
 pub(crate) fn select_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -1239,7 +1254,8 @@ mod tests {
         clear_rejected_video_negative_memory, clear_selected_video_memory,
         compact_video_continuity_note, merge_rejected_video_negative_memory,
         parse_structured_storyboard_description, rejected_video_negative_rejection_count,
-        select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
+        select_neighbor_selected_video_memory_notes,
+        select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
         select_rejected_video_negative_memory_notes, select_script_video_style_memory_notes,
         select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
     };
@@ -1391,6 +1407,36 @@ mod tests {
         );
 
         assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_reads_single_rejection_noise() {
+        let note = select_pending_rejected_video_observation_note(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion, avoid flat cold lighting".into(),
+            }],
+            12,
+        );
+
+        assert_eq!(
+            note,
+            Some("avoid shaky handheld motion, avoid flat cold lighting".into())
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_note_skips_promoted_noise() {
+        let note = select_pending_rejected_video_observation_note(
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid shaky handheld motion"
+                    .into(),
+            }],
+            12,
+        );
+
+        assert_eq!(note, None);
     }
 
     #[test]

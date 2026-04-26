@@ -11,12 +11,14 @@ class GenerateVideoPromptResponse {
   const GenerateVideoPromptResponse({
     required this.prompt,
     this.negativePrompt,
+    this.observationNote,
     required this.model,
     required this.duration,
   });
 
   final String prompt;
   final String? negativePrompt;
+  final String? observationNote;
   final String model;
   final int duration;
 
@@ -24,6 +26,7 @@ class GenerateVideoPromptResponse {
     return GenerateVideoPromptResponse(
       prompt: json['prompt'] as String,
       negativePrompt: json['negativePrompt'] as String?,
+      observationNote: json['observationNote'] as String?,
       model: json['model'] as String,
       duration: (json['duration'] as num).toInt(),
     );

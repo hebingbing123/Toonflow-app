@@ -15,8 +15,9 @@ use crate::production::workbench::meta::common::{
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
     compact_video_continuity_note, select_neighbor_selected_video_memory_notes,
-    select_project_video_style_memory_notes, select_script_video_style_memory_notes,
-    select_selected_video_memory_notes, AgentMemoryRow, StoryboardPromptSeedRow,
+    select_pending_rejected_video_observation_note, select_project_video_style_memory_notes,
+    select_script_video_style_memory_notes, select_selected_video_memory_notes, AgentMemoryRow,
+    StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
 use crate::scope::http::require_owned_numeric_script_scope_user_pool;
@@ -46,6 +47,7 @@ pub(in crate::production) struct GenerateVideoPromptBody {
 pub(in crate::production) struct GenerateVideoPromptResponse {
     prompt: String,
     negative_prompt: Option<String>,
+    observation_note: Option<String>,
     model: String,
     duration: i32,
 }
@@ -106,6 +108,22 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     } else {
         None
     };
+    let observation_note = if negative_prompt.is_none() {
+        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+            load_pending_video_observation_note(
+                pool,
+                user_id,
+                body.project_id,
+                body.script_id,
+                storyboard_id,
+            )
+            .await?
+        } else {
+            None
+        }
+    } else {
+        None
+    };
     let duration = resolve_video_prompt_duration(
         body.duration_hint,
         body.description.as_deref(),
@@ -115,6 +133,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     Ok(JsonResponse(GenerateVideoPromptResponse {
         prompt,
         negative_prompt,
+        observation_note,
         model: "runway-gen-2".to_string(),
         duration,
     }))
@@ -286,6 +305,40 @@ async fn load_video_prompt_memory_notes(
         select_prioritized_video_style_notes(&rows, storyboard_numeric_id),
         select_video_prompt_memory_notes(&rows, storyboard_numeric_id),
     ))
+}
+
+async fn load_pending_video_observation_note(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<Option<String>, ApiError> {
+    let rows = sqlx::query_as::<_, AgentMemoryRow>(
+        r#"
+        SELECT name, content
+        FROM app_agent_memory
+        WHERE owner_user_id = $1
+          AND numeric_project_id = $2
+          AND episodes_id = $3
+          AND agent_type = 'productionAgent'
+          AND memory_type = 'summary'
+          AND name = 'rejected_video_negative_memory'
+        ORDER BY create_time_ms DESC
+        LIMIT 8
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(
+        select_pending_rejected_video_observation_note(&rows, storyboard_numeric_id)
+            .map(|note| format!("待观察失败倾向：{note}")),
+    )
 }
 
 fn select_prioritized_video_style_notes(
@@ -1153,7 +1206,8 @@ pub(in crate::production) async fn post_workbench_get_video_model_detail(
 mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description, resolve_video_prompt_duration,
-        select_prioritized_video_style_notes, select_video_prompt_memory_notes, VideoPromptContext,
+        select_prioritized_video_style_notes, select_video_prompt_memory_notes,
+        GenerateVideoPromptResponse, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_project_video_style_memory_notes,
@@ -1554,6 +1608,25 @@ mod tests {
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12),
             vec!["镜头低机位压迫感，情绪克制".to_string()]
+        );
+    }
+
+    #[test]
+    fn generate_video_prompt_response_serializes_observation_note() {
+        let value = serde_json::to_value(GenerateVideoPromptResponse {
+            prompt: "Single cinematic shot.".into(),
+            negative_prompt: None,
+            observation_note: Some("待观察失败倾向：avoid shaky handheld motion".into()),
+            model: "runway-gen-2".into(),
+            duration: 5,
+        })
+        .expect("serialize response");
+
+        assert_eq!(
+            value
+                .get("observationNote")
+                .and_then(serde_json::Value::as_str),
+            Some("待观察失败倾向：avoid shaky handheld motion")
         );
     }
 }
