@@ -477,24 +477,27 @@ fn build_storyboard_negative_prompts(
         .iter()
         .copied()
         .map(|storyboard_id| {
-            let review_prompt = compact_negative_review_constraints(
+            let review_fragments = collect_negative_review_fragments(
                 &review_rows
                     .iter()
                     .filter(|row| quality_review_row_matches_storyboard(row, storyboard_id))
                     .cloned()
                     .collect::<Vec<_>>(),
+                storyboard_id,
             );
-            let rejected_prompt = select_rejected_video_negative_memory_notes(
-                rejected_rows,
-                storyboard_id,
-                prompt_seed_map.get(&storyboard_id).map(String::as_str),
-            )
-            .into_iter()
-            .next();
-            (
-                storyboard_id,
-                merge_negative_prompts(review_prompt.as_deref(), rejected_prompt.as_deref()),
-            )
+            let rejected_fragments = split_negative_prompt_fragments(
+                select_rejected_video_negative_memory_notes(
+                    rejected_rows,
+                    storyboard_id,
+                    prompt_seed_map.get(&storyboard_id).map(String::as_str),
+                )
+                .into_iter()
+                .next()
+                .as_deref(),
+            );
+            let review_prompt =
+                merge_negative_prompt_fragment_groups(&[rejected_fragments, review_fragments]);
+            (storyboard_id, review_prompt)
         })
         .collect()
 }
@@ -510,9 +513,20 @@ fn quality_review_row_matches_storyboard(row: &QualityReviewSeedRow, storyboard_
     }
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 fn compact_negative_review_constraints(rows: &[QualityReviewSeedRow]) -> Option<String> {
+    merge_negative_prompt_fragment_groups(&[collect_negative_review_fragments(rows, 0)])
+}
+
+fn collect_negative_review_fragments(
+    rows: &[QualityReviewSeedRow],
+    storyboard_id: i32,
+) -> Vec<String> {
     let mut fragments = Vec::new();
-    for row in rows {
+    for row in rows
+        .iter()
+        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
+    {
         if let Some(category) = row.bad_case_category.as_deref() {
             push_unique_negative_fragment(&mut fragments, map_bad_case_category(category));
         }
@@ -520,7 +534,10 @@ fn compact_negative_review_constraints(rows: &[QualityReviewSeedRow]) -> Option<
             break;
         }
     }
-    for row in rows {
+    for row in rows
+        .iter()
+        .filter(|row| review_row_targets_storyboard(row, storyboard_id))
+    {
         if let Some(comments) = row.comments.as_deref() {
             for fragment in infer_negative_fragments_from_comments(comments) {
                 push_unique_negative_fragment(&mut fragments, Some(fragment));
@@ -530,11 +547,42 @@ fn compact_negative_review_constraints(rows: &[QualityReviewSeedRow]) -> Option<
             break;
         }
     }
-    if fragments.is_empty() {
-        return None;
+    for row in rows
+        .iter()
+        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(category) = row.bad_case_category.as_deref() {
+            push_unique_negative_fragment(&mut fragments, map_bad_case_category(category));
+        }
+        if fragments.len() >= 6 {
+            break;
+        }
     }
-    let joined = fragments.join(", ");
-    Some(clip_negative_prompt(&joined))
+    for row in rows
+        .iter()
+        .filter(|row| !review_row_targets_storyboard(row, storyboard_id))
+    {
+        if let Some(comments) = row.comments.as_deref() {
+            for fragment in infer_negative_fragments_from_comments(comments) {
+                push_unique_negative_fragment(&mut fragments, Some(fragment));
+            }
+        }
+        if fragments.len() >= 6 {
+            break;
+        }
+    }
+    fragments
+}
+
+fn review_row_targets_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32) -> bool {
+    matches!(
+        row.target_type.as_deref().map(str::trim),
+        Some("storyboard")
+    ) && row
+        .target_id
+        .as_deref()
+        .and_then(|value| value.trim().parse::<i32>().ok())
+        .is_some_and(|value| value == storyboard_id)
 }
 
 fn push_unique_negative_fragment(target: &mut Vec<String>, candidate: Option<&'static str>) {
@@ -600,8 +648,29 @@ fn infer_negative_fragments_from_comments(comments: &str) -> Vec<&'static str> {
 }
 
 fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Option<String> {
+    merge_negative_prompt_fragment_groups(&[
+        split_negative_prompt_fragments(manual),
+        split_negative_prompt_fragments(automatic),
+    ])
+}
+
+fn merge_negative_prompt_fragment_groups(groups: &[Vec<String>]) -> Option<String> {
     let mut fragments = Vec::new();
-    for prompt in [manual, automatic].into_iter().flatten() {
+    for group in groups {
+        for fragment in group {
+            push_negative_fragment_with_budget(&mut fragments, fragment);
+        }
+    }
+    if fragments.is_empty() {
+        None
+    } else {
+        Some(fragments.join(", "))
+    }
+}
+
+fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
+    let mut fragments = Vec::new();
+    if let Some(prompt) = prompt {
         for fragment in prompt.split([',', ';', '，', '；', '\n']) {
             let fragment = fragment.trim();
             if fragment.is_empty() {
@@ -614,10 +683,31 @@ fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Opti
             fragments.push(fragment.to_string());
         }
     }
-    if fragments.is_empty() {
-        None
-    } else {
-        Some(clip_negative_prompt(&fragments.join(", ")))
+    fragments
+}
+
+fn push_negative_fragment_with_budget(target: &mut Vec<String>, candidate: &str) {
+    if negative_fragment_is_covered(candidate, target) {
+        return;
+    }
+    target.retain(|existing| !negative_fragment_contains(candidate, existing));
+    let mut next = target.clone();
+    next.push(candidate.to_string());
+    let joined = next.join(", ");
+    if joined.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS {
+        *target = next;
+        return;
+    }
+
+    let clipped = clip_negative_prompt(candidate);
+    if clipped.is_empty() || negative_fragment_is_covered(&clipped, target) {
+        return;
+    }
+    let mut clipped_next = target.clone();
+    clipped_next.push(clipped);
+    let clipped_joined = clipped_next.join(", ");
+    if clipped_joined.chars().count() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS {
+        *target = clipped_next;
     }
 }
 
@@ -686,7 +776,7 @@ mod tests {
         compact_negative_review_constraints, compact_video_ratio,
         infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
         merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
-        QualityReviewSeedRow,
+        QualityReviewSeedRow, VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
     use crate::production::workbench::video_prompt_memory::{
@@ -875,14 +965,47 @@ mod tests {
 
         assert!(prompt_12.contains("avoid extra shot changes or wrong framing"));
         assert!(prompt_12.contains("avoid warped anatomy, blur, flicker"));
-        assert!(prompt_12.contains("avoid flicker or motion jitter"));
         assert!(prompt_12.contains("avoid op"));
         assert!(!prompt_12.contains("avoid flat cold lighting"));
 
         assert!(prompt_13.contains("avoid warped anatomy, blur, flicker"));
-        assert!(prompt_13.contains("avoid flicker or motion jitter"));
         assert!(prompt_13.contains("avoid flat cold lighting"));
         assert!(!prompt_13.contains("avoid extra shot changes or wrong framing"));
+    }
+
+    #[test]
+    fn build_storyboard_negative_prompts_prioritizes_storyboard_memory_over_global_review_tail() {
+        let prompts = build_storyboard_negative_prompts(
+            &[12],
+            &[
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: Some("visual_error".into()),
+                    comments: Some("明显闪烁，手部也会变形".into()),
+                },
+                QualityReviewSeedRow {
+                    target_type: Some("output".into()),
+                    target_id: None,
+                    bad_case_category: Some("character_break".into()),
+                    comments: Some("角色服装和脸都会漂移".into()),
+                },
+            ],
+            &[AgentMemoryRow {
+                name: "rejected_video_negative_memory".into(),
+                content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid oppressive or frantic mood, avoid flat cold lighting".into(),
+            }],
+            &HashMap::new(),
+        );
+
+        let prompt = prompts
+            .get(&12)
+            .and_then(|value| value.as_deref())
+            .expect("storyboard 12 prompt");
+
+        assert!(prompt.contains("avoid oppressive or frantic mood"));
+        assert!(prompt.contains("avoid flat cold lighting"));
+        assert!(prompt.len() <= VIDEO_NEGATIVE_PROMPT_MAX_CHARS + 3);
     }
 
     #[test]
