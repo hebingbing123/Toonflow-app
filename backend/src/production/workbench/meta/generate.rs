@@ -3793,6 +3793,7 @@ fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
         .map(|fragment| strip_auto_scope_continuity_scaffolding(&fragment))
         .filter(|fragment| !fragment.is_empty())
         .collect::<Vec<_>>();
+    let fragments = compact_auto_scope_continuity_fragments(fragments);
     if fragments.is_empty() {
         return None;
     }
@@ -3801,6 +3802,115 @@ fn compact_auto_scope_continuity_summary(note: &str) -> Option<String> {
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn compact_auto_scope_continuity_fragments(fragments: Vec<String>) -> Vec<String> {
+    let mut kept = Vec::new();
+    for fragment in fragments {
+        if kept.iter().any(|existing| existing == &fragment) {
+            continue;
+        }
+        kept.push(fragment);
+    }
+
+    let has_specific_guidance = kept
+        .iter()
+        .any(|fragment| continuity_note_adds_specific_guidance(fragment));
+    kept.into_iter()
+        .filter(|fragment| {
+            !auto_scope_continuity_fragment_is_covered(fragment, &kept, has_specific_guidance)
+        })
+        .collect()
+}
+
+fn auto_scope_continuity_fragment_is_covered(
+    candidate: &str,
+    fragments: &[String],
+    has_specific_guidance: bool,
+) -> bool {
+    if auto_scope_continuity_fragment_is_generic(candidate) && has_specific_guidance {
+        return true;
+    }
+
+    let candidate_axis = auto_scope_continuity_axis(candidate);
+    let candidate_specificity = score_continuity_specificity(candidate);
+    fragments.iter().any(|other| {
+        if other == candidate {
+            return false;
+        }
+        let same_axis = candidate_axis != AutoScopeContinuityAxis::None
+            && candidate_axis == auto_scope_continuity_axis(other);
+        same_axis
+            && score_continuity_specificity(other) > candidate_specificity
+            && auto_scope_continuity_fragments_share_anchor(candidate, other)
+    })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AutoScopeContinuityAxis {
+    None,
+    Positioning,
+    Rhythm,
+}
+
+fn auto_scope_continuity_axis(fragment: &str) -> AutoScopeContinuityAxis {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return AutoScopeContinuityAxis::None;
+    }
+    if [
+        "跳轴",
+        "视线",
+        "方向",
+        "构图",
+        "站位",
+        "走位",
+        "位置",
+        "前后景",
+    ]
+    .iter()
+    .any(|keyword| normalized.contains(keyword))
+    {
+        return AutoScopeContinuityAxis::Positioning;
+    }
+    if ["节奏", "动作"]
+        .iter()
+        .any(|keyword| normalized.contains(keyword))
+    {
+        return AutoScopeContinuityAxis::Rhythm;
+    }
+    AutoScopeContinuityAxis::None
+}
+
+fn auto_scope_continuity_fragments_share_anchor(left: &str, right: &str) -> bool {
+    let left = normalize_prompt_text(left);
+    let right = normalize_prompt_text(right);
+    if left.is_empty() || right.is_empty() {
+        return false;
+    }
+    [
+        "跳轴",
+        "视线",
+        "方向",
+        "构图",
+        "站位",
+        "走位",
+        "位置",
+        "前后景",
+        "节奏",
+        "动作",
+    ]
+    .iter()
+    .any(|keyword| left.contains(keyword) && right.contains(keyword))
+}
+
+fn auto_scope_continuity_fragment_is_generic(fragment: &str) -> bool {
+    let normalized = normalize_prompt_text(fragment);
+    !normalized.is_empty()
+        && !continuity_note_adds_specific_guidance(&normalized)
+        && ["衔接", "连续", "统一", "一致", "延续", "保持"]
+            .iter()
+            .any(|keyword| normalized.contains(keyword))
 }
 
 fn strip_auto_scope_continuity_scaffolding(fragment: &str) -> String {
@@ -5872,6 +5982,42 @@ mod tests {
         assert_eq!(
             select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
             vec!["保持角色站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_drops_generic_continuity_half_inside_same_summary() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=保持当前镜头衔接统一，人物站位不要跳轴".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
+            vec!["人物站位不要跳轴".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_memory_notes_drops_weaker_positioning_fragment_when_jump_axis_exists() {
+        let rows = vec![AgentMemoryRow {
+            name: "auto_scope_memory".into(),
+            content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | summary=保持当前镜头角色站位连续，人物站位不要跳轴".to_string(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("主角冲出旧宅".into()),
+            video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、无台词、脚步声门响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_memory_notes(&rows, 12, None, Some(&storyboard_row)),
+            vec!["人物站位不要跳轴".to_string()]
         );
     }
 
