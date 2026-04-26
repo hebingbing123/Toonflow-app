@@ -351,23 +351,23 @@ fn select_video_prompt_style_notes(
         return exact;
     }
 
-    let prioritized = select_prioritized_video_style_note(
+    let neighbor = collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
+        .into_iter()
+        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+        .take(1)
+        .collect::<Vec<_>>();
+    if !neighbor.is_empty() {
+        return neighbor;
+    }
+
+    select_prioritized_video_style_note(
         rows,
         storyboard_numeric_id,
         current_prompt_seed,
         Some(storyboard_row),
     )
     .into_iter()
-    .collect::<Vec<_>>();
-    if !prioritized.is_empty() {
-        return prioritized;
-    }
-
-    collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
-        .into_iter()
-        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
-        .take(1)
-        .collect()
+    .collect()
 }
 
 fn collect_neighbor_video_prompt_style_notes(
@@ -3166,7 +3166,7 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
-            vec!["镜头稳定跟拍，情绪紧张，光影冷调逆光".to_string()]
+            vec!["镜头近景稳定跟拍，情绪紧张，光影冷调逆光".to_string()]
         );
     }
 
