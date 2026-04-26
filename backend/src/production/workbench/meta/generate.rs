@@ -1509,6 +1509,9 @@ fn compact_continuity_note(
         .split('，')
         .map(normalize_prompt_text)
         .filter(|fragment| !fragment.is_empty())
+        .filter_map(|fragment| {
+            trim_continuity_fragment_against_storyboard_fields(&fragment, fields)
+        })
         .filter(|fragment| {
             let normalized_core = continuity_fragment_core(fragment);
             !continuity_fragment_matches_fields(fragment, fields, &expected_camera)
@@ -1528,6 +1531,52 @@ fn compact_continuity_note(
         &fragments.join("，"),
         VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
     ))
+}
+
+fn trim_continuity_fragment_against_storyboard_fields(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let (prefix, body) = continuity_fragment_prefix_and_body(&normalized);
+    let mut trimmed = body.to_string();
+    for field in [
+        fields.shot.as_str(),
+        fields.camera_move.as_str(),
+        fields.mood.as_str(),
+        fields.lighting.as_str(),
+        fields.setting.as_str(),
+    ]
+    .into_iter()
+    .map(normalize_prompt_text)
+    .filter(|field| !field.is_empty())
+    {
+        trimmed = trimmed.replace(&field, "");
+    }
+    let trimmed = trimmed
+        .trim_matches(|ch: char| {
+            ch.is_whitespace()
+                || matches!(
+                    ch,
+                    ',' | '，' | ';' | '；' | ':' | '：' | '/' | '／' | '、' | '|' | '-' | ' '
+                )
+        })
+        .to_string();
+    if trimmed.is_empty()
+        || ["镜头", "情绪", "光影", "场景"]
+            .iter()
+            .any(|prefix| trimmed == *prefix)
+    {
+        None
+    } else if prefix.is_empty() {
+        Some(trimmed)
+    } else {
+        Some(format!("{prefix}{trimmed}"))
+    }
 }
 
 fn continuity_fragment_core(fragment: &str) -> Option<String> {
@@ -1560,6 +1609,37 @@ fn continuity_fragment_core(fragment: &str) -> Option<String> {
             .filter(|value| !value.is_empty())
             .map(str::to_string)
     })
+}
+
+fn continuity_fragment_prefix_and_body(fragment: &str) -> (String, String) {
+    let normalized = normalize_prompt_text(fragment);
+    if normalized.is_empty() {
+        return (String::new(), String::new());
+    }
+    for prefix in [
+        "保持上一镜头已确认的",
+        "保持上一镜头已确认",
+        "保留上一镜头已确认的",
+        "保留上一镜头已确认",
+        "延续上一镜头已确认的",
+        "延续上一镜头已确认",
+        "保持上一镜头的",
+        "保留上一镜头的",
+        "延续上一镜头的",
+        "保持上一镜头",
+        "保留上一镜头",
+        "延续上一镜头",
+        "保持",
+        "保留",
+        "延续",
+    ] {
+        if let Some(body) = normalized.strip_prefix(prefix).map(str::trim) {
+            if !body.is_empty() {
+                return (prefix.to_string(), body.to_string());
+            }
+        }
+    }
+    (String::new(), normalized)
 }
 
 fn collect_prompt_coverage(
@@ -3569,6 +3649,33 @@ mod tests {
             !prompt.contains("Continuity notes: 保持上一镜头低机位压迫感"),
             "{prompt}"
         );
+    }
+
+    #[test]
+    fn build_video_prompt_drops_continuity_half_already_split_between_storyboard_and_style_anchor()
+    {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角逼近门厅、旧宅门厅、主角、5秒、中景、推进、停步回头、冷峻、冷调逆光、无台词、风声回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片冷调悬疑".into()),
+            project_director_manual: None,
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: vec!["光影冷调逆光颗粒".into()],
+            continuity_notes: vec!["保持上一镜头冷调逆光颗粒".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片冷调悬疑; 光影颗粒."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("Continuity notes:"), "{prompt}");
+        assert_eq!(prompt.matches("颗粒").count(), 1, "{prompt}");
     }
 
     #[test]
