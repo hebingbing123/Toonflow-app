@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::production::workbench::meta::common::{
     clip_prompt_fragment, extract_key_value, normalize_prompt_text, parse_positive_int,
-    parse_structured_storyboard_description,
+    parse_structured_storyboard_description, StructuredStoryboardDescription,
 };
 use crate::production::workbench::video_prompt_memory::{
     select_neighbor_selected_video_memory_notes, select_script_video_style_memory_notes,
@@ -216,10 +216,10 @@ fn build_video_prompt(
     clauses.push("Single cinematic shot.".to_string());
 
     let resolved_description = resolve_video_prompt_description(description, context);
-    match resolved_description
+    let structured_fields = resolved_description
         .as_deref()
-        .and_then(parse_structured_storyboard_description)
-    {
+        .and_then(parse_structured_storyboard_description);
+    match structured_fields.as_ref() {
         Some(fields) => {
             if !fields.subject.is_empty() {
                 clauses.push(format!(
@@ -277,7 +277,7 @@ fn build_video_prompt(
         }
     }
 
-    if let Some(note) = build_continuity_clause(context) {
+    if let Some(note) = build_continuity_clause(context, structured_fields.as_ref()) {
         clauses.push(note);
     }
     if image_url.is_some() {
@@ -311,12 +311,15 @@ fn resolve_video_prompt_description(
     })
 }
 
-fn build_continuity_clause(context: Option<&VideoPromptContext>) -> Option<String> {
+fn build_continuity_clause(
+    context: Option<&VideoPromptContext>,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
     let notes = context
         .map(|ctx| {
             ctx.continuity_notes
                 .iter()
-                .map(|note| clip_prompt_fragment(note, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                .filter_map(|note| compact_continuity_note(note, structured_fields))
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
@@ -324,6 +327,67 @@ fn build_continuity_clause(context: Option<&VideoPromptContext>) -> Option<Strin
         return None;
     }
     Some(format!("Continuity notes: {}.", notes.join("; ")))
+}
+
+fn compact_continuity_note(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+    let Some(fields) = structured_fields else {
+        return Some(clip_prompt_fragment(
+            &normalized,
+            VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+        ));
+    };
+
+    let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .filter(|part| !part.is_empty())
+        .collect::<String>();
+    let fragments = normalized
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| !continuity_fragment_matches_fields(fragment, fields, &expected_camera))
+        .collect::<Vec<_>>();
+
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
+fn continuity_fragment_matches_fields(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    expected_camera: &str,
+) -> bool {
+    fragment == fields.subject
+        || fragment == fields.action
+        || (!expected_camera.is_empty()
+            && fragment
+                .strip_prefix("镜头")
+                .is_some_and(|value| value == expected_camera))
+        || (!fields.mood.is_empty()
+            && fragment
+                .strip_prefix("情绪")
+                .is_some_and(|value| value == fields.mood))
+        || (!fields.lighting.is_empty()
+            && fragment
+                .strip_prefix("光影")
+                .is_some_and(|value| value == fields.lighting))
+        || (!fields.setting.is_empty()
+            && fragment
+                .strip_prefix("场景")
+                .is_some_and(|value| value == fields.setting))
 }
 
 fn resolve_video_prompt_duration(
@@ -564,6 +628,36 @@ mod tests {
         assert!(prompt.contains("Subject: 主角冲出旧宅."));
         assert!(prompt.contains("Dialogue or voice-over: 别回头."));
         assert!(prompt.contains("Continuity notes: 保持上一镜头已确认的冷调压迫感."));
+    }
+
+    #[test]
+    fn build_video_prompt_deduplicates_structured_memory_fragments() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，光影阴天冷光，场景旧宅走廊".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(!prompt.contains("Continuity notes:"));
+        assert_eq!(prompt.matches("Subject: 主角冲出旧宅.").count(), 1);
+    }
+
+    #[test]
+    fn build_video_prompt_keeps_only_non_duplicate_continuity_fragments() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、急迫、阴天冷光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            continuity_notes: vec!["主角冲出旧宅，镜头中景稳定跟拍，情绪急迫，保持上一镜头压迫感".into()],
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Continuity notes: 保持上一镜头压迫感."));
+        assert!(!prompt.contains("镜头中景稳定跟拍，情绪急迫"));
     }
 
     #[test]
