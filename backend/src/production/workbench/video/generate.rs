@@ -727,17 +727,6 @@ fn review_row_targets_storyboard(row: &QualityReviewSeedRow, storyboard_id: i32)
         .is_some_and(|value| value == storyboard_id)
 }
 
-fn push_unique_negative_fragment(target: &mut Vec<String>, candidate: Option<&'static str>) {
-    let Some(candidate) = candidate else {
-        return;
-    };
-    if negative_fragment_is_covered(candidate, target) {
-        return;
-    }
-    target.retain(|existing| !negative_fragment_covers(candidate, existing));
-    target.push(candidate.to_string());
-}
-
 fn push_scored_negative_fragment(
     target: &mut Vec<ScoredNegativeFragment>,
     order: &mut usize,
@@ -814,13 +803,13 @@ fn score_review_negative_fragment(
 ) -> i32 {
     let source_score = if storyboard_scoped { 48 } else { 0 };
     let detail_score = if from_comments { 8 } else { 0 };
+    let canonical = canonical_negative_fragment(fragment);
     let family_score = match negative_fragment_family(fragment) {
         "flicker_motion_jitter" => 36,
         "shot_change_framing" | "camera_framing" => 34,
         "lighting_backlight" => 20,
         "mood_tone" => 16,
         _ => {
-            let canonical = canonical_negative_fragment(fragment);
             if canonical.contains("face")
                 || canonical.contains("costume")
                 || canonical.contains("character")
@@ -838,7 +827,19 @@ fn score_review_negative_fragment(
             }
         }
     };
-    source_score + detail_score + family_score - negative_fragment_information_score(fragment) as i32 / 6
+    let breadth_score = [
+        canonical.contains("warped") || canonical.contains("anatom"),
+        canonical.contains("blur"),
+        canonical.contains("flicker") || canonical.contains("jitter"),
+        canonical.contains("face") || canonical.contains("identity"),
+        canonical.contains("costume") || canonical.contains("character"),
+    ]
+    .into_iter()
+    .filter(|present| *present)
+    .count() as i32
+        * 4;
+    source_score + detail_score + family_score + breadth_score
+        - negative_fragment_information_score(fragment) as i32 / 6
 }
 
 fn merge_negative_prompts(manual: Option<&str>, automatic: Option<&str>) -> Option<String> {
@@ -903,13 +904,10 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             visual_style_idx.get_or_insert(idx);
             visual_style_flags.extreme_camera_angle |= flags.extreme_camera_angle;
             visual_style_flags.tight_close_up |= flags.tight_close_up;
-            visual_style_flags.oppressive_or_frantic_mood |=
-                flags.oppressive_or_frantic_mood;
-            visual_style_flags.overly_cold_emotional_tone |=
-                flags.overly_cold_emotional_tone;
+            visual_style_flags.oppressive_or_frantic_mood |= flags.oppressive_or_frantic_mood;
+            visual_style_flags.overly_cold_emotional_tone |= flags.overly_cold_emotional_tone;
             visual_style_flags.flat_cold_lighting |= flags.flat_cold_lighting;
-            visual_style_flags.harsh_backlight_silhouette |=
-                flags.harsh_backlight_silhouette;
+            visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
             continue;
         }
         compacted.push((idx, fragment));
@@ -924,7 +922,10 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
         }
     }
     compacted.sort_by(|a, b| a.0.cmp(&b.0));
-    compacted.into_iter().map(|(_, fragment)| fragment).collect()
+    compacted
+        .into_iter()
+        .map(|(_, fragment)| fragment)
+        .collect()
 }
 
 fn parse_character_consistency_fragment(fragment: &str) -> Option<CharacterConsistencyFlags> {
@@ -1221,12 +1222,11 @@ fn infer_video_provider(model: &str) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::{
-        build_storyboard_negative_prompts, clip_negative_prompt,
-        collect_negative_review_fragments, compact_negative_review_constraints,
-        compact_video_ratio, infer_negative_fragments_from_comments, infer_video_provider,
-        load_auto_negative_prompts, merge_negative_prompts, normalize_upload_sources,
-        quality_review_row_matches_storyboard, review_fragment_conflicts_with_selected_style,
-        QualityReviewSeedRow,
+        build_storyboard_negative_prompts, clip_negative_prompt, collect_negative_review_fragments,
+        compact_negative_review_constraints, compact_video_ratio,
+        infer_negative_fragments_from_comments, infer_video_provider, load_auto_negative_prompts,
+        merge_negative_prompts, normalize_upload_sources, quality_review_row_matches_storyboard,
+        review_fragment_conflicts_with_selected_style, QualityReviewSeedRow,
         VIDEO_NEGATIVE_PROMPT_MAX_CHARS,
     };
     use crate::production::types::GenerateVideoUploadItem;
@@ -1318,7 +1318,7 @@ mod tests {
 
         assert_eq!(
             fragments.first().map(String::as_str),
-            Some("avoid face drift or costume inconsistency")
+            Some("avoid costume or character drift")
         );
         assert!(fragments.contains(&"avoid warped anatomy, blur, flicker".to_string()));
         assert!(fragments.contains(&"avoid extra shot changes or wrong framing".to_string()));
@@ -1357,7 +1357,10 @@ mod tests {
         )
         .expect("merged prompt");
 
-        assert_eq!(merged, "avoid extra shot changes or wrong framing, avoid blur");
+        assert_eq!(
+            merged,
+            "avoid extra shot changes or wrong framing, avoid blur"
+        );
     }
 
     #[test]
