@@ -185,6 +185,9 @@ pub(crate) fn build_rejected_video_negative_memory(
         &mut fragments,
         map_rejected_lighting_fragment(&fields.lighting),
     );
+    let fragments = compact_rejected_negative_fragment_families(
+        fragments.into_iter().map(str::to_string).collect(),
+    );
     if fragments.is_empty() {
         return None;
     }
@@ -3052,6 +3055,25 @@ mod tests {
         assert!(content.contains("avoid=avoid repeating stable follow camera"));
         assert!(content.contains("avoid oppressive or frantic mood"));
         assert!(content.contains("avoid flat cold lighting"));
+    }
+
+    #[test]
+    fn build_rejected_video_negative_memory_compacts_same_family_fragments() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("门厅低机位逼视".into()),
+                video_desc: Some("（主角对峙、旧宅门厅、主角、5秒、近景、低机位逼近、盯住来人、克制、暖光、、、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(
+            content.contains("avoid=avoid extreme camera angle or overly tight close-up framing")
+        );
+        assert!(!content
+            .contains("avoid=avoid overly tight close-up framing, avoid extreme camera angle"));
     }
 
     #[test]
