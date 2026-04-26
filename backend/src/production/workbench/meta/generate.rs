@@ -384,6 +384,7 @@ fn select_video_prompt_style_notes(
         Some(storyboard_row),
     )
     .into_iter()
+    .filter_map(|note| compact_contextual_video_style_note(&note, Some(storyboard_row)))
     .collect()
 }
 
@@ -567,6 +568,7 @@ fn resolve_observation_filter_style_note(
         current_prompt_seed,
         storyboard_row,
     )
+    .and_then(|note| compact_contextual_video_style_note(&note, storyboard_row))
     .or_else(|| select_contextual_observation_summary_style_note(rows, storyboard_row))
 }
 
@@ -581,7 +583,8 @@ fn select_contextual_observation_summary_style_note(
     select_script_video_style_memory_notes(rows)
         .into_iter()
         .chain(select_project_video_style_memory_notes(rows))
-        .find(|note| observation_style_note_context_evidence(note, &context) >= 2)
+        .filter(|note| observation_style_note_context_evidence(note, &context) >= 2)
+        .find_map(|note| compact_contextual_video_style_note(&note, storyboard_row))
 }
 
 fn observation_style_note_context_evidence(
@@ -904,6 +907,13 @@ fn build_video_prompt(
 }
 
 fn compact_neighbor_video_style_note(
+    note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    compact_contextual_video_style_note(note, storyboard_row)
+}
+
+fn compact_contextual_video_style_note(
     note: &str,
     storyboard_row: Option<&StoryboardPromptSeedRow>,
 ) -> Option<String> {
@@ -4450,17 +4460,11 @@ mod tests {
     }
 
     #[test]
-    fn select_video_prompt_style_notes_prefers_exact_storyboard_style_memory() {
-        let rows = vec![
-            AgentMemoryRow {
-                name: "selected_video_memory".into(),
-                content: "storyboardIds=12 | style=镜头近景稳定跟拍，情绪紧张，光影冷调逆光 | note=当前镜头已确认".into(),
-            },
-            AgentMemoryRow {
-                name: "selected_video_memory".into(),
-                content: "storyboardIds=11 | note=女主贴墙前行，镜头稳定近景，情绪冷色压迫感".into(),
-            },
-        ];
+    fn select_video_prompt_style_notes_trims_exact_storyboard_style_memory_to_residual_hint() {
+        let rows = vec![AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=12 | style=镜头近景稳定跟拍，情绪紧张压迫，光影冷调逆光 | note=当前镜头已确认".into(),
+        }];
         let storyboard_row = StoryboardPromptSeedRow {
             prompt: Some("女主转身回望".into()),
             video_desc: Some("（女主转身回望、旧宅走廊、女主、5秒、近景、稳定跟拍、回头确认身后动静、紧张、冷调逆光、无台词、脚步回响、A12）".into()),
@@ -4469,8 +4473,23 @@ mod tests {
 
         assert_eq!(
             select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
-            vec!["镜头近景稳定跟拍，情绪紧张，光影冷调逆光".to_string()]
+            vec!["情绪压迫".to_string()]
         );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_skip_script_summary_that_only_repeats_storyboard_fields() {
+        let rows = vec![AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光 | note=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(select_video_prompt_style_notes(&rows, 12, None, &storyboard_row).is_empty());
     }
 
     #[test]
@@ -4735,6 +4754,23 @@ mod tests {
         assert_eq!(
             select_prioritized_video_style_note(&rows, 12, None, Some(&storyboard_row)),
             Some("情绪冷色压迫感，光影冷调逆光".to_string())
+        );
+    }
+
+    #[test]
+    fn resolve_observation_filter_style_note_skips_summary_that_only_repeats_storyboard_fields() {
+        let rows = vec![AgentMemoryRow {
+            name: "script_video_style_memory".into(),
+            content: "sampleCount=5 | style=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光 | note=镜头稳定跟拍，情绪克制，光影潮湿路灯暖光".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主在雨夜街口停下".into()),
+            video_desc: Some("（女主在雨夜街口停下、雨夜街口、女主、5秒、中景、稳定跟拍、停步抬头看向路灯、克制、潮湿路灯暖光、无台词、雨声车流、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert!(
+            resolve_observation_filter_style_note(&rows, 12, None, Some(&storyboard_row)).is_none()
         );
     }
 
