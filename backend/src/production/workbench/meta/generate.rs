@@ -536,22 +536,25 @@ async fn load_pending_video_observation_note(
         current_prompt_seed,
         storyboard_row.as_ref(),
     );
-    let note = select_pending_rejected_video_observation_candidates(
-        &rows,
-        storyboard_numeric_id,
-        current_prompt_seed,
-    )
-    .into_iter()
-    .filter_map(|note| {
-        compact_negative_constraint_against_storyboard_style(
-            &note,
-            prioritized_style_note.as_deref(),
-            storyboard_row.as_ref(),
+    let note = select_best_video_prompt_observation_note(
+        select_pending_rejected_video_observation_candidates(
+            &rows,
+            storyboard_numeric_id,
+            current_prompt_seed,
         )
-    })
-    .find(|note| {
-        !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
-    });
+        .into_iter()
+        .filter_map(|note| {
+            compact_negative_constraint_against_storyboard_style(
+                &note,
+                prioritized_style_note.as_deref(),
+                storyboard_row.as_ref(),
+            )
+        })
+        .filter(|note| {
+            !video_prompt_observation_is_irrelevant_to_storyboard(note, storyboard_row.as_ref())
+        })
+        .collect(),
+    );
 
     Ok(note.map(|note| format!("待观察失败倾向：{note}")))
 }
@@ -758,6 +761,153 @@ fn compact_conflicting_negative_pair(
         (false, true) => Some(lhs.to_string()),
         (true, true) => None,
     }
+}
+
+fn select_best_video_prompt_observation_note(candidates: Vec<String>) -> Option<String> {
+    candidates.into_iter().max_by(|a, b| {
+        score_video_prompt_observation_specificity(a)
+            .cmp(&score_video_prompt_observation_specificity(b))
+            .then(
+                score_video_prompt_observation_quality(a)
+                    .cmp(&score_video_prompt_observation_quality(b)),
+            )
+            .then(b.chars().count().cmp(&a.chars().count()))
+            .then(b.cmp(a))
+    })
+}
+
+fn score_video_prompt_observation_specificity(note: &str) -> i32 {
+    let normalized = canonical_observation_note(note);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    for keyword in [
+        "jump axis",
+        "axis",
+        "eyeline",
+        "framing",
+        "composition",
+        "direction",
+        "camera angle",
+        "close-up",
+        "跳轴",
+        "视线",
+        "构图",
+        "方向",
+        "站位",
+        "走位",
+        "机位",
+        "景别",
+    ] {
+        if normalized.contains(keyword) {
+            score += 18;
+        }
+    }
+    for keyword in [
+        "face distortion",
+        "identity drift",
+        "costume drift",
+        "costume inconsistency",
+        "lip-sync",
+        "口型",
+        "脸",
+        "身份",
+        "服装",
+        "角色一致",
+    ] {
+        if normalized.contains(keyword) {
+            score += 16;
+        }
+    }
+    for keyword in [
+        "backlight",
+        "silhouette",
+        "lighting",
+        "light",
+        "flicker",
+        "exposure",
+        "reflection",
+        "反光",
+        "逆光",
+        "光影",
+        "曝光",
+        "闪烁",
+    ] {
+        if normalized.contains(keyword) {
+            score += 12;
+        }
+    }
+    for keyword in [
+        "shaky", "handheld", "motion", "stutter", "blur", "抖动", "手持", "运镜",
+    ] {
+        if normalized.contains(keyword) {
+            score += 10;
+        }
+    }
+    for keyword in [
+        "mood",
+        "emotion",
+        "tragic",
+        "oppressive",
+        "frantic",
+        "情绪",
+        "压迫",
+        "悲怆",
+    ] {
+        if normalized.contains(keyword) {
+            score += 6;
+        }
+    }
+    if normalized.contains("repeat")
+        || normalized.contains("repeating")
+        || normalized.contains("重复")
+    {
+        score -= 8;
+    }
+    score
+}
+
+fn score_video_prompt_observation_quality(note: &str) -> i32 {
+    let normalized = canonical_observation_note(note);
+    if normalized.is_empty() {
+        return 0;
+    }
+
+    let mut score = 0;
+    for keyword in [
+        "face distortion",
+        "identity drift",
+        "costume drift",
+        "costume inconsistency",
+        "lip-sync",
+        "jump axis",
+        "axis",
+        "eyeline",
+        "framing",
+        "camera angle",
+        "close-up",
+        "backlight",
+        "silhouette",
+        "flicker",
+        "stutter",
+        "blur",
+        "跳轴",
+        "视线",
+        "构图",
+        "方向",
+        "站位",
+        "走位",
+        "逆光",
+        "曝光",
+        "闪烁",
+    ] {
+        if normalized.contains(keyword) {
+            score += 10;
+        }
+    }
+    score
 }
 
 fn build_video_prompt(
@@ -3264,7 +3414,8 @@ mod tests {
     use super::{
         build_video_prompt, compact_negative_constraint_against_storyboard_style,
         parse_structured_storyboard_description, resolve_observation_filter_style_note,
-        resolve_video_prompt_duration, select_video_prompt_memory_notes,
+        resolve_video_prompt_duration, score_video_prompt_observation_specificity,
+        select_best_video_prompt_observation_note, select_video_prompt_memory_notes,
         select_video_prompt_style_notes, trim_video_prompt_memory_rows,
         video_prompt_observation_conflicts_with_style,
         video_prompt_observation_is_irrelevant_to_storyboard, GenerateVideoPromptResponse,
@@ -4963,6 +5114,39 @@ mod tests {
         });
 
         assert_eq!(note, Some("avoid shaky handheld motion".to_string()));
+    }
+
+    #[test]
+    fn select_best_video_prompt_observation_note_prefers_specific_constraint_over_generic_retry() {
+        let note = select_best_video_prompt_observation_note(vec![
+            "avoid repeating stable follow camera".to_string(),
+            "avoid extreme camera angle".to_string(),
+        ]);
+
+        assert_eq!(note, Some("avoid extreme camera angle".to_string()));
+    }
+
+    #[test]
+    fn select_best_video_prompt_observation_note_prefers_shorter_when_scores_tie() {
+        let note = select_best_video_prompt_observation_note(vec![
+            "avoid harsh backlight silhouette please".to_string(),
+            "avoid harsh backlight silhouette".to_string(),
+        ]);
+
+        assert_eq!(
+            note,
+            Some("avoid harsh backlight silhouette".to_string())
+        );
+    }
+
+    #[test]
+    fn score_video_prompt_observation_specificity_penalizes_repeat_style_retry() {
+        assert!(
+            score_video_prompt_observation_specificity("avoid extreme camera angle")
+                > score_video_prompt_observation_specificity(
+                    "avoid repeating stable follow camera"
+                )
+        );
     }
 
     #[test]
