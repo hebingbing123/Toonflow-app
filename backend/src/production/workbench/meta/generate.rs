@@ -29,6 +29,15 @@ const VIDEO_PROMPT_PROJECT_STYLE_MEMORY_ROW_LIMIT: usize = 1;
 const VIDEO_PROMPT_MEMORY_NOTE_LIMIT: usize = 2;
 const VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS: usize = 56;
 const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
+const LOCAL_SHOT_FRAMING_KEYWORDS: [&str; 7] = [
+    "低机位",
+    "高机位",
+    "特写",
+    "近景",
+    "中景",
+    "全景",
+    "远景",
+];
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -458,6 +467,7 @@ struct RankedStyleNote {
     note: String,
     score: i32,
     recency_idx: usize,
+    source_name: String,
 }
 
 fn build_style_note_selection_context(
@@ -537,6 +547,7 @@ fn collect_ranked_video_style_note_candidates(
             note,
             score: base_score + sample_count * 4,
             recency_idx: idx,
+            source_name: row.name.clone(),
         });
     }
     candidates
@@ -589,6 +600,12 @@ fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionC
         if fragment.is_empty() {
             continue;
         }
+        if note.source_name == "selected_video_memory"
+            && fragment.starts_with("镜头")
+            && local_shot_framing_fragment(&fragment)
+        {
+            score -= 18;
+        }
         if !context.mood.is_empty()
             && fragment.starts_with("情绪")
             && fragment.contains(&context.mood)
@@ -618,6 +635,12 @@ fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionC
         }
     }
     score
+}
+
+fn local_shot_framing_fragment(fragment: &str) -> bool {
+    LOCAL_SHOT_FRAMING_KEYWORDS
+        .iter()
+        .any(|keyword| fragment.contains(keyword))
 }
 
 fn compact_unique_memory_notes(notes: Vec<String>) -> Vec<String> {
@@ -2464,7 +2487,7 @@ mod tests {
     }
 
     #[test]
-    fn prioritized_video_prompt_memory_prefers_more_recent_neighbor_when_context_is_missing() {
+    fn prioritized_video_prompt_memory_prefers_script_summary_over_neighbor_local_framing_when_context_is_missing() {
         let rows = vec![
             AgentMemoryRow {
                 name: "selected_video_memory".into(),
@@ -2475,6 +2498,19 @@ mod tests {
                 content: "sampleCount=6 | style=情绪冷色压迫感，光影冷调逆光，场景旧宅走廊 | note=情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".into(),
             },
         ];
+
+        assert_eq!(
+            select_prioritized_video_style_notes(&rows, 12, None, None),
+            vec!["情绪冷色压迫感，光影冷调逆光".to_string()]
+        );
+    }
+
+    #[test]
+    fn prioritized_video_prompt_memory_keeps_neighbor_local_framing_when_no_summary_exists() {
+        let rows = vec![AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=11 | style=镜头稳定近景，情绪冷色压迫感 | note=镜头稳定近景，情绪冷色压迫感".into(),
+        }];
 
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, None),
