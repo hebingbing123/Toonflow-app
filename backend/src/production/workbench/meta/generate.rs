@@ -14,9 +14,10 @@ use crate::production::workbench::meta::common::{
 };
 use crate::production::workbench::video::generate::load_auto_negative_prompt;
 use crate::production::workbench::video_prompt_memory::{
-    compact_video_continuity_note, select_pending_rejected_video_observation_candidates,
-    select_prioritized_video_style_note, select_project_video_style_memory_notes,
-    select_script_video_style_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
+    compact_video_continuity_note, compact_video_style_prompt_note,
+    select_pending_rejected_video_observation_candidates, select_prioritized_video_style_note,
+    select_project_video_style_memory_notes, select_script_video_style_memory_notes,
+    select_selected_video_memory_notes, storyboard_prompt_seed, AgentMemoryRow,
     StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated;
@@ -323,16 +324,98 @@ async fn load_video_prompt_memory_notes(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let rows = trim_video_prompt_memory_rows(rows);
     Ok((
-        select_prioritized_video_style_note(
+        select_video_prompt_style_notes(
             &rows,
             storyboard_numeric_id,
             current_prompt_seed,
-            Some(storyboard_row),
+            storyboard_row,
         )
         .into_iter()
         .collect(),
         select_video_prompt_memory_notes(&rows, storyboard_numeric_id, Some(storyboard_row)),
     ))
+}
+
+fn select_video_prompt_style_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+    storyboard_row: &StoryboardPromptSeedRow,
+) -> Vec<String> {
+    let exact =
+        select_selected_video_memory_notes(rows, storyboard_numeric_id, current_prompt_seed)
+            .into_iter()
+            .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+            .collect::<Vec<_>>();
+    if !exact.is_empty() {
+        return exact;
+    }
+
+    let prioritized = select_prioritized_video_style_note(
+        rows,
+        storyboard_numeric_id,
+        current_prompt_seed,
+        Some(storyboard_row),
+    )
+    .into_iter()
+    .collect::<Vec<_>>();
+    if !prioritized.is_empty() {
+        return prioritized;
+    }
+
+    collect_neighbor_video_prompt_style_notes(rows, storyboard_numeric_id)
+        .into_iter()
+        .filter_map(|note| compact_neighbor_video_style_note(&note, Some(storyboard_row)))
+        .take(1)
+        .collect()
+}
+
+fn collect_neighbor_video_prompt_style_notes(
+    rows: &[AgentMemoryRow],
+    storyboard_numeric_id: i32,
+) -> Vec<String> {
+    let mut scored = rows
+        .iter()
+        .enumerate()
+        .filter(|(_, row)| row.name == "selected_video_memory")
+        .filter_map(|(idx, row)| {
+            let storyboard_ids = extract_storyboard_ids_from_memory_content(&row.content);
+            if storyboard_ids.is_empty() || storyboard_ids.contains(&storyboard_numeric_id) {
+                return None;
+            }
+            let distance = storyboard_ids
+                .iter()
+                .map(|id| (storyboard_numeric_id - *id).abs())
+                .min()?;
+            let note = extract_key_value(&row.content, "style")
+                .or_else(|| extract_key_value(&row.content, "note"))?;
+            Some((distance, idx, note))
+        })
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(a.2.cmp(&b.2)));
+
+    let mut notes = Vec::new();
+    for (_, _, note) in scored {
+        if notes.iter().any(|existing| existing == &note) {
+            continue;
+        }
+        notes.push(note);
+        if notes.len() >= 2 {
+            break;
+        }
+    }
+    notes
+}
+
+fn extract_storyboard_ids_from_memory_content(content: &str) -> Vec<i32> {
+    extract_key_value(content, "storyboardIds")
+        .map(|raw| {
+            raw.split(',')
+                .filter_map(|part| part.trim().parse::<i32>().ok())
+                .filter(|id| *id > 0)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default()
 }
 
 fn trim_video_prompt_memory_rows(rows: Vec<AgentMemoryRow>) -> Vec<AgentMemoryRow> {
@@ -728,6 +811,72 @@ fn build_video_prompt(
     clauses.join(" ")
 }
 
+fn compact_neighbor_video_style_note(
+    note: &str,
+    storyboard_row: Option<&StoryboardPromptSeedRow>,
+) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+    let Some(fields) = storyboard_row
+        .and_then(|row| row.video_desc.as_deref())
+        .and_then(parse_structured_storyboard_description)
+    else {
+        return compact_video_style_prompt_note(&normalized);
+    };
+
+    let expected_camera = [fields.shot.as_str(), fields.camera_move.as_str()]
+        .into_iter()
+        .filter(|part| !part.is_empty())
+        .collect::<String>();
+    let fragments = normalized
+        .split('，')
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| {
+            neighbor_style_fragment_matches_storyboard(fragment, &fields, &expected_camera)
+        })
+        .map(|fragment| clip_prompt_fragment(&fragment, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+        .collect::<Vec<_>>();
+    if fragments.is_empty() {
+        return None;
+    }
+
+    Some(clip_prompt_fragment(
+        &fragments.join("，"),
+        VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+    ))
+}
+
+fn neighbor_style_fragment_matches_storyboard(
+    fragment: &str,
+    fields: &StructuredStoryboardDescription,
+    expected_camera: &str,
+) -> bool {
+    if fragment.starts_with("镜头") {
+        return continuity_fragment_matches_fields(fragment, fields, expected_camera)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.shot)
+            || prompt_style_fragment_overlaps_field(fragment, &fields.camera_move);
+    }
+    if fragment.starts_with("情绪") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.mood);
+    }
+    if fragment.starts_with("光影") {
+        return prompt_style_fragment_overlaps_field(fragment, &fields.lighting);
+    }
+    false
+}
+
+fn prompt_style_fragment_overlaps_field(fragment: &str, field: &str) -> bool {
+    if field.is_empty() {
+        return false;
+    }
+    let canonical = canonical_continuity_fragment(fragment);
+    !canonical.is_empty()
+        && (canonical == field || canonical.contains(field) || field.contains(&canonical))
+}
+
 fn build_video_prompt_quality_tail(
     context: Option<&VideoPromptContext>,
     structured_fields: Option<&StructuredStoryboardDescription>,
@@ -800,8 +949,7 @@ fn build_project_visual_anchors(
     if let Some(style) = ctx
         .project_art_style
         .as_deref()
-        .map(normalize_prompt_text)
-        .filter(|text| !text.is_empty())
+        .and_then(|value| compact_project_art_style_note(value, structured_fields, &style_coverage))
     {
         anchors.push(clip_prompt_fragment(&style, 32));
         extend_prompt_coverage(&mut style_coverage, anchors.as_slice());
@@ -832,6 +980,49 @@ fn build_project_visual_anchors(
         break;
     }
     anchors
+}
+
+fn compact_project_art_style_note(
+    note: &str,
+    structured_fields: Option<&StructuredStoryboardDescription>,
+    prompt_coverage: &[String],
+) -> Option<String> {
+    let normalized = normalize_prompt_text(note);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let mut fragments = normalized
+        .split(['，', ',', '；', ';', '。', '\n'])
+        .map(normalize_prompt_text)
+        .filter(|fragment| !fragment.is_empty())
+        .filter(|fragment| !prompt_fragment_is_covered(fragment, prompt_coverage))
+        .filter(|fragment| {
+            structured_fields.is_none_or(|fields| {
+                fragment != &fields.mood
+                    && fragment != &fields.lighting
+                    && fragment != &fields.setting
+                    && !continuity_fragment_matches_fields(
+                        fragment,
+                        fields,
+                        &[fields.shot.as_str(), fields.camera_move.as_str()]
+                            .into_iter()
+                            .filter(|part| !part.is_empty())
+                            .collect::<String>(),
+                    )
+            })
+        })
+        .collect::<Vec<_>>();
+
+    if fragments.is_empty() {
+        if prompt_fragment_is_covered(&normalized, prompt_coverage) {
+            return None;
+        }
+        return Some(clip_prompt_fragment(&normalized, 32));
+    }
+
+    fragments.dedup();
+    Some(clip_prompt_fragment(&fragments.join(", "), 32))
 }
 
 fn compact_memory_style_anchor(
@@ -2090,9 +2281,9 @@ mod tests {
     use super::{
         build_video_prompt, parse_structured_storyboard_description,
         resolve_observation_filter_style_note, resolve_video_prompt_duration,
-        select_video_prompt_memory_notes, trim_video_prompt_memory_rows,
-        video_prompt_observation_conflicts_with_style, GenerateVideoPromptResponse,
-        VideoPromptContext,
+        select_video_prompt_memory_notes, select_video_prompt_style_notes,
+        trim_video_prompt_memory_rows, video_prompt_observation_conflicts_with_style,
+        GenerateVideoPromptResponse, VideoPromptContext,
     };
     use crate::production::workbench::video_prompt_memory::{
         select_neighbor_selected_video_memory_notes, select_prioritized_video_style_note,
@@ -2401,6 +2592,32 @@ mod tests {
         );
         assert!(!prompt.contains("Format:"));
         assert!(!prompt.contains("光影偏冷"));
+    }
+
+    #[test]
+    fn build_video_prompt_trims_project_art_style_fragments_already_covered_elsewhere() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角冲出旧宅、旧宅走廊、主角、5秒、中景、稳定跟拍、快步推门冲出、冷峻压迫、冷调逆光、别回头、脚步声门响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: Some("胶片颗粒，冷调逆光，冷峻压迫".into()),
+            project_director_manual: Some("镜头衔接统一".into()),
+            script_role_anchors: Vec::new(),
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(
+            prompt.contains("Style anchor: 胶片颗粒; 镜头衔接统一."),
+            "{prompt}"
+        );
+        assert!(!prompt.contains("冷调逆光;"));
+        assert!(!prompt.contains("冷峻压迫;"));
     }
 
     #[test]
@@ -2908,6 +3125,48 @@ mod tests {
         assert_eq!(
             select_neighbor_selected_video_memory_notes(&rows, 12, 2),
             vec!["镜头稳定近景，情绪冷色压迫感".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_falls_back_to_matching_neighbor_style_fragments() {
+        let rows = vec![AgentMemoryRow {
+            name: "selected_video_memory".into(),
+            content: "storyboardIds=11 | note=女主贴墙前行，镜头稳定近景，情绪冷色压迫感".into(),
+        }];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主转身回望".into()),
+            video_desc: Some("（女主转身回望、旧宅走廊、女主、5秒、近景、稳定跟拍、回头确认身后动静、紧张、冷调逆光、无台词、脚步回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            vec!["镜头稳定近景".to_string()]
+        );
+    }
+
+    #[test]
+    fn select_video_prompt_style_notes_prefers_exact_storyboard_style_memory() {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=12 | style=镜头近景稳定跟拍，情绪紧张，光影冷调逆光 | note=当前镜头已确认".into(),
+            },
+            AgentMemoryRow {
+                name: "selected_video_memory".into(),
+                content: "storyboardIds=11 | note=女主贴墙前行，镜头稳定近景，情绪冷色压迫感".into(),
+            },
+        ];
+        let storyboard_row = StoryboardPromptSeedRow {
+            prompt: Some("女主转身回望".into()),
+            video_desc: Some("（女主转身回望、旧宅走廊、女主、5秒、近景、稳定跟拍、回头确认身后动静、紧张、冷调逆光、无台词、脚步回响、A12）".into()),
+            duration: Some("5s".into()),
+        };
+
+        assert_eq!(
+            select_video_prompt_style_notes(&rows, 12, None, &storyboard_row),
+            vec!["镜头稳定跟拍，情绪紧张，光影冷调逆光".to_string()]
         );
     }
 

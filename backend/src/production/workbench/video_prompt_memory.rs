@@ -28,6 +28,8 @@ const STABLE_PROMPT_SHOT_KEYWORDS: [&str; 8] = [
     "手持",
     "跟拍",
 ];
+const PROMPT_SHOT_FRAMING_KEYWORDS: [&str; 7] =
+    ["特写", "近景", "中景", "全景", "远景", "低机位", "高机位"];
 const CONTINUITY_NOTE_KEYWORDS: [&str; 8] = [
     "保持", "延续", "衔接", "连续", "一致", "统一", "方向", "构图",
 ];
@@ -838,7 +840,6 @@ pub(crate) fn select_selected_video_memory_notes(
     notes
 }
 
-#[cfg(test)]
 pub(crate) fn select_neighbor_selected_video_memory_notes(
     rows: &[AgentMemoryRow],
     storyboard_numeric_id: i32,
@@ -862,7 +863,30 @@ pub(crate) fn select_neighbor_selected_video_memory_notes(
                 .iter()
                 .map(|id| (storyboard_numeric_id - *id).abs())
                 .min()?;
-            let note = selected_video_style_value(row)?;
+            let note = extract_key_value(&row.content, "style")
+                .map(|value| clip_prompt_fragment(&value, VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS))
+                .or_else(|| {
+                    extract_key_value(&row.content, "note").and_then(|value| {
+                        let fragments = value
+                            .split('，')
+                            .map(normalize_prompt_text)
+                            .filter(|fragment| {
+                                STYLE_NOTE_PREFIXES
+                                    .iter()
+                                    .any(|prefix| fragment.starts_with(prefix))
+                            })
+                            .collect::<Vec<_>>();
+                        if fragments.is_empty() {
+                            None
+                        } else {
+                            Some(clip_prompt_fragment(
+                                &fragments.join("，"),
+                                VIDEO_PROMPT_MEMORY_NOTE_MAX_CHARS,
+                            ))
+                        }
+                    })
+                })
+                .or_else(|| selected_video_style_value(row))?;
             Some((distance, idx, note))
         })
         .collect::<Vec<_>>();
@@ -1599,7 +1623,15 @@ fn compact_prompt_style_fragment(fragment: &str) -> Option<String> {
 }
 
 fn compact_prompt_shot_style_fragment(fragment: &str) -> Option<String> {
-    let matched = extract_style_keywords(fragment, "镜头", &STABLE_PROMPT_SHOT_KEYWORDS);
+    let mut matched = extract_style_keywords(fragment, "镜头", &PROMPT_SHOT_FRAMING_KEYWORDS);
+    for keyword in extract_style_keywords(fragment, "镜头", &STABLE_PROMPT_SHOT_KEYWORDS) {
+        if matched.iter().any(|existing| {
+            existing == &keyword || existing.contains(&keyword) || keyword.contains(existing)
+        }) {
+            continue;
+        }
+        matched.push(keyword);
+    }
     if matched.is_empty() {
         return None;
     }
