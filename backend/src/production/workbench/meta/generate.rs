@@ -446,7 +446,6 @@ fn select_prioritized_video_style_notes(
 struct StyleNoteSelectionContext {
     description: String,
     subject: String,
-    setting: String,
     action: String,
     shot: String,
     camera_move: String,
@@ -486,10 +485,6 @@ fn build_style_note_selection_context(
         subject: fields
             .as_ref()
             .map(|value| normalize_prompt_text(&value.subject))
-            .unwrap_or_default(),
-        setting: fields
-            .as_ref()
-            .map(|value| normalize_prompt_text(&value.setting))
             .unwrap_or_default(),
         action: fields
             .as_ref()
@@ -593,12 +588,6 @@ fn score_ranked_style_note(note: &RankedStyleNote, context: &StyleNoteSelectionC
     for fragment in note.note.split('，').map(normalize_prompt_text) {
         if fragment.is_empty() {
             continue;
-        }
-        if !context.setting.is_empty()
-            && fragment.starts_with("场景")
-            && fragment.contains(&context.setting)
-        {
-            score += 28;
         }
         if !context.mood.is_empty()
             && fragment.starts_with("情绪")
@@ -968,7 +957,7 @@ fn compact_memory_style_anchor(
 }
 
 fn style_fragment_prefix(fragment: &str) -> bool {
-    ["镜头", "情绪", "光影", "场景"]
+    ["镜头", "情绪", "光影"]
         .iter()
         .any(|prefix| fragment.starts_with(prefix))
 }
@@ -2441,7 +2430,7 @@ mod tests {
 
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, Some(&storyboard_row)),
-            vec!["情绪冷色压迫感，光影冷调逆光，场景旧宅走廊".to_string()]
+            vec!["情绪冷色压迫感，光影冷调逆光".to_string()]
         );
     }
 
@@ -2460,7 +2449,7 @@ mod tests {
 
         assert_eq!(
             select_prioritized_video_style_notes(&rows, 12, None, None),
-            vec!["光影冷调逆光，场景旧宅走廊".to_string()]
+            vec!["光影冷调逆光".to_string()]
         );
     }
 
