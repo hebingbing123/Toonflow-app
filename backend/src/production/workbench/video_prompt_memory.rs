@@ -1104,7 +1104,8 @@ fn observation_note_same_family(existing: &str, candidate: &str) -> bool {
 }
 
 fn observation_note_family(value: &str) -> &'static str {
-    match canonical_observation_note(value).as_str() {
+    let canonical = canonical_observation_note(value);
+    match canonical.as_str() {
         "avoid flicker" | "avoid flicker or motion jitter" => "flicker_motion_jitter",
         "avoid unnecessary shot changes" | "avoid extra shot changes or wrong framing" => {
             "shot_change_framing"
@@ -1126,7 +1127,32 @@ fn observation_note_family(value: &str) -> &'static str {
         | "avoid costume or character drift"
         | "avoid face drift or costume inconsistency"
         | "avoid face distortion, identity drift, costume drift" => "character_consistency",
-        _ => "",
+        _ => {
+            if canonical.contains("shaky")
+                || canonical.contains("handheld")
+                || canonical.contains("stable follow camera")
+                || canonical.contains("follow camera")
+            {
+                "camera_motion_stability"
+            } else if canonical.contains("shot change")
+                || canonical.contains("wrong framing")
+                || canonical.contains("unnecessary shot")
+            {
+                "shot_change_framing"
+            } else if canonical.contains("tragic")
+                || canonical.contains("oppressive")
+                || canonical.contains("frantic")
+                || canonical.contains("cold emotional tone")
+            {
+                "mood_tone"
+            } else if canonical.contains("neon reflection") || canonical.contains("reflection") {
+                "lighting_reflection"
+            } else if canonical.contains("lip-sync") {
+                "lip_sync"
+            } else {
+                ""
+            }
+        }
     }
 }
 
@@ -3164,15 +3190,15 @@ fn map_rejected_shot_or_camera_fragment(value: &str) -> Option<&'static str> {
     if value.is_empty() {
         return None;
     }
+    if value.contains("手持") {
+        return Some("avoid shaky handheld motion");
+    }
     if value.contains("稳定跟拍")
         || value.contains("跟拍")
         || value.contains("推进")
         || value.contains("慢推")
     {
         return Some("avoid repeating stable follow camera");
-    }
-    if value.contains("手持") {
-        return Some("avoid shaky handheld motion");
     }
     if value.contains("低机位") || value.contains("高机位") {
         return Some("avoid extreme camera angle");
@@ -3684,6 +3710,22 @@ mod tests {
     }
 
     #[test]
+    fn build_rejected_video_negative_memory_prefers_handheld_warning_for_handheld_follow_camera() {
+        let content = build_rejected_video_negative_memory(
+            12,
+            &StoryboardPromptSeedRow {
+                prompt: Some("雨巷追随".into()),
+                video_desc: Some("（主角穿过雨巷、霓虹雨巷、主角、5秒、中景、手持跟拍、踩水快步穿行、克制、霓虹反光、无台词、雨声脚步声、A12）".into()),
+                duration: Some("5".into()),
+            },
+        )
+        .expect("content");
+
+        assert!(content.contains("avoid shaky handheld motion"));
+        assert!(!content.contains("avoid repeating stable follow camera"));
+    }
+
+    #[test]
     fn build_rejected_video_negative_memory_skips_low_signal_mood_only_memory() {
         let content = build_rejected_video_negative_memory(
             12,
@@ -4034,6 +4076,39 @@ mod tests {
     }
 
     #[test]
+    fn select_rejected_video_negative_memory_notes_drops_repeat_follow_when_handheld_warning_exists(
+    ) {
+        let notes = select_rejected_video_negative_memory_notes(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=2 | avoid=avoid repeating stable follow camera"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=3 | avoid=avoid shaky handheld motion"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | rejectionCount=2 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec!["avoid shaky handheld motion, avoid flat cold lighting".to_string()]
+        );
+    }
+
+    #[test]
     fn select_rejected_video_negative_memory_notes_parses_ascii_and_cjk_delimiters() {
         let notes = select_rejected_video_negative_memory_notes(
             &[AgentMemoryRow {
@@ -4279,6 +4354,42 @@ mod tests {
             vec![
                 "avoid flat cold lighting".to_string(),
                 "avoid flicker or motion jitter".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn select_pending_rejected_video_observation_candidates_drops_repeat_follow_when_handheld_warning_exists(
+    ) {
+        let notes = select_pending_rejected_video_observation_candidates(
+            &[
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid repeating stable follow camera"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content:
+                        "storyboardIds=12 | rejectionCount=1 | avoid=avoid shaky handheld motion"
+                            .into(),
+                },
+                AgentMemoryRow {
+                    name: "rejected_video_negative_memory".into(),
+                    content: "storyboardIds=12 | rejectionCount=1 | avoid=avoid flat cold lighting"
+                        .into(),
+                },
+            ],
+            12,
+            None,
+        );
+
+        assert_eq!(
+            notes,
+            vec![
+                "avoid shaky handheld motion".to_string(),
+                "avoid flat cold lighting".to_string(),
             ]
         );
     }
