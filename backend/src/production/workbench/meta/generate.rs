@@ -164,7 +164,6 @@ struct VideoPromptContext {
     storyboard_prompt_seed: Option<String>,
     project_art_style: Option<String>,
     project_director_manual: Option<String>,
-    project_video_ratio: Option<String>,
     script_role_anchors: Vec<String>,
     script_scene_anchors: Vec<String>,
     script_tool_anchors: Vec<String>,
@@ -176,7 +175,6 @@ struct VideoPromptContext {
 struct ProjectPromptSeedRow {
     art_style: Option<String>,
     director_manual: Option<String>,
-    video_ratio: Option<String>,
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -232,7 +230,7 @@ async fn load_video_prompt_context(
     .await?;
     let project_row = sqlx::query_as::<_, ProjectPromptSeedRow>(
         r#"
-        SELECT art_style, director_manual, video_ratio
+        SELECT art_style, director_manual
         FROM app_project
         WHERE owner_user_id = $1
           AND numeric_id = $2
@@ -289,7 +287,6 @@ async fn load_video_prompt_context(
         project_director_manual: project_row
             .as_ref()
             .and_then(|row| row.director_manual.clone()),
-        project_video_ratio: project_row.and_then(|row| row.video_ratio),
         script_role_anchors,
         script_scene_anchors,
         script_tool_anchors,
@@ -809,14 +806,7 @@ fn build_video_prompt(
     let style_anchors =
         build_project_visual_anchors(context, structured_fields.as_ref(), &prompt_coverage);
     if !style_anchors.is_empty() {
-        let mut style_clause = vec![format!("Style anchor: {}.", style_anchors.join("; "))];
-        if let Some(ratio) = context
-            .and_then(|ctx| ctx.project_video_ratio.as_deref())
-            .and_then(format_video_ratio_hint)
-        {
-            style_clause.push(format!("Format: {ratio}."));
-        }
-        clauses.push(style_clause.join(" "));
+        clauses.push(format!("Style anchor: {}.", style_anchors.join("; ")));
     }
     extend_prompt_coverage(&mut prompt_coverage, &style_anchors);
     let continuity_notes =
@@ -1444,17 +1434,6 @@ fn project_director_fragment_relevant(fragment: &str) -> bool {
     .any(|keyword| fragment.contains(keyword))
 }
 
-fn format_video_ratio_hint(value: &str) -> Option<String> {
-    let normalized = normalize_prompt_text(value).replace(' ', "");
-    match normalized.as_str() {
-        "" => None,
-        "9:16" => Some("vertical 9:16".to_string()),
-        "16:9" => Some("horizontal 16:9".to_string()),
-        "1:1" => Some("square 1:1".to_string()),
-        _ => Some(clip_prompt_fragment(&normalized, 16)),
-    }
-}
-
 fn continuity_fragment_matches_fields(
     fragment: &str,
     fields: &StructuredStoryboardDescription,
@@ -1812,7 +1791,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1835,7 +1813,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1858,7 +1835,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1881,7 +1857,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1905,7 +1880,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一".into()),
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
             script_tool_anchors: Vec::new(),
@@ -1934,7 +1908,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持稳定跟拍，镜头衔接统一".into()),
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
             script_tool_anchors: Vec::new(),
@@ -1957,7 +1930,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1976,7 +1948,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一，光影偏冷".into()),
-            project_video_ratio: Some("9:16".into()),
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -1990,7 +1961,7 @@ mod tests {
             prompt.contains("Style anchor: 胶片冷调悬疑; 保持低机位压迫感, 镜头衔接统一."),
             "{prompt}"
         );
-        assert!(prompt.contains("Format: vertical 9:16."));
+        assert!(!prompt.contains("Format:"));
         assert!(!prompt.contains("光影偏冷"));
     }
 
@@ -2003,7 +1974,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("镜头稳定跟拍，情绪急迫，光影阴天冷光，镜头衔接统一".into()),
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -2028,7 +1998,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("场景旧宅走廊，保持低机位压迫感，镜头衔接统一，质感克制粗粝".into()),
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: Vec::new(),
             script_tool_anchors: Vec::new(),
@@ -2052,7 +2021,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: vec![
                 "主角: 黑色风衣，短发，克制冷峻".into(),
                 "路人: 灰色外套".into(),
@@ -2079,7 +2047,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: vec![
                 "同伴: 灰色毛衣，神情惊惶".into(),
                 "主角: 黑色风衣，短发，克制冷峻".into(),
@@ -2105,7 +2072,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: vec![
                 "旧宅走廊: 潮湿斑驳，冷色长廊".into(),
@@ -2137,7 +2103,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: None,
             project_director_manual: None,
-            project_video_ratio: None,
             script_role_anchors: Vec::new(),
             script_scene_anchors: vec![
                 "门厅: 破损玻璃，潮湿回声".into(),
@@ -2168,7 +2133,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一".into()),
-            project_video_ratio: None,
             script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
             script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
             script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
@@ -2201,7 +2165,6 @@ mod tests {
             storyboard_prompt_seed: None,
             project_art_style: Some("胶片冷调悬疑".into()),
             project_director_manual: Some("保持低机位压迫感，镜头衔接统一".into()),
-            project_video_ratio: None,
             script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
             script_scene_anchors: vec!["旧宅走廊: 潮湿斑驳，冷色长廊".into()],
             script_tool_anchors: vec!["青铜匕首: 刀身旧磨损，寒光克制".into()],
@@ -2237,7 +2200,6 @@ mod tests {
                 storyboard_prompt_seed: None,
                 project_art_style: None,
                 project_director_manual: None,
-                project_video_ratio: None,
                 script_role_anchors: Vec::new(),
                 script_scene_anchors: Vec::new(),
                 script_tool_anchors: Vec::new(),
@@ -2262,7 +2224,6 @@ mod tests {
                 storyboard_prompt_seed: None,
                 project_art_style: None,
                 project_director_manual: None,
-                project_video_ratio: None,
                 script_role_anchors: Vec::new(),
                 script_scene_anchors: Vec::new(),
                 script_tool_anchors: Vec::new(),
