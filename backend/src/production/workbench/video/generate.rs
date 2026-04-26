@@ -1172,12 +1172,21 @@ struct VisualStyleConstraintFlags {
     harsh_backlight_silhouette: bool,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct VisualErrorFlags {
+    warped_anatomy: bool,
+    blur: bool,
+    flicker: bool,
+}
+
 fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     let mut compacted = Vec::with_capacity(fragments.len());
     let mut character_flags = CharacterConsistencyFlags::default();
     let mut character_idx = None;
     let mut visual_style_flags = VisualStyleConstraintFlags::default();
     let mut visual_style_idx = None;
+    let mut visual_error_flags = VisualErrorFlags::default();
+    let mut visual_error_idx = None;
 
     for (idx, fragment) in fragments.into_iter().enumerate() {
         if let Some(flags) = parse_character_consistency_fragment(&fragment) {
@@ -1197,6 +1206,13 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             visual_style_flags.harsh_backlight_silhouette |= flags.harsh_backlight_silhouette;
             continue;
         }
+        if let Some(flags) = parse_visual_error_fragment(&fragment) {
+            visual_error_idx.get_or_insert(idx);
+            visual_error_flags.warped_anatomy |= flags.warped_anatomy;
+            visual_error_flags.blur |= flags.blur;
+            visual_error_flags.flicker |= flags.flicker;
+            continue;
+        }
         compacted.push((idx, fragment));
     }
 
@@ -1205,6 +1221,11 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
     }
     if let Some(idx) = visual_style_idx {
         for fragment in render_visual_style_constraint_fragments(visual_style_flags) {
+            compacted.push((idx, fragment));
+        }
+    }
+    if let Some(idx) = visual_error_idx {
+        for fragment in render_visual_error_fragments(visual_error_flags) {
             compacted.push((idx, fragment));
         }
     }
@@ -1326,6 +1347,47 @@ fn render_visual_style_constraint_fragments(flags: VisualStyleConstraintFlags) -
     fragments
 }
 
+fn parse_visual_error_fragment(fragment: &str) -> Option<VisualErrorFlags> {
+    match canonical_negative_fragment(fragment).as_str() {
+        "avoid warped anatomy, blur, flicker" => Some(VisualErrorFlags {
+            warped_anatomy: true,
+            blur: true,
+            flicker: true,
+        }),
+        "avoid warped hands or limbs" | "avoid warped anatomy" => Some(VisualErrorFlags {
+            warped_anatomy: true,
+            ..Default::default()
+        }),
+        "avoid blur" => Some(VisualErrorFlags {
+            blur: true,
+            ..Default::default()
+        }),
+        "avoid flicker" | "avoid flicker or motion jitter" => Some(VisualErrorFlags {
+            flicker: true,
+            ..Default::default()
+        }),
+        _ => None,
+    }
+}
+
+fn render_visual_error_fragments(flags: VisualErrorFlags) -> Vec<String> {
+    if flags.warped_anatomy && flags.blur && flags.flicker {
+        return vec!["avoid warped anatomy, blur, flicker".to_string()];
+    }
+
+    let mut fragments = Vec::new();
+    if flags.warped_anatomy {
+        fragments.push("avoid warped hands or limbs".to_string());
+    }
+    if flags.flicker {
+        fragments.push("avoid flicker or motion jitter".to_string());
+    }
+    if flags.blur {
+        fragments.push("avoid blur".to_string());
+    }
+    fragments
+}
+
 fn split_negative_prompt_fragments(prompt: Option<&str>) -> Vec<String> {
     let mut fragments = Vec::new();
     if let Some(prompt) = prompt {
@@ -1385,6 +1447,12 @@ fn negative_fragment_is_covered(candidate: &str, existing_fragments: &[String]) 
 
 fn negative_fragment_covers(existing: &str, candidate: &str) -> bool {
     if let (Some(existing_flags), Some(candidate_flags)) = (
+        parse_visual_error_fragment(existing),
+        parse_visual_error_fragment(candidate),
+    ) {
+        return visual_error_flags_cover(existing_flags, candidate_flags);
+    }
+    if let (Some(existing_flags), Some(candidate_flags)) = (
         parse_character_consistency_fragment(existing),
         parse_character_consistency_fragment(candidate),
     ) {
@@ -1410,6 +1478,12 @@ fn character_consistency_flags_cover(
     (!candidate.face_distortion || existing.face_distortion)
         && (!candidate.identity_drift || existing.identity_drift)
         && (!candidate.costume_inconsistency || existing.costume_inconsistency)
+}
+
+fn visual_error_flags_cover(existing: VisualErrorFlags, candidate: VisualErrorFlags) -> bool {
+    (!candidate.warped_anatomy || existing.warped_anatomy)
+        && (!candidate.blur || existing.blur)
+        && (!candidate.flicker || existing.flicker)
 }
 
 fn visual_style_constraint_flags_cover(
@@ -1853,6 +1927,28 @@ mod tests {
             merged,
             "avoid extreme camera angle or overly tight close-up framing, avoid overly cold, oppressive, or frantic mood"
         );
+    }
+
+    #[test]
+    fn merge_negative_prompts_compacts_visual_error_family_before_budgeting() {
+        let merged = merge_negative_prompts(
+            Some("avoid blur, avoid flicker"),
+            Some("avoid warped hands or limbs"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid warped anatomy, blur, flicker");
+    }
+
+    #[test]
+    fn merge_negative_prompts_visual_error_bundle_covers_individual_fragments() {
+        let merged = merge_negative_prompts(
+            Some("avoid warped anatomy, blur, flicker"),
+            Some("avoid blur, avoid flicker or motion jitter"),
+        )
+        .expect("merged prompt");
+
+        assert_eq!(merged, "avoid warped anatomy, blur, flicker");
     }
 
     #[tokio::test]
