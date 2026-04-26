@@ -16,3 +16,4 @@ mod tests;
 pub use openapi::ProductionApi;
 pub use router::router;
 pub(crate) use types::{VideoItem, WorkbenchGenerateVideoBody};
+pub(crate) use workbench::video_prompt_memory::{storyboard_prompt_seed, StoryboardPromptSeedRow};

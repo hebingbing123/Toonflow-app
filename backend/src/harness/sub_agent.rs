@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 use crate::harness::HarnessContext;
 use crate::llm::chat_completion_assistant_text;
+use crate::production::{storyboard_prompt_seed, StoryboardPromptSeedRow};
 use crate::prompting::skills::{read_skill_markdown, read_skill_markdown_section};
 
 use super::invoke::InvokeError;
@@ -29,6 +30,14 @@ struct ScopeSignature {
     focus_sections: Vec<&'static str>,
     novel_ids: Vec<i64>,
     relative_script_offset: Option<i64>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct ScopedStoryboardPromptSeedRow {
+    numeric_id: i32,
+    prompt: Option<String>,
+    video_desc: Option<String>,
+    duration: Option<String>,
 }
 
 fn parse_tag_attributes(line: &str, tag_name: &str) -> Option<serde_json::Map<String, Value>> {
@@ -614,10 +623,14 @@ fn build_auto_memory_snapshot(
     arguments: &Value,
     result_text: &str,
     review: Option<&Value>,
+    prompt_seed_scope: Option<&str>,
 ) -> String {
     let mut parts = vec![format!("tool={tool_name}")];
     if let Some(scope) = scope_summary(arguments) {
         parts.push(format!("scope={scope}"));
+    }
+    if let Some(prompt_seed_scope) = prompt_seed_scope.filter(|value| !value.is_empty()) {
+        parts.push(prompt_seed_scope.to_string());
     }
 
     if let Some(review) = review {
@@ -651,6 +664,80 @@ fn build_auto_memory_snapshot(
     }
 
     truncate_chars(&parts.join(" | "), AUTO_MEMORY_MAX_CHARS)
+}
+
+fn format_storyboard_prompt_seed_scope(
+    storyboard_prompt_seeds: &[(i32, String)],
+) -> Option<String> {
+    match storyboard_prompt_seeds {
+        [] => None,
+        [(_, prompt_seed)] => Some(format!("promptSeed={prompt_seed}")),
+        seeds => Some(format!(
+            "storyboardPromptSeeds={}",
+            seeds
+                .iter()
+                .map(|(storyboard_id, prompt_seed)| format!("{storyboard_id}:{prompt_seed}"))
+                .collect::<Vec<_>>()
+                .join(",")
+        )),
+    }
+}
+
+async fn resolve_storyboard_prompt_seed_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_numeric_id: i32,
+    episodes_id: Option<i32>,
+    arguments: &Value,
+) -> Result<Option<String>, InvokeError> {
+    let Some(script_numeric_id) = episodes_id.filter(|id| *id > 0) else {
+        return Ok(None);
+    };
+    let storyboard_ids = parse_positive_id_list(arguments, "storyboardIds");
+    if storyboard_ids.is_empty() {
+        return Ok(None);
+    }
+    let storyboard_ids = storyboard_ids
+        .into_iter()
+        .filter_map(|id| i32::try_from(id).ok())
+        .collect::<Vec<_>>();
+    if storyboard_ids.is_empty() {
+        return Ok(None);
+    }
+
+    let rows = sqlx::query_as::<_, ScopedStoryboardPromptSeedRow>(
+        r#"
+        SELECT sb.numeric_id, sb.prompt, sb.video_desc, sb.duration
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        INNER JOIN app_project p ON p.id = sc.project_id
+        WHERE p.owner_user_id = $1
+          AND p.numeric_id = $2
+          AND sc.numeric_id = $3
+          AND sb.numeric_id = ANY($4)
+        ORDER BY sb.numeric_id ASC
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_numeric_id)
+    .bind(script_numeric_id)
+    .bind(&storyboard_ids)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
+
+    let seeds = rows
+        .into_iter()
+        .filter_map(|row| {
+            let prompt_seed = storyboard_prompt_seed(&StoryboardPromptSeedRow {
+                prompt: row.prompt,
+                video_desc: row.video_desc,
+                duration: row.duration,
+            })?;
+            Some((row.numeric_id, prompt_seed))
+        })
+        .collect::<Vec<_>>();
+    Ok(format_storyboard_prompt_seed_scope(&seeds))
 }
 
 async fn load_auto_memory_note(
@@ -911,7 +998,21 @@ pub async fn invoke_sub_agent_tool(
         ctx.project_numeric_id,
         agent_memory_type_for_tool(tool_name),
     ) {
-        let snapshot = build_auto_memory_snapshot(tool_name, arguments, &text, review.as_ref());
+        let prompt_seed_scope = resolve_storyboard_prompt_seed_scope(
+            pool,
+            ctx.user_id,
+            project_numeric_id,
+            ctx.script_numeric_id,
+            arguments,
+        )
+        .await?;
+        let snapshot = build_auto_memory_snapshot(
+            tool_name,
+            arguments,
+            &text,
+            review.as_ref(),
+            prompt_seed_scope.as_deref(),
+        );
         persist_auto_memory_snapshot(
             pool,
             ctx.user_id,
@@ -934,9 +1035,9 @@ pub async fn invoke_sub_agent_tool(
 #[cfg(test)]
 mod tests {
     use super::{
-        build_auto_memory_snapshot, parse_review_summary, parse_scope_signature,
-        parse_tag_attributes, scope_signature_from_args, select_auto_memory_entries,
-        sub_agent_prompt_from_args,
+        build_auto_memory_snapshot, format_storyboard_prompt_seed_scope, parse_review_summary,
+        parse_scope_signature, parse_tag_attributes, scope_signature_from_args,
+        select_auto_memory_entries, sub_agent_prompt_from_args,
     };
     use serde_json::json;
 
@@ -1050,6 +1151,7 @@ mod tests {
                 "summary": "导演规划可用但资产还需对齐",
                 "assetIds": "7,8"
             })),
+            None,
         );
 
         assert!(snapshot.contains("tool=run_sub_agent_production_supervision"));
@@ -1065,12 +1167,35 @@ mod tests {
             &json!({"assetIds": [5, 1, 5]}),
             "  第一行结果  \n\n第二行结果  ",
             None,
+            None,
         );
 
         assert!(snapshot.contains("tool=run_sub_agent_storyboard_table"));
         assert!(snapshot.contains("scope=assetIds=1,5"));
         assert!(snapshot.contains("result=第一行结果 第二行结果"));
         assert!(snapshot.chars().count() <= 320);
+    }
+
+    #[test]
+    fn format_storyboard_prompt_seed_scope_uses_single_prompt_seed_for_single_storyboard() {
+        assert_eq!(
+            format_storyboard_prompt_seed_scope(&[(12, "seed-12-current".to_string())]),
+            Some("promptSeed=seed-12-current".to_string())
+        );
+    }
+
+    #[test]
+    fn build_auto_memory_snapshot_includes_multi_storyboard_prompt_seed_scope() {
+        let snapshot = build_auto_memory_snapshot(
+            "run_sub_agent_storyboard_gen",
+            &json!({"storyboardIds": [12, 14]}),
+            "补齐分镜连续性",
+            None,
+            Some("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current"),
+        );
+
+        assert!(snapshot.contains("scope=storyboardIds=12,14"));
+        assert!(snapshot.contains("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current"));
     }
 
     #[test]

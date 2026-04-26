@@ -509,8 +509,13 @@ fn prioritize_storyboard_memory_indices(
             let storyboard_ids = extract_storyboard_ids_from_memory_content(&row.content);
             let exact_storyboard_match =
                 storyboard_numeric_id > 0 && storyboard_ids.contains(&storyboard_numeric_id);
-            let prompt_seed_match = memory_prompt_seed_matches(&row.content, current_prompt_seed);
-            let prompt_seed_present = extract_key_value(&row.content, "promptSeed").is_some();
+            let prompt_seed_match = memory_prompt_seed_matches(
+                &row.content,
+                storyboard_numeric_id,
+                current_prompt_seed,
+            );
+            let prompt_seed_present =
+                memory_prompt_seed_for_storyboard(&row.content, storyboard_numeric_id).is_some();
             let storyboard_distance =
                 storyboard_distance_from_memory_content(&row.content, storyboard_numeric_id)
                     .unwrap_or(i32::MAX);
@@ -537,13 +542,38 @@ fn prioritize_storyboard_memory_indices(
         .collect()
 }
 
-fn memory_prompt_seed_matches(content: &str, current_prompt_seed: Option<&str>) -> bool {
+fn memory_prompt_seed_matches(
+    content: &str,
+    storyboard_numeric_id: i32,
+    current_prompt_seed: Option<&str>,
+) -> bool {
     match current_prompt_seed {
         Some(seed) if !seed.is_empty() => {
-            extract_key_value(content, "promptSeed").as_deref() == Some(seed)
+            memory_prompt_seed_for_storyboard(content, storyboard_numeric_id).as_deref()
+                == Some(seed)
         }
         _ => false,
     }
+}
+
+fn memory_prompt_seed_for_storyboard(content: &str, storyboard_numeric_id: i32) -> Option<String> {
+    if let Some(prompt_seed) =
+        extract_key_value(content, "promptSeed").filter(|seed| !seed.is_empty())
+    {
+        return Some(prompt_seed);
+    }
+    if storyboard_numeric_id <= 0 {
+        return None;
+    }
+    extract_key_value(content, "storyboardPromptSeeds").and_then(|mapping| {
+        mapping.split(',').find_map(|entry| {
+            let (raw_storyboard_id, prompt_seed) = entry.split_once(':')?;
+            let entry_storyboard_id = raw_storyboard_id.trim().parse::<i32>().ok()?;
+            (entry_storyboard_id == storyboard_numeric_id)
+                .then(|| prompt_seed.trim().to_string())
+                .filter(|seed| !seed.is_empty())
+        })
+    })
 }
 
 fn storyboard_distance_from_memory_content(
@@ -5418,6 +5448,30 @@ mod tests {
                 .count(),
             6
         );
+    }
+
+    #[test]
+    fn trim_video_prompt_memory_rows_prefers_matching_auto_scope_prompt_seed_map_over_newer_stale_row(
+    ) {
+        let rows = vec![
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12,14 | storyboardPromptSeeds=12:seed-12-current,14:seed-14-current | summary=保持当前镜头角色站位".into(),
+            },
+            AgentMemoryRow {
+                name: "auto_scope_memory".into(),
+                content: "tool=run_sub_agent_storyboard_panel | scope=storyboardIds=12 | promptSeed=seed-12-stale | summary=旧版镜头走位".into(),
+            },
+        ];
+
+        let trimmed = trim_video_prompt_memory_rows(rows, 12, Some("seed-12-current"));
+
+        assert!(trimmed.iter().any(|row| {
+            row.name == "auto_scope_memory"
+                && row
+                    .content
+                    .contains("storyboardPromptSeeds=12:seed-12-current,14:seed-14-current")
+        }));
     }
 
     #[test]
