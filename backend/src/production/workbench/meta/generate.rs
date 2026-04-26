@@ -35,6 +35,22 @@ const VIDEO_PROMPT_CONTINUITY_NOTE_LIMIT: usize = 1;
 const ACTION_OBJECT_PREFIX_VERBS: [&str; 10] = [
     "握紧", "拿着", "提着", "举着", "攥着", "扶住", "抱着", "拖着", "背着", "扛着",
 ];
+const ACTION_SUBJECT_PREFIXES: [&str; 10] = [
+    "主角", "女主", "男主", "反派", "女孩", "男孩", "女人", "男人", "老人", "孩子",
+];
+const SETTING_SUBJECT_LEAD_IN_SUFFIXES: [&str; 10] = [
+    "身后的",
+    "身后",
+    "旁边的",
+    "旁的",
+    "旁边",
+    "面前的",
+    "前的",
+    "后的",
+    "所在的",
+    "附近的",
+];
+const PROMPT_LEADING_BRIDGES: [&str; 7] = ["在", "于", "向", "朝", "往", "从", "自"];
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -794,13 +810,19 @@ fn build_video_prompt(
             let compacted_dialogue = compact_dialogue_clause(&fields.dialogue);
             let mut subject =
                 compact_subject_clause(&fields.subject, &asset_coverage, &prompt_coverage);
-            let setting =
-                compact_setting_clause(&fields.setting, &asset_coverage, &prompt_coverage);
+            let setting = compact_setting_clause(
+                &fields.setting,
+                &asset_coverage,
+                &prompt_coverage,
+                Some(fields.subject.as_str()),
+                Some(fields.action.as_str()),
+            );
             let action = compact_action_clause(
                 &fields.action,
                 &asset_coverage,
                 &prompt_coverage,
                 compacted_dialogue.as_deref(),
+                Some(fields.setting.as_str()),
             );
 
             if prompt_clauses_substantially_overlap(subject.as_deref(), action.as_deref()) {
@@ -1784,41 +1806,39 @@ fn collect_prompt_coverage(
 fn compact_subject_clause(
     subject: &str,
     asset_coverage: &[String],
-    prompt_coverage: &[String],
+    _prompt_coverage: &[String],
 ) -> Option<String> {
-    compact_prompt_clause(
-        subject,
-        asset_coverage,
-        prompt_coverage,
-        PromptClauseKind::Subject,
-    )
+    compact_prompt_clause(subject, asset_coverage, None, PromptClauseKind::Subject)
 }
 
 fn compact_setting_clause(
     setting: &str,
     asset_coverage: &[String],
     prompt_coverage: &[String],
+    subject: Option<&str>,
+    action: Option<&str>,
 ) -> Option<String> {
-    compact_prompt_clause(
-        setting,
-        asset_coverage,
-        prompt_coverage,
-        PromptClauseKind::Setting,
-    )
+    let compacted = strip_prompt_setting_subject_prefix(setting, prompt_coverage);
+    let compacted =
+        strip_prompt_setting_context_prefix(&compacted, subject, action).unwrap_or(compacted);
+    let compacted =
+        compact_prompt_clause(&compacted, asset_coverage, None, PromptClauseKind::Setting)?;
+    let compacted = normalize_prompt_clause_compaction(&compacted, PromptClauseKind::Setting);
+    (!compacted.is_empty()
+        && !prompt_fragment_has_direct_coverage(&compacted, asset_coverage)
+        && !prompt_fragment_has_direct_coverage(&compacted, prompt_coverage))
+    .then_some(compacted)
 }
 
 fn compact_action_clause(
     action: &str,
     asset_coverage: &[String],
-    prompt_coverage: &[String],
+    _prompt_coverage: &[String],
     dialogue: Option<&str>,
+    setting: Option<&str>,
 ) -> Option<String> {
-    let compacted = compact_prompt_clause(
-        action,
-        asset_coverage,
-        prompt_coverage,
-        PromptClauseKind::Action,
-    )?;
+    let compacted =
+        compact_prompt_clause(action, asset_coverage, setting, PromptClauseKind::Action)?;
 
     let trimmed = dialogue
         .and_then(|line| strip_dialogue_covered_action_suffix(&compacted, line))
@@ -1836,7 +1856,7 @@ enum PromptClauseKind {
 fn compact_prompt_clause(
     raw: &str,
     asset_coverage: &[String],
-    _prompt_coverage: &[String],
+    setting: Option<&str>,
     kind: PromptClauseKind,
 ) -> Option<String> {
     let normalized = normalize_prompt_text(raw);
@@ -1844,7 +1864,8 @@ fn compact_prompt_clause(
         return None;
     }
 
-    let mut compacted = strip_leading_covered_prompt_fragment(&normalized, asset_coverage);
+    let mut compacted = strip_action_setting_prefix(&normalized, setting, kind);
+    compacted = strip_leading_covered_prompt_fragment(&compacted, asset_coverage);
     compacted = strip_action_object_prefix(&compacted, asset_coverage, kind);
     compacted = normalize_prompt_clause_compaction(&compacted, kind);
     if compacted.is_empty() {
@@ -1998,9 +2019,217 @@ fn strip_prompt_prefix_candidate<'a>(fragment: &'a str, candidate: &str) -> Opti
 
 fn strip_prompt_leading_bridge(fragment: &str) -> Option<&str> {
     let trimmed = fragment.trim_start();
-    ["在", "于", "向", "朝", "往", "从", "自"]
+    PROMPT_LEADING_BRIDGES
         .into_iter()
         .find_map(|prefix| trimmed.strip_prefix(prefix))
+}
+
+fn strip_action_setting_prefix(
+    fragment: &str,
+    setting: Option<&str>,
+    kind: PromptClauseKind,
+) -> String {
+    if !matches!(kind, PromptClauseKind::Action) {
+        return fragment.to_string();
+    }
+
+    let mut compacted = normalize_prompt_text(fragment);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut candidates = build_prompt_setting_prefix_candidates(setting);
+    candidates.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &candidates {
+            if candidate.chars().count() < 4 {
+                continue;
+            }
+            let Some(stripped) = strip_prompt_prefix_candidate(&compacted, candidate) else {
+                continue;
+            };
+            let stripped = stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(
+                        ch,
+                        '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                    )
+            });
+            if stripped.chars().count() < 2 {
+                continue;
+            }
+            compacted = stripped.to_string();
+            changed = true;
+            break;
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
+}
+
+fn strip_prompt_setting_subject_prefix(setting: &str, prompt_coverage: &[String]) -> String {
+    let mut compacted = normalize_prompt_text(setting);
+    if compacted.is_empty() {
+        return compacted;
+    }
+
+    let mut coverage = prompt_coverage
+        .iter()
+        .map(|entry| canonical_prompt_fragment(entry))
+        .filter(|entry| !entry.is_empty())
+        .collect::<Vec<_>>();
+    coverage.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()).then(a.cmp(b)));
+
+    loop {
+        let mut changed = false;
+        for candidate in &coverage {
+            if candidate.chars().count() < 2 || !compacted.starts_with(candidate) {
+                continue;
+            }
+            let rest = compacted[candidate.len()..].trim_start();
+            for suffix in SETTING_SUBJECT_LEAD_IN_SUFFIXES {
+                let Some(stripped) = rest.strip_prefix(suffix) else {
+                    continue;
+                };
+                let stripped = stripped.trim_start_matches(|ch: char| {
+                    ch.is_whitespace()
+                        || matches!(
+                            ch,
+                            '的' | '里' | '中' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+                        )
+                });
+                if stripped.chars().count() < 2 {
+                    continue;
+                }
+                compacted = stripped.to_string();
+                changed = true;
+                break;
+            }
+            if changed {
+                break;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    compacted
+}
+
+fn strip_prompt_setting_context_prefix(
+    setting: &str,
+    subject: Option<&str>,
+    action: Option<&str>,
+) -> Option<String> {
+    let compacted = normalize_prompt_text(setting);
+    if compacted.is_empty() {
+        return None;
+    }
+
+    let locative_lead_in = prompt_setting_locative_lead_in(&compacted)?;
+    if locative_lead_in.chars().count() < 4 {
+        return None;
+    }
+
+    let covered_by_context = subject
+        .into_iter()
+        .chain(action)
+        .map(prompt_context_variants)
+        .flatten()
+        .any(|candidate| candidate.starts_with(&locative_lead_in));
+    if !covered_by_context {
+        return None;
+    }
+
+    let (_, suffix) = strip_prompt_setting_descriptive_lead_in(&compacted)?;
+    let suffix = suffix.trim_start_matches(|ch: char| {
+        ch.is_whitespace()
+            || matches!(
+                ch,
+                '的' | '里' | '中' | ':' | '：' | ',' | '，' | '、' | ';' | '；'
+            )
+    });
+    (suffix.chars().count() >= 2).then(|| suffix.to_string())
+}
+
+fn build_prompt_setting_prefix_candidates(setting: Option<&str>) -> Vec<String> {
+    let mut candidates = Vec::new();
+    let Some(setting) = setting
+        .map(normalize_prompt_text)
+        .filter(|value| !value.is_empty())
+    else {
+        return candidates;
+    };
+
+    candidates.push(setting.clone());
+    if let Some(stripped) = strip_prompt_leading_bridge(&setting) {
+        candidates.push(stripped.to_string());
+    }
+    if let Some((prefix, _)) = strip_prompt_setting_descriptive_lead_in(&setting) {
+        candidates.push(prefix.to_string());
+        if let Some(stripped) = strip_prompt_leading_bridge(prefix) {
+            candidates.push(stripped.to_string());
+        }
+    }
+    candidates.sort();
+    candidates.dedup();
+    candidates
+}
+
+fn prompt_setting_locative_lead_in(setting: &str) -> Option<String> {
+    let normalized = normalize_prompt_text(setting);
+    let (prefix, _) = strip_prompt_setting_descriptive_lead_in(&normalized)?;
+    let prefix = strip_prompt_leading_bridge(prefix).unwrap_or(prefix);
+    let prefix = normalize_prompt_text(prefix);
+    (!prefix.is_empty()).then_some(prefix)
+}
+
+fn strip_prompt_setting_descriptive_lead_in(setting: &str) -> Option<(&str, &str)> {
+    let normalized = setting.trim();
+    let split_at = normalized.find('的')?;
+    let (prefix, suffix_with_marker) = normalized.split_at(split_at);
+    let suffix = suffix_with_marker.strip_prefix('的')?;
+    let prefix = prefix.trim();
+    let suffix = suffix.trim();
+    (!prefix.is_empty() && !suffix.is_empty()).then_some((prefix, suffix))
+}
+
+fn prompt_context_variants(value: &str) -> Vec<String> {
+    let normalized = normalize_prompt_text(value);
+    if normalized.is_empty() {
+        return Vec::new();
+    }
+
+    let mut variants = vec![normalized.clone()];
+    if let Some(stripped) = strip_prompt_subject_role_prefix(&normalized) {
+        variants.push(stripped.to_string());
+        if let Some(bridge) = strip_prompt_leading_bridge(stripped) {
+            variants.push(bridge.to_string());
+        }
+    }
+    if let Some(stripped) = strip_prompt_leading_bridge(&normalized) {
+        variants.push(stripped.to_string());
+    }
+    variants.sort();
+    variants.dedup();
+    variants
+}
+
+fn strip_prompt_subject_role_prefix(value: &str) -> Option<&str> {
+    ACTION_SUBJECT_PREFIXES.iter().find_map(|prefix| {
+        value.strip_prefix(prefix).map(|stripped| {
+            stripped.trim_start_matches(|ch: char| {
+                ch.is_whitespace()
+                    || matches!(ch, '的' | '着' | '地' | ':' | '：' | ',' | '，' | '、')
+            })
+        })
+    })
 }
 
 fn normalize_prompt_clause_compaction(fragment: &str, kind: PromptClauseKind) -> String {
@@ -3633,6 +3862,28 @@ mod tests {
     }
 
     #[test]
+    fn build_video_prompt_trims_subject_lead_in_from_setting_when_subject_already_exists() {
+        let context = VideoPromptContext {
+            storyboard_prompt: None,
+            storyboard_video_desc: Some("（主角驻足、主角身后的门厅、主角、5秒、中景、稳定跟拍、抬眼观察、紧张、阴天冷光、无台词、脚步回响、A12）".into()),
+            storyboard_duration: Some("5s".into()),
+            storyboard_prompt_seed: None,
+            project_art_style: None,
+            project_director_manual: None,
+            script_role_anchors: vec!["主角: 黑色风衣，短发，克制冷峻".into()],
+            script_scene_anchors: Vec::new(),
+            script_tool_anchors: Vec::new(),
+            memory_style_notes: Vec::new(),
+            continuity_notes: Vec::new(),
+        };
+
+        let prompt = build_video_prompt(None, None, Some(&context));
+
+        assert!(prompt.contains("Setting: 门厅."), "{prompt}");
+        assert!(!prompt.contains("Setting: 主角身后的门厅."), "{prompt}");
+    }
+
+    #[test]
     fn build_video_prompt_drops_subject_when_compaction_makes_it_duplicate_action() {
         let context = VideoPromptContext {
             storyboard_prompt: None,
@@ -3706,8 +3957,10 @@ mod tests {
 
         let prompt = build_video_prompt(None, None, Some(&context));
 
-        assert!(prompt.contains("Setting: 尽头的门厅."), "{prompt}");
-        assert!(prompt.contains("Action: 尽头停步回头."), "{prompt}");
+        assert!(prompt.contains("Setting: 门厅."), "{prompt}");
+        assert!(prompt.contains("Action: 停步回头."), "{prompt}");
+        assert!(!prompt.contains("Setting: 尽头的门厅."), "{prompt}");
+        assert!(!prompt.contains("Action: 尽头停步回头."), "{prompt}");
         assert!(!prompt.contains("Setting: 在旧宅走廊尽头的门厅."));
         assert!(!prompt.contains("Action: 在旧宅走廊尽头停步回头."));
     }
